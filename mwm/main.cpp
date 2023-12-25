@@ -4069,8 +4069,8 @@ draw_text(const char * str , COLOR text_color, COLOR bg_color, const xcb_window_
 }
 
 void 
-configureRootWindow() 
-{    
+configureRootWindow()
+{
     set_win_color
     (
         screen->root, 

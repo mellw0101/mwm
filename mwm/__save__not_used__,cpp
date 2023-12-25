@@ -181,8 +181,8 @@
 //             // Connect
 //             if (connect(fd, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr)) == -1) 
 //             {
-//                 ::close(fd);
-//                 throw std::runtime_error("Failed to connect");
+//              ::close(fd);
+//              throw std::runtime_error("Failed to connect");
 //             }
 //         }
 
