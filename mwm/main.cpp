@@ -3347,7 +3347,7 @@ class tile
         }
 
         void
-        animate(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight)
+        animate_old(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight)
         {
             XCPPBAnimator anim(conn, c->frame);
             anim.animate
@@ -3366,9 +3366,22 @@ class tile
         }
 
         void
-        animate_(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight)
+        animate(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight)
         {
-            animate_client(c, endX, endY, endWidth, endHeight, TILE_ANIMATION_DURATION);
+            XCPPBAnimator anim(c);
+            anim.animate_client
+            (
+                c->x,
+                c->y, 
+                c->width, 
+                c->height, 
+                endX,
+                endY, 
+                endWidth, 
+                endHeight, 
+                TILE_ANIMATION_DURATION
+            );
+            wm::update_client(c);
         }
 };
 
