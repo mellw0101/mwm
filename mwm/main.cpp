@@ -2369,7 +2369,7 @@ class WinManager
                 {   K,          SUPER                   }
             });
 
-            // make_frame(c);
+            make_frame(c);
             get::name(c);
             get_win_info(c);
             wm::update_client(c);
@@ -2558,8 +2558,8 @@ class WinManager
                 XCB_COPY_FROM_PARENT, 
                 c->frame, 
                 screen->root, 
-                0, 
-                0, 
+                c->x, 
+                c->y, 
                 c->width, 
                 c->height + 20, 
                 0, 
