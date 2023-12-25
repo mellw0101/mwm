@@ -1,3 +1,4 @@
+#include <cstdint>
 #include <xcb/xcb.h>
 #define main_cpp
 #include "include.hpp"
@@ -1796,6 +1797,8 @@ class XCPPBAnimator
         void 
         conf_client_test()
         {
+            const uint32_t x = currentX, y = currentY, w = currentWidth, h = currentHeight;
+
             xcb_configure_window
             (
                 connection,
@@ -1803,11 +1806,11 @@ class XCPPBAnimator
                 XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
                 (const uint32_t[2])
                 {
-                    static_cast<const uint32_t &>(currentWidth),
-                    static_cast<const uint32_t &>(currentHeight - 20)
+                    static_cast<const uint32_t &>(w),
+                    static_cast<const uint32_t &>(h - 20)
                 }
             );
-            xcb_flush(connection);
+            // xcb_flush(connection);
 
             xcb_configure_window
             (
@@ -1816,10 +1819,10 @@ class XCPPBAnimator
                 XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
                 (const uint32_t[4])
                 {
-                    static_cast<const uint32_t &>(currentX),
-                    static_cast<const uint32_t &>(currentY),
-                    static_cast<const uint32_t &>(currentWidth),
-                    static_cast<const uint32_t &>(currentHeight)
+                    static_cast<const uint32_t &>(x),
+                    static_cast<const uint32_t &>(y),
+                    static_cast<const uint32_t &>(w),
+                    static_cast<const uint32_t &>(h)
                 }
             );
             xcb_flush(connection);
