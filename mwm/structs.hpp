@@ -24,6 +24,25 @@ struct COLOR_RGB
     uint8_t b;
 };
 
+enum class RGB_CODE 
+{
+    BLACK,
+    WHITE,
+    RED,
+    GREEN,
+    BLUE,
+    YELLOW,
+    MAGENTA,
+    CYAN,
+    GREY,
+    DARK_GREY,
+    LIGHT_GREY,
+    ORANGE,
+    BROWN,
+    PINK,
+    PURPLE
+};
+
 enum class TILEPOS 
 {
     LEFT        = 1,

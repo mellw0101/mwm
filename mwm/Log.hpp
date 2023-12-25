@@ -328,16 +328,16 @@ private:
 };
 
 // ANSI escape codes for colors
-#define RED 		"\033[1;31m" 
-#define GREEN 		"\033[1;32m" 
-#define YELLOW 		"\033[1;33m"
-#define BLUE 		"\033[1;34m"
-#define MEGENTA 	"\033[1;35m"
-#define CYAN 		"\033[1;36m"
-#define WHITE 		"\033[1;37m"
-#define BOLD 		"\033[1m"
-#define UNDERLINE 	"\033[4m"
-#define RESET 		"\033[0m"
+#define log_RED 		"\033[1;31m" 
+#define log_GREEN 		"\033[1;32m" 
+#define log_YELLOW 		"\033[1;33m"
+#define log_BLUE 		"\033[1;34m"
+#define log_MEGENTA 	"\033[1;35m"
+#define log_CYAN 		"\033[1;36m"
+#define log_WHITE 		"\033[1;37m"
+#define log_BOLD 		"\033[1m"
+#define log_UNDERLINE 	"\033[4m"
+#define log_RESET 		"\033[0m"
 
 
 enum LogLevel {
@@ -355,14 +355,14 @@ public:
 	{
 		FileHandler file("/home/mellw/nlog");
 		log_arragnge(list, message, args...);
-		file.append(TIME::get() + ":" + getLogPrefix(level) + ":" + MEGENTA + "[" + function + "]" + RESET + ":" + str + "\n");
+		file.append(TIME::get() + ":" + getLogPrefix(level) + ":" + log_MEGENTA + "[" + function + "]" + log_RESET + ":" + str + "\n");
     }
 
     void 
 	log(LogLevel level, const std::string &function) 
 	{
 		FileHandler file("/home/mellw/nlog");
-		file.append(TIME::get() + ":" + getLogPrefix(level) + ":[" + MEGENTA + function + RESET + "]\n");
+		file.append(TIME::get() + ":" + getLogPrefix(level) + ":[" + log_MEGENTA + function + log_RESET + "]\n");
     }
 
 private:
@@ -376,19 +376,19 @@ private:
 		{
             case INFO:
 			{
-                return GREEN 	"[INFO]" 	RESET;
+                return log_GREEN 	"[INFO]" 	log_RESET;
 			}
             case WARNING:
 			{
-			    return YELLOW 	"[WARNING]" RESET;
+			    return log_YELLOW 	"[WARNING]" log_RESET;
 			}
             case ERROR:
             {
-			    return RED 		"[ERROR]" 	RESET;
+			    return log_RED 		"[ERROR]" 	log_RESET;
 			}
 			case FUNC:
 			{
-				return MEGENTA	"[FUNC]"	RESET;
+				return log_MEGENTA	"[FUNC]"	log_RESET;
 			}
             default:
 			{
