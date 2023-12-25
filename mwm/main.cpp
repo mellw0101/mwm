@@ -1555,11 +1555,6 @@ class color
 {
     public:
     
-        ~color()
-        {
-            free(reply);
-        }
-
         static uint32_t
         get(COLOR color)
         {
@@ -1719,12 +1714,6 @@ class color
             color.b = b;
             return color;
         }
-
-    private:
-
-        static xcb_colormap_t colormap;
-        static xcb_alloc_color_reply_t *reply;
-
 };
 
 class set_win_color 
