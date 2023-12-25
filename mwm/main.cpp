@@ -1551,6 +1551,11 @@ class set_color
         apply_color(colormap, win, r, g, b);
     }
 
+    ~set_color()
+    {
+        free(reply);
+    }
+
     private:
     xcb_alloc_color_reply_t *reply;
 
@@ -1568,7 +1573,6 @@ class set_color
             }
         );
         xcb_flush(conn);
-        free(reply);
     }
 
     xcb_colormap_t 
