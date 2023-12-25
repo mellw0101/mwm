@@ -1461,7 +1461,16 @@ class XCPPBAnimator
             
             if (XisTimeToRender())
             {
-                config_client(XCB_CONFIG_WINDOW_X, currentX);
+                xcb_configure_window
+                (
+                    conn,
+                    c->frame,
+                    XCB_CONFIG_WINDOW_X,
+                    (const uint32_t[1])
+                    {
+                        static_cast<const uint32_t &>(currentX)
+                    }
+                );
             }
         }
 
@@ -1504,7 +1513,16 @@ class XCPPBAnimator
             
             if (YisTimeToRender())
             {
-                config_client(XCB_CONFIG_WINDOW_Y, currentY);
+                xcb_configure_window
+                (
+                    conn,
+                    c->frame,
+                    XCB_CONFIG_WINDOW_Y,
+                    (const uint32_t[1])
+                    {
+                        static_cast<const uint32_t &>(currentY)
+                    }
+                );
             }
         }
 
