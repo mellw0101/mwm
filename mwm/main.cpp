@@ -1,3 +1,4 @@
+#include "xcb_source/libxcb/xcb.h"
 #define main_cpp
 #include "include.hpp"
 
@@ -1432,11 +1433,9 @@ class XCPPBAnimator
                 if (currentX == endX && currentY == endY && currentWidth == endWidth && currentHeight == endHeight)
                 {
                     conf_client_test();
-                    xcb_flush(connection);
                     break;
                 }
                 conf_client_test();
-                xcb_flush(connection);
                 thread_sleep(GAnimDuration);
             }
         }
@@ -1789,6 +1788,7 @@ class XCPPBAnimator
                     static_cast<const uint32_t &>(currentHeight)
                 }
             );
+            xcb_flush(connection);
 
             xcb_configure_window
             (
@@ -1803,6 +1803,7 @@ class XCPPBAnimator
                     static_cast<const uint32_t &>(currentHeight)
                 }
             );
+            xcb_flush(connection);
         }
 };
 
