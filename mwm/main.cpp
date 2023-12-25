@@ -1555,6 +1555,11 @@ class color
 {
     public:
     
+    ~color()
+    {
+        free(reply);
+    }
+
     uint32_t
     get(COLOR color)
     {
@@ -1581,20 +1586,27 @@ class color
 
 };
 
-class set_color 
+class set_win_color 
 {
     public:
 
-    set_color(SET_COLOR mode, const xcb_window_t & win, const uint16_t & r, const uint16_t & g, const uint16_t & b)
+    set_win_color(SET_COLOR mode, const xcb_window_t & win, const uint16_t & r, const uint16_t & g, const uint16_t & b)
     {
         xcb_colormap_t colormap = make_colormap(win);
         apply_color(colormap, win, r, g, b);
     }
 
-    set_color(const xcb_window_t & win, const uint8_t & r, const uint8_t & g, const uint8_t & b)
+    set_win_color(const xcb_window_t & win, const uint8_t & r, const uint8_t & g, const uint8_t & b)
     {
         xcb_colormap_t colormap = make_colormap(win);
-        apply_color(colormap, win, scale_color(r), scale_color(g), scale_color(b));
+        apply_color
+        (
+            colormap, 
+            win, 
+            scale::from_8_to_16_bit(r), 
+            scale::from_8_to_16_bit(g), 
+            scale::from_8_to_16_bit(b)
+        );
     }
 
     private:
@@ -1603,6 +1615,12 @@ class set_color
     void
     apply_color(const xcb_colormap_t & colormap, const xcb_window_t & win, const uint16_t & r, const uint16_t & g, const uint16_t & b)
     {
+        COLOR Color;
+        Color.r = r;
+        Color.g = g;
+        Color.b = b;
+
+        color col;
         xcb_change_window_attributes
         (
             conn,
@@ -1610,7 +1628,7 @@ class set_color
             XCB_CW_BACK_PIXEL,
             (const uint32_t[1])
             {
-                static_cast<const uint32_t &>(get_color(colormap, r, g, b))
+                static_cast<const uint32_t &>(col.get(Color))
             }
         );
         xcb_flush(conn);
@@ -1630,32 +1648,6 @@ class set_color
             screen->root_visual
         );
         return colormap;
-    }
-
-    uint32_t
-    get_color(const xcb_colormap_t & colormap, const uint16_t & r, const uint16_t & g, const uint16_t & b)
-    {
-        reply = xcb_alloc_color_reply
-        (
-            conn, 
-            xcb_alloc_color
-            (
-                conn,
-                colormap,
-                r, 
-                g, 
-                b
-            ), 
-            NULL
-        );
-        return reply->pixel;
-    }
-
-    uint16_t 
-    scale_color(uint8_t color) 
-    {
-        // Scale 8-bit color to 16-bit color
-        return static_cast<uint16_t>(color) << 8 | color;
     }
 };
 
@@ -3568,7 +3560,7 @@ configureRootWindow()
     // );
     // free(reply);
 
-    set_color(screen->root, 0, 0, 255);
+    set_win_color(screen->root, 0, 0, 255);
 
     // APPLY THE EVENT MASKS TO THE ROOT WINDOW
     xcb_change_window_attributes
