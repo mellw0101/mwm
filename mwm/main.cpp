@@ -3347,7 +3347,7 @@ class tile
         }
 
         void
-        animate_old(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight)
+        animate(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight)
         {
             XCPPBAnimator anim(conn, c->frame);
             anim.animate
@@ -3366,7 +3366,7 @@ class tile
         }
 
         void
-        animate(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight)
+        animate_(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight)
         {
             animate_client(c, endX, endY, endWidth, endHeight, TILE_ANIMATION_DURATION);
         }
