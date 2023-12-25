@@ -1,5 +1,6 @@
 #include "structs.hpp"
 #include "tools.hpp"
+#include "xcb_source/libxcb/xcb.h"
 #include <cstdint>
 #include <xcb/xproto.h>
 #define main_cpp
@@ -1575,7 +1576,7 @@ class color
 
     private:
 
-    xcb_colormap_t colormap = screen->default_colormap;
+    xcb_colormap_t colormap = xcb_generate_id(conn);
     xcb_alloc_color_reply_t *reply;
 
 };
