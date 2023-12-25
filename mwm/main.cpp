@@ -1804,7 +1804,7 @@ class XCPPBAnimator
                 (const uint32_t[2])
                 {
                     static_cast<const uint32_t &>(currentWidth),
-                    static_cast<const uint32_t &>(currentHeight)
+                    static_cast<const uint32_t &>(currentHeight - 20)
                 }
             );
             xcb_flush(connection);
