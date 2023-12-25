@@ -1544,19 +1544,12 @@ animate(client * & c, const int & endX, const int & endY, const int & endWidth, 
     wm::update_client(c);
 }
 
-struct COLOR 
-{
-    uint8_t r;
-    uint8_t g;
-    uint8_t b;
-};
-
 class color 
 {
     public:
     
         static uint32_t
-        get(COLOR color)
+        get(rgb_color_code color)
         {
             xcb_colormap_t colormap = screen->default_colormap;
             xcb_alloc_color_reply_t * reply = xcb_alloc_color_reply
@@ -1575,18 +1568,18 @@ class color
             return reply->pixel;
         }
 
-        static COLOR
-        rgb_code(const uint8_t & r, const uint8_t & g, const uint8_t & b)
+        static rgb_color_code
+        code(const uint8_t & r, const uint8_t & g, const uint8_t & b)
         {
-            COLOR color;
+            rgb_color_code color;
             color.r = r;
             color.g = g;
             color.b = b;
             return color;
         }
 
-        static COLOR
-        rgb_code(RGB_CODE rgb_code)
+        static rgb_color_code
+        code(COLOR rgb_code)
         {
             uint8_t r;
             uint8_t g;
@@ -1594,105 +1587,105 @@ class color
             
             switch (rgb_code) 
             {
-                case RGB_CODE::WHITE:
+                case COLOR::WHITE:
                 {
                     r = 255;
                     g = 255;
                     b = 255;
                     break;
                 }
-                case RGB_CODE::BLACK:
+                case COLOR::BLACK:
                 {
                     r = 0;
                     g = 0;
                     b = 0;
                     break;
                 }
-                case RGB_CODE::RED:
+                case COLOR::RED:
                 {
                     r = 255;
                     g = 0;
                     b = 0;
                     break;
                 }
-                case RGB_CODE::GREEN:
+                case COLOR::GREEN:
                 {
                     r = 0;
                     g = 255;
                     b = 0;
                     break;
                 }
-                case RGB_CODE::BLUE:
+                case COLOR::BLUE:
                 {
                     r = 0;
                     g = 0;
                     b = 255;
                     break;
                 }
-                case RGB_CODE::YELLOW:
+                case COLOR::YELLOW:
                 {
                     r = 255;
                     g = 255;
                     b = 0;
                     break;
                 }
-                case RGB_CODE::CYAN:
+                case COLOR::CYAN:
                 {
                     r = 0;
                     g = 255;
                     b = 255;
                     break;
                 }
-                case RGB_CODE::MAGENTA:
+                case COLOR::MAGENTA:
                 {
                     r = 255;
                     g = 0;
                     b = 255;
                     break;
                 }
-                case RGB_CODE::GREY:
+                case COLOR::GREY:
                 {
                     r = 128;
                     g = 128;
                     b = 128;
                     break;
                 }
-                case RGB_CODE::LIGHT_GREY:
+                case COLOR::LIGHT_GREY:
                 {
                     r = 192;
                     g = 192;
                     b = 192;
                     break;
                 }
-                case RGB_CODE::DARK_GREY:
+                case COLOR::DARK_GREY:
                 {
                     r = 64;
                     g = 64;
                     b = 64;
                     break;
                 }
-                case RGB_CODE::ORANGE:
+                case COLOR::ORANGE:
                 {
                     r = 255;
                     g = 165;
                     b = 0;
                     break;
                 }
-                case RGB_CODE::PURPLE:
+                case COLOR::PURPLE:
                 {
                     r = 128;
                     g = 0;
                     b = 128;
                     break;
                 }
-                case RGB_CODE::BROWN:
+                case COLOR::BROWN:
                 {
                     r = 165;
                     g = 42;
                     b = 42;
                     break;
                 }
-                case RGB_CODE::PINK:
+                case COLOR::PINK:
                 {
                     r = 255;
                     g = 192;
@@ -1708,7 +1701,7 @@ class color
                 }
             }
 
-            COLOR color;
+            rgb_color_code color;
             color.r = r;
             color.g = g;
             color.b = b;
@@ -1739,25 +1732,44 @@ class set_win_color
             );
         }
 
+        set_win_color(const xcb_window_t & win, rgb_color_code COLOR)
+        {
+            xcb_colormap_t colormap = make_colormap(win);
+            apply_color
+            (
+                colormap, 
+                win, 
+                COLOR
+            );
+        }
+
+        set_win_color(const xcb_window_t & win, COLOR COLOR)
+        {
+            xcb_colormap_t colormap = make_colormap(win);
+            apply_color
+            (
+                colormap, 
+                win, 
+                color::code(COLOR)
+            );
+        }
+
     private:
         xcb_alloc_color_reply_t *reply;
         
         void
         apply_color(const xcb_colormap_t & colormap, const xcb_window_t & win, const uint16_t & r, const uint16_t & g, const uint16_t & b)
         {
-            COLOR COLOR = color::rgb_code(r, g, b);
+            rgb_color_code COLOR = color::code(r, g, b);
+            change_win_color(win, COLOR);
+            xcb_flush(conn);
+            free(reply);
+        }
 
-            color color;
-            xcb_change_window_attributes
-            (
-                conn,
-                win,
-                XCB_CW_BACK_PIXEL,
-                (const uint32_t[1])
-                {
-                    static_cast<const uint32_t &>(color::get(COLOR))
-                }
-            );
+        void
+        apply_color(const xcb_colormap_t & colormap, const xcb_window_t & win, rgb_color_code COLOR)
+        {
+            change_win_color(win, COLOR);
             xcb_flush(conn);
             free(reply);
         }
@@ -1775,6 +1787,22 @@ class set_win_color
                 screen->root_visual
             );
             return colormap;
+        }
+
+        void
+        change_win_color(const xcb_window_t & win, rgb_color_code COLOR)
+        {
+            xcb_change_window_attributes
+            (
+                conn,
+                win,
+                XCB_CW_BACK_PIXEL,
+                (const uint32_t[1])
+                {
+                    static_cast<const uint32_t &>(color::get(COLOR))
+                }
+            );
+            xcb_flush(conn);
         }
 };
 
@@ -3621,7 +3649,7 @@ draw_text(const char * str , COLOR text_color, COLOR bg_color, const xcb_window_
     xcb_gcontext_t gc = xcb_generate_id(conn);
 
     // Load font
-    const char *font_name = "7x13";
+    const char * font_name = "7x13";
     xcb_font_t font = xcb_generate_id(conn);
     xcb_open_font
     (
@@ -3639,14 +3667,23 @@ draw_text(const char * str , COLOR text_color, COLOR bg_color, const xcb_window_
         XCB_GC_FOREGROUND | XCB_GC_BACKGROUND | XCB_GC_FONT, 
         (const uint32_t[3])
         {
-            color::get(text_color), 
-            color::get(bg_color),
+            color::get(color::code(text_color)), 
+            color::get(color::code(bg_color)),
             font
         }
     );
 
     // Draw text
-    xcb_image_text_8(conn, strlen(str), win, gc, x, y, str);
+    xcb_image_text_8
+    (
+        conn, 
+        strlen(str), 
+        win, 
+        gc, 
+        x, 
+        y, 
+        str
+    );
 
     // Flush the connection
     xcb_flush(conn);
@@ -3655,7 +3692,11 @@ draw_text(const char * str , COLOR text_color, COLOR bg_color, const xcb_window_
 void 
 configureRootWindow() 
 {    
-    set_win_color(screen->root, 0, 0, 255);
+    set_win_color
+    (
+        screen->root, 
+        BLUE
+    );
 
     // APPLY THE EVENT MASKS TO THE ROOT WINDOW
     xcb_change_window_attributes
@@ -3697,8 +3738,8 @@ configureRootWindow()
     draw_text
     (
         "Hello World", 
-        color::rgb_code(RGB_CODE::WHITE), 
-        color::rgb_code(RGB_CODE::BLUE),
+        WHITE, 
+        BLUE,
         screen->root,
         500,
         20

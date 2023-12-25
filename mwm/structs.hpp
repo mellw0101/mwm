@@ -17,14 +17,14 @@ enum SET_COLOR
     RAW
 };
 
-struct COLOR_RGB 
+struct rgb_color_code 
 {
     uint8_t r;
     uint8_t g;
     uint8_t b;
 };
 
-enum class RGB_CODE 
+enum COLOR 
 {
     BLACK,
     WHITE,
