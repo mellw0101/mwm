@@ -1042,6 +1042,9 @@ class XCPPBAnimator
         XCPPBAnimator(client * & c)
         : connection(conn), c(c) {}
 
+        XCPPBAnimator(xcb_connection_t* connection, const xcb_window_t & window, client * c)
+        : connection(connection), window(window), c(c) {}
+
         void /**
          * @brief Animates the position and size of an object from a starting point to an ending point.
          * 
@@ -1150,8 +1153,8 @@ class XCPPBAnimator
             HAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(std::abs(endHeight - startHeight)); 
 
             /* START ANIMATION THREADS */
-            XAnimationThread = std::thread(&XCPPBAnimator::CliXAnimation, this, endX);
-            YAnimationThread = std::thread(&XCPPBAnimator::CliYAnimation, this, endY);
+            XAnimationThread = std::thread(&XCPPBAnimator::XAnimation, this, endX);
+            YAnimationThread = std::thread(&XCPPBAnimator::YAnimation, this, endY);
             WAnimationThread = std::thread(&XCPPBAnimator::CliWAnimation, this, endWidth);
             HAnimationThread = std::thread(&XCPPBAnimator::CliHAnimation, this, endHeight);
 
