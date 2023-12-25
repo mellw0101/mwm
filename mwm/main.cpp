@@ -662,7 +662,7 @@ class mv_client
             (
                 conn,
                 false, // owner_events: false to not propagate events to other clients
-                c->win,
+                c->frame,
                 XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_POINTER_MOTION,
                 XCB_GRAB_MODE_ASYNC,
                 XCB_GRAB_MODE_ASYNC,
@@ -687,7 +687,7 @@ class mv_client
             xcb_configure_window
             (
                 conn,
-                c->win,
+                c->frame,
                 XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y,
                 (const uint32_t[2])
                 {
@@ -698,7 +698,7 @@ class mv_client
         }
 
         /* DEFENITIONS TO REDUCE REDUNDENT CODE IN 'snap' FUNCTION */
-        #define RIGHT_   screen->width_in_pixels  - c->width
+        #define RIGHT_  screen->width_in_pixels  - c->width
         #define BOTTOM  screen->height_in_pixels - c->height
 
         void 
@@ -1737,7 +1737,6 @@ class color
 class set_win_color 
 {
     public:
-
         set_win_color(SET_COLOR mode, const xcb_window_t & win, const uint16_t & r, const uint16_t & g, const uint16_t & b)
         {
             xcb_colormap_t colormap = make_colormap(win);
