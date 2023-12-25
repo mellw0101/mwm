@@ -1,3 +1,4 @@
+#include <xcb/xcb.h>
 #define main_cpp
 #include "include.hpp"
 
@@ -22,6 +23,19 @@ static xcb_screen_t * screen;
 static void 
 draw_text(const char * str , COLOR text_color, COLOR bg_color, const xcb_window_t & win, const int16_t & x, const int16_t & y);
 
+namespace XCBwm 
+{
+    void
+    check_err(xcb_connection_t * connection, xcb_void_cookie_t cookie , const char * sender_function, const char * err_msg)
+    {
+        xcb_generic_error_t * err = xcb_request_check(connection, cookie);
+        if (err)
+        {
+            log.log(ERROR, sender_function, err_msg, err->error_code);
+            free(err);
+        }
+    }
+};
 
 namespace get {
     client * 
@@ -4002,13 +4016,29 @@ ewmh_init()
         LOG_error("ewmh faild to initialize");
         wm::kill_session();
     }    
+    
     xcb_intern_atom_cookie_t *cookie = xcb_ewmh_init_atoms(conn, ewmh);
+    
     if (!(xcb_ewmh_init_atoms_replies(ewmh, cookie, 0)))
     {
         LOG_error("xcb_ewmh_init_atoms_replies:faild")
         exit(1);
     }
-    // xcb_ewmh_set_wm_name(ewmh, screen->root, strlen(str), str);
+
+    const char * str = "XCBWM";
+    XCBwm::check_err
+    (
+        conn, 
+        xcb_ewmh_set_wm_name
+        (
+            ewmh, 
+            screen->root, 
+            strlen(str), 
+            str
+        ), 
+        __func__, 
+        "xcb_ewmh_set_wm_name"
+    );
 }
 
 void
