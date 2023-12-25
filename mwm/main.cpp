@@ -1193,6 +1193,7 @@ class XCPPBAnimator
         double YAnimDuration;
         double WAnimDuration;
         double HAnimDuration;
+        std::atomic<bool> stopGFlag{false};
         std::atomic<bool> stopXFlag{false};
         std::atomic<bool> stopYFlag{false};
         std::atomic<bool> stopWFlag{false};
@@ -1636,10 +1637,17 @@ class XCPPBAnimator
          */
         stopAnimations() 
         {
+            stopHFlag.store(true);
             stopXFlag.store(true);
             stopYFlag.store(true);
             stopWFlag.store(true);
             stopHFlag.store(true);
+
+            if (GAnimationThread.joinable()) 
+            {
+                GAnimationThread.join();
+                stopGFlag.store(false);
+            }
 
             if (XAnimationThread.joinable()) 
             {
