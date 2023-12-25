@@ -22,6 +22,9 @@ static const xcb_setup_t * setup;
 static xcb_screen_iterator_t iter;
 static xcb_screen_t * screen;
 
+static void 
+draw_text(const char * str , COLOR text_color, COLOR bg_color, const xcb_window_t & win, const int16_t & x, const int16_t & y);
+
 namespace get {
     client * 
     client_from_win(const xcb_window_t * w) 
@@ -2600,7 +2603,6 @@ class WinManager
                 (const uint32_t[1])
                 {
                     color::get(BLUE)
-                    // screen->white_pixel
                 }
             );
             
@@ -2616,7 +2618,8 @@ class WinManager
             
             xcb_map_window(conn, c->frame);
             xcb_flush(conn); 
-            // set_win_color(c->frame, BLUE);
+
+            draw_text("sug", WHITE, BLUE, c->frame, 2, 2);
         }
 
         static void
