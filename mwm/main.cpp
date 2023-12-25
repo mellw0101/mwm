@@ -1568,6 +1568,28 @@ class color
             return reply->pixel;
         }
 
+        static uint32_t
+        get(COLOR color)
+        {
+            xcb_colormap_t colormap = screen->default_colormap;
+            rgb_color_code color_code = code(color);
+            xcb_alloc_color_reply_t * reply = xcb_alloc_color_reply
+            (
+                conn, 
+                xcb_alloc_color
+                (
+                    conn,
+                    colormap,
+                    scale::from_8_to_16_bit(color_code.r), 
+                    scale::from_8_to_16_bit(color_code.g),
+                    scale::from_8_to_16_bit(color_code.b)
+                ), 
+                NULL
+            );
+            return reply->pixel;
+        }
+
+
         static rgb_color_code
         code(const uint8_t & r, const uint8_t & g, const uint8_t & b)
         {
@@ -2577,7 +2599,8 @@ class WinManager
                 XCB_CW_BACK_PIXEL, 
                 (const uint32_t[1])
                 {
-                    screen->white_pixel
+                    color::get(BLUE)
+                    // screen->white_pixel
                 }
             );
             
@@ -3664,8 +3687,8 @@ draw_text(const char * str , COLOR text_color, COLOR bg_color, const xcb_window_
         XCB_GC_FOREGROUND | XCB_GC_BACKGROUND | XCB_GC_FONT, 
         (const uint32_t[3])
         {
-            color::get(color::code(text_color)), 
-            color::get(color::code(bg_color)),
+            color::get(text_color), 
+            color::get(bg_color),
             font
         }
     );
