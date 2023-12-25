@@ -12,6 +12,11 @@ enum
      */
 };
 
+enum SET_COLOR 
+{
+    RAW
+};
+
 enum class TILEPOS 
 {
     LEFT        = 1,

@@ -1,3 +1,4 @@
+#include "structs.hpp"
 #include <cstdint>
 #include <xcb/xproto.h>
 #define main_cpp
@@ -1545,15 +1546,21 @@ class set_color
 {
     public:
 
-    set_color(const xcb_window_t & win, const uint16_t & r, const uint16_t & g, const uint16_t & b)
+    set_color(SET_COLOR mode, const xcb_window_t & win, const uint16_t & r, const uint16_t & g, const uint16_t & b)
     {
         xcb_colormap_t colormap = make_colormap(win);
         apply_color(colormap, win, r, g, b);
     }
 
+    set_color(const xcb_window_t & win, const uint8_t & r, const uint8_t & g, const uint8_t & b)
+    {
+        xcb_colormap_t colormap = make_colormap(win);
+        apply_color(colormap, win, scale_color(r), scale_color(g), scale_color(b));
+    }
+
     private:
     xcb_alloc_color_reply_t *reply;
-
+    
     void
     apply_color(const xcb_colormap_t & colormap, const xcb_window_t & win, const uint16_t & r, const uint16_t & g, const uint16_t & b)
     {
@@ -1603,6 +1610,13 @@ class set_color
             NULL
         );
         return reply->pixel;
+    }
+
+    uint16_t 
+    scale_color(uint8_t color) 
+    {
+        // Scale 8-bit color to 16-bit color
+        return static_cast<uint16_t>(color) << 8 | color;
     }
 };
 
@@ -3486,7 +3500,7 @@ configureRootWindow()
     // );
     // free(reply);
 
-    set_color(screen->root, 0, 0, 0xffff);
+    set_color(screen->root, 0, 0, 255);
 
     // APPLY THE EVENT MASKS TO THE ROOT WINDOW
     xcb_change_window_attributes
