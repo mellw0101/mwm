@@ -1810,7 +1810,7 @@ class XCPPBAnimator
                     static_cast<const uint32_t &>(h - 20)
                 }
             );
-            // xcb_flush(connection);
+            xcb_flush(connection);
 
             xcb_configure_window
             (
