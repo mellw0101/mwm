@@ -1152,7 +1152,7 @@ class XCPPBAnimator
             GAnimDuration = frameDuration;
 
             /* START ANIMATION THREADS */
-            GAnimationThread = std::thread(&XCPPBAnimator::GFrameAnimation, this, endX, endY, endWidth, endHeight);
+            // GAnimationThread = std::thread(&XCPPBAnimator::GFrameAnimation, this, endX, endY, endWidth, endHeight);
             XAnimationThread = std::thread(&XCPPBAnimator::CliXAnimation, this, endX);
             YAnimationThread = std::thread(&XCPPBAnimator::CliYAnimation, this, endY);
             WAnimationThread = std::thread(&XCPPBAnimator::CliWAnimation, this, endWidth);
