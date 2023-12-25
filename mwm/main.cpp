@@ -2591,12 +2591,9 @@ class WinManager
                 20
             ); 
             
-            // MAP THE FRAME WINDOW SO IT BECOMES VISIBLE
             xcb_map_window(conn, c->frame);
-
-            // FLUSH THE REQUEST TO THE X SERVER 
-            // FOR EMIDIET HANDELING OF THE REQUEST
             xcb_flush(conn); 
+            set_win_color(c->frame, BLUE);
         }
 
         static void
