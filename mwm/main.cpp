@@ -1545,7 +1545,7 @@ class set_color
 {
     public:
 
-    set_color(const xcb_window_t & win, const uint8_t & r, const uint8_t & g, const uint8_t & b)
+    set_color(const xcb_window_t & win, const uint16_t & r, const uint16_t & g, const uint16_t & b)
     {
         xcb_colormap_t colormap = make_colormap(win);
         apply_color(colormap, win, r, g, b);
@@ -1555,7 +1555,7 @@ class set_color
     xcb_alloc_color_reply_t *reply;
 
     void
-    apply_color(const xcb_colormap_t & colormap, const xcb_window_t & win, const uint8_t & r, const uint8_t & g, const uint8_t & b)
+    apply_color(const xcb_colormap_t & colormap, const xcb_window_t & win, const uint16_t & r, const uint16_t & g, const uint16_t & b)
     {
         xcb_change_window_attributes
         (
@@ -1587,7 +1587,7 @@ class set_color
     }
 
     uint32_t
-    get_color(const xcb_colormap_t & colormap, const uint8_t & r, const uint8_t & g, const uint8_t & b)
+    get_color(const xcb_colormap_t & colormap, const uint16_t & r, const uint16_t & g, const uint16_t & b)
     {
         reply = xcb_alloc_color_reply
         (
@@ -3486,7 +3486,7 @@ configureRootWindow()
     // );
     // free(reply);
 
-    set_color(screen->root, 0, 0, 255);
+    set_color(screen->root, 0, 0, 0xffff);
 
     // APPLY THE EVENT MASKS TO THE ROOT WINDOW
     xcb_change_window_attributes
