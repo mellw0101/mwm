@@ -1039,6 +1039,9 @@ class XCPPBAnimator
         XCPPBAnimator(xcb_connection_t* connection, const xcb_window_t & window)
         : connection(connection), window(window) {}
 
+        XCPPBAnimator(client * & c)
+        : connection(conn), c(c) {}
+
         void /**
          * @brief Animates the position and size of an object from a starting point to an ending point.
          * 
@@ -1104,6 +1107,60 @@ class XCPPBAnimator
             /* STOP THE ANIMATION */
             stopAnimations();
         }
+
+        void 
+        animate_client(int startX, int startY, int startWidth, int startHeight, int endX, int endY, int endWidth, int endHeight, int duration)
+        {
+            /* ENSURE ANY EXISTING ANIMATION IS STOPPED */
+            stopAnimations();
+            
+            /* INITILIZE CLASS VARIABELS WITH INPUT VALUES */
+            currentX      = startX;
+            currentY      = startY;
+            currentWidth  = startWidth;
+            currentHeight = startHeight;
+
+            int steps = duration; 
+
+            /**
+             * @brief Calculate if the step is positive or negative for each property.
+             *
+             * The variables @param stepX, stepY, stepWidth, stepHeight are always set to either 1 or -1.
+             * This is determined by dividing the absolute value of the difference between the start and end values
+             * by the difference itself. This results in a value of 1 or -1, which is used to determine if the animation 
+             * is moving in a positive (increasing) or negative (decreasing) direction for each property.
+             */
+            stepX      = std::abs(endX - startX)           / (endX - startX);
+            stepY      = std::abs(endY - startY)           / (endY - startY);
+            stepWidth  = std::abs(endWidth - startWidth)   / (endWidth - startWidth);
+            stepHeight = std::abs(endHeight - startHeight) / (endHeight - startHeight);
+
+            /**
+             * @brief CALCULATE THE DURATION FOR EACH STEP BASED ON THE TOTAL ANIMATION DURATION AND THE ABSOLUTE VALUE OF THE LENGTH OF EACH ANIMATION 
+             * 
+             * @param XAnimDuration, YAnimDuration, WAnimDuration, HAnimDuration represent the time each step takes to iterate one pixel for each respective thread.
+             * 
+             * The duration for each step is calculated by dividing the total animation duration by the absolute value of the lengt on the respective animation.
+             * This ensures that each thread will iterate each pixel from start to end value,
+             * ensuring that all threads will complete at the same time.
+             */
+            XAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(std::abs(endX - startX));
+            YAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(std::abs(endY - startY)); 
+            WAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(std::abs(endWidth - startWidth));
+            HAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(std::abs(endHeight - startHeight)); 
+
+            /* START ANIMATION THREADS */
+            XAnimationThread = std::thread(&XCPPBAnimator::CliXAnimation, this, endX);
+            YAnimationThread = std::thread(&XCPPBAnimator::CliYAnimation, this, endY);
+            WAnimationThread = std::thread(&XCPPBAnimator::CliWAnimation, this, endWidth);
+            HAnimationThread = std::thread(&XCPPBAnimator::CliHAnimation, this, endHeight);
+
+            /* WAIT FOR ANIMATION TO COMPLETE */
+            std::this_thread::sleep_for(std::chrono::milliseconds(duration));
+
+            /* STOP THE ANIMATION */
+            stopAnimations();
+        }
         
         /**
          * @brief Destructor to ensure the animation threads are stopped when the object is destroyed.
@@ -1116,6 +1173,7 @@ class XCPPBAnimator
     private:
         xcb_connection_t* connection;
         xcb_window_t window;
+        client * c;
         std::thread XAnimationThread;
         std::thread YAnimationThread;
         std::thread WAnimationThread;
@@ -1365,6 +1423,182 @@ class XCPPBAnimator
 
         void /**
          *
+         * @brief Performs animation on window 'x' position until the specified 'endX' is reached.
+         * 
+         * This function updates the 'x' of a window in a loop until the current 'x'
+         * matches the specified end 'x'. It uses the "XStep()" function to incrementally
+         * update the 'x' and the "thread_sleep()" function to introduce a delay between updates.
+         * 
+         * @param endX The desired 'x' position of the window.
+         *
+         */
+        CliXAnimation(const int & endX) 
+        {
+            XlastUpdateTime = std::chrono::high_resolution_clock::now();
+            while (true) 
+            {
+                if (currentX == endX) 
+                {
+                    config_window(XCB_CONFIG_WINDOW_X, endX);
+                    break;
+                }
+                CliXStep();
+                thread_sleep(XAnimDuration);
+            }
+        }
+
+        void /**
+         * @brief Performs a step in the X direction.
+         * 
+         * This function increments the currentX variable by the stepX value.
+         * If it is time to render, it configures the window's X position using the currentX value.
+         * 
+         * @note This function assumes that the connection and window variables are properly initialized.
+         */
+        CliXStep() 
+        {
+            currentX += stepX;
+            
+            if (XisTimeToRender())
+            {
+                config_client(XCB_CONFIG_WINDOW_X, currentX);
+            }
+        }
+
+        void /**
+         *
+         * @brief Performs animation on window 'y' position until the specified 'endY' is reached.
+         * 
+         * This function updates the 'y' of a window in a loop until the current 'y'
+         * matches the specified end 'y'. It uses the "YStep()" function to incrementally
+         * update the 'y' and the "thread_sleep()" function to introduce a delay between updates.
+         * 
+         * @param endY The desired 'y' positon of the window.
+         *
+         */
+        CliYAnimation(const int & endY) 
+        {
+            YlastUpdateTime = std::chrono::high_resolution_clock::now();
+            while (true) 
+            {
+                if (currentY == endY) 
+                {
+                    config_window(XCB_CONFIG_WINDOW_Y, endY);
+                    break;
+                }
+                CliYStep();
+                thread_sleep(YAnimDuration);
+            }
+        }
+
+        void /**
+         * @brief Performs a step in the Y direction.
+         * 
+         * This function increments the currentY variable by the stepY value.
+         * If it is time to render, it configures the window's Y position using xcb_configure_window
+         * and flushes the connection using xcb_flush.
+         */
+        CliYStep() 
+        {
+            currentY += stepY;
+            
+            if (YisTimeToRender())
+            {
+                config_client(XCB_CONFIG_WINDOW_Y, currentY);
+            }
+        }
+
+        void /**
+         *
+         * @brief Performs a 'width' animation until the specified end 'width' is reached.
+         * 
+         * This function updates the 'width' of a window in a loop until the current 'width'
+         * matches the specified end 'width'. It uses the "WStep()" function to incrementally
+         * update the 'width' and the "thread_sleep()" function to introduce a delay between updates.
+         * 
+         * @param endWidth The desired 'width' of the window.
+         *
+         */
+        CliWAnimation(const int & endWidth) 
+        {
+            WlastUpdateTime = std::chrono::high_resolution_clock::now();
+            while (true) 
+            {
+                if (currentWidth == endWidth) 
+                {
+                    config_window(XCB_CONFIG_WINDOW_WIDTH, endWidth);
+                    break;
+                }
+                CliWStep();
+                thread_sleep(WAnimDuration);
+            }
+        }
+
+        void /**
+         *
+         * @brief Performs a step in the width calculation and updates the window width if it is time to render.
+         * 
+         * This function increments the current width by the step width. If it is time to render, it configures the window width
+         * using the XCB library and flushes the connection.
+         *
+         */
+        CliWStep() 
+        {
+            currentWidth += stepWidth;
+
+            if (WisTimeToRender())
+            {
+                config_client(XCB_CONFIG_WINDOW_WIDTH, currentWidth);
+            }
+        }
+
+        void /**
+         *
+         * @brief Performs a 'height' animation until the specified end 'height' is reached.
+         * 
+         * This function updates the 'height' of a window in a loop until the current 'height'
+         * matches the specified end 'height'. It uses the "HStep()" function to incrementally
+         * update the 'height' and the "thread_sleep()" function to introduce a delay between updates.
+         * 
+         * @param endWidth The desired 'height' of the window.
+         *
+         */
+        CliHAnimation(const int & endHeight) 
+        {
+            HlastUpdateTime = std::chrono::high_resolution_clock::now();
+            while (true) 
+            {
+                if (currentHeight == endHeight) 
+                {
+                    config_window(XCB_CONFIG_WINDOW_HEIGHT, endHeight);
+                    break;
+                }
+                CliHStep();
+                thread_sleep(HAnimDuration);
+            }
+        }
+
+        void /**
+         *
+         * @brief Increases the current height by the step height and updates the window height if it's time to render.
+         * 
+         * This function is responsible for incrementing the current height by the step height and updating the window height
+         * if it's time to render. It uses the xcb_configure_window function to configure the window height and xcb_flush to
+         * flush the changes to the X server.
+         *
+         */
+        CliHStep() 
+        {
+            currentHeight += stepHeight;
+            
+            if (HisTimeToRender())
+            {
+                config_client(XCB_CONFIG_WINDOW_HEIGHT, currentHeight);
+            }
+        }
+
+        void /**
+         *
          * @brief Stops all animations by setting the corresponding flags to true and joining the animation threads.
          *        After joining the threads, the flags are set back to false.
          *
@@ -1526,6 +1760,43 @@ class XCPPBAnimator
             );
             xcb_flush(connection);
         }
+
+        void /**
+         *
+         * @brief Configures the window with the specified mask and value.
+         * 
+         * This function configures the window using the XCB library. It takes in a mask and a value
+         * as parameters and applies the configuration to the window.
+         * 
+         * @param mask The mask specifying which attributes to configure.
+         * @param value The value to set for the specified attributes.
+         * 
+         */
+        config_client(const uint32_t & mask, const uint32_t & value)
+        {
+            xcb_configure_window
+            (
+                connection,
+                c->win,
+                mask,
+                (const uint32_t[1])
+                {
+                    static_cast<const uint32_t &>(value)
+                }
+            );
+
+            xcb_configure_window
+            (
+                connection,
+                c->frame,
+                mask,
+                (const uint32_t[1])
+                {
+                    static_cast<const uint32_t &>(value)
+                }
+            );
+            xcb_flush(connection);
+        }
 };
 
 void
@@ -1533,6 +1804,25 @@ animate(client * & c, const int & endX, const int & endY, const int & endWidth, 
 {
     XCPPBAnimator anim(conn, c->frame);
     anim.animate
+    (
+        c->x,
+        c->y, 
+        c->width, 
+        c->height, 
+        endX,
+        endY, 
+        endWidth, 
+        endHeight, 
+        duration
+    );
+    wm::update_client(c);
+}
+
+void
+animate_client(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight, const int & duration)
+{
+    XCPPBAnimator client_anim(c);
+    client_anim.animate_client
     (
         c->x,
         c->y, 
@@ -3039,7 +3329,7 @@ class tile
         }
 
         void
-        animate(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight)
+        animate_old(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight)
         {
             XCPPBAnimator anim(conn, c->frame);
             anim.animate
@@ -3055,6 +3345,12 @@ class tile
                 TILE_ANIMATION_DURATION
             );
             wm::update_client(c);
+        }
+
+        void
+        animate(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight)
+        {
+            animate_client(c, endX, endY, endWidth, endHeight, TILE_ANIMATION_DURATION);
         }
 };
 
