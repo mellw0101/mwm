@@ -1,4 +1,3 @@
-#include "structs.hpp"
 #define main_cpp
 #include "include.hpp"
 
@@ -6,8 +5,8 @@ Logger log;
 XCB xcb;
 
 std::vector<client *> client_list; // global list of clients
-u_Ptr_Vec<client> U_client_list; // global list of clients
-Vec<u_Ptr<int>> b;
+// u_Ptr_Vec<client> U_client_list; // global list of clients
+// Vec<u_Ptr<int>> b;
 std::vector<desktop *> desktop_list;
 
 desktop * cur_d;

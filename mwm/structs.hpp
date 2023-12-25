@@ -126,13 +126,13 @@ struct desktop
     uint16_t height;
 };
 
-template <typename T>
-using u_Ptr = std::unique_ptr<T>;
-template <typename T>
-using Vec = std::vector<T>;
+// template <typename T>
+// using u_Ptr = std::unique_ptr<T>;
+// template <typename T>
+// using Vec = std::vector<T>;
 
-template <typename T>
-using u_Ptr_Vec = std::vector<std::unique_ptr<client>>;
+// template <typename T>
+// using u_Ptr_Vec = std::vector<std::unique_ptr<client>>;
 
 // template <typename T>
 // using SPtr = std::shared_ptr<T>;
