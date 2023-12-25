@@ -1576,7 +1576,7 @@ class color
 
     private:
 
-    xcb_colormap_t colormap = xcb_generate_id(conn);
+    xcb_colormap_t colormap = screen->default_colormap;
     xcb_alloc_color_reply_t *reply;
 
 };
