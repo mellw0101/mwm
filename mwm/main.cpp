@@ -2619,7 +2619,7 @@ class WinManager
             xcb_map_window(conn, c->frame);
             xcb_flush(conn); 
 
-            draw_text("sug", WHITE, BLUE, c->frame, 2, 2);
+            draw_text("sug", WHITE, BLUE, c->frame, 2, 8);
         }
 
         static void
