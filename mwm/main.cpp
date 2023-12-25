@@ -1531,7 +1531,7 @@ class XCPPBAnimator
 void
 animate(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight, const int & duration)
 {
-    XCPPBAnimator anim(conn, c->win);
+    XCPPBAnimator anim(conn, c->frame);
     anim.animate
     (
         c->x,
