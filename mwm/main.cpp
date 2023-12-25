@@ -3377,7 +3377,15 @@ make_desktop(const uint16_t & n)
 
 void 
 configureRootWindow() 
-{
+{    
+    /* Create a colormap */
+    xcb_colormap_t colormap = xcb_generate_id(conn);
+    xcb_create_colormap(conn, XCB_COLORMAP_ALLOC_NONE, colormap, screen->root, screen->root_visual);
+
+    /* Allocate the color blue */
+    uint16_t blue = 0xffff;
+    xcb_alloc_color_reply_t *reply = xcb_alloc_color_reply(conn, xcb_alloc_color(conn, colormap, 0, 0, blue), NULL);
+
     // MAKE THE ROOT WINDOW THE SIZE OF THE SCREEN AND BLACK
     xcb_change_window_attributes
     (
@@ -3387,7 +3395,7 @@ configureRootWindow()
         (const uint32_t[1])
         {
             // SET THE BACKROUND TO BLACK
-            screen->black_pixel 
+            reply->pixel
         }
     );
 
