@@ -1563,8 +1563,8 @@ class color
         static uint32_t
         get(COLOR color)
         {
-            colormap = screen->default_colormap;
-            reply = xcb_alloc_color_reply
+            xcb_colormap_t colormap = screen->default_colormap;
+            xcb_alloc_color_reply_t * reply = xcb_alloc_color_reply
             (
                 conn, 
                 xcb_alloc_color
