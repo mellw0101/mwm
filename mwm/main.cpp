@@ -1,4 +1,5 @@
 #include "structs.hpp"
+#include "tools.hpp"
 #include <cstdint>
 #include <xcb/xproto.h>
 #define main_cpp
@@ -1541,6 +1542,43 @@ animate(client * & c, const int & endX, const int & endY, const int & endWidth, 
     );
     wm::update_client(c);
 }
+
+struct COLOR 
+{
+    uint8_t r;
+    uint8_t g;
+    uint8_t b;
+};
+
+class color 
+{
+    public:
+    
+    uint32_t
+    get(COLOR color)
+    {
+        reply = xcb_alloc_color_reply
+        (
+            conn, 
+            xcb_alloc_color
+            (
+                conn,
+                colormap,
+                scale::from_8_to_16_bit(color.r), 
+                scale::from_8_to_16_bit(color.g),
+                scale::from_8_to_16_bit(color.b)
+            ), 
+            NULL
+        );
+        return reply->pixel;
+    }
+
+    private:
+
+    xcb_colormap_t colormap = screen->default_colormap;
+    xcb_alloc_color_reply_t *reply;
+
+};
 
 class set_color 
 {
@@ -3458,16 +3496,16 @@ make_desktop(const uint16_t & n)
 }
 
 void
-draw_text(const char * str)
+draw_text(const char * str , COLOR text_color, COLOR bg_color)
 {
-    
+    color color;
     screen = xcb_setup_roots_iterator(xcb_get_setup(conn)).data;
     xcb_window_t window = screen->root;
 
     // Create graphics context
     xcb_gcontext_t gc = xcb_generate_id(conn);
     uint32_t mask = XCB_GC_FOREGROUND | XCB_GC_BACKGROUND | XCB_GC_FONT;
-    uint32_t values[3] = {screen->black_pixel, screen->white_pixel};
+    uint32_t values[3] = {color.get(text_color), color.get(bg_color)};
 
     // Load font
     const char *font_name = "7x13";
@@ -3568,7 +3606,17 @@ configureRootWindow()
     // FLUSH TO MAKE X SERVER HANDEL REQUEST NOW
     xcb_flush(conn);
 
-    draw_text("Hello World");
+    COLOR text_color;
+    text_color.r = 255;
+    text_color.g = 255;
+    text_color.b = 255;
+
+    COLOR bg_color;
+    bg_color.r = 0;
+    bg_color.g = 0;
+    bg_color.b = 255;
+
+    draw_text("Hello World", text_color, bg_color);
 }
 
 bool 

@@ -47,6 +47,7 @@
     #include "xcb.hpp"
     #include "defenitions.hpp"
     #include "Screen.hpp"
+    #include "tools.hpp"
 
 #endif
 
