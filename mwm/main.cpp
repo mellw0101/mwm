@@ -2619,7 +2619,7 @@ class WinManager
             xcb_map_window(conn, c->frame);
             xcb_flush(conn); 
 
-            draw_text("sug", WHITE, BLUE, c->frame, 2, 8);
+            draw_text("sug", WHITE, BLUE, c->frame, 2, 17);
         }
 
         static void
@@ -3672,7 +3672,7 @@ draw_text(const char * str , COLOR text_color, COLOR bg_color, const xcb_window_
     xcb_gcontext_t gc = xcb_generate_id(conn);
 
     // Load font
-    const char * font_name = "7x13";
+    const char * font_name = "7x14";
     xcb_font_t font = xcb_generate_id(conn);
     xcb_open_font
     (
