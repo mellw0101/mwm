@@ -1459,29 +1459,10 @@ class XCPPBAnimator
             {
                 if (currentX == endX) 
                 {
-                    config_window(c->frame, XCB_CONFIG_WINDOW_X, endX);
                     break;
                 }
-                CliXStep();
+                currentX += stepX;
                 thread_sleep(XAnimDuration);
-            }
-        }
-
-        void /**
-         * @brief Performs a step in the X direction.
-         * 
-         * This function increments the currentX variable by the stepX value.
-         * If it is time to render, it configures the window's X position using the currentX value.
-         * 
-         * @note This function assumes that the connection and window variables are properly initialized.
-         */
-        CliXStep() 
-        {
-            currentX += stepX;
-            
-            if (XisTimeToRender())
-            {
-                config_window(c->frame, XCB_CONFIG_WINDOW_X, currentX);
             }
         }
 
@@ -1503,37 +1484,10 @@ class XCPPBAnimator
             {
                 if (currentY == endY) 
                 {
-                    config_window(c->frame, XCB_CONFIG_WINDOW_Y, endY);
                     break;
                 }
-                CliYStep();
+                currentY += stepY;
                 thread_sleep(YAnimDuration);
-            }
-        }
-
-        void /**
-         * @brief Performs a step in the Y direction.
-         * 
-         * This function increments the currentY variable by the stepY value.
-         * If it is time to render, it configures the window's Y position using xcb_configure_window
-         * and flushes the connection using xcb_flush.
-         */
-        CliYStep() 
-        {
-            currentY += stepY;
-            
-            if (YisTimeToRender())
-            {
-                xcb_configure_window
-                (
-                    conn,
-                    c->frame,
-                    XCB_CONFIG_WINDOW_Y,
-                    (const uint32_t[1])
-                    {
-                        static_cast<const uint32_t &>(currentY)
-                    }
-                );
             }
         }
 
@@ -1555,29 +1509,10 @@ class XCPPBAnimator
             {
                 if (currentWidth == endWidth) 
                 {
-                    config_client(XCB_CONFIG_WINDOW_WIDTH, endWidth);
                     break;
                 }
-                CliWStep();
+                currentWidth += stepWidth;
                 thread_sleep(WAnimDuration);
-            }
-        }
-
-        void /**
-         *
-         * @brief Performs a step in the width calculation and updates the window width if it is time to render.
-         * 
-         * This function increments the current width by the step width. If it is time to render, it configures the window width
-         * using the XCB library and flushes the connection.
-         *
-         */
-        CliWStep() 
-        {
-            currentWidth += stepWidth;
-
-            if (WisTimeToRender())
-            {
-                config_client(XCB_CONFIG_WINDOW_WIDTH, currentWidth);
             }
         }
 
@@ -1599,30 +1534,10 @@ class XCPPBAnimator
             {
                 if (currentHeight == endHeight) 
                 {
-                    config_client(XCB_CONFIG_WINDOW_HEIGHT, endHeight);
                     break;
                 }
-                CliHStep();
+                currentHeight += stepHeight;
                 thread_sleep(HAnimDuration);
-            }
-        }
-
-        void /**
-         *
-         * @brief Increases the current height by the step height and updates the window height if it's time to render.
-         * 
-         * This function is responsible for incrementing the current height by the step height and updating the window height
-         * if it's time to render. It uses the xcb_configure_window function to configure the window height and xcb_flush to
-         * flush the changes to the X server.
-         *
-         */
-        CliHStep() 
-        {
-            currentHeight += stepHeight;
-            
-            if (HisTimeToRender())
-            {
-                config_client(XCB_CONFIG_WINDOW_HEIGHT, currentHeight);
             }
         }
 
