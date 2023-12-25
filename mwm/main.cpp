@@ -1149,7 +1149,7 @@ class XCPPBAnimator
             GAnimDuration = frameDuration;
 
             /* START ANIMATION THREADS */
-            // GAnimationThread = std::thread(&XCPPBAnimator::GFrameAnimation, this, endX, endY, endWidth, endHeight);
+            GAnimationThread = std::thread(&XCPPBAnimator::GFrameAnimation, this, endX, endY, endWidth, endHeight);
             XAnimationThread = std::thread(&XCPPBAnimator::CliXAnimation, this, endX);
             YAnimationThread = std::thread(&XCPPBAnimator::CliYAnimation, this, endY);
             WAnimationThread = std::thread(&XCPPBAnimator::CliWAnimation, this, endWidth);
@@ -1197,7 +1197,6 @@ class XCPPBAnimator
         std::atomic<bool> stopYFlag{false};
         std::atomic<bool> stopWFlag{false};
         std::atomic<bool> stopHFlag{false};
-        std::chrono::high_resolution_clock::time_point GlastUpdateTime;
         std::chrono::high_resolution_clock::time_point XlastUpdateTime;
         std::chrono::high_resolution_clock::time_point YlastUpdateTime;
         std::chrono::high_resolution_clock::time_point WlastUpdateTime;
@@ -1428,7 +1427,6 @@ class XCPPBAnimator
         void
         GFrameAnimation(const int & endX, const int & endY, const int & endWidth, const int & endHeight, const int & duration)
         {
-            GlastUpdateTime = std::chrono::high_resolution_clock::now();
             while (true)
             {
                 if (currentX == endX && currentY == endY && currentWidth == endWidth && currentHeight == endHeight)
