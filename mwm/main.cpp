@@ -3371,7 +3371,7 @@ class tile
         void
         animate(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight)
         {
-            XCPPBAnimator anim(c);
+            XCPPBAnimator anim(conn, c->frame, c);
             anim.animate_client
             (
                 c->x,
