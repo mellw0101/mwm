@@ -1149,6 +1149,7 @@ class XCPPBAnimator
             YAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(std::abs(endY - startY)); 
             WAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(std::abs(endWidth - startWidth));
             HAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(std::abs(endHeight - startHeight)); 
+            GAnimDuration = frameDuration;
 
             /* START ANIMATION THREADS */
             GAnimationThread = std::thread(&XCPPBAnimator::GFrameAnimation, this, endX, endY, endWidth, endHeight);
@@ -1189,6 +1190,7 @@ class XCPPBAnimator
         int stepY;
         int stepWidth;
         int stepHeight;
+        double GAnimDuration;
         double XAnimDuration;
         double YAnimDuration;
         double WAnimDuration;
@@ -1440,7 +1442,7 @@ class XCPPBAnimator
                 }
                 conf_client_test();
                 xcb_flush(connection);
-                thread_sleep(frameDuration);
+                thread_sleep(GAnimDuration);
             }
         }
 
