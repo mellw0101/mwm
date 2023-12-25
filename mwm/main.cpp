@@ -1039,8 +1039,8 @@ class XCPPBAnimator
         XCPPBAnimator(xcb_connection_t* connection, const xcb_window_t & window)
         : connection(connection), window(window) {}
 
-        XCPPBAnimator(client * & c)
-        : connection(conn), c(c) {}
+        XCPPBAnimator(xcb_connection_t* connection, client * c)
+        : connection(connection), c(c) {}
 
         XCPPBAnimator(xcb_connection_t* connection, const xcb_window_t & window, client * c)
         : connection(connection), window(window), c(c) {}
@@ -1859,7 +1859,7 @@ animate(client * & c, const int & endX, const int & endY, const int & endWidth, 
 void
 animate_client(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight, const int & duration)
 {
-    XCPPBAnimator client_anim(c);
+    XCPPBAnimator client_anim(conn, c);
     client_anim.animate_client
     (
         c->x,
@@ -3388,7 +3388,7 @@ class tile
         void
         animate(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight)
         {
-            XCPPBAnimator anim(conn, c->frame, c);
+            XCPPBAnimator anim(conn,  c);
             anim.animate_client
             (
                 c->x,
