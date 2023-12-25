@@ -3695,7 +3695,7 @@ configureRootWindow()
     set_win_color
     (
         screen->root, 
-        BLUE
+        LIGHT_GREY
     );
 
     // APPLY THE EVENT MASKS TO THE ROOT WINDOW
@@ -3739,7 +3739,7 @@ configureRootWindow()
     (
         "Hello World", 
         WHITE, 
-        BLUE,
+        LIGHT_GREY,
         screen->root,
         500,
         20
