@@ -41,6 +41,7 @@
     #include <future>
     #include <iostream>
     #include <algorithm>
+    #include <memory>
 
     #include "structs.hpp"
     #include "Log.hpp"
@@ -56,6 +57,7 @@
     #include <cstdint>
     #include <vector>
     #include <xcb/xproto.h>
+    #include <memory>
 
 #endif
 

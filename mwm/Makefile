@@ -7,7 +7,7 @@ CXXFLAGS = \
 ${CFLAGS}
 
 LIBS = -lxcb -lxcb-keysyms -lxcb-cursor -lxcb-icccm -lxcb-ewmh
-LDFLAGS  = ${LIBS} -flto -O3 -march=native
+LDFLAGS  = ${LIBS} -flto -O3 -march=native -std=c++20
 # -s
 
 cc = clang

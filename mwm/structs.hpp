@@ -71,6 +71,13 @@ enum MAXWIN_ANIMATION
     MAXWIN_ANIMATION_DURATION = 80
 };
 
+enum show_hide 
+{
+    SHOW,
+    HIDE
+};
+
+
 enum Direction 
 {
     NEXT,
@@ -118,5 +125,20 @@ struct desktop
     uint16_t width;
     uint16_t height;
 };
+
+template <typename T>
+using u_Ptr = std::unique_ptr<T>;
+template <typename T>
+using Vec = std::vector<T>;
+
+template <typename T>
+using u_Ptr_Vec = std::vector<std::unique_ptr<client>>;
+
+// template <typename T>
+// using SPtr = std::shared_ptr<T>;
+// template <typename T>
+// using WPtr = std::weak_ptr<T>;
+
+
 
 #endif

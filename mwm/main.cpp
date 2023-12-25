@@ -1,3 +1,4 @@
+#include "structs.hpp"
 #define main_cpp
 #include "include.hpp"
 
@@ -5,6 +6,8 @@ Logger log;
 XCB xcb;
 
 std::vector<client *> client_list; // global list of clients
+u_Ptr_Vec<client> U_client_list; // global list of clients
+Vec<u_Ptr<int>> b;
 std::vector<desktop *> desktop_list;
 
 desktop * cur_d;
@@ -20,6 +23,7 @@ static xcb_screen_t * screen;
 static void 
 draw_text(const char * str , COLOR text_color, COLOR bg_color, const xcb_window_t & win, const int16_t & x, const int16_t & y);
 
+
 namespace get {
     client * 
     client_from_win(const xcb_window_t * w) 
@@ -32,10 +36,12 @@ namespace get {
             }
         }
         return nullptr; /*
-
-            RETURN 'nullptr' BECAUSE THE
-            WINDOW DOES NOT BELONG TO ANY 
-            CLIENT IN THE CLIENT LIST
+         *
+         * THIS WILL
+         * RETURN 'nullptr' BECAUSE THE
+         * WINDOW DOES NOT BELONG TO ANY 
+         * CLIENT IN THE CLIENT LIST
+         *  
          */ 
     }
 
@@ -584,8 +590,12 @@ class wm {
         }
 };
 
-// Function to remove a client based on its window ID
-void removeClient(const xcb_window_t & win) 
+void /**
+ *
+ * @brief Function to remove a client based on its window ID 
+ *
+ */
+removeClient(const xcb_window_t & win) 
 {
     auto it = std::remove_if
     (
@@ -603,11 +613,6 @@ void removeClient(const xcb_window_t & win)
     // Erase the removed clients from the vector
     client_list.erase(it, client_list.end());
 }
-
-enum show_hide {
-    SHOW,
-    HIDE
-};
 
 void 
 show_hide_client(client * c, const show_hide & mode) 
@@ -1025,8 +1030,10 @@ namespace XCBAnimator {
 }
 
 /**
+ *
  * @class XCPPBAnimator
  * @brief Class for animating the position and size of an XCB window.
+ *
  */
 class XCPPBAnimator 
 {
@@ -1889,7 +1896,6 @@ class color
             return reply->pixel;
         }
 
-
         static rgb_color_code
         code(const uint8_t & r, const uint8_t & g, const uint8_t & b)
         {
@@ -2510,17 +2516,27 @@ namespace borrowed
     bool
     getgeom(const xcb_drawable_t * win, int16_t * x, int16_t * y, uint16_t * width, uint16_t * height, uint8_t * depth)
     {
-        xcb_get_geometry_reply_t * geom = xcb_get_geometry_reply(conn,
-                xcb_get_geometry(conn, * win), NULL);
+        xcb_get_geometry_reply_t * geom = xcb_get_geometry_reply
+        (
+            conn,
+            xcb_get_geometry
+            (
+                conn, 
+                * win
+            ), 
+            NULL
+        );
 
         if (NULL == geom)
+        {
             return false;
+        }
 
-        * x = geom->x;
-        * y = geom->y;
-        * width = geom->width;
+        * x      = geom->x;
+        * y      = geom->y;
+        * width  = geom->width;
         * height = geom->height;
-        * depth = geom->depth;
+        * depth  = geom->depth;
 
         free(geom);
         return true;
@@ -2559,6 +2575,7 @@ namespace borrowed
                 static_cast<const uint32_t &>(y)
             }
         );
+
         xcb_flush(conn);
     }
 
@@ -2597,7 +2614,7 @@ namespace borrowed
             c->ogsize.width, 
             c->ogsize.height
         );
-        c->ismax    = false;
+        c->ismax = false;
     }
 
     void
@@ -2625,6 +2642,7 @@ namespace borrowed
             LOG_error("client is nullptr");
             return;
         }
+
         if (c->ismax)
         {
             unmaxwin(c);
@@ -2635,8 +2653,8 @@ namespace borrowed
         const uint16_t & mon_y      = 0;
         const uint16_t & mon_width  = screen->width_in_pixels;
         const uint16_t & mon_height = screen->height_in_pixels;
-
         wm::save_ogsize(c);
+
         maxwin_animate
         (
             c, 
@@ -3039,7 +3057,6 @@ class tile
                     set_tile_sizepos(c, TILEPOS::LEFT);
                     break;
                 }
-                
                 case TILE::RIGHT:
                 {
                     // IF 'CURRENTLY_TILED' TO 'RIGHT'
@@ -3076,7 +3093,6 @@ class tile
                     set_tile_sizepos(c, TILEPOS::RIGHT);
                     break;
                 }
-
                 case TILE::DOWN:
                 {
                     // IF 'CURRENTLY_TILED' 'LEFT' OR 'LEFT_UP'
@@ -3103,7 +3119,6 @@ class tile
                         return;
                     }
                 }
-
                 case TILE::UP:
                 {
                     // IF 'CURRENTLY_TILED' 'LEFT'
@@ -3137,7 +3152,7 @@ class tile
         
         void
         moveresize(client * & c)
-        {        
+        {
             xcb_configure_window
             (
                 conn,
@@ -3173,7 +3188,6 @@ class tile
                     }
                     break;
                 }
-
                 case TILEPOS::RIGHT:
                 {
                     if (c->x        == screen->width_in_pixels / 2 
@@ -3185,7 +3199,6 @@ class tile
                     }
                     break;
                 }
-
                 case TILEPOS::LEFT_DOWN:
                 {
                     if (c->x        == 0
@@ -3197,7 +3210,6 @@ class tile
                     }
                     break;
                 }
-
                 case TILEPOS::RIGHT_DOWN:
                 {
                     if (c->x        == screen->width_in_pixels / 2
@@ -3209,7 +3221,6 @@ class tile
                     }
                     break;
                 }
-
                 case TILEPOS::LEFT_UP:
                 {
                     if (c->x        == 0
@@ -3221,7 +3232,6 @@ class tile
                     }
                     break;
                 }
-
                 case TILEPOS::RIGHT_UP:
                 {
                     if (c->x        == screen->width_in_pixels / 2
@@ -3254,7 +3264,6 @@ class tile
                     );
                     return;
                 }
-                
                 case TILEPOS::RIGHT:
                 {
                     animate
@@ -3267,7 +3276,6 @@ class tile
                     );
                     return;
                 }
-                
                 case TILEPOS::LEFT_DOWN:
                 {
                     animate
@@ -3280,7 +3288,6 @@ class tile
                     );
                     return;
                 }
-
                 case TILEPOS::RIGHT_DOWN:
                 {
                     animate
@@ -3293,7 +3300,6 @@ class tile
                     );
                     return;
                 }
-
                 case TILEPOS::LEFT_UP:
                 {
                     animate
@@ -3306,7 +3312,6 @@ class tile
                     );
                     return;
                 } 
-                
                 case TILEPOS::RIGHT_UP:
                 {
                     animate
@@ -3378,8 +3383,10 @@ class Event
 {
     public:
         /**
+         *
          * @brief Constructor for the Event class.
          *        Initializes the key symbols and keycodes.
+         *
          */
         Event()
         {
@@ -3387,8 +3394,10 @@ class Event
         }
 
         /**
+         *
          * @brief Destructor for the Event class.
          *        Frees the allocated key symbols.
+         *
          */
         ~Event() 
         {
@@ -3414,52 +3423,52 @@ class Event
                     key_press_handler(ev);
                     break;
                 }
-                
                 case XCB_MAP_NOTIFY: 
                 {
                     map_notify_handler(ev);
                     break;
                 }
-                
                 case XCB_MAP_REQUEST: 
                 {
                     map_req_handler(ev);
                     break;
                 }
-                
                 case XCB_BUTTON_PRESS: 
                 {
                     button_press_handler(ev);
                     break;
                 }
-
                 case XCB_CONFIGURE_REQUEST:
                 {
                     configure_request_handler(ev);
                     break;
                 }
-
                 case XCB_FOCUS_IN:
                 {
                     focus_in_handler(ev);
                     break;
                 }
-
                 case XCB_FOCUS_OUT:
                 {
                     focus_out_handler(ev);
                     break;
                 }
-
-                /* 
-                    TODO 
-                    THIS ACTS WIERDLY   
+                /** TODO ** 
+                 *
+                 * @brief Handle the 'XCB_CLIENT_MESSAGE' event.
+                 *        This event is used to handle the 'close' button on the window.
+                 *        When the 'close' button is pressed, the window is destroyed.
+                 *        
+                 * @param ev The XCB event to be handled.
+                 *
+                 * @note This event is not currently handled.
+                 *       This needs to be checked and implemented.
+                 *
                  */
                 case XCB_CLIENT_MESSAGE: 
                 {
                     break;
                 }
-
                 case XCB_DESTROY_NOTIFY:
                 {
                     destroy_notify_handler(ev);
@@ -3495,7 +3504,6 @@ class Event
                         break;
                     }
                 }
-                
             }
 
             /*
@@ -3712,6 +3720,11 @@ class Event
                 }
             }
 
+            /**
+             *
+             * @brief This is a debug kebinding to test featurtes before they are implemented.  
+             * 
+             */
             if (e->detail == k)
             {
                 switch (e->state) 
