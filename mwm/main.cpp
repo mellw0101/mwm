@@ -2593,7 +2593,7 @@ class WinManager
             
             xcb_map_window(conn, c->frame);
             xcb_flush(conn); 
-            set_win_color(c->frame, BLUE);
+            // set_win_color(c->frame, BLUE);
         }
 
         static void
