@@ -1,3 +1,5 @@
+#include <cstdint>
+#include <xcb/xproto.h>
 #define main_cpp
 #include "include.hpp"
 
@@ -1538,6 +1540,71 @@ animate(client * & c, const int & endX, const int & endY, const int & endWidth, 
     );
     wm::update_client(c);
 }
+
+class set_color 
+{
+    public:
+
+    set_color(const xcb_window_t & win, const uint8_t & r, const uint8_t & g, const uint8_t & b)
+    {
+        xcb_colormap_t colormap = make_colormap(win);
+        apply_color(colormap, win, r, g, b);
+    }
+
+    private:
+    xcb_alloc_color_reply_t *reply;
+
+    void
+    apply_color(const xcb_colormap_t & colormap, const xcb_window_t & win, const uint8_t & r, const uint8_t & g, const uint8_t & b)
+    {
+        xcb_change_window_attributes
+        (
+            conn,
+            win,
+            XCB_CW_BACK_PIXEL,
+            (const uint32_t[1])
+            {
+                static_cast<const uint32_t &>(get_color(colormap, r, g, b))
+            }
+        );
+        xcb_flush(conn);
+        free(reply);
+    }
+
+    xcb_colormap_t 
+    make_colormap(const xcb_window_t & win)
+    {
+        xcb_colormap_t colormap = xcb_generate_id(conn);
+        xcb_create_colormap
+        (
+            conn, 
+            XCB_COLORMAP_ALLOC_NONE, 
+            colormap, 
+            win, 
+            screen->root_visual
+        );
+        return colormap;
+    }
+
+    uint32_t
+    get_color(const xcb_colormap_t & colormap, const uint8_t & r, const uint8_t & g, const uint8_t & b)
+    {
+        reply = xcb_alloc_color_reply
+        (
+            conn, 
+            xcb_alloc_color
+            (
+                conn,
+                colormap,
+                r, 
+                g, 
+                b
+            ), 
+            NULL
+        );
+        return reply->pixel;
+    }
+};
 
 void 
 move_desktop(const uint8_t & n)
@@ -3378,13 +3445,32 @@ make_desktop(const uint16_t & n)
 void 
 configureRootWindow() 
 {    
-    /* Create a colormap */
+    // CREATE A COLORMAP
     xcb_colormap_t colormap = xcb_generate_id(conn);
-    xcb_create_colormap(conn, XCB_COLORMAP_ALLOC_NONE, colormap, screen->root, screen->root_visual);
+    xcb_create_colormap
+    (
+        conn, 
+        XCB_COLORMAP_ALLOC_NONE, 
+        colormap, 
+        screen->root, 
+        screen->root_visual
+    );
 
-    /* Allocate the color blue */
+    // ALLOCATE A COLOR
     uint16_t blue = 0xffff;
-    xcb_alloc_color_reply_t *reply = xcb_alloc_color_reply(conn, xcb_alloc_color(conn, colormap, 0, 0, blue), NULL);
+    xcb_alloc_color_reply_t *reply = xcb_alloc_color_reply
+    (
+        conn, 
+        xcb_alloc_color
+        (
+            conn,
+            colormap,
+            0, 
+            0, 
+            blue
+        ), 
+        NULL
+    );
 
     // MAKE THE ROOT WINDOW THE SIZE OF THE SCREEN AND BLACK
     xcb_change_window_attributes
@@ -3398,6 +3484,7 @@ configureRootWindow()
             reply->pixel
         }
     );
+    free(reply);
 
     // APPLY THE EVENT MASKS TO THE ROOT WINDOW
     xcb_change_window_attributes
