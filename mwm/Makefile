@@ -13,7 +13,7 @@ cc = clang
 CXX = clang++
 
 SRC = main.cpp tools.cpp
-OBJ = $(SRC:../src/%.cpp=%.o)
+OBJ = $(SRC:./.cpp=.o)
 DEPS = $(OBJ:.o=.d)
 
 all: test
