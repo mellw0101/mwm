@@ -1153,8 +1153,8 @@ class XCPPBAnimator
             HAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(std::abs(endHeight - startHeight)); 
 
             /* START ANIMATION THREADS */
-            XAnimationThread = std::thread(&XCPPBAnimator::XAnimation, this, endX);
-            YAnimationThread = std::thread(&XCPPBAnimator::YAnimation, this, endY);
+            XAnimationThread = std::thread(&XCPPBAnimator::CliXAnimation, this, endX);
+            YAnimationThread = std::thread(&XCPPBAnimator::CliYAnimation, this, endY);
             WAnimationThread = std::thread(&XCPPBAnimator::CliWAnimation, this, endWidth);
             HAnimationThread = std::thread(&XCPPBAnimator::CliHAnimation, this, endHeight);
 
@@ -1442,7 +1442,7 @@ class XCPPBAnimator
             {
                 if (currentX == endX) 
                 {
-                    config_window(XCB_CONFIG_WINDOW_X, endX);
+                    config_window(c->frame, XCB_CONFIG_WINDOW_X, endX);
                     break;
                 }
                 CliXStep();
@@ -1464,16 +1464,7 @@ class XCPPBAnimator
             
             if (XisTimeToRender())
             {
-                xcb_configure_window
-                (
-                    conn,
-                    c->frame,
-                    XCB_CONFIG_WINDOW_X,
-                    (const uint32_t[1])
-                    {
-                        static_cast<const uint32_t &>(currentX)
-                    }
-                );
+                config_window(c->frame, XCB_CONFIG_WINDOW_X, currentX);
             }
         }
 
@@ -1495,7 +1486,7 @@ class XCPPBAnimator
             {
                 if (currentY == endY) 
                 {
-                    config_window(XCB_CONFIG_WINDOW_Y, endY);
+                    config_window(c->frame, XCB_CONFIG_WINDOW_Y, endY);
                     break;
                 }
                 CliYStep();
@@ -1547,7 +1538,7 @@ class XCPPBAnimator
             {
                 if (currentWidth == endWidth) 
                 {
-                    config_window(XCB_CONFIG_WINDOW_WIDTH, endWidth);
+                    config_client(XCB_CONFIG_WINDOW_WIDTH, endWidth);
                     break;
                 }
                 CliWStep();
@@ -1591,7 +1582,7 @@ class XCPPBAnimator
             {
                 if (currentHeight == endHeight) 
                 {
-                    config_window(XCB_CONFIG_WINDOW_HEIGHT, endHeight);
+                    config_client(XCB_CONFIG_WINDOW_HEIGHT, endHeight);
                     break;
                 }
                 CliHStep();
@@ -1773,6 +1764,32 @@ class XCPPBAnimator
             (
                 connection,
                 window,
+                mask,
+                (const uint32_t[1])
+                {
+                    static_cast<const uint32_t &>(value)
+                }
+            );
+            xcb_flush(connection);
+        }
+
+        void /**
+         *
+         * @brief Configures the window with the specified mask and value.
+         * 
+         * This function configures the window using the XCB library. It takes in a mask and a value
+         * as parameters and applies the configuration to the window.
+         * 
+         * @param mask The mask specifying which attributes to configure.
+         * @param value The value to set for the specified attributes.
+         * 
+         */
+        config_window(const xcb_window_t & win, const uint32_t & mask, const uint32_t & value)
+        {
+            xcb_configure_window
+            (
+                connection,
+                win,
                 mask,
                 (const uint32_t[1])
                 {
