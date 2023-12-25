@@ -1,7 +1,5 @@
-#include "structs.hpp"
-#include "tools.hpp"
 #include "xcb_source/libxcb/xcb.h"
-#include <cstdint>
+#include <thread>
 #include <xcb/xproto.h>
 #define main_cpp
 #include "include.hpp"
@@ -1153,6 +1151,7 @@ class XCPPBAnimator
             HAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(std::abs(endHeight - startHeight)); 
 
             /* START ANIMATION THREADS */
+            GAnimationThread = std::thread(&XCPPBAnimator::GFrameAnimation, this, endX, endY, endWidth, endHeight);
             XAnimationThread = std::thread(&XCPPBAnimator::CliXAnimation, this, endX);
             YAnimationThread = std::thread(&XCPPBAnimator::CliYAnimation, this, endY);
             WAnimationThread = std::thread(&XCPPBAnimator::CliWAnimation, this, endWidth);
@@ -1177,6 +1176,7 @@ class XCPPBAnimator
         xcb_connection_t* connection;
         xcb_window_t window;
         client * c;
+        std::thread GAnimationThread;
         std::thread XAnimationThread;
         std::thread YAnimationThread;
         std::thread WAnimationThread;
@@ -1197,6 +1197,7 @@ class XCPPBAnimator
         std::atomic<bool> stopYFlag{false};
         std::atomic<bool> stopWFlag{false};
         std::atomic<bool> stopHFlag{false};
+        std::chrono::high_resolution_clock::time_point GlastUpdateTime;
         std::chrono::high_resolution_clock::time_point XlastUpdateTime;
         std::chrono::high_resolution_clock::time_point YlastUpdateTime;
         std::chrono::high_resolution_clock::time_point WlastUpdateTime;
@@ -1421,6 +1422,24 @@ class XCPPBAnimator
                     }
                 );
                 xcb_flush(connection);
+            }
+        }
+
+        void
+        GFrameAnimation(const int & endX, const int & endY, const int & endWidth, const int & endHeight, const int & duration)
+        {
+            GlastUpdateTime = std::chrono::high_resolution_clock::now();
+            while (true)
+            {
+                if (currentX == endX && currentY == endY && currentWidth == endWidth && currentHeight == endHeight)
+                {
+                    conf_client_test();
+                    xcb_flush(connection);
+                    break;
+                }
+                conf_client_test();
+                xcb_flush(connection);
+                thread_sleep(frameDuration);
             }
         }
 
@@ -1834,6 +1853,36 @@ class XCPPBAnimator
                 }
             );
             xcb_flush(connection);
+        }
+
+        void 
+        conf_client_test()
+        {
+            xcb_configure_window
+            (
+                connection,
+                c->win,
+                XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
+                (const uint32_t[2])
+                {
+                    static_cast<const uint32_t &>(currentWidth),
+                    static_cast<const uint32_t &>(currentHeight)
+                }
+            );
+
+            xcb_configure_window
+            (
+                connection,
+                c->frame,
+                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
+                (const uint32_t[4])
+                {
+                    static_cast<const uint32_t &>(currentX),
+                    static_cast<const uint32_t &>(currentY),
+                    static_cast<const uint32_t &>(currentWidth),
+                    static_cast<const uint32_t &>(currentHeight)
+                }
+            );
         }
 };
 
