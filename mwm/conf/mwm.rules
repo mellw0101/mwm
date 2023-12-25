@@ -1,0 +1,17 @@
+polkit.addRule(function(action, subject) {
+    if ((action.id == "org.freedesktop.systemd1.manage-units" &&
+         action.lookup("unit") == "mwm.service" &&
+         (action.lookup("verb") == "start" || action.lookup("verb") == "stop")) &&
+         subject.isInGroup("wheel")) {
+        return polkit.Result.YES;
+    }
+});
+
+polkit.addRule(function(action, subject) {
+    if ((action.id == "org.freedesktop.systemd1.manage-units" &&
+         action.lookup("unit") == "mwm-X.service" &&
+         (action.lookup("verb") == "start" || action.lookup("verb") == "stop")) &&
+         subject.isInGroup("wheel")) {
+        return polkit.Result.YES;
+    }
+});

@@ -1,0 +1,105 @@
+// enum auth_protos 
+//         {
+//             AUTH_MC1,
+//             N_AUTH_PROTOS
+//         };
+
+//         #define AUTH_PROTO_XDM_AUTHORIZATION "XDM-AUTHORIZATION-1"
+//         #define AUTH_PROTO_MIT_MAGIC_COOKIE "MIT-MAGIC-COOKIE-1"
+
+//         // Initialize the vector with the protocol names
+//         std::vector<std::string> authnames_str = {
+//             AUTH_PROTO_MIT_MAGIC_COOKIE
+//         };
+
+//         // Create a vector of char* pointers to the C-style strings
+//         std::vector<char*> authnames_cstr;
+
+
+//         int authnameslen[N_AUTH_PROTOS] = 
+//         {
+//             static_cast<const int>(sizeof(AUTH_PROTO_MIT_MAGIC_COOKIE) - 1),
+//         };
+
+//         Xauth *
+//         get_authptr(struct sockaddr *sockname, int display) 
+//         {
+//             char *addr = nullptr;
+//             int addrlen = 0;
+//             unsigned short family;
+//             char hostnamebuf[256];  // big enough for max hostname
+//             char dispbuf[40];  // big enough to hold more than 2^64 base 10
+//             int dispbuflen;
+
+//             family = FamilyLocal; // Usually 256 for XCB_FAMILY_LOCAL
+//             switch(sockname->sa_family) 
+//             {
+//                 case AF_INET6: 
+//                 {
+//                     struct sockaddr_in6 *sockaddr_ipv6 = reinterpret_cast<struct sockaddr_in6 *>(sockname);
+//                     addr = reinterpret_cast<char *>(&sockaddr_ipv6->sin6_addr);
+//                     addrlen = sizeof(sockaddr_ipv6->sin6_addr);
+//                     if (!IN6_IS_ADDR_V4MAPPED(&sockaddr_ipv6->sin6_addr) 
+//                     && !IN6_IS_ADDR_LOOPBACK(&sockaddr_ipv6->sin6_addr)) 
+//                     {
+//                         family = XCB_FAMILY_INTERNET_6;
+//                     }
+//                     break;
+//                 }
+//                 case AF_INET: 
+//                 {
+//                     struct sockaddr_in *sockaddr_ipv4 = reinterpret_cast<struct sockaddr_in *>(sockname);
+//                     addr = reinterpret_cast<char *>(&sockaddr_ipv4->sin_addr);
+//                     addrlen = sizeof(sockaddr_ipv4->sin_addr);
+//                     if (sockaddr_ipv4->sin_addr.s_addr != htonl(INADDR_LOOPBACK)) 
+//                     {
+//                         family = XCB_FAMILY_INTERNET;
+//                     }
+//                     break;
+//                 }
+//                 case AF_UNIX: 
+//                 {
+//                     // Nothing to do for Unix domain sockets
+//                     break;
+//                 }
+//                 default:
+//                 {
+//                     return nullptr; // Cannot authenticate this family
+//                 }
+//             }
+
+//             dispbuflen = snprintf(dispbuf, sizeof(dispbuf), "%d", display);
+//             if (dispbuflen < 0)
+//             {
+//                 return nullptr;
+//             }
+//             dispbuflen = std::min(dispbuflen, static_cast<int>(sizeof(dispbuf) - 1));
+
+//             if (family == FamilyLocal) 
+//             {
+//                 if (gethostname(hostnamebuf, sizeof(hostnamebuf)) == -1)
+//                 {
+//                     return nullptr; // Do not know own hostname
+//                 }
+//                 addr = hostnamebuf;
+//                 addrlen = strlen(addr);
+//             }
+
+//             for (const auto& name : authnames_str) 
+//             {
+//                 char* cstr = new char[name.size() + 1]; // +1 for null terminator
+//                 std::strcpy(cstr, name.c_str());
+//                 authnames_cstr.push_back(cstr);
+//             }
+
+//             return XauGetBestAuthByAddr(family,
+//                                         static_cast<unsigned short>(addrlen), 
+//                                         addr,
+//                                         static_cast<unsigned short>(dispbuflen), 
+//                                         dispbuf,
+//                                         N_AUTH_PROTOS, 
+//                                         authnames_cstr.data(), 
+//                                         authnameslen);
+//         }
+
+        

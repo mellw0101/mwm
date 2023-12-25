@@ -1,0 +1,4 @@
+#!/bin/bash
+systemctl stop mwm
+systemctl stop mwm-X
+sudo systemctl restart getty@tty2
