@@ -3443,6 +3443,7 @@ ewmh_init()
         LOG_error("xcb_ewmh_init_atoms_replies:faild")
         exit(1);
     }
+    // xcb_ewmh_set_wm_name(ewmh, screen->root, strlen(str), str);
 }
 
 void
@@ -3454,6 +3455,34 @@ make_desktop(const uint16_t & n)
     d->height   = screen->height_in_pixels;
     cur_d       = d;
     desktop_list.push_back(d);
+}
+
+void
+draw_text(const char * str)
+{
+    
+    screen = xcb_setup_roots_iterator(xcb_get_setup(conn)).data;
+    xcb_window_t window = screen->root;
+
+    // Create graphics context
+    xcb_gcontext_t gc = xcb_generate_id(conn);
+    uint32_t mask = XCB_GC_FOREGROUND | XCB_GC_BACKGROUND | XCB_GC_FONT;
+    uint32_t values[3] = {screen->black_pixel, screen->white_pixel};
+
+    // Load font
+    const char *font_name = "7x13";
+    xcb_font_t font = xcb_generate_id(conn);
+    xcb_open_font(conn, font, strlen(font_name), font_name);
+    values[2] = font;
+
+    xcb_create_gc(conn, gc, window, mask, values);
+
+    // Draw text
+    const char* text = str;
+    xcb_image_text_8(conn, strlen(text), window, gc, 50, 50, text);
+
+    // Flush the connection
+    xcb_flush(conn);
 }
 
 void 
@@ -3538,6 +3567,8 @@ configureRootWindow()
 
     // FLUSH TO MAKE X SERVER HANDEL REQUEST NOW
     xcb_flush(conn);
+
+    draw_text("Hello World");
 }
 
 bool 
