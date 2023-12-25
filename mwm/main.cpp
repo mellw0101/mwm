@@ -371,7 +371,7 @@ class focus {
             xcb_configure_window
             (
                 conn,
-                c->win,
+                c->frame,
                 XCB_CONFIG_WINDOW_STACK_MODE, 
                 (const uint32_t[1])
                 {
@@ -2064,6 +2064,23 @@ class resize_client
         }
 
         void
+        resize_win_old(const uint16_t & width, const uint16_t & height)
+        {
+            // CONFIGURE THE WINDOW WITH THE NEW WIDTH AND HEIGHT
+            xcb_configure_window 
+            (
+                conn,
+                c->win,
+                XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
+                (const uint32_t[2])
+                {
+                    static_cast<const uint32_t &>(width), 
+                    static_cast<const uint32_t &>(height)
+                }
+            );
+        }
+
+        void
         resize_win(const uint16_t & width, const uint16_t & height)
         {
             // CONFIGURE THE WINDOW WITH THE NEW WIDTH AND HEIGHT
@@ -2071,6 +2088,18 @@ class resize_client
             (
                 conn,
                 c->win,
+                XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
+                (const uint32_t[2])
+                {
+                    static_cast<const uint32_t &>(width), 
+                    static_cast<const uint32_t &>(height)
+                }
+            );
+
+            xcb_configure_window 
+            (
+                conn,
+                c->frame,
                 XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
                 (const uint32_t[2])
                 {
