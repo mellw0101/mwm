@@ -1,20 +1,20 @@
 FASTFLAGS = \
--O3 -march=native -flto
+-O3 -march=native
 
 CFLAGS = \
 -std=c++20 -pedantic -Wall -Wno-deprecated-declarations ${FASTFLAGS}
-CXXFLAGS = ${CFLAGS}
+CXXFLAGS = \
+${CFLAGS}
 
 LIBS = -lxcb -lxcb-keysyms -lxcb-cursor -lxcb-icccm -lxcb-ewmh
-LDFLAGS  = ${LIBS}  -O3 -march=native 
-# -std=c++20
+LDFLAGS  = ${LIBS} -flto -O3 -march=native -std=c++20
 # -s
 
 cc = clang
 CXX = clang++
 
 SRC = main.cpp tools.cpp
-OBJ = $(SRC:./.cpp=.o)
+OBJ = $(SRC:../src/%.cpp=%.o)
 DEPS = $(OBJ:.o=.d)
 
 all: test
