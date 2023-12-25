@@ -507,7 +507,7 @@ class wm {
             }
 
             uint16_t x, y, width, height;
-            getWindowSize(c->win, x, y, width, height);
+            getWindowSize(c->frame, x, y, width, height);
             c->x        = x;
             c->y        = y;
             c->width    = width;
