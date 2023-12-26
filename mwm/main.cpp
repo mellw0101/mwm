@@ -3672,7 +3672,7 @@ class WinDecoretor
 
             apply_event_mask(XCB_EVENT_MASK_STRUCTURE_NOTIFY, c->titlebar);
             apply_event_mask(XCB_EVENT_MASK_ENTER_WINDOW, c->titlebar);
-            
+
             win_tools::grab_buttons(c->titlebar, {
                {   L_MOUSE_BUTTON,     NULL }
             });
@@ -5188,19 +5188,24 @@ run()
     Event event;
     while (true)
     {
-        xcb_generic_event_t * ev = xcb_wait_for_event(conn);
+        // xcb_generic_event_t * ev = xcb_wait_for_event(conn);
+        // if (!ev) 
+        // {
+        //     continue;
+        // }
+        // // SEND THE EVENT TO THE EVENT HANDLER
+        // event.handler(ev);
         
-        if (!ev) 
-        {
-            continue;
-        }
+        // // DEALLOCATE THE MEMORY THE EVENT
+        // // USED AFTER IT HAS BEEN HANDLED
+        // free(ev);
 
-        // SEND THE EVENT TO THE EVENT HANDLER
-        event.handler(ev);
-        
-        // DEALLOCATE THE MEMORY THE EVENT
-        // USED AFTER IT HAS BEEN HANDLED
-        free(ev);
+        xcb_generic_event_t * ev;
+        while ((ev = xcb_poll_for_event(conn)))
+        {
+            event.handler(ev);
+            free(ev);
+        }   
     }
 }
 
