@@ -3379,7 +3379,8 @@ class Compositor
         setTransparency(xcb_window_t window, float alpha) 
         {
             auto it = windowPictures.find(window);
-            if (it != windowPictures.end()) {
+            if (it != windowPictures.end()) 
+            {
                 xcb_render_picture_t picture = it->second;
 
                 uint16_t w, h;
@@ -3674,7 +3675,8 @@ class WinManager
             wm::update_client(c);
             focus::client(c);
 
-            // gCompositor->addWindow(c->frame);
+            gCompositor->addWindow(c->frame);
+            gCompositor->composite();
         }
  
         static void 
