@@ -3692,7 +3692,7 @@ class WinDecoretor
                 conn,
                 XCB_COPY_FROM_PARENT,
                 c->close_button,
-                c->titlebar,
+                c->frame,
                 10,
                 0,
                 20,
