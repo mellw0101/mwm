@@ -4110,31 +4110,14 @@ class Event
         void
         destroy_notify_handler(const xcb_generic_event_t * & ev)
         {
-            // const auto * e = reinterpret_cast<const xcb_destroy_notify_event_t *>(ev);
-            auto * e = (xcb_destroy_notify_event_t *) ev;
-            
-            log_win("e->window", e->window);
-            
-            xcb_window_t * children;
-            uint32_t children_count;
-
-            children = XCBwm::get_window_children(conn, e->window, &children_count);
-
-            for (uint32_t i = 0; i < children_count; i++)
-            {
-                log_win("children[i]", children[i]);
-                // client * c = get::client_from_win(& children[i]);
-                // if (c)
-                // {
-                //     wm::unmanage_client(c);
-                // }
-            }
+            const auto * e = reinterpret_cast<const xcb_destroy_notify_event_t *>(ev);
         }
 
         void
         unmap_notify_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_unmap_notify_event_t *>(ev);
+            xcb_unmap_window(conn, XCBwm::get_parent_window(e->window));   
         }
 
         void 
