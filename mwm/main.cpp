@@ -3925,8 +3925,7 @@ class Event
         {
             const auto * e = reinterpret_cast<const xcb_map_notify_event_t *>(ev);
             
-            client * c = get::client_from_win(& e->event);
-            log_win("e->event: ", e->event);
+            client * c = get::client_from_win(& e->window);
             log_win("e->window: ", e->window);
             if (c)
             {
