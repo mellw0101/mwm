@@ -5112,12 +5112,6 @@ class Event
         enter_notify_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_enter_notify_event_t *>(ev);
-            
-            client * c = get::client_from_win(& e->event);
-            if (!c)
-            {
-                return;
-            }
             log_win("e->event: ", e->event);         
         }
 };
