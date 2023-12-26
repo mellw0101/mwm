@@ -3134,7 +3134,6 @@ namespace borrowed
         c->ismax = true;
         xcb_flush(conn);
         focus::client(c);
-        c->isKilleble = true;
     }
 }
 
@@ -3624,8 +3623,6 @@ class WinManager
             {
                 c->ismax = false;
             }
-
-            c->isKilleble = false;
         
             client_list.push_back(c);
             cur_d->current_clients.push_back(c);
@@ -4641,13 +4638,6 @@ class Event
             {
                 wm::update_client(c);
             }
-
-            c = get::client_from_frame(& e->window);
-            if (c)
-            {
-                c->isKilleble = true;
-                log_info("isKilleble");
-            }   
         }
         
         void 
