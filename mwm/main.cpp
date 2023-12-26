@@ -2830,7 +2830,6 @@ class WinManager
 
             make_frame(c);
             get::name(c);
-            get_win_info(c);
             wm::update_client(c);
             focus::client(c);
         }
