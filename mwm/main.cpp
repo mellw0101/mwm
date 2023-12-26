@@ -4736,11 +4736,13 @@ draw_text(const char * str , const COLOR & text_color, const COLOR & bg_color, c
 void 
 configureRootWindow()
 {
-    set_win_color
-    (
-        screen->root, 
-        DARK_GREY
-    );
+    // set_win_color
+    // (
+    //     screen->root, 
+    //     DARK_GREY
+    // );
+    set_png_as_backround file("/home/mellw/mwm_png/galaxy17.png");
+    file.setAsBackground(screen->root);
 
     // APPLY THE EVENT MASKS TO THE ROOT WINDOW
     xcb_change_window_attributes
@@ -4779,8 +4781,7 @@ configureRootWindow()
     // FLUSH TO MAKE X SERVER HANDEL REQUEST NOW
     xcb_flush(conn);
 
-    set_png_as_backround file("/home/mellw/mwm_png/galaxy17.png");
-    file.setAsBackground(screen->root);
+    
     // draw_text
     // (
     //     "Hello World", 
