@@ -1,4 +1,5 @@
 #include "Log.hpp"
+#include "defenitions.hpp"
 #include "structs.hpp"
 #include <cstdint>
 #include <string>
@@ -120,6 +121,26 @@ namespace get {
         for (const auto & c : client_list) 
         {
             if (* w == c->win) 
+            {
+                return c;
+            }
+        }
+        return nullptr; /*
+         *
+         * THIS WILL
+         * RETURN 'nullptr' BECAUSE THE
+         * WINDOW DOES NOT BELONG TO ANY 
+         * CLIENT IN THE CLIENT LIST
+         *  
+         */ 
+    }
+
+    client * 
+    client_from_frame(const xcb_window_t * w) 
+    {
+        for (const auto & c : client_list) 
+        {
+            if (* w == c->frame) 
             {
                 return c;
             }
@@ -4015,12 +4036,15 @@ class Event
             client * c = get::client_from_win(& e->window);
             if (c)
             {
-                if (c->frame == e->window)
-                {
-                    c->isKilleble = true;
-                }
                 wm::update_client(c);
             }
+
+            c = get::client_from_frame(& e->window);
+            if (c)
+            {
+                c->isKilleble = true;
+                log_info("isKilleble");
+            }   
         }
         
         void 
