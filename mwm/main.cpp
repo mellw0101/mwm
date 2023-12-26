@@ -1,3 +1,4 @@
+#include "Log.hpp"
 #include "structs.hpp"
 #include <cstdint>
 #include <string>
@@ -89,16 +90,18 @@ namespace XCBwm
         xcb_query_tree_cookie_t cookie = xcb_query_tree(conn, window);
         xcb_query_tree_reply_t *reply = xcb_query_tree_reply(conn, cookie, NULL);
 
-        if (!reply) {
-            fprintf(stderr, "Error: Unable to query the window tree.\n");
+        if (!reply) 
+        {
+            log.log(ERROR, __func__, "Error: Unable to query the window tree.");
             return NULL;
         }
 
         *child_count = xcb_query_tree_children_length(reply);
         xcb_window_t *children = static_cast<xcb_window_t *>(malloc(*child_count * sizeof(xcb_window_t)));
 
-        if (!children) {
-            fprintf(stderr, "Error: Unable to allocate memory for children.\n");
+        if (!children) 
+        {
+            log.log(ERROR, __func__, "Error: Unable to allocate memory for children.");
             free(reply);
             return NULL;
         }
