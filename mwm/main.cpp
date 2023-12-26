@@ -3086,8 +3086,8 @@ class WinManager
                 XCB_COPY_FROM_PARENT, 
                 c->frame, 
                 screen->root, 
-                c->x - 1, 
-                c->y - 1, 
+                c->x, 
+                c->y, 
                 c->width, 
                 c->height + 20, 
                 0, 
@@ -3116,7 +3116,7 @@ class WinManager
                 conn, 
                 c->win, 
                 c->frame, 
-                0, 
+                2, 
                 20
             );
             apply_event_mask(c->frame); 
