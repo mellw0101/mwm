@@ -1974,6 +1974,18 @@ class XCPPBAnimator
             xcb_configure_window
             (
                 connection,
+                c->titlebar,
+                XCB_CONFIG_WINDOW_WIDTH,
+                (const uint32_t[1])
+                {
+                    static_cast<const uint32_t &>(w)
+                }
+            );
+            xcb_flush(connection);
+
+            xcb_configure_window
+            (
+                connection,
                 c->close_button,
                 XCB_CONFIG_WINDOW_X,
                 (const uint32_t[1])
@@ -2886,6 +2898,17 @@ class resize_client
             xcb_configure_window 
             (
                 conn,
+                c->titlebar,
+                XCB_CONFIG_WINDOW_WIDTH,
+                (const uint32_t[2])
+                {
+                    static_cast<const uint32_t &>(width)
+                }
+            );
+
+            xcb_configure_window 
+            (
+                conn,
                 c->close_button,
                 XCB_CONFIG_WINDOW_X,
                 (const uint32_t[2])
@@ -3674,7 +3697,7 @@ class WinDecoretor
                 c->frame, 
                 0, 
                 0, 
-                screen->width_in_pixels, 
+                c->width, 
                 20, 
                 0, 
                 XCB_WINDOW_CLASS_INPUT_OUTPUT, 
