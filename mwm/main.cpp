@@ -2870,6 +2870,17 @@ class resize_client
                     static_cast<const uint32_t &>(height)
                 }
             );
+
+            xcb_configure_window 
+            (
+                conn,
+                c->close_button,
+                XCB_CONFIG_WINDOW_X,
+                (const uint32_t[2])
+                {
+                    static_cast<const uint32_t &>(width - 20)
+                }
+            );
         }
 
         void
@@ -3726,7 +3737,6 @@ class WinDecoretor
             xcb_map_window(conn, c->close_button);
             xcb_flush(conn);
         }
-        
 };
 
 class WinManager 
