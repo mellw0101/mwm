@@ -2714,7 +2714,7 @@ class WinManager
                 return;
             }
             
-            log.log(INFO, __func__, "c->win:" + std::to_string(c->win));
+            log.log(INFO, __func__, "c->win: " + std::to_string(c->win));
             wm::setWindowPosition(c);
             wm::setWindowSize(c);
 
@@ -4027,6 +4027,9 @@ class Event
         destroy_notify_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_destroy_notify_event_t *>(ev);
+
+            log.log(INFO, __func__, "e->window: " + std::to_string(e->window));
+            log.log(INFO, __func__, "e->event: " + std::to_string(e->event));
             
             client * c = get::client_from_win(& e->window);
             if (!c)
