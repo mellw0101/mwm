@@ -4105,14 +4105,13 @@ class Event
         {
             const auto * e = reinterpret_cast<const xcb_unmap_notify_event_t *>(ev);
             log.log(INFO, __func__, "e->window: " + std::to_string(e->window));
-            log.log(INFO, __func__, "e->event: " + std::to_string(e->event));
             client * c = get::client_from_win(& e->window);
-            if (!c)
+            if (c)
             {
                 return;
             }
-            // xcb_unmap_window(conn, c->frame);
-            // xcb_flush(conn);
+            xcb_unmap_window(conn, e->window);
+            xcb_flush(conn);
         }
 };
 
