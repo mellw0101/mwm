@@ -3426,30 +3426,68 @@ class Compositor
         xcb_render_pictformat_t 
         findArgbFormat(xcb_render_query_pict_formats_reply_t* reply) 
         {
+            if (!reply) 
+            {
+                log_error("XRender query pict formats reply is null.");
+                return 0;
+            }
+
             xcb_render_pictformat_t format = 0;
 
             // Iterate over screens
             xcb_render_pictscreen_iterator_t screen_iter = xcb_render_query_pict_formats_screens_iterator(reply);
-            for (; screen_iter.rem; xcb_render_pictscreen_next(&screen_iter)) {
+            for (; screen_iter.rem; xcb_render_pictscreen_next(&screen_iter)) 
+            {
+                if (!screen_iter.data) 
+                {
+                    log_error("Invalid pictscreen data.");
+                    continue;
+                }
 
                 // Iterate over depths
                 xcb_render_pictdepth_iterator_t depth_iter = xcb_render_pictscreen_depths_iterator(screen_iter.data);
-                for (; depth_iter.rem; xcb_render_pictdepth_next(&depth_iter)) {
+                for (; depth_iter.rem; xcb_render_pictdepth_next(&depth_iter)) 
+                {
+                    if (!depth_iter.data) 
+                    {
+                        log_error("Invalid pictdepth data.");
+                        continue;
+                    }
 
                     // Check if the depth is 32
-                    if (depth_iter.data->depth == 32) {
+                    if (depth_iter.data->depth == 32) 
+                    {
                         // Iterate over visuals at this depth
                         xcb_render_pictvisual_iterator_t visual_iter = xcb_render_pictdepth_visuals_iterator(depth_iter.data);
-                        for (; visual_iter.rem; xcb_render_pictvisual_next(&visual_iter)) {
-                            // If a visual with 32-bit depth is found, return its format
+                        for (; visual_iter.rem; xcb_render_pictvisual_next(&visual_iter)) 
+                        {
+                            if (!visual_iter.data) 
+                            {
+                                log_error("Invalid pictvisual data.");
+                                continue;
+                            }
+
                             format = visual_iter.data->format;
-                            if (format) return format;
+                            if (format)
+                            {
+                                return format; /** 
+                                 *
+                                 * If a visual with 32-bit depth is found, return its format 
+                                 *
+                                 */
+                            } 
                         }
                     }
                 }
             }
+
+            if (format == 0) 
+            {
+                log_error("No suitable ARGB format found.");
+            }
+
             return format;
-        }
+        }  
 };
 
 Compositor* gCompositor = nullptr;
