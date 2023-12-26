@@ -3682,6 +3682,31 @@ class WinDecoretor
 
             draw_text("sug", WHITE, BLACK, c->titlebar, 2, 14);
         }
+
+        void
+        make_buttons()
+        {
+            c->close_button = xcb_generate_id(conn);
+            xcb_create_window(
+                conn,
+                XCB_COPY_FROM_PARENT,
+                c->close_button,
+                c->titlebar,
+                c->width - 20,
+                0,
+                20,
+                20,
+                0,
+                XCB_WINDOW_CLASS_INPUT_OUTPUT,
+                screen->root_visual,
+                0,
+                NULL
+            );
+            
+            set_win_color(c->close_button, BLUE);
+            xcb_map_window(conn, c->close_button);
+            xcb_flush(conn);
+        }
 };
 
 class WinManager 

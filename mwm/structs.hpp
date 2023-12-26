@@ -108,7 +108,11 @@ struct client
 {
 	xcb_window_t win;
     xcb_window_t frame;
-    xcb_window_t titlebar;            
+    xcb_window_t titlebar;
+    xcb_window_t close_button;
+    xcb_window_t max_button;
+    xcb_window_t min_button;
+
 	int16_t x, y;                   
 	uint16_t width,height;          
 	uint8_t  depth;  
