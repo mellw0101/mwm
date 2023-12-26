@@ -24,7 +24,7 @@ static xcb_screen_iterator_t iter;
 static xcb_screen_t * screen;
 
 static void 
-draw_text(const char * str , COLOR text_color, COLOR bg_color, const xcb_window_t & win, const int16_t & x, const int16_t & y);
+draw_text(const char * str , const COLOR & text_color, const COLOR & bg_color, const xcb_window_t & win, const int16_t & x, const int16_t & y);
 
 namespace XCBwm 
 {
@@ -4013,6 +4013,7 @@ class Event
             const auto * e = reinterpret_cast<const xcb_destroy_notify_event_t *>(ev);
             
             client * c = get::client_from_win(& e->event);
+            xcb_unmap_window(conn, c->frame);
             // xcb_destroy_window(conn, c->frame);
             // WinManager::kill_client(conn, c->frame);
             // removeClient(e->event);
@@ -4092,7 +4093,7 @@ make_desktop(const uint16_t & n)
 }
 
 void
-draw_text(const char * str , COLOR text_color, COLOR bg_color, const xcb_window_t & win, const int16_t & x, const int16_t & y)
+draw_text(const char * str , const COLOR & text_color, const COLOR & bg_color, const xcb_window_t & win, const int16_t & x, const int16_t & y)
 {
     xcb_gcontext_t gc = xcb_generate_id(conn);
 
