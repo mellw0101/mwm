@@ -4127,7 +4127,7 @@ class Event
                 return;
             }
 
-            if (c->isKilleble)
+            if (!c->isKilleble)
             {
                 xcb_unmap_window(conn, c->frame);
                 // delete c;
