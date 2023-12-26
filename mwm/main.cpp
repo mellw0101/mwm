@@ -3587,6 +3587,11 @@ class Event
                     unmap_notify_handler(ev);
                     break;
                 }
+                case XCB_REPARENT_NOTIFY:
+                {
+                    reparent_notify_handler(ev);
+                    break;
+                }
             }
         }
 
@@ -4089,6 +4094,14 @@ class Event
         unmap_notify_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_unmap_notify_event_t *>(ev);
+            log.log(INFO, __func__, "e->window: " + std::to_string(e->window));
+            log_win("e->window->parent: ", XCBwm::get_parent_window(e->window));
+        }
+
+        void 
+        reparent_notify_handler(const xcb_generic_event_t * & ev)
+        {
+            const auto * e = reinterpret_cast<const xcb_reparent_notify_event_t *>(ev);
             log.log(INFO, __func__, "e->window: " + std::to_string(e->window));
             log_win("e->window->parent: ", XCBwm::get_parent_window(e->window));
         }
