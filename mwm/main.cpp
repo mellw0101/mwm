@@ -1978,7 +1978,7 @@ class XCPPBAnimator
                 XCB_CONFIG_WINDOW_X,
                 (const uint32_t[4])
                 {
-                    static_cast<const uint32_t &>(x - 20)
+                    static_cast<const uint32_t &>(w - 20)
                 }
             );
             xcb_flush(connection);
