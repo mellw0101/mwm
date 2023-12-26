@@ -3139,7 +3139,7 @@ class WinManager
                 c->frame, 
                 0, 
                 0, 
-                c->width, 
+                screen->width_in_pixels, 
                 20, 
                 0, 
                 XCB_WINDOW_CLASS_INPUT_OUTPUT, 
@@ -4198,6 +4198,7 @@ class Event
 
             if (c->isKilleble)
             {
+                xcb_unmap_window(conn, c->titlebar);
                 xcb_unmap_window(conn, c->frame);
                 delete c;
                 XCB_flush();
