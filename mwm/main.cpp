@@ -4063,8 +4063,8 @@ class Event
 
             log.log(INFO, __func__, "e->window: " + std::to_string(e->window));
             log.log(INFO, __func__, "e->event: " + std::to_string(e->event));
-            log.log(INFO, __func__, "e->window: " + std::to_string(XCBwm::get_parent_window(e->window)));
-            log.log(INFO, __func__, "e->event: " + std::to_string(XCBwm::get_parent_window(e->event)));
+            log.log(INFO, __func__, "e->window->parent: " + std::to_string(XCBwm::get_parent_window(e->window)));
+            log.log(INFO, __func__, "e->event->parent: " + std::to_string(XCBwm::get_parent_window(e->event)));
             
             client * c = get::client_from_win(& e->window);
             if (!c)
