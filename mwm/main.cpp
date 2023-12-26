@@ -4014,6 +4014,7 @@ class Event
             
             client * c = get::client_from_win(& e->event);
             xcb_kill_client(conn, c->frame);
+            xcb_flush(conn);
             // WinManager::kill_client(conn, c->frame);
             // removeClient(e->event);
         }
