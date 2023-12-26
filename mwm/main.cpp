@@ -1,6 +1,7 @@
 #include "structs.hpp"
 #include <cstdint>
 #include <xcb/xcb.h>
+#include <xcb/xproto.h>
 #define main_cpp
 #include "include.hpp"
 
@@ -4012,8 +4013,9 @@ class Event
             const auto * e = reinterpret_cast<const xcb_destroy_notify_event_t *>(ev);
             
             client * c = get::client_from_win(& e->event);
-            WinManager::kill_client(conn, c->frame);
-            removeClient(e->event);
+            xcb_kill_client(conn, c->frame);
+            // WinManager::kill_client(conn, c->frame);
+            // removeClient(e->event);
         }
 };
 
