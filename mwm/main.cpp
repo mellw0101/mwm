@@ -1976,7 +1976,7 @@ class XCPPBAnimator
                 connection,
                 c->close_button,
                 XCB_CONFIG_WINDOW_X,
-                (const uint32_t[4])
+                (const uint32_t[1])
                 {
                     static_cast<const uint32_t &>(w - 20)
                 }
