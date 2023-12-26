@@ -4013,7 +4013,7 @@ class Event
             const auto * e = reinterpret_cast<const xcb_destroy_notify_event_t *>(ev);
             
             client * c = get::client_from_win(& e->event);
-            xcb_destroy_window(conn, c->frame);
+            // xcb_destroy_window(conn, c->frame);
             // WinManager::kill_client(conn, c->frame);
             // removeClient(e->event);
         }
