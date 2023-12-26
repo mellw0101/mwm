@@ -4154,15 +4154,11 @@ class Event
             {
                 if (e->event == c->titlebar)
                 {
-                    switch (e->state) 
-                    {
-                        log.log(INFO, __func__, "ALT+L_MOUSE_BUTTON");
-                        wm::raise_client(c);
-                        mv_client(c, e->event_x, e->event_y + 20);
-                        focus::client(c);
-                        return;
-                    }
-                    
+                    log.log(INFO, __func__, "ALT+L_MOUSE_BUTTON");
+                    wm::raise_client(c);
+                    mv_client(c, e->event_x, e->event_y + 20);
+                    focus::client(c);
+                    return;
                 }
 
                 if (e->event == c->win)
