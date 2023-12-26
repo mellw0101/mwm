@@ -3759,8 +3759,8 @@ class WinDecoretor
                 20
             );
 
-            apply_event_mask(XCB_EVENT_MASK_STRUCTURE_NOTIFY, c->frame); 
-            
+            apply_event_mask(XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT, c->frame); 
+
             xcb_map_window(conn, c->frame);
             xcb_flush(conn);
         }
