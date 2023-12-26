@@ -4161,7 +4161,7 @@ class Event
                 log_info("isKilleble");
                 xcb_unmap_window(conn, c->frame);
                 XCB_flush();
-                // delete c;
+                delete c;
             }
             else 
             {
