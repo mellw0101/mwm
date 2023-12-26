@@ -3411,7 +3411,7 @@ class Compositor
         }
 };
 
-static Compositor compositor(nullptr, nullptr);
+static Compositor compositor(conn, screen);
 
 class WinDecoretor 
 {
