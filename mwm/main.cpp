@@ -2966,6 +2966,43 @@ class WinManager
             }
         }
 
+        static void
+        grab_buttons(const xcb_window_t & win, std::initializer_list<std::pair<const uint8_t, const uint16_t>> bindings)
+        {
+            for (const auto & binding : bindings)
+            {
+                const uint8_t & button = binding.first;
+                const uint16_t & modifier = binding.second;
+                xcb_grab_button
+                (
+                    conn, 
+                    
+                    // 'OWNER_EVENTS : SET TO 0 FOR NO EVENT PROPAGATION'
+                    1, 
+                    win, 
+                    
+                    // EVENT MASK
+                    XCB_EVENT_MASK_BUTTON_PRESS, 
+                    
+                    // POINTER MODE
+                    XCB_GRAB_MODE_ASYNC, 
+                    
+                    // KEYBOARD MODE
+                    XCB_GRAB_MODE_ASYNC, 
+                    
+                    // CONFINE TO WINDOW
+                    XCB_NONE, 
+                    
+                    // CURSOR
+                    XCB_NONE, 
+                    button, 
+                    modifier    
+                );
+                // FLUSH THE REQUEST TO THE X SERVER
+                xcb_flush(conn); 
+            }
+        }
+
         static void 
         grab_keys(client * & c, std::initializer_list<std::pair<const uint32_t, const uint16_t>> bindings) 
         {
@@ -3201,7 +3238,7 @@ class WinManager
             );
 
             apply_event_mask(c->titlebar);
-            grab_buttons(c, {
+            grab_buttons(c->titlebar, {
                {   L_MOUSE_BUTTON,     NULL }
             });
 
