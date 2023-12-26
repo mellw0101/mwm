@@ -1,5 +1,6 @@
 #include "structs.hpp"
 #include <cstdint>
+#include <string>
 #include <xcb/xcb.h>
 #include <xcb/xproto.h>
 #define main_cpp
@@ -2713,6 +2714,7 @@ class WinManager
                 return;
             }
             
+            log.log(INFO, __func__, "c->win:" + std::to_string(c->win));
             wm::setWindowPosition(c);
             wm::setWindowSize(c);
 
@@ -2983,7 +2985,6 @@ class WinManager
         {
             // CREATE A FRAME WINDOW
             c->frame = xcb_generate_id(conn);
-            log.log(INFO, __func__, "c->frame: " + std::to_string(c->frame));
             xcb_create_window
             (
                 conn, 
@@ -3023,8 +3024,6 @@ class WinManager
                 0, 
                 20
             ); 
-            
-            apply_event_mask(c->frame);
             xcb_map_window(conn, c->frame);
             xcb_flush(conn); 
 
