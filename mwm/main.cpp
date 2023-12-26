@@ -3102,7 +3102,6 @@ class WinManager
             xcb_flush(conn); 
 
             draw_text("sug", WHITE, BLUE, c->frame, 2, 17);
-            c->isKilleble = true;
         }
 
         static void
@@ -4016,6 +4015,10 @@ class Event
             client * c = get::client_from_win(& e->window);
             if (c)
             {
+                if (c->frame == e->window)
+                {
+                    c->isKilleble = true;
+                }
                 wm::update_client(c);
             }
         }
@@ -4132,7 +4135,7 @@ class Event
             if (c->isKilleble)
             {
                 log_info("isKilleble");
-                // xcb_unmap_window(conn, c->frame);
+                xcb_unmap_window(conn, c->frame);
                 // delete c;
             }
             else 
