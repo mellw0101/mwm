@@ -2289,7 +2289,7 @@ class set_png_as_backround
 {
     public:
         set_png_as_backround(const char * pngFilePath) : pngFilePath(pngFilePath) {}
-        ~set_png_as_backround();
+        // ~set_png_as_backround();
         
         void 
         setAsBackground(const xcb_window_t & win)
@@ -4780,6 +4780,7 @@ configureRootWindow()
     xcb_flush(conn);
 
     set_png_as_backround file("~/mwm_png/galaxy17.png");
+    file.setAsBackground(screen->root);
     // draw_text
     // (
     //     "Hello World", 
