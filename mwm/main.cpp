@@ -2792,6 +2792,7 @@ namespace borrowed
         c->ismax = true;
         xcb_flush(conn);
         focus::client(c);
+        c->isKilleble = true;
     }
 }
 
