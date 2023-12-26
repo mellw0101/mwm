@@ -4771,10 +4771,11 @@ class Event
                 return;
             }
 
+            xcb_unmap_window(conn, c->titlebar);
+            xcb_unmap_window(conn, c->frame);
+            xcb_flush(conn);
             xcb_kill_client(conn, c->titlebar);
             xcb_kill_client(conn, c->frame);
-            // xcb_unmap_window(conn, c->titlebar);
-            // xcb_unmap_window(conn, c->frame);
             xcb_flush(conn);
             delete c;
         }
