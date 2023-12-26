@@ -4066,8 +4066,8 @@ class Event
             {
                 return;
             }
-            xcb_unmap_window(conn, c->frame);
-            xcb_flush(conn);
+            // xcb_unmap_window(conn, c->frame);
+            // xcb_flush(conn);
         }
 };
 
