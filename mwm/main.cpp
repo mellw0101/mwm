@@ -4779,7 +4779,7 @@ configureRootWindow()
     // FLUSH TO MAKE X SERVER HANDEL REQUEST NOW
     xcb_flush(conn);
 
-    set_png_as_backround file("~/mwm_png/galaxy17.png");
+    set_png_as_backround file("/home/mellw/mwm_png/galaxy17.png");
     file.setAsBackground(screen->root);
     // draw_text
     // (
