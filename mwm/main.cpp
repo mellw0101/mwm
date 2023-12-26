@@ -3023,7 +3023,8 @@ class WinManager
                 c->frame, 
                 0, 
                 20
-            ); 
+            );
+            apply_event_mask(c->frame); 
             xcb_map_window(conn, c->frame);
             xcb_flush(conn); 
 
