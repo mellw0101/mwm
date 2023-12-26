@@ -2983,6 +2983,7 @@ class WinManager
         {
             // CREATE A FRAME WINDOW
             c->frame = xcb_generate_id(conn);
+            log.log(INFO, __func__, "c->frame: " + std::to_string(c->frame));
             xcb_create_window
             (
                 conn, 
@@ -2999,6 +3000,7 @@ class WinManager
                 0, 
                 NULL
             );
+            log.log(INFO, __func__, "c->frame: " + std::to_string(c->frame));
 
             // SET THE BACKGROUND COLOR TO WHITE
             xcb_change_window_attributes
