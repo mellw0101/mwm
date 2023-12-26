@@ -4763,6 +4763,8 @@ class Event
         {
             const auto * e = reinterpret_cast<const xcb_destroy_notify_event_t *>(ev);
 
+            log_win("e->window: ", e->window);
+            log_win("e->event: ", e->event);
         }
 
         void
