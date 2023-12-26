@@ -3278,8 +3278,8 @@ namespace win_tools
 class Compositor 
 {
     public:
-        Compositor(xcb_connection_t* conn, xcb_screen_t* screen) 
-        : connection(conn), root(screen->root) 
+        Compositor(xcb_connection_t* connection, xcb_screen_t* screen) 
+        : connection(connection), root(screen->root) 
         {
             // Initialize XRender for ARGB visuals and pictures
             initRenderExtension();
