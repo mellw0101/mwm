@@ -1,3 +1,4 @@
+#include "structs.hpp"
 #include <cstdint>
 #include <xcb/xcb.h>
 #define main_cpp
@@ -1049,7 +1050,7 @@ namespace XCBAnimator {
  * @brief Class for animating the position and size of an XCB window.
  *
  */
-class XCPPBAnimator 
+class XCPPBAnimator
 {
     public:
         XCPPBAnimator(xcb_connection_t* connection, const xcb_window_t & window)
@@ -1870,7 +1871,6 @@ animate_client(client * & c, const int & endX, const int & endY, const int & end
 class color 
 {
     public:
-    
         static uint32_t
         get(rgb_color_code color)
         {
@@ -2758,6 +2758,38 @@ class WinManager
             get_win_info(c);
             wm::update_client(c);
             focus::client(c);
+        }
+ 
+        static void 
+        kill_client(xcb_connection_t *conn, xcb_window_t window) 
+        {
+            xcb_intern_atom_cookie_t protocols_cookie = xcb_intern_atom(conn, 1, 12, "WM_PROTOCOLS");
+            xcb_intern_atom_reply_t *protocols_reply = xcb_intern_atom_reply(conn, protocols_cookie, NULL);
+
+            xcb_intern_atom_cookie_t delete_cookie = xcb_intern_atom(conn, 0, 16, "WM_DELETE_WINDOW");
+            xcb_intern_atom_reply_t *delete_reply = xcb_intern_atom_reply(conn, delete_cookie, NULL);
+
+            if (!protocols_reply || !delete_reply) 
+            {
+                log.log(ERROR, __func__, "Could not create atoms.");
+                free(protocols_reply);
+                free(delete_reply);
+                return;
+            }
+
+            xcb_client_message_event_t ev = {0};
+            ev.response_type = XCB_CLIENT_MESSAGE;
+            ev.window = window;
+            ev.format = 32;
+            ev.sequence = 0;
+            ev.type = protocols_reply->atom;
+            ev.data.data32[0] = delete_reply->atom;
+            ev.data.data32[1] = XCB_CURRENT_TIME;
+
+            xcb_send_event(conn, 0, window, XCB_EVENT_MASK_NO_EVENT, (char *) & ev);
+
+            free(protocols_reply);
+            free(delete_reply);
         }
 
     private:
@@ -3978,7 +4010,9 @@ class Event
         destroy_notify_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_destroy_notify_event_t *>(ev);
-
+            
+            client * c = get::client_from_win(& e->window);
+            WinManager::kill_client(conn, c->frame);
             removeClient(e->event);
         }
 };
