@@ -32,8 +32,6 @@ static xcb_screen_t * screen;
 static void 
 draw_text(const char * str , const COLOR & text_color, const COLOR & bg_color, const xcb_window_t & win, const int16_t & x, const int16_t & y);
 
-
-
 namespace XCBwm 
 {
     void
@@ -146,7 +144,7 @@ namespace get
     {
         for (const auto & c : client_list) 
         {
-            if (* w == c->win || * w == c->frame || * w == c->titlebar) 
+            if (* w == c->win || * w == c->frame || * w == c->titlebar || * w == c->close_button) 
             {
                 return c;
             }
@@ -167,6 +165,26 @@ namespace get
         for (const auto & c : client_list) 
         {
             if (* w == c->frame) 
+            {
+                return c;
+            }
+        }
+        return nullptr; /*
+         *
+         * THIS WILL
+         * RETURN 'nullptr' BECAUSE THE
+         * WINDOW DOES NOT BELONG TO ANY 
+         * CLIENT IN THE CLIENT LIST
+         *  
+         */ 
+    }
+
+    client * 
+    client_from_close_button(const xcb_window_t * w) 
+    {
+        for (const auto & c : client_list) 
+        {
+            if (* w == c->close_button) 
             {
                 return c;
             }
@@ -3220,10 +3238,42 @@ namespace error
         }
         return 0;
     }
-}
+} 
 
 namespace win_tools 
 {
+    void 
+    kill_client(xcb_connection_t *conn, xcb_window_t window) 
+    {
+        xcb_intern_atom_cookie_t protocols_cookie = xcb_intern_atom(conn, 1, 12, "WM_PROTOCOLS");
+        xcb_intern_atom_reply_t *protocols_reply = xcb_intern_atom_reply(conn, protocols_cookie, NULL);
+
+        xcb_intern_atom_cookie_t delete_cookie = xcb_intern_atom(conn, 0, 16, "WM_DELETE_WINDOW");
+        xcb_intern_atom_reply_t *delete_reply = xcb_intern_atom_reply(conn, delete_cookie, NULL);
+
+        if (!protocols_reply || !delete_reply) 
+        {
+            log.log(ERROR, __func__, "Could not create atoms.");
+            free(protocols_reply);
+            free(delete_reply);
+            return;
+        }
+
+        xcb_client_message_event_t ev = {0};
+        ev.response_type = XCB_CLIENT_MESSAGE;
+        ev.window = window;
+        ev.format = 32;
+        ev.sequence = 0;
+        ev.type = protocols_reply->atom;
+        ev.data.data32[0] = delete_reply->atom;
+        ev.data.data32[1] = XCB_CURRENT_TIME;
+
+        xcb_send_event(conn, 0, window, XCB_EVENT_MASK_NO_EVENT, (char *) & ev);
+
+        free(protocols_reply);
+        free(delete_reply);
+    }
+
     void
     apply_event_mask(const xcb_event_mask_t ev_mask, const xcb_window_t & win)
     {
@@ -3379,6 +3429,36 @@ namespace win_tools
 
         free(reply);
         return true;
+    }
+
+    int
+    send_sigterm_to_client(client * c)
+    {
+        if (!c)
+        {
+            return - 1;
+        }
+
+        xcb_unmap_window(conn, c->titlebar);
+        xcb_unmap_window(conn, c->frame);
+        xcb_flush(conn);
+        kill_client(conn, c->titlebar);
+        kill_client(conn, c->frame);
+        xcb_flush(conn);
+        delete c;
+
+        return 0;
+    }
+
+    void
+    close_button_kill(client * c)
+    {
+        int result = send_sigterm_to_client(c);
+
+        if (result == -1)
+        {
+            log_error("client is nullptr");
+        }
     }
 }
 
@@ -3736,18 +3816,18 @@ class WinDecoretor
             c->close_button = xcb_generate_id(conn);
             xcb_create_window
             (
-                conn, 
-                XCB_COPY_FROM_PARENT, 
-                c->close_button, 
-                c->titlebar, 
-                c->width - 20, 
-                0, 
-                20, 
-                20, 
-                0, 
-                XCB_WINDOW_CLASS_INPUT_OUTPUT, 
-                screen->root_visual, 
-                0, 
+                conn,
+                XCB_COPY_FROM_PARENT,
+                c->close_button,
+                c->titlebar,
+                c->width - 20,
+                0,
+                20,
+                20,
+                0,
+                XCB_WINDOW_CLASS_INPUT_OUTPUT,
+                screen->root_visual,
+                0,
                 NULL
             );
 
@@ -5147,6 +5227,11 @@ class Event
                             return;
                         }
                     }
+                }
+
+                if (e->event == c->close_button)
+                {
+                    win_tools::close_button_kill(c);
                 }
             }
 
