@@ -3927,6 +3927,7 @@ class Event
             
             client * c = get::client_from_win(& e->event);
             log_win("e->event: ", e->event);
+            log_win("e->window: ", e->window);
             if (c)
             {
                 wm::update_client(c);
