@@ -4013,6 +4013,7 @@ class Event
             const auto * e = reinterpret_cast<const xcb_destroy_notify_event_t *>(ev);
             
             client * c = get::client_from_win(& e->event);
+            xcb_unmap_window(conn, c->win);
             xcb_unmap_window(conn, c->frame);
             xcb_flush(conn);
             // xcb_destroy_window(conn, c->frame);
