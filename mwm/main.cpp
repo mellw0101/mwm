@@ -3919,7 +3919,7 @@ class Event
         map_req_handler(const xcb_generic_event_t * & ev) 
         {
             const auto * e = reinterpret_cast<const xcb_map_request_event_t *>(ev);
-            WinManager::manage_new_window( e->window);
+            WinManager::manage_new_window(e->window);
         }
         
         void 
@@ -4013,6 +4013,10 @@ class Event
             const auto * e = reinterpret_cast<const xcb_destroy_notify_event_t *>(ev);
             
             client * c = get::client_from_win(& e->event);
+            if (!c)
+            {
+                return;
+            }
             xcb_unmap_window(conn, c->win);
             xcb_unmap_window(conn, c->frame);
             xcb_flush(conn);
