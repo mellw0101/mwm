@@ -4132,7 +4132,7 @@ class Event
             if (c->isKilleble)
             {
                 log_info("isKilleble");
-                xcb_unmap_window(conn, c->frame);
+                // xcb_unmap_window(conn, c->frame);
                 // delete c;
             }
             else 
