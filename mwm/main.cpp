@@ -3568,7 +3568,7 @@ class WinDecoretor
 
             make_frame(c);
             make_titlebar(c);
-            make_buttons();
+            make_buttons(c);
         }
         
     private:
@@ -3685,7 +3685,7 @@ class WinDecoretor
         }
 
         void
-        make_buttons()
+        make_buttons(client * & c)
         {
             c->close_button = xcb_generate_id(conn);
             xcb_create_window(
