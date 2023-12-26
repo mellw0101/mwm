@@ -60,6 +60,27 @@ namespace XCBwm
         free(reply);
         return parent_window;
     }
+
+    xcb_window_t 
+    get_root_window(xcb_window_t window) 
+    {
+        xcb_query_tree_cookie_t cookie;
+        xcb_query_tree_reply_t *reply;
+
+        cookie = xcb_query_tree(conn, window);
+        reply = xcb_query_tree_reply(conn, cookie, NULL);
+
+        if (!reply) 
+        {
+            log.log(ERROR, __func__, "Error: Unable to query the window tree.");
+            return (xcb_window_t) 0; // Invalid window ID
+        }
+
+        xcb_window_t root_window = reply->root;
+
+        free(reply);
+        return root_window;
+    }
 };
 
 namespace get {
@@ -4064,8 +4085,8 @@ class Event
             const auto * e = reinterpret_cast<const xcb_destroy_notify_event_t *>(ev);
 
             log.log(INFO, __func__, "e->window: " + std::to_string(e->window));
-            log_win("e->window->parent: ", e->window);
-
+            log_win("e->window->parent: ", XCBwm::get_parent_window(e->window));
+        
             client * c = get::client_from_win(& e->window);
             if (!c)
             {
