@@ -2898,7 +2898,21 @@ class WinManager
                     XCB_EVENT_MASK_FOCUS_CHANGE
                 }
             );
+        }
 
+        static void
+        apply_event_mask(const xcb_window_t & win)
+        {
+            xcb_change_window_attributes
+            (
+                conn,
+                win,
+                XCB_CW_EVENT_MASK,
+                (const uint32_t[1])
+                {
+                    XCB_EVENT_MASK_FOCUS_CHANGE
+                }
+            );
         }
 
         static bool 
@@ -3008,6 +3022,7 @@ class WinManager
                 20
             ); 
             
+            apply_event_mask(c->frame);
             xcb_map_window(conn, c->frame);
             xcb_flush(conn); 
 
