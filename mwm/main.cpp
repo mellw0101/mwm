@@ -4064,8 +4064,8 @@ class Event
             const auto * e = reinterpret_cast<const xcb_destroy_notify_event_t *>(ev);
 
             log.log(INFO, __func__, "e->window: " + std::to_string(e->window));
-            log_win("e->window: ", e->window);
-                    
+            log_win("e->window->parent: ", e->window);
+
             client * c = get::client_from_win(& e->window);
             if (!c)
             {
