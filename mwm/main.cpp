@@ -5207,6 +5207,7 @@ class Event
             {
                 if (e->event == c->close_button)
                 {
+                    log.log(INFO, __func__, "close_button");
                     win_tools::close_button_kill(c);
                     return;
                 }
