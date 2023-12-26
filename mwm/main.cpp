@@ -4110,8 +4110,11 @@ class Event
         void
         destroy_notify_handler(const xcb_generic_event_t * & ev)
         {
-            const auto * e = reinterpret_cast<const xcb_destroy_notify_event_t *>(ev);
-
+            // const auto * e = reinterpret_cast<const xcb_destroy_notify_event_t *>(ev);
+            auto * e = (xcb_destroy_notify_event_t *) ev;
+            
+            log_win("e->window", e->window);
+            
             xcb_window_t * children;
             uint32_t children_count;
 
