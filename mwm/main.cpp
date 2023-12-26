@@ -3288,13 +3288,52 @@ class Compositor
         void 
         addWindow(xcb_window_t window) 
         {
-            // Create an off-screen picture for this window
+            // Check for a valid connection
+            if (!connection) 
+            {
+                log_error("XCB connection is null.");
+                return;
+            }
+
+            // Get window dimensions
+            uint16_t width = win_tools::get_win_w(window);
+            uint16_t height = win_tools::get_win_h(window);
+            if (width <= 0 || height <= 0) 
+            {
+                log_error("Invalid window dimensions.");
+                return;
+            }
+
+            // Create an off-screen pixmap
             xcb_pixmap_t pixmap = xcb_generate_id(connection);
-            xcb_create_pixmap(connection, 32, pixmap, root, win_tools::get_win_w(window), win_tools::get_win_h(window));
+            xcb_void_cookie_t pixmap_cookie = xcb_create_pixmap_checked(connection, 32, pixmap, root, width, height);
+            
+            // Check for errors in pixmap creation
+            xcb_generic_error_t* err = xcb_request_check(connection, pixmap_cookie);
+            if (err) 
+            {
+                log_error("Failed to create pixmap. ERROR_CODE: " + std::to_string(err->error_code));
+                free(err);
+                return;
+            }
 
+            // Create a render picture
             xcb_render_picture_t picture = xcb_generate_id(connection);
-            xcb_render_create_picture(connection, picture, pixmap, renderFormat, 0, nullptr);
+            xcb_void_cookie_t picture_cookie = xcb_render_create_picture_checked(connection, picture, pixmap, renderFormat, 0, nullptr);
 
+            // Check for errors in picture creation
+            err = xcb_request_check(connection, picture_cookie);
+            if (err) 
+            {
+                log_error("Failed to create render picture. ERROR_CODE: " + std::to_string(err->error_code));
+                free(err);
+
+                // Clean up the pixmap since picture creation failed
+                xcb_free_pixmap(connection, pixmap);
+                return;
+            }
+
+            // Store the picture associated with the window
             windowPictures[window] = picture;
         }
 
