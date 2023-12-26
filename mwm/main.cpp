@@ -119,7 +119,8 @@ namespace XCBwm
     }
 };
 
-namespace get {
+namespace get 
+{
     client * 
     client_from_win(const xcb_window_t * w) 
     {
@@ -504,7 +505,8 @@ namespace get {
     }
 }
 
-class focus {
+class focus 
+{
     public:
         static void
         client(client * c)
@@ -556,7 +558,8 @@ class focus {
         }
 };
 
-class wm {
+class wm 
+{
     public:
         static void 
         setWindowSize(client * c) 
@@ -3141,6 +3144,38 @@ namespace borrowed
     }
 }
 
+namespace error
+{
+    int
+    conn_error(xcb_connection_t * conn, const char * sender_function)
+    {
+        if (xcb_connection_has_error(conn))
+        {
+            log_error("XCB connection is null.");
+            return CONN_ERR;
+        }
+        return 0;
+    }
+
+    int
+    cookie_error(xcb_void_cookie_t cookie , const char * sender_function)
+    {
+        if (check_conn != 0)
+        {
+            return CONN_ERR;
+        }
+
+        xcb_generic_error_t * err = xcb_request_check(conn, cookie);
+        if (err)
+        {
+            log_error(err->error_code);
+            free(err);
+            return err->error_code;
+        }
+        return 0;
+    }
+}
+
 namespace win_tools 
 {
     void
@@ -3272,6 +3307,32 @@ namespace win_tools
             height = 200;
         }
         return height;
+    }
+
+    bool 
+    getPointerPosition(xcb_window_t window, int& posX, int& posY) 
+    {
+        if (check_conn == CONN_ERR) 
+        {
+            return false;
+        }
+
+        // Query pointer
+        xcb_query_pointer_cookie_t cookie = xcb_query_pointer(conn, window);
+        xcb_query_pointer_reply_t* reply = xcb_query_pointer_reply(conn, cookie, nullptr);
+
+        if (!reply) 
+        {
+            log_error("Unable to query pointer position.");
+            return false;
+        }
+
+        // Get pointer coordinates
+        posX = reply->root_x;
+        posY = reply->root_y;
+
+        free(reply);
+        return true;
     }
 }
 
@@ -3497,18 +3558,19 @@ class WinDecoretor
 {
     public:
         WinDecoretor(xcb_connection_t * connection, client * c) 
-        : connection(connection), c(c)
+        : c(c)
         {
             if (xcb_connection_has_error(connection)) 
             {
                 log_error("XCB connection is null.");
                 return;
             }
+
             make_frame(c);
+            make_titlebar(c);
         }
         
     private:
-        xcb_connection_t * connection;
         client * c;
 
         void
@@ -3569,12 +3631,11 @@ class WinDecoretor
                 0, 
                 20
             );
-            apply_event_mask(XCB_EVENT_MASK_STRUCTURE_NOTIFY, c->frame); 
-            xcb_map_window(conn, c->frame);
-            xcb_flush(conn); 
 
-            // draw_text("sug", WHITE, BLUE, c->frame, 2, 17);
-            make_titlebar(c);
+            apply_event_mask(XCB_EVENT_MASK_STRUCTURE_NOTIFY, c->frame); 
+            apply_event_mask(XCB_EVENT_MASK_POINTER_MOTION, c->frame);
+            xcb_map_window(conn, c->frame);
+            xcb_flush(conn);
         }
 
         void
@@ -3611,6 +3672,7 @@ class WinDecoretor
 
             apply_event_mask(XCB_EVENT_MASK_STRUCTURE_NOTIFY, c->titlebar);
             apply_event_mask(XCB_EVENT_MASK_ENTER_WINDOW, c->titlebar);
+            
             win_tools::grab_buttons(c->titlebar, {
                {   L_MOUSE_BUTTON,     NULL }
             });

@@ -2,18 +2,26 @@
 #ifndef DEFENITIONS_HPP
 #define DEFENITIONS_HPP
 
+/* main.cpp */
+#define conn_err()  error::conn_error(conn ,__func__)                     
+#define check_conn  error::conn_error(conn ,__func__)
+#define check_cookie(cookie)  error::cookie_error(cookie, __func__)
+
+#define check_error(cookie, err_msg) check_err(conn, cookie, __func__, err_msg)
+
 /* LOG DEFENITIONS */
-#define LOG_ev_response_type(ev)    	Log::xcb_event_response_type(__func__, ev);
-#define LOG_func                    	Log::FUNC(__func__);
-#define LOG_error(message)          	Log::ERROR(__FUNCTION__, "]:[", message);
-#define LOG_info(message)           	Log::INFO(__FUNCTION__, "]:[", message);
-#define LOG_f_info(message)         	Log::FUNC_INFO(__FUNCTION__, "]:[", message);
-#define LOG_warning(message)        	Log::WARNING(__FUNCTION__, "]:[", message);
-#define LOG_start()                 	Log::Start("mwm");
-#define log_event_response_typ()		Log::xcb_event_response_type(__func__, e->response_type)
-#define log_info(message)               log.log(INFO, __func__, message)
-#define log_error(message)              log.log(ERROR, __FUNCTION__, message)
-#define log_win(win_name ,window)       log.log(INFO, __func__, win_name + std::to_string(window))
+#define LOG_ev_response_type(ev)    	    Log::xcb_event_response_type(__func__, ev);
+#define LOG_func                    	    Log::FUNC(__func__);
+#define LOG_error(message)          	    Log::ERROR(__FUNCTION__, "]:[", message);
+#define LOG_info(message)           	    Log::INFO(__FUNCTION__, "]:[", message);
+#define LOG_f_info(message)         	    Log::FUNC_INFO(__FUNCTION__, "]:[", message);
+#define LOG_warning(message)        	    Log::WARNING(__FUNCTION__, "]:[", message);
+#define LOG_start()                 	    Log::Start("mwm");
+#define log_event_response_typ()		    Log::xcb_event_response_type(__func__, e->response_type)
+#define log_info(message)                   log.log(INFO, __func__, message)
+#define log_error(message)                  log.log(ERROR, __FUNCTION__, message)
+#define log_error_code(message, err_code)   log.log(ERROR, __FUNCTION__, message, err_code)
+#define log_win(win_name ,window)           log.log(INFO, __func__, win_name + std::to_string(window))
 
 /* XCB DEFENITIONS */
 #define XCB_map_window(win)             xcb.map_window(conn, win, __FUNCTION__)

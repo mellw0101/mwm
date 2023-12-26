@@ -43,6 +43,13 @@ enum COLOR
     PURPLE
 };
 
+typedef enum Error_codes 
+{
+    CONN_ERR = -28,
+    OK  = 0
+} 
+Error_codes;
+
 enum class TILEPOS 
 {
     LEFT        = 1,
