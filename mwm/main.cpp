@@ -3567,7 +3567,7 @@ class WinDecoretor
             }
 
             make_frame(c);
-            make_titlebar(c);
+            // make_titlebar(c);
             make_buttons(c);
         }
         
