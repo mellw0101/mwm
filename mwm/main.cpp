@@ -3539,6 +3539,11 @@ class Event
                     destroy_notify_handler(ev);
                     break;
                 }
+                case XCB_UNMAP_NOTIFY:
+                {
+                    unmap_notify_handler(ev);
+                    break;
+                }
             }
         }
 
@@ -4048,6 +4053,21 @@ class Event
             // xcb_destroy_window(conn, c->frame);
             // WinManager::kill_client(conn, c->frame);
             // removeClient(e->event);
+        }
+
+        void
+        unmap_notify_handler(const xcb_generic_event_t * & ev)
+        {
+            const auto * e = reinterpret_cast<const xcb_unmap_notify_event_t *>(ev);
+            log.log(INFO, __func__, "e->window: " + std::to_string(e->window));
+            log.log(INFO, __func__, "e->event: " + std::to_string(e->event));
+            client * c = get::client_from_win(& e->window);
+            if (!c)
+            {
+                return;
+            }
+            xcb_unmap_window(conn, c->frame);
+            xcb_flush(conn);
         }
 };
 
