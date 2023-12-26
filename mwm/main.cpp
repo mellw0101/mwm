@@ -3797,6 +3797,8 @@ class WinDecoretor
                 }
             );
 
+            apply_event_mask(XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT, c->titlebar); 
+
             win_tools::grab_buttons(c->titlebar, {
                {   L_MOUSE_BUTTON,     NULL }
             });
