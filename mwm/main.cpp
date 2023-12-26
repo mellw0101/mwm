@@ -2562,7 +2562,7 @@ class set_png_as_backround
         void 
         apply_background(xcb_connection_t *connection, xcb_window_t window, xcb_screen_t *screen, const std::string& image_path) 
         {
-            ImageData imgData = loadPNG(image_path);
+            ImageData imgData = loadPNG_non_cpp_iso(image_path);
             xcb_image_t *image = create_xcb_image(imgData, connection, screen);
             if (!image) 
             {
@@ -4779,9 +4779,9 @@ configureRootWindow()
     // FLUSH TO MAKE X SERVER HANDEL REQUEST NOW
     xcb_flush(conn);
 
-    // set_png_as_backround file("/home/mellw/mwm_png/galaxy17.png");
-    // file.setAsBackground(screen->root);
-    // XCB_flush();
+    set_png_as_backround file("/home/mellw/mwm_png/galaxy17.png");
+    file.setAsBackground(screen->root);
+    XCB_flush();
     // draw_text
     // (
     //     "Hello World", 
