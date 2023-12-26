@@ -3567,7 +3567,7 @@ class WinDecoretor
             }
 
             make_frame(c);
-            // make_titlebar(c);
+            make_titlebar(c);
             make_close_button(c);
         }
         
@@ -3694,9 +3694,9 @@ class WinDecoretor
                 XCB_COPY_FROM_PARENT, 
                 c->close_button, 
                 c->frame, 
+                c->width - 20, 
                 0, 
-                0, 
-                screen->width_in_pixels, 
+                20, 
                 20, 
                 0, 
                 XCB_WINDOW_CLASS_INPUT_OUTPUT, 
@@ -3712,7 +3712,7 @@ class WinDecoretor
                 XCB_CW_BACK_PIXEL, 
                 (const uint32_t[1])
                 {
-                    color::get(BLACK)
+                    color::get(BLUE)
                 }
             );
 
@@ -3725,8 +3725,6 @@ class WinDecoretor
 
             xcb_map_window(conn, c->close_button);
             xcb_flush(conn);
-
-            draw_text("sug", WHITE, BLACK, c->close_button, 2, 14);
         }
         
 };
