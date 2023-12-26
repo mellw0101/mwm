@@ -32,6 +32,8 @@ static xcb_screen_t * screen;
 static void 
 draw_text(const char * str , const COLOR & text_color, const COLOR & bg_color, const xcb_window_t & win, const int16_t & x, const int16_t & y);
 
+
+
 namespace XCBwm 
 {
     void
@@ -3411,7 +3413,7 @@ class Compositor
         }
 };
 
-static Compositor compositor(conn, screen);
+Compositor* gCompositor = nullptr;
 
 class WinDecoretor 
 {
@@ -3595,7 +3597,7 @@ class WinManager
             wm::update_client(c);
             focus::client(c);
 
-            compositor.addWindow(c->win);
+            gCompositor->addWindow(c->win);
         }
  
         static void 
@@ -5280,6 +5282,7 @@ setup_wm()
 
     move_desktop(1);
     Compositor compositor(conn, screen);
+    gCompositor = &compositor;
     return 0;
 }
 
