@@ -4012,7 +4012,7 @@ class Event
         {
             const auto * e = reinterpret_cast<const xcb_destroy_notify_event_t *>(ev);
             
-            client * c = get::client_from_win(& e->event);
+            client * c = get::client_from_win(& e->window);
             if (!c)
             {
                 return;
