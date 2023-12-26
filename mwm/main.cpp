@@ -3760,7 +3760,7 @@ class WinDecoretor
             );
 
             apply_event_mask(XCB_EVENT_MASK_STRUCTURE_NOTIFY, c->frame); 
-            apply_event_mask(XCB_EVENT_MASK_POINTER_MOTION, c->frame);
+            
             xcb_map_window(conn, c->frame);
             xcb_flush(conn);
         }
@@ -4214,6 +4214,7 @@ class WinManager
                 20
             );
             apply_event_mask(c->frame); 
+
             xcb_map_window(conn, c->frame);
             xcb_flush(conn); 
 
