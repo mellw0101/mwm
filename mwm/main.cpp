@@ -4011,7 +4011,7 @@ class Event
         {
             const auto * e = reinterpret_cast<const xcb_destroy_notify_event_t *>(ev);
             
-            client * c = get::client_from_win(& e->window);
+            client * c = get::client_from_win(& e->event);
             WinManager::kill_client(conn, c->frame);
             removeClient(e->event);
         }
