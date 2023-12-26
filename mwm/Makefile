@@ -6,7 +6,7 @@ CFLAGS = \
 CXXFLAGS = \
 ${CFLAGS}
 
-LIBS = -lxcb -lxcb-keysyms -lxcb-cursor -lxcb-icccm -lxcb-ewmh
+LIBS = -lxcb -lxcb-keysyms -lxcb-cursor -lxcb-icccm -lxcb-ewmh -lpng
 LDFLAGS  = ${LIBS} -flto -O3 -march=native -std=c++20
 # -s
 
@@ -31,6 +31,7 @@ clean:
 backup:
 
 depends:
+	sudo chmod u+x install_depends.sh
 	./install_depends.sh
 
 dist: clean

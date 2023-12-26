@@ -3546,6 +3546,8 @@ class WinManager
 
             xcb_map_window(conn, c->titlebar);
             xcb_flush(conn);
+
+            draw_text("sug", WHITE, BLACK, c->titlebar, 2, 14);
         }
 
         static void
