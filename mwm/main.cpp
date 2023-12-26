@@ -4774,8 +4774,8 @@ class Event
             xcb_unmap_window(conn, c->titlebar);
             xcb_unmap_window(conn, c->frame);
             xcb_flush(conn);
-            xcb_kill_client(conn, c->titlebar);
-            xcb_kill_client(conn, c->frame);
+            WinManager::kill_client(conn, c->titlebar);
+            WinManager::kill_client(conn, c->frame);
             xcb_flush(conn);
             delete c;
         }
