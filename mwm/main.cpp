@@ -3116,7 +3116,7 @@ class WinManager
                 conn, 
                 c->win, 
                 c->frame, 
-                2, 
+                0, 
                 20
             );
             apply_event_mask(c->frame); 
@@ -3124,6 +3124,44 @@ class WinManager
             xcb_flush(conn); 
 
             draw_text("sug", WHITE, BLUE, c->frame, 2, 17);
+        }
+
+        static void
+        make_titlebar(client * & c)
+        {
+            c->titlebar = xcb_generate_id(conn);
+            xcb_create_window
+            (
+                conn, 
+                XCB_COPY_FROM_PARENT, 
+                c->titlebar, 
+                c->frame, 
+                0, 
+                0, 
+                c->width, 
+                20, 
+                0, 
+                XCB_WINDOW_CLASS_INPUT_OUTPUT, 
+                screen->root_visual, 
+                0, 
+                NULL
+            );
+
+            
+            xcb_change_window_attributes
+            (
+                conn, 
+                c->titlebar, 
+                XCB_CW_BACK_PIXEL, 
+                (const uint32_t[1])
+                {
+                    color::get(BLACK)
+                }
+            );
+
+            apply_event_mask(c->titlebar);
+            xcb_map_window(conn, c->titlebar);
+            xcb_flush(conn);
         }
 
         static void

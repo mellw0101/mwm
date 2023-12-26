@@ -100,7 +100,8 @@ struct size_pos
 struct client 
 {
 	xcb_window_t win;
-    xcb_window_t frame;            
+    xcb_window_t frame;
+    xcb_window_t titlebar;            
 	int16_t x, y;                   
 	uint16_t width,height;          
 	uint8_t  depth;  
