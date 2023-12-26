@@ -3046,6 +3046,8 @@ class WinManager
             {
                 c->ismax = false;
             }
+
+            c->isKilleble = false;
         
             client_list.push_back(c);
             cur_d->current_clients.push_back(c);
@@ -3096,6 +3098,7 @@ class WinManager
                 0, 
                 20
             );
+            c->isKilleble = true;
             apply_event_mask(c->frame); 
             xcb_map_window(conn, c->frame);
             xcb_flush(conn); 
@@ -4117,7 +4120,18 @@ class Event
         unmap_notify_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_unmap_notify_event_t *>(ev);
-            xcb_unmap_window(conn, XCBwm::get_parent_window(e->window));   
+            
+            client * c = get::client_from_win(& e->window);
+            if (!c)
+            {
+                return;
+            }
+
+            if (c->isKilleble)
+            {
+                xcb_unmap_window(conn, c->frame);
+                // delete c;
+            }
         }
 
         void 

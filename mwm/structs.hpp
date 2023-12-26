@@ -106,7 +106,7 @@ struct client
 	uint8_t  depth;  
     size_pos ogsize;
     size_pos tile_ogsize;
-    bool ismax;
+    bool ismax, isKilleble;
     uint16_t desktop;
 };
 
