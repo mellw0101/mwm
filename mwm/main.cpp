@@ -3547,7 +3547,6 @@ class WinDecoretor
                 0, 
                 NULL
             );
-            log.log(INFO, __func__, "c->frame: " + std::to_string(c->frame));
 
             // SET THE BACKGROUND COLOR TO WHITE
             xcb_change_window_attributes
@@ -4010,7 +4009,6 @@ class WinManager
                 NULL
             );
 
-            
             xcb_change_window_attributes
             (
                 conn, 
@@ -4550,6 +4548,11 @@ class Event
                 case XCB_REPARENT_NOTIFY:
                 {
                     reparent_notify_handler(ev);
+                    break;
+                }
+                case XCB_ENTER_NOTIFY:
+                {
+                    enter_notify_handler(ev);
                     break;
                 }
             }
@@ -5102,6 +5105,19 @@ class Event
         reparent_notify_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_reparent_notify_event_t *>(ev);
+        }
+        
+        void
+        enter_notify_handler(const xcb_generic_event_t * & ev)
+        {
+            const auto * e = reinterpret_cast<const xcb_enter_notify_event_t *>(ev);
+            
+            client * c = get::client_from_win(& e->event);
+            if (!c)
+            {
+                return;
+            }
+            log_win("e->event: ", e->event);            
         }
 };
 
