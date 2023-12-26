@@ -2757,7 +2757,6 @@ class WinManager
             });
 
             make_frame(c);
-            log_win("c->win", c->win);
             get::name(c);
             get_win_info(c);
             wm::update_client(c);
@@ -3926,6 +3925,7 @@ class Event
             const auto * e = reinterpret_cast<const xcb_map_notify_event_t *>(ev);
             
             client * c = get::client_from_win(& e->event);
+            log_win("c->win: ", c->win);
             if (c)
             {
                 wm::update_client(c);
