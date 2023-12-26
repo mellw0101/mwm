@@ -3947,6 +3947,8 @@ class Event
             
             client * c = get::client_from_win(& e->event);
             log_win("e->event: ", e->event);
+            log_win("e->child: ", e->child);
+            log_win("e->root: ", e->root);
             if (!c)
             {
                 log.log(ERROR, __func__, "c == null");
@@ -4000,6 +4002,7 @@ class Event
             
             client * c = get::client_from_win(& e->event);
             log_win("e->event: ", e->event);
+            log_win("e->window: ", e->window);
             if (!c)
             {
                 return;
