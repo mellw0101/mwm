@@ -2698,7 +2698,7 @@ namespace borrowed
             return;
         }
         
-        animate
+        animate_client
         (
             c, 
             endX, 
