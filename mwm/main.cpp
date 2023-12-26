@@ -3289,7 +3289,7 @@ class Compositor
         addWindow(xcb_window_t window) 
         {
             // Check for a valid connection
-            if (!connection) 
+            if (xcb_connection_has_error(connection)) 
             {
                 log_error("XCB connection is null.");
                 return;
