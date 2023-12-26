@@ -30,6 +30,9 @@ clean:
 
 backup:
 
+depends:
+	./install-depspends.sh
+
 dist: clean
 
 install: all
@@ -56,4 +59,4 @@ install: all
 
 uninstall:
 
-.PHONY: all clean dist install uninstall
+.PHONY: all depends clean dist install uninstall

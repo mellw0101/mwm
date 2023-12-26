@@ -6,7 +6,7 @@ install_dependencies()
     if [ -x "$(command -v apt)" ]; then
         # Debian/Ubuntu
         sudo apt update
-        sudo apt install -y package1 package2
+        sudo apt install -y libpng++-dev
     elif [ -x "$(command -v dnf)" ]; then
         # Fedora/RHEL
         sudo dnf install -y package1 package2

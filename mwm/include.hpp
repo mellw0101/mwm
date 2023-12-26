@@ -42,6 +42,7 @@
     #include <iostream>
     #include <algorithm>
     #include <memory>
+    #include <png.h>
 
     #include "structs.hpp"
     #include "Log.hpp"
