@@ -3842,8 +3842,8 @@ class WinDecoretor
                 }
             );
 
-            apply_event_mask(XCB_EVENT_MASK_BUTTON_PRESS, c->close_button);
-            // apply_event_mask(XCB_EVENT_MASK_ENTER_WINDOW, c->close_button);
+            apply_event_mask(XCB_EVENT_MASK_STRUCTURE_NOTIFY, c->close_button);
+            apply_event_mask(XCB_EVENT_MASK_ENTER_WINDOW, c->close_button);
 
             win_tools::grab_buttons(c->close_button, {
                {   L_MOUSE_BUTTON,     NULL }
@@ -5205,6 +5205,12 @@ class Event
             
             if (e->detail == L_MOUSE_BUTTON)
             {
+                if (e->event == c->close_button)
+                {
+                    win_tools::close_button_kill(c);
+                    return;
+                }
+
                 if (e->event == c->titlebar)
                 {
                     log.log(INFO, __func__, "ALT+L_MOUSE_BUTTON");
@@ -5227,11 +5233,6 @@ class Event
                             return;
                         }
                     }
-                }
-
-                if (e->event == c->close_button)
-                {
-                    win_tools::close_button_kill(c);
                 }
             }
 
