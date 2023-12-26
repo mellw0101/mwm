@@ -5203,6 +5203,10 @@ run()
         xcb_generic_event_t * ev;
         while ((ev = xcb_poll_for_event(conn)))
         {
+            if (!ev) 
+            {
+                continue;
+            }
             event.handler(ev);
             free(ev);
         }   
