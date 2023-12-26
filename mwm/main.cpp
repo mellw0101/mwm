@@ -2292,9 +2292,9 @@ class set_png_as_backround
         // ~set_png_as_backround();
         
         void 
-        setAsBackground(xcb_window_t win)
+        setAsBackground(xcb_connection_t * connection, xcb_window_t win)
         {
-            apply_background(conn, win, screen, pngFilePath);
+            apply_background(connection, win, screen, pngFilePath);
         }
 
     private:
@@ -3138,6 +3138,183 @@ namespace borrowed
     }
 }
 
+namespace win_tools 
+{
+    void
+    apply_event_mask(const xcb_event_mask_t ev_mask, const xcb_window_t & win)
+    {
+        xcb_change_window_attributes
+        (
+            conn,
+            win,
+            XCB_CW_EVENT_MASK,
+            (const uint32_t[1])
+            {
+                ev_mask
+            }
+        );
+    }
+
+    void
+    grab_buttons(const xcb_window_t & win, std::initializer_list<std::pair<const uint8_t, const uint16_t>> bindings)
+    {
+        for (const auto & binding : bindings)
+        {
+            const uint8_t & button = binding.first;
+            const uint16_t & modifier = binding.second;
+            xcb_grab_button
+            (
+                conn, 
+                
+                // 'OWNER_EVENTS : SET TO 0 FOR NO EVENT PROPAGATION'
+                1, 
+                win, 
+                
+                // EVENT MASK
+                XCB_EVENT_MASK_BUTTON_PRESS, 
+                
+                // POINTER MODE
+                XCB_GRAB_MODE_ASYNC, 
+                
+                // KEYBOARD MODE
+                XCB_GRAB_MODE_ASYNC, 
+                
+                // CONFINE TO WINDOW
+                XCB_NONE, 
+                
+                // CURSOR
+                XCB_NONE, 
+                button, 
+                modifier    
+            );
+            // FLUSH THE REQUEST TO THE X SERVER
+            xcb_flush(conn); 
+        }
+    }
+}
+
+class WinDecoretor 
+{
+    public:
+        WinDecoretor(const xcb_window_t & win) : win(win) {}
+        
+    private:
+        xcb_window_t win;
+        xcb_window_t parent_win;
+
+        void
+        apply_event_mask(const xcb_window_t & win)
+        {
+            xcb_change_window_attributes
+            (
+                conn,
+                win,
+                XCB_CW_EVENT_MASK,
+                (const uint32_t[1])
+                {
+                    XCB_EVENT_MASK_FOCUS_CHANGE
+                }
+            );
+        }
+
+        void 
+        make_frame(client * & c)
+        {
+            // CREATE A FRAME WINDOW
+            c->frame = xcb_generate_id(conn);
+            xcb_create_window
+            (
+                conn, 
+                XCB_COPY_FROM_PARENT, 
+                c->frame, 
+                screen->root, 
+                c->x, 
+                c->y, 
+                c->width, 
+                c->height + 20, 
+                0, 
+                XCB_WINDOW_CLASS_INPUT_OUTPUT, 
+                screen->root_visual, 
+                0, 
+                NULL
+            );
+            log.log(INFO, __func__, "c->frame: " + std::to_string(c->frame));
+
+            // SET THE BACKGROUND COLOR TO WHITE
+            xcb_change_window_attributes
+            (
+                conn, 
+                c->frame, 
+                XCB_CW_BACK_PIXEL, 
+                (const uint32_t[1])
+                {
+                    color::get(BLUE)
+                }
+            );
+            
+            // REPARENT THE PROGRAM_WINDOW TO THE FRAME_WINDOW
+            xcb_reparent_window
+            (
+                conn, 
+                c->win, 
+                c->frame, 
+                0, 
+                20
+            );
+            apply_event_mask(c->frame); 
+            xcb_map_window(conn, c->frame);
+            xcb_flush(conn); 
+
+            // draw_text("sug", WHITE, BLUE, c->frame, 2, 17);
+            make_titlebar(c);
+        }
+
+        void
+        make_titlebar(client * & c)
+        {
+            c->titlebar = xcb_generate_id(conn);
+            xcb_create_window
+            (
+                conn, 
+                XCB_COPY_FROM_PARENT, 
+                c->titlebar, 
+                c->frame, 
+                0, 
+                0, 
+                screen->width_in_pixels, 
+                20, 
+                0, 
+                XCB_WINDOW_CLASS_INPUT_OUTPUT, 
+                screen->root_visual, 
+                0, 
+                NULL
+            );
+
+            
+            xcb_change_window_attributes
+            (
+                conn, 
+                c->titlebar, 
+                XCB_CW_BACK_PIXEL, 
+                (const uint32_t[1])
+                {
+                    color::get(BLACK)
+                }
+            );
+
+            apply_event_mask(c->titlebar);
+            win_tools::grab_buttons(c->titlebar, {
+               {   L_MOUSE_BUTTON,     NULL }
+            });
+
+            xcb_map_window(conn, c->titlebar);
+            xcb_flush(conn);
+
+            draw_text("sug", WHITE, BLACK, c->titlebar, 2, 14);
+        }
+
+};
+
 class WinManager 
 {
     public:
@@ -3160,6 +3337,7 @@ class WinManager
             xcb_flush(conn);
 
             apply_event_mask(c);
+            win_tools::apply_event_mask(XCB_EVENT_MASK_STRUCTURE_NOTIFY, c->win);
 
             // GRAB MOUSE BUTTONS FOR THE WINDOW 
             // SO WINDOW CAN BE INTERACTED WITH
@@ -4778,19 +4956,6 @@ configureRootWindow()
 
     // FLUSH TO MAKE X SERVER HANDEL REQUEST NOW
     xcb_flush(conn);
-
-    // set_png_as_backround file("/home/mellw/mwm_png/galaxy17.png");
-    // file.setAsBackground(screen->root);
-    // XCB_flush();
-    // draw_text
-    // (
-    //     "Hello World", 
-    //     WHITE, 
-    //     DARK_GREY,
-    //     screen->root,
-    //     500,
-    //     20
-    // );
 }
 
 bool 
