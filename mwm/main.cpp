@@ -81,6 +81,33 @@ namespace XCBwm
         free(reply);
         return root_window;
     }
+
+    xcb_window_t *
+    get_window_children(xcb_connection_t *conn, xcb_window_t window, uint32_t *child_count) 
+    {
+        *child_count = 0;
+        xcb_query_tree_cookie_t cookie = xcb_query_tree(conn, window);
+        xcb_query_tree_reply_t *reply = xcb_query_tree_reply(conn, cookie, NULL);
+
+        if (!reply) {
+            fprintf(stderr, "Error: Unable to query the window tree.\n");
+            return NULL;
+        }
+
+        *child_count = xcb_query_tree_children_length(reply);
+        xcb_window_t *children = static_cast<xcb_window_t *>(malloc(*child_count * sizeof(xcb_window_t)));
+
+        if (!children) {
+            fprintf(stderr, "Error: Unable to allocate memory for children.\n");
+            free(reply);
+            return NULL;
+        }
+
+        memcpy(children, xcb_query_tree_children(reply), *child_count * sizeof(xcb_window_t));
+        
+        free(reply);
+        return children;
+    }
 };
 
 namespace get {
@@ -4082,28 +4109,32 @@ class Event
         {
             const auto * e = reinterpret_cast<const xcb_destroy_notify_event_t *>(ev);
 
-            log.log(INFO, __func__, "e->window: " + std::to_string(e->window));
-            log_win("e->window->root: ", XCBwm::get_root_window(e->window));
-            log_win("e->window->parent: ", XCBwm::get_parent_window(e->window));
-            // xcb_destroy_window(conn, c->frame);
-            // WinManager::kill_client(conn, c->frame);
-            // removeClient(e->event);
+            xcb_window_t * children;
+            uint32_t children_count;
+
+            children = XCBwm::get_window_children(conn, e->window, &children_count);
+
+            for (uint32_t i = 0; i < children_count; i++)
+            {
+                log_win("children[i]", children[i]);
+                // client * c = get::client_from_win(& children[i]);
+                // if (c)
+                // {
+                //     wm::unmanage_client(c);
+                // }
+            }
         }
 
         void
         unmap_notify_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_unmap_notify_event_t *>(ev);
-            log.log(INFO, __func__, "e->window: " + std::to_string(e->window));
-            log_win("e->window->parent: ", XCBwm::get_parent_window(e->window));
         }
 
         void 
         reparent_notify_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_reparent_notify_event_t *>(ev);
-            log.log(INFO, __func__, "e->window: " + std::to_string(e->window));
-            log_win("e->window->parent: ", XCBwm::get_parent_window(e->window));
         }
 };
 
