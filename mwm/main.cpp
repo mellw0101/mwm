@@ -3568,7 +3568,7 @@ class WinDecoretor
 
             make_frame(c);
             // make_titlebar(c);
-            make_buttons(c);
+            make_close_button(c);
         }
         
     private:
@@ -3685,39 +3685,50 @@ class WinDecoretor
         }
 
         void
-        make_buttons(client * & c)
+        make_close_button(client * & c)
         {
-            c->close_button = xcb_generate_id(conn);
-            xcb_create_window(
-                conn,
-                XCB_COPY_FROM_PARENT,
-                c->close_button,
-                c->frame,
-                10,
-                0,
-                20,
-                20,
-                0,
-                XCB_WINDOW_CLASS_INPUT_OUTPUT,
-                screen->root_visual,
-                0,
+            c->titlebar = xcb_generate_id(conn);
+            xcb_create_window
+            (
+                conn, 
+                XCB_COPY_FROM_PARENT, 
+                c->close_button, 
+                c->frame, 
+                0, 
+                0, 
+                screen->width_in_pixels, 
+                20, 
+                0, 
+                XCB_WINDOW_CLASS_INPUT_OUTPUT, 
+                screen->root_visual, 
+                0, 
                 NULL
             );
 
             xcb_change_window_attributes
             (
                 conn, 
-                c->titlebar, 
+                c->close_button, 
                 XCB_CW_BACK_PIXEL, 
                 (const uint32_t[1])
                 {
-                    color::get(WHITE)
+                    color::get(BLACK)
                 }
             );
 
+            apply_event_mask(XCB_EVENT_MASK_STRUCTURE_NOTIFY, c->close_button);
+            apply_event_mask(XCB_EVENT_MASK_ENTER_WINDOW, c->close_button);
+
+            win_tools::grab_buttons(c->close_button, {
+               {   L_MOUSE_BUTTON,     NULL }
+            });
+
             xcb_map_window(conn, c->close_button);
             xcb_flush(conn);
+
+            draw_text("sug", WHITE, BLACK, c->close_button, 2, 14);
         }
+        
 };
 
 class WinManager 
