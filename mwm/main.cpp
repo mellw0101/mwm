@@ -3098,12 +3098,12 @@ class WinManager
                 0, 
                 20
             );
-            c->isKilleble = true;
             apply_event_mask(c->frame); 
             xcb_map_window(conn, c->frame);
             xcb_flush(conn); 
 
             draw_text("sug", WHITE, BLUE, c->frame, 2, 17);
+            c->isKilleble = true;
         }
 
         static void
@@ -4127,7 +4127,7 @@ class Event
                 return;
             }
 
-            if (!c->isKilleble)
+            if (c->isKilleble)
             {
                 xcb_unmap_window(conn, c->frame);
                 // delete c;
