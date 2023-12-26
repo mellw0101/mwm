@@ -31,7 +31,7 @@ clean:
 backup:
 
 depends:
-	./install-depspends.sh
+	./install_depends.sh
 
 dist: clean
 
