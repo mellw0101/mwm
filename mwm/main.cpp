@@ -1970,6 +1970,18 @@ class XCPPBAnimator
                 }
             );
             xcb_flush(connection);
+
+            xcb_configure_window
+            (
+                connection,
+                c->close_button,
+                XCB_CONFIG_WINDOW_X,
+                (const uint32_t[4])
+                {
+                    static_cast<const uint32_t &>(x - 20)
+                }
+            );
+            xcb_flush(connection);
         }
 };
 
@@ -1999,13 +2011,13 @@ animate_client(client * & c, const int & endX, const int & endY, const int & end
     client_anim.animate_client
     (
         c->x,
-        c->y, 
-        c->width, 
-        c->height, 
+        c->y,
+        c->width,
+        c->height,
         endX,
-        endY, 
-        endWidth, 
-        endHeight, 
+        endY,
+        endWidth,
+        endHeight,
         duration
     );
     wm::update_client(c);
