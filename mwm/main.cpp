@@ -4011,6 +4011,7 @@ class Event
         map_notify_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_map_notify_event_t *>(ev);
+            log_win("e->window: ", e->window);
             
             client * c = get::client_from_win(& e->window);
             if (c)
@@ -4113,6 +4114,7 @@ class Event
         destroy_notify_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_destroy_notify_event_t *>(ev);
+
         }
 
         void
@@ -4121,6 +4123,7 @@ class Event
             const auto * e = reinterpret_cast<const xcb_unmap_notify_event_t *>(ev);
             
             client * c = get::client_from_win(& e->window);
+            log_win("e->window: ", e->window);
             if (!c)
             {
                 return;
@@ -4128,8 +4131,13 @@ class Event
 
             if (c->isKilleble)
             {
+                log_info("isKilleble");
                 xcb_unmap_window(conn, c->frame);
                 // delete c;
+            }
+            else 
+            {
+                log_info("! isKilleble");
             }
         }
 
