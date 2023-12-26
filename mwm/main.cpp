@@ -2951,6 +2951,8 @@ class WinManager
                 return nullptr;
             }
 
+            c->win = xcb_generate_id(conn);
+
             c->win      = win;
             c->height   = (data.height < 300) ? 300 : data.height;
             c->width    = (data.width < 400)  ? 400 : data.width;
