@@ -3824,6 +3824,8 @@ class Event
                 {
                     case SUPER:
                     {
+                        log_win("e->event", e->event);
+                        log_win("e->event-parent", XCBwm::get_parent_window(e->event));
                         break;
                     }
                 }
