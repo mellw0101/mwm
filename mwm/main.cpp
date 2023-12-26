@@ -136,11 +136,51 @@ namespace get {
     }
 
     client * 
+    client_from_all_win(const xcb_window_t * w) 
+    {
+        for (const auto & c : client_list) 
+        {
+            if (* w == c->win || * w == c->frame || * w == c->titlebar) 
+            {
+                return c;
+            }
+        }
+        return nullptr; /*
+         *
+         * THIS WILL
+         * RETURN 'nullptr' BECAUSE THE
+         * WINDOW DOES NOT BELONG TO ANY 
+         * CLIENT IN THE CLIENT LIST
+         *  
+         */ 
+    }
+
+    client * 
     client_from_frame(const xcb_window_t * w) 
     {
         for (const auto & c : client_list) 
         {
             if (* w == c->frame) 
+            {
+                return c;
+            }
+        }
+        return nullptr; /*
+         *
+         * THIS WILL
+         * RETURN 'nullptr' BECAUSE THE
+         * WINDOW DOES NOT BELONG TO ANY 
+         * CLIENT IN THE CLIENT LIST
+         *  
+         */ 
+    }
+
+    client * 
+    client_from_titlebar(const xcb_window_t * w) 
+    {
+        for (const auto & c : client_list) 
+        {
+            if (* w == c->titlebar) 
             {
                 return c;
             }
@@ -3161,6 +3201,10 @@ class WinManager
             );
 
             apply_event_mask(c->titlebar);
+            grab_buttons(c, {
+               {   L_MOUSE_BUTTON,     NULL }
+            });
+
             xcb_map_window(conn, c->titlebar);
             xcb_flush(conn);
         }
@@ -4099,21 +4143,43 @@ class Event
         {
             const auto * e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
             
-            client * c = get::client_from_win(& e->event);
+            client * c = get::client_from_all_win(& e->event);
             if (!c)
             {
                 log.log(ERROR, __func__, "c == null");
                 return;
             }
             
-            if ((e->detail == L_MOUSE_BUTTON) 
-             && (e->event != screen->root) 
-             && (e->state & ALT))
+            if (e->detail == L_MOUSE_BUTTON)
             {
-                log.log(INFO, __func__, "ALT+L_MOUSE_BUTTON");
-                wm::raise_client(c);
-                mv_client(c, e->event_x, e->event_y + 20);
-                focus::client(c);
+                if (e->event == c->titlebar)
+                {
+                    switch (e->state) 
+                    {
+                        log.log(INFO, __func__, "ALT+L_MOUSE_BUTTON");
+                        wm::raise_client(c);
+                        mv_client(c, e->event_x, e->event_y + 20);
+                        focus::client(c);
+                        return;
+                    }
+                    
+                }
+
+                if (e->event == c->win)
+                {
+                    switch (e->state) 
+                    {
+                        case ALT:
+                        {
+                            log.log(INFO, __func__, "ALT+L_MOUSE_BUTTON");
+                            wm::raise_client(c);
+                            mv_client(c, e->event_x, e->event_y + 20);
+                            focus::client(c);
+                            return;
+                        }
+                    }
+                    
+                }
             }
 
             if ((e->detail == R_MOUSE_BUTTON) 
