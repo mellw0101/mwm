@@ -4772,6 +4772,7 @@ class Event
             }
             xcb_unmap_window(conn, c->titlebar);
             xcb_unmap_window(conn, c->frame);
+            xcb_flush(conn);
             delete c;
         }
 
