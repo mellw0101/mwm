@@ -2292,7 +2292,7 @@ class set_png_as_backround
         // ~set_png_as_backround();
         
         void 
-        setAsBackground(const xcb_window_t & win)
+        setAsBackground(xcb_window_t win)
         {
             apply_background(conn, win, screen, pngFilePath);
         }
