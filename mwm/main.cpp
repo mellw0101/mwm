@@ -2288,7 +2288,7 @@ class set_win_color
 class set_png_as_backround 
 {
     public:
-        set_png_as_backround(const char * pngFilePath) : pngFilePath(pngFilePath) {}
+        set_png_as_backround(const std::string & pngFilePath) : pngFilePath(pngFilePath) {}
         // ~set_png_as_backround();
         
         void 
@@ -2298,7 +2298,7 @@ class set_png_as_backround
         }
 
     private:
-        const char * pngFilePath;
+        std::string pngFilePath;
 
         struct ImageData 
         {
