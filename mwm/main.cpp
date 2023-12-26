@@ -4085,7 +4085,7 @@ class Event
             const auto * e = reinterpret_cast<const xcb_destroy_notify_event_t *>(ev);
 
             log.log(INFO, __func__, "e->window: " + std::to_string(e->window));
-            log_win("e->window->parent: ", XCBwm::get_parent_window(e->window));
+            log_win("e->window->root: ", XCBwm::get_root_window(e->window));
         
             client * c = get::client_from_win(& e->window);
             if (!c)
@@ -4105,13 +4105,7 @@ class Event
         {
             const auto * e = reinterpret_cast<const xcb_unmap_notify_event_t *>(ev);
             log.log(INFO, __func__, "e->window: " + std::to_string(e->window));
-            client * c = get::client_from_win(& e->window);
-            if (c)
-            {
-                return;
-            }
-            xcb_unmap_window(conn, e->window);
-            xcb_flush(conn);
+            log_win("e->window->parent: ", XCBwm::get_parent_window(e->window));
         }
 };
 
