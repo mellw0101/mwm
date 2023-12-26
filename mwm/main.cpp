@@ -2285,11 +2285,11 @@ class set_win_color
         }
 };
 
-class XcbBackgroundSetter 
+class set_png_as_backround 
 {
     public:
-        XcbBackgroundSetter(const char * pngFilePath) : pngFilePath(pngFilePath) {}
-        ~XcbBackgroundSetter();
+        set_png_as_backround(const char * pngFilePath) : pngFilePath(pngFilePath) {}
+        ~set_png_as_backround();
         
         void 
         setAsBackground(const xcb_window_t & win)
@@ -4779,15 +4779,16 @@ configureRootWindow()
     // FLUSH TO MAKE X SERVER HANDEL REQUEST NOW
     xcb_flush(conn);
 
-    draw_text
-    (
-        "Hello World", 
-        WHITE, 
-        DARK_GREY,
-        screen->root,
-        500,
-        20
-    );
+    set_png_as_backround file("~/mwm_png/galaxy17.png");
+    // draw_text
+    // (
+    //     "Hello World", 
+    //     WHITE, 
+    //     DARK_GREY,
+    //     screen->root,
+    //     500,
+    //     20
+    // );
 }
 
 bool 
