@@ -3797,9 +3797,6 @@ class WinDecoretor
                 }
             );
 
-            apply_event_mask(XCB_EVENT_MASK_STRUCTURE_NOTIFY, c->titlebar);
-            apply_event_mask(XCB_EVENT_MASK_ENTER_WINDOW, c->titlebar);
-
             win_tools::grab_buttons(c->titlebar, {
                {   L_MOUSE_BUTTON,     NULL }
             });
@@ -3842,7 +3839,6 @@ class WinDecoretor
                 }
             );
 
-            apply_event_mask(XCB_EVENT_MASK_STRUCTURE_NOTIFY, c->close_button);
             apply_event_mask(XCB_EVENT_MASK_BUTTON_PRESS, c->close_button);
 
             win_tools::grab_buttons(c->close_button, {
