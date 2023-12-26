@@ -3496,14 +3496,23 @@ Compositor* gCompositor = nullptr;
 class WinDecoretor 
 {
     public:
-        WinDecoretor(const xcb_window_t & win) : win(win) {}
+        WinDecoretor(xcb_connection_t * connection, client * c) 
+        : connection(connection), c(c)
+        {
+            if (xcb_connection_has_error(connection)) 
+            {
+                log_error("XCB connection is null.");
+                return;
+            }
+            make_frame(c);
+        }
         
     private:
-        xcb_window_t win;
-        xcb_window_t parent_win;
+        xcb_connection_t * connection;
+        client * c;
 
         void
-        apply_event_mask(const xcb_window_t & win)
+        apply_event_mask(const xcb_event_mask_t ev_mask, const xcb_window_t & win)
         {
             xcb_change_window_attributes
             (
@@ -3512,7 +3521,7 @@ class WinDecoretor
                 XCB_CW_EVENT_MASK,
                 (const uint32_t[1])
                 {
-                    XCB_EVENT_MASK_FOCUS_CHANGE
+                    ev_mask
                 }
             );
         }
@@ -3561,7 +3570,7 @@ class WinDecoretor
                 0, 
                 20
             );
-            apply_event_mask(c->frame); 
+            apply_event_mask(XCB_EVENT_MASK_STRUCTURE_NOTIFY, c->frame); 
             xcb_map_window(conn, c->frame);
             xcb_flush(conn); 
 
@@ -3590,7 +3599,6 @@ class WinDecoretor
                 NULL
             );
 
-            
             xcb_change_window_attributes
             (
                 conn, 
@@ -3602,7 +3610,7 @@ class WinDecoretor
                 }
             );
 
-            apply_event_mask(c->titlebar);
+            apply_event_mask(XCB_EVENT_MASK_STRUCTURE_NOTIFY, c->titlebar);
             win_tools::grab_buttons(c->titlebar, {
                {   L_MOUSE_BUTTON,     NULL }
             });
@@ -3612,7 +3620,6 @@ class WinDecoretor
 
             draw_text("sug", WHITE, BLACK, c->titlebar, 2, 14);
         }
-
 };
 
 class WinManager 
@@ -3670,13 +3677,10 @@ class WinManager
                 {   K,          SUPER                   }
             });
 
-            make_frame(c);
+            WinDecoretor(conn ,c);
             get::name(c);
             wm::update_client(c);
             focus::client(c);
-
-            gCompositor->addWindow(c->frame);
-            gCompositor->composite();
         }
  
         static void 
@@ -4814,7 +4818,7 @@ class Event
             }
         }
 
-        void /* 
+        void /*
             INITIALIZES KEYBOARD KEY SYMBOLS AND STORES 
             THE KEYCODES UNTIL SESSION IS KILLED 
          */
