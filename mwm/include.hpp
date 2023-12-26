@@ -15,6 +15,7 @@
     #include <xcb/xcb_icccm.h>
     #include <xcb/xcb_ewmh.h>
     #include <xcb/xcb_xrm.h>
+    #include <xcb/render.h>
     #include <X11/keysym.h>
     #include <X11/X.h>
     #include <cstddef>
@@ -43,6 +44,7 @@
     #include <algorithm>
     #include <memory>
     #include <png.h>
+    #include <unordered_map>
 
     #include "structs.hpp"
     #include "Log.hpp"

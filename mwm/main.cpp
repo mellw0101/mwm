@@ -3190,7 +3190,224 @@ namespace win_tools
             xcb_flush(conn); 
         }
     }
+
+    xcb_visualtype_t * /**
+     *
+     * @brief Function to find an ARGB visual 
+     *
+     */
+    find_argb_visual(xcb_connection_t *conn, xcb_screen_t *screen) 
+    {
+        xcb_depth_iterator_t depth_iter = xcb_screen_allowed_depths_iterator(screen);
+
+        for (; depth_iter.rem; xcb_depth_next(&depth_iter)) 
+        {
+            xcb_visualtype_iterator_t visual_iter = xcb_depth_visuals_iterator(depth_iter.data);
+            for (; visual_iter.rem; xcb_visualtype_next(&visual_iter)) 
+            {
+                if (depth_iter.data->depth == 32) 
+                {
+                    return visual_iter.data;
+                }
+            }
+        }
+        return NULL;
+    }
+
+    void 
+    get_win_w_h(xcb_window_t window, uint16_t & width, uint16_t & height) 
+    {
+        xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
+        xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
+
+        if (geometry) 
+        {
+            width = geometry->width;
+            height = geometry->height;
+            free(geometry);
+        } 
+        else 
+        {
+            width = height = 200;
+        }
+    }
+
+    uint16_t 
+    get_win_w(xcb_window_t window) 
+    {
+        xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
+        xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
+
+        uint16_t width;
+        if (geometry) 
+        {
+            width = geometry->width;
+            free(geometry);
+        } 
+        else 
+        {
+            width = 200;
+        }
+        return width;
+    }
+    
+    uint16_t 
+    get_win_h(xcb_window_t window) 
+    {
+        xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
+        xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
+
+        uint16_t height;
+        if (geometry) 
+        {
+            height = geometry->height;
+            free(geometry);
+        } 
+        else 
+        {
+            height = 200;
+        }
+        return height;
+    }
 }
+
+class Compositor 
+{
+    public:
+        Compositor(xcb_connection_t* conn, xcb_screen_t* screen) 
+        : connection(conn), root(screen->root) 
+        {
+            // Initialize XRender for ARGB visuals and pictures
+            initRenderExtension();
+        }
+
+        void 
+        addWindow(xcb_window_t window) 
+        {
+            // Create an off-screen picture for this window
+            xcb_pixmap_t pixmap = xcb_generate_id(connection);
+            xcb_create_pixmap(connection, 32, pixmap, root, win_tools::get_win_w(window), win_tools::get_win_h(window));
+
+            xcb_render_picture_t picture = xcb_generate_id(connection);
+            xcb_render_create_picture(connection, picture, pixmap, renderFormat, 0, nullptr);
+
+            windowPictures[window] = picture;
+        }
+
+        void 
+        removeWindow(xcb_window_t window) 
+        {
+            // Clean up resources for the window
+            auto it = windowPictures.find(window);
+            if (it != windowPictures.end()) {
+                xcb_render_free_picture(connection, it->second);
+                windowPictures.erase(it);
+            }
+        }
+
+        void 
+        composite() 
+        {
+            // Composite all windows onto the screen
+            for (const auto& pair : windowPictures) {
+                xcb_render_picture_t srcPic = pair.second;
+                xcb_render_composite
+                (
+                    connection, 
+                    XCB_RENDER_PICT_OP_OVER, 
+                    srcPic, 
+                    XCB_NONE, 
+                    rootPicture,
+                    0, 
+                    0, 
+                    0, 
+                    0, 
+                    0, 
+                    0, 
+                    win_tools::get_win_w(pair.first), 
+                    win_tools::get_win_h(pair.first)
+                );
+            }
+
+            xcb_flush(connection);
+        }
+
+        void 
+        setTransparency(xcb_window_t window, float alpha) 
+        {
+            auto it = windowPictures.find(window);
+            if (it != windowPictures.end()) {
+                xcb_render_picture_t picture = it->second;
+
+                uint16_t w, h;
+                win_tools::get_win_w_h(window, w, h);
+
+                // Create a semi-transparent rectangle
+                xcb_rectangle_t rect = {0, 0, w, h};
+                uint32_t color = (static_cast<uint32_t>(alpha * 255) << 24); // Adjust alpha value
+
+                // Create a graphic context for alpha blending
+                xcb_gcontext_t gc = xcb_generate_id(connection);
+                xcb_create_gc(connection, gc, root, 0, nullptr);
+
+                // Fill the rectangle with the semi-transparent color
+                xcb_change_gc(connection, gc, XCB_GC_FOREGROUND, &color);
+                xcb_poly_fill_rectangle(connection, picture, gc, 1, &rect);
+
+                // Free the graphic context
+                xcb_free_gc(connection, gc);
+            }
+        }
+
+    private:
+        xcb_connection_t* connection;
+        xcb_window_t root;
+        xcb_render_pictformat_t renderFormat;
+        std::unordered_map<xcb_window_t, xcb_render_picture_t> windowPictures;
+        xcb_render_picture_t rootPicture;
+
+        void 
+        initRenderExtension() 
+        {
+            // Find ARGB visual and create a root picture
+            xcb_render_query_pict_formats_cookie_t cookie = xcb_render_query_pict_formats(connection);
+            xcb_render_query_pict_formats_reply_t* reply = xcb_render_query_pict_formats_reply(connection, cookie, nullptr);
+
+            renderFormat = findArgbFormat(reply);
+            rootPicture = xcb_generate_id(connection);
+            xcb_render_create_picture(connection, rootPicture, root, renderFormat, 0, nullptr);
+
+            free(reply);
+        }
+
+        xcb_render_pictformat_t 
+        findArgbFormat(xcb_render_query_pict_formats_reply_t* reply) 
+        {
+            xcb_render_pictformat_t format = 0;
+
+            // Iterate over screens
+            xcb_render_pictscreen_iterator_t screen_iter = xcb_render_query_pict_formats_screens_iterator(reply);
+            for (; screen_iter.rem; xcb_render_pictscreen_next(&screen_iter)) {
+
+                // Iterate over depths
+                xcb_render_pictdepth_iterator_t depth_iter = xcb_render_pictscreen_depths_iterator(screen_iter.data);
+                for (; depth_iter.rem; xcb_render_pictdepth_next(&depth_iter)) {
+
+                    // Check if the depth is 32
+                    if (depth_iter.data->depth == 32) {
+                        // Iterate over visuals at this depth
+                        xcb_render_pictvisual_iterator_t visual_iter = xcb_render_pictdepth_visuals_iterator(depth_iter.data);
+                        for (; visual_iter.rem; xcb_render_pictvisual_next(&visual_iter)) {
+                            // If a visual with 32-bit depth is found, return its format
+                            format = visual_iter.data->format;
+                            if (format) return format;
+                        }
+                    }
+                }
+            }
+            return format;
+        }
+};
 
 class WinDecoretor 
 {
@@ -4632,7 +4849,7 @@ class Event
         {
             const auto * e = reinterpret_cast<const xcb_map_notify_event_t *>(ev);
             log_win("e->window: ", e->window);
-            
+
             client * c = get::client_from_win(& e->window);
             if (c)
             {
@@ -4683,7 +4900,6 @@ class Event
                             return;
                         }
                     }
-                    
                 }
             }
 
@@ -5057,6 +5273,7 @@ setup_wm()
     make_desktop(5);
 
     move_desktop(1);
+    Compositor compositor(conn, screen);
     return 0;
 }
 
