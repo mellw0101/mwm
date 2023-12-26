@@ -3703,8 +3703,18 @@ class WinDecoretor
                 0,
                 NULL
             );
-            
-            set_win_color(c->close_button, BLUE);
+
+            xcb_change_window_attributes
+            (
+                conn, 
+                c->titlebar, 
+                XCB_CW_BACK_PIXEL, 
+                (const uint32_t[1])
+                {
+                    color::get(WHITE)
+                }
+            );
+
             xcb_map_window(conn, c->close_button);
             xcb_flush(conn);
         }
