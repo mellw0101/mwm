@@ -3597,7 +3597,7 @@ class WinManager
             wm::update_client(c);
             focus::client(c);
 
-            gCompositor->addWindow(c->win);
+            gCompositor->addWindow(c->frame);
         }
  
         static void 
