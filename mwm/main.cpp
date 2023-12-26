@@ -3687,7 +3687,7 @@ class WinDecoretor
         void
         make_close_button(client * & c)
         {
-            c->titlebar = xcb_generate_id(conn);
+            c->close_button = xcb_generate_id(conn);
             xcb_create_window
             (
                 conn, 
