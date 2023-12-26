@@ -4765,6 +4765,14 @@ class Event
 
             log_win("e->window: ", e->window);
             log_win("e->event: ", e->event);
+            client * c = get::client_from_win(& e->event);
+            if (!c)
+            {
+                return;
+            }
+            xcb_unmap_window(conn, c->titlebar);
+            xcb_unmap_window(conn, c->frame);
+            delete c;
         }
 
         void
@@ -4779,13 +4787,13 @@ class Event
                 return;
             }
 
-            if (c->isKilleble)
-            {
-                xcb_unmap_window(conn, c->titlebar);
-                xcb_unmap_window(conn, c->frame);
-                delete c;
-                XCB_flush();
-            }
+            // if (c->isKilleble)
+            // {
+            //     xcb_unmap_window(conn, c->titlebar);
+            //     xcb_unmap_window(conn, c->frame);
+            //     delete c;
+            //     XCB_flush();
+            // }
         }
 
         void 
