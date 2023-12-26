@@ -4002,14 +4002,11 @@ class Event
             
             client * c = get::client_from_win(& e->event);
             log_win("e->event: ", e->event);
-            log_win("e->window: ", e->window);
-            if (!c)
+            if (c)
             {
-                return;
+                wm::ungrab_button(c, L_MOUSE_BUTTON, 0);
+                focused_client = c;
             }
-
-            wm::ungrab_button(c, L_MOUSE_BUTTON, 0);
-            focused_client = c;
         }
 
         void
