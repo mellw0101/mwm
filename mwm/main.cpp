@@ -5195,7 +5195,7 @@ class Event
         button_press_handler(const xcb_generic_event_t * & ev) 
         {
             const auto * e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
-            
+            log_win("e->event: ", e->event);
             client * c = get::client_from_all_win(& e->event);
             if (!c)
             {
