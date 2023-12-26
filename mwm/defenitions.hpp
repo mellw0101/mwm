@@ -13,6 +13,7 @@
 #define log_event_response_typ()		Log::xcb_event_response_type(__func__, e->response_type)
 #define log_info(message)               log.log(INFO, __func__, message)
 #define log_error(message)              log.log(ERROR, __FUNCTION__, message)
+#define log_win(win_name ,window)            log.log(INFO, __func__, win_name + std::to_string(window))
 
 /* XCB DEFENITIONS */
 #define XCB_map_window(win)             xcb.map_window(conn, win, __FUNCTION__)

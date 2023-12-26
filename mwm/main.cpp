@@ -2757,6 +2757,7 @@ class WinManager
             });
 
             make_frame(c);
+            log_win("c->win", c->win);
             get::name(c);
             get_win_info(c);
             wm::update_client(c);
@@ -2950,8 +2951,6 @@ class WinManager
                 log.log(ERROR, __func__, "Could not allocate memory for client");
                 return nullptr;
             }
-
-            c->win = xcb_generate_id(conn);
 
             c->win      = win;
             c->height   = (data.height < 300) ? 300 : data.height;
