@@ -4743,6 +4743,7 @@ configureRootWindow()
     // );
     set_png_as_backround file("/home/mellw/mwm_png/galaxy17.png");
     file.setAsBackground(screen->root);
+    XCB_flush();
 
     // APPLY THE EVENT MASKS TO THE ROOT WINDOW
     xcb_change_window_attributes
