@@ -3976,7 +3976,6 @@ class Event
             const auto * e = reinterpret_cast<const xcb_map_notify_event_t *>(ev);
             
             client * c = get::client_from_win(& e->window);
-            log_win("e->window: ", e->window);
             if (c)
             {
                 wm::update_client(c);
@@ -3996,9 +3995,6 @@ class Event
             const auto * e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
             
             client * c = get::client_from_win(& e->event);
-            log_win("e->event: ", e->event);
-            log_win("e->child: ", e->child);
-            log_win("e->root: ", e->root);
             if (!c)
             {
                 log.log(ERROR, __func__, "c == null");
@@ -4038,7 +4034,6 @@ class Event
         configure_request_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_configure_request_event_t *>(ev);
-            log_win("e->window: ", e->window);
             data.width     = e->width;
             data.height    = e->height;
             data.x         = e->x;
@@ -4051,7 +4046,6 @@ class Event
             const auto * e = reinterpret_cast<const xcb_focus_in_event_t *>(ev);
             
             client * c = get::client_from_win(& e->event);
-            log_win("e->event: ", e->event);
             if (c)
             {
                 wm::ungrab_button(c, L_MOUSE_BUTTON, 0);
@@ -4065,7 +4059,6 @@ class Event
             const auto * e = reinterpret_cast<const xcb_focus_out_event_t *>(ev);
             
             client * c = get::client_from_win(& e->event);
-            log_win("e->event: ", e->event);
             if (!c)
             {
                 return;
@@ -4086,15 +4079,7 @@ class Event
 
             log.log(INFO, __func__, "e->window: " + std::to_string(e->window));
             log_win("e->window->root: ", XCBwm::get_root_window(e->window));
-        
-            client * c = get::client_from_win(& e->window);
-            if (!c)
-            {
-                return;
-            }
-            xcb_unmap_window(conn, c->win);
-            xcb_unmap_window(conn, c->frame);
-            xcb_flush(conn);
+            log_win("e->window->parent: ", XCBwm::get_parent_window(e->window));
             // xcb_destroy_window(conn, c->frame);
             // WinManager::kill_client(conn, c->frame);
             // removeClient(e->event);
