@@ -5477,28 +5477,28 @@ run()
     Event event;
     while (true)
     {
-        // xcb_generic_event_t * ev = xcb_wait_for_event(conn);
-        // if (!ev) 
-        // {
-        //     continue;
-        // }
-        // // SEND THE EVENT TO THE EVENT HANDLER
-        // event.handler(ev);
-        
-        // // DEALLOCATE THE MEMORY THE EVENT
-        // // USED AFTER IT HAS BEEN HANDLED
-        // free(ev);
-
-        xcb_generic_event_t * ev;
-        while ((ev = xcb_poll_for_event(conn)))
+        xcb_generic_event_t * ev = xcb_wait_for_event(conn);
+        if (!ev) 
         {
-            if (!ev) 
-            {
-                continue;
-            }
-            event.handler(ev);
-            free(ev);
-        }   
+            continue;
+        }
+        // SEND THE EVENT TO THE EVENT HANDLER
+        event.handler(ev);
+        
+        // DEALLOCATE THE MEMORY THE EVENT
+        // USED AFTER IT HAS BEEN HANDLED
+        free(ev);
+
+        // xcb_generic_event_t * ev;
+        // while ((ev = xcb_poll_for_event(conn)))
+        // {
+        //     if (!ev) 
+        //     {
+        //         continue;
+        //     }
+        //     event.handler(ev);
+        //     free(ev);
+        // }   
     }
 }
 
