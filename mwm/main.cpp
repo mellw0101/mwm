@@ -3900,7 +3900,16 @@ class WinManager
             xcb_flush(conn);
 
             apply_event_mask(c);
-            win_tools::apply_event_mask((const uint32_t[2]) {XCB_EVENT_MASK_STRUCTURE_NOTIFY, XCB_EVENT_MASK_BUTTON_PRESS}, c->win);
+            win_tools::apply_event_mask
+            (
+                (const uint32_t[3]) 
+                {
+                    XCB_EVENT_MASK_STRUCTURE_NOTIFY,
+                    XCB_EVENT_MASK_BUTTON_PRESS,
+                    XCB_EVENT_MASK_BUTTON_RELEASE
+                }, 
+                c->win
+            );
 
             // GRAB MOUSE BUTTONS FOR THE WINDOW 
             // SO WINDOW CAN BE INTERACTED WITH
