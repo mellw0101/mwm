@@ -3877,7 +3877,16 @@ class WinDecoretor
                 }
             );
 
-            apply_event_mask(XCB_EVENT_MASK_BUTTON_PRESS, c->close_button);
+            apply_event_mask
+            (
+                (const uint32_t[3]) 
+                {
+                    XCB_EVENT_MASK_BUTTON_PRESS,
+                    XCB_EVENT_MASK_ENTER_WINDOW,
+                    XCB_EVENT_MASK_LEAVE_WINDOW
+                }, 
+                c->close_button
+            );
 
             win_tools::grab_buttons(c->close_button, {
                {   L_MOUSE_BUTTON,     NULL }
@@ -3942,7 +3951,6 @@ class WinManager
                 {   N_5,        ALT                     },
                 {   R_ARROW,    CTRL | SUPER            },
                 {   L_ARROW,    CTRL | SUPER            },
-                {   L_ARROW,    NULL                    },
                 {   R_ARROW,    CTRL | SUPER | SHIFT    },
                 {   L_ARROW,    CTRL | SUPER | SHIFT    },
                 {   R_ARROW,    SUPER                   },
