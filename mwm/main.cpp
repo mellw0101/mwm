@@ -3923,11 +3923,12 @@ class WinManager
             apply_event_mask(c);
             win_tools::apply_event_mask
             (
-                (const uint32_t[3]) 
+                (const uint32_t[4]) 
                 {
                     XCB_EVENT_MASK_STRUCTURE_NOTIFY,
                     XCB_EVENT_MASK_BUTTON_PRESS,
-                    XCB_EVENT_MASK_BUTTON_RELEASE
+                    XCB_EVENT_MASK_BUTTON_RELEASE,
+                    XCB_EVENT_MASK_ENTER_WINDOW
                 }, 
                 c->win
             );
