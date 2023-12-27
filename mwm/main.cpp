@@ -3942,6 +3942,7 @@ class WinManager
                 {   N_5,        ALT                     },
                 {   R_ARROW,    CTRL | SUPER            },
                 {   L_ARROW,    CTRL | SUPER            },
+                {   L_ARROW,    NULL                    },
                 {   R_ARROW,    CTRL | SUPER | SHIFT    },
                 {   L_ARROW,    CTRL | SUPER | SHIFT    },
                 {   R_ARROW,    SUPER                   },
