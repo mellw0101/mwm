@@ -3711,6 +3711,8 @@ class WinDecoretor
             log_win( "c->titlebar: ", c->titlebar);
             make_close_button(c);
             log_win( "c->close_button: ", c->close_button);
+            make_max_button(c);
+            log_win( "c->max_button: ", c->max_button);
         }
         
     private:
@@ -3895,6 +3897,57 @@ class WinDecoretor
             });
 
             xcb_map_window(conn, c->close_button);
+            xcb_flush(conn);
+        }
+
+        void
+        make_max_button(client * & c)
+        {
+            c->max_button = xcb_generate_id(conn);
+            xcb_create_window
+            (
+                conn,
+                XCB_COPY_FROM_PARENT,
+                c->max_button,
+                c->frame,
+                c->width - 40,
+                0,
+                20,
+                20,
+                0,
+                XCB_WINDOW_CLASS_INPUT_OUTPUT,
+                screen->root_visual,
+                0,
+                NULL
+            );
+
+            xcb_change_window_attributes
+            (
+                conn, 
+                c->max_button, 
+                XCB_CW_BACK_PIXEL, 
+                (const uint32_t[1])
+                {
+                    color::get(RED)
+                }
+            );
+
+            apply_event_mask
+            (
+                (const uint32_t[3]) 
+                {
+                    XCB_EVENT_MASK_BUTTON_PRESS,
+                    XCB_EVENT_MASK_ENTER_WINDOW,
+                    XCB_EVENT_MASK_LEAVE_WINDOW
+                }, 
+                c->max_button
+            );
+
+            win_tools::grab_buttons(c->max_button, {
+               {   L_MOUSE_BUTTON,     NULL }
+            });
+
+            xcb_map_window(conn, c->max_button);
             xcb_flush(conn);
         }
 };
@@ -5253,7 +5306,7 @@ class Event
             client * c = get::client_from_all_win(& e->event);
             if (!c)
             {
-                log.log(ERROR, __func__, "c == null");
+                log_error("c == null");
                 return;
             }
             
@@ -5261,14 +5314,14 @@ class Event
             {
                 if (e->event == c->close_button)
                 {
-                    log.log(INFO, __func__, "close_button");
+                    log_error("L_MOUSE_BUTTON + close_button");
                     win_tools::close_button_kill(c);
                     return;
                 }
 
                 if (e->event == c->titlebar)
                 {
-                    log.log(INFO, __func__, "ALT+L_MOUSE_BUTTON");
+                    log_error("L_MOUSE_BUTTON + titlebar");
                     wm::raise_client(c);
                     mv_client(c, e->event_x, e->event_y);
                     focus::client(c);
@@ -5281,7 +5334,7 @@ class Event
                     {
                         case ALT:
                         {
-                            log.log(INFO, __func__, "ALT+L_MOUSE_BUTTON");
+                            log_error("ALT + L_MOUSE_BUTTON");
                             wm::raise_client(c);
                             mv_client(c, e->event_x, e->event_y + 20);
                             focus::client(c);
@@ -5291,22 +5344,28 @@ class Event
                 }
             }
 
-            if ((e->detail == R_MOUSE_BUTTON) 
-             && (e->event != screen->root) 
-             && (e->state & ALT))
+            if (e->detail == R_MOUSE_BUTTON) 
             {
-                log.log(INFO, __func__, "ALT+R_MOUSE_BUTTON");
-                wm::raise_client(c);
-                resize_client(c, 0);
-                focus::client(c);
+                switch (e->state) 
+                {
+                    case ALT:
+                    {
+                        log_error("ALT + R_MOUSE_BUTTON");
+                        wm::raise_client(c);
+                        resize_client(c, 0);
+                        focus::client(c);
+                        return;
+                    }
+                }
             }
 
             if ((e->detail == L_MOUSE_BUTTON) 
              && (e->event != screen->root) 
              && (c != focused_client))
             {
-                log.log(INFO, __func__, "L_MOUSE_BUTTON");
+                log_error("L_MOUSE_BUTTON");
                 focus::client(c);
+                return;
             } 
         }
 
