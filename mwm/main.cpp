@@ -3718,6 +3718,18 @@ class WinDecoretor
             );
         }
 
+        void
+        apply_event_mask(const uint32_t * values, const xcb_window_t & win)
+        {
+            xcb_change_window_attributes
+            (
+                conn,
+                win,
+                XCB_CW_EVENT_MASK,
+                values
+            );
+        }
+
         void 
         make_frame(client * & c)
         {
@@ -3752,6 +3764,8 @@ class WinDecoretor
                 }
             );
             
+            
+
             // REPARENT THE PROGRAM_WINDOW TO THE FRAME_WINDOW
             xcb_reparent_window
             (
@@ -3817,7 +3831,7 @@ class WinDecoretor
                 conn,
                 XCB_COPY_FROM_PARENT,
                 c->close_button,
-                c->titlebar,
+                c->frame,
                 c->width - 20,
                 0,
                 20,
