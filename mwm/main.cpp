@@ -5442,6 +5442,7 @@ class Event
                     }
                     wm::raise_client(c);
                     focus::client(c);
+                    wm::ungrab_button(c, L_MOUSE_BUTTON, 0);
                     return;
                 }
             }
