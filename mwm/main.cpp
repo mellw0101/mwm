@@ -2024,6 +2024,18 @@ class XCPPBAnimator
                 }
             );
             xcb_flush(connection);
+
+            xcb_configure_window
+            (
+                connection,
+                c->min_button,
+                XCB_CONFIG_WINDOW_X,
+                (const uint32_t[1])
+                {
+                    static_cast<const uint32_t &>(w - 60)
+                }
+            );
+            xcb_flush(connection);
         }
 };
 
@@ -2955,6 +2967,17 @@ class resize_client
                 (const uint32_t[2])
                 {
                     static_cast<const uint32_t &>(width - 40)
+                }
+            );
+
+            xcb_configure_window 
+            (
+                conn,
+                c->min_button,
+                XCB_CONFIG_WINDOW_X,
+                (const uint32_t[2])
+                {
+                    static_cast<const uint32_t &>(width - 60)
                 }
             );
         }
