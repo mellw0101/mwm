@@ -3693,8 +3693,11 @@ class WinDecoretor
             }
 
             make_frame(c);
+            log_win( "c->frame: ", c->frame);
             make_titlebar(c);
+            log_win( "c->titlebar: ", c->titlebar);
             make_close_button(c);
+            log_win( "c->close_button: ", c->close_button);
         }
         
     private:
@@ -5170,8 +5173,6 @@ class Event
         map_notify_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_map_notify_event_t *>(ev);
-            log_win("e->window: ", e->window);
-
             client * c = get::client_from_win(& e->window);
             if (c)
             {
@@ -5321,7 +5322,6 @@ class Event
             const auto * e = reinterpret_cast<const xcb_unmap_notify_event_t *>(ev);
             
             client * c = get::client_from_win(& e->window);
-            log_win("e->window: ", e->window);
             if (!c)
             {
                 return;
