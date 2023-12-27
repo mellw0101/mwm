@@ -5533,9 +5533,10 @@ setSubstructureRedirectMask()
         conn,
         screen->root,
         XCB_CW_EVENT_MASK,
-        (const uint32_t[1])
+        (const uint32_t[2])
         {
-            XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT
+            XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT,
+            XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY
         }
     );
 
