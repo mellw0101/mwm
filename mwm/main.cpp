@@ -5439,6 +5439,9 @@ class Event
                             return;
                         }
                     }
+                    wm::raise_client(c);
+                    focus::client(c);
+                    return;
                 }
             }
 
