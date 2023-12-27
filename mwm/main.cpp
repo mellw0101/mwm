@@ -3736,6 +3736,8 @@ class WinDecoretor
             log_win( "c->close_button: ", c->close_button);
             make_max_button(c);
             log_win( "c->max_button: ", c->max_button);
+            make_min_button(c);
+            log_win( "c->min_button: ", c->min_button);
         }
         
     private:
@@ -3971,6 +3973,57 @@ class WinDecoretor
             });
 
             xcb_map_window(conn, c->max_button);
+            xcb_flush(conn);
+        }
+
+        void
+        make_min_button(client * & c)
+        {
+            c->min_button = xcb_generate_id(conn);
+            xcb_create_window
+            (
+                conn,
+                XCB_COPY_FROM_PARENT,
+                c->min_button,
+                c->frame,
+                c->width - 60,
+                0,
+                20,
+                20,
+                0,
+                XCB_WINDOW_CLASS_INPUT_OUTPUT,
+                screen->root_visual,
+                0,
+                NULL
+            );
+
+            xcb_change_window_attributes
+            (
+                conn, 
+                c->min_button, 
+                XCB_CW_BACK_PIXEL, 
+                (const uint32_t[1])
+                {
+                    color::get(GREEN)
+                }
+            );
+
+            apply_event_mask
+            (
+                (const uint32_t[3]) 
+                {
+                    XCB_EVENT_MASK_BUTTON_PRESS,
+                    XCB_EVENT_MASK_ENTER_WINDOW,
+                    XCB_EVENT_MASK_LEAVE_WINDOW
+                }, 
+                c->min_button
+            );
+
+            win_tools::grab_buttons(c->min_button, {
+               {   L_MOUSE_BUTTON,     NULL }
+            });
+
+            xcb_map_window(conn, c->min_button);
             xcb_flush(conn);
         }
 };
