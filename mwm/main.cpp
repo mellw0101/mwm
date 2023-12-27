@@ -5487,6 +5487,7 @@ class Event
         focus_in_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_focus_in_event_t *>(ev);
+            log_win("e->event: ", e->event);
             
             client * c = get::client_from_win(& e->event);
             if (c)
@@ -5501,6 +5502,7 @@ class Event
         focus_out_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_focus_out_event_t *>(ev);
+            log_win("e->event: ", e->event);
             
             client * c = get::client_from_win(& e->event);
             if (!c)
