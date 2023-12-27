@@ -3777,7 +3777,17 @@ class WinDecoretor
                 }
             );
             
-            apply_event_mask((const uint32_t[1]){XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_POINTER_MOTION | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY}, c->frame);
+            apply_event_mask
+            (
+                (const uint32_t[4])
+                {
+                    XCB_EVENT_MASK_BUTTON_PRESS, 
+                    XCB_EVENT_MASK_BUTTON_RELEASE, 
+                    XCB_EVENT_MASK_POINTER_MOTION, 
+                    XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY
+                },
+                c->frame
+            );
 
             // REPARENT THE PROGRAM_WINDOW TO THE FRAME_WINDOW
             xcb_reparent_window
