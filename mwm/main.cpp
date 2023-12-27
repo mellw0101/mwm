@@ -5489,6 +5489,7 @@ class Event
             if (c)
             {
                 wm::ungrab_button(c, L_MOUSE_BUTTON, 0);
+                wm::raise_client(c);
                 focused_client = c;
             }
         }
