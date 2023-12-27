@@ -3815,7 +3815,6 @@ class WinDecoretor
                 NULL
             );
 
-            // SET THE BACKGROUND COLOR TO WHITE
             xcb_change_window_attributes
             (
                 conn, 
@@ -3823,7 +3822,7 @@ class WinDecoretor
                 XCB_CW_BACK_PIXEL, 
                 (const uint32_t[1])
                 {
-                    color::get(BLUE)
+                    color::get(DARK_GREY)
                 }
             );
             
@@ -3894,7 +3893,7 @@ class WinDecoretor
             xcb_map_window(conn, c->titlebar);
             xcb_flush(conn);
 
-            draw_text("sug", WHITE, BLACK, c->titlebar, 2, 14);
+            // draw_text("sug", WHITE, BLACK, c->titlebar, 2, 14);
         }
 
         void
