@@ -3290,6 +3290,19 @@ namespace win_tools
     }
 
     void
+    apply_event_mask(const uint32_t * ev_mask, const xcb_window_t & win)
+    {
+        xcb_change_window_attributes
+        (
+            conn,
+            win,
+            XCB_CW_EVENT_MASK,
+            ev_mask
+        );
+    }
+
+
+    void
     grab_buttons(const xcb_window_t & win, std::initializer_list<std::pair<const uint8_t, const uint16_t>> bindings)
     {
         for (const auto & binding : bindings)
@@ -3887,7 +3900,7 @@ class WinManager
             xcb_flush(conn);
 
             apply_event_mask(c);
-            win_tools::apply_event_mask(XCB_EVENT_MASK_STRUCTURE_NOTIFY, c->win);
+            win_tools::apply_event_mask((const uint32_t[1]){XCB_EVENT_MASK_STRUCTURE_NOTIFY | XCB_EVENT_MASK_BUTTON_PRESS}, c->win);
 
             // GRAB MOUSE BUTTONS FOR THE WINDOW 
             // SO WINDOW CAN BE INTERACTED WITH
