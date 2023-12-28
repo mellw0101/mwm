@@ -3828,14 +3828,8 @@ class WinDecoretor
             
             apply_event_mask
             (
-                (const uint32_t[7])
+                (const uint32_t[1])
                 {
-                    XCB_EVENT_MASK_BUTTON_PRESS, 
-                    XCB_EVENT_MASK_BUTTON_RELEASE, 
-                    XCB_EVENT_MASK_POINTER_MOTION,
-                    XCB_EVENT_MASK_ENTER_WINDOW,
-                    XCB_EVENT_MASK_LEAVE_WINDOW,
-                    XCB_EVENT_MASK_FOCUS_CHANGE,
                     XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT
                 },
                 c->frame
