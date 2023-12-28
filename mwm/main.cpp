@@ -657,7 +657,7 @@ class wm
             xcb_configure_window
             (
                 conn,
-                c->win,
+                c->frame,
                 XCB_CONFIG_WINDOW_STACK_MODE, 
                 values
             );
