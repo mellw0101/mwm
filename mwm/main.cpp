@@ -1,6 +1,7 @@
 #include "mxb.hpp"
 #include "structs.hpp"
 #include <cstdint>
+#include <xcb/xcb.h>
 #include <xcb/xproto.h>
 #define main_cpp
 #include "include.hpp"
@@ -5549,6 +5550,7 @@ class Event
                             color::get(PURPLE)
                         }
                     );
+                    xcb_flush(conn);
                 }
             }
         }
