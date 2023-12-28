@@ -81,4 +81,7 @@
     #include <cstdint>
     #include <cstdlib>
 
+    #include "Log.hpp"
+    #include "defenitions.hpp"
+
 #endif

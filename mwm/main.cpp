@@ -1,5 +1,4 @@
-#include <xcb/xcb.h>
-#include <xcb/xproto.h>
+#include "mxb.hpp"
 #define main_cpp
 #include "include.hpp"
 
@@ -5243,8 +5242,8 @@ class Event
                 {
                     case SUPER:
                     {
-                        log_win("e->event", e->event);
-                        log_win("e->event-parent", XCBwm::get_parent_window(e->event));
+                        client * c = get::client_from_win(& e->event);
+                        getCurrentEventMask(conn, c->win);
                         break;
                     }
                 }
