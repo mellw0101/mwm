@@ -5428,7 +5428,7 @@ class Event
                             wm::raise_client(c);
                             mv_client(c, e->event_x, e->event_y + 20);
                             focus::client(c);
-                            return;
+                            break;
                         }
                     }
                     log_info("L_MOUSE_BUTTON + win");
