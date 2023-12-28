@@ -1,5 +1,6 @@
 #include "mxb.hpp"
 #include <cstdint>
+#include <xcb/xproto.h>
 #define main_cpp
 #include "include.hpp"
 
@@ -4019,16 +4020,8 @@ class WinDecoretor
                 }
             );
 
-            apply_event_mask
-            (
-                (const uint32_t[3]) 
-                {
-                    XCB_EVENT_MASK_BUTTON_PRESS,
-                    XCB_EVENT_MASK_ENTER_WINDOW,
-                    XCB_EVENT_MASK_LEAVE_WINDOW
-                }, 
-                c->min_button
-            );
+            uint32_t mask = XCB_EVENT_MASK_ENTER_WINDOW;
+            apply_event_mask(& mask, c->min_button);
 
             win_tools::grab_buttons(c->min_button, {
                {   L_MOUSE_BUTTON,     NULL }
@@ -4094,13 +4087,10 @@ class WinManager
 
             WinDecoretor(conn ,c);
             
-            uint32_t mask = XCB_EVENT_MASK_FOCUS_CHANGE | XCB_EVENT_MASK_ENTER_WINDOW;
+            // uint32_t mask = XCB_EVENT_MASK_FOCUS_CHANGE | XCB_EVENT_MASK_ENTER_WINDOW;
+            // win_tools::apply_event_mask(& mask, c->win);
 
-            win_tools::apply_event_mask
-            (
-                & mask,
-                c->win
-            );
+            mxb_apply_event_mask(XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_FOCUS_CHANGE, c->win);
 
             get::name(c);
             wm::update_client(c);

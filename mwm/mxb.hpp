@@ -14,4 +14,7 @@ mxb_kill_client(xcb_window_t window);
 void
 getCurrentEventMask(xcb_connection_t* conn, xcb_window_t window);
 
+void 
+mxb_apply_event_mask(uint32_t values, const xcb_window_t &win);
+
 #endif /* MXB_HPP */
