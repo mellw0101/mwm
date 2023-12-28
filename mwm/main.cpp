@@ -4066,12 +4066,12 @@ class WinManager
             // xcb_map_window(conn, c->win);  
             xcb_flush(conn);
 
-            apply_event_mask(c);
             win_tools::apply_event_mask
             (
-                (const uint32_t[1]) 
+                (const uint32_t[2]) 
                 {
-                    XCB_EVENT_MASK_STRUCTURE_NOTIFY
+                    XCB_EVENT_MASK_STRUCTURE_NOTIFY,
+                    XCB_EVENT_MASK_FOCUS_CHANGE
                 }, 
                 c->win
             );
