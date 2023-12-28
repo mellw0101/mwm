@@ -3830,8 +3830,7 @@ class WinDecoretor
             (
                 (const uint32_t[2])
                 {
-                    XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY,
-                    XCB_EVENT_MASK_FOCUS_CHANGE
+                    XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY
                 },
                 c->frame
             );
@@ -4069,9 +4068,8 @@ class WinManager
 
             win_tools::apply_event_mask
             (
-                (const uint32_t[2]) 
+                (const uint32_t[1]) 
                 {
-                    XCB_EVENT_MASK_PROPERTY_CHANGE,
                     XCB_EVENT_MASK_FOCUS_CHANGE
                 }, 
                 c->win
