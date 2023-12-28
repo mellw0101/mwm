@@ -50,7 +50,8 @@ install_dependencies()
                             build-essential         \
                             libxcb-ewmh-dev         \
                             libxcb-ewmh2            \
-                            libxcb-xrm-dev 
+                            libxcb-xrm-dev          \
+                            konsole
     elif [ -x "$(command -v dnf)" ]; then
         # Fedora/RHEL
         sudo dnf install -y package1 package2
