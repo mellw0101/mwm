@@ -1,3 +1,4 @@
+#include <xcb/xcb.h>
 #include <xcb/xproto.h>
 #define main_cpp
 #include "include.hpp"
@@ -3915,6 +3916,13 @@ class WinDecoretor
                 }
             );
 
+            win_tools::grab_buttons(c->close_button, {
+               {   L_MOUSE_BUTTON,     NULL }
+            });
+
+            xcb_map_window(conn, c->close_button);
+            xcb_flush(conn);
+
             apply_event_mask
             (
                 (const uint32_t[3]) 
@@ -3925,12 +3933,6 @@ class WinDecoretor
                 }, 
                 c->close_button
             );
-
-            win_tools::grab_buttons(c->close_button, {
-               {   L_MOUSE_BUTTON,     NULL }
-            });
-
-            xcb_map_window(conn, c->close_button);
             xcb_flush(conn);
         }
 
