@@ -47,7 +47,9 @@ install_dependencies()
                             libxshmfence-dev        \
                             libxxf86vm-dev          \
                             clang                   \
-                            build-essential         
+                            build-essential         \
+                            libxcb-ewmh-dev/focal   \
+                            libxcb-ewmh2/focal
     elif [ -x "$(command -v dnf)" ]; then
         # Fedora/RHEL
         sudo dnf install -y package1 package2
