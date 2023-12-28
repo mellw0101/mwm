@@ -98,9 +98,3 @@ getCurrentEventMask(xcb_connection_t* conn, xcb_window_t window)
         log_error("Unable to get window attributes.");
     }
 }
-
-void 
-mxb_apply_event_mask(uint32_t values, const xcb_window_t &win) 
-{
-    xcb_change_window_attributes(conn, win, XCB_CW_EVENT_MASK, &values);
-}

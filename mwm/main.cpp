@@ -1,4 +1,5 @@
 #include "mxb.hpp"
+#include "structs.hpp"
 #include <cstdint>
 #include <xcb/xproto.h>
 #define main_cpp
@@ -5533,9 +5534,23 @@ class Event
         enter_notify_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_enter_notify_event_t *>(ev);
-            log_win("e->event: ", e->event);
-            log_win("e->child: ", e->child);
-            log_win("e->root: ", e->root);         
+            client * c = get::client_from_all_win(& e->event);       
+            if (c)
+            {
+                if (e->event == c->max_button)
+                {
+                    xcb_change_window_attributes
+                    (
+                        conn, 
+                        c->max_button, 
+                        XCB_CW_BACK_PIXEL, 
+                        (const uint32_t[1])
+                        {
+                            color::get(PURPLE)
+                        }
+                    );
+                }
+            }
         }
 };
 
