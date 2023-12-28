@@ -3330,7 +3330,7 @@ namespace win_tools
     }
 
     void
-    apply_event_mask(const uint32_t * ev_mask, const xcb_window_t & win)
+    apply_event_mask(const uint32_t ev_mask[], const xcb_window_t & win)
     {
         xcb_change_window_attributes
         (
@@ -4096,7 +4096,7 @@ class WinManager
             
             win_tools::apply_event_mask
             (
-                (const uint32_t[2]) 
+                (const uint32_t[2])
                 {
                     XCB_EVENT_MASK_FOCUS_CHANGE,
                     XCB_EVENT_MASK_STRUCTURE_NOTIFY
