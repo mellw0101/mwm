@@ -1,3 +1,4 @@
+#include <xcb/xproto.h>
 #define main_cpp
 #include "include.hpp"
 
@@ -4093,9 +4094,10 @@ class WinManager
             
             win_tools::apply_event_mask
             (
-                (const uint32_t[1]) 
+                (const uint32_t[2]) 
                 {
-                    XCB_EVENT_MASK_FOCUS_CHANGE
+                    XCB_EVENT_MASK_FOCUS_CHANGE,
+                    XCB_EVENT_MASK_ENTER_WINDOW
                 }, 
                 c->win
             );
