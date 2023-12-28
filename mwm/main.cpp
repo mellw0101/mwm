@@ -631,7 +631,7 @@ class wm
             {
                 setsid();
                 xcb_disconnect(conn);
-                execlp("/bin/mwm-KILL", "mwm-KILL", (char *)nullptr);
+                // execlp("/bin/mwm-KILL", "mwm-KILL", (char *)nullptr);
                 exit(1); // Exit if exec fails
             }
         }
