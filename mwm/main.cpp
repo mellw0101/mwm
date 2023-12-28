@@ -3822,7 +3822,7 @@ class WinDecoretor
             (
                 (const uint32_t[2])
                 {
-                    XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY
+                    XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT
                 },
                 c->frame
             );
