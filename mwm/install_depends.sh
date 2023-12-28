@@ -45,7 +45,9 @@ install_dependencies()
                             libxv-dev               \
                             libxvmc-dev             \
                             libxshmfence-dev        \
-                            libxxf86vm-dev
+                            libxxf86vm-dev          \
+                            clang                   \
+                            build-essential         
     elif [ -x "$(command -v dnf)" ]; then
         # Fedora/RHEL
         sudo dnf install -y package1 package2
