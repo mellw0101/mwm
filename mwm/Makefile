@@ -13,7 +13,7 @@ LDFLAGS  = ${LIBS} -flto -O3 -march=native -std=c++20
 cc = clang
 CXX = clang++
 
-SRC = main.cpp tools.cpp
+SRC = main.cpp tools.cpp mxb.cpp
 OBJ = $(SRC:../src/%.cpp=%.o)
 DEPS = $(OBJ:.o=.d)
 
