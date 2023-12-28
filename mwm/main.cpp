@@ -4087,10 +4087,8 @@ class WinManager
 
             WinDecoretor(conn ,c);
             
-            // uint32_t mask = XCB_EVENT_MASK_FOCUS_CHANGE | XCB_EVENT_MASK_ENTER_WINDOW;
-            // win_tools::apply_event_mask(& mask, c->win);
-
-            mxb_apply_event_mask(XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_FOCUS_CHANGE, c->win);
+            uint32_t mask = XCB_EVENT_MASK_FOCUS_CHANGE | XCB_EVENT_MASK_ENTER_WINDOW;
+            win_tools::apply_event_mask(& mask, c->win);
 
             get::name(c);
             wm::update_client(c);
