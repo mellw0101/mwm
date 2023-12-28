@@ -3818,15 +3818,6 @@ class WinDecoretor
                     color::get(DARK_GREY)
                 }
             );
-            
-            apply_event_mask
-            (
-                (const uint32_t[2])
-                {
-                    XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY
-                },
-                c->frame
-            );
 
             // REPARENT THE PROGRAM_WINDOW TO THE FRAME_WINDOW
             xcb_reparent_window
@@ -3839,6 +3830,16 @@ class WinDecoretor
             );
 
             xcb_map_window(conn, c->frame);
+            xcb_flush(conn);
+        
+            apply_event_mask
+            (
+                (const uint32_t[2])
+                {
+                    XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY
+                },
+                c->frame
+            );
             xcb_flush(conn);
         }
 
@@ -4096,9 +4097,10 @@ class WinManager
             
             win_tools::apply_event_mask
             (
-                (const uint32_t[1]) 
+                (const uint32_t[2]) 
                 {
-                    XCB_EVENT_MASK_FOCUS_CHANGE
+                    XCB_EVENT_MASK_FOCUS_CHANGE,
+                    XCB_EVENT_MASK_ENTER_WINDOW
                 }, 
                 c->win
             );
