@@ -1,4 +1,5 @@
 #include "mxb.hpp"
+#include <cstdint>
 #define main_cpp
 #include "include.hpp"
 
@@ -4093,13 +4094,11 @@ class WinManager
 
             WinDecoretor(conn ,c);
             
+            uint32_t mask = XCB_EVENT_MASK_FOCUS_CHANGE | XCB_EVENT_MASK_ENTER_WINDOW;
+
             win_tools::apply_event_mask
             (
-                (const uint32_t[2]) 
-                {
-                    XCB_EVENT_MASK_FOCUS_CHANGE,
-                    XCB_EVENT_MASK_ENTER_WINDOW
-                }, 
+                & mask,
                 c->win
             );
 
