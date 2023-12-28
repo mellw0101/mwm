@@ -3971,11 +3971,9 @@ class WinDecoretor
 
             apply_event_mask
             (
-                (const uint32_t[3]) 
+                (const uint32_t[1]) 
                 {
-                    XCB_EVENT_MASK_BUTTON_PRESS,
                     XCB_EVENT_MASK_ENTER_WINDOW,
-                    XCB_EVENT_MASK_LEAVE_WINDOW
                 }, 
                 c->max_button
             );
@@ -5243,7 +5241,7 @@ class Event
                     case SUPER:
                     {
                         client * c = get::client_from_win(& e->event);
-                        getCurrentEventMask(conn, c->win);
+                        getCurrentEventMask(conn, c->max_button);
                         break;
                     }
                 }
