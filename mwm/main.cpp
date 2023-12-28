@@ -4066,15 +4066,6 @@ class WinManager
             // xcb_map_window(conn, c->win);  
             xcb_flush(conn);
 
-            win_tools::apply_event_mask
-            (
-                (const uint32_t[1]) 
-                {
-                    XCB_EVENT_MASK_FOCUS_CHANGE
-                }, 
-                c->win
-            );
-
             // GRAB MOUSE BUTTONS FOR THE WINDOW 
             // SO WINDOW CAN BE INTERACTED WITH
             grab_buttons(c, 
@@ -4108,6 +4099,16 @@ class WinManager
             });
 
             WinDecoretor(conn ,c);
+            
+            win_tools::apply_event_mask
+            (
+                (const uint32_t[1]) 
+                {
+                    XCB_EVENT_MASK_FOCUS_CHANGE
+                }, 
+                c->win
+            );
+
             get::name(c);
             wm::update_client(c);
             focus::client(c);
