@@ -4081,7 +4081,8 @@ class WinManager
             grab_buttons(c, 
             {
                 {   L_MOUSE_BUTTON,     ALT },
-                {   R_MOUSE_BUTTON,     ALT }
+                {   R_MOUSE_BUTTON,     ALT },
+                {   L_MOUSE_BUTTON,     0   }
             });
             
             // GRAB KEYS FOR THE WINDOW SO THAT KEYBINDINGS WORK
