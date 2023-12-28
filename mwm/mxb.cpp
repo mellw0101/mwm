@@ -5,7 +5,6 @@ namespace
     xcb_connection_t *conn;
     xcb_screen_t *screen;
     xcb_generic_error_t * err;
-    client *c;
 }
 
 int
