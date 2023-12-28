@@ -3836,7 +3836,7 @@ class WinDecoretor
                     XCB_EVENT_MASK_ENTER_WINDOW,
                     XCB_EVENT_MASK_LEAVE_WINDOW,
                     XCB_EVENT_MASK_FOCUS_CHANGE,
-                    XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY
+                    XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT
                 },
                 c->frame
             );
