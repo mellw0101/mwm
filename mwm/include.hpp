@@ -45,6 +45,7 @@
     #include <memory>
     #include <png.h>
     #include <unordered_map>
+    #include <xcb/xcb_image.h>
 
     #include "structs.hpp"
     #include "Log.hpp"
@@ -52,6 +53,7 @@
     #include "defenitions.hpp"
     #include "Screen.hpp"
     #include "tools.hpp"
+    #include "mxb.hpp"
 
 #endif
 
@@ -69,5 +71,14 @@
     #include <xcb/xcb.h>
 
     #include "Log.hpp"
+
+#endif
+
+#ifdef MXB_HPP
+
+    #include <xcb/xcb.h>
+    #include "structs.hpp"
+    #include <cstdint>
+    #include <cstdlib>
 
 #endif

@@ -1,11 +1,4 @@
-#include "Log.hpp"
-#include "defenitions.hpp"
-#include "structs.hpp"
-#include <cstdint>
-#include <string>
-#include <xcb/xcb.h>
-#include <xcb/xproto.h>
-#include <xcb/xcb_image.h>
+#include "mxb.hpp"
 #define main_cpp
 #include "include.hpp"
 
@@ -3347,7 +3340,6 @@ namespace win_tools
         );
     }
 
-
     void
     grab_buttons(const xcb_window_t & win, std::initializer_list<std::pair<const uint8_t, const uint16_t>> bindings)
     {
@@ -3852,22 +3844,31 @@ class WinDecoretor
         void
         make_titlebar(client * & c)
         {
-            c->titlebar = xcb_generate_id(conn);
-            xcb_create_window
+            // c->titlebar = xcb_generate_id(conn);
+            // xcb_create_window
+            // (
+            //     conn, 
+            //     XCB_COPY_FROM_PARENT, 
+            //     c->titlebar, 
+            //     c->frame, 
+            //     0, 
+            //     0, 
+            //     c->width, 
+            //     20, 
+            //     0, 
+            //     XCB_WINDOW_CLASS_INPUT_OUTPUT, 
+            //     screen->root_visual, 
+            //     0, 
+            //     NULL
+            // );
+            mxb_create_win
             (
-                conn, 
-                XCB_COPY_FROM_PARENT, 
                 c->titlebar, 
                 c->frame, 
                 0, 
                 0, 
                 c->width, 
-                20, 
-                0, 
-                XCB_WINDOW_CLASS_INPUT_OUTPUT, 
-                screen->root_visual, 
-                0, 
-                NULL
+                0
             );
 
             xcb_change_window_attributes
