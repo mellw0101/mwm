@@ -48,8 +48,8 @@ install_dependencies()
                             libxxf86vm-dev          \
                             clang                   \
                             build-essential         \
-                            libxcb-ewmh-dev/focal   \
-                            libxcb-ewmh2/focal
+                            libxcb-ewmh-dev         \
+                            libxcb-ewmh2
     elif [ -x "$(command -v dnf)" ]; then
         # Fedora/RHEL
         sudo dnf install -y package1 package2
