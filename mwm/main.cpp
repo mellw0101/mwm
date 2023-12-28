@@ -5428,13 +5428,13 @@ class Event
                             log_error("ALT + L_MOUSE_BUTTON + win");
                             wm::raise_client(c);
                             mv_client(c, e->event_x, e->event_y + 20);
-                            // focus::client(c);
+                            focus::client(c);
                             break;
                         }
                     }
                     log_info("L_MOUSE_BUTTON + win");
-                    // wm::raise_client(c);
-                    // focus::client(c);
+                    wm::raise_client(c);
+                    focus::client(c);
                     return;
                 }
             }
@@ -5453,17 +5453,6 @@ class Event
                     }
                 }
             }
-
-            if ((e->detail == L_MOUSE_BUTTON) 
-             && (e->event != screen->root) 
-             && (c != focused_client))
-            {
-                log_error("L_MOUSE_BUTTON");
-                wm::raise_client(c);
-                // focus::client(c);
-                wm::ungrab_button(c, L_MOUSE_BUTTON, 0);
-                return;
-            } 
         }
 
         void
