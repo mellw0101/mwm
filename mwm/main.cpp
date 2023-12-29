@@ -2359,7 +2359,6 @@ class set_png_as_backround
 {
     public:
         set_png_as_backround(const std::string & pngFilePath) : pngFilePath(pngFilePath) {}
-        // ~set_png_as_backround();
         
         void 
         setAsBackground(xcb_connection_t * connection, xcb_window_t win)
@@ -2376,8 +2375,7 @@ class set_png_as_backround
             int width;
             int height;
         };
-
-                
+  
         ImageData 
         loadPNG(const std::string& filePath) 
         {
@@ -2918,7 +2916,7 @@ class resize_client
                 (const uint32_t[2])
                 {
                     static_cast<const uint32_t &>(width), 
-                    static_cast<const uint32_t &>(height)
+                    static_cast<const uint32_t &>(height - 20)
                 }
             );
 
@@ -5535,24 +5533,6 @@ class Event
         enter_notify_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_enter_notify_event_t *>(ev);
-            client * c = get::client_from_all_win(& e->event);       
-            if (c)
-            {
-                if (e->event == c->max_button)
-                {
-                    xcb_change_window_attributes
-                    (
-                        conn, 
-                        c->max_button, 
-                        XCB_CW_BACK_PIXEL, 
-                        (const uint32_t[1])
-                        {
-                            color::get(PURPLE)
-                        }
-                    );
-                    xcb_flush(conn);
-                }
-            }
         }
 };
 

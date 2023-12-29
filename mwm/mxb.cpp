@@ -3,7 +3,7 @@
 namespace 
 {
     static xcb_connection_t *conn;
-    xcb_screen_t *screen;
+    static xcb_screen_t *screen;
     xcb_generic_error_t * err;
     Logger log;
 }
@@ -87,9 +87,6 @@ getCurrentEventMask(xcb_connection_t* conn, xcb_window_t window)
     if (attr_reply) 
     {
         log_info("event_mask: " + std::to_string(attr_reply->your_event_mask));
-        log_info("do_not_propagate_mask: " + std::to_string(attr_reply->do_not_propagate_mask));
-        log_info("override_redirect: " + std::to_string(attr_reply->override_redirect));
-        log_info("map_state: " + std::to_string(attr_reply->map_state));
         log_info("all_event_masks: " + std::to_string(attr_reply->all_event_masks));
         free(attr_reply);
     }
