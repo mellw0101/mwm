@@ -25,6 +25,10 @@ class mxb_draw_png
             {
                 ApplyImageToWindow(connection, win, screen, xcbImage);
             }
+            else 
+            {
+                log_error("Failed to load PNG image: " + pngFilePath);
+            }
         }
 
     private:
@@ -337,6 +341,7 @@ class mxb_draw_png
 
             if (!LoadPNG(filename, width, height, channels, &imageData)) 
             {
+                log_error("Failed to load PNG image: " + filename);
                 return nullptr;
             }
 
