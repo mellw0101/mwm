@@ -3317,7 +3317,7 @@ class max_win
     public:
         enum max_win_type
         {
-            NORMAL_MAXWIN,
+            BUTTON_MAXWIN,
             EWMH_MAXWIN,
         };
 
@@ -3328,7 +3328,6 @@ class max_win
                 case EWMH_MAXWIN:
                 {
                     EWMHChecker ewmh_checker(conn, ewmh);
-                    
                     if (ewmh_checker.is_fullscreen(c->win))
                     {
                         ewmh_unmax_win(c);
@@ -3337,11 +3336,18 @@ class max_win
                     {
                         ewmh_max_win(c);
                     }
-
                     break;
                 }
-                case NORMAL_MAXWIN:
+                case BUTTON_MAXWIN:
                 {
+                    if (c->ismax)
+                    {
+                        button_unmax_win(c);
+                    }
+                    else
+                    {
+                        button_max_win(c);
+                    }
                     break;
                 }
             }
@@ -3418,6 +3424,46 @@ class max_win
                 32,
                 0,
                 0
+            );
+            xcb_flush(conn);
+        }
+
+        void 
+        save_max_button_ogsize(client * c)
+        {
+            c->max_button_ogsize.x      = c->x;
+            c->max_button_ogsize.y      = c->y;
+            c->max_button_ogsize.width  = c->width;
+            c->max_button_ogsize.height = c->height;
+        }
+
+        void
+        button_max_win(client * c)
+        {
+            save_max_ewmh_ogsize(c);
+            c->ismax = true;
+            max_win_animate
+            (
+                c, 
+                0, 
+                0, 
+                screen->width_in_pixels, 
+                screen->height_in_pixels
+            );
+            xcb_flush(conn);
+        }
+
+        void
+        button_unmax_win(client * c)
+        {
+            c->ismax = false;
+            max_win_animate
+            (
+                c, 
+                c->max_button_ogsize.x, 
+                c->max_button_ogsize.y, 
+                c->max_button_ogsize.width, 
+                c->max_button_ogsize.height
             );
             xcb_flush(conn);
         }
@@ -5384,7 +5430,6 @@ class Event
                         {
                             log.log(INFO, __func__, "is not Fullscreen");
                         }
-
                         break;
                     }
                 }
@@ -5544,6 +5589,14 @@ class Event
                 {
                     log_error("L_MOUSE_BUTTON + close_button");
                     win_tools::close_button_kill(c);
+                    return;
+                }
+
+                if (e->event == c->max_button)
+                {
+                    log_error("L_MOUSE_BUTTON + max_button");
+                    client * c = get::client_from_all_win(& e->event);
+                    max_win(c, max_win::BUTTON_MAXWIN);
                     return;
                 }
 
@@ -5805,7 +5858,7 @@ draw_text(const char * str , const COLOR & text_color, const COLOR & bg_color, c
         XCB_GC_FOREGROUND | XCB_GC_BACKGROUND | XCB_GC_FONT, 
         (const uint32_t[3])
         {
-            color::get(text_color), 
+            color::get(text_color),
             color::get(bg_color),
             font
         }

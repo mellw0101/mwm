@@ -120,6 +120,7 @@ struct client
     size_pos ogsize;
     size_pos tile_ogsize;
     size_pos max_ewmh_ogsize;
+    size_pos max_button_ogsize;
     
     bool ismax;
     uint16_t desktop;
