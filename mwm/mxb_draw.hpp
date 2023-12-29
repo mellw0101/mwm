@@ -19,8 +19,7 @@ class mxb_draw_png
         void 
         setAsBackground(xcb_window_t win)
         {
-            const std::string imagePath = "path_to_your_image.png";
-            xcb_image_t* xcbImage = CreateXCBImageFromPNG(imagePath, connection, screen);
+            xcb_image_t* xcbImage = CreateXCBImageFromPNG(pngFilePath, connection, screen);
 
             if (xcbImage) 
             {
