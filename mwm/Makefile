@@ -6,7 +6,7 @@ CFLAGS = \
 CXXFLAGS = \
 ${CFLAGS}
 
-LIBS = -lxcb -lxcb-keysyms -lxcb-cursor -lxcb-icccm -lxcb-ewmh -lpng -lxcb-image -lxcb-render -lxcb-composite -lxcb-xinerama -lxcb-xkb -lxcb-xfixes -lxcb-shape -lxcb-randr -lstb_image
+LIBS = -lxcb -lxcb-keysyms -lxcb-cursor -lxcb-icccm -lxcb-ewmh -lpng -lxcb-image -lxcb-render -lxcb-composite -lxcb-xinerama -lxcb-xkb -lxcb-xfixes -lxcb-shape -lxcb-randr
 LDFLAGS  = ${LIBS} -flto -O3 -march=native -std=c++20
 # -s
 
