@@ -19,17 +19,16 @@ class mxb_draw_png
         void 
         setAsBackground(xcb_window_t win)
         {
-            apply_background(connection, win, screen, pngFilePath);
-            // xcb_image_t* xcbImage = CreateXCBImageFromPNG(pngFilePath, connection, screen);
+            xcb_image_t* xcbImage = CreateXCBImageFromPNG(pngFilePath, connection, screen);
 
-            // if (xcbImage) 
-            // {
-            //     ApplyImageToWindow(connection, win, screen, xcbImage);
-            // }
-            // else 
-            // {
-            //     log_error("Failed to load PNG image: " + pngFilePath);
-            // }
+            if (xcbImage) 
+            {
+                ApplyImageToWindow(connection, win, screen, xcbImage);
+            }
+            else 
+            {
+                log_error("Failed to load PNG image: " + pngFilePath);
+            }
         }
 
     private:
