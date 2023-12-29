@@ -3440,14 +3440,14 @@ class max_win
         void
         button_max_win(client * c)
         {
-            save_max_ewmh_ogsize(c);
+            save_max_button_ogsize(c);
             c->ismax = true;
             max_win_animate
             (
-                c, 
-                0, 
-                0, 
-                screen->width_in_pixels, 
+                c,
+                0,
+                0,
+                screen->width_in_pixels,
                 screen->height_in_pixels
             );
             xcb_flush(conn);
@@ -3460,9 +3460,9 @@ class max_win
             max_win_animate
             (
                 c, 
-                c->max_button_ogsize.x, 
-                c->max_button_ogsize.y, 
-                c->max_button_ogsize.width, 
+                c->max_button_ogsize.x,
+                c->max_button_ogsize.y,
+                c->max_button_ogsize.width,
                 c->max_button_ogsize.height
             );
             xcb_flush(conn);
