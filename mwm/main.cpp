@@ -3312,6 +3312,122 @@ namespace error
     }
 } 
 
+class max_win 
+{    
+    public:
+        enum max_win_type
+        {
+            NORMAL_MAXWIN,
+            EWMH_MAXWIN,
+        };
+
+        max_win(client * c, max_win_type type)
+        {
+            switch (type)
+            {
+                case EWMH_MAXWIN:
+                {
+                    EWMHChecker ewmh_checker(conn, ewmh);
+                    int is_fullscreen = ewmh_checker.is_fullscreen(c->win);
+
+                    switch (is_fullscreen) 
+                    {
+                        case true:
+                        {
+                            ewmh_unmax_win(c);
+                            break;
+                        }
+                        case false:
+                        {
+                            ewmh_max_win(c);
+                            break;
+                        }
+                    }
+                    break;
+                }
+                case NORMAL_MAXWIN:
+                {
+                    break;
+                }
+            }
+        }
+
+    private:
+        void
+        max_win_animate(client * c, const int & endX, const int & endY, const int & endWidth, const int & endHeight)
+        {
+            animate_client
+            (
+                c, 
+                endX, 
+                endY, 
+                endWidth, 
+                endHeight, 
+                MAXWIN_ANIMATION_DURATION
+            );
+        }
+
+        void 
+        save_max_ewmh_ogsize(client * c)
+        {
+            c->x = c->max_ewmh_ogsize.x;
+            c->y = c->max_ewmh_ogsize.y;
+            c->width = c->max_ewmh_ogsize.width;
+            c->height = c->max_ewmh_ogsize.height;
+        }
+
+        void
+        ewmh_max_win(client * c)
+        {
+            save_max_ewmh_ogsize(c);
+            max_win_animate
+            (
+                c, 
+                0, 
+                -20, 
+                screen->width_in_pixels, 
+                screen->height_in_pixels + 20
+            );
+            xcb_change_property
+            (
+                conn,
+                XCB_PROP_MODE_REPLACE,
+                c->win,
+                ewmh->_NET_WM_STATE,
+                XCB_ATOM_ATOM,
+                32,
+                1,
+                &ewmh->_NET_WM_STATE_FULLSCREEN
+            );
+            xcb_flush(conn);
+        }
+
+        void
+        ewmh_unmax_win(client * c)
+        {
+            max_win_animate
+            (
+                c, 
+                c->max_ewmh_ogsize.x, 
+                c->max_ewmh_ogsize.y, 
+                c->max_ewmh_ogsize.width, 
+                c->max_ewmh_ogsize.height
+            );
+            xcb_change_property
+            (
+                conn,
+                XCB_PROP_MODE_REPLACE,
+                c->win,
+                ewmh->_NET_WM_STATE, 
+                XCB_ATOM_ATOM,
+                32,
+                0,
+                0
+            );
+            xcb_flush(conn);
+        }
+};
+
 namespace win_tools 
 {
     void 
@@ -5059,7 +5175,9 @@ class Event
             {
                 log.log(INFO, __func__, "F11");
                 client *c = get::client_from_win(&e->event);
-                borrowed::maxwin(c, 0);
+                max_win(c, max_win::EWMH_MAXWIN);
+                
+                // borrowed::maxwin(c, 0);
             }
 
             /*
