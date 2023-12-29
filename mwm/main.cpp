@@ -3379,9 +3379,9 @@ class max_win
             (
                 c, 
                 0, 
-                0, 
+                - 20, 
                 screen->width_in_pixels, 
-                screen->height_in_pixels
+                screen->height_in_pixels + 20
             );
             xcb_change_property
             (
