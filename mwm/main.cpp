@@ -5537,6 +5537,7 @@ class Event
         enter_notify_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_enter_notify_event_t *>(ev);
+            log_win("e->event: ", e->event);
         }
 
         void

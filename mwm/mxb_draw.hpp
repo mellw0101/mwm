@@ -19,16 +19,17 @@ class mxb_draw_png
         void 
         setAsBackground(xcb_window_t win)
         {
-            xcb_image_t* xcbImage = CreateXCBImageFromPNG(pngFilePath, connection, screen);
+            apply_background(connection, win, screen, pngFilePath);
+            // xcb_image_t* xcbImage = CreateXCBImageFromPNG(pngFilePath, connection, screen);
 
-            if (xcbImage) 
-            {
-                ApplyImageToWindow(connection, win, screen, xcbImage);
-            }
-            else 
-            {
-                log_error("Failed to load PNG image: " + pngFilePath);
-            }
+            // if (xcbImage) 
+            // {
+            //     ApplyImageToWindow(connection, win, screen, xcbImage);
+            // }
+            // else 
+            // {
+            //     log_error("Failed to load PNG image: " + pngFilePath);
+            // }
         }
 
     private:
@@ -316,9 +317,9 @@ class mxb_draw_png
             xcb_clear_area(connection, 0, window, 0, 0, imgData.width, imgData.height);
             xcb_flush(connection);
 
-            xcb_free_pixmap(connection, pixmap);
-            xcb_free_gc(connection, gc);
-            xcb_image_destroy(image);
+            // xcb_free_pixmap(connection, pixmap);
+            // xcb_free_gc(connection, gc);
+            // xcb_image_destroy(image);
         }
 
         bool 
