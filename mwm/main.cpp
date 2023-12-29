@@ -1,4 +1,3 @@
-#include "mxb.hpp"
 #include "structs.hpp"
 #include <cstdint>
 #include <xcb/xcb.h>
@@ -2815,6 +2814,37 @@ move_to_previus_desktop_w_app()
     wm::raise_client(focused_client);
 }
 
+class EWMHChecker 
+{
+    private:
+        xcb_connection_t* conn;
+        xcb_ewmh_connection_t* ewmh_conn;
+
+    public:
+        EWMHChecker(xcb_connection_t* connection, xcb_ewmh_connection_t* ewmh_connection)
+        : conn(connection), ewmh_conn(ewmh_connection) {}
+
+        bool 
+        is_fullscreen(xcb_window_t window) 
+        {
+            xcb_get_property_cookie_t cookie = xcb_ewmh_get_wm_state(ewmh_conn, window);
+            xcb_ewmh_get_atoms_reply_t wm_state;
+            if (xcb_ewmh_get_wm_state_reply(ewmh_conn, cookie, &wm_state, NULL) == 1) 
+            {
+                for (unsigned int i = 0; i < wm_state.atoms_len; i++) 
+                {
+                    if (wm_state.atoms[i] == ewmh_conn->_NET_WM_STATE_FULLSCREEN) 
+                    {
+                        xcb_ewmh_get_atoms_reply_wipe(&wm_state);
+                        return true;
+                    }
+                }
+                xcb_ewmh_get_atoms_reply_wipe(&wm_state);
+            }
+            return false;
+        }
+};
+
 class resize_client 
 {
     public:
@@ -5232,7 +5262,16 @@ class Event
                     case SUPER:
                     {
                         client * c = get::client_from_win(& e->event);
-                        getCurrentEventMask(conn, c->max_button);
+                        EWMHChecker ewmhChecker(conn, ewmh);
+                        if (ewmhChecker.is_fullscreen(c->win))
+                        {
+                            log.log(INFO, __func__, "isFullscreen");
+                        }
+                        else
+                        {
+                            log.log(INFO, __func__, "is not Fullscreen");
+                        }
+
                         break;
                     }
                 }
