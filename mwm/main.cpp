@@ -3365,10 +3365,10 @@ class max_win
         void 
         save_max_ewmh_ogsize(client * c)
         {
-            c->x = c->max_ewmh_ogsize.x;
-            c->y = c->max_ewmh_ogsize.y;
-            c->width = c->max_ewmh_ogsize.width;
-            c->height = c->max_ewmh_ogsize.height;
+            c->max_ewmh_ogsize.x      = c->x;
+            c->max_ewmh_ogsize.y      = c->y;
+            c->max_ewmh_ogsize.width  = c->width;
+            c->max_ewmh_ogsize.height = c->height;
         }
 
         void
