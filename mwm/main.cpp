@@ -5678,15 +5678,11 @@ draw_text(const char * str , const COLOR & text_color, const COLOR & bg_color, c
 void 
 configureRootWindow()
 {
-    // set_win_color
-    // (
-    //     screen->root, 
-    //     DARK_GREY
-    // );
-
-    mxb_draw_png png(conn, screen, "/home/mellw/mwm_png/galaxy17.png");
-
-    png.setAsBackground(screen->root);
+    set_win_color
+    (
+        screen->root, 
+        DARK_GREY
+    );
 
     // APPLY THE EVENT MASKS TO THE ROOT WINDOW
     xcb_change_window_attributes
