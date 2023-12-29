@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <xcb/xcb.h>
 #include <xcb/xproto.h>
+#include "mxb_draw.hpp"
 #define main_cpp
 #include "include.hpp"
 
@@ -3926,16 +3927,8 @@ class WinDecoretor
             xcb_map_window(conn, c->close_button);
             xcb_flush(conn);
 
-            apply_event_mask
-            (
-                (const uint32_t[3]) 
-                {
-                    XCB_EVENT_MASK_BUTTON_PRESS,
-                    XCB_EVENT_MASK_ENTER_WINDOW,
-                    XCB_EVENT_MASK_LEAVE_WINDOW
-                }, 
-                c->close_button
-            );
+            uint mask = XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW;
+            apply_event_mask(& mask, c->close_button);
             xcb_flush(conn);
         }
 
@@ -3971,14 +3964,8 @@ class WinDecoretor
                 }
             );
 
-            apply_event_mask
-            (
-                (const uint32_t[1]) 
-                {
-                    XCB_EVENT_MASK_ENTER_WINDOW,
-                }, 
-                c->max_button
-            );
+            uint32_t mask = XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW;
+            apply_event_mask(& mask, c->max_button);
 
             win_tools::grab_buttons(c->max_button, {
                {   L_MOUSE_BUTTON,     NULL }
@@ -4020,7 +4007,7 @@ class WinDecoretor
                 }
             );
 
-            uint32_t mask = XCB_EVENT_MASK_ENTER_WINDOW;
+            uint32_t mask = XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW;
             apply_event_mask(& mask, c->min_button);
 
             win_tools::grab_buttons(c->min_button, {
@@ -4859,6 +4846,18 @@ class tile
         }
 };
 
+class buttons 
+{
+    public:
+        static void
+        close_button(client * & c)
+        {
+            WinManager::kill_client(conn, c->win);
+        }
+
+    private:
+};
+
 class Event 
 {
     public:
@@ -4967,6 +4966,11 @@ class Event
                 case XCB_ENTER_NOTIFY:
                 {
                     enter_notify_handler(ev);
+                    break;
+                }
+                case XCB_LEAVE_NOTIFY:
+                {
+                    leave_notify_handler(ev);
                     break;
                 }
             }
@@ -5534,6 +5538,13 @@ class Event
         {
             const auto * e = reinterpret_cast<const xcb_enter_notify_event_t *>(ev);
         }
+
+        void
+        leave_notify_handler(const xcb_generic_event_t * & ev)
+        {
+            const auto * e = reinterpret_cast<const xcb_leave_notify_event_t *>(ev);
+            log_win("e->event: ", e->event);
+        }
 };
 
 void /**
@@ -5666,11 +5677,15 @@ draw_text(const char * str , const COLOR & text_color, const COLOR & bg_color, c
 void 
 configureRootWindow()
 {
-    set_win_color
-    (
-        screen->root, 
-        DARK_GREY
-    );
+    // set_win_color
+    // (
+    //     screen->root, 
+    //     DARK_GREY
+    // );
+
+    mxb_draw_png png(conn, screen, "/home/mellw/mwm_png/galaxy17.png");
+
+    png.setAsBackground(screen->root);
 
     // APPLY THE EVENT MASKS TO THE ROOT WINDOW
     xcb_change_window_attributes

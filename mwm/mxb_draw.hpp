@@ -6,23 +6,34 @@
 #include <png.h>
 #include <memory>
 #include <xcb/xproto.h>
-
-static xcb_screen_t *screen;
+#include "Log.hpp"
+#include "defenitions.hpp"
+#include "stb_image.h"
 
 class mxb_draw_png 
 {
     public:
-        mxb_draw_png(const std::string & pngFilePath) : pngFilePath(pngFilePath) {}
+        mxb_draw_png(xcb_connection_t * connection, xcb_screen_t * screen, const std::string & pngFilePath) 
+        : connection(connection), screen(screen), pngFilePath(pngFilePath) {}
         
         void 
-        setAsBackground(xcb_connection_t * connection, xcb_window_t win)
+        setAsBackground(xcb_window_t win)
         {
-            apply_background(connection, win, screen, pngFilePath);
+            const std::string imagePath = "path_to_your_image.png";
+            xcb_image_t* xcbImage = CreateXCBImageFromPNG(imagePath, connection, screen);
+
+            if (xcbImage) 
+            {
+                ApplyImageToWindow(connection, win, screen, xcbImage);
+            }
         }
 
     private:
-        std::string pngFilePath;
-
+        const std::string pngFilePath;
+        xcb_connection_t * connection;
+        xcb_screen_t * screen;
+        Logger log;
+        
         struct ImageData 
         {
             std::vector<unsigned char> data;
@@ -305,5 +316,70 @@ class mxb_draw_png
             xcb_free_pixmap(connection, pixmap);
             xcb_free_gc(connection, gc);
             xcb_image_destroy(image);
+        }
+
+        bool 
+        LoadPNG(const std::string& filename, int& width, int& height, int& channels, unsigned char** imageData) 
+        {
+            *imageData = stbi_load(filename.c_str(), &width, &height, &channels, 0);
+            if (*imageData == nullptr) 
+            {
+                log_error("Failed to load PNG image: " + filename);
+                return false;
+            }
+            return true;
+        }
+
+        xcb_image_t* 
+        CreateXCBImageFromPNG(const std::string& filename, xcb_connection_t* connection, xcb_screen_t* screen) 
+        {
+            int width, height, channels;
+            unsigned char* imageData = nullptr;
+
+            if (!LoadPNG(filename, width, height, channels, &imageData)) 
+            {
+                return nullptr;
+            }
+
+            // Assuming the PNG is in RGBA format
+            if (channels != 4) 
+            {
+                log_error("Unsupported number of channels. Expected 4 (RGBA).");
+                stbi_image_free(imageData);
+                return nullptr;
+            }
+
+            xcb_image_t* xcbImage = xcb_image_create_native
+            (
+                connection, 
+                width, 
+                height, 
+                XCB_IMAGE_FORMAT_Z_PIXMAP, 
+                screen->root_depth, 
+                nullptr, 
+                ~0, 
+                imageData
+            );
+            
+            return xcbImage;
+        }
+
+        void 
+        ApplyImageToWindow(xcb_connection_t* connection, xcb_window_t window, xcb_screen_t* screen, xcb_image_t* image) 
+        {
+            // Create a graphics context
+            xcb_gcontext_t gc = xcb_generate_id(connection);
+            uint32_t value_mask = XCB_GC_FOREGROUND | XCB_GC_BACKGROUND;
+            uint32_t value_list[2];
+            value_list[0] = screen->black_pixel;
+            value_list[1] = screen->white_pixel;
+
+            xcb_create_gc(connection, gc, window, value_mask, value_list);
+
+            // Put the image onto the window
+            xcb_image_put(connection, window, gc, image, 0, 0, 0);
+
+            // Flush the commands to the server
+            xcb_flush(connection);
         }
 };
