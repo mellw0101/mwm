@@ -3328,21 +3328,16 @@ class max_win
                 case EWMH_MAXWIN:
                 {
                     EWMHChecker ewmh_checker(conn, ewmh);
-                    int is_fullscreen = ewmh_checker.is_fullscreen(c->win);
-
-                    switch (is_fullscreen) 
+                    
+                    if (ewmh_checker.is_fullscreen(c->win))
                     {
-                        case true:
-                        {
-                            ewmh_unmax_win(c);
-                            break;
-                        }
-                        case false:
-                        {
-                            ewmh_max_win(c);
-                            break;
-                        }
+                        ewmh_unmax_win(c);
                     }
+                    else
+                    {
+                        ewmh_max_win(c);
+                    }
+
                     break;
                 }
                 case NORMAL_MAXWIN:
