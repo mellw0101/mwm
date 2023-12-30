@@ -2719,7 +2719,7 @@ test(xcb_window_t win, const char* imagePath)
         XCB_CW_BACK_PIXMAP, 
         &pixmap
     );
-    
+
     xcb_clear_area
     (
         conn, 
@@ -2734,6 +2734,114 @@ test(xcb_window_t win, const char* imagePath)
     // Cleanup
     xcb_image_destroy(xcb_image);
     imlib_free_image();
+}
+
+void 
+set_png(xcb_window_t win, const char* imagePath) 
+{
+    // Load an image using Imlib2
+    Imlib_Image image = imlib_load_image(imagePath);
+    if (!image) 
+    {
+        // Handle error...
+        return;
+    }
+
+    // Get the original image size
+    imlib_context_set_image(image);
+    int originalWidth = imlib_image_get_width();
+    int originalHeight = imlib_image_get_height();
+
+    // Calculate new size maintaining aspect ratio
+    float aspectRatio = (float)originalWidth / originalHeight;
+    int newHeight = screen->height_in_pixels;
+    int newWidth = (int)(newHeight * aspectRatio);
+
+    // Scale the image if it is wider than the screen
+    if (newWidth > screen->width_in_pixels) 
+    {
+        newWidth = screen->width_in_pixels;
+        newHeight = (int)(newWidth / aspectRatio);
+    }
+
+    Imlib_Image scaledImage = imlib_create_cropped_scaled_image
+    (
+        0, 
+        0, 
+        originalWidth, 
+        originalHeight, 
+        newWidth, 
+        newHeight
+    );
+    imlib_free_image(); // Free original image
+    imlib_context_set_image(scaledImage);
+
+    // Get the scaled image data
+    DATA32* data = imlib_image_get_data();
+
+    // Create an XCB image from the scaled data
+    xcb_image_t* xcb_image = xcb_image_create_native
+    (
+        conn, 
+        newWidth, 
+        newHeight, 
+        XCB_IMAGE_FORMAT_Z_PIXMAP, 
+        screen->root_depth, 
+        NULL, 
+        ~0, (uint8_t*)data
+    );
+
+    // Create a pixmap for the screen size with a black background
+    xcb_pixmap_t pixmap = xcb_generate_id(conn);
+    xcb_create_pixmap
+    (
+        conn, 
+        screen->root_depth, 
+        pixmap, 
+        screen->root, 
+        screen->width_in_pixels, 
+        screen->height_in_pixels
+    );
+    xcb_gcontext_t gc = create_graphical_context(conn, win);
+    xcb_rectangle_t rect = {0, 0, screen->width_in_pixels, screen->height_in_pixels};
+    xcb_poly_fill_rectangle
+    (
+        conn, 
+        pixmap, 
+        gc, 
+        1, 
+        &rect
+    );
+
+    // Calculate position to center the image
+    int x = (screen->width_in_pixels - newWidth) / 2;
+    int y = (screen->height_in_pixels - newHeight) / 2;
+
+    // Put the scaled image onto the pixmap at the calculated position
+    xcb_image_put
+    (
+        conn, 
+        pixmap, 
+        gc, 
+        xcb_image, 
+        x,
+        y, 
+        0
+    );
+
+    // Set the pixmap as the background of the window
+    xcb_change_window_attributes
+    (
+        conn, 
+        win, 
+        XCB_CW_BACK_PIXMAP, 
+        &pixmap
+    );
+
+    // Cleanup
+    xcb_free_gc(conn, gc); // Free the GC
+    xcb_image_destroy(xcb_image);
+    imlib_free_image(); // Free scaled image
 }
 
 void 
@@ -6123,7 +6231,8 @@ setup_wm()
     Compositor compositor(conn, screen);
     gCompositor = &compositor;
 
-    test(screen->root, "/home/mellw/mwm_png/galaxy17.png");
+    // test(screen->root, "/home/mellw/mwm_png/galaxy17.png");
+    set_png(screen->root, "/home/mellw/mwm_png/galaxy17.png");
     return 0;
 }
 
