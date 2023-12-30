@@ -4417,9 +4417,7 @@ class WinManager
             log.log(INFO, __func__, "c->win: " + std::to_string(c->win));
             wm::setWindowPosition(c);
             wm::setWindowSize(c);
-
-            // MAP THE WINDOW
-            // XCB_map_window(w);
+            
             xcb_map_window(conn, c->win);  
             xcb_flush(conn);
 

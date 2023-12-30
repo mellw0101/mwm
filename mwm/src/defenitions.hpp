@@ -23,10 +23,6 @@
 #define log_error_code(message, err_code)   log.log(ERROR, __FUNCTION__, message, err_code)
 #define log_win(win_name ,window)           log.log(INFO, __func__, win_name + std::to_string(window))
 
-/* XCB DEFENITIONS */
-#define XCB_map_window(win)             xcb.map_window(conn, win, __FUNCTION__)
-#define XCB_flush()                     xcb.flush(conn, __FUNCTION__)
-
 /* MOD_MASK DEFENITIONS */
 #define SHIFT   XCB_MOD_MASK_SHIFT
 #define ALT     XCB_MOD_MASK_1
