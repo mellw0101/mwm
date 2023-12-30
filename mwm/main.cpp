@@ -2,12 +2,10 @@
 #include <cstdint>
 #include <xcb/xcb.h>
 #include <xcb/xproto.h>
-#include "mxb_draw.hpp"
 #define main_cpp
 #include "include.hpp"
 
 Logger log;
-XCB xcb;
 
 std::vector<client *> client_list; // global list of clients
 // u_Ptr_Vec<client> U_client_list; // global list of clients
@@ -24,15 +22,12 @@ static const xcb_setup_t * setup;
 static xcb_screen_iterator_t iter;
 static xcb_screen_t * screen;
 static xcb_gcontext_t gc;
-    
-
-
 
 static void 
 draw_text(const char * str , const COLOR & text_color, const COLOR & bg_color, const xcb_window_t & win, const int16_t & x, const int16_t & y);
 
 static xcb_gcontext_t 
-create_graphical_context(xcb_connection_t* connection, xcb_window_t window);
+create_graphical_context(xcb_window_t window);
 
 namespace XCBwm 
 {
@@ -556,7 +551,7 @@ class focus
                     XCB_STACK_MODE_ABOVE
                 }
             );
-            XCB_flush();
+            xcb_flush(conn);
         }
         
         static void 
@@ -574,7 +569,7 @@ class focus
                 c->win, 
                 XCB_CURRENT_TIME
             );
-            XCB_flush();
+            xcb_flush(conn);
         }
 };
 
@@ -2705,7 +2700,7 @@ test(xcb_window_t win, const char* imagePath)
     (
         conn, 
         pixmap, 
-        create_graphical_context(conn, win), 
+        create_graphical_context(win), 
         xcb_image, 
         0, 
         0, 
@@ -4003,6 +3998,125 @@ class Compositor
 
 Compositor * gCompositor = nullptr;
 
+void 
+set_png(xcb_window_t win, const char * imagePath)
+{
+    // Load an image using Imlib2
+    Imlib_Image image = imlib_load_image(imagePath);
+    if (!image) 
+    {
+        // Handle error...
+        return;
+    }
+
+    // Get the original image size
+    imlib_context_set_image(image);
+    int originalWidth = imlib_image_get_width();
+    int originalHeight = imlib_image_get_height();
+
+    // Calculate new size maintaining aspect ratio
+    float aspectRatio = (float)originalWidth / originalHeight;
+    int newHeight = screen->height_in_pixels;
+    int newWidth = (int)(newHeight * aspectRatio);
+
+    // Scale the image if it is wider than the screen
+    if (newWidth > screen->width_in_pixels) 
+    {
+        newWidth = screen->width_in_pixels;
+        newHeight = (int)(newWidth / aspectRatio);
+    }
+
+    Imlib_Image scaledImage = imlib_create_cropped_scaled_image
+    (
+        0, 
+        0, 
+        originalWidth, 
+        originalHeight, 
+        newWidth, 
+        newHeight
+    );
+    imlib_free_image(); // Free original image
+    imlib_context_set_image(scaledImage);
+
+    // Get the scaled image data
+    DATA32* data = imlib_image_get_data();
+
+    // Create an XCB image from the scaled data
+    xcb_image_t* xcb_image = xcb_image_create_native
+    (
+        conn, 
+        newWidth, 
+        newHeight, 
+        XCB_IMAGE_FORMAT_Z_PIXMAP, 
+        screen->root_depth, 
+        NULL, 
+        ~0, (uint8_t*)data
+    );
+
+    // Create a pixmap for the screen size with a black background
+    xcb_pixmap_t pixmap = xcb_generate_id(conn);
+    xcb_create_pixmap
+    (
+        conn, 
+        screen->root_depth, 
+        pixmap, 
+        screen->root, 
+        screen->width_in_pixels, 
+        screen->height_in_pixels
+    );
+    xcb_gcontext_t gc = create_graphical_context(win);
+    xcb_rectangle_t rect = {0, 0, screen->width_in_pixels, screen->height_in_pixels};
+    xcb_poly_fill_rectangle
+    (
+        conn, 
+        pixmap, 
+        gc, 
+        1, 
+        &rect
+    );
+
+    // Calculate position to center the image
+    int x = (screen->width_in_pixels - newWidth) / 2;
+    int y = (screen->height_in_pixels - newHeight) / 2;
+
+    // Put the scaled image onto the pixmap at the calculated position
+    xcb_image_put
+    (
+        conn, 
+        pixmap, 
+        gc, 
+        xcb_image, 
+        x,
+        y, 
+        0
+    );
+
+    // Set the pixmap as the background of the window
+    xcb_change_window_attributes
+    (
+        conn, 
+        win, 
+        XCB_CW_BACK_PIXMAP, 
+        &pixmap
+    );
+
+    // Cleanup
+    xcb_free_gc(conn, gc); // Free the GC
+    xcb_image_destroy(xcb_image);
+    imlib_free_image(); // Free scaled image
+
+    xcb_clear_area
+    (
+        conn, 
+        0, 
+        win, 
+        0, 
+        0, 
+        win_tools::get_win_w(win), 
+        win_tools::get_win_h(win)
+    );
+}
+
 class WinDecoretor 
 {
     public:
@@ -4305,8 +4419,8 @@ class WinManager
             wm::setWindowSize(c);
 
             // MAP THE WINDOW
-            XCB_map_window(w);
-            // xcb_map_window(conn, c->win);  
+            // XCB_map_window(w);
+            xcb_map_window(conn, c->win);  
             xcb_flush(conn);
 
             // GRAB MOUSE BUTTONS FOR THE WINDOW 
@@ -4880,10 +4994,10 @@ class tile
         void 
         save_tile_ogsize(client * & c)
         {
-            c->tile_ogsize.x        = c->x;
-            c->tile_ogsize.y        = c->y;
-            c->tile_ogsize.width    = c->width;
-            c->tile_ogsize.height   = c->height;
+            c->tile_ogsize.x      = c->x;
+            c->tile_ogsize.y      = c->y;
+            c->tile_ogsize.width  = c->width;
+            c->tile_ogsize.height = c->height;
         }
         
         void
@@ -5114,137 +5228,6 @@ class tile
             wm::update_client(c);
         }
 };
-
-class buttons 
-{
-    public:
-        static void
-        close_button(client * & c)
-        {
-            WinManager::kill_client(conn, c->win);
-        }
-
-    private:
-};
-
-void 
-set_png(xcb_window_t win, const char * imagePath)
-{
-    // Load an image using Imlib2
-    Imlib_Image image = imlib_load_image(imagePath);
-    if (!image) 
-    {
-        // Handle error...
-        return;
-    }
-
-    // Get the original image size
-    imlib_context_set_image(image);
-    int originalWidth = imlib_image_get_width();
-    int originalHeight = imlib_image_get_height();
-
-    // Calculate new size maintaining aspect ratio
-    float aspectRatio = (float)originalWidth / originalHeight;
-    int newHeight = screen->height_in_pixels;
-    int newWidth = (int)(newHeight * aspectRatio);
-
-    // Scale the image if it is wider than the screen
-    if (newWidth > screen->width_in_pixels) 
-    {
-        newWidth = screen->width_in_pixels;
-        newHeight = (int)(newWidth / aspectRatio);
-    }
-
-    Imlib_Image scaledImage = imlib_create_cropped_scaled_image
-    (
-        0, 
-        0, 
-        originalWidth, 
-        originalHeight, 
-        newWidth, 
-        newHeight
-    );
-    imlib_free_image(); // Free original image
-    imlib_context_set_image(scaledImage);
-
-    // Get the scaled image data
-    DATA32* data = imlib_image_get_data();
-
-    // Create an XCB image from the scaled data
-    xcb_image_t* xcb_image = xcb_image_create_native
-    (
-        conn, 
-        newWidth, 
-        newHeight, 
-        XCB_IMAGE_FORMAT_Z_PIXMAP, 
-        screen->root_depth, 
-        NULL, 
-        ~0, (uint8_t*)data
-    );
-
-    // Create a pixmap for the screen size with a black background
-    xcb_pixmap_t pixmap = xcb_generate_id(conn);
-    xcb_create_pixmap
-    (
-        conn, 
-        screen->root_depth, 
-        pixmap, 
-        screen->root, 
-        screen->width_in_pixels, 
-        screen->height_in_pixels
-    );
-    xcb_gcontext_t gc = create_graphical_context(conn, win);
-    xcb_rectangle_t rect = {0, 0, screen->width_in_pixels, screen->height_in_pixels};
-    xcb_poly_fill_rectangle
-    (
-        conn, 
-        pixmap, 
-        gc, 
-        1, 
-        &rect
-    );
-
-    // Calculate position to center the image
-    int x = (screen->width_in_pixels - newWidth) / 2;
-    int y = (screen->height_in_pixels - newHeight) / 2;
-
-    // Put the scaled image onto the pixmap at the calculated position
-    xcb_image_put
-    (
-        conn, 
-        pixmap, 
-        gc, 
-        xcb_image, 
-        x,
-        y, 
-        0
-    );
-
-    // Set the pixmap as the background of the window
-    xcb_change_window_attributes
-    (
-        conn, 
-        win, 
-        XCB_CW_BACK_PIXMAP, 
-        &pixmap
-    );
-
-    // Cleanup
-    xcb_free_gc(conn, gc); // Free the GC
-    xcb_image_destroy(xcb_image);
-    imlib_free_image(); // Free scaled image
-
-    xcb_clear_area
-    (
-        conn, 
-        0, 
-        win, 
-        0, 
-        0, 
-        win_tools::get_win_w(win), 
-        win_tools::get_win_h(win)
-    );
-}
 
 class Event 
 {
@@ -6082,17 +6065,29 @@ draw_text(const char * str , const COLOR & text_color, const COLOR & bg_color, c
 }
   
 xcb_gcontext_t 
-create_graphical_context(xcb_connection_t* connection, xcb_window_t window) 
+create_graphical_context(xcb_window_t window) 
 {
     // Generate an ID for the GC
-    xcb_gcontext_t gc = xcb_generate_id(connection);
+    xcb_gcontext_t gc = xcb_generate_id(conn);
 
     // Set the values for the GC
     uint32_t mask = XCB_GC_FOREGROUND | XCB_GC_BACKGROUND | XCB_GC_GRAPHICS_EXPOSURES;
-    uint32_t values[3] = {screen->black_pixel, screen->white_pixel, 0};
+    uint32_t values[3] = 
+    {
+        screen->black_pixel, 
+        screen->white_pixel, 
+        0
+    };
 
     // Create the GC
-    xcb_create_gc(connection, gc, window, mask, values);
+    xcb_create_gc
+    (
+        conn, 
+        gc, 
+        window, 
+        mask, 
+        values
+    );
 
     return gc;
 }
@@ -6202,7 +6197,7 @@ setDefaultCursor()
     xcb_cursor_context_free(ctx);
 }
 
-const int8_t 
+const int8_t
 setup_wm()
 {
     conn = xcb_connect(nullptr, nullptr);
