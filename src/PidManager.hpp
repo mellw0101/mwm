@@ -123,25 +123,29 @@ class PidManager
             return QString();
         }
         
-        QStringList 
+        std::vector<std::string>
         getSubprocesses(pid_t parent_pid) 
         {
-            QStringList subprocesses;
+            std::vector<std::string> subprocesses;
             DIR* dir;
             struct dirent* entry;
             std::string tasks_path = "/proc/" + std::to_string(parent_pid) + "/task/";
 
             dir = opendir(tasks_path.c_str());
-            if (!dir) {
+            if (!dir) 
+            {
                 perror("opendir");
                 return subprocesses;
             }
 
-            while ((entry = readdir(dir)) != nullptr) {
-                if (entry->d_type == DT_DIR) {
+            while ((entry = readdir(dir)) != nullptr) 
+            {
+                if (entry->d_type == DT_DIR) 
+                {
                     pid_t pid = std::atoi(entry->d_name);
-                    if (pid > 0 && pid != parent_pid) { // Exclude the parent pid and '.' or '..' directories
-                        subprocesses << QString::number(pid);
+                    if (pid > 0 && pid != parent_pid) // Exclude the parent pid and '.' or '..' directories
+                    {
+                        subprocesses.push_back(std::to_string(pid));
                     }
                 }
             }
@@ -150,10 +154,10 @@ class PidManager
             return subprocesses;
         }
         
-        QStringList 
+        std::vector<std::string> 
         findSubprocesses(int pid) 
         {
-            QStringList subprocesses;
+            std::vector<std::string> subprocesses;
             DIR* procDir = opendir("/proc");
             if (procDir == nullptr) {
                 perror("opendir");
@@ -180,8 +184,7 @@ class PidManager
                                 if (tokens[3].find_first_not_of("0123456789") == std::string::npos) {
                                     int ppid = std::stoi(tokens[3]);
                                     if (ppid == pid) {
-                                        subprocesses.append(QString::number(id));
-                                        debug(F, __func__, V, " id:", N, id, " ", VV, getProcessNameByPid(id), R);
+                                        subprocesses.push_back(std::to_string(id));
                                     }
                                 }
                             } catch (const std::invalid_argument& e) {
@@ -290,7 +293,7 @@ class PidManager
             return pidTTYs;
         }
         
-        QString 
+        std::string 
         pidCmdLine(const pid_t& pid) 
         {
             QString line = "/proc/" + QString::number(pid) + "/cmdline";
@@ -314,7 +317,7 @@ class PidManager
             return QString();
         }
         
-        QString 
+        std::string 
         pidStatus(const pid_t& pid) 
         {
             QString line = "/proc/" + QString::number(pid) + "/status";
@@ -332,7 +335,7 @@ class PidManager
             return QString();
         }
         
-        QString 
+        std::string
         pidFileDescriptors(pid_t pid) 
         {
             QString result = QString();
@@ -356,7 +359,7 @@ class PidManager
             return result;
         }
         
-        QString 
+        std::string
         getProcessNameByPid(pid_t pid) 
         {
             std::string path = "/proc/" + std::to_string(pid) + "/comm";
@@ -371,8 +374,8 @@ class PidManager
             }
         }
         
-        QStringList 
-        getRunningProsseses(const QString& Prossesname)
+        std::string
+        getRunningProsseses(const std::string & Prossesname)
         {
             QString name = getCorrectProssesName(Prossesname);
             // searchPIDsForTTY("pts");
@@ -381,27 +384,6 @@ class PidManager
             return getPidByName(name);
         }
         
-        void 
-        updateDockManager(DockManager& dockManager, const QString& appName) 
-        {
-            QStringList mainPIDs = getRunningProsseses(appName);
-            for (const QString& mainPID : mainPIDs) {
-                QMap<QString, QString> subPIDsWithNames;
-
-                QStringList mainSubPIDs = findSubprocesses(mainPID.toInt());
-                for (const QString &mainSubPID : mainSubPIDs) {
-                    QString mainSubPIDName = getProcessNameByPid(mainSubPID.toInt());
-                    subPIDsWithNames[mainSubPID] = mainSubPIDName;
-                }
-
-                QStringList subPIDs = getSubprocesses(mainPID.toInt());
-                for (const QString& subPID : subPIDs) {
-                    QString subPIDName = getProcessNameByPid(subPID.toInt());
-                    subPIDsWithNames[subPID] = subPIDName;
-                }
-                dockManager.addProcess(appName, mainPID, subPIDsWithNames);
-            }
-        }
     private:
         std::vector<int> pidList;
 };
