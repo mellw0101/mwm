@@ -2719,6 +2719,17 @@ test(xcb_window_t win, const char* imagePath)
         XCB_CW_BACK_PIXMAP, 
         &pixmap
     );
+    
+    xcb_clear_area
+    (
+        conn, 
+        0, 
+        win, 
+        0, 
+        0, 
+        screen->width_in_pixels, 
+        screen->height_in_pixels
+    );
 
     // Cleanup
     xcb_image_destroy(xcb_image);
