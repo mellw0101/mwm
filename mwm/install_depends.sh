@@ -51,7 +51,8 @@ install_dependencies()
                             libxcb-ewmh-dev         \
                             libxcb-ewmh2            \
                             libxcb-xrm-dev          \
-                            konsole
+                            konsole                 \
+                            xinit
     elif [ -x "$(command -v dnf)" ]; then
         # Fedora/RHEL
         sudo dnf install -y package1 package2
