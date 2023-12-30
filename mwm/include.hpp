@@ -46,6 +46,7 @@
     #include <png.h>
     #include <unordered_map>
     #include <xcb/xcb_image.h>
+    #include <Imlib2.h>
 
     #include "structs.hpp"
     #include "Log.hpp"

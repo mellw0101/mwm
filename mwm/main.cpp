@@ -23,11 +23,16 @@ static xcb_ewmh_connection_t * ewmh;
 static const xcb_setup_t * setup;
 static xcb_screen_iterator_t iter;
 static xcb_screen_t * screen;
+static xcb_gcontext_t gc;
+    
 
 
 
 static void 
 draw_text(const char * str , const COLOR & text_color, const COLOR & bg_color, const xcb_window_t & win, const int16_t & x, const int16_t & y);
+
+static xcb_gcontext_t 
+create_graphical_context(xcb_connection_t* connection, xcb_window_t window);
 
 namespace XCBwm 
 {
@@ -2653,6 +2658,72 @@ class set_png_as_backround
             xcb_image_destroy(image);
         }
 };
+
+void 
+test(xcb_window_t win, const char* imagePath) 
+{
+    // Load an image using Imlib2
+    Imlib_Image image = imlib_load_image(imagePath);
+    if (!image) 
+    {
+        // Handle error...
+        return;
+    }
+
+    // Get the image data
+    imlib_context_set_image(image);
+    int width = imlib_image_get_width();
+    int height = imlib_image_get_height();
+    DATA32* data = imlib_image_get_data();
+
+    // Create an XCB image from the data
+    xcb_image_t* xcb_image = xcb_image_create_native
+    (
+        conn, 
+        width, 
+        height,
+        XCB_IMAGE_FORMAT_Z_PIXMAP, 
+        screen->root_depth, 
+        NULL, 
+        ~0, 
+        (uint8_t*)data
+    );
+
+    // Create a pixmap and put the image into it
+    xcb_pixmap_t pixmap = xcb_generate_id(conn);
+    xcb_create_pixmap
+    (
+        conn, 
+        screen->root_depth,
+        pixmap,
+        screen->root, 
+        width, 
+        height
+    );
+    
+    xcb_image_put
+    (
+        conn, 
+        pixmap, 
+        create_graphical_context(conn, win), 
+        xcb_image, 
+        0, 
+        0, 
+        0
+    );
+
+    xcb_change_window_attributes
+    (
+        conn, 
+        win,
+        XCB_CW_BACK_PIXMAP, 
+        &pixmap
+    );
+
+    // Cleanup
+    xcb_image_destroy(xcb_image);
+    imlib_free_image();
+}
 
 void 
 move_desktop(const uint8_t & n)
@@ -5587,14 +5658,14 @@ class Event
             {
                 if (e->event == c->close_button)
                 {
-                    log_error("L_MOUSE_BUTTON + close_button");
+                    log_info("L_MOUSE_BUTTON + close_button");
                     win_tools::close_button_kill(c);
                     return;
                 }
 
                 if (e->event == c->max_button)
                 {
-                    log_error("L_MOUSE_BUTTON + max_button");
+                    log_info("L_MOUSE_BUTTON + max_button");
                     client * c = get::client_from_all_win(& e->event);
                     max_win(c, max_win::BUTTON_MAXWIN);
                     return;
@@ -5602,7 +5673,7 @@ class Event
 
                 if (e->event == c->titlebar)
                 {
-                    log_error("L_MOUSE_BUTTON + titlebar");
+                    log_info("L_MOUSE_BUTTON + titlebar");
                     wm::raise_client(c);
                     mv_client(c, e->event_x, e->event_y);
                     focus::client(c);
@@ -5615,7 +5686,7 @@ class Event
                     {
                         case ALT:
                         {
-                            log_error("ALT + L_MOUSE_BUTTON + win");
+                            log_info("ALT + L_MOUSE_BUTTON + win");
                             wm::raise_client(c);
                             mv_client(c, e->event_x, e->event_y + 20);
                             focus::client(c);
@@ -5879,6 +5950,22 @@ draw_text(const char * str , const COLOR & text_color, const COLOR & bg_color, c
     // Flush the connection
     xcb_flush(conn);
 }
+  
+xcb_gcontext_t 
+create_graphical_context(xcb_connection_t* connection, xcb_window_t window) 
+{
+    // Generate an ID for the GC
+    xcb_gcontext_t gc = xcb_generate_id(connection);
+
+    // Set the values for the GC
+    uint32_t mask = XCB_GC_FOREGROUND | XCB_GC_BACKGROUND | XCB_GC_GRAPHICS_EXPOSURES;
+    uint32_t values[3] = {screen->black_pixel, screen->white_pixel, 0};
+
+    // Create the GC
+    xcb_create_gc(connection, gc, window, mask, values);
+
+    return gc;
+}
 
 void 
 configureRootWindow()
@@ -6024,6 +6111,8 @@ setup_wm()
     move_desktop(1);
     Compositor compositor(conn, screen);
     gCompositor = &compositor;
+
+    test(screen->root, "/home/mellw/mwm_png/galaxy17.png");
     return 0;
 }
 
