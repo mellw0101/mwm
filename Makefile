@@ -35,9 +35,9 @@ LDFLAGS = 	${LIBS} 		\
 cc = clang
 CXX = clang++
 
-SRC = 	main.cpp 	\
-		tools.cpp	\
-		mxb.cpp
+SRC = 	src/main.cpp 	\
+		src/tools.cpp	\
+		src/mxb.cpp
 
 OBJ = $(SRC:../src/%.cpp=%.o)
 DEPS = $(OBJ:.o=.d)
