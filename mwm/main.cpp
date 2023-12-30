@@ -2736,8 +2736,6 @@ test(xcb_window_t win, const char* imagePath)
     imlib_free_image();
 }
 
-
-
 void 
 move_desktop(const uint8_t & n)
 {
@@ -5130,7 +5128,7 @@ class buttons
 };
 
 void 
-set_png(xcb_window_t win, const char* imagePath) 
+set_png(xcb_window_t win, const char * imagePath)
 {
     // Load an image using Imlib2
     Imlib_Image image = imlib_load_image(imagePath);
@@ -5236,7 +5234,16 @@ set_png(xcb_window_t win, const char* imagePath)
     xcb_image_destroy(xcb_image);
     imlib_free_image(); // Free scaled image
 
-    xcb_clear_area(conn, 0, win, 0, 0, win_tools::get_win_w(win), win_tools::get_win_h(win));
+    xcb_clear_area
+    (
+        conn, 
+        0, 
+        win, 
+        0, 
+        0, 
+        win_tools::get_win_w(win), 
+        win_tools::get_win_h(win)
+    );
 }
 
 class Event 
@@ -6236,7 +6243,7 @@ setup_wm()
     gCompositor = &compositor;
 
     // test(screen->root, "/home/mellw/mwm_png/galaxy17.png");
-    set_png(screen->root, "/home/mellw/mwm_png/galaxy17.png");
+    set_png(screen->root, "/home/mellw/mwm_png/galaxy14.png");
     return 0;
 }
 
