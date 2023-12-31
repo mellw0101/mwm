@@ -2927,102 +2927,6 @@ move_desktop(const uint8_t & n)
     }
 }
 
-void 
-next_hide(client * c) 
-{
-	XCBAnimator::Move anim(conn, c->win);
-    anim.move(c->x, c->y, c->x - screen->width_in_pixels, c->y, 1000);
-	wm::update_client(c);
-	show_hide_client(c, HIDE);
-}
-
-void 
-next_show(client * c) 
-{
-	show_hide_client(c, SHOW);
-	XCBAnimator::Move anim(conn, c->win);
-    anim.move(c->x, c->y, c->x - screen->width_in_pixels, c->y, 1000);
-	wm::update_client(c);
-    focus::client(c);
-}
-
-void
-Next_Desktop() 
-{
-	if (cur_d->desktop == desktop_list.size()) 
-	{
-		return;
-	}
-
-	// HIDE CLIENTS ON CURRENT_DESKTOP
-	for (const auto & c : cur_d->current_clients) 
-	{
-		if (c) 
-		{
-            show_hide_client(c, HIDE);
-		}
-	}
-
-	cur_d = desktop_list[cur_d->desktop];
-
-	// SHOW CLIENTS ON NEXT_DESKTOP
-	for (const auto & c : cur_d->current_clients)
-	{
-		if (c) 
-		{
-			show_hide_client(c, SHOW);
-		}
-	}
-}
-
-void
-prev_hide(client * c)
-{
-    XCBAnimator::Move anim(conn, c->win);
-    anim.move(c->x, c->y, c->x + screen->width_in_pixels, c->y, 1000);
-    wm::update_client(c);
-    show_hide_client(c, HIDE);
-}
-
-void 
-prev_show(client * c)
-{
-    show_hide_client(c, SHOW);
-    XCBAnimator::Move anim(conn, c->win);
-    anim.move(c->x, c->y, c->x + screen->width_in_pixels, c->y, 1000);
-    wm::update_client(c);
-    focus::client(c);
-}
-
-void
-Prev_Desktop()
-{
-	LOG_func
-	if (cur_d->desktop == 1)
-	{
-		return;
-	}
-
-	// HIDE CLIENTS ON CURRENT_DESKTOP
-	for (const auto & c : cur_d->current_clients)
-	{
-		if (c)
-		{
-            show_hide_client(c, HIDE);
-		}
-	}
-
-	cur_d = desktop_list[cur_d->desktop - 2];
-	// SHOW CLIENTS ON NEXT_DESKTOP
-	for (const auto & c : cur_d->current_clients)
-	{
-		if (c)
-		{
-            show_hide_client(c, SHOW);
-		}
-	}
-}
-
 void
 move_to_next_desktop_w_app()
 {
@@ -3060,10 +2964,6 @@ move_to_previus_desktop_w_app()
 
 class EWMHChecker 
 {
-    private:
-        xcb_connection_t* conn;
-        xcb_ewmh_connection_t* ewmh_conn;
-
     public:
         EWMHChecker(xcb_connection_t* connection, xcb_ewmh_connection_t* ewmh_connection)
         : conn(connection), ewmh_conn(ewmh_connection) {}
@@ -3087,6 +2987,10 @@ class EWMHChecker
             }
             return false;
         }
+    
+    private:
+        xcb_connection_t* conn;
+        xcb_ewmh_connection_t* ewmh_conn;
 };
 
 class resize_client 
@@ -6061,6 +5965,7 @@ class Event
             WinManager::kill_client(conn, c->frame);
             xcb_flush(conn);
             delete c;
+            xcb_flush(conn);
         }
 
         void
