@@ -2784,6 +2784,9 @@ class change_desktop
 
         std::atomic<bool> stop_show_flag{false};
         std::atomic<bool> stop_hide_flag{false};
+        std::atomic<bool> reverse_animation_flag{false};
+
+        std::vector<std::thread> animation_threads;
 
         std::vector<client *> 
         get_clients_on_desktop(const uint8_t & desktop)
@@ -2810,8 +2813,10 @@ class change_desktop
                     {
                         if (c)
                         {
-                            std::thread t(&change_desktop::anim_cli, this, c, c->x - screen->width_in_pixels);
-                            t.detach();
+                            // std::thread t(&change_desktop::anim_cli, this, c, c->x - screen->width_in_pixels);
+                            // t.detach();
+                            // animation_threads.emplace_back(&change_desktop::anim_cli, this, c, calculateEndX(c, direction));
+                            animation_threads.emplace_back(&change_desktop::anim_cli, this, c, c->x - screen->width_in_pixels);
                         }
                     }
                     break;
@@ -2822,8 +2827,9 @@ class change_desktop
                     {
                         if (c)
                         {
-                            std::thread t(&change_desktop::anim_cli, this, c, c->x + screen->width_in_pixels);
-                            t.detach();
+                            // std::thread t(&change_desktop::anim_cli, this, c, c->x + screen->width_in_pixels);
+                            // t.detach();
+                            animation_threads.emplace_back(&change_desktop::anim_cli, this, c, c->x + screen->width_in_pixels);
                         }
                     }
                     break;
@@ -2835,7 +2841,6 @@ class change_desktop
         anim_cli(client * c, const int & endx)
         {
             XCPPBAnimator anim(conn, c);
-            // anim.animate_client(c->x, c->y, c->width, c->height, endx, c->y, c->width, c->height, DURATION);
             anim.animate_client_x(c->x, endx, DURATION);
         }
 
