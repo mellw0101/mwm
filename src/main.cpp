@@ -2734,12 +2734,12 @@ class change_desktop
             {
                 case NEXT:
                 {
-                    for (auto & c : clients)
+                    for (const auto & c : clients)
                     {
                         if (c)
                         {
                             // animate_client(c, c->x - screen->width_in_pixels, c->y, c->width, c->height, 1000);
-                            std::thread t(&animate_client, c, c->x - screen->width_in_pixels, c->y, c->width, c->height, 1000);
+                            std::thread t(animate_client, c, c->x - screen->width_in_pixels, c->y, c->width, c->height, 1000);
                             t.detach();
                         }
                     }
