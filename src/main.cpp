@@ -1,9 +1,3 @@
-#include "structs.hpp"
-#include <cstdint>
-#include <thread>
-#include <vector>
-#include <xcb/xcb.h>
-#include <xcb/xproto.h>
 #define main_cpp
 #include "include.hpp"
 #include "mxb.hpp"
@@ -1349,19 +1343,47 @@ class XCPPBAnimator
         };
 
         void
-        animate_client_change_desktop(std::vector<client *> show, std::vector<client *> hide, const DIRECTION & direction)
+        animate_client_x(int startX, int endX, int duration)
         {
-            switch (direction) 
-            {
-                case NEXT:
-                {
-                    break;
-                }
-                case PREV:
-                {
-                    break;
-                }
-            }
+            /* ENSURE ANY EXISTING ANIMATION IS STOPPED */
+            stopAnimations();
+            
+            /* INITILIZE CLASS VARIABELS WITH INPUT VALUES */
+            currentX = startX;
+
+            int steps = duration; 
+
+            /**
+             * @brief Calculate if the step is positive or negative for each property.
+             *
+             * The variables @param stepX, stepY, stepWidth, stepHeight are always set to either 1 or -1.
+             * This is determined by dividing the absolute value of the difference between the start and end values
+             * by the difference itself. This results in a value of 1 or -1, which is used to determine if the animation 
+             * is moving in a positive (increasing) or negative (decreasing) direction for each property.
+             */
+            stepX = std::abs(endX - startX) / (endX - startX);
+
+            /**
+             * @brief CALCULATE THE DURATION FOR EACH STEP BASED ON THE TOTAL ANIMATION DURATION AND THE ABSOLUTE VALUE OF THE LENGTH OF EACH ANIMATION 
+             * 
+             * @param XAnimDuration, YAnimDuration, WAnimDuration, HAnimDuration represent the time each step takes to iterate one pixel for each respective thread.
+             * 
+             * The duration for each step is calculated by dividing the total animation duration by the absolute value of the lengt on the respective animation.
+             * This ensures that each thread will iterate each pixel from start to end value,
+             * ensuring that all threads will complete at the same time.
+             */
+            XAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(std::abs(endX - startX));
+            GAnimDuration = frameDuration;
+
+            /* START ANIMATION THREADS */
+            GAnimationThread = std::thread(&XCPPBAnimator::GFrameAnimation_X, this, endX);
+            XAnimationThread = std::thread(&XCPPBAnimator::CliXAnimation, this, endX);
+
+            /* WAIT FOR ANIMATION TO COMPLETE */
+            std::this_thread::sleep_for(std::chrono::milliseconds(duration));
+
+            /* STOP THE ANIMATION */
+            stopAnimations();
         }
         
         /**
@@ -1637,6 +1659,21 @@ class XCPPBAnimator
                     break;
                 }
                 conf_client_test();
+                thread_sleep(GAnimDuration);
+            }
+        }
+
+        void
+        GFrameAnimation_X(const int & endX)
+        {
+            while (true)
+            {
+                if (currentX == endX)
+                {
+                    conf_client_x();
+                    break;
+                }
+                conf_client_x();
                 thread_sleep(GAnimDuration);
             }
         }
@@ -2053,6 +2090,21 @@ class XCPPBAnimator
                 {
                     static_cast<const uint32_t &>(w - 60)
                 }
+            );
+            xcb_flush(connection);
+        }
+
+        void 
+        conf_client_x()
+        {
+            const uint32_t x = currentX;
+
+            xcb_configure_window
+            (
+                connection, 
+                c->frame, 
+                XCB_CONFIG_WINDOW_X, 
+                (const uint32_t[1]) { x }
             );
             xcb_flush(connection);
         }
@@ -2690,7 +2742,11 @@ class change_desktop
             DURATION = 400
         };
 
-        change_desktop(xcb_connection_t * connection, const DIRECTION & direction)
+        change_desktop(xcb_connection_t * connection) 
+        : connection(connection) {}
+
+        void 
+        change_to(const DIRECTION & direction)
         {
             switch (direction)
             {
@@ -2718,8 +2774,16 @@ class change_desktop
         }
 
     private:
+        xcb_connection_t * connection;
+
         std::vector<client *> show;
         std::vector<client *> hide;
+
+        std::thread show_thread;
+        std::thread hide_thread;
+
+        std::atomic<bool> stop_show_flag{false};
+        std::atomic<bool> stop_hide_flag{false};
 
         std::vector<client *> 
         get_clients_on_desktop(const uint8_t & desktop)
@@ -2772,8 +2836,38 @@ class change_desktop
         anim_cli(client * c, const int & endx)
         {
             XCPPBAnimator anim(conn, c);
-            anim.animate_client(c->x, c->y, c->width, c->height, endx, c->y, c->width, c->height, DURATION);
+            // anim.animate_client(c->x, c->y, c->width, c->height, endx, c->y, c->width, c->height, DURATION);
+            anim.animate_client_x(c->x, endx, DURATION);
             wm::update_client(c);
+        }
+
+        void
+        thread_sleep(const double & milliseconds) 
+        {
+            // Creating a duration with double milliseconds
+            auto duration = std::chrono::duration<double, std::milli>(milliseconds);
+
+            // Sleeping for the duration
+            std::this_thread::sleep_for(duration);
+        }
+
+        void
+        stopAnimations() 
+        {
+            stop_show_flag.store(true);
+            stop_hide_flag.store(true);
+            
+            if (show_thread.joinable()) 
+            {
+                show_thread.join();
+                stop_show_flag.store(false);
+            }
+
+            if (hide_thread.joinable()) 
+            {
+                hide_thread.join();
+                stop_hide_flag.store(false);
+            }
         }
 };
 
@@ -5547,7 +5641,8 @@ class Event
                     }
                     case CTRL + SUPER:
                     {
-				        change_desktop change(conn, change_desktop::NEXT);
+				        change_desktop change_desktop(conn);
+                        change_desktop.change_to(change_desktop::NEXT);
                         break;
                     }
                     case SUPER:
@@ -5578,7 +5673,8 @@ class Event
                     }
                     case CTRL + SUPER:
                     {
-				        change_desktop change(conn, change_desktop::PREV);
+				        change_desktop change_desktop(conn);
+                        change_desktop.change_to(change_desktop::PREV);
                         break;
                     }
                     case SUPER:
