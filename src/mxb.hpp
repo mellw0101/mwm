@@ -1,7 +1,15 @@
 #ifndef MXB_HPP
 #define MXB_HPP
 #include "include.hpp"
+#include <stdexcept>
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <unistd.h>
+#include <X11/Xauth.h>
+#include <string>
+#include <cstring>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 
 int
 check(xcb_void_cookie_t cookie);
@@ -15,12 +23,6 @@ mxb_kill_client(xcb_window_t window);
 void
 getCurrentEventMask(xcb_connection_t* conn, xcb_window_t window);
 
-#include <cstring>
-#include <stdexcept>
-#include <sys/socket.h>
-#include <sys/un.h>
-#include <unistd.h>
-#include <X11/Xauth.h>
 
 // Structure to hold authentication information
 struct xpp_auth_info_t 

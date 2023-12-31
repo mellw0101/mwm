@@ -2812,7 +2812,7 @@ class change_desktop
                         {
                             // animate_client(c, c->x - screen->width_in_pixels, c->y, c->width, c->height, 1000);
                             std::thread t(&change_desktop::anim_cli, this, c, c->x - screen->width_in_pixels);
-                            t.detach();
+                            // t.detach();
                         }
                     }
                     break;

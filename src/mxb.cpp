@@ -97,14 +97,6 @@ getCurrentEventMask(xcb_connection_t* conn, xcb_window_t window)
     }
 }
 
-#include <iostream>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <unistd.h>
-#include <cstring>
-#include <arpa/inet.h>
-#include <sys/un.h>
-
 // Function to send a simple message to the X server
 void 
 sendXMessage() 
@@ -235,12 +227,6 @@ class UnixSocket
         struct sockaddr_un addr;
 };
 
-#include <cstring>
-#include <stdexcept>
-#include <sys/socket.h>
-#include <sys/un.h>
-#include <unistd.h>
-
 XConnection * 
 mxb_connect(const char* display) 
 {
@@ -272,15 +258,6 @@ mxb_connection_has_error(XConnection * conn)
     }
     return 0;
 }
-
-#include <iostream>
-#include <string>
-#include <stdexcept>
-#include <cstring>
-#include <sys/socket.h>
-#include <sys/un.h>
-#include <memory>
-#include <cerrno>
 
 class XConnection_iso_cpp 
 {
