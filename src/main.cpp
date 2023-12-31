@@ -2780,7 +2780,7 @@ class change_desktop
                     break;
                 }
             }
-            thread_sleep(DURATION);
+            thread_sleep(DURATION + 2);
             joinAndClearThreads();
         }
 
