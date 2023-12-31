@@ -1,5 +1,6 @@
 #include "structs.hpp"
 #include <cstdint>
+#include <thread>
 #include <vector>
 #include <xcb/xcb.h>
 #include <xcb/xproto.h>
@@ -2684,6 +2685,11 @@ class change_desktop
             PREV
         };
 
+        enum DURATION
+        {
+            DURATION = 400
+        };
+
         change_desktop(xcb_connection_t * connection, const DIRECTION & direction)
         {
             switch (direction)
@@ -2695,6 +2701,7 @@ class change_desktop
                     animate(show, NEXT);
                     animate(hide, NEXT);
                     cur_d = desktop_list[cur_d->desktop];
+                    std::this_thread::sleep_for(std::chrono::milliseconds(DURATION));
                     break;
                 }
                 case PREV:
@@ -2704,6 +2711,7 @@ class change_desktop
                     animate(show, PREV);
                     animate(hide, PREV);
                     cur_d = desktop_list[cur_d->desktop - 2];
+                    std::this_thread::sleep_for(std::chrono::milliseconds(DURATION));
                     break;
                 }
             }
@@ -2764,7 +2772,7 @@ class change_desktop
         anim_cli(client * c, const int & endx)
         {
             XCPPBAnimator anim(conn, c);
-            anim.animate_client(c->x, c->y, c->width, c->height, endx, c->y, c->width, c->height, 400);
+            anim.animate_client(c->x, c->y, c->width, c->height, endx, c->y, c->width, c->height, DURATION);
             wm::update_client(c);
         }
 };
