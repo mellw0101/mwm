@@ -2741,7 +2741,7 @@ class change_desktop
                         {
                             // animate_client(c, c->x - screen->width_in_pixels, c->y, c->width, c->height, 1000);
 
-                            t = std::thread(animate_client, c, c->x - screen->width_in_pixels, c->y, c->width, c->height, 1000);
+                            t = std::thread(animate_client, this, c, c->x - screen->width_in_pixels, c->y, c->width, c->height, 1000);
                             t.detach();
                         }
                     }
