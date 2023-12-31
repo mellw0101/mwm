@@ -2712,7 +2712,6 @@ class change_desktop
     private:
         std::vector<client *> show;
         std::vector<client *> hide;
-        std::thread t;
 
         std::vector<client *> 
         get_clients_on_desktop(const uint8_t & desktop)
@@ -2735,13 +2734,13 @@ class change_desktop
             {
                 case NEXT:
                 {
-                    for (auto & c : clients)
+                    for (const auto & c : clients)
                     {
                         if (c)
                         {
                             // animate_client(c, c->x - screen->width_in_pixels, c->y, c->width, c->height, 1000);
 
-                            t = std::thread(animate_client, this, c, c->x - screen->width_in_pixels, c->y, c->width, c->height, 1000);
+                            std::thread t(&change_desktop::anim_cli, c, c->x - screen->width_in_pixels);
                             t.detach();
                         }
                     }
@@ -2762,8 +2761,11 @@ class change_desktop
         }
 
         void
-        anim_cli()
-        {}
+        anim_cli(client *c, const int & endx)
+        {
+            XCPPBAnimator anim(conn, c);
+            anim.animate_client(c->x, c->y, c->width, c->height, endx, c->y, c->width, c->height, 1000);
+        }
 };
 
 void 
