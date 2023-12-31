@@ -3835,6 +3835,7 @@ namespace win_tools
         kill_client(conn, c->frame);
         xcb_flush(conn);
         delete c;
+        xcb_flush(conn);
 
         return 0;
     }
