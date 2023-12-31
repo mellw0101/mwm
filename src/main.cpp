@@ -6169,6 +6169,11 @@ main()
     }
 
     XConnection * mxb_connection = mxb_connect(nullptr);
+    if (!mxb_connection)
+    {
+        LOG_error("mxb_connection == nullptr")
+        return -1;
+    }
 
     run();
     xcb_disconnect(conn);
