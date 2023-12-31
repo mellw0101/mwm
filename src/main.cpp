@@ -880,7 +880,7 @@ class mv_client
             {
                 // SNAP WINDOW TO 'RIGHT' BORDER OF 'NON_CONTROLLED' WINDOW
                 if ((x > cli->x + cli->width - N && x < cli->x + cli->width + N) 
-                    && (y + c->height > cli->y && y < cli->y + cli->height))
+                 && (y + c->height > cli->y && y < cli->y + cli->height))
                 {
                     // SNAP WINDOW TO 'RIGHT_TOP' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
                     if (y > cli->y - NC && y < cli->y + NC)
@@ -902,7 +902,7 @@ class mv_client
 
                 // SNAP WINSOW TO 'LEFT' BORDER OF 'NON_CONTROLLED' WINDOW
                 if ((x + c->width > cli->x - N && x + c->width < cli->x + N) 
-                    && (y + c->height > cli->y && y < cli->y + cli->height))
+                 && (y + c->height > cli->y && y < cli->y + cli->height))
                 {
                     // SNAP WINDOW TO 'LEFT_TOP' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
                     if (y > cli->y - NC && y < cli->y + NC)
@@ -924,7 +924,7 @@ class mv_client
 
                 // SNAP WINDOW TO 'BOTTOM' BORDER OF 'NON_CONTROLLED' WINDOW
                 if ((y > cli->y + cli->height - N && y < cli->y + cli->height + N) 
-                    && (x + c->width > cli->x && x < cli->x + cli->width))
+                 && (x + c->width > cli->x && x < cli->x + cli->width))
                 {
                     // SNAP WINDOW TO 'BOTTOM_LEFT' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
                     if (x > cli->x - NC && x < cli->x + NC)
@@ -1067,7 +1067,6 @@ class mv_client
                 CHECK IF THE ELAPSED TIME EXCEEDS THE FRAME DURATION
              */ 
             {
-                
                 lastUpdateTime = currentTime; /*
                     UPDATE THE LAST_UPDATE_TIME TO THE 
                     CURRENT TIME FOR THE NEXT CHECK
@@ -1214,9 +1213,6 @@ class XCPPBAnimator
 
         XCPPBAnimator(xcb_connection_t* connection, client * c)
         : connection(connection), c(c) {}
-
-        XCPPBAnimator(xcb_connection_t* connection, const xcb_window_t & window, client * c)
-        : connection(connection), window(window), c(c) {}
 
         void /**
          * @brief Animates the position and size of an object from a starting point to an ending point.
@@ -2651,83 +2647,6 @@ class set_png_as_backround
             xcb_image_destroy(image);
         }
 };
-
-void 
-test(xcb_window_t win, const char* imagePath) 
-{
-    // Load an image using Imlib2
-    Imlib_Image image = imlib_load_image(imagePath);
-    if (!image) 
-    {
-        // Handle error...
-        return;
-    }
-
-    // Get the image data
-    imlib_context_set_image(image);
-    int width = imlib_image_get_width();
-    int height = imlib_image_get_height();
-    DATA32* data = imlib_image_get_data();
-
-    // Create an XCB image from the data
-    xcb_image_t* xcb_image = xcb_image_create_native
-    (
-        conn, 
-        width, 
-        height,
-        XCB_IMAGE_FORMAT_Z_PIXMAP, 
-        screen->root_depth, 
-        NULL, 
-        ~0, 
-        (uint8_t*)data
-    );
-
-    // Create a pixmap and put the image into it
-    xcb_pixmap_t pixmap = xcb_generate_id(conn);
-    xcb_create_pixmap
-    (
-        conn, 
-        screen->root_depth,
-        pixmap,
-        screen->root, 
-        width, 
-        height
-    );
-    
-    xcb_image_put
-    (
-        conn, 
-        pixmap, 
-        create_graphical_context(win), 
-        xcb_image, 
-        0, 
-        0, 
-        0
-    );
-
-    xcb_change_window_attributes
-    (
-        conn, 
-        win,
-        XCB_CW_BACK_PIXMAP, 
-        &pixmap
-    );
-
-    xcb_clear_area
-    (
-        conn, 
-        0, 
-        win, 
-        0, 
-        0, 
-        screen->width_in_pixels, 
-        screen->height_in_pixels
-    );
-
-    // Cleanup
-    xcb_image_destroy(xcb_image);
-    imlib_free_image();
-}
 
 void 
 move_desktop(const uint8_t & n)
