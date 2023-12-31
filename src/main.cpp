@@ -2771,6 +2771,7 @@ class change_desktop
                 }
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(DURATION + 10));
+            joinAndClearThreads();
         }
 
     private:
@@ -2871,6 +2872,19 @@ class change_desktop
                 hide_thread.join();
                 stop_hide_flag.store(false);
             }
+        }
+
+        void 
+        joinAndClearThreads() 
+        {
+            for (auto & t : animation_threads) 
+            {
+                if (t.joinable()) 
+                {
+                    t.join();
+                }
+            }
+            animation_threads.clear();
         }
 };
 
