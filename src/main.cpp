@@ -6162,11 +6162,11 @@ int
 main() 
 {
     LOG_start()
-    const int8_t & err = setup_wm();
-    if (err != 0)
-    {
-        return err;
-    }
+    // const int8_t & err = setup_wm();
+    // if (err != 0)
+    // {
+    //     return err;
+    // }
 
     XConnection * mxb_connection = mxb_connect(nullptr);
     if (!mxb_connection)
@@ -6180,7 +6180,7 @@ main()
         return -1;
     }
 
-    run();
-    xcb_disconnect(conn);
+    // run();
+    // xcb_disconnect(conn);
     return 0;
 }
