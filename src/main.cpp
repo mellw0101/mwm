@@ -2740,7 +2740,7 @@ class change_desktop
 
         enum DURATION
         {
-            DURATION = 200
+            DURATION = 100
         };
 
         change_desktop(xcb_connection_t * connection) 
@@ -2780,7 +2780,7 @@ class change_desktop
                     break;
                 }
             }
-            std::this_thread::sleep_for(std::chrono::milliseconds(DURATION));
+            thread_sleep(DURATION);
             joinAndClearThreads();
         }
 
