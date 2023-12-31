@@ -23,7 +23,8 @@ LIBS = 	-lxcb 			\
 		-lxcb-xfixes 	\
 		-lxcb-shape 	\
 		-lxcb-randr     \
-		-lImlib2
+		-lImlib2		\
+		-lXau
 
 LDFLAGS = 	${LIBS} 		\
 			-flto 			\

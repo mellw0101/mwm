@@ -53,7 +53,8 @@ install_dependencies()
                             libxcb-xrm-dev          \
                             konsole                 \
                             xinit                   \
-                            libimlib2-dev  
+                            libimlib2-dev           \
+                            libxau-dev
     elif [ -x "$(command -v dnf)" ]; then
         # Fedora/RHEL
         sudo dnf install -y package1 package2
