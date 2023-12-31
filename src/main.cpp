@@ -4,6 +4,7 @@
 #include <xcb/xproto.h>
 #define main_cpp
 #include "include.hpp"
+#include "mxb.hpp"
 
 Logger log;
 
@@ -6166,6 +6167,9 @@ main()
     {
         return err;
     }
+
+    XConnection * mxb_connection = mxb_connect(nullptr);
+
     run();
     xcb_disconnect(conn);
     return 0;

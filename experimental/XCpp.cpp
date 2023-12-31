@@ -1,13 +1,12 @@
 #include <X11/Xauth.h>
-#include <cstdlib>
 #include <stdexcept>
-#include <string>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/un.h>
 #include <unistd.h>
 #include <vector>
+#include <xcb/xproto.h>
 
 void 
 configure_window(int window_id, int x, int y, int width, int height) 
@@ -65,7 +64,7 @@ typedef struct xpp_auth_info_t
     int   datalen;  /**< Length of the data member. */
     char *data;   /**< Data interpreted in a protocol-specific manner. */
 } xpp_auth_info_t;
-/* 
+
 class xpp_get_auth_info 
 {
     public:
@@ -103,21 +102,21 @@ class xpp_get_auth_info
             Xauth *authptr = 0;
             int ret = 1;
 
-            / * Some systems like hpux or Hurd do not expose peer names
+            /* Some systems like hpux or Hurd do not expose peer names
             * for UNIX Domain Sockets, but this is irrelevant,
             * since compute_auth() ignores the peer name in this
-            * case anyway.* /
+            * case anyway.*/
             if ((sockname = get_peer_sock_name(getpeername, fd)) == NULL)
             {
                 if ((sockname = get_peer_sock_name(getsockname, fd)) == NULL)
                 {
-                    return 0;   / * can only authenticate sockets * /
+                    return 0;   /* can only authenticate sockets */
                 }
 
                 if (sockname->sa_family != AF_UNIX)
                 {
                     free(sockname);
-                    return 0;   / * except for AF_UNIX, sockets should have peernames * /
+                    return 0;   /* except for AF_UNIX, sockets should have peernames */
                 }
                 gotsockname = 1;
             }
@@ -126,12 +125,12 @@ class xpp_get_auth_info
             if (authptr == 0)
             {
                 free(sockname);
-                return 0;   / * cannot find good auth data * /
+                return 0;   /* cannot find good auth data */
             }
 
             info->namelen = memdup(&info->name, authptr->name, authptr->name_length);
             if (!info->namelen)
-                goto no_auth;   / * out of memory * /
+                goto no_auth;   /* out of memory */
 
             if (!gotsockname)
             {
@@ -140,7 +139,7 @@ class xpp_get_auth_info
                 if ((sockname = get_peer_sock_name(getsockname, fd)) == NULL)
                 {
                     free(info->name);
-                    goto no_auth;   / * can only authenticate sockets * /
+                    goto no_auth;   /* can only authenticate sockets */
                 }
             }
 
@@ -148,7 +147,7 @@ class xpp_get_auth_info
             if(!ret)
             {
                 free(info->name);
-                goto no_auth;   / * cannot build auth record * /
+                goto no_auth;   /* cannot build auth record */
             }
 
             free(sockname);
@@ -182,7 +181,7 @@ class xpp_get_auth_info
                 return 0;
             }
 
-            std::memcpy(*dst, src, len);
+            memcpy(*dst, src, len);
             return len;
         }
 
@@ -255,7 +254,7 @@ class xpp_get_auth_info
             for (const auto& name : authnames_str) 
             {
                 char* cstr = new char[name.size() + 1]; // +1 for null terminator
-                std::strcpy(cstr, name.c_str());
+                strcpy(cstr, name.c_str());
                 authnames_cstr.push_back(cstr);
             }
 
@@ -269,7 +268,7 @@ class xpp_get_auth_info
                                         authnameslen);
         }
 
-        / * `sockaddr_un.sun_path' typical size usually ranges between 92 and 108 * /
+        /* `sockaddr_un.sun_path' typical size usually ranges between 92 and 108 */
         #define INITIAL_SOCKNAME_SLACK 108
 
         sockaddr * 
@@ -284,9 +283,9 @@ class xpp_get_auth_info
                 return nullptr;
             }
 
-            / * Both getpeername() and getsockname() truncates sockname if
+            /* Both getpeername() and getsockname() truncates sockname if
             there is not enough space and set the required length in
-            actual_socknamelen * /
+            actual_socknamelen */
             if (socket_func(fd, sockname, &actual_socknamelen) == -1)
             {
                 return nullptr;
@@ -320,7 +319,7 @@ class xpp_get_auth_info
             for (const auto& name : authnames_str) 
             {
                 char* cstr = new char[name.size() + 1]; // +1 for null terminator
-                std::strcpy(cstr, name.c_str());
+                strcpy(cstr, name.c_str());
                 authnames_cstr.push_back(cstr);
             }
 
@@ -350,10 +349,10 @@ class xpp_get_auth_info
                 return 1;
             }
             
-            return 0;   / * Unknown authorization type  * /
+            return 0;   /* Unknown authorization type  */
         }
 };
-*/
+
 class UnixSocket {
     public:
         UnixSocket(const char* file) 
