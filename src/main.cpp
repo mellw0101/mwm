@@ -2734,12 +2734,12 @@ class change_desktop
             {
                 case NEXT:
                 {
-                    for (auto & c : clients)
+                    for (auto c : clients)
                     {
                         if (c)
                         {
                             // animate_client(c, c->x - screen->width_in_pixels, c->y, c->width, c->height, 1000);
-                            std::thread t(animate_client, c, c->x - screen->width_in_pixels, c->y, c->width, c->height, 1000);
+                            std::thread t(&change_desktop::anim_cli, this, c, c->x - screen->width_in_pixels);
                             t.detach();
                         }
                     }
@@ -2760,8 +2760,12 @@ class change_desktop
         }
 
         void
-        anim_cli()
-        {}
+        anim_cli(client * c, const int & endx)
+        {
+            XCPPBAnimator anim(conn, c);
+            anim.animate_client(c->x, c->y, c->width, c->height, endx, c->y, c->width, c->height, 400);
+            wm::update_client(c);
+        }
 };
 
 void 
