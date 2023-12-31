@@ -2734,7 +2734,7 @@ class change_desktop
             {
                 case NEXT:
                 {
-                    for (auto c : clients)
+                    for (const auto c : clients)
                     {
                         if (c)
                         {
