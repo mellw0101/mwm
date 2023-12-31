@@ -2106,6 +2106,7 @@ class XCPPBAnimator
                 XCB_CONFIG_WINDOW_X, 
                 (const uint32_t[1]) { x }
             );
+            c->x = x;
             xcb_flush(connection);
         }
 };
@@ -2836,7 +2837,6 @@ class change_desktop
             XCPPBAnimator anim(conn, c);
             // anim.animate_client(c->x, c->y, c->width, c->height, endx, c->y, c->width, c->height, DURATION);
             anim.animate_client_x(c->x, endx, DURATION);
-            wm::update_client(c);
         }
 
         void
