@@ -2757,7 +2757,6 @@ class change_desktop
                     animate(show, NEXT);
                     animate(hide, NEXT);
                     cur_d = desktop_list[cur_d->desktop];
-                    std::this_thread::sleep_for(std::chrono::milliseconds(DURATION + 10));
                     break;
                 }
                 case PREV:
@@ -2767,10 +2766,10 @@ class change_desktop
                     animate(show, PREV);
                     animate(hide, PREV);
                     cur_d = desktop_list[cur_d->desktop - 2];
-                    std::this_thread::sleep_for(std::chrono::milliseconds(DURATION + 10));
                     break;
                 }
             }
+            std::this_thread::sleep_for(std::chrono::milliseconds(DURATION + 10));
         }
 
     private:
