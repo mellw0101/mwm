@@ -1,6 +1,6 @@
 #define main_cpp
 #include "include.hpp"
-#include "mxb.hpp"
+// #include "mxb.hpp"
 
 Logger log;
 
@@ -4478,7 +4478,7 @@ class WinManager
 {
     public:
         static void 
-        manage_new_window(const xcb_drawable_t & w) 
+        manage_new_window(const xcb_window_t & w) 
         {
             client * c = make_client(w);
             if (!c)
@@ -6324,12 +6324,12 @@ main()
         return err;
     }
 
-    XConnection * mxb_connection = mxb_connect(nullptr);
-    if (!mxb_connection)
-    {
-        log_error("mxb_connection == nullptr");
-        return -1;
-    }
+    // XConnection * mxb_connection = mxb_connect(nullptr);
+    // if (!mxb_connection)
+    // {
+    //     log_error("mxb_connection == nullptr");
+    //     return -1;
+    // }
 
     run();
     xcb_disconnect(conn);
