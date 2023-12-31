@@ -261,7 +261,7 @@ mxb_connection_has_error(XConnection * conn)
 {
     try 
     {
-        conn->confirmConnection();
+        // conn->confirmConnection();
         std::string response = conn->sendMessage("BIG-REQUESTS");
         log_info(response);
     }
