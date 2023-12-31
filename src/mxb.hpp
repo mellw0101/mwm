@@ -1,6 +1,7 @@
 #ifndef MXB_HPP
 #define MXB_HPP
 #include "include.hpp"
+#include <netinet/in.h>
 
 int
 check(xcb_void_cookie_t cookie);
@@ -88,11 +89,15 @@ class XConnection
             const std::string extensionName = "BIG-REQUESTS";  // Example extension
             uint16_t nameLength = static_cast<uint16_t>(extensionName.length());
 
-            // Construct the request
+            // Calculate the total length of the request in 4-byte units, including padding
+            uint16_t requestLength = htons((8 + nameLength + 3) / 4); // Length in 4-byte units
             char request[32] = {0};  // 32 bytes is enough for most requests
             request[0] = 98;         // Opcode for QueryExtension
-            request[4] = nameLength & 0xFF;        // Length of the extension name (low byte)
-            request[5] = (nameLength >> 8) & 0xFF; // Length of the extension name (high byte)
+            request[1] = 0;          // Unused
+            request[2] = (requestLength >> 8) & 0xFF;  // Length (high byte)
+            request[3] = requestLength & 0xFF;         // Length (low byte)
+            request[4] = nameLength & 0xFF;            // Length of the extension name (low byte)
+            request[5] = (nameLength >> 8) & 0xFF;     // Length of the extension name (high byte)
             std::memcpy(&request[8], extensionName.c_str(), nameLength); // Copy the extension name
 
             // Send the request
