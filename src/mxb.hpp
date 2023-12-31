@@ -143,6 +143,66 @@ class XConnection
             }
         }
 
+        std::string 
+        sendMessage(const std::string & extensionName) 
+        {
+            uint16_t nameLength = static_cast<uint16_t>(extensionName.length());
+
+            // Calculate the total length of the request in 4-byte units, including padding
+            uint16_t requestLength = htons((8 + nameLength + 3) / 4); // Length in 4-byte units
+            char request[32] = {0};  // 32 bytes is enough for most requests
+            request[0] = 98;         // Opcode for QueryExtension
+            request[1] = 0;          // Unused
+            request[2] = (requestLength >> 8) & 0xFF;  // Length (high byte)
+            request[3] = requestLength & 0xFF;         // Length (low byte)
+            request[4] = nameLength & 0xFF;            // Length of the extension name (low byte)
+            request[5] = (nameLength >> 8) & 0xFF;     // Length of the extension name (high byte)
+            std::memcpy(&request[8], extensionName.c_str(), nameLength); // Copy the extension name
+
+            // Send the request
+            if (send(fd, request, 8 + nameLength, 0) == -1) 
+            {
+                throw std::runtime_error("Failed to send QueryExtension request");
+            }
+
+            // Prepare to receive the response
+            char reply[32] = {0}; // Buffer to hold the response
+            int received = 0;     // Number of bytes received so far
+
+            // Read the response from the server
+            while (received < sizeof(reply)) 
+            {
+                int n = recv(fd, reply + received, sizeof(reply) - received, 0);
+                if (n == -1) 
+                {
+                    throw std::runtime_error("Failed to receive QueryExtension reply");
+                }
+                else if (n == 0) 
+                {
+                    throw std::runtime_error("Connection closed by X server");
+                }
+                received += n;
+            }
+
+            // Process the reply
+            // Check if the first byte is 1 (indicating a reply)
+            if (reply[0] != 1) 
+            {
+                throw std::runtime_error("Invalid response received from X server");
+            }
+
+            // Check if the extension is present
+            bool extensionPresent = reply[1];
+            if (extensionPresent) 
+            {
+                return "Extension is supported by the X server.";
+            } 
+            else 
+            {
+                return "Extension is not supported by the X server.";
+            }
+        }
+
     private:
         int fd;
         struct sockaddr_un addr;
