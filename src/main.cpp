@@ -2694,7 +2694,7 @@ class change_desktop
                     show = get_clients_on_desktop(cur_d->desktop + 1);
                     animate(show, NEXT);
                     animate(hide, NEXT);
-                    cur_d++;
+                    cur_d = desktop_list[cur_d->desktop];
                     break;
                 }
                 case PREV:
@@ -2703,7 +2703,7 @@ class change_desktop
                     show = get_clients_on_desktop(cur_d->desktop - 1);
                     animate(show, PREV);
                     animate(hide, PREV);
-                    cur_d--;
+                    cur_d = desktop_list[cur_d->desktop - 2];
                     break;
                 }
             }
