@@ -1,5 +1,6 @@
 #include "structs.hpp"
 #include <cstdint>
+#include <vector>
 #include <xcb/xcb.h>
 #include <xcb/xproto.h>
 #define main_cpp
@@ -1215,6 +1216,9 @@ class XCPPBAnimator
         XCPPBAnimator(xcb_connection_t* connection, client * c)
         : connection(connection), c(c) {}
 
+        XCPPBAnimator(xcb_connection_t * connection)
+        : connection(connection) {}
+
         void /**
          * @brief Animates the position and size of an object from a starting point to an ending point.
          * 
@@ -1335,6 +1339,28 @@ class XCPPBAnimator
 
             /* STOP THE ANIMATION */
             stopAnimations();
+        }
+
+        enum DIRECTION 
+        {
+            NEXT,
+            PREV
+        };
+
+        void
+        animate_client_change_desktop(std::vector<client *> show, std::vector<client *> hide, const DIRECTION & direction)
+        {
+            switch (direction) 
+            {
+                case NEXT:
+                {
+                    break;
+                }
+                case PREV:
+                {
+                    break;
+                }
+            }
         }
         
         /**
@@ -2646,6 +2672,89 @@ class set_png_as_backround
             xcb_free_pixmap(connection, pixmap);
             xcb_free_gc(connection, gc);
             xcb_image_destroy(image);
+        }
+};
+
+class change_desktop
+{
+    public:
+        enum DIRECTION
+        {
+            NEXT,
+            PREV
+        };
+
+        change_desktop(xcb_connection_t * connection, const DIRECTION & direction)
+        {
+            switch (direction)
+            {
+                case NEXT:
+                {
+                    hide = get_clients_on_desktop(cur_d->desktop);
+                    show = get_clients_on_desktop(cur_d->desktop + 1);
+                    animate(show, NEXT);
+                    animate(hide, NEXT);
+                    cur_d++;
+                    break;
+                }
+                case PREV:
+                {
+                    hide = get_clients_on_desktop(cur_d->desktop);
+                    show = get_clients_on_desktop(cur_d->desktop - 1);
+                    animate(show, PREV);
+                    animate(hide, PREV);
+                    cur_d--;
+                    break;
+                }
+            }
+        }
+
+    private:
+        std::vector<client *> show;
+        std::vector<client *> hide;
+
+        std::vector<client *> 
+        get_clients_on_desktop(const uint8_t & desktop)
+        {
+            std::vector<client *> clients;
+            for (const auto & c : client_list)
+            {
+                if (c->desktop == desktop)
+                {
+                    clients.push_back(c);
+                }
+            }
+            return clients;
+        }
+
+        void
+        animate(std::vector<client *> clients, const DIRECTION & direction)
+        {
+            switch (direction) 
+            {
+                case NEXT:
+                {
+                    for (auto & c : clients)
+                    {
+                        if (c)
+                        {
+                            animate_client(c, c->x - screen->width_in_pixels, c->y, c->width, c->height, 1000);
+                        }
+                    }
+                    break;
+                }
+                case PREV:
+                {
+                    for (auto & c : clients)
+                    {
+                        if (c)
+                        {
+                            animate_client(c, c->x + screen->width_in_pixels, c->y, c->width, c->height, 1000);
+                        }
+                    }
+                    break;
+                }
+            }
         }
 };
 
@@ -5419,7 +5528,7 @@ class Event
                     }
                     case CTRL + SUPER:
                     {
-				        Next_Desktop();
+				        change_desktop change(conn, change_desktop::NEXT);
                         break;
                     }
                     case SUPER:
@@ -5450,7 +5559,7 @@ class Event
                     }
                     case CTRL + SUPER:
                     {
-				        Prev_Desktop();
+				        change_desktop change(conn, change_desktop::PREV);
                         break;
                     }
                     case SUPER:
