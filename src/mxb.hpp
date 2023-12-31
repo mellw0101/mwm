@@ -82,7 +82,6 @@ class XConnection
             return fd;
         }
 
-        // Function to send a simple QueryExtension request
         void 
         confirmConnection() 
         {
@@ -108,11 +107,21 @@ class XConnection
 
             // Prepare to receive the response
             char reply[32] = {0}; // Buffer to hold the response
+            int received = 0;     // Number of bytes received so far
 
             // Read the response from the server
-            if (recv(fd, reply, sizeof(reply), 0) == -1) 
+            while (received < sizeof(reply)) 
             {
-                throw std::runtime_error("Failed to receive QueryExtension reply");
+                int n = recv(fd, reply + received, sizeof(reply) - received, 0);
+                if (n == -1) 
+                {
+                    throw std::runtime_error("Failed to receive QueryExtension reply");
+                }
+                else if (n == 0) 
+                {
+                    throw std::runtime_error("Connection closed by X server");
+                }
+                received += n;
             }
 
             // Process the reply
