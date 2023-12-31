@@ -6174,6 +6174,11 @@ main()
         log_error("mxb_connection == nullptr");
         return -1;
     }
+    if (mxb_connection_has_error(mxb_connection))
+    {
+        log_error("mxb_connection_has_error(mxb_connection)");
+        return -1;
+    }
 
     run();
     xcb_disconnect(conn);

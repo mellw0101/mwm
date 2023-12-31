@@ -81,10 +81,59 @@ class XConnection
             return fd;
         }
 
+        // Function to send a simple QueryExtension request
+        void 
+        confirmConnection() 
+        {
+            const std::string extensionName = "BIG-REQUESTS";  // Example extension
+            uint16_t nameLength = static_cast<uint16_t>(extensionName.length());
+
+            // Construct the request
+            char request[32] = {0};  // 32 bytes is enough for most requests
+            request[0] = 98;         // Opcode for QueryExtension
+            request[4] = nameLength & 0xFF;        // Length of the extension name (low byte)
+            request[5] = (nameLength >> 8) & 0xFF; // Length of the extension name (high byte)
+            std::memcpy(&request[8], extensionName.c_str(), nameLength); // Copy the extension name
+
+            // Send the request
+            if (send(fd, request, 8 + nameLength, 0) == -1) 
+            {
+                throw std::runtime_error("Failed to send QueryExtension request");
+            }
+
+            // Prepare to receive the response
+            char reply[32] = {0}; // Buffer to hold the response
+
+            // Read the response from the server
+            if (recv(fd, reply, sizeof(reply), 0) == -1) 
+            {
+                throw std::runtime_error("Failed to receive QueryExtension reply");
+            }
+
+            // Process the reply
+            // Check if the first byte is 1 (indicating a reply)
+            if (reply[0] != 1) 
+            {
+                throw std::runtime_error("Invalid response received from X server");
+            }
+
+            // Check if the extension is present
+            bool extensionPresent = reply[1];
+            if (extensionPresent) 
+            {
+                log_info("BIG-REQUESTS extension is supported by the X server.");
+            } 
+            else 
+            {
+                log_info("BIG-REQUESTS extension is not supported by the X server.");
+            }
+        }
+
     private:
         int fd;
         struct sockaddr_un addr;
         xpp_auth_info_t auth_info;
+        Logger log;
 
         // Function to authenticate an X11 connection
         bool 
@@ -190,6 +239,10 @@ class XConnection
         }
 };
 
-XConnection * mxb_connect(const char* display);
+XConnection * 
+mxb_connect(const char* display);
+
+int
+mxb_connection_has_error(XConnection * conn);
 
 #endif /* MXB_HPP */

@@ -241,7 +241,6 @@ class UnixSocket
 #include <sys/un.h>
 #include <unistd.h>
 
-
 XConnection * 
 mxb_connect(const char* display) 
 {
@@ -255,6 +254,21 @@ mxb_connect(const char* display)
         std::cerr << "Connection error: " << e.what() << std::endl;
         return nullptr;
     }
+}
+
+int
+mxb_connection_has_error(XConnection * conn)
+{
+    try 
+    {
+        conn->confirmConnection();
+    }
+    catch (const std::exception & e)
+    {
+        log_error(e.what());
+        return 1;
+    }
+    return 0;
 }
 
 #include <iostream>
