@@ -1,6 +1,5 @@
 #include "structs.hpp"
 #include <cstdint>
-#include <thread>
 #include <vector>
 #include <xcb/xcb.h>
 #include <xcb/xproto.h>
@@ -2741,7 +2740,7 @@ class change_desktop
                         {
                             // animate_client(c, c->x - screen->width_in_pixels, c->y, c->width, c->height, 1000);
 
-                            std::thread t(&change_desktop::anim_cli, this, c, c->x - screen->width_in_pixels, std::thread::id());
+                            std::thread t(&change_desktop::anim_cli, this, c, c->x - screen->width_in_pixels);
                             t.detach();
                         }
                     }
