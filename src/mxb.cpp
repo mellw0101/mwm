@@ -242,7 +242,8 @@ class UnixSocket
 #include <unistd.h>
 
 
-XConnection * mxb_connect(const char* display) 
+XConnection * 
+mxb_connect(const char* display) 
 {
     try 
     {

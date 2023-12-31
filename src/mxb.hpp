@@ -75,7 +75,8 @@ class XConnection
             delete[] auth_info.data;
         }
 
-        int getFd() const 
+        int 
+        getFd() const 
         {
             return fd;
         }
@@ -86,7 +87,8 @@ class XConnection
         xpp_auth_info_t auth_info;
 
         // Function to authenticate an X11 connection
-        bool authenticate_x11_connection(int display_number, xpp_auth_info_t& auth_info) 
+        bool 
+        authenticate_x11_connection(int display_number, xpp_auth_info_t& auth_info) 
         {
             // Try to get the XAUTHORITY environment variable; fall back to default
             const char* xauthority_env = std::getenv("XAUTHORITY");
@@ -129,7 +131,8 @@ class XConnection
             return found;
         }
 
-        std::string getSocketPath(const char * display) 
+        std::string 
+        getSocketPath(const char * display) 
         {
             std::string displayStr;
 
@@ -163,7 +166,8 @@ class XConnection
             return "/tmp/.X11-unix/X" + std::to_string(displayNumber);
         }
 
-        int parseDisplayNumber(const char * display) 
+        int 
+        parseDisplayNumber(const char * display) 
         {
             if (!display) 
             {
