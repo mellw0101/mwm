@@ -2753,6 +2753,11 @@ class change_desktop
             {
                 case NEXT:
                 {
+                    if (cur_d->desktop == desktop_list.size())
+                    {
+                        return;
+                    }
+
                     hide = get_clients_on_desktop(cur_d->desktop);
                     show = get_clients_on_desktop(cur_d->desktop + 1);
                     animate(show, NEXT);
@@ -2762,6 +2767,11 @@ class change_desktop
                 }
                 case PREV:
                 {
+                    if (cur_d->desktop == 1)
+                    {
+                        return;
+                    }
+
                     hide = get_clients_on_desktop(cur_d->desktop);
                     show = get_clients_on_desktop(cur_d->desktop - 1);
                     animate(show, PREV);
@@ -2770,7 +2780,7 @@ class change_desktop
                     break;
                 }
             }
-            std::this_thread::sleep_for(std::chrono::milliseconds(DURATION + 10));
+            std::this_thread::sleep_for(std::chrono::milliseconds(DURATION));
             joinAndClearThreads();
         }
 
