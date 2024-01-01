@@ -47,12 +47,21 @@
     #include <unordered_map>
     #include <xcb/xcb_image.h>
     #include <Imlib2.h>
+    #include <stdexcept>
+    #include <sys/socket.h>
+    #include <sys/un.h>
+    #include <unistd.h>
+    #include <X11/Xauth.h>
+    #include <string>
+    #include <cstring>
+    #include <netinet/in.h>
+    #include <arpa/inet.h>
+
 
     #include "structs.hpp"
     #include "Log.hpp"
     #include "defenitions.hpp"
     #include "tools.hpp"
-    #include "mxb.hpp"
 
 #endif
 
