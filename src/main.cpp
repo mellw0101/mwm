@@ -3835,7 +3835,7 @@ namespace win_tools
         xcb_unmap_window(conn, c->titlebar);
         xcb_unmap_window(conn, c->frame);
         xcb_flush(conn);
-        
+
         kill_client(conn, c->win);
         kill_client(conn, c->close_button);
         kill_client(conn, c->max_button);
@@ -3844,7 +3844,8 @@ namespace win_tools
         kill_client(conn, c->frame);
         xcb_flush(conn);
         
-        delete c;
+        removeClient(c->win);
+        client_list.erase(std::remove(client_list.begin(), client_list.end(), c), client_list.end());
 
         return 0;
     }
