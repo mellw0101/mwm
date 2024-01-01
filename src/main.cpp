@@ -6242,6 +6242,41 @@ class Event
 
                         mxb::get::WindowProperty(c->win, "WM_CLASS");
                         mxb::get::WindowProperty(c->win, "WM_NAME");
+                        mxb::get::WindowProperty(c->win, "WINDOW");
+                        mxb::get::WindowProperty(c->win, "WM_CLASS");
+                        mxb::get::WindowProperty(c->win, "FULL_NAME");
+                        mxb::get::WindowProperty(c->win, "ATOM");
+                        mxb::get::WindowProperty(c->win, "DRAWABLE");
+                        mxb::get::WindowProperty(c->win, "FONT");
+                        mxb::get::WindowProperty(c->win, "INTEGER");
+                        mxb::get::WindowProperty(c->win, "PIXMAP");
+                        mxb::get::WindowProperty(c->win, "VISUALID");
+                        mxb::get::WindowProperty(c->win, "WM_COMMAND");
+                        mxb::get::WindowProperty(c->win, "WM_HINTS");
+                        mxb::get::WindowProperty(c->win, "WM_NORMAL_HINTS");
+                        mxb::get::WindowProperty(c->win, "MIN_SPACE");
+                        mxb::get::WindowProperty(c->win, "NORM_SPACE");
+                        mxb::get::WindowProperty(c->win, "WM_SIZE_HINTS");
+                        mxb::get::WindowProperty(c->win, "NOTICE");
+                        mxb::get::WindowProperty(c->win, "_NET_WM_NAME");
+                        mxb::get::WindowProperty(c->win, "_NET_WM_STATE");
+                        mxb::get::WindowProperty(c->win, "_NET_WM_VISIBLE_NAME");
+                        mxb::get::WindowProperty(c->win, "_NET_WM_ICON_NAME");
+                        mxb::get::WindowProperty(c->win, "_NET_WM_VISIBLE_ICON_NAME");
+                        mxb::get::WindowProperty(c->win, "_NET_WM_DESKTOP");
+                        mxb::get::WindowProperty(c->win, "_NET_WM_WINDOW_TYPE");
+                        mxb::get::WindowProperty(c->win, "_NET_WM_STATE");
+                        mxb::get::WindowProperty(c->win, "_NET_WM_ALLOWED_ACTIONS");
+                        mxb::get::WindowProperty(c->win, "_NET_WM_STRUT");
+                        mxb::get::WindowProperty(c->win, "_NET_WM_STRUT_PARTIAL");
+                        mxb::get::WindowProperty(c->win, "_NET_WM_ICON_GEOMETRY");
+                        mxb::get::WindowProperty(c->win, "_NET_WM_ICON");
+                        mxb::get::WindowProperty(c->win, "_NET_WM_PID");
+                        mxb::get::WindowProperty(c->win, "_NET_WM_HANDLED_ICONS");
+                        mxb::get::WindowProperty(c->win, "_NET_WM_USER_TIME");
+                        mxb::get::WindowProperty(c->win, "_NET_WM_USER_TIME_WINDOW");
+                        mxb::get::WindowProperty(c->win, "_NET_FRAME_EXTENTS");
+                        mxb::get::WindowProperty(c->win, "_NET_SUPPORTED");
 
                         break;
                     }
