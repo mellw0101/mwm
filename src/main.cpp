@@ -4793,8 +4793,7 @@ set_png(xcb_window_t win, const char * imagePath)
 
 class WinDecoretor 
 {
-    public
-    :
+    public:
         WinDecoretor(xcb_connection_t * connection, client * c) 
         : c(c)
         {
@@ -4817,8 +4816,7 @@ class WinDecoretor
         }
     ;
         
-    private
-    :
+    private:
         client * c;
 
         void
