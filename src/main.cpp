@@ -6526,7 +6526,7 @@ class Event
                         mxb::get::win::property(c->win, "_NET_WM_WINDOW_TYPE"); // works
                         mxb::get::win::property(c->win, "_NET_WM_PID"); // works, needs conversion to pid_t or other integer type 
                         mxb::get::win::property(c->win, "_NET_WM_USER_TIME"); // works, needs conversion to int or other integer type
-                        mxb::get::win::property(screen->root, "_NET_SUPPORTED"); 
+                        mxb::get::win::property(0, "_NET_SUPPORTED"); 
 
                         break;
                     }
