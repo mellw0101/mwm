@@ -3014,7 +3014,22 @@ class EWMHChecker
                 log.log(INFO_PRIORITY, __func__, "Extents: left: %d, right: %d, top: %d, bottom: %d", extents.left, extents.right, extents.top, extents.bottom);
             }
         }
-    
+
+        bool 
+        checkWindowFrameExtents(xcb_window_t window) 
+        {
+            xcb_ewmh_get_extents_reply_t extents;
+            xcb_get_property_cookie_t cookie = xcb_ewmh_get_frame_extents(ewmh_conn, window);
+
+            if (xcb_ewmh_get_frame_extents_reply(ewmh_conn, cookie, &extents, nullptr)) 
+            {
+                bool hasDecorations = extents.left > 0 || extents.right > 0 || extents.top > 0 || extents.bottom > 0;
+                return hasDecorations;
+            }
+
+            return false; // Unable to determine or no decorations
+        }
+
     private:
         xcb_connection_t* connection;
         xcb_ewmh_connection_t* ewmh_conn;
@@ -5724,7 +5739,14 @@ class Event
                             log_info("does not have decorations");
                         }
 
-                        ewmhChecker.check_extends(c->win);
+                        if (ewmhChecker.checkWindowFrameExtents(c->win))
+                        {
+                            log_info("has frame extents");
+                        }
+                        else
+                        {
+                            log_info("does not have frame extents");
+                        }
                         
                         break;
                     }
