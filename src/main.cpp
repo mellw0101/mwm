@@ -6585,7 +6585,14 @@ class Event
                         mxb::get::win::property(c->win, "_NET_WM_PID"); // works, needs conversion to pid_t or other integer type 
                         mxb::get::win::property(c->win, "_NET_WM_USER_TIME"); // works, needs conversion to int or other integer type
 
-                        mxb::EWMH::check::isWindowNormalType(c->win);
+                        if (mxb::EWMH::check::isWindowNormalType(c->win))
+                        {
+                            log_info("is normal type");
+                        }
+                        else
+                        {
+                            log_info("is not normal type");
+                        }
 
                         break;
                     }
