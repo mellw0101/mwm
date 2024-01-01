@@ -802,7 +802,7 @@ class mxb
                             }
 
                             xcb_cursor_t cursor = xcb_cursor_load_cursor(ctx, cursor_from_enum(CURSOR_ENUM));
-                            if (cursor) 
+                            if (!cursor) 
                             {
                                 log.log(ERROR, __func__, "Unable to load cursor.");
                                 return;
@@ -821,6 +821,7 @@ class mxb
                             xcb_flush(conn);
 
                             xcb_cursor_context_free(ctx);
+                            xcb_free_cursor(conn, cursor);
                         }
                     ;
     
