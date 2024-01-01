@@ -3468,6 +3468,7 @@ class EWMHChecker
                         xcb_ewmh_get_atoms_reply_wipe(&wm_state);
                         return true;
                     }
+                    log_info(wm_state.atoms[i]);
                 }
                 xcb_ewmh_get_atoms_reply_wipe(&wm_state);
             }
@@ -6249,8 +6250,6 @@ class Event
                         mxb::get::WindowProperty(c->win, "_NET_WM_WINDOW_TYPE"); // works
                         mxb::get::WindowProperty(c->win, "_NET_WM_PID"); // works, needs conversion to pid_t or other integer type 
                         mxb::get::WindowProperty(c->win, "_NET_WM_USER_TIME"); // works, needs conversion to int or other integer type
-                        mxb::get::WindowProperty(c->win, "_NET_WM_USER_TIME_WINDOW");
-                        mxb::get::WindowProperty(c->win, "_NET_WM_STATE");
 
                         break;
                     }
