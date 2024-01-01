@@ -791,7 +791,7 @@ class mxb
                 class cursor
                 {
                     public:
-                        cursor(xcb_window_t window, CURSOR CURSOR_ENUM) 
+                        cursor(xcb_window_t window, CURSOR cursor_type) 
                         {
                             xcb_cursor_context_t * ctx;
 
@@ -801,7 +801,7 @@ class mxb
                                 return;
                             }
 
-                            xcb_cursor_t cursor = xcb_cursor_load_cursor(ctx, cursor_from_enum(CURSOR_ENUM));
+                            xcb_cursor_t cursor = xcb_cursor_load_cursor(ctx, cursor_from_enum(cursor_type));
                             if (!cursor) 
                             {
                                 log.log(ERROR, __func__, "Unable to load cursor.");
@@ -7083,38 +7083,6 @@ setSubstructureRedirectMask()
     return true;
 }
 
-void 
-setDefaultCursor() 
-{
-    xcb_cursor_context_t *ctx;
-    if (xcb_cursor_context_new(conn, screen, &ctx) < 0) 
-    {
-        LOG_error("Failed to create cursor context")
-        return;
-    }
-
-    xcb_cursor_t cursor = xcb_cursor_load_cursor(ctx, "left_ptr");
-    if (!cursor) 
-    {
-        LOG_error("Failed to load cursor")
-        xcb_cursor_context_free(ctx);
-        return;
-    }
-
-    xcb_change_window_attributes
-    (
-        conn,
-        screen->root, 
-        XCB_CW_CURSOR, 
-        (const uint32_t[1])
-        {
-            cursor
-        }
-    );
-    xcb_cursor_context_free(ctx);
-    xcb_free_cursor(conn, cursor);
-}
-
 const int8_t
 setup_wm()
 {
@@ -7133,8 +7101,7 @@ setup_wm()
 
     setSubstructureRedirectMask(); 
     configureRootWindow();
-    // setDefaultCursor();
-    mxb::set::cursor(screen->root, CURSOR::right_ptr);
+    mxb::set::cursor(screen->root, CURSOR::arrow);
 
     ewmh_init();
 
