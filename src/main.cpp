@@ -1017,6 +1017,38 @@ class mxb
                         }
                     ;
                 };
+
+                class check
+                {
+                    public:
+                        static bool
+                        active_window(xcb_window_t window)
+                        {
+                            xcb_window_t active_window = 0;
+                            xcb_ewmh_get_active_window_reply(ewmh, xcb_ewmh_get_active_window(ewmh, 0), &active_window, NULL);
+                            return window == active_window;
+                        }
+                        
+                        static bool 
+                        isWindowNormalType(xcb_window_t window) 
+                        {
+                            xcb_ewmh_get_atoms_reply_t type_reply;
+                            if (xcb_ewmh_get_wm_window_type_reply(ewmh, xcb_ewmh_get_wm_window_type(ewmh, window), &type_reply, nullptr)) 
+                            {
+                                for (unsigned int i = 0; i < type_reply.atoms_len; ++i) 
+                                {
+                                    if (type_reply.atoms[i] == ewmh->_NET_WM_WINDOW_TYPE_NORMAL) 
+                                    {
+                                        xcb_ewmh_get_atoms_reply_wipe(&type_reply);
+                                        return true;
+                                    }
+                                }
+                                xcb_ewmh_get_atoms_reply_wipe(&type_reply);
+                            }
+                            return false;
+                        }
+                    ;
+                };
             ;
 
             private:
@@ -6552,6 +6584,8 @@ class Event
                         mxb::get::win::property(c->win, "_NET_WM_WINDOW_TYPE"); // works
                         mxb::get::win::property(c->win, "_NET_WM_PID"); // works, needs conversion to pid_t or other integer type 
                         mxb::get::win::property(c->win, "_NET_WM_USER_TIME"); // works, needs conversion to int or other integer type
+
+                        mxb::EWMH::check::isWindowNormalType(c->win);
 
                         break;
                     }
