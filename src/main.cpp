@@ -535,7 +535,7 @@ class mxb
                         free(reply);
                     }
 
-                    log.log(INFO, __func__, "property value(" + std::string(atom_name) + ") = " + std::string(propertyValue));
+                    log.log(INFO, __func__, "property(" + std::string(atom_name) + ") = " + std::string(propertyValue));
                     std::string spropertyValue = std::string(propertyValue);
                     free(propertyValue);
 
