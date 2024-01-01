@@ -5018,12 +5018,6 @@ class WinDecoretor
         WinDecoretor(xcb_connection_t * connection, client * c)
         : c(c)
         {
-            if (xcb_connection_has_error(connection)) 
-            {
-                log_error("XCB connection is null.");
-                return;
-            }
-
             make_frame(c);
             log_win("c->frame: ", c->frame);
             make_titlebar(c);
