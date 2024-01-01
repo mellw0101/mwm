@@ -3844,7 +3844,7 @@ namespace win_tools
         kill_client(conn, c->frame);
         xcb_flush(conn);
         
-        removeClient(c->win);
+        delete c;
         client_list.erase(std::remove(client_list.begin(), client_list.end(), c), client_list.end());
 
         return 0;
