@@ -6364,6 +6364,11 @@ class Event
                     leave_notify_handler(ev);
                     break;
                 }
+                case XCB_MOTION_NOTIFY:
+                {
+                    motion_notify_handler(ev);
+                    break;
+                }
             }
         }
     ;
@@ -6989,6 +6994,14 @@ class Event
         {
             const auto * e = reinterpret_cast<const xcb_leave_notify_event_t *>(ev);
             // log_win("e->event: ", e->event);
+        }
+
+        void 
+        motion_notify_handler(const xcb_generic_event_t * & ev)
+        {
+            const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
+            log_win("e->event: ", e->event);
+            log_info(e->event_x);
         }
     ;
 };
