@@ -1004,6 +1004,19 @@ class mxb
                         }
                     ;
                 };
+
+                class get
+                {
+                    public:
+                        static xcb_window_t
+                        active_window()
+                        {
+                            xcb_window_t window = 0;
+                            xcb_ewmh_get_active_window_reply(ewmh, xcb_ewmh_get_active_window(ewmh, 0), &window, NULL);
+                            return window;
+                        }
+                    ;
+                };
             ;
 
             private:
@@ -6777,6 +6790,7 @@ class Event
                 wm::ungrab_button(c, L_MOUSE_BUTTON, 0);
                 wm::raise_client(c);
                 mxb::EWMH::set::active_window(c->win);
+                log_win("active_window: ", mxb::EWMH::get::active_window());
                 focused_client = c;
             }
         }
