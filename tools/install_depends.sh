@@ -54,7 +54,8 @@ install_dependencies()
                             konsole                 \
                             xinit                   \
                             libimlib2-dev           \
-                            libxau-dev
+                            libxau-dev              \
+                            libpolkit-agent-1-dev
     elif [ -x "$(command -v dnf)" ]; then
         # Fedora/RHEL
         sudo dnf install -y package1 package2
