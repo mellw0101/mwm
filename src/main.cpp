@@ -7095,9 +7095,10 @@ setup_wm()
         return -1;
     }
 
-    setup = xcb_get_setup(conn);
-    iter = xcb_setup_roots_iterator(setup);
-    screen = iter.data;
+    // setup = xcb_get_setup(conn);
+    mxb::set::_screen(xcb_setup_roots_iterator(xcb_get_setup(conn)).data);
+    // iter = xcb_setup_roots_iterator(setup);
+    // screen = iter.data;
 
     setSubstructureRedirectMask(); 
     configureRootWindow();
