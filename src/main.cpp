@@ -7361,7 +7361,6 @@ class Event
                     }
                     // log_info("L_MOUSE_BUTTON + win");
                     wm::raise_client(c);
-                    resize_client(c, mxb::get::pointer::x(), mxb::get::pointer::y());
                     focus::client(c);
                     return;
                 }
