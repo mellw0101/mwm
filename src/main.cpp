@@ -28,7 +28,7 @@ create_graphical_context(xcb_window_t window);
 
 class mxb 
 {
-    private: class XConnection 
+    public: class XConnection 
     {
         public:
             struct mxb_auth_info_t 
@@ -318,7 +318,7 @@ class mxb
             }
     };
 
-    public: XConnection * 
+    public: static XConnection * 
     mxb_connect(const char* display) 
     {
         try 
@@ -333,7 +333,7 @@ class mxb
         }
     }
 
-    public: int
+    public: static int
     mxb_connection_has_error(XConnection * conn)
     {
         try 
@@ -6787,12 +6787,12 @@ main()
         return err;
     }
 
-    // XConnection * mxb_connection = mxb_connect(nullptr);
-    // if (!mxb_connection)
-    // {
-    //     log_error("mxb_connection == nullptr");
-    //     return -1;
-    // }
+    mxb::XConnection * mxb_connection = mxb::mxb_connect(nullptr);
+    if (!mxb_connection)
+    {
+        log_error("mxb_connection == nullptr");
+        return -1;
+    }
 
     run();
     xcb_disconnect(conn);
