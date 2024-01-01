@@ -4551,6 +4551,7 @@ class resize_client
                     static_cast<const uint32_t &>(c->height + c->y - y)
                 }
             );
+            xcb_flush(conn);
         }
 
         void
