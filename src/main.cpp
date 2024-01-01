@@ -6976,6 +6976,7 @@ setDefaultCursor()
         }
     );
     xcb_cursor_context_free(ctx);
+    xcb_free_cursor(conn, cursor);
 }
 
 const int8_t
