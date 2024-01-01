@@ -903,26 +903,7 @@ class mxb
                 EWMH(xcb_connection_t* connection, xcb_ewmh_connection_t* ewmh_connection)
                 : connection(connection), ewmh_conn(ewmh_connection) {}
 
-                bool 
-                is_fullscreen(xcb_window_t window) 
-                {
-                    xcb_get_property_cookie_t cookie = xcb_ewmh_get_wm_state(ewmh_conn, window);
-                    xcb_ewmh_get_atoms_reply_t wm_state;
-                    if (xcb_ewmh_get_wm_state_reply(ewmh_conn, cookie, &wm_state, NULL) == 1) 
-                    {
-                        for (unsigned int i = 0; i < wm_state.atoms_len; i++) 
-                        {
-                            log_info(mxb::get::AtomName(wm_state.atoms[i]));
-                            if (wm_state.atoms[i] == ewmh_conn->_NET_WM_STATE_FULLSCREEN) 
-                            {
-                                xcb_ewmh_get_atoms_reply_wipe(&wm_state);
-                                return true;
-                            }
-                        }
-                        xcb_ewmh_get_atoms_reply_wipe(&wm_state);
-                    }
-                    return false;
-                }
+                
 
                 // Function to check the type of a window
                 std::vector<std::string> 
@@ -1044,6 +1025,27 @@ class mxb
                                     }
                                 }
                                 xcb_ewmh_get_atoms_reply_wipe(&type_reply);
+                            }
+                            return false;
+                        }
+
+                        static bool 
+                        is_window_fullscreen(xcb_window_t window) 
+                        {
+                            xcb_get_property_cookie_t cookie = xcb_ewmh_get_wm_state(ewmh, window);
+                            xcb_ewmh_get_atoms_reply_t wm_state;
+                            if (xcb_ewmh_get_wm_state_reply(ewmh, cookie, &wm_state, NULL) == 1) 
+                            {
+                                for (unsigned int i = 0; i < wm_state.atoms_len; i++) 
+                                {
+                                    log_info(mxb::get::AtomName(wm_state.atoms[i]));
+                                    if (wm_state.atoms[i] == ewmh->_NET_WM_STATE_FULLSCREEN) 
+                                    {
+                                        xcb_ewmh_get_atoms_reply_wipe(&wm_state);
+                                        return true;
+                                    }
+                                }
+                                xcb_ewmh_get_atoms_reply_wipe(&wm_state);
                             }
                             return false;
                         }
@@ -4399,8 +4401,7 @@ class max_win
             {
                 case EWMH_MAXWIN:
                 {
-                    mxb::EWMH ewmh_checker(conn, ewmh);
-                    if (ewmh_checker.is_fullscreen(c->win))
+                    if (mxb::EWMH::check::is_window_fullscreen(c->win))
                     {
                         ewmh_unmax_win(c);
                     }
@@ -5816,6 +5817,11 @@ class tile
     public:
         tile(client * & c, TILE tile)
         {
+            if (mxb::EWMH::check::is_window_fullscreen(c->win))
+            {
+                return;
+            }
+
             switch (tile) 
             {
                 case TILE::LEFT:
