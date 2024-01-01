@@ -1748,6 +1748,11 @@ class mv_client
         mv_client(client * & c, const uint16_t & start_x, const uint16_t & start_y) 
         : c(c), start_x(start_x), start_y(start_y)
         {
+            if (mxb::EWMH::check::is_window_fullscreen(c->win))
+            {
+                return;
+            }
+
             // log.log(FUNC, __func__);
             grab_pointer();
 
@@ -3929,6 +3934,11 @@ class resize_client
         resize_client(client * & c , int retard_int) 
         : c(c) 
         {
+            if (mxb::EWMH::check::is_window_fullscreen(c->win))
+            {
+                return;
+            }
+
             grab_pointer();
             
             teleport_mouse(c->x + c->width, c->y + c->height); /* 
