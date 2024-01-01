@@ -1210,25 +1210,25 @@ class mxb
                             const uint32_t & y = mxb::get::pointer::y();
 
                             // TOP EDGE OF CLIENT
-                            if (y > c->y - prox && y < c->y)
+                            if (y > c->y - prox && y <= c->y)
                             {
                                 return edge::TOP;
                             }
 
                             // BOTTOM EDGE OF CLIENT
-                            if (y > c->y + c->height && y < c->y + c->height + prox)
+                            if (y >= c->y + c->height && y < c->y + c->height + prox)
                             {
                                 return edge::BOTTOM_edge;
                             }
 
                             // LEFT EDGE OF CLIENT
-                            if (x > c->x - prox && x < c->x)
+                            if (x > c->x - prox && x <= c->x)
                             {
                                 return edge::LEFT;
                             }
 
                             // RIGHT EDGE OF CLIENT
-                            if (x > c->x + c->width && x < c->x + c->width + prox)
+                            if (x >= c->x + c->width && x < c->x + c->width + prox)
                             {
                                 return edge::RIGHT;
                             }
