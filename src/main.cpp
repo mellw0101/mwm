@@ -1172,25 +1172,25 @@ class mxb
                             for (const auto & c : cur_d->current_clients)
                             {
                                 // LEFT EDGE OF CLIENT
-                                if (x > c->x - prox && x < c->x + prox)
+                                if (x > c->x - prox && x <= c->x)
                                 {
                                     return c;
                                 }
 
                                 // RIGHT EDGE OF CLIENT
-                                if (x > c->x + c->width - prox && x < c->x + c->width + prox)
+                                if (x >= c->x + c->width && x < c->x + c->width + prox)
                                 {
                                     return c;
                                 }
 
                                 // TOP EDGE OF CLIENT
-                                if (y > c->y - prox && y < c->y + prox)
+                                if (y > c->y - prox && y <= c->y)
                                 {
                                     return c;
                                 }
 
                                 // BOTTOM EDGE OF CLIENT
-                                if (y > c->y + c->height - prox && y < c->y + c->height + prox)
+                                if (y >= c->y + c->height && y < c->y + c->height + prox)
                                 {
                                     return c;
                                 }
