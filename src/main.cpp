@@ -6241,6 +6241,7 @@ class Event
                         }
 
                         mxb::get::WindowProperty(c->win, "WM_CLASS");
+                        mxb::get::WindowProperty(c->win, "WM_NAME");
 
                         break;
                     }
@@ -6617,7 +6618,7 @@ ewmh_init()
         exit(1);
     }
 
-    const char * str = "XCBWM";
+    const char * str = "mwm";
     mxb::check::err
     (
         conn, 
