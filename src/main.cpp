@@ -6242,12 +6242,12 @@ class Event
 
                         mxb::get::WindowProperty(c->win, "WM_CLASS");
                         mxb::get::WindowProperty(c->win, "WM_NAME");
-                        mxb::get::WindowProperty(c->win, "WINDOW");
+                        mxb::get::WindowProperty(c->win, "WM_WINDOW");
                         mxb::get::WindowProperty(c->win, "WM_CLASS");
-                        mxb::get::WindowProperty(c->win, "FULL_NAME");
-                        mxb::get::WindowProperty(c->win, "ATOM");
-                        mxb::get::WindowProperty(c->win, "DRAWABLE");
-                        mxb::get::WindowProperty(c->win, "FONT");
+                        mxb::get::WindowProperty(c->win, "WM_FULL_NAME");
+                        mxb::get::WindowProperty(c->win, "WM_ATOM");
+                        mxb::get::WindowProperty(c->win, "WM_DRAWABLE");
+                        mxb::get::WindowProperty(c->win, "WM_FONT");
                         mxb::get::WindowProperty(c->win, "INTEGER");
                         mxb::get::WindowProperty(c->win, "PIXMAP");
                         mxb::get::WindowProperty(c->win, "VISUALID");
