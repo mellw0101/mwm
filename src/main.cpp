@@ -5176,7 +5176,7 @@ class WinDecoretor
             xcb_map_window(conn, c->frame);
             xcb_flush(conn);
 
-            uint32_t mask = XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY | XCB_EVENT_MASK_ENTER_WINDOW;
+            uint32_t mask = XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY;
             apply_event_mask(&mask, c->frame);
             xcb_flush(conn);
         }
