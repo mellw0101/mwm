@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <string>
 #include <xcb/xcb.h>
+#include <xcb/xcb_ewmh.h>
 #include <xcb/xproto.h>
 #define main_cpp
 #include "include.hpp"
@@ -701,6 +702,45 @@ class mxb
                                 height = 200;
                             }
                             return height;
+                        }
+                    ;
+                };
+
+                class pointer
+                {
+                    public:
+                        static uint32_t
+                        x()
+                        {
+                            xcb_query_pointer_cookie_t cookie = xcb_query_pointer(conn, screen->root);
+                            xcb_query_pointer_reply_t * reply = xcb_query_pointer_reply(conn, cookie, nullptr);
+                            if (!reply) 
+                            {
+                                log_error("reply is nullptr.");
+                                return 0;                            
+                            } 
+
+                            uint32_t x;
+                            x = reply->root_x;
+                            free(reply);
+                            return x;
+                        }
+                        
+                        static uint32_t
+                        y()
+                        {
+                            xcb_query_pointer_cookie_t cookie = xcb_query_pointer(conn, screen->root);
+                            xcb_query_pointer_reply_t * reply = xcb_query_pointer_reply(conn, cookie, nullptr);
+                            if (!reply) 
+                            {
+                                log_error("reply is nullptr.");
+                                return 0;                            
+                            } 
+
+                            uint32_t y;
+                            y = reply->root_y;
+                            free(reply);
+                            return y;
                         }
                     ;
                 };
@@ -4014,11 +4054,48 @@ class resize_client
             xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
             xcb_flush(conn);
         }
+
+        resize_client(client * & c, const uint32_t & x, const uint32_t & y)
+        : c(c), x(x), y(y)
+        {
+            if (mxb::EWMH::check::is_window_fullscreen(c->win))
+            {
+                return;
+            }
+
+            if (!calc())
+            {
+                log_info("false");
+                return;
+            }
+            else 
+            {
+                log_info("true");
+            }
+        }
     ;
 
     private:
         client * & c;
-
+        uint32_t x;
+        uint32_t y;
+        
+        bool
+        calc()
+        {
+            for (const auto & c : cur_d->current_clients)
+            {
+                if (c)
+                {
+                    if (y > c->y + c->height - 5 && y < c->y + c->height)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+        
         void
         grab_pointer()
         {
@@ -4151,6 +4228,104 @@ class resize_client
                 (const uint32_t[2])
                 {
                     static_cast<const uint32_t &>(width - 60)
+                }
+            );
+        }
+
+        void
+        resize_win_width(const uint16_t & width)
+        {
+            // CONFIGURE THE WINDOW WITH THE NEW WIDTH AND HEIGHT
+            xcb_configure_window 
+            (
+                conn,
+                c->win,
+                XCB_CONFIG_WINDOW_WIDTH,
+                (const uint32_t[1])
+                {
+                    static_cast<const uint32_t &>(width) 
+                }
+            );
+
+            xcb_configure_window 
+            (
+                conn,
+                c->frame,
+                XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
+                (const uint32_t[1])
+                {
+                    static_cast<const uint32_t &>(width) 
+                }
+            );
+
+            xcb_configure_window 
+            (
+                conn,
+                c->titlebar,
+                XCB_CONFIG_WINDOW_WIDTH,
+                (const uint32_t[1])
+                {
+                    static_cast<const uint32_t &>(width)
+                }
+            );
+
+            xcb_configure_window 
+            (
+                conn,
+                c->close_button,
+                XCB_CONFIG_WINDOW_X,
+                (const uint32_t[1])
+                {
+                    static_cast<const uint32_t &>(width - 20)
+                }
+            );
+
+            xcb_configure_window 
+            (
+                conn,
+                c->max_button,
+                XCB_CONFIG_WINDOW_X,
+                (const uint32_t[1])
+                {
+                    static_cast<const uint32_t &>(width - 40)
+                }
+            );
+
+            xcb_configure_window 
+            (
+                conn,
+                c->min_button,
+                XCB_CONFIG_WINDOW_X,
+                (const uint32_t[1])
+                {
+                    static_cast<const uint32_t &>(width - 60)
+                }
+            );
+        }
+
+        void
+        resize_win_height(const uint16_t & height)
+        {
+            // CONFIGURE THE WINDOW WITH THE NEW WIDTH AND HEIGHT
+            xcb_configure_window 
+            (
+                conn,
+                c->win,
+                XCB_CONFIG_WINDOW_HEIGHT,
+                (const uint32_t[1])
+                {
+                    static_cast<const uint32_t &>(height - 20)
+                }
+            );
+
+            xcb_configure_window 
+            (
+                conn,
+                c->frame,
+                XCB_CONFIG_WINDOW_HEIGHT,
+                (const uint32_t[2])
+                {
+                    static_cast<const uint32_t &>(height)
                 }
             );
         }
@@ -5473,11 +5648,9 @@ class WinManager
             WinDecoretor(conn ,c);
             
             uint32_t mask = 
-            XCB_EVENT_MASK_FOCUS_CHANGE    | 
-            XCB_EVENT_MASK_ENTER_WINDOW    |
-            XCB_EVENT_MASK_LEAVE_WINDOW    |
-            XCB_EVENT_MASK_POINTER_MOTION  |
-            XCB_EVENT_MASK_STRUCTURE_NOTIFY;
+            XCB_EVENT_MASK_FOCUS_CHANGE  | 
+            XCB_EVENT_MASK_ENTER_WINDOW  |
+            XCB_EVENT_MASK_LEAVE_WINDOW  ;
             mxb::set::event_mask(& mask, c->win);
 
             get::name(c);
@@ -6873,6 +7046,7 @@ class Event
                     }
                     // log_info("L_MOUSE_BUTTON + win");
                     wm::raise_client(c);
+                    resize_client(c, mxb::get::pointer::x(), mxb::get::pointer::y());
                     focus::client(c);
                     return;
                 }
