@@ -84,6 +84,14 @@ enum show_hide
     HIDE
 };
 
+enum class edge
+{
+    NONE,
+    LEFT,
+    RIGHT,
+    TOP,
+    BOTTOM_edge
+};
 
 enum Direction 
 {

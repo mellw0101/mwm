@@ -1,3 +1,5 @@
+#include "structs.hpp"
+#include <xcb/xproto.h>
 #define main_cpp
 #include "include.hpp"
 // #include "mxb.hpp"
@@ -1156,42 +1158,85 @@ class mxb
             ;
         };
 
-        class calc
+        class Client 
         {
             public:
-                static bool
-                client_edge_prox_to_pointer(const int & prox)
+                class calc
                 {
-                    const uint32_t & x = mxb::get::pointer::x();
-                    const uint32_t & y = mxb::get::pointer::y();
-                    for (const auto & c : cur_d->current_clients)
-                    {
-                        // LEFT EDGE OF CLIENT
-                        if (x > c->x - prox && x < c->x + prox)
+                    public:
+                        static client *
+                        client_edge_prox_to_pointer(const int & prox)
                         {
-                            return true;
-                        }
+                            const uint32_t & x = mxb::get::pointer::x();
+                            const uint32_t & y = mxb::get::pointer::y();
+                            for (const auto & c : cur_d->current_clients)
+                            {
+                                // LEFT EDGE OF CLIENT
+                                if (x > c->x - prox && x < c->x + prox)
+                                {
+                                    return c;
+                                }
 
-                        // RIGHT EDGE OF CLIENT
-                        if (x > c->x + c->width - prox && x < c->x + c->width + prox)
-                        {
-                            return true;
-                        }
+                                // RIGHT EDGE OF CLIENT
+                                if (x > c->x + c->width - prox && x < c->x + c->width + prox)
+                                {
+                                    return c;
+                                }
 
-                        // TOP EDGE OF CLIENT
-                        if (y > c->y - prox && y < c->y + prox)
-                        {
-                            return true;
-                        }
+                                // TOP EDGE OF CLIENT
+                                if (y > c->y - prox && y < c->y + prox)
+                                {
+                                    return c;
+                                }
 
-                        // BOTTOM EDGE OF CLIENT
-                        if (y > c->y + c->height - prox && y < c->y + c->height + prox)
-                        {
-                            return true;
+                                // BOTTOM EDGE OF CLIENT
+                                if (y > c->y + c->height - prox && y < c->y + c->height + prox)
+                                {
+                                    return c;
+                                }
+                            }
+                            return nullptr;
                         }
-                    }
-                    return false;
-                }
+                    ;
+                };  
+
+                class get
+                {
+                    public:    
+                        static edge
+                        client_edge(client * c, const int & prox)
+                        {
+                            const uint32_t & x = mxb::get::pointer::x();
+                            const uint32_t & y = mxb::get::pointer::y();
+
+                            // TOP EDGE OF CLIENT
+                            if (y > c->y - prox && y < c->y + prox)
+                            {
+                                return edge::TOP;
+                            }
+
+                            // BOTTOM EDGE OF CLIENT
+                            if (y > c->y + c->height - prox && y < c->y + c->height + prox)
+                            {
+                                return edge::BOTTOM_edge;
+                            }
+
+                            // LEFT EDGE OF CLIENT
+                            if (x > c->x - prox && x < c->x + prox)
+                            {
+                                return edge::LEFT;
+                            }
+
+                            // RIGHT EDGE OF CLIENT
+                            if (x > c->x + c->width - prox && x < c->x + c->width + prox)
+                            {
+                                return edge::RIGHT;
+                            }
+
+                            return edge::NONE;
+                        }
+                    ;
+                };
             ;
         };
     ;
@@ -4094,14 +4139,15 @@ class resize_client
             {
                 return;
             }
-
-            if (!calc())
-            {
-                log_info("false");
-                return;
-            }
             
+            grab_pointer();
 
+            teleport_mouse(mxb::Client::get::client_edge(c, 10));
+
+            run(mxb::Client::get::client_edge(c, 10));
+
+            xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
+            xcb_flush(conn);
         }
     ;
 
@@ -4109,22 +4155,6 @@ class resize_client
         client * & c;
         uint32_t x;
         uint32_t y;
-        
-        bool
-        calc()
-        {
-            for (const auto & c : cur_d->current_clients)
-            {
-                if (c)
-                {
-                    if (y > c->y + c->height - 5 && y < c->y + c->height)
-                    {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
         
         void
         grab_pointer()
@@ -4170,6 +4200,86 @@ class resize_client
                 y
             );
             xcb_flush(conn);
+        }
+
+        void 
+        teleport_mouse(edge edge) 
+        {
+            switch (edge) 
+            {
+                case edge::TOP:
+                {
+
+                    xcb_warp_pointer
+                    (
+                        conn, 
+                        XCB_NONE, 
+                        screen->root, 
+                        0, 
+                        0, 
+                        0, 
+                        0, 
+                        mxb::get::pointer::x(), 
+                        y
+                    );
+                    xcb_flush(conn);
+                }
+                case edge::BOTTOM_edge:
+                {
+                    xcb_warp_pointer
+                    (
+                        conn, 
+                        XCB_NONE, 
+                        screen->root, 
+                        0, 
+                        0, 
+                        0, 
+                        0, 
+                        mxb::get::pointer::x(), 
+                        c->y + c->height
+                    );
+                    xcb_flush(conn);
+                } 
+
+                case edge::LEFT:
+                {
+                    xcb_warp_pointer
+                    (
+                        conn, 
+                        XCB_NONE, 
+                        screen->root, 
+                        0, 
+                        0, 
+                        0, 
+                        0, 
+                        c->x, 
+                        mxb::get::pointer::y()
+                    );
+                    xcb_flush(conn);
+                }
+
+                case edge::RIGHT:
+                {
+                    xcb_warp_pointer
+                    (
+                        conn, 
+                        XCB_NONE, 
+                        screen->root, 
+                        0, 
+                        0, 
+                        0, 
+                        0, 
+                        c->x + c->width, 
+                        mxb::get::pointer::y()
+                    );
+                    xcb_flush(conn);
+                }
+                
+                case edge::NONE:
+                {
+                    return;
+                }
+            }
         }
 
         void
@@ -4423,6 +4533,172 @@ class resize_client
                 }
                 // Free the event memory after processing
                 free(ev); 
+            }
+        }
+
+        void /* 
+            THIS IS THE MAIN EVENT LOOP FOR 'resize_client'
+         */
+        run(edge edge)
+        {
+            switch (edge)
+            {
+                case edge::TOP:
+                {
+                    xcb_generic_event_t * ev;
+                    bool shouldContinue = true;
+
+                    // Wait for motion events and handle window resizing
+                    while (shouldContinue) 
+                    {
+                        ev = xcb_wait_for_event(conn);
+                        if (!ev) 
+                        {
+                            continue;
+                        }
+
+                        switch (ev->response_type & ~0x80) 
+                        {
+                            case XCB_MOTION_NOTIFY: 
+                            {
+                                const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
+                                if (isTimeToRender())
+                                {
+                                    resize_win_height(e->root_y);
+                                    xcb_flush(conn); 
+                                }
+                                break;
+                            }
+                            case XCB_BUTTON_RELEASE: 
+                            {
+                                shouldContinue = false;                        
+                                wm::update_client(c); 
+                                break;
+                            }
+                        }
+                        // Free the event memory after processing
+                        free(ev); 
+                    }
+                }
+
+                case edge::BOTTOM_edge:
+                {
+                    xcb_generic_event_t * ev;
+                    bool shouldContinue = true;
+
+                    // Wait for motion events and handle window resizing
+                    while (shouldContinue) 
+                    {
+                        ev = xcb_wait_for_event(conn);
+                        if (!ev) 
+                        {
+                            continue;
+                        }
+
+                        switch (ev->response_type & ~0x80) 
+                        {
+                            case XCB_MOTION_NOTIFY: 
+                            {
+                                const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
+                                if (isTimeToRender())
+                                {
+                                    resize_win_height(e->root_y);
+                                    xcb_flush(conn); 
+                                }
+                                break;
+                            }
+                            case XCB_BUTTON_RELEASE: 
+                            {
+                                shouldContinue = false;                        
+                                wm::update_client(c); 
+                                break;
+                            }
+                        }
+                        // Free the event memory after processing
+                        free(ev); 
+                    }
+                }
+
+                case edge::LEFT:
+                {
+                    xcb_generic_event_t * ev;
+                    bool shouldContinue = true;
+
+                    // Wait for motion events and handle window resizing
+                    while (shouldContinue) 
+                    {
+                        ev = xcb_wait_for_event(conn);
+                        if (!ev) 
+                        {
+                            continue;
+                        }
+
+                        switch (ev->response_type & ~0x80) 
+                        {
+                            case XCB_MOTION_NOTIFY: 
+                            {
+                                const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
+                                if (isTimeToRender())
+                                {
+                                    resize_win_width(e->root_x);
+                                    xcb_flush(conn); 
+                                }
+                                break;
+                            }
+                            case XCB_BUTTON_RELEASE: 
+                            {
+                                shouldContinue = false;                        
+                                wm::update_client(c); 
+                                break;
+                            }
+                        }
+                        // Free the event memory after processing
+                        free(ev); 
+                    }
+                }
+
+                case edge::RIGHT:
+                {
+                    xcb_generic_event_t * ev;
+                    bool shouldContinue = true;
+
+                    // Wait for motion events and handle window resizing
+                    while (shouldContinue) 
+                    {
+                        ev = xcb_wait_for_event(conn);
+                        if (!ev) 
+                        {
+                            continue;
+                        }
+
+                        switch (ev->response_type & ~0x80) 
+                        {
+                            case XCB_MOTION_NOTIFY: 
+                            {
+                                const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
+                                if (isTimeToRender())
+                                {
+                                    resize_win_width(e->root_x);
+                                    xcb_flush(conn); 
+                                }
+                                break;
+                            }
+                            case XCB_BUTTON_RELEASE: 
+                            {
+                                shouldContinue = false;                        
+                                wm::update_client(c); 
+                                break;
+                            }
+                        }
+                        // Free the event memory after processing
+                        free(ev); 
+                    }
+                }
+
+                case edge::NONE:
+                {
+                    return;
+                }
             }
         }
 
@@ -7028,16 +7304,16 @@ class Event
         {
             const auto * e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
             // log_win("e->event: ", e->event);
-            if (mxb::calc::client_edge_prox_to_pointer(10))
+            client * c = mxb::Client::calc::client_edge_prox_to_pointer(10);
+            if (c)
             {
-                log_info("client_edge_prox_to_pointer = true");
+                wm::raise_client(c);
+                resize_client(c, 0, 0);
+                focus::client(c);
+                return;
             }
-            else 
-            {
-                log_info("client_edge_prox_to_pointer = false");
-            }
-            
-            client * c = get::client_from_all_win(& e->event);
+
+            c = get::client_from_all_win(& e->event);
             if (!c)
             {
                 // log_error("c == null");
