@@ -4391,7 +4391,7 @@ class resize_client
             (
                 conn,
                 c->frame,
-                XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
+                XCB_CONFIG_WINDOW_WIDTH,
                 (const uint32_t[1])
                 {
                     static_cast<const uint32_t &>(width) 
