@@ -487,6 +487,27 @@ class mxb
                 }
 
                 static std::string 
+                AtomName(xcb_atom_t atom) 
+                {
+                    xcb_get_atom_name_cookie_t cookie = xcb_get_atom_name(conn, atom);
+                    xcb_get_atom_name_reply_t* reply = xcb_get_atom_name_reply(conn, cookie, nullptr);
+
+                    if (!reply) 
+                    {
+                        log_error("reply is nullptr.");
+                        return "";
+                    }
+
+                    int name_len = xcb_get_atom_name_name_length(reply);
+                    char* name = xcb_get_atom_name_name(reply);
+
+                    std::string atomName(name, name + name_len);
+
+                    free(reply);
+                    return atomName;
+                }
+
+                static std::string 
                 WindowProperty(xcb_window_t window, const char * atom_name) 
                 {
                     xcb_get_property_reply_t *reply;
@@ -3468,7 +3489,7 @@ class EWMHChecker
                         xcb_ewmh_get_atoms_reply_wipe(&wm_state);
                         return true;
                     }
-                    log_info(wm_state.atoms[i]);
+                    log_info(mxb::get::AtomName(wm_state.atoms[i]));
                 }
                 xcb_ewmh_get_atoms_reply_wipe(&wm_state);
             }
