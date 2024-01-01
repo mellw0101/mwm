@@ -794,7 +794,6 @@ class mxb
                         cursor(xcb_window_t window, CURSOR CURSOR_ENUM) 
                         {
                             xcb_cursor_context_t * ctx;
-                            xcb_cursor_t cursor;
 
                             if (xcb_cursor_context_new(conn, screen, &ctx) < 0) 
                             {
@@ -802,7 +801,7 @@ class mxb
                                 return;
                             }
 
-                            cursor = xcb_cursor_load_cursor(ctx, cursor_from_enum(CURSOR_ENUM));
+                            xcb_cursor_t cursor = xcb_cursor_load_cursor(ctx, cursor_from_enum(CURSOR_ENUM));
                             if (cursor) 
                             {
                                 log.log(ERROR, __func__, "Unable to load cursor.");
@@ -822,7 +821,6 @@ class mxb
                             xcb_flush(conn);
 
                             xcb_cursor_context_free(ctx);
-                            xcb_free_cursor(conn, cursor);
                         }
                     ;
     
