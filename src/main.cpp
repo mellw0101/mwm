@@ -3835,7 +3835,7 @@ namespace win_tools
         kill_client(conn, c->frame);
         xcb_flush(conn);
         
-        removeClient(c->win);
+        delete c;
 
         return 0;
     }
@@ -5965,7 +5965,7 @@ class Event
             WinManager::kill_client(conn, c->titlebar);
             WinManager::kill_client(conn, c->frame);
             xcb_flush(conn);
-            removeClient(c->win);
+            delete c;
         }
 
         void
