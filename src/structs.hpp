@@ -106,6 +106,8 @@ struct size_pos
 
 struct client 
 {
+    const char * name = "";
+
 	xcb_window_t win;
     xcb_window_t frame;
     xcb_window_t titlebar;

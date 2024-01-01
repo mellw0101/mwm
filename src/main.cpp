@@ -28,490 +28,579 @@ create_graphical_context(xcb_window_t window);
 
 class mxb 
 {
-    public: class XConnection 
-    {
-        public:
-            struct mxb_auth_info_t 
-            {
-                int namelen;
-                char* name;
-                int datalen;
-                char* data;
-            };
-
-            XConnection(const char * display) 
-            {
-                std::string socketPath = getSocketPath(display);
-
-                // Initialize address
-                memset(&addr, 0, sizeof(addr));
-                addr.sun_family = AF_UNIX;
-                strncpy(addr.sun_path, socketPath.c_str(), sizeof(addr.sun_path) - 1);
-
-                // Create socket
-                fd = socket(AF_UNIX, SOCK_STREAM, 0);
-                if (fd == -1) 
+    public: 
+        class XConnection 
+        {
+            public:
+                struct mxb_auth_info_t 
                 {
-                    throw std::runtime_error("Failed to create socket");
-                }
+                    int namelen;
+                    char* name;
+                    int datalen;
+                    char* data;
+                };
 
-                // Connect to the X server's socket
-                if (connect(fd, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr)) == -1) 
+                XConnection(const char * display) 
                 {
-                    ::close(fd);
-                    throw std::runtime_error("Failed to connect to X server");
-                }
+                    std::string socketPath = getSocketPath(display);
 
-                // Perform authentication
-                int displayNumber = parseDisplayNumber(display);
-                if (!authenticate_x11_connection(displayNumber, auth_info)) 
-                {
-                    ::close(fd);
-                    throw std::runtime_error("Failed to authenticate with X server");
-                }
-            }
+                    // Initialize address
+                    memset(&addr, 0, sizeof(addr));
+                    addr.sun_family = AF_UNIX;
+                    strncpy(addr.sun_path, socketPath.c_str(), sizeof(addr.sun_path) - 1);
 
-            ~XConnection() 
-            {
-                if (fd != -1) 
-                {
-                    ::close(fd);
-                }
-                delete[] auth_info.name;
-                delete[] auth_info.data;
-            }
-
-            int 
-            getFd() const 
-            {
-                return fd;
-            }
-
-            void 
-            confirmConnection() 
-            {
-                const std::string extensionName = "BIG-REQUESTS";  // Example extension
-                uint16_t nameLength = static_cast<uint16_t>(extensionName.length());
-
-                // Calculate the total length of the request in 4-byte units, including padding
-                uint16_t requestLength = htons((8 + nameLength + 3) / 4); // Length in 4-byte units
-                char request[32] = {0};  // 32 bytes is enough for most requests
-                request[0] = 98;         // Opcode for QueryExtension
-                request[1] = 0;          // Unused
-                request[2] = (requestLength >> 8) & 0xFF;  // Length (high byte)
-                request[3] = requestLength & 0xFF;         // Length (low byte)
-                request[4] = nameLength & 0xFF;            // Length of the extension name (low byte)
-                request[5] = (nameLength >> 8) & 0xFF;     // Length of the extension name (high byte)
-                std::memcpy(&request[8], extensionName.c_str(), nameLength); // Copy the extension name
-
-                // Send the request
-                if (send(fd, request, 8 + nameLength, 0) == -1) 
-                {
-                    throw std::runtime_error("Failed to send QueryExtension request");
-                }
-
-                // Prepare to receive the response
-                char reply[32] = {0}; // Buffer to hold the response
-                int received = 0;     // Number of bytes received so far
-
-                // Read the response from the server
-                while (received < sizeof(reply)) 
-                {
-                    int n = recv(fd, reply + received, sizeof(reply) - received, 0);
-                    if (n == -1) 
+                    // Create socket
+                    fd = socket(AF_UNIX, SOCK_STREAM, 0);
+                    if (fd == -1) 
                     {
-                        throw std::runtime_error("Failed to receive QueryExtension reply");
+                        throw std::runtime_error("Failed to create socket");
                     }
-                    else if (n == 0) 
+
+                    // Connect to the X server's socket
+                    if (connect(fd, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr)) == -1) 
                     {
-                        throw std::runtime_error("Connection closed by X server");
+                        ::close(fd);
+                        throw std::runtime_error("Failed to connect to X server");
                     }
-                    received += n;
-                }
 
-                // Process the reply
-                // Check if the first byte is 1 (indicating a reply)
-                if (reply[0] != 1) 
-                {
-                    throw std::runtime_error("Invalid response received from X server");
-                }
-
-                // Check if the extension is present
-                bool extensionPresent = reply[1];
-                if (extensionPresent) 
-                {
-                    log_info("BIG-REQUESTS extension is supported by the X server.");
-                } 
-                else 
-                {
-                    log_info("BIG-REQUESTS extension is not supported by the X server.");
-                }
-            }
-
-            std::string 
-            sendMessage(const std::string & extensionName) 
-            {
-                uint16_t nameLength = static_cast<uint16_t>(extensionName.length());
-
-                // Calculate the total length of the request in 4-byte units, including padding
-                uint16_t requestLength = htons((8 + nameLength + 3) / 4); // Length in 4-byte units
-                char request[32] = {0};  // 32 bytes is enough for most requests
-                request[0] = 98;         // Opcode for QueryExtension
-                request[1] = 0;          // Unused
-                request[2] = (requestLength >> 8) & 0xFF;  // Length (high byte)
-                request[3] = requestLength & 0xFF;         // Length (low byte)
-                request[4] = nameLength & 0xFF;            // Length of the extension name (low byte)
-                request[5] = (nameLength >> 8) & 0xFF;     // Length of the extension name (high byte)
-                std::memcpy(&request[8], extensionName.c_str(), nameLength); // Copy the extension name
-
-                // Send the request
-                if (send(fd, request, 8 + nameLength, 0) == -1) 
-                {
-                    throw std::runtime_error("Failed to send QueryExtension request");
-                }
-
-                // Prepare to receive the response
-                char reply[32] = {0}; // Buffer to hold the response
-                int received = 0;     // Number of bytes received so far
-
-                // Read the response from the server
-                while (received < sizeof(reply)) 
-                {
-                    int n = recv(fd, reply + received, sizeof(reply) - received, 0);
-                    if (n == -1) 
+                    // Perform authentication
+                    int displayNumber = parseDisplayNumber(display);
+                    if (!authenticate_x11_connection(displayNumber, auth_info)) 
                     {
-                        throw std::runtime_error("Failed to receive QueryExtension reply");
+                        ::close(fd);
+                        throw std::runtime_error("Failed to authenticate with X server");
                     }
-                    else if (n == 0) 
+                }
+
+                ~XConnection() 
+                {
+                    if (fd != -1) 
                     {
-                        throw std::runtime_error("Connection closed by X server");
+                        ::close(fd);
                     }
-                    received += n;
+                    delete[] auth_info.name;
+                    delete[] auth_info.data;
                 }
 
-                // Process the reply
-                // Check if the first byte is 1 (indicating a reply)
-                if (reply[0] != 1) 
+                int 
+                getFd() const 
                 {
-                    throw std::runtime_error("Invalid response received from X server");
+                    return fd;
                 }
 
-                // Check if the extension is present
-                bool extensionPresent = reply[1];
-                if (extensionPresent) 
+                void 
+                confirmConnection() 
                 {
-                    return "Extension is supported by the X server.";
-                } 
-                else 
-                {
-                    return "Extension is not supported by the X server.";
-                }
-            }
+                    const std::string extensionName = "BIG-REQUESTS";  // Example extension
+                    uint16_t nameLength = static_cast<uint16_t>(extensionName.length());
 
-        private:
-            int fd;
-            struct sockaddr_un addr;
-            mxb_auth_info_t auth_info;
-            Logger log;
+                    // Calculate the total length of the request in 4-byte units, including padding
+                    uint16_t requestLength = htons((8 + nameLength + 3) / 4); // Length in 4-byte units
+                    char request[32] = {0};  // 32 bytes is enough for most requests
+                    request[0] = 98;         // Opcode for QueryExtension
+                    request[1] = 0;          // Unused
+                    request[2] = (requestLength >> 8) & 0xFF;  // Length (high byte)
+                    request[3] = requestLength & 0xFF;         // Length (low byte)
+                    request[4] = nameLength & 0xFF;            // Length of the extension name (low byte)
+                    request[5] = (nameLength >> 8) & 0xFF;     // Length of the extension name (high byte)
+                    std::memcpy(&request[8], extensionName.c_str(), nameLength); // Copy the extension name
 
-            // Function to authenticate an X11 connection
-            bool 
-            authenticate_x11_connection(int display_number, mxb_auth_info_t & auth_info) 
-            {
-                // Try to get the XAUTHORITY environment variable; fall back to default
-                const char* xauthority_env = std::getenv("XAUTHORITY");
-                std::string xauthority_file = xauthority_env ? xauthority_env : "~/.Xauthority";
-
-                // Open the Xauthority file
-                FILE* auth_file = fopen(xauthority_file.c_str(), "rb");
-                if (!auth_file) 
-                {
-                    // Handle error: Failed to open .Xauthority file
-                    return false;
-                }
-
-                Xauth* xauth_entry;
-                bool found = false;
-                while ((xauth_entry = XauReadAuth(auth_file)) != nullptr) 
-                {
-                    // Check if the entry matches your display number
-                    // Assuming display_number is the display you're interested in
-                    if (std::to_string(display_number) == std::string(xauth_entry->number, xauth_entry->number_length)) 
+                    // Send the request
+                    if (send(fd, request, 8 + nameLength, 0) == -1) 
                     {
-                        // Fill the auth_info structure
-                        auth_info.namelen = xauth_entry->name_length;
-                        auth_info.name = new char[xauth_entry->name_length];
-                        std::memcpy(auth_info.name, xauth_entry->name, xauth_entry->name_length);
-
-                        auth_info.datalen = xauth_entry->data_length;
-                        auth_info.data = new char[xauth_entry->data_length];
-                        std::memcpy(auth_info.data, xauth_entry->data, xauth_entry->data_length);
-
-                        found = true;
-                        XauDisposeAuth(xauth_entry);
-                        break;
+                        throw std::runtime_error("Failed to send QueryExtension request");
                     }
-                    XauDisposeAuth(xauth_entry);
-                }
 
-                fclose(auth_file);
+                    // Prepare to receive the response
+                    char reply[32] = {0}; // Buffer to hold the response
+                    int received = 0;     // Number of bytes received so far
 
-                return found;
-            }
-
-            std::string 
-            getSocketPath(const char * display) 
-            {
-                std::string displayStr;
-
-                if (display == nullptr) 
-                {
-                    char* envDisplay = std::getenv("DISPLAY");
-                    
-                    if (envDisplay != nullptr) 
+                    // Read the response from the server
+                    while (received < sizeof(reply)) 
                     {
-                        displayStr = envDisplay;
+                        int n = recv(fd, reply + received, sizeof(reply) - received, 0);
+                        if (n == -1) 
+                        {
+                            throw std::runtime_error("Failed to receive QueryExtension reply");
+                        }
+                        else if (n == 0) 
+                        {
+                            throw std::runtime_error("Connection closed by X server");
+                        }
+                        received += n;
+                    }
+
+                    // Process the reply
+                    // Check if the first byte is 1 (indicating a reply)
+                    if (reply[0] != 1) 
+                    {
+                        throw std::runtime_error("Invalid response received from X server");
+                    }
+
+                    // Check if the extension is present
+                    bool extensionPresent = reply[1];
+                    if (extensionPresent) 
+                    {
+                        log_info("BIG-REQUESTS extension is supported by the X server.");
                     } 
                     else 
                     {
-                        displayStr = ":0";
+                        log_info("BIG-REQUESTS extension is not supported by the X server.");
                     }
-                } 
-                else 
-                {
-                    displayStr = display;
                 }
 
-                int displayNumber = 0;
-
-                // Extract the display number from the display string
-                size_t colonPos = displayStr.find(':');
-                if (colonPos != std::string::npos) 
+                std::string 
+                sendMessage(const std::string & extensionName) 
                 {
-                    displayNumber = std::stoi(displayStr.substr(colonPos + 1));
+                    uint16_t nameLength = static_cast<uint16_t>(extensionName.length());
+
+                    // Calculate the total length of the request in 4-byte units, including padding
+                    uint16_t requestLength = htons((8 + nameLength + 3) / 4); // Length in 4-byte units
+                    char request[32] = {0};  // 32 bytes is enough for most requests
+                    request[0] = 98;         // Opcode for QueryExtension
+                    request[1] = 0;          // Unused
+                    request[2] = (requestLength >> 8) & 0xFF;  // Length (high byte)
+                    request[3] = requestLength & 0xFF;         // Length (low byte)
+                    request[4] = nameLength & 0xFF;            // Length of the extension name (low byte)
+                    request[5] = (nameLength >> 8) & 0xFF;     // Length of the extension name (high byte)
+                    std::memcpy(&request[8], extensionName.c_str(), nameLength); // Copy the extension name
+
+                    // Send the request
+                    if (send(fd, request, 8 + nameLength, 0) == -1) 
+                    {
+                        throw std::runtime_error("Failed to send QueryExtension request");
+                    }
+
+                    // Prepare to receive the response
+                    char reply[32] = {0}; // Buffer to hold the response
+                    int received = 0;     // Number of bytes received so far
+
+                    // Read the response from the server
+                    while (received < sizeof(reply)) 
+                    {
+                        int n = recv(fd, reply + received, sizeof(reply) - received, 0);
+                        if (n == -1) 
+                        {
+                            throw std::runtime_error("Failed to receive QueryExtension reply");
+                        }
+                        else if (n == 0) 
+                        {
+                            throw std::runtime_error("Connection closed by X server");
+                        }
+                        received += n;
+                    }
+
+                    // Process the reply
+                    // Check if the first byte is 1 (indicating a reply)
+                    if (reply[0] != 1) 
+                    {
+                        throw std::runtime_error("Invalid response received from X server");
+                    }
+
+                    // Check if the extension is present
+                    bool extensionPresent = reply[1];
+                    if (extensionPresent) 
+                    {
+                        return "Extension is supported by the X server.";
+                    } 
+                    else 
+                    {
+                        return "Extension is not supported by the X server.";
+                    }
+                }
+            ;
+
+            private:
+                int fd;
+                struct sockaddr_un addr;
+                mxb_auth_info_t auth_info;
+                Logger log;
+
+                // Function to authenticate an X11 connection
+                bool 
+                authenticate_x11_connection(int display_number, mxb_auth_info_t & auth_info) 
+                {
+                    // Try to get the XAUTHORITY environment variable; fall back to default
+                    const char* xauthority_env = std::getenv("XAUTHORITY");
+                    std::string xauthority_file = xauthority_env ? xauthority_env : "~/.Xauthority";
+
+                    // Open the Xauthority file
+                    FILE* auth_file = fopen(xauthority_file.c_str(), "rb");
+                    if (!auth_file) 
+                    {
+                        // Handle error: Failed to open .Xauthority file
+                        return false;
+                    }
+
+                    Xauth* xauth_entry;
+                    bool found = false;
+                    while ((xauth_entry = XauReadAuth(auth_file)) != nullptr) 
+                    {
+                        // Check if the entry matches your display number
+                        // Assuming display_number is the display you're interested in
+                        if (std::to_string(display_number) == std::string(xauth_entry->number, xauth_entry->number_length)) 
+                        {
+                            // Fill the auth_info structure
+                            auth_info.namelen = xauth_entry->name_length;
+                            auth_info.name = new char[xauth_entry->name_length];
+                            std::memcpy(auth_info.name, xauth_entry->name, xauth_entry->name_length);
+
+                            auth_info.datalen = xauth_entry->data_length;
+                            auth_info.data = new char[xauth_entry->data_length];
+                            std::memcpy(auth_info.data, xauth_entry->data, xauth_entry->data_length);
+
+                            found = true;
+                            XauDisposeAuth(xauth_entry);
+                            break;
+                        }
+                        XauDisposeAuth(xauth_entry);
+                    }
+
+                    fclose(auth_file);
+
+                    return found;
                 }
 
-                return "/tmp/.X11-unix/X" + std::to_string(displayNumber);
-            }
-
-            int 
-            parseDisplayNumber(const char * display) 
-            {
-                if (!display) 
+                std::string 
+                getSocketPath(const char * display) 
                 {
-                    display = std::getenv("DISPLAY");
+                    std::string displayStr;
+
+                    if (display == nullptr) 
+                    {
+                        char* envDisplay = std::getenv("DISPLAY");
+                        
+                        if (envDisplay != nullptr) 
+                        {
+                            displayStr = envDisplay;
+                        } 
+                        else 
+                        {
+                            displayStr = ":0";
+                        }
+                    } 
+                    else 
+                    {
+                        displayStr = display;
+                    }
+
+                    int displayNumber = 0;
+
+                    // Extract the display number from the display string
+                    size_t colonPos = displayStr.find(':');
+                    if (colonPos != std::string::npos) 
+                    {
+                        displayNumber = std::stoi(displayStr.substr(colonPos + 1));
+                    }
+
+                    return "/tmp/.X11-unix/X" + std::to_string(displayNumber);
                 }
 
-                if (!display) 
+                int 
+                parseDisplayNumber(const char * display) 
                 {
+                    if (!display) 
+                    {
+                        display = std::getenv("DISPLAY");
+                    }
+
+                    if (!display) 
+                    {
+                        return 0;  // default to display 0
+                    }
+
+                    const std::string displayStr = display;
+                    size_t colonPos = displayStr.find(':');
+                    if (colonPos != std::string::npos) 
+                    {
+                        return std::stoi(displayStr.substr(colonPos + 1));
+                    }
+
                     return 0;  // default to display 0
                 }
+            ;
+        };
 
-                const std::string displayStr = display;
-                size_t colonPos = displayStr.find(':');
-                if (colonPos != std::string::npos) 
+        static XConnection * 
+        mxb_connect(const char* display) 
+        {
+            try 
+            {
+                return new XConnection(display);
+            } 
+            catch (const std::exception & e) 
+            {
+                // Handle exceptions or errors here
+                std::cerr << "Connection error: " << e.what() << std::endl;
+                return nullptr;
+            }
+        }
+
+        static int
+        mxb_connection_has_error(XConnection * conn)
+        {
+            try 
+            {
+                // conn->confirmConnection();
+                std::string response = conn->sendMessage("BIG-REQUESTS");
+                log_info(response);
+            }
+            catch (const std::exception & e)
+            {
+                log_error(e.what());
+                return 1;
+            }
+            return 0;
+        }
+
+        class get 
+        {
+            public: 
+                static xcb_connection_t * 
+                connection() 
                 {
-                    return std::stoi(displayStr.substr(colonPos + 1));
+                    return conn;
                 }
 
-                return 0;  // default to display 0
-            }
-    };
+                static xcb_ewmh_connection_t * 
+                ewmh_connection() 
+                {
+                    return ewmh;
+                }
 
-    public: static XConnection * 
-    mxb_connect(const char* display) 
-    {
-        try 
+                static const xcb_setup_t * 
+                _setup() 
+                {
+                    return setup;
+                }
+
+                static xcb_screen_iterator_t 
+                _iter() 
+                {
+                    return iter;
+                }
+
+                static xcb_screen_t * 
+                _screen() 
+                {
+                    return screen;
+                }
+
+                static xcb_gcontext_t 
+                _gc() 
+                {
+                    return gc;
+                }
+
+                static xcb_window_t 
+                root_window(xcb_window_t window) 
+                {
+                    xcb_query_tree_cookie_t cookie;
+                    xcb_query_tree_reply_t *reply;
+
+                    cookie = xcb_query_tree(conn, window);
+                    reply = xcb_query_tree_reply(conn, cookie, NULL);
+
+                    if (!reply) 
+                    {
+                        log.log(ERROR, __func__, "Error: Unable to query the window tree.");
+                        return (xcb_window_t) 0; // Invalid window ID
+                    }
+
+                    xcb_window_t root_window = reply->root;
+
+                    free(reply);
+                    return root_window;
+                }
+
+                static xcb_window_t
+                parent_window(xcb_window_t window) 
+                {
+                    xcb_query_tree_cookie_t cookie;
+                    xcb_query_tree_reply_t *reply;
+
+                    cookie = xcb_query_tree(conn, window);
+                    reply = xcb_query_tree_reply(conn, cookie, NULL);
+
+                    if (!reply) 
+                    {
+                        log.log(ERROR, __func__, "Error: Unable to query the window tree.");
+                        return (xcb_window_t) 0; // Invalid window ID
+                    }
+
+                    xcb_window_t parent_window = reply->parent;
+
+                    free(reply);
+                    return parent_window;
+                }
+
+                static xcb_window_t *
+                window_children(xcb_connection_t *conn, xcb_window_t window, uint32_t *child_count) 
+                {
+                    *child_count = 0;
+                    xcb_query_tree_cookie_t cookie = xcb_query_tree(conn, window);
+                    xcb_query_tree_reply_t *reply = xcb_query_tree_reply(conn, cookie, NULL);
+
+                    if (!reply) 
+                    {
+                        log.log(ERROR, __func__, "Error: Unable to query the window tree.");
+                        return NULL;
+                    }
+
+                    *child_count = xcb_query_tree_children_length(reply);
+                    xcb_window_t *children = static_cast<xcb_window_t *>(malloc(*child_count * sizeof(xcb_window_t)));
+
+                    if (!children) 
+                    {
+                        log.log(ERROR, __func__, "Error: Unable to allocate memory for children.");
+                        free(reply);
+                        return NULL;
+                    }
+
+                    memcpy(children, xcb_query_tree_children(reply), *child_count * sizeof(xcb_window_t));
+                    
+                    free(reply);
+                    return children;
+                }
+
+                static xcb_atom_t
+                atom(const char * atom_name) 
+                {
+                    xcb_intern_atom_cookie_t cookie = xcb_intern_atom
+                    (
+                        conn, 
+                        0, 
+                        strlen(atom_name), 
+                        atom_name
+                    );
+                    
+                    xcb_intern_atom_reply_t * reply = xcb_intern_atom_reply(conn, cookie, NULL);
+                    
+                    if (!reply) 
+                    {
+                        return XCB_ATOM_NONE;
+                    } 
+
+                    xcb_atom_t atom = reply->atom;
+                    free(reply);
+                    return atom;
+                }
+
+                static std::string 
+                WindowProperty(xcb_window_t window, const char * atom_name) 
+                {
+                    xcb_get_property_reply_t *reply;
+                    unsigned int reply_len;
+                    char *propertyValue;
+
+                    reply = xcb_get_property_reply
+                    (
+                        conn,
+                        xcb_get_property
+                        (
+                            conn,
+                            false,
+                            window,
+                            atom
+                            (
+                                atom_name
+                            ),
+                            XCB_GET_PROPERTY_TYPE_ANY,
+                            0,
+                            60
+                        ),
+                        NULL
+                    );
+
+                    if (!reply || xcb_get_property_value_length(reply) == 0) 
+                    {
+                        if (reply != nullptr) 
+                        {
+                            log.log(ERROR, __func__, "reply length for property(" + std::string(atom_name) + ") = 0");
+                            free(reply);
+                            return "";
+                        }
+
+                        log.log(ERROR, __func__, "reply == nullptr");
+                        return "";
+                    }
+
+                    reply_len = xcb_get_property_value_length(reply);
+                    propertyValue = static_cast<char *>(malloc(sizeof(char) * (reply_len + 1)));
+                    memcpy(propertyValue, xcb_get_property_value(reply), reply_len);
+                    propertyValue[reply_len] = '\0';
+
+                    if (reply) 
+                    {
+                        free(reply);
+                    }
+
+                    log.log(INFO, __func__, "property value(" + std::string(atom_name) + ") = " + std::string(propertyValue));
+                    std::string spropertyValue = std::string(propertyValue);
+                    free(propertyValue);
+
+                    return spropertyValue;
+                }
+            ;
+        };
+
+        class set 
         {
-            return new XConnection(display);
-        } 
-        catch (const std::exception & e) 
+            public: 
+                static void 
+                connection(xcb_connection_t * c) 
+                {
+                    conn = c;
+                }
+
+                static void 
+                ewmh_connection(xcb_ewmh_connection_t * c) 
+                {
+                    ewmh = c;
+                }
+
+                static void 
+                _setup(const xcb_setup_t * s) 
+                {
+                    setup = s;
+                }
+
+                static void 
+                _iter(xcb_screen_iterator_t i) 
+                {
+                    iter = i;
+                }
+
+                static void 
+                _screen(xcb_screen_t * s) 
+                {
+                    screen = s;
+                }
+
+                static void 
+                _gc(xcb_gcontext_t g) 
+                {
+                    gc = g;
+                }
+            ;
+        };
+
+        class check
         {
-            // Handle exceptions or errors here
-            std::cerr << "Connection error: " << e.what() << std::endl;
-            return nullptr;
-        }
-    }
-
-    public: static int
-    mxb_connection_has_error(XConnection * conn)
-    {
-        try 
-        {
-            // conn->confirmConnection();
-            std::string response = conn->sendMessage("BIG-REQUESTS");
-            log_info(response);
-        }
-        catch (const std::exception & e)
-        {
-            log_error(e.what());
-            return 1;
-        }
-        return 0;
-    }
-
-    public: class get 
-    {
-        public: static xcb_connection_t * 
-        connection() 
-        {
-            return conn;
-        }
-
-        public: static xcb_ewmh_connection_t * 
-        ewmh_connection() 
-        {
-            return ewmh;
-        }
-
-        public: static const xcb_setup_t * 
-        _setup() 
-        {
-            return setup;
-        }
-
-        public: static xcb_screen_iterator_t 
-        _iter() 
-        {
-            return iter;
-        }
-
-        public: static xcb_screen_t * 
-        _screen() 
-        {
-            return screen;
-        }
-
-        public: static xcb_gcontext_t 
-        _gc() 
-        {
-            return gc;
-        }
-
-        public: static xcb_window_t 
-        root_window(xcb_window_t window) 
-        {
-            xcb_query_tree_cookie_t cookie;
-            xcb_query_tree_reply_t *reply;
-
-            cookie = xcb_query_tree(conn, window);
-            reply = xcb_query_tree_reply(conn, cookie, NULL);
-
-            if (!reply) 
-            {
-                log.log(ERROR, __func__, "Error: Unable to query the window tree.");
-                return (xcb_window_t) 0; // Invalid window ID
-            }
-
-            xcb_window_t root_window = reply->root;
-
-            free(reply);
-            return root_window;
-        }
-
-        public: static xcb_window_t
-        parent_window(xcb_window_t window) 
-        {
-            xcb_query_tree_cookie_t cookie;
-            xcb_query_tree_reply_t *reply;
-
-            cookie = xcb_query_tree(conn, window);
-            reply = xcb_query_tree_reply(conn, cookie, NULL);
-
-            if (!reply) 
-            {
-                log.log(ERROR, __func__, "Error: Unable to query the window tree.");
-                return (xcb_window_t) 0; // Invalid window ID
-            }
-
-            xcb_window_t parent_window = reply->parent;
-
-            free(reply);
-            return parent_window;
-        }
-
-        public: static xcb_window_t *
-        window_children(xcb_connection_t *conn, xcb_window_t window, uint32_t *child_count) 
-        {
-            *child_count = 0;
-            xcb_query_tree_cookie_t cookie = xcb_query_tree(conn, window);
-            xcb_query_tree_reply_t *reply = xcb_query_tree_reply(conn, cookie, NULL);
-
-            if (!reply) 
-            {
-                log.log(ERROR, __func__, "Error: Unable to query the window tree.");
-                return NULL;
-            }
-
-            *child_count = xcb_query_tree_children_length(reply);
-            xcb_window_t *children = static_cast<xcb_window_t *>(malloc(*child_count * sizeof(xcb_window_t)));
-
-            if (!children) 
-            {
-                log.log(ERROR, __func__, "Error: Unable to allocate memory for children.");
-                free(reply);
-                return NULL;
-            }
-
-            memcpy(children, xcb_query_tree_children(reply), *child_count * sizeof(xcb_window_t));
-            
-            free(reply);
-            return children;
-        }
-    };
-
-    public: class set 
-    {
-        public: static void 
-        connection(xcb_connection_t * c) 
-        {
-            conn = c;
-        }
-
-        public: static void 
-        ewmh_connection(xcb_ewmh_connection_t * c) 
-        {
-            ewmh = c;
-        }
-
-        public: static void 
-        _setup(const xcb_setup_t * s) 
-        {
-            setup = s;
-        }
-
-        public: static void 
-        _iter(xcb_screen_iterator_t i) 
-        {
-            iter = i;
-        }
-
-        public: static void 
-        _screen(xcb_screen_t * s) 
-        {
-            screen = s;
-        }
-
-        public: static void 
-        _gc(xcb_gcontext_t g) 
-        {
-            gc = g;
-        }
-    };
-
-    public: class check
-    {
-        public: static void
-        err(xcb_connection_t * connection, xcb_void_cookie_t cookie , const char * sender_function, const char * err_msg)
-        {
-            xcb_generic_error_t * err = xcb_request_check(connection, cookie);
-            if (err)
-            {
-                log.log(ERROR, sender_function, err_msg, err->error_code);
-                free(err);
-            }
-        }
-    };
+            public: 
+                static void
+                err(xcb_connection_t * connection, xcb_void_cookie_t cookie , const char * sender_function, const char * err_msg)
+                {
+                    xcb_generic_error_t * err = xcb_request_check(connection, cookie);
+                    if (err)
+                    {
+                        log.log(ERROR, sender_function, err_msg, err->error_code);
+                        free(err);
+                    }
+                }
+            ;
+        };
+    ;
 };
 
 namespace get 
@@ -6522,7 +6611,7 @@ ewmh_init()
     
     if (!(xcb_ewmh_init_atoms_replies(ewmh, cookie, 0)))
     {
-        LOG_error("xcb_ewmh_init_atoms_replies:faild")
+        log_error("xcb_ewmh_init_atoms_replies:faild");
         exit(1);
     }
 
@@ -6787,12 +6876,12 @@ main()
         return err;
     }
 
-    mxb::XConnection * mxb_connection = mxb::mxb_connect(nullptr);
-    if (!mxb_connection)
-    {
-        log_error("mxb_connection == nullptr");
-        return -1;
-    }
+    // mxb::XConnection * mxb_connection = mxb::mxb_connect(nullptr);
+    // if (!mxb_connection)
+    // {
+    //     log_error("mxb_connection == nullptr");
+    //     return -1;
+    // }
 
     run();
     xcb_disconnect(conn);
