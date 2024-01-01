@@ -4446,6 +4446,7 @@ class resize_client
                     static_cast<const uint32_t &>(c->width - 60 + c->x - x)
                 }
             );
+            xcb_flush(conn);
         }
 
         void
