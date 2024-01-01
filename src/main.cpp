@@ -765,9 +765,9 @@ void /**
  */
 removeClient(client * c) 
 {
-    delete c;
     client_list.erase(std::remove(client_list.begin(), client_list.end(), c), client_list.end());
     cur_d->current_clients.erase(std::remove(cur_d->current_clients.begin(), cur_d->current_clients.end(), c), cur_d->current_clients.end());
+    delete c;
 }
 
 void 
