@@ -4583,6 +4583,7 @@ class resize_client
                         // Free the event memory after processing
                         free(ev); 
                     }
+                    break;
                 }
 
                 case edge::BOTTOM_edge:
@@ -4621,6 +4622,7 @@ class resize_client
                         // Free the event memory after processing
                         free(ev); 
                     }
+                    break;
                 }
 
                 case edge::LEFT:
@@ -4659,6 +4661,7 @@ class resize_client
                         // Free the event memory after processing
                         free(ev); 
                     }
+                    break;
                 }
 
                 case edge::RIGHT:
@@ -4697,6 +4700,7 @@ class resize_client
                         // Free the event memory after processing
                         free(ev); 
                     }
+                    break;
                 }
 
                 case edge::NONE:
