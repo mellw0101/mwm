@@ -720,7 +720,7 @@ class wm
         static void
         grab_button(client * c, const uint8_t & mouse_button, const uint16_t & modifiers) 
         {
-            LOG_func
+            // LOG_func
             xcb_grab_button(
                 conn, 
                 1, // 'owner_events'. Set to 0 for no event propagation
@@ -798,7 +798,7 @@ class mv_client
         mv_client(client * & c, const uint16_t & start_x, const uint16_t & start_y) 
         : c(c), start_x(start_x), start_y(start_y)
         {
-            log.log(FUNC, __func__);
+            // log.log(FUNC, __func__);
             grab_pointer();
 
             run();
@@ -5893,11 +5893,11 @@ class Event
         button_press_handler(const xcb_generic_event_t * & ev) 
         {
             const auto * e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
-            log_win("e->event: ", e->event);
+            // log_win("e->event: ", e->event);
             client * c = get::client_from_all_win(& e->event);
             if (!c)
             {
-                log_error("c == null");
+                // log_error("c == null");
                 return;
             }
             
@@ -5905,14 +5905,14 @@ class Event
             {
                 if (e->event == c->close_button)
                 {
-                    log_info("L_MOUSE_BUTTON + close_button");
+                    // log_info("L_MOUSE_BUTTON + close_button");
                     win_tools::close_button_kill(c);
                     return;
                 }
 
                 if (e->event == c->max_button)
                 {
-                    log_info("L_MOUSE_BUTTON + max_button");
+                    // log_info("L_MOUSE_BUTTON + max_button");
                     client * c = get::client_from_all_win(& e->event);
                     max_win(c, max_win::BUTTON_MAXWIN);
                     return;
@@ -5920,7 +5920,7 @@ class Event
 
                 if (e->event == c->titlebar)
                 {
-                    log_info("L_MOUSE_BUTTON + titlebar");
+                    // log_info("L_MOUSE_BUTTON + titlebar");
                     wm::raise_client(c);
                     mv_client(c, e->event_x, e->event_y);
                     focus::client(c);
@@ -5933,14 +5933,14 @@ class Event
                     {
                         case ALT:
                         {
-                            log_info("ALT + L_MOUSE_BUTTON + win");
+                            // log_info("ALT + L_MOUSE_BUTTON + win");
                             wm::raise_client(c);
                             mv_client(c, e->event_x, e->event_y + 20);
                             focus::client(c);
                             break;
                         }
                     }
-                    log_info("L_MOUSE_BUTTON + win");
+                    // log_info("L_MOUSE_BUTTON + win");
                     wm::raise_client(c);
                     focus::client(c);
                     return;
