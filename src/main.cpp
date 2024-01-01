@@ -4388,7 +4388,7 @@ class resize_client
                 (const uint32_t[2])
                 {
                     static_cast<const uint32_t &>(x),
-                    static_cast<const uint32_t &>(x - c->x) 
+                    static_cast<const uint32_t &>(c->width)
                 }
             );
 
