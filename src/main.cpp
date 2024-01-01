@@ -4146,7 +4146,7 @@ class resize_client
             
             grab_pointer();
 
-            teleport_mouse(mxb::Client::get::client_edge(c, 10));
+            // teleport_mouse(mxb::Client::get::client_edge(c, 10));
 
             run(mxb::Client::get::client_edge(c, 10));
 
