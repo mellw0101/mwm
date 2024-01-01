@@ -5175,16 +5175,9 @@ class WinDecoretor
 
             xcb_map_window(conn, c->frame);
             xcb_flush(conn);
-        
-            apply_event_mask
-            (
-                (const uint32_t[2])
-                {
-                    XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY,
-                    XCB_EVENT_MASK_ENTER_WINDOW
-                },
-                c->frame
-            );
+
+            uint32_t mask = XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY | XCB_EVENT_MASK_ENTER_WINDOW;
+            apply_event_mask(&mask, c->frame);
             xcb_flush(conn);
         }
 
@@ -6922,7 +6915,7 @@ class Event
         enter_notify_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_enter_notify_event_t *>(ev);
-            // log_win("e->event: ", e->event);
+            log_win("e->event: ", e->event);
         }
 
         void
