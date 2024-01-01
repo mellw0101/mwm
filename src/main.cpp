@@ -5713,6 +5713,7 @@ class Event
                     case SUPER:
                     {
                         client * c = get::client_from_win(& e->event);
+                        
                         EWMHChecker ewmhChecker(conn, ewmh);
                         if (ewmhChecker.checkWindowDecorations(c->win))
                         {
@@ -5722,6 +5723,9 @@ class Event
                         {
                             log_info("does not have decorations");
                         }
+
+                        ewmhChecker.check_extends(c->win);
+                        
                         break;
                     }
                 }
