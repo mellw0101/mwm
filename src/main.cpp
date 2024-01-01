@@ -3582,7 +3582,7 @@ move_to_previus_desktop_w_app()
     wm::raise_client(focused_client);
 }
 
-class resize_client 
+class resize_client
 {
     public:
         /* 
@@ -3846,7 +3846,7 @@ class resize_client
     ;
 };
 
-namespace borrowed 
+namespace borrowed
 {
     bool
     getgeom(const xcb_drawable_t * win, int16_t * x, int16_t * y, uint16_t * width, uint16_t * height, uint8_t * depth)
@@ -4051,7 +4051,7 @@ namespace error
     }
 } 
 
-class max_win 
+class max_win
 {    
     public:
         enum max_win_type
