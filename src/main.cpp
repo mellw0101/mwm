@@ -2958,7 +2958,7 @@ class EWMHChecker
 {
     public:
         EWMHChecker(xcb_connection_t* connection, xcb_ewmh_connection_t* ewmh_connection)
-        : conn(connection), ewmh_conn(ewmh_connection) {}
+        : connection(connection), ewmh_conn(ewmh_connection) {}
 
         bool 
         is_fullscreen(xcb_window_t window) 
@@ -2979,9 +2979,32 @@ class EWMHChecker
             }
             return false;
         }
+
+        bool 
+        checkWindowDecorations(xcb_window_t window) 
+        {
+            xcb_intern_atom_cookie_t* cookie = xcb_ewmh_init_atoms(connection, ewmh_conn);
+            xcb_ewmh_init_atoms_replies(ewmh_conn, cookie, nullptr);
+
+            xcb_ewmh_get_atoms_reply_t win_type_reply;
+            if (xcb_ewmh_get_wm_window_type_reply(ewmh_conn, xcb_ewmh_get_wm_window_type(ewmh_conn, window), &win_type_reply, nullptr)) 
+            {
+                for (unsigned int i = 0; i < win_type_reply.atoms_len; i++) 
+                {
+                    if (win_type_reply.atoms[i] == ewmh_conn->_NET_WM_WINDOW_TYPE_NORMAL) 
+                    {
+                        xcb_ewmh_get_atoms_reply_wipe(&win_type_reply);
+                        return true; // Window is likely to be decorated
+                    }
+                }
+                xcb_ewmh_get_atoms_reply_wipe(&win_type_reply);
+            }
+
+            return false; // Window is likely not decorated
+        }
     
     private:
-        xcb_connection_t* conn;
+        xcb_connection_t* connection;
         xcb_ewmh_connection_t* ewmh_conn;
 };
 
@@ -5679,13 +5702,13 @@ class Event
                     {
                         client * c = get::client_from_win(& e->event);
                         EWMHChecker ewmhChecker(conn, ewmh);
-                        if (ewmhChecker.is_fullscreen(c->win))
+                        if (ewmhChecker.checkWindowDecorations(c->win))
                         {
-                            log.log(INFO, __func__, "isFullscreen");
+                            log_info("has decorations");
                         }
                         else
                         {
-                            log.log(INFO, __func__, "is not Fullscreen");
+                            log_info("does not have decorations");
                         }
                         break;
                     }
