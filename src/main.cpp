@@ -6243,6 +6243,7 @@ class Event
                         mxb::get::WindowProperty(c->win, "WM_CLASS"); // works
                         mxb::get::WindowProperty(c->win, "WM_NAME"); //works
                         mxb::get::WindowProperty(c->win, "WM_PROTOCOLS"); 
+                        mxb::get::WindowProperty(c->win, "WM_STATE");
                         mxb::get::WindowProperty(c->win, "WM_WINDOW_STATE");
                         mxb::get::WindowProperty(c->win, "WM_WINDOW");
                         mxb::get::WindowProperty(c->win, "WM_CLASS");
