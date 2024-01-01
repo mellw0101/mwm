@@ -6240,6 +6240,8 @@ class Event
                             log_info("does not have frame extents");
                         }
 
+                        mxb::get::WindowProperty(c->win, "WM_CLASS");
+
                         break;
                     }
                 }
