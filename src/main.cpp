@@ -3484,12 +3484,12 @@ class EWMHChecker
             {
                 for (unsigned int i = 0; i < wm_state.atoms_len; i++) 
                 {
+                    log_info(mxb::get::AtomName(wm_state.atoms[i]));
                     if (wm_state.atoms[i] == ewmh_conn->_NET_WM_STATE_FULLSCREEN) 
                     {
                         xcb_ewmh_get_atoms_reply_wipe(&wm_state);
                         return true;
                     }
-                    log_info(mxb::get::AtomName(wm_state.atoms[i]));
                 }
                 xcb_ewmh_get_atoms_reply_wipe(&wm_state);
             }
