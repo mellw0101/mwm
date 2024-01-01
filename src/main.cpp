@@ -3828,9 +3828,18 @@ namespace win_tools
             return - 1;
         }
 
+        xcb_unmap_window(conn, c->win);
+        xcb_unmap_window(conn, c->close_button);
+        xcb_unmap_window(conn, c->max_button);
+        xcb_unmap_window(conn, c->min_button);
         xcb_unmap_window(conn, c->titlebar);
         xcb_unmap_window(conn, c->frame);
         xcb_flush(conn);
+        
+        kill_client(conn, c->win);
+        kill_client(conn, c->close_button);
+        kill_client(conn, c->max_button);
+        kill_client(conn, c->min_button);
         kill_client(conn, c->titlebar);
         kill_client(conn, c->frame);
         xcb_flush(conn);
@@ -5959,13 +5968,11 @@ class Event
                 return;
             }
 
-            xcb_unmap_window(conn, c->titlebar);
-            xcb_unmap_window(conn, c->frame);
-            xcb_flush(conn);
-            WinManager::kill_client(conn, c->titlebar);
-            WinManager::kill_client(conn, c->frame);
-            xcb_flush(conn);
-            delete c;
+            int result = win_tools::send_sigterm_to_client(c);
+            if (result == -1)
+            {
+                log_error("send_sigterm_to_client: faild");
+            }
         }
 
         void
