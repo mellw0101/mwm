@@ -621,6 +621,108 @@ class mxb
                 }
             ;
         };
+
+        class EWMH 
+        {
+            public:
+                EWMH(xcb_connection_t* connection, xcb_ewmh_connection_t* ewmh_connection)
+                : connection(connection), ewmh_conn(ewmh_connection) {}
+
+                bool 
+                is_fullscreen(xcb_window_t window) 
+                {
+                    xcb_get_property_cookie_t cookie = xcb_ewmh_get_wm_state(ewmh_conn, window);
+                    xcb_ewmh_get_atoms_reply_t wm_state;
+                    if (xcb_ewmh_get_wm_state_reply(ewmh_conn, cookie, &wm_state, NULL) == 1) 
+                    {
+                        for (unsigned int i = 0; i < wm_state.atoms_len; i++) 
+                        {
+                            log_info(mxb::get::AtomName(wm_state.atoms[i]));
+                            if (wm_state.atoms[i] == ewmh_conn->_NET_WM_STATE_FULLSCREEN) 
+                            {
+                                xcb_ewmh_get_atoms_reply_wipe(&wm_state);
+                                return true;
+                            }
+                        }
+                        xcb_ewmh_get_atoms_reply_wipe(&wm_state);
+                    }
+                    return false;
+                }
+
+                // Function to check the type of a window
+                std::vector<std::string> 
+                WindowType(xcb_window_t window) 
+                {
+                    std::vector<std::string> types;
+                    xcb_get_property_cookie_t cookie = xcb_ewmh_get_wm_window_type(ewmh_conn, window);
+                    xcb_ewmh_get_atoms_reply_t wm_window_type;
+
+                    if (xcb_ewmh_get_wm_window_type_reply(ewmh_conn, cookie, &wm_window_type, nullptr) == 1) 
+                    {
+                        for (unsigned int i = 0; i < wm_window_type.atoms_len; i++) 
+                        {
+                            log_info(mxb::get::AtomName(wm_window_type.atoms[i]));
+                            types.push_back(mxb::get::AtomName(wm_window_type.atoms[i]));
+                        }
+                        xcb_ewmh_get_atoms_reply_wipe(&wm_window_type);
+                    }
+                    return types;
+                }
+
+                bool 
+                checkWindowDecorations(xcb_window_t window) 
+                {
+                    xcb_intern_atom_cookie_t* cookie = xcb_ewmh_init_atoms(connection, ewmh_conn);
+                    xcb_ewmh_init_atoms_replies(ewmh_conn, cookie, nullptr);
+
+                    xcb_ewmh_get_atoms_reply_t win_type_reply;
+                    if (xcb_ewmh_get_wm_window_type_reply(ewmh_conn, xcb_ewmh_get_wm_window_type(ewmh_conn, window), &win_type_reply, nullptr)) 
+                    {
+                        for (unsigned int i = 0; i < win_type_reply.atoms_len; i++) 
+                        {
+                            if (win_type_reply.atoms[i] == ewmh_conn->_NET_WM_WINDOW_TYPE_NORMAL) 
+                            {
+                                xcb_ewmh_get_atoms_reply_wipe(&win_type_reply);
+                                return true; // Window is likely to be decorated
+                            }
+                        }
+                        xcb_ewmh_get_atoms_reply_wipe(&win_type_reply);
+                    }
+
+                    return false; // Window is likely not decorated
+                }
+
+                void
+                check_extends(xcb_window_t window)
+                {
+                    xcb_ewmh_get_extents_reply_t extents;
+                    if (xcb_ewmh_get_frame_extents_reply(ewmh_conn, xcb_ewmh_get_frame_extents(ewmh_conn, window), &extents, nullptr)) 
+                    {
+                        log.log(INFO_PRIORITY, __func__, "Extents: left: %d, right: %d, top: %d, bottom: %d", extents.left, extents.right, extents.top, extents.bottom);
+                    }
+                }
+
+                bool 
+                checkWindowFrameExtents(xcb_window_t window) 
+                {
+                    xcb_ewmh_get_extents_reply_t extents;
+                    xcb_get_property_cookie_t cookie = xcb_ewmh_get_frame_extents(ewmh_conn, window);
+
+                    if (xcb_ewmh_get_frame_extents_reply(ewmh_conn, cookie, &extents, nullptr)) 
+                    {
+                        bool hasDecorations = extents.left > 0 || extents.right > 0 || extents.top > 0 || extents.bottom > 0;
+                        return hasDecorations;
+                    }
+
+                    return false; // Unable to determine or no decorations
+                }
+            ;
+
+            private:
+                xcb_connection_t* connection;
+                xcb_ewmh_connection_t* ewmh_conn;
+            ;
+        };
     ;
 };
 
@@ -1318,6 +1420,7 @@ class mv_client
             xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
             xcb_flush(conn);
         }
+    ;
 
     private:
         client * & c;
@@ -1579,6 +1682,7 @@ class mv_client
                 RETURN FALSE IF NOT ENOUGH TIME HAS PASSED
              */ 
         }
+    ;
 };
 
 namespace XCBAnimator {
@@ -1896,6 +2000,7 @@ class XCPPBAnimator
         {
             stopAnimations();
         }
+    ;
 
     private:
         xcb_connection_t* connection;
@@ -2611,6 +2716,7 @@ class XCPPBAnimator
             );
             xcb_flush(connection);
         }
+    ;
 };
 
 void
@@ -2834,6 +2940,7 @@ class color
             color.b = b;
             return color;
         }
+    ;
 };
 
 class set_win_color 
@@ -2879,6 +2986,7 @@ class set_win_color
                 color::code(COLOR)
             );
         }
+    ;
 
     private:
         xcb_alloc_color_reply_t *reply;
@@ -2930,6 +3038,7 @@ class set_win_color
             );
             xcb_flush(conn);
         }
+    ;
 };
 
 class set_png_as_backround 
@@ -2942,6 +3051,7 @@ class set_png_as_backround
         {
             apply_background(connection, win, screen, pngFilePath);
         }
+    ;
 
     private:
         std::string pngFilePath;
@@ -3229,6 +3339,7 @@ class set_png_as_backround
             xcb_free_gc(connection, gc);
             xcb_image_destroy(image);
         }
+    ;
 };
 
 std::mutex mtx;
@@ -3289,6 +3400,7 @@ class change_desktop
             joinAndClearThreads();
             mtx.unlock();
         }
+    ;
 
     private:
         xcb_connection_t * connection;
@@ -3403,6 +3515,7 @@ class change_desktop
             }
             animation_threads.clear();
         }
+    ;
 };
 
 void 
@@ -3469,86 +3582,6 @@ move_to_previus_desktop_w_app()
     wm::raise_client(focused_client);
 }
 
-class EWMHChecker 
-{
-    public:
-        EWMHChecker(xcb_connection_t* connection, xcb_ewmh_connection_t* ewmh_connection)
-        : connection(connection), ewmh_conn(ewmh_connection) {}
-
-        bool 
-        is_fullscreen(xcb_window_t window) 
-        {
-            xcb_get_property_cookie_t cookie = xcb_ewmh_get_wm_state(ewmh_conn, window);
-            xcb_ewmh_get_atoms_reply_t wm_state;
-            if (xcb_ewmh_get_wm_state_reply(ewmh_conn, cookie, &wm_state, NULL) == 1) 
-            {
-                for (unsigned int i = 0; i < wm_state.atoms_len; i++) 
-                {
-                    log_info(mxb::get::AtomName(wm_state.atoms[i]));
-                    if (wm_state.atoms[i] == ewmh_conn->_NET_WM_STATE_FULLSCREEN) 
-                    {
-                        xcb_ewmh_get_atoms_reply_wipe(&wm_state);
-                        return true;
-                    }
-                }
-                xcb_ewmh_get_atoms_reply_wipe(&wm_state);
-            }
-            return false;
-        }
-
-        bool 
-        checkWindowDecorations(xcb_window_t window) 
-        {
-            xcb_intern_atom_cookie_t* cookie = xcb_ewmh_init_atoms(connection, ewmh_conn);
-            xcb_ewmh_init_atoms_replies(ewmh_conn, cookie, nullptr);
-
-            xcb_ewmh_get_atoms_reply_t win_type_reply;
-            if (xcb_ewmh_get_wm_window_type_reply(ewmh_conn, xcb_ewmh_get_wm_window_type(ewmh_conn, window), &win_type_reply, nullptr)) 
-            {
-                for (unsigned int i = 0; i < win_type_reply.atoms_len; i++) 
-                {
-                    if (win_type_reply.atoms[i] == ewmh_conn->_NET_WM_WINDOW_TYPE_NORMAL) 
-                    {
-                        xcb_ewmh_get_atoms_reply_wipe(&win_type_reply);
-                        return true; // Window is likely to be decorated
-                    }
-                }
-                xcb_ewmh_get_atoms_reply_wipe(&win_type_reply);
-            }
-
-            return false; // Window is likely not decorated
-        }
-
-        void
-        check_extends(xcb_window_t window)
-        {
-            xcb_ewmh_get_extents_reply_t extents;
-            if (xcb_ewmh_get_frame_extents_reply(ewmh_conn, xcb_ewmh_get_frame_extents(ewmh_conn, window), &extents, nullptr)) 
-            {
-                log.log(INFO_PRIORITY, __func__, "Extents: left: %d, right: %d, top: %d, bottom: %d", extents.left, extents.right, extents.top, extents.bottom);
-            }
-        }
-
-        bool 
-        checkWindowFrameExtents(xcb_window_t window) 
-        {
-            xcb_ewmh_get_extents_reply_t extents;
-            xcb_get_property_cookie_t cookie = xcb_ewmh_get_frame_extents(ewmh_conn, window);
-
-            if (xcb_ewmh_get_frame_extents_reply(ewmh_conn, cookie, &extents, nullptr)) 
-            {
-                bool hasDecorations = extents.left > 0 || extents.right > 0 || extents.top > 0 || extents.bottom > 0;
-                return hasDecorations;
-            }
-
-            return false; // Unable to determine or no decorations
-        }
-
-    private:
-        xcb_connection_t* connection;
-        xcb_ewmh_connection_t* ewmh_conn;
-};
-
 class resize_client 
 {
     public:
@@ -3572,6 +3605,7 @@ class resize_client
             xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
             xcb_flush(conn);
         }
+    ;
 
     private:
         client * & c;
@@ -3809,6 +3843,7 @@ class resize_client
             // RETURN FALSE IF NOT ENOUGH TIME HAS PASSED
             return false; 
         }
+    ;
 };
 
 namespace borrowed 
@@ -4031,7 +4066,7 @@ class max_win
             {
                 case EWMH_MAXWIN:
                 {
-                    EWMHChecker ewmh_checker(conn, ewmh);
+                    mxb::EWMH ewmh_checker(conn, ewmh);
                     if (ewmh_checker.is_fullscreen(c->win))
                     {
                         ewmh_unmax_win(c);
@@ -4056,6 +4091,7 @@ class max_win
                 }
             }
         }
+    ;
 
     private:
         void
@@ -4171,6 +4207,7 @@ class max_win
             );
             xcb_flush(conn);
         }
+    ;
 };
 
 namespace win_tools 
@@ -5981,6 +6018,7 @@ class Event
                 }
             }
         }
+    ;
 
     private:
         xcb_key_symbols_t * keysyms;
@@ -6243,7 +6281,7 @@ class Event
                     {
                         client * c = get::client_from_win(& e->event);
                         
-                        EWMHChecker ewmhChecker(conn, ewmh);
+                        mxb::EWMH ewmhChecker(conn, ewmh);
                         if (ewmhChecker.checkWindowDecorations(c->win))
                         {
                             log_info("has decorations");
@@ -6271,7 +6309,6 @@ class Event
                         mxb::get::WindowProperty(c->win, "_NET_WM_WINDOW_TYPE"); // works
                         mxb::get::WindowProperty(c->win, "_NET_WM_PID"); // works, needs conversion to pid_t or other integer type 
                         mxb::get::WindowProperty(c->win, "_NET_WM_USER_TIME"); // works, needs conversion to int or other integer type
-                        mxb::get::WindowProperty(c->win, "_NET_WM_STATE_FULLSCREEN");
 
                         break;
                     }
@@ -6592,6 +6629,7 @@ class Event
             const auto * e = reinterpret_cast<const xcb_leave_notify_event_t *>(ev);
             // log_win("e->event: ", e->event);
         }
+    ;
 };
 
 void /**

@@ -367,6 +367,7 @@ class Logger
 			FileHandler file("/home/mellw/nlog");
 			file.append(TIME::get() + ":" + getLogPrefix(level) + ":[" + log_MEGENTA + function + log_RESET + "]\n");
 		}
+	;
 
 	private:
 		std::vector<std::string> list;
@@ -435,6 +436,7 @@ class Logger
 			}
 			str = result;
 		}
+	;
 };
 
 #endif // DWMLOG_HPP
