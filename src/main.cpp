@@ -4793,7 +4793,8 @@ set_png(xcb_window_t win, const char * imagePath)
 
 class WinDecoretor 
 {
-    public:
+    public
+    :
         WinDecoretor(xcb_connection_t * connection, client * c) 
         : c(c)
         {
@@ -4804,18 +4805,20 @@ class WinDecoretor
             }
 
             make_frame(c);
-            log_win( "c->frame: ", c->frame);
+            log_win("c->frame: ", c->frame);
             make_titlebar(c);
-            log_win( "c->titlebar: ", c->titlebar);
+            log_win("c->titlebar: ", c->titlebar);
             make_close_button(c);
-            log_win( "c->close_button: ", c->close_button);
+            log_win("c->close_button: ", c->close_button);
             make_max_button(c);
-            log_win( "c->max_button: ", c->max_button);
+            log_win("c->max_button: ", c->max_button);
             make_min_button(c);
-            log_win( "c->min_button: ", c->min_button);
+            log_win("c->min_button: ", c->min_button);
         }
+    ;
         
-    private:
+    private
+    :
         client * c;
 
         void
@@ -5074,6 +5077,7 @@ class WinDecoretor
             xcb_map_window(conn, c->min_button);
             xcb_flush(conn);
         }
+    ;
 };
 
 class WinManager 
