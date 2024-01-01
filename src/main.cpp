@@ -4526,6 +4526,34 @@ class resize_client
         }
 
         void
+        resize_win_top(const uint16_t & y)
+        {
+            // CONFIGURE THE WINDOW WITH THE NEW WIDTH AND HEIGHT
+            xcb_configure_window 
+            (
+                conn,
+                c->win,
+                XCB_CONFIG_WINDOW_HEIGHT,
+                (const uint32_t[1])
+                {
+                    static_cast<const uint32_t &>(y - 20)
+                }
+            );
+
+            xcb_configure_window 
+            (
+                conn,
+                c->frame,
+                XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT,
+                (const uint32_t[2])
+                {
+                    static_cast<const uint32_t &>(y),
+                    static_cast<const uint32_t &>(c->height + c->y - y)
+                }
+            );
+        }
+
+        void
         resize_win_height(const uint16_t & height)
         {
             // CONFIGURE THE WINDOW WITH THE NEW WIDTH AND HEIGHT
@@ -4646,7 +4674,7 @@ class resize_client
                                 const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
                                 if (isTimeToRender())
                                 {
-                                    resize_win_height(e->root_y);
+                                    resize_win_top(e->root_y);
                                     xcb_flush(conn); 
                                 }
                                 break;
