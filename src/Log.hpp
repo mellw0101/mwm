@@ -296,35 +296,60 @@ private:
 	}
 };
 
-class toString {
-public:
-	template<typename T>
-	toString(const T &input)
-	{
-		result = convert(input);
-	}
+class toString 
+{
+	public:
+		template<typename T>
+		toString(const T &input)
+		{
+			result = convert(input);
+		}
 
-	operator std::string() const 
-	{
-		return result;
-	}
+		operator std::string() const 
+		{
+			return result;
+		}
+	;
 
-private:
-	std::string result;
+	private:
+		std::string result;
 
-	std::string 
-	convert(const int16_t &in)
-	{
-		std::string str;
-		str = std::to_string(in);
-		return str;
-	}
+		std::string 
+		convert(const int16_t &in)
+		{
+			std::string str;
+			str = std::to_string(in);
+			return str;
+		}
 
-	std::string
-	convert(const std::string &in)
-	{
-		return in;
-	}
+		std::string
+		convert(const std::string &in)
+		{
+			return in;
+		}
+
+		std::string
+		convert(const std::vector<uint32_t> &in)
+		{
+			std::string str;
+			for (auto &i : in) 
+			{
+				str += std::to_string(i) + " ";
+			}
+			return str;
+		}
+
+		std::string
+		convert(const std::vector<xcb_event_mask_t> &in)
+		{
+			std::string str;
+			for (auto &i : in) 
+			{
+				str += std::to_string(i) + " ";
+			}
+			return str;
+		}
+	;
 };
 
 // ANSI escape codes for colors

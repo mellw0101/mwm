@@ -1,5 +1,6 @@
 #include "Log.hpp"
 #include <cstddef>
+#include <cstdint>
 #include <string>
 #include <xcb/xcb.h>
 #include <xcb/xproto.h>
@@ -747,6 +748,45 @@ class mxb
                     free(reply);
                     return atomName;
                 }
+
+                static uint32_t
+                event_mask_sum(xcb_window_t window) 
+                {
+                    uint32_t mask = 0;
+
+                    // Get the window attributes
+                    xcb_get_window_attributes_cookie_t attr_cookie = xcb_get_window_attributes(conn, window);
+                    xcb_get_window_attributes_reply_t * attr_reply = xcb_get_window_attributes_reply(conn, attr_cookie, NULL);
+
+                    // Check if the reply is valid
+                    if (attr_reply) 
+                    {
+                        mask = attr_reply->all_event_masks;
+                        free(attr_reply);
+                    }
+                    else 
+                    {
+                        log_error("Unable to get window attributes.");
+                    }
+                    return mask;
+                }
+
+                static std::vector<xcb_event_mask_t>
+                event_mask(uint32_t maskSum)
+                {
+                    std::vector<xcb_event_mask_t> setMasks;
+                    
+                    // Iterate over all enum values
+                    for (int mask = XCB_EVENT_MASK_KEY_PRESS; mask <= XCB_EVENT_MASK_OWNER_GRAB_BUTTON; mask <<= 1) 
+                    {
+                        if (maskSum & mask) 
+                        {
+                            setMasks.push_back(static_cast<xcb_event_mask_t>(mask));
+                        }
+                    }
+
+                    return setMasks;
+                }
             ;
         };
 
@@ -787,6 +827,32 @@ class mxb
                 _gc(xcb_gcontext_t g) 
                 {
                     gc = g;
+                }
+
+                static void
+                event_mask(const uint32_t * values, const xcb_window_t & win)
+                {
+                    xcb_change_window_attributes
+                    (
+                        conn,
+                        win,
+                        XCB_CW_EVENT_MASK,
+                        values
+                    );
+                }
+
+                static void 
+                event_mask(xcb_window_t window, const std::vector<xcb_event_mask_t>& masks) 
+                {
+                    uint32_t cumulativeMask = 0;
+                    for (auto mask : masks) 
+                    {
+                        cumulativeMask |= mask;
+                    }
+
+                    uint32_t values[] = { cumulativeMask };
+                    xcb_change_window_attributes(conn, window, XCB_CW_EVENT_MASK, values);
+                    xcb_flush(conn);
                 }
 
                 class cursor
@@ -902,8 +968,6 @@ class mxb
             public:
                 EWMH(xcb_connection_t* connection, xcb_ewmh_connection_t* ewmh_connection)
                 : connection(connection), ewmh_conn(ewmh_connection) {}
-
-                
 
                 // Function to check the type of a window
                 std::vector<std::string> 
@@ -6602,6 +6666,8 @@ class Event
                         {
                             log_info("is not normal type");
                         }
+
+                        log_info(mxb::get::event_mask(mxb::get::event_mask_sum(c->win)));
 
                         break;
                     }
