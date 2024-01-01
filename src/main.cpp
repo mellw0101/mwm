@@ -1,4 +1,5 @@
 #include "Log.hpp"
+#include <cstddef>
 #include <string>
 #include <xcb/xcb.h>
 #include <xcb/xproto.h>
@@ -753,9 +754,9 @@ class mxb
         {
             public: 
                 static void 
-                connection(xcb_connection_t * c) 
+                _conn(const char * displayname, int * screenp) 
                 {
-                    conn = c;
+                    conn = xcb_connect(displayname, screenp);
                 }
 
                 static void 
@@ -765,21 +766,21 @@ class mxb
                 }
 
                 static void 
-                _setup(const xcb_setup_t * s) 
+                _setup() 
                 {
-                    setup = s;
+                    setup = xcb_get_setup(xcb_connect(nullptr, nullptr));
                 }
 
                 static void 
-                _iter(xcb_screen_iterator_t i) 
+                _iter() 
                 {
-                    iter = i;
+                    iter = xcb_setup_roots_iterator(xcb_get_setup(xcb_connect(nullptr, nullptr)));
                 }
 
                 static void 
-                _screen(xcb_screen_t * s) 
+                _screen() 
                 {
-                    screen = s;
+                    screen = xcb_setup_roots_iterator(xcb_get_setup(xcb_connect(nullptr, nullptr))).data;
                 }
 
                 static void 
@@ -7086,8 +7087,7 @@ setSubstructureRedirectMask()
 const int8_t
 setup_wm()
 {
-    // conn = xcb_connect(nullptr, nullptr);
-    mxb::set::connection(xcb_connect(nullptr, nullptr));
+    mxb::set::_conn(nullptr, nullptr);
     
     if (xcb_connection_has_error(conn)) 
     {
@@ -7095,8 +7095,8 @@ setup_wm()
         return -1;
     }
 
+    mxb::set::_screen();
     // setup = xcb_get_setup(conn);
-    mxb::set::_screen(xcb_setup_roots_iterator(xcb_get_setup(conn)).data);
     // iter = xcb_setup_roots_iterator(setup);
     // screen = iter.data;
 
