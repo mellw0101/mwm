@@ -768,19 +768,19 @@ class mxb
                 static void 
                 _setup() 
                 {
-                    setup = xcb_get_setup(xcb_connect(nullptr, nullptr));
+                    setup = xcb_get_setup(conn);
                 }
 
                 static void 
                 _iter() 
                 {
-                    iter = xcb_setup_roots_iterator(xcb_get_setup(xcb_connect(nullptr, nullptr)));
+                    iter = xcb_setup_roots_iterator(setup);
                 }
 
                 static void 
                 _screen() 
                 {
-                    screen = xcb_setup_roots_iterator(xcb_get_setup(xcb_connect(nullptr, nullptr))).data;
+                    screen = iter.data;
                 }
 
                 static void 
@@ -7095,6 +7095,8 @@ setup_wm()
         return -1;
     }
 
+    mxb::set::_setup();
+    mxb::set::_iter();
     mxb::set::_screen();
     // setup = xcb_get_setup(conn);
     // iter = xcb_setup_roots_iterator(setup);
