@@ -401,6 +401,28 @@ class mxb
             return 0;
         }
 
+        static void 
+        announce_window_manager(int screen_nbr) 
+        {
+            // Create an invisible window
+            xcb_window_t wm_window = xcb_generate_id(conn);
+            xcb_create_window(conn, XCB_COPY_FROM_PARENT, wm_window, screen->root, 
+                            0, 0, 1, 1, 0, XCB_WINDOW_CLASS_INPUT_OUTPUT, 
+                            screen->root_visual, 0, NULL);
+
+            xcb_ewmh_init_atoms(conn, ewmh);
+
+            // Set _NET_SUPPORTING_WM_CHECK on the root window
+            xcb_ewmh_set_supporting_wm_check(ewmh, screen_nbr, wm_window);
+            xcb_ewmh_set_supporting_wm_check(ewmh, wm_window, wm_window);
+
+            // Set _NET_WM_NAME on the invisible window
+            const char *wm_name = "mwm";
+            xcb_ewmh_set_wm_name(ewmh, wm_window, strlen(wm_name), wm_name);
+
+            xcb_flush(conn);
+        }
+
         class get 
         {
             public: 
@@ -7123,6 +7145,7 @@ setup_wm()
 
     // test(screen->root, "/home/mellw/mwm_png/galaxy17.png");
     set_png(screen->root, "/home/mellw/mwm_png/galaxy17.png");
+    mxb::announce_window_manager(0);
     return 0;
 }
 
