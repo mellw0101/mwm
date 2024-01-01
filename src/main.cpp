@@ -4791,10 +4791,10 @@ set_png(xcb_window_t win, const char * imagePath)
     );
 }
 
-class WinDecoretor 
+class WinDecoretor
 {
     public:
-        WinDecoretor(xcb_connection_t * connection, client * c) 
+        WinDecoretor(xcb_connection_t * connection, client * c)
         : c(c)
         {
             if (xcb_connection_has_error(connection)) 
