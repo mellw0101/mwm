@@ -340,94 +340,101 @@ private:
 #define log_RESET 		"\033[0m"
 
 
-enum LogLevel {
+enum LogLevel 
+{
     INFO,
+	INFO_PRIORITY,
     WARNING,
     ERROR,
 	FUNC
 };
 
-class Logger {
-public:
-    template<typename T, typename... Args>
-    void 
-	log(LogLevel level, const std::string &function, const T& message, Args&&... args) 
-	{
-		FileHandler file("/home/mellw/nlog");
-		log_arragnge(list, message, args...);
-		file.append(TIME::get() + ":" + getLogPrefix(level) + ":" + log_MEGENTA + "[" + function + "]" + log_RESET + ":" + str + "\n");
-    }
-
-    void 
-	log(LogLevel level, const std::string &function) 
-	{
-		FileHandler file("/home/mellw/nlog");
-		file.append(TIME::get() + ":" + getLogPrefix(level) + ":[" + log_MEGENTA + function + log_RESET + "]\n");
-    }
-
-private:
-	std::vector<std::string> list;
-	std::string str;
-
-	std::string 
-	getLogPrefix(LogLevel level) const 
-	{
-        switch (level) 
+class Logger 
+{
+	public:
+		template<typename T, typename... Args>
+		void 
+		log(LogLevel level, const std::string &function, const T& message, Args&&... args) 
 		{
-            case INFO:
-			{
-                return log_GREEN 	"[INFO]" 	log_RESET;
-			}
-            case WARNING:
-			{
-			    return log_YELLOW 	"[WARNING]" log_RESET;
-			}
-            case ERROR:
-            {
-			    return log_RED 		"[ERROR]" 	log_RESET;
-			}
-			case FUNC:
-			{
-				return log_MEGENTA	"[FUNC]"	log_RESET;
-			}
-            default:
-			{
-                return std::to_string(level);
-			}
-        }
-    }
-
-	template<typename T, typename... Args>
-	void
-	log_arragnge(std::vector<std::string> list, const T &message, const Args&... args)
-	{
-		list.push_back(toString(message));
-		if constexpr (sizeof...(args) > 0)
-		{
-			log_arragnge(list, args...);
+			FileHandler file("/home/mellw/nlog");
+			log_arragnge(list, message, args...);
+			file.append(TIME::get() + ":" + getLogPrefix(level) + ":" + log_MEGENTA + "[" + function + "]" + log_RESET + ":" + str + "\n");
 		}
-		else
-		{
-			log_append(list);
-		}
-	}
 
-	void
-	log_append(std::vector<std::string> list)
-	{
-		std::string result;
-		int current = 0;
-		for (auto &i : list)
+		void 
+		log(LogLevel level, const std::string &function) 
 		{
-			result += "[" + i + "]";
-			if (current != list.size() - 1) 
-			{
-				result += ":";
-			}
-			current++;
+			FileHandler file("/home/mellw/nlog");
+			file.append(TIME::get() + ":" + getLogPrefix(level) + ":[" + log_MEGENTA + function + log_RESET + "]\n");
 		}
-		str = result;
-	}
+
+	private:
+		std::vector<std::string> list;
+		std::string str;
+
+		std::string 
+		getLogPrefix(LogLevel level) const 
+		{
+			switch (level) 
+			{
+				case INFO:
+				{
+					return log_GREEN 	"[INFO]" 		  log_RESET;
+				}
+				case INFO_PRIORITY:
+				{
+					return log_CYAN		"[INFO_PRIORITY]" log_RESET;
+				}
+				case WARNING:
+				{
+					return log_YELLOW 	"[WARNING]" 	  log_RESET;
+				}
+				case ERROR:
+				{
+					return log_RED 		"[ERROR]" 		  log_RESET;
+				}
+				case FUNC:
+				{
+					return log_MEGENTA	"[FUNC]"		  log_RESET;
+				}
+				default:
+				{
+					return std::to_string(level);
+				}
+			}
+		}
+
+		template<typename T, typename... Args>
+		void
+		log_arragnge(std::vector<std::string> list, const T &message, const Args&... args)
+		{
+			list.push_back(toString(message));
+			if constexpr (sizeof...(args) > 0)
+			{
+				log_arragnge(list, args...);
+			}
+			else
+			{
+				log_append(list);
+			}
+		}
+
+		void
+		log_append(std::vector<std::string> list)
+		{
+			std::string result;
+			int current = 0;
+			for (auto &i : list)
+			{
+				result += "[" + i + "]";
+				if (current != list.size() - 1) 
+				{
+					result += ":";
+				}
+				current++;
+			}
+			str = result;
+		}
 };
 
 #endif // DWMLOG_HPP

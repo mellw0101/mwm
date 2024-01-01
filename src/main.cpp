@@ -1,3 +1,5 @@
+#include "Log.hpp"
+#include <xcb/xproto.h>
 #define main_cpp
 #include "include.hpp"
 // #include "mxb.hpp"
@@ -3001,6 +3003,16 @@ class EWMHChecker
             }
 
             return false; // Window is likely not decorated
+        }
+
+        void
+        check_extends(xcb_window_t window)
+        {
+            xcb_ewmh_get_extents_reply_t extents;
+            if (xcb_ewmh_get_frame_extents_reply(ewmh_conn, xcb_ewmh_get_frame_extents(ewmh_conn, window), &extents, nullptr)) 
+            {
+                log.log(INFO_PRIORITY, __func__, "Extents: left: %d, right: %d, top: %d, bottom: %d", extents.left, extents.right, extents.top, extents.bottom);
+            }
         }
     
     private:
