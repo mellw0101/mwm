@@ -2716,6 +2716,8 @@ class set_png_as_backround
         }
 };
 
+std::mutex mtx;
+
 class change_desktop
 {
     public:
@@ -2767,8 +2769,10 @@ class change_desktop
                     break;
                 }
             }
+            mtx.lock();
             thread_sleep(DURATION + 20);
             joinAndClearThreads();
+            mtx.unlock();
         }
 
     private:
