@@ -1,4 +1,5 @@
 #include "Log.hpp"
+#include <string>
 #include <xcb/xcb.h>
 #include <xcb/xproto.h>
 #define main_cpp
@@ -26,6 +27,51 @@ draw_text(const char * str , const COLOR & text_color, const COLOR & bg_color, c
 
 static xcb_gcontext_t 
 create_graphical_context(xcb_window_t window);
+
+enum class CURSOR
+{
+    arrow,
+    hand1,
+    hand2,
+    watch,
+    xterm,
+    cross,
+    left_ptr,
+    right_ptr,
+    center_ptr,
+    sb_v_double_arrow,
+    sb_h_double_arrow,
+    fleur,
+    question_arrow,
+    pirate,
+    coffee_mug,
+    umbrella,
+    circle,
+    xsb_left_arrow,
+    xsb_right_arrow,
+    xsb_up_arrow,
+    xsb_down_arrow,
+    top_left_corner,
+    top_right_corner,
+    bottom_left_corner,
+    bottom_right_corner,
+    sb_left_arrow,
+    sb_right_arrow,
+    sb_up_arrow,
+    sb_down_arrow,
+    top_side,
+    bottom_side,
+    left_side,
+    right_side,
+    top_tee,
+    bottom_tee,
+    left_tee,
+    right_tee,
+    top_left_arrow,
+    top_right_arrow,
+    bottom_left_arrow,
+    bottom_right_arrow
+};
 
 class mxb 
 {
@@ -741,6 +787,97 @@ class mxb
                 {
                     gc = g;
                 }
+
+                class cursor
+                {
+                    public:
+                        cursor(xcb_window_t window, CURSOR CURSOR_ENUM) 
+                        {
+                            xcb_cursor_context_t * ctx;
+                            xcb_cursor_t cursor;
+
+                            if (xcb_cursor_context_new(conn, screen, &ctx) < 0) 
+                            {
+                                log.log(ERROR, __func__, "Unable to create cursor context.");
+                                return;
+                            }
+
+                            cursor = xcb_cursor_load_cursor(ctx, cursor_from_enum(CURSOR_ENUM));
+                            if (cursor) 
+                            {
+                                log.log(ERROR, __func__, "Unable to load cursor.");
+                                return;
+                            }
+
+                            xcb_change_window_attributes
+                            (
+                                conn, 
+                                window, 
+                                XCB_CW_CURSOR, 
+                                (uint32_t[1])
+                                {
+                                    cursor 
+                                }
+                            );
+                            xcb_flush(conn);
+
+                            xcb_cursor_context_free(ctx);
+                            xcb_free_cursor(conn, cursor);
+                        }
+                    ;
+    
+                    private:
+                        const char *
+                        cursor_from_enum(CURSOR CURSOR)
+                        {
+                            switch (CURSOR) 
+                            {
+                                case CURSOR::arrow: return "arrow";
+                                case CURSOR::hand1: return "hand1";
+                                case CURSOR::hand2: return "hand2";
+                                case CURSOR::watch: return "watch";
+                                case CURSOR::xterm: return "xterm";
+                                case CURSOR::cross: return "cross";
+                                case CURSOR::left_ptr: return "left_ptr";
+                                case CURSOR::right_ptr: return "right_ptr";
+                                case CURSOR::center_ptr: return "center_ptr";
+                                case CURSOR::sb_v_double_arrow: return "sb_v_double_arrow";
+                                case CURSOR::sb_h_double_arrow: return "sb_h_double_arrow";
+                                case CURSOR::fleur: return "fleur";
+                                case CURSOR::question_arrow: return "question_arrow";
+                                case CURSOR::pirate: return "pirate";
+                                case CURSOR::coffee_mug: return "coffee_mug";
+                                case CURSOR::umbrella: return "umbrella";
+                                case CURSOR::circle: return "circle";
+                                case CURSOR::xsb_left_arrow: return "xsb_left_arrow";
+                                case CURSOR::xsb_right_arrow: return "xsb_right_arrow";
+                                case CURSOR::xsb_up_arrow: return "xsb_up_arrow";
+                                case CURSOR::xsb_down_arrow: return "xsb_down_arrow";
+                                case CURSOR::top_left_corner: return "top_left_corner";
+                                case CURSOR::top_right_corner: return "top_right_corner";
+                                case CURSOR::bottom_left_corner: return "bottom_left_corner";
+                                case CURSOR::bottom_right_corner: return "bottom_right_corner";
+                                case CURSOR::sb_left_arrow: return "sb_left_arrow";
+                                case CURSOR::sb_right_arrow: return "sb_right_arrow";
+                                case CURSOR::sb_up_arrow: return "sb_up_arrow";
+                                case CURSOR::sb_down_arrow: return "sb_down_arrow";
+                                case CURSOR::top_side: return "top_side";
+                                case CURSOR::bottom_side: return "bottom_side";
+                                case CURSOR::left_side: return "left_side";
+                                case CURSOR::right_side: return "right_side";
+                                case CURSOR::top_tee: return "top_tee";
+                                case CURSOR::bottom_tee: return "bottom_tee";
+                                case CURSOR::left_tee: return "left_tee";
+                                case CURSOR::right_tee: return "right_tee";
+                                case CURSOR::top_left_arrow: return "top_left_arrow";
+                                case CURSOR::top_right_arrow: return "top_right_arrow";
+                                case CURSOR::bottom_left_arrow: return "bottom_left_arrow";
+                                case CURSOR::bottom_right_arrow: return "bottom_right_arrow";
+                                default: return "left_ptr";
+                            }
+                        }
+                    ;
+                };
             ;
         };
 
@@ -6997,7 +7134,8 @@ setup_wm()
 
     setSubstructureRedirectMask(); 
     configureRootWindow();
-    setDefaultCursor();
+    // setDefaultCursor();
+    mxb::set::cursor(screen->root, CURSOR::left_ptr);
 
     ewmh_init();
 
