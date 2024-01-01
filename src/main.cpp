@@ -413,7 +413,7 @@ class mxb
             xcb_ewmh_init_atoms(conn, ewmh);
 
             // Set _NET_SUPPORTING_WM_CHECK on the root window
-            xcb_ewmh_set_supporting_wm_check(ewmh, screen_nbr, wm_window);
+            xcb_ewmh_set_supporting_wm_check(ewmh, screen->root, wm_window);
             xcb_ewmh_set_supporting_wm_check(ewmh, wm_window, wm_window);
 
             // Set _NET_WM_NAME on the invisible window
