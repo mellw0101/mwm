@@ -7134,7 +7134,7 @@ setup_wm()
     setSubstructureRedirectMask(); 
     configureRootWindow();
     // setDefaultCursor();
-    mxb::set::cursor(screen->root, CURSOR::left_ptr);
+    mxb::set::cursor(screen->root, CURSOR::right_ptr);
 
     ewmh_init();
 
