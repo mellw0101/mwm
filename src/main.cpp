@@ -991,6 +991,19 @@ class mxb
 
                     return false; // Unable to determine or no decorations
                 }
+
+                class set
+                {
+                    public:
+                        static void
+                        active_window(xcb_window_t window)
+                        {
+                            xcb_ewmh_set_active_window(ewmh, 0, window); // 0 for the first (default) screen
+                            xcb_flush(conn);
+                            // xcb_ewmh_request_change_active_window(ewmh, 0, window, XCB_EWMH_CLIENT_SOURCE_TYPE_NORMAL, XCB_CURRENT_TIME, XCB_NONE);
+                        }
+                    ;
+                };
             ;
 
             private:
@@ -6526,7 +6539,6 @@ class Event
                         mxb::get::win::property(c->win, "_NET_WM_WINDOW_TYPE"); // works
                         mxb::get::win::property(c->win, "_NET_WM_PID"); // works, needs conversion to pid_t or other integer type 
                         mxb::get::win::property(c->win, "_NET_WM_USER_TIME"); // works, needs conversion to int or other integer type
-                        mxb::get::win::property(0, "_NET_SUPPORTED"); 
 
                         break;
                     }
@@ -6764,6 +6776,7 @@ class Event
             {
                 wm::ungrab_button(c, L_MOUSE_BUTTON, 0);
                 wm::raise_client(c);
+                mxb::EWMH::set::active_window(c->win);
                 focused_client = c;
             }
         }
