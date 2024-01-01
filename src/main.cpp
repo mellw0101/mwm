@@ -4678,7 +4678,7 @@ class resize_client
                                 const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
                                 if (isTimeToRender())
                                 {
-                                    resize_win_width(e->root_x);
+                                    resize_win_width(e->root_x - c->x);
                                     xcb_flush(conn); 
                                 }
                                 break;
