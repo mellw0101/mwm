@@ -4399,7 +4399,7 @@ class resize_client
                 (const uint32_t[2])
                 {
                     static_cast<const uint32_t &>(x),
-                    static_cast<const uint32_t &>(c->width) 
+                    static_cast<const uint32_t &>(c->width + c->x - x) 
                 }
             );
 
@@ -4407,10 +4407,9 @@ class resize_client
             (
                 conn,
                 c->titlebar,
-                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_WIDTH,
-                (const uint32_t[2])
+                XCB_CONFIG_WINDOW_WIDTH,
+                (const uint32_t[1])
                 {
-                    static_cast<const uint32_t &>(x),
                     static_cast<const uint32_t &>(c->width)
                 }
             );
