@@ -1,4 +1,5 @@
 #include "Log.hpp"
+#include <xcb/xcb.h>
 #include <xcb/xproto.h>
 #define main_cpp
 #include "include.hpp"
@@ -392,76 +393,269 @@ class mxb
                     return gc;
                 }
 
-                static xcb_window_t 
-                root_window(xcb_window_t window) 
+                class win 
                 {
-                    xcb_query_tree_cookie_t cookie;
-                    xcb_query_tree_reply_t *reply;
+                    public:
+                        static xcb_window_t 
+                        root(xcb_window_t window) 
+                        {
+                            xcb_query_tree_cookie_t cookie;
+                            xcb_query_tree_reply_t *reply;
 
-                    cookie = xcb_query_tree(conn, window);
-                    reply = xcb_query_tree_reply(conn, cookie, NULL);
+                            cookie = xcb_query_tree(conn, window);
+                            reply = xcb_query_tree_reply(conn, cookie, NULL);
 
-                    if (!reply) 
-                    {
-                        log.log(ERROR, __func__, "Error: Unable to query the window tree.");
-                        return (xcb_window_t) 0; // Invalid window ID
-                    }
+                            if (!reply) 
+                            {
+                                log.log(ERROR, __func__, "Error: Unable to query the window tree.");
+                                return (xcb_window_t) 0; // Invalid window ID
+                            }
 
-                    xcb_window_t root_window = reply->root;
+                            xcb_window_t root_window = reply->root;
 
-                    free(reply);
-                    return root_window;
-                }
+                            free(reply);
+                            return root_window;
+                        }
 
-                static xcb_window_t
-                parent_window(xcb_window_t window) 
-                {
-                    xcb_query_tree_cookie_t cookie;
-                    xcb_query_tree_reply_t *reply;
+                        static xcb_window_t
+                        parent(xcb_window_t window) 
+                        {
+                            xcb_query_tree_cookie_t cookie;
+                            xcb_query_tree_reply_t *reply;
 
-                    cookie = xcb_query_tree(conn, window);
-                    reply = xcb_query_tree_reply(conn, cookie, NULL);
+                            cookie = xcb_query_tree(conn, window);
+                            reply = xcb_query_tree_reply(conn, cookie, NULL);
 
-                    if (!reply) 
-                    {
-                        log.log(ERROR, __func__, "Error: Unable to query the window tree.");
-                        return (xcb_window_t) 0; // Invalid window ID
-                    }
+                            if (!reply) 
+                            {
+                                log.log(ERROR, __func__, "Error: Unable to query the window tree.");
+                                return (xcb_window_t) 0; // Invalid window ID
+                            }
 
-                    xcb_window_t parent_window = reply->parent;
+                            xcb_window_t parent_window = reply->parent;
 
-                    free(reply);
-                    return parent_window;
-                }
+                            free(reply);
+                            return parent_window;
+                        }
 
-                static xcb_window_t *
-                window_children(xcb_connection_t *conn, xcb_window_t window, uint32_t *child_count) 
-                {
-                    *child_count = 0;
-                    xcb_query_tree_cookie_t cookie = xcb_query_tree(conn, window);
-                    xcb_query_tree_reply_t *reply = xcb_query_tree_reply(conn, cookie, NULL);
+                        static xcb_window_t *
+                        children(xcb_connection_t *conn, xcb_window_t window, uint32_t *child_count) 
+                        {
+                            *child_count = 0;
+                            xcb_query_tree_cookie_t cookie = xcb_query_tree(conn, window);
+                            xcb_query_tree_reply_t *reply = xcb_query_tree_reply(conn, cookie, NULL);
 
-                    if (!reply) 
-                    {
-                        log.log(ERROR, __func__, "Error: Unable to query the window tree.");
-                        return NULL;
-                    }
+                            if (!reply) 
+                            {
+                                log.log(ERROR, __func__, "Error: Unable to query the window tree.");
+                                return NULL;
+                            }
 
-                    *child_count = xcb_query_tree_children_length(reply);
-                    xcb_window_t *children = static_cast<xcb_window_t *>(malloc(*child_count * sizeof(xcb_window_t)));
+                            *child_count = xcb_query_tree_children_length(reply);
+                            xcb_window_t *children = static_cast<xcb_window_t *>(malloc(*child_count * sizeof(xcb_window_t)));
 
-                    if (!children) 
-                    {
-                        log.log(ERROR, __func__, "Error: Unable to allocate memory for children.");
-                        free(reply);
-                        return NULL;
-                    }
+                            if (!children) 
+                            {
+                                log.log(ERROR, __func__, "Error: Unable to allocate memory for children.");
+                                free(reply);
+                                return NULL;
+                            }
 
-                    memcpy(children, xcb_query_tree_children(reply), *child_count * sizeof(xcb_window_t));
-                    
-                    free(reply);
-                    return children;
-                }
+                            memcpy(children, xcb_query_tree_children(reply), *child_count * sizeof(xcb_window_t));
+                            
+                            free(reply);
+                            return children;
+                        }
+
+                        static std::string 
+                        property(xcb_window_t window, const char * atom_name) 
+                        {
+                            xcb_get_property_reply_t *reply;
+                            unsigned int reply_len;
+                            char *propertyValue;
+
+                            reply = xcb_get_property_reply
+                            (
+                                conn,
+                                xcb_get_property
+                                (
+                                    conn,
+                                    false,
+                                    window,
+                                    atom
+                                    (
+                                        atom_name
+                                    ),
+                                    XCB_GET_PROPERTY_TYPE_ANY,
+                                    0,
+                                    60
+                                ),
+                                NULL
+                            );
+
+                            if (!reply || xcb_get_property_value_length(reply) == 0) 
+                            {
+                                if (reply != nullptr) 
+                                {
+                                    log.log(ERROR, __func__, "reply length for property(" + std::string(atom_name) + ") = 0");
+                                    free(reply);
+                                    return "";
+                                }
+
+                                log.log(ERROR, __func__, "reply == nullptr");
+                                return "";
+                            }
+
+                            reply_len = xcb_get_property_value_length(reply);
+                            propertyValue = static_cast<char *>(malloc(sizeof(char) * (reply_len + 1)));
+                            memcpy(propertyValue, xcb_get_property_value(reply), reply_len);
+                            propertyValue[reply_len] = '\0';
+
+                            if (reply) 
+                            {
+                                free(reply);
+                            }
+
+                            log.log(INFO, __func__, "property(" + std::string(atom_name) + ") = " + std::string(propertyValue));
+                            std::string spropertyValue = std::string(propertyValue);
+                            free(propertyValue);
+
+                            return spropertyValue;
+                        }
+
+                        static void
+                        size_pos(xcb_window_t window, uint16_t & x, uint16_t & y, uint16_t & width, uint16_t & height) 
+                        {
+                            xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
+                            xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
+
+                            if (geometry) 
+                            {
+                                x = geometry->x;
+                                y = geometry->y;
+                                width = geometry->width;
+                                height = geometry->height;
+                                free(geometry);
+                            } 
+                            else 
+                            {
+                                x = y = width = height = 200;
+                            }
+                        }
+
+                        static void 
+                        x_y(xcb_window_t window, uint16_t & x, uint16_t & y) 
+                        {
+                            xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
+                            xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
+
+                            if (geometry) 
+                            {
+                                x = geometry->x;
+                                y = geometry->y;
+                                free(geometry);
+                            } 
+                            else 
+                            {
+                                x = y = 200;
+                            }
+                        }
+
+                        static void 
+                        width_height(xcb_window_t window, uint16_t & width, uint16_t & height) 
+                        {
+                            xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
+                            xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
+
+                            if (geometry) 
+                            {
+                                width = geometry->width;
+                                height = geometry->height;
+                                free(geometry);
+                            } 
+                            else 
+                            {
+                                width = height = 200;
+                            }
+                        }
+
+                        static uint16_t 
+                        x(xcb_window_t window)
+                        {
+                            xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
+                            xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
+
+                            uint16_t x;
+                            if (geometry) 
+                            {
+                                x = geometry->x;
+                                free(geometry);
+                            } 
+                            else 
+                            {
+                                x = 200;
+                            }
+                            return x;
+                        }
+                        
+                        static uint16_t 
+                        y(xcb_window_t window)
+                        {
+                            xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
+                            xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
+
+                            uint16_t y;
+                            if (geometry) 
+                            {
+                                y = geometry->y;
+                                free(geometry);
+                            } 
+                            else 
+                            {
+                                y = 200;
+                            }
+                            return y;
+                        }
+
+                        static uint16_t 
+                        width(xcb_window_t window) 
+                        {
+                            xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
+                            xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
+
+                            uint16_t width;
+                            if (geometry) 
+                            {
+                                width = geometry->width;
+                                free(geometry);
+                            } 
+                            else 
+                            {
+                                width = 200;
+                            }
+                            return width;
+                        }
+                        
+                        static uint16_t 
+                        height(xcb_window_t window) 
+                        {
+                            xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
+                            xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
+
+                            uint16_t height;
+                            if (geometry) 
+                            {
+                                height = geometry->height;
+                                free(geometry);
+                            } 
+                            else 
+                            {
+                                height = 200;
+                            }
+                            return height;
+                        }
+                    ;
+                };
 
                 static xcb_atom_t
                 atom(const char * atom_name) 
@@ -505,62 +699,6 @@ class mxb
 
                     free(reply);
                     return atomName;
-                }
-
-                static std::string 
-                WindowProperty(xcb_window_t window, const char * atom_name) 
-                {
-                    xcb_get_property_reply_t *reply;
-                    unsigned int reply_len;
-                    char *propertyValue;
-
-                    reply = xcb_get_property_reply
-                    (
-                        conn,
-                        xcb_get_property
-                        (
-                            conn,
-                            false,
-                            window,
-                            atom
-                            (
-                                atom_name
-                            ),
-                            XCB_GET_PROPERTY_TYPE_ANY,
-                            0,
-                            60
-                        ),
-                        NULL
-                    );
-
-                    if (!reply || xcb_get_property_value_length(reply) == 0) 
-                    {
-                        if (reply != nullptr) 
-                        {
-                            log.log(ERROR, __func__, "reply length for property(" + std::string(atom_name) + ") = 0");
-                            free(reply);
-                            return "";
-                        }
-
-                        log.log(ERROR, __func__, "reply == nullptr");
-                        return "";
-                    }
-
-                    reply_len = xcb_get_property_value_length(reply);
-                    propertyValue = static_cast<char *>(malloc(sizeof(char) * (reply_len + 1)));
-                    memcpy(propertyValue, xcb_get_property_value(reply), reply_len);
-                    propertyValue[reply_len] = '\0';
-
-                    if (reply) 
-                    {
-                        free(reply);
-                    }
-
-                    log.log(INFO, __func__, "property(" + std::string(atom_name) + ") = " + std::string(propertyValue));
-                    std::string spropertyValue = std::string(propertyValue);
-                    free(propertyValue);
-
-                    return spropertyValue;
                 }
             ;
         };
@@ -4331,62 +4469,6 @@ namespace win_tools
         return NULL;
     }
 
-    void 
-    get_win_w_h(xcb_window_t window, uint16_t & width, uint16_t & height) 
-    {
-        xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
-        xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
-
-        if (geometry) 
-        {
-            width = geometry->width;
-            height = geometry->height;
-            free(geometry);
-        } 
-        else 
-        {
-            width = height = 200;
-        }
-    }
-
-    uint16_t 
-    get_win_w(xcb_window_t window) 
-    {
-        xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
-        xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
-
-        uint16_t width;
-        if (geometry) 
-        {
-            width = geometry->width;
-            free(geometry);
-        } 
-        else 
-        {
-            width = 200;
-        }
-        return width;
-    }
-    
-    uint16_t 
-    get_win_h(xcb_window_t window) 
-    {
-        xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
-        xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
-
-        uint16_t height;
-        if (geometry) 
-        {
-            height = geometry->height;
-            free(geometry);
-        } 
-        else 
-        {
-            height = 200;
-        }
-        return height;
-    }
-
     bool 
     getPointerPosition(xcb_window_t window, int& posX, int& posY) 
     {
@@ -4475,8 +4557,8 @@ class Compositor
             }
 
             // Get window dimensions
-            uint16_t width = win_tools::get_win_w(window);
-            uint16_t height = win_tools::get_win_h(window);
+            uint16_t width = mxb::get::win::width(window);
+            uint16_t height = mxb::get::win::height(window);
             if (width <= 0 || height <= 0) 
             {
                 log_error("Invalid window dimensions.");
@@ -4546,8 +4628,8 @@ class Compositor
                     0, 
                     0, 
                     0, 
-                    win_tools::get_win_w(pair.first), 
-                    win_tools::get_win_h(pair.first)
+                    mxb::get::win::width(pair.first), 
+                    mxb::get::win::height(pair.first)
                 );
             }
 
@@ -4563,7 +4645,7 @@ class Compositor
                 xcb_render_picture_t picture = it->second;
 
                 uint16_t w, h;
-                win_tools::get_win_w_h(window, w, h);
+                mxb::get::win::width_height(window, w, h);
 
                 // Create a semi-transparent rectangle
                 xcb_rectangle_t rect = {0, 0, w, h};
@@ -4581,6 +4663,7 @@ class Compositor
                 xcb_free_gc(connection, gc);
             }
         }
+    ;
 
     private:
         xcb_connection_t* connection;
@@ -4667,7 +4750,8 @@ class Compositor
             }
 
             return format;
-        }  
+        }
+    ;
 };
 
 Compositor * gCompositor = nullptr;
@@ -4786,8 +4870,8 @@ set_png(xcb_window_t win, const char * imagePath)
         win, 
         0, 
         0, 
-        win_tools::get_win_w(win), 
-        win_tools::get_win_h(win)
+        mxb::get::win::width(win), 
+        mxb::get::win::height(win)
     );
 }
 
@@ -6302,15 +6386,15 @@ class Event
                             log_info("does not have frame extents");
                         }
 
-                        mxb::get::WindowProperty(c->win, "WM_CLASS"); // works
-                        mxb::get::WindowProperty(c->win, "WM_NAME"); //works
-                        mxb::get::WindowProperty(c->win, "WM_PROTOCOLS"); // works
-                        mxb::get::WindowProperty(c->win, "WM_HINTS"); // works
-                        mxb::get::WindowProperty(c->win, "WM_NORMAL_HINTS"); // works
-                        mxb::get::WindowProperty(c->win, "_NET_WM_NAME"); // works, gives (WM_NAME WM_CLASS) 
-                        mxb::get::WindowProperty(c->win, "_NET_WM_WINDOW_TYPE"); // works
-                        mxb::get::WindowProperty(c->win, "_NET_WM_PID"); // works, needs conversion to pid_t or other integer type 
-                        mxb::get::WindowProperty(c->win, "_NET_WM_USER_TIME"); // works, needs conversion to int or other integer type
+                        mxb::get::win::property(c->win, "WM_CLASS"); // works
+                        mxb::get::win::property(c->win, "WM_NAME"); //works
+                        mxb::get::win::property(c->win, "WM_PROTOCOLS"); // works
+                        mxb::get::win::property(c->win, "WM_HINTS"); // works
+                        mxb::get::win::property(c->win, "WM_NORMAL_HINTS"); // works
+                        mxb::get::win::property(c->win, "_NET_WM_NAME"); // works, gives (WM_NAME WM_CLASS) 
+                        mxb::get::win::property(c->win, "_NET_WM_WINDOW_TYPE"); // works
+                        mxb::get::win::property(c->win, "_NET_WM_PID"); // works, needs conversion to pid_t or other integer type 
+                        mxb::get::win::property(c->win, "_NET_WM_USER_TIME"); // works, needs conversion to int or other integer type
 
                         break;
                     }
@@ -6897,7 +6981,8 @@ setDefaultCursor()
 const int8_t
 setup_wm()
 {
-    conn = xcb_connect(nullptr, nullptr);
+    // conn = xcb_connect(nullptr, nullptr);
+    mxb::set::connection(xcb_connect(nullptr, nullptr));
     
     if (xcb_connection_has_error(conn)) 
     {
