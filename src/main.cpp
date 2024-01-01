@@ -4210,7 +4210,7 @@ class max_win
     ;
 };
 
-namespace win_tools 
+namespace win_tools
 {
     void 
     kill_client(xcb_connection_t *conn, xcb_window_t window) 
@@ -4454,7 +4454,7 @@ namespace win_tools
     }
 }
 
-class Compositor 
+class Compositor
 {
     public:
         Compositor(xcb_connection_t* connection, xcb_screen_t* screen) 
@@ -5078,7 +5078,7 @@ class WinDecoretor
     ;
 };
 
-class WinManager 
+class WinManager
 {
     public:
         static void 
@@ -5538,7 +5538,7 @@ class WinManager
  * It provides methods to tile windows to the left, right, *up, or *down positions on the screen.
  * The class also includes helper methods to check the current tile position of a window and set the size and position of a window.
  */
-class tile 
+class tile
 {
     public:
         tile(client * & c, TILE tile)
@@ -5903,7 +5903,7 @@ class tile
         }
 };
 
-class Event 
+class Event
 {
     public:
         /**
