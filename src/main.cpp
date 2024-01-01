@@ -1,10 +1,3 @@
-#include "Log.hpp"
-#include <cstddef>
-#include <cstdint>
-#include <string>
-#include <xcb/xcb.h>
-#include <xcb/xcb_ewmh.h>
-#include <xcb/xproto.h>
 #define main_cpp
 #include "include.hpp"
 // #include "mxb.hpp"
@@ -1160,6 +1153,45 @@ class mxb
             private:
                 xcb_connection_t* connection;
                 xcb_ewmh_connection_t* ewmh_conn;
+            ;
+        };
+
+        class calc
+        {
+            public:
+                static bool
+                client_edge_prox_to_pointer(const int & prox)
+                {
+                    const uint32_t & x = mxb::get::pointer::x();
+                    const uint32_t & y = mxb::get::pointer::y();
+                    for (const auto & c : cur_d->current_clients)
+                    {
+                        // LEFT EDGE OF CLIENT
+                        if (x > c->x - prox && x < c->x + prox)
+                        {
+                            return true;
+                        }
+
+                        // RIGHT EDGE OF CLIENT
+                        if (x > c->x + c->width - prox && x < c->x + c->width + prox)
+                        {
+                            return true;
+                        }
+
+                        // TOP EDGE OF CLIENT
+                        if (y > c->y - prox && y < c->y + prox)
+                        {
+                            return true;
+                        }
+
+                        // BOTTOM EDGE OF CLIENT
+                        if (y > c->y + c->height - prox && y < c->y + c->height + prox)
+                        {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
             ;
         };
     ;
@@ -4068,10 +4100,8 @@ class resize_client
                 log_info("false");
                 return;
             }
-            else 
-            {
-                log_info("true");
-            }
+            
+
         }
     ;
 
@@ -6998,6 +7028,15 @@ class Event
         {
             const auto * e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
             // log_win("e->event: ", e->event);
+            if (mxb::calc::client_edge_prox_to_pointer(10))
+            {
+                log_info("client_edge_prox_to_pointer = true");
+            }
+            else 
+            {
+                log_info("client_edge_prox_to_pointer = false");
+            }
+            
             client * c = get::client_from_all_win(& e->event);
             if (!c)
             {
