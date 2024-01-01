@@ -4377,6 +4377,80 @@ class resize_client
         }
 
         void
+        resize_win_left(const uint16_t & x)
+        {
+            // CONFIGURE THE WINDOW WITH THE NEW WIDTH AND HEIGHT
+            xcb_configure_window 
+            (
+                conn,
+                c->win,
+                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_WIDTH,
+                (const uint32_t[2])
+                {
+                    static_cast<const uint32_t &>(x),
+                    static_cast<const uint32_t &>(x - c->x) 
+                }
+            );
+
+            xcb_configure_window 
+            (
+                conn,
+                c->frame,
+                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_WIDTH,
+                (const uint32_t[2])
+                {
+                    static_cast<const uint32_t &>(x),
+                    static_cast<const uint32_t &>(x - c->x) 
+                }
+            );
+
+            xcb_configure_window 
+            (
+                conn,
+                c->titlebar,
+                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_WIDTH,
+                (const uint32_t[2])
+                {
+                    static_cast<const uint32_t &>(x),
+                    static_cast<const uint32_t &>(x - c->x)
+                }
+            );
+
+            xcb_configure_window 
+            (
+                conn,
+                c->close_button,
+                XCB_CONFIG_WINDOW_X,
+                (const uint32_t[1])
+                {
+                    static_cast<const uint32_t &>(x - c->x - 20)
+                }
+            );
+
+            xcb_configure_window 
+            (
+                conn,
+                c->max_button,
+                XCB_CONFIG_WINDOW_X,
+                (const uint32_t[1])
+                {
+                    static_cast<const uint32_t &>(x - c->x - 40)
+                }
+            );
+
+            xcb_configure_window 
+            (
+                conn,
+                c->min_button,
+                XCB_CONFIG_WINDOW_X,
+                (const uint32_t[1])
+                {
+                    static_cast<const uint32_t &>(x - c->x - 60)
+                }
+            );
+        }
+
+        void
         resize_win_width(const uint16_t & width)
         {
             // CONFIGURE THE WINDOW WITH THE NEW WIDTH AND HEIGHT
@@ -4607,7 +4681,7 @@ class resize_client
                                 const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
                                 if (isTimeToRender())
                                 {
-                                    resize_win_height(e->root_y);
+                                    resize_win_height(e->root_y - c->y);
                                     xcb_flush(conn); 
                                 }
                                 break;
@@ -4646,7 +4720,7 @@ class resize_client
                                 const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
                                 if (isTimeToRender())
                                 {
-                                    resize_win_width(e->root_x);
+                                    resize_win_left(e->root_x);
                                     xcb_flush(conn); 
                                 }
                                 break;
