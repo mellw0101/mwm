@@ -6309,7 +6309,7 @@ setup_wm()
     gCompositor = &compositor;
 
     // test(screen->root, "/home/mellw/mwm_png/galaxy17.png");
-    set_png(screen->root, "/home/mellw/mwm_png/galaxy14.png");
+    set_png(screen->root, "/home/mellw/mwm_png/galaxy17.png");
     return 0;
 }
 
