@@ -763,23 +763,11 @@ void /**
  * @brief Function to remove a client based on its window ID 
  *
  */
-removeClient(const xcb_window_t & win) 
+removeClient(client * c) 
 {
-    auto it = std::remove_if
-    (
-        client_list.begin(),
-        client_list.end(),
-        [win](const client * c) { return c->win == win; }
-    );
-
-    // Delete the removed clients to avoid memory leaks
-    for (auto iter = it; iter != client_list.end(); ++iter) 
-    {
-        delete *iter;
-    }
-
-    // Erase the removed clients from the vector
-    client_list.erase(it, client_list.end());
+    delete c;
+    client_list.erase(std::remove(client_list.begin(), client_list.end(), c), client_list.end());
+    cur_d->current_clients.erase(std::remove(cur_d->current_clients.begin(), cur_d->current_clients.end(), c), cur_d->current_clients.end());
 }
 
 void 
@@ -3844,8 +3832,7 @@ namespace win_tools
         kill_client(conn, c->frame);
         xcb_flush(conn);
         
-        delete c;
-        client_list.erase(std::remove(client_list.begin(), client_list.end(), c), client_list.end());
+        removeClient(c);
 
         return 0;
     }
