@@ -4652,168 +4652,71 @@ class resize_client
          */
         run(edge edge)
         {
-            switch (edge)
+            if (edge == edge::NONE)
             {
-                case edge::TOP:
+                return;
+            }
+            
+            xcb_generic_event_t * ev;
+            bool shouldContinue = true;
+
+            // Wait for motion events and handle window resizing
+            while (shouldContinue) 
+            {
+                ev = xcb_wait_for_event(conn);
+                if (!ev) 
                 {
-                    xcb_generic_event_t * ev;
-                    bool shouldContinue = true;
+                    continue;
+                }
 
-                    // Wait for motion events and handle window resizing
-                    while (shouldContinue) 
+                switch (ev->response_type & ~0x80) 
+                {
+                    case XCB_MOTION_NOTIFY: 
                     {
-                        ev = xcb_wait_for_event(conn);
-                        if (!ev) 
+                        const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
+                        if (isTimeToRender())
                         {
-                            continue;
-                        }
-
-                        switch (ev->response_type & ~0x80) 
-                        {
-                            case XCB_MOTION_NOTIFY: 
+                            switch (edge)
                             {
-                                const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
-                                if (isTimeToRender())
+                                case edge::TOP:
                                 {
                                     resize_win_top(e->root_y);
-                                    xcb_flush(conn); 
+                                    break;
                                 }
-                                break;
-                            }
-                            case XCB_BUTTON_RELEASE: 
-                            {
-                                shouldContinue = false;                        
-                                wm::update_client(c); 
-                                break;
-                            }
-                        }
-                        // Free the event memory after processing
-                        free(ev); 
-                    }
-                    break;
-                }
-
-                case edge::BOTTOM_edge:
-                {
-                    xcb_generic_event_t * ev;
-                    bool shouldContinue = true;
-
-                    // Wait for motion events and handle window resizing
-                    while (shouldContinue) 
-                    {
-                        ev = xcb_wait_for_event(conn);
-                        if (!ev) 
-                        {
-                            continue;
-                        }
-
-                        switch (ev->response_type & ~0x80) 
-                        {
-                            case XCB_MOTION_NOTIFY: 
-                            {
-                                const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
-                                if (isTimeToRender())
+                                case edge::BOTTOM_edge:
                                 {
                                     resize_win_height(e->root_y - c->y);
-                                    xcb_flush(conn); 
+                                    break;
                                 }
-                                break;
-                            }
-                            case XCB_BUTTON_RELEASE: 
-                            {
-                                shouldContinue = false;                        
-                                wm::update_client(c); 
-                                break;
-                            }
-                        }
-                        // Free the event memory after processing
-                        free(ev); 
-                    }
-                    break;
-                }
-
-                case edge::LEFT:
-                {
-                    xcb_generic_event_t * ev;
-                    bool shouldContinue = true;
-
-                    // Wait for motion events and handle window resizing
-                    while (shouldContinue) 
-                    {
-                        ev = xcb_wait_for_event(conn);
-                        if (!ev) 
-                        {
-                            continue;
-                        }
-
-                        switch (ev->response_type & ~0x80) 
-                        {
-                            case XCB_MOTION_NOTIFY: 
-                            {
-                                const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
-                                if (isTimeToRender())
+                                case edge::LEFT:
                                 {
                                     resize_win_left(e->root_x);
-                                    xcb_flush(conn); 
+                                    break;
                                 }
-                                break;
-                            }
-                            case XCB_BUTTON_RELEASE: 
-                            {
-                                shouldContinue = false;                        
-                                wm::update_client(c); 
-                                break;
-                            }
-                        }
-                        // Free the event memory after processing
-                        free(ev); 
-                    }
-                    break;
-                }
-
-                case edge::RIGHT:
-                {
-                    xcb_generic_event_t * ev;
-                    bool shouldContinue = true;
-
-                    // Wait for motion events and handle window resizing
-                    while (shouldContinue) 
-                    {
-                        ev = xcb_wait_for_event(conn);
-                        if (!ev) 
-                        {
-                            continue;
-                        }
-
-                        switch (ev->response_type & ~0x80) 
-                        {
-                            case XCB_MOTION_NOTIFY: 
-                            {
-                                const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
-                                if (isTimeToRender())
+                                case edge::RIGHT:
                                 {
                                     resize_win_width(e->root_x - c->x);
-                                    xcb_flush(conn); 
+                                    break;
                                 }
-                                break;
+                                case edge::NONE:
+                                {
+                                    return;
+                                    break;
+                                }
                             }
-                            case XCB_BUTTON_RELEASE: 
-                            {
-                                shouldContinue = false;                        
-                                wm::update_client(c); 
-                                break;
-                            }
+                            xcb_flush(conn); 
                         }
-                        // Free the event memory after processing
-                        free(ev); 
+                        break;
                     }
-                    break;
+                    case XCB_BUTTON_RELEASE: 
+                    {
+                        shouldContinue = false;                        
+                        wm::update_client(c); 
+                        break;
+                    }
                 }
-
-                case edge::NONE:
-                {
-                    return;
-                }
+                // Free the event memory after processing
+                free(ev); 
             }
         }
 
@@ -7620,7 +7523,6 @@ void /**
  */
 run() 
 {
-    // INITIALIZES THE EVENT CLASS AS EVENT
     Event event;
     while (true)
     {
@@ -7629,23 +7531,8 @@ run()
         {
             continue;
         }
-        // SEND THE EVENT TO THE EVENT HANDLER
         event.handler(ev);
-        
-        // DEALLOCATE THE MEMORY THE EVENT
-        // USED AFTER IT HAS BEEN HANDLED
         free(ev);
-
-        // xcb_generic_event_t * ev;
-        // while ((ev = xcb_poll_for_event(conn)))
-        // {
-        //     if (!ev) 
-        //     {
-        //         continue;
-        //     }
-        //     event.handler(ev);
-        //     free(ev);
-        // }   
     }
 }
 
