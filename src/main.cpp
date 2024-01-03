@@ -5050,6 +5050,7 @@ class max_win
                     {
                         ewmh_max_win(c);
                     }
+
                     break;
                 }
                 case BUTTON_MAXWIN:
@@ -5062,6 +5063,7 @@ class max_win
                     {
                         button_max_win(c);
                     }
+
                     break;
                 }
             }
@@ -5099,10 +5101,10 @@ class max_win
             max_win_animate
             (
                 c, 
-                0, 
-                - 20, 
-                screen->width_in_pixels, 
-                screen->height_in_pixels + 20
+                - BORDER_SIZE, 
+                - TITLE_BAR_SIZE, 
+                screen->width_in_pixels + (BORDER_SIZE * 2), 
+                screen->height_in_pixels + TITLE_BAR_SIZE + BORDER_SIZE
             );
             xcb_change_property
             (
