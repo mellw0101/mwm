@@ -4830,7 +4830,7 @@ class resize_client
                         XCB_CONFIG_WINDOW_X,
                         (const uint32_t[1])
                         {
-                            static_cast<const uint32_t &>(c->width - 20 + c->x - x)
+                            static_cast<const uint32_t &>((c->width - BUTTON_SIZE + c->x - x) - BORDER_SIZE)
                         }
                     );
 
@@ -4842,7 +4842,7 @@ class resize_client
                         XCB_CONFIG_WINDOW_X,
                         (const uint32_t[1])
                         {
-                            static_cast<const uint32_t &>(c->width - 40 + c->x - x)
+                            static_cast<const uint32_t &>((c->width - (BUTTON_SIZE * 2) + c->x - x) - BORDER_SIZE)
                         }
                     );
 
@@ -4854,7 +4854,7 @@ class resize_client
                         XCB_CONFIG_WINDOW_X,
                         (const uint32_t[1])
                         {
-                            static_cast<const uint32_t &>(c->width - 60 + c->x - x)
+                            static_cast<const uint32_t &>((c->width - (BUTTON_SIZE * 3) + c->x - x) - BORDER_SIZE)
                         }
                     );
 
