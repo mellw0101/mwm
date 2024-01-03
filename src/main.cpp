@@ -151,12 +151,11 @@ namespace test
 // }
 
 template<typename Type>
-std::unique_ptr<Type, decltype(&std::free)> make_unique_event(xcb_generic_event_t * event) 
-{
-    // if (!event) 
-    // {
-    //     return ;
-    // }
+std::unique_ptr<Type, decltype(&std::free)> make_unique_event(xcb_generic_event_t * event) {
+    if (!event) {
+        // If the event is nullptr, return an equivalent unique_ptr
+        return std::unique_ptr<Type, decltype(&std::free)>(nullptr, std::free);
+    }
 
     // Create a unique_ptr with custom deleter for the generic event
     std::unique_ptr<xcb_generic_event_t, decltype(&std::free)> uniqueEvent(event, std::free);
@@ -8465,6 +8464,10 @@ class Event
         {
             // const auto * e = reinterpret_cast<const xcb_focus_in_event_t *>(ev);
             auto e = make_unique_event<xcb_focus_in_event_t>(ev);
+            if (!e)
+            {
+                return;
+            }
             // log_win("e->event: ", e->event);
             
             client * c = get::client_from_win(& e->event);
