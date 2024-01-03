@@ -77,7 +77,8 @@ enum TILE_ANIMATION
 typedef enum Decor_data 
 {
     TITLE_BAR_HEIGHT = 20,
-    BORDER_SIZE = 4
+    BORDER_SIZE = 4,
+    BUTTON_SIZE = TITLE_BAR_HEIGHT
 } 
 Decor_data;
 
