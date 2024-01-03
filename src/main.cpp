@@ -6165,7 +6165,7 @@ class WinDecoretor
                 0,
                 NULL
             );
-            xcb_configure_window
+            xcb_change_window_attributes
             (
                 conn, 
                 c->border.top, 
