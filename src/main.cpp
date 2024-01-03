@@ -3228,6 +3228,7 @@ class XCPPBAnimator
             );
             xcb_flush(connection);
 
+            // c->border.left
             xcb_configure_window
             (
                 connection,
@@ -3238,6 +3239,7 @@ class XCPPBAnimator
                     static_cast<const uint32_t &>(h - TITLE_BAR_SIZE -BORDER_SIZE)
                 }
             );
+            xcb_flush(connection);
 
             // c->border.bottom
             xcb_configure_window
