@@ -77,7 +77,8 @@ typedef enum Decor_data
 {
     TITLE_BAR_SIZE = 20,
     BORDER_SIZE = 1
-} Decor_data;
+} 
+Decor_data;
 
 enum MAXWIN_ANIMATION 
 {

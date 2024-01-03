@@ -5800,8 +5800,8 @@ class WinDecoretor
                 conn, 
                 c->win, 
                 c->frame, 
-                0, 
-                20
+                BORDER_SIZE, 
+                TITLE_BAR_SIZE
             );
 
             xcb_map_window(conn, c->frame);
