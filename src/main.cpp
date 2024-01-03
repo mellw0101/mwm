@@ -7838,7 +7838,8 @@ class Event
                 }
                 case XCB_FOCUS_IN:
                 {
-                    focus_in_handler(ev);
+                    auto e = make_unique_event<xcb_focus_in_event_t>(ev);
+                    focus_in_handler(e);
                     break;
                 }
                 case XCB_FOCUS_OUT:
@@ -8460,17 +8461,16 @@ class Event
         }
 
         void
-        focus_in_handler(xcb_generic_event_t * ev)
+        focus_in_handler(const std::unique_ptr<xcb_focus_in_event_t, decltype(&std::free)>& e)
         {
-            const auto * e = reinterpret_cast<const xcb_focus_in_event_t *>(ev);
-            // auto e = make_unique_event<xcb_focus_in_event_t>(ev);
+            // const auto * e = reinterpret_cast<const xcb_focus_in_event_t *>(ev);
             if (!e)
             {
                 return;
             }
             // log_win("e->event: ", e->event);
             
-            client * c = get::client_from_win(& e->event);
+            client * c = get::client_from_win( & e->event);
             if (c)
             {
                 wm::ungrab_button(c, L_MOUSE_BUTTON, 0);
