@@ -5047,7 +5047,7 @@ class resize_client
                         XCB_CONFIG_WINDOW_HEIGHT,
                         (const uint32_t[1])
                         {
-                            static_cast<const uint32_t &>(height - 20 - BORDER_SIZE)
+                            static_cast<const uint32_t &>(height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2))
                         }
                     );
 
@@ -5071,7 +5071,7 @@ class resize_client
                         XCB_CONFIG_WINDOW_HEIGHT, 
                         (const uint32_t[1])
                         {
-                            static_cast<const uint32_t &>((c->height + c->y - height) - (BORDER_SIZE * 2))
+                            static_cast<const uint32_t &>((c->height + c->y + height) - (BORDER_SIZE * 2))
                         }
                     );
 
@@ -5095,7 +5095,7 @@ class resize_client
                         XCB_CONFIG_WINDOW_Y, 
                         (const uint32_t[1])
                         {
-                            static_cast<const uint32_t &>((c->height + c->y + height) - BORDER_SIZE)
+                            static_cast<const uint32_t &>((c->height + c->y + height) - (BORDER_SIZE * 2))
                         }
                     );
                 }
