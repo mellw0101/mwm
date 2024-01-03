@@ -7127,24 +7127,24 @@ class WinManager
                 return nullptr;
             }
 
-            c->win      = win;
-            c->height   = (data.height < 300) ? 300 : data.height;
-            c->width    = (data.width < 400)  ? 400 : data.width;
-            c->x        = (data.x <= 0)       ? (screen->width_in_pixels / 2)  - (c->width / 2)  : data.x;
-            c->y        = (data.y <= 0)       ? (screen->height_in_pixels / 2) - (c->height / 2) : data.y;
+            c->win    = win;
+            c->height = (data.height < 300) ? 300 : data.height;
+            c->width  = (data.width < 400)  ? 400 : data.width;
+            c->x      = (data.x <= 0)       ? (screen->width_in_pixels / 2)  - (c->width / 2)  : data.x;
+            c->y      = (data.y <= 0)       ? (screen->height_in_pixels / 2) - (c->height / 2) : data.y;
             
             // DEFAULT DEPTH IS 24 BIT
             // THIS CAN BE ADJUSTED IF NESSESARY
-            c->depth    = 24; 
-            c->desktop  = cur_d->desktop;
+            c->depth   = 24; 
+            c->desktop = cur_d->desktop;
 
             if (is_exclusive_fullscreen(c)) 
             {
-                c->x = 0;
-                c->y = 0;
-                c->width = screen->width_in_pixels;
+                c->x      = 0;
+                c->y      = 0;
+                c->width  = screen->width_in_pixels;
                 c->height = screen->height_in_pixels;
-                c->ismax = true;
+                c->ismax  = true;
             }
             else 
             {
