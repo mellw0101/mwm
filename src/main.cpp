@@ -8169,14 +8169,18 @@ class Event
         button_press_handler(const xcb_generic_event_t * & ev) 
         {
             const auto * e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
-            // log_win("e->event: ", e->event);
-            client * c = mxb::Client::calc::client_edge_prox_to_pointer(10);
-            if (c)
+            client * c;
+
+            if (BORDER_SIZE == 0)
             {
-                wm::raise_client(c);
-                resize_client::no_border(c, 0, 0);
-                focus::client(c);
-                return;
+                c = mxb::Client::calc::client_edge_prox_to_pointer(10);
+                if (c)
+                {
+                    wm::raise_client(c);
+                    resize_client::no_border(c, 0, 0);
+                    focus::client(c);
+                    return;
+                }
             }
 
             c = get::client_from_all_win(& e->event);
