@@ -5062,6 +5062,42 @@ class resize_client
                             static_cast<const uint32_t &>(height)
                         }
                     );
+
+                    // c->border.left
+                    xcb_configure_window
+                    (
+                        conn, 
+                        c->border.left, 
+                        XCB_CONFIG_WINDOW_HEIGHT, 
+                        (const uint32_t[1])
+                        {
+                            static_cast<const uint32_t &>((c->height + c->y - height) - (BORDER_SIZE * 2))
+                        }
+                    );
+
+                    // c->border.right
+                    xcb_configure_window
+                    (
+                        conn, 
+                        c->border.right, 
+                        XCB_CONFIG_WINDOW_HEIGHT, 
+                        (const uint32_t[1])
+                        {
+                            static_cast<const uint32_t &>((c->height + c->y - height) - (BORDER_SIZE * 2))
+                        }
+                    );
+
+                    // c->border.bottom
+                    xcb_configure_window
+                    (
+                        conn, 
+                        c->border.bottom, 
+                        XCB_CONFIG_WINDOW_Y, 
+                        (const uint32_t[1])
+                        {
+                            static_cast<const uint32_t &>((c->height + c->y - height) - BORDER_SIZE)
+                        }
+                    );
                 }
 
                 void /* 
