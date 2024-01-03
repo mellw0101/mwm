@@ -1,3 +1,5 @@
+#include <cstdint>
+#include <xcb/xproto.h>
 #define main_cpp
 #include "include.hpp"
 // #include "mxb.hpp"
@@ -4854,6 +4856,18 @@ class resize_client
                             static_cast<const uint32_t &>(c->width - 60 + c->x - x)
                         }
                     );
+
+                    // c->borrom.right
+                    xcb_configure_window
+                    (
+                        conn, 
+                        c->border.right, 
+                        XCB_CONFIG_WINDOW_Y,
+                        (const uint32_t[1])
+                        {
+                            static_cast<const uint32_t &>((c->width + c->x - x) - (BORDER_SIZE * 2))
+                        }
+                    );
                 }
 
                 void
@@ -4943,7 +4957,7 @@ class resize_client
                         XCB_CONFIG_WINDOW_HEIGHT,
                         (const uint32_t[1])
                         {
-                            static_cast<const uint32_t &>((c->height - 20 + c->y - y) - BORDER_SIZE)
+                            static_cast<const uint32_t &>((c->height - 20 + c->y - y) - (BORDER_SIZE * 2))
                         }
                     );
 
@@ -8158,28 +8172,24 @@ class Event
 
                 if (e->event == c->border.left)
                 {
-                    log_info("L_MOUSE_BUTTON + border.left");
                     resize_client::border(c, edge::LEFT);
                     return;
                 }
 
                 if (e->event == c->border.right)
                 {
-                    log_info("L_MOUSE_BUTTON + border.right");
                     resize_client::border(c, edge::RIGHT);
                     return;
                 }
 
                 if (e->event == c->border.top)
                 {
-                    log_info("L_MOUSE_BUTTON + border.top");
                     resize_client::border(c, edge::TOP);
                     return;
                 }
 
                 if (e->event == c->border.bottom)
                 {
-                    log_info("L_MOUSE_BUTTON + border.bottom");
                     resize_client::border(c, edge::BOTTOM_edge);
                     return;
                 }
