@@ -3157,8 +3157,8 @@ class XCPPBAnimator
                 XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
                 (const uint32_t[2])
                 {
-                    static_cast<const uint32_t &>(w),
-                    static_cast<const uint32_t &>(h - 20)
+                    static_cast<const uint32_t &>(w - (BORDER_SIZE * 2)),
+                    static_cast<const uint32_t &>(h - 20 - BORDER_SIZE)
                 }
             );
             xcb_flush(connection);
