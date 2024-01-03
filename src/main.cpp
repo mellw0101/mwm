@@ -4869,6 +4869,30 @@ class resize_client
                             static_cast<const uint32_t &>(c->width - BORDER_SIZE + c->x - x)
                         }
                     );
+
+                    // c->bottom.top
+                    xcb_configure_window
+                    (
+                        conn, 
+                        c->border.top, 
+                        XCB_CONFIG_WINDOW_WIDTH, 
+                        (const uint32_t[1])
+                        {
+                            static_cast<const uint32_t &>((c->width + c->x - x) - (BORDER_SIZE * 2))
+                        }
+                    );
+
+                    // c->bottom.bottom
+                    xcb_configure_window
+                    (
+                        conn, 
+                        c->border.bottom, 
+                        XCB_CONFIG_WINDOW_WIDTH, 
+                        (const uint32_t[1])
+                        {
+                            static_cast<const uint32_t &>((c->width + c->x - x) - (BORDER_SIZE * 2))
+                        }
+                    );
                 }
 
                 void
