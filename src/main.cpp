@@ -6061,7 +6061,7 @@ class WinDecoretor
                 c->frame, 
                 BORDER_SIZE, 
                 c->height + TITLE_BAR_SIZE, 
-                c->width - (BORDER_SIZE * 2), 
+                c->width, 
                 BORDER_SIZE, 
                 0, 
                 XCB_WINDOW_CLASS_INPUT_OUTPUT, 
