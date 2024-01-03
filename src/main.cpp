@@ -1,4 +1,5 @@
 #include "structs.hpp"
+#include <cstdint>
 #include <xcb/xproto.h>
 #define main_cpp
 #include "include.hpp"
@@ -6008,6 +6009,18 @@ class WinDecoretor
                 NULL
             );
             xcb_map_window(conn, c->border.left);
+            xcb_flush(conn);
+
+            xcb_change_window_attributes
+            (
+                conn, 
+                c->border.left, 
+                XCB_CW_BACK_PIXEL, 
+                (const uint32_t[1])
+                {
+                    color::get(BLACK) 
+                }
+            );
             xcb_flush(conn);
         }
     ;
