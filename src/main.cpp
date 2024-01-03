@@ -4866,7 +4866,7 @@ class resize_client
                         XCB_CONFIG_WINDOW_X,
                         (const uint32_t[1])
                         {
-                            static_cast<const uint32_t &>(400)
+                            static_cast<const uint32_t &>(c->width - BORDER_SIZE + c->x - x)
                         }
                     );
                 }
