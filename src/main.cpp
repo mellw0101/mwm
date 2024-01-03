@@ -6031,6 +6031,7 @@ class WinDecoretor
                     color::get(BLACK) 
                 }
             );
+            mxb::set::cursor(c->border.left, CURSOR::pirate);
             xcb_map_window(conn, c->border.left);
             xcb_flush(conn);
 
