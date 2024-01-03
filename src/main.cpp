@@ -5870,7 +5870,7 @@ class WinDecoretor
                 c->x, 
                 c->y, 
                 c->width + (BORDER_SIZE * 2), 
-                c->height + TITLE_BAR_SIZE + BORDER_SIZE, 
+                c->height + TITLE_BAR_SIZE + (BORDER_SIZE * 2), 
                 0, 
                 XCB_WINDOW_CLASS_INPUT_OUTPUT, 
                 screen->root_visual, 
@@ -5896,7 +5896,7 @@ class WinDecoretor
                 c->win, 
                 c->frame, 
                 BORDER_SIZE, 
-                TITLE_BAR_SIZE
+                TITLE_BAR_SIZE + BORDER_SIZE
             );
 
             xcb_map_window(conn, c->frame);
@@ -8045,13 +8045,6 @@ main()
     {
         return err;
     }
-
-    // mxb::XConnection * mxb_connection = mxb::mxb_connect(nullptr);
-    // if (!mxb_connection)
-    // {
-    //     log_error("mxb_connection == nullptr");
-    //     return -1;
-    // }
 
     run();
     xcb_disconnect(conn);

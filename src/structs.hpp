@@ -124,6 +124,7 @@ struct client_border_decor
 {
     xcb_window_t left;
     xcb_window_t right;
+    xcb_window_t top;
     xcb_window_t bottom;
 };
 
@@ -137,7 +138,7 @@ struct client
     xcb_window_t close_button;
     xcb_window_t max_button;
     xcb_window_t min_button;
-    
+
     client_border_decor border;
 
 	int16_t x, y;     
