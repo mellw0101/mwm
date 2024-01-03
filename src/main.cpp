@@ -6122,7 +6122,7 @@ class WinDecoretor
                 XCB_CW_BACK_PIXEL, 
                 (const uint32_t[1])
                 {
-                    color::get(RED) 
+                    color::get(BLACK) 
                 }
             );
             mxb::set::cursor(c->border.left, CURSOR::left_side);
@@ -6153,7 +6153,7 @@ class WinDecoretor
                 XCB_CW_BACK_PIXEL, 
                 (const uint32_t[1])
                 {
-                    color::get(RED) 
+                    color::get(BLACK) 
                 }
             );
             mxb::set::cursor(c->border.right, CURSOR::right_side);
@@ -6184,7 +6184,7 @@ class WinDecoretor
                 XCB_CW_BACK_PIXEL, 
                 (const uint32_t[1])
                 {
-                    color::get(RED)
+                    color::get(BLACK)
                 }
             );
             mxb::set::cursor(c->border.top, CURSOR::top_side);
@@ -6215,7 +6215,7 @@ class WinDecoretor
                 XCB_CW_BACK_PIXEL, 
                 (const uint32_t[1])
                 { 
-                    color::get(RED) 
+                    color::get(BLACK) 
                 }
             );
             mxb::set::cursor(c->border.bottom, CURSOR::bottom_side);
