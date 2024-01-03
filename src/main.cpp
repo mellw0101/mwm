@@ -3203,7 +3203,7 @@ class XCPPBAnimator
                 XCB_CONFIG_WINDOW_X,
                 (const uint32_t[1])
                 {
-                    static_cast<const uint32_t &>(w - 20 - (BORDER_SIZE * 2))
+                    static_cast<const uint32_t &>(w - 20 - BORDER_SIZE)
                 }
             );
             xcb_flush(connection);
@@ -3216,7 +3216,7 @@ class XCPPBAnimator
                 XCB_CONFIG_WINDOW_X,
                 (const uint32_t[1])
                 {
-                    static_cast<const uint32_t &>(w - 40 - (BORDER_SIZE * 2))
+                    static_cast<const uint32_t &>(w - 40 - BORDER_SIZE)
                 }
             );
             xcb_flush(connection);
@@ -3229,7 +3229,7 @@ class XCPPBAnimator
                 XCB_CONFIG_WINDOW_X,
                 (const uint32_t[1])
                 {
-                    static_cast<const uint32_t &>(w - 60 - (BORDER_SIZE * 2))
+                    static_cast<const uint32_t &>(w - 60 - BORDER_SIZE)
                 }
             );
             xcb_flush(connection);
