@@ -5730,6 +5730,7 @@ class WinDecoretor
             log_win("c->max_button: ", c->max_button);
             make_min_button(c);
             log_win("c->min_button: ", c->min_button);
+            make_borders(c);
         }
     ;
         
