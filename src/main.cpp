@@ -1,5 +1,7 @@
 #include "structs.hpp"
+#include <algorithm>
 #include <cstdint>
+#include <xcb/xcb.h>
 #include <xcb/xproto.h>
 #define main_cpp
 #include "include.hpp"
@@ -68,6 +70,131 @@ enum class CURSOR
     bottom_left_arrow,
     bottom_right_arrow
 };
+
+namespace test 
+{
+	#define NEW_EVENT_TYPE(name, type) \
+		using name = std::unique_ptr<type, decltype(&std::free)>;
+
+	// event types.
+	NEW_EVENT_TYPE(KeyPressEvent, xcb_key_press_event_t)
+	NEW_EVENT_TYPE(KeyReleaseEvent, xcb_key_release_event_t)
+	NEW_EVENT_TYPE(KeymapNotifyEvent, xcb_keymap_notify_event_t)
+
+	NEW_EVENT_TYPE(ButtonPressEvent, xcb_button_press_event_t)
+	NEW_EVENT_TYPE(ButtonReleaseEvent, xcb_button_release_event_t)
+
+	NEW_EVENT_TYPE(MotionNotifyEvent, xcb_motion_notify_event_t)
+	NEW_EVENT_TYPE(EnterNotifyEvent, xcb_enter_notify_event_t)
+	NEW_EVENT_TYPE(LeaveNotifyEvent, xcb_leave_notify_event_t)
+
+	NEW_EVENT_TYPE(FocusInEvent, xcb_focus_in_event_t)
+	NEW_EVENT_TYPE(FocusOutEvent, xcb_focus_out_event_t)
+
+	NEW_EVENT_TYPE(ExposeEvent, xcb_expose_event_t)
+	NEW_EVENT_TYPE(GraphicsExposureEvent, xcb_graphics_exposure_event_t)
+	NEW_EVENT_TYPE(NoExposureEvent, xcb_no_exposure_event_t)
+
+	NEW_EVENT_TYPE(VisibilityNotifyEvent, xcb_visibility_notify_event_t)
+	NEW_EVENT_TYPE(ReparentNotifyEvent, xcb_reparent_notify_event_t)
+	NEW_EVENT_TYPE(PropertyNotifyEvent, xcb_property_notify_event_t)
+	NEW_EVENT_TYPE(ResizeRequestEvent, xcb_resize_request_event_t)
+	NEW_EVENT_TYPE(GravityNotifyEvent, xcb_gravity_notify_event_t)
+	NEW_EVENT_TYPE(ColormapNotifyEvent, xcb_colormap_notify_event_t)
+	NEW_EVENT_TYPE(ClientMessageEvent, xcb_client_message_event_t)
+
+	NEW_EVENT_TYPE(CreateNotifyEvent, xcb_create_notify_event_t)
+	NEW_EVENT_TYPE(DestroyNotifyEvent, xcb_destroy_notify_event_t)
+
+	NEW_EVENT_TYPE(UnmapNotifyEvent, xcb_unmap_notify_event_t)
+	NEW_EVENT_TYPE(MapNotifyEvent, xcb_map_notify_event_t)
+	NEW_EVENT_TYPE(MapRequestEvent, xcb_map_request_event_t)
+	NEW_EVENT_TYPE(MappingNotifyEvent, xcb_mapping_notify_event_t)
+
+	NEW_EVENT_TYPE(ConfigureNotifyEvent, xcb_configure_notify_event_t)
+	NEW_EVENT_TYPE(ConfigureRequestEvent, xcb_configure_request_event_t)
+
+	NEW_EVENT_TYPE(CirculateRequestEvent, xcb_circulate_request_event_t)
+	NEW_EVENT_TYPE(CirculateNotifyEvent, xcb_circulate_notify_event_t)
+
+	NEW_EVENT_TYPE(SelectionClearEvent, xcb_selection_clear_event_t)
+	NEW_EVENT_TYPE(SelectionRequestEvent, xcb_selection_request_event_t)
+	NEW_EVENT_TYPE(SelectionNotifyEvent, xcb_selection_notify_event_t)
+
+	NEW_EVENT_TYPE(RandrScreenChangeNotifyEvent, xcb_randr_screen_change_notify_event_t)
+	NEW_EVENT_TYPE(RandrNotifyEvent, xcb_randr_notify_event_t)
+
+	NEW_EVENT_TYPE(GeEvent, xcb_ge_generic_event_t)
+	NEW_EVENT_TYPE(Event, xcb_generic_event_t)
+
+	NEW_EVENT_TYPE(Error, xcb_generic_error_t)
+
+	#undef NEW_EVENT_TYPE
+}
+
+// // Factory function to create a unique_ptr for xcb_focus_in_event_t
+// std::unique_ptr<xcb_focus_in_event_t, decltype(&std::free)> make_unique_focus_in_event(xcb_generic_event_t* event) {
+//     if (!event) {
+//         return nullptr;
+//     }
+
+//     // Check if the event is a focus in event
+//     if ((event->response_type & ~0x80) == XCB_FOCUS_IN) {
+//         // Cast and return as unique_ptr with custom deleter
+//         return std::unique_ptr<xcb_focus_in_event_t, decltype(&std::free)>(
+//             reinterpret_cast<xcb_focus_in_event_t*>(event), std::free);
+//     } else {
+//         // Not a focus in event, free the event and return nullptr
+//         std::free(event);
+//         return nullptr;
+//     }
+// }
+
+template<typename Type>
+std::unique_ptr<Type, decltype(&std::free)> make_unique_event(xcb_generic_event_t * event) 
+{
+    // if (!event) 
+    // {
+    //     return ;
+    // }
+
+    // Create a unique_ptr with custom deleter for the generic event
+    std::unique_ptr<xcb_generic_event_t, decltype(&std::free)> uniqueEvent(event, std::free);
+
+    // Cast the generic event to the specific type and return
+    return std::unique_ptr<Type, decltype(&std::free)>
+    (
+        reinterpret_cast<Type*>(uniqueEvent.release()), std::free
+    );
+}
+
+// functions to cast between event types
+namespace test 
+{
+	// Use custom deleter
+	template <typename To, typename From, typename Del>
+	inline decltype(auto) event_cast(std::unique_ptr<From, Del>&& ptr) 
+    {
+		return std::unique_ptr<typename To::element_type, Del>
+        {
+			reinterpret_cast<typename To::element_type*>(ptr.release()), std::move(ptr.get_deleter())
+		};
+	}
+
+
+	// Use default deleter
+	template <typename To, typename From>
+	inline decltype(auto) event_cast(std::unique_ptr<From>&& ptr) 
+    {
+		return std::unique_ptr<typename To::element_type>
+        {
+			reinterpret_cast<typename To::element_type*>(ptr.release())
+		};
+	}
+
+    
+}
+
 
 class mxb 
 {
@@ -1288,6 +1415,56 @@ class mxb
                 };
             ;
         };
+
+        class uppscale
+        {
+            public:    
+                struct Pixel 
+                {
+                    uint8_t r, g, b;
+                };
+
+                struct Image 
+                {
+                    int width, height;
+                    std::vector<Pixel> pixels;
+
+                    Pixel getPixel(int x, int y) const 
+                    {
+                        return pixels[y * width + x];
+                    }
+
+                    void setPixel(int x, int y, const Pixel& pixel) 
+                    {
+                        pixels[y * width + x] = pixel;
+                    }
+                };
+
+                Image 
+                upscaleImage(const Image& input, int newWidth, int newHeight) 
+                {
+                    Image output;
+                    output.width = newWidth;
+                    output.height = newHeight;
+                    output.pixels.resize(newWidth * newHeight);
+
+                    for (int y = 0; y < newHeight; ++y) 
+                    {
+                        for (int x = 0; x < newWidth; ++x) 
+                        {
+                            // Find the nearest pixel in the input image
+                            int srcX = x * input.width / newWidth;
+                            int srcY = y * input.height / newHeight;
+                            Pixel nearestPixel = input.getPixel(srcX, srcY);
+
+                            output.setPixel(x, y, nearestPixel);
+                        }
+                    }
+
+                    return output;
+                }
+            ;
+        };
     ;
 };
 
@@ -1971,7 +2148,6 @@ show_hide_client(client * c, const show_hide & mode)
             xcb_unmap_window(conn, c->win);
             break;
         }
-
         case SHOW:
         {
             xcb_map_window(conn, c->win);
@@ -2263,124 +2439,6 @@ class mv_client
         }
     ;
 };
-
-namespace XCBAnimator {
-    class Move {
-        public:
-            Move(xcb_connection_t* connection, xcb_window_t window)
-                : connection(connection), window(window) {}
-
-            // Public method to start the animation
-            void move(int startX, int startY, int endX, int endY, int duration) {
-                // Ensure any existing animation is stopped
-                stopAnimation();
-
-                // Set initial coordinates
-                currentX = startX;
-                currentY = startY;
-
-                // Calculate step size based on time
-                int steps = duration / animationInterval;
-                stepX = (endX - startX) / steps;
-                stepY = (endY - startY) / steps;
-
-                // Start a new thread for animation
-                animationThread = std::thread(&Move::animateThread, this, endX, endY);
-
-                // Wait for the animation to complete
-                std::this_thread::sleep_for(std::chrono::milliseconds(duration));
-
-                // Stop the animation
-                stopAnimation();
-            }
-
-            // Destructor to ensure the animation thread is stopped when the object is destroyed
-            ~Move() {
-                stopAnimation();
-            }
-
-        private:
-            xcb_connection_t* connection;
-            xcb_window_t window;
-            std::thread animationThread;
-            int currentX;
-            int currentY;
-            int stepX;
-            int stepY;
-            const int animationInterval = 5; // milliseconds
-            std::atomic<bool> stopFlag{false};
-
-            // Static method for the animation thread
-            void animateThread(int endX, int endY) 
-            {
-                while (true) 
-                {
-                    // Perform animation step
-                    moveStep();
-
-                    // Sleep for the animation interval
-                    std::this_thread::sleep_for(std::chrono::milliseconds(animationInterval));
-
-                    // Check if animation should stop
-                    if (currentX >= endX && currentY >= endY) 
-                    {
-                        break;
-                    }
-                }
-                move(endX, endY);
-            }
-
-            void move(const int & x, const int & y) 
-            {
-                xcb_configure_window
-                (
-                    connection,
-                    window,
-                    XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y,
-                    (const uint32_t[2])
-                    {
-                        static_cast<const uint32_t &>(x), 
-                        static_cast<const uint32_t &>(y)
-                    }
-                );
-                xcb_flush(connection);
-            }
-
-            void moveStep() 
-            {
-                currentX += stepX;
-                currentY += stepY;
-
-                xcb_configure_window
-                (
-                    connection,
-                    window,
-                    XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y,
-                    (const uint32_t[2])
-                    {
-                        static_cast<const uint32_t &>(currentX), 
-                        static_cast<const uint32_t &>(currentY)
-                    }
-                );
-                xcb_flush(connection);
-            }
-
-            // Static method to stop the animation
-            void stopAnimation() 
-            {
-                if (animationThread.joinable()) 
-                {
-                    // Signal the thread to exit
-                    stopFlag.store(true);
-                    // Wait for the thread to finish
-                    animationThread.join();
-                    // Reset the stop flag
-                    stopFlag.store(false);
-                }
-            }
-    };
-
-}
 
 /**
  *
@@ -7750,7 +7808,7 @@ class Event
          * @param ev The XCB event to be handled.
          *
          */
-        handler(const xcb_generic_event_t * ev)
+        handler(xcb_generic_event_t * ev)
         {
             switch (ev->response_type & ~0x80) 
             {
@@ -7847,9 +7905,9 @@ class Event
         xcb_keycode_t t{}, q{}, f{}, f11{}, n_1{}, n_2{}, n_3{}, n_4{}, n_5{}, r_arrow{}, l_arrow{}, u_arrow{}, d_arrow{}, tab{}, k{}; 
         
         void 
-        key_press_handler(const xcb_generic_event_t * & ev)
+        key_press_handler(xcb_generic_event_t * & ev)
         {
-            const auto * e = reinterpret_cast<const xcb_key_press_event_t * &>(ev);
+            const auto * e = reinterpret_cast<xcb_key_press_event_t * &>(ev);
             
             /*
                 CHECK IF 'ALT+CTRL+T' WAS PRESSED
@@ -8264,7 +8322,7 @@ class Event
         }
         
         void 
-        map_notify_handler(const xcb_generic_event_t * & ev)
+        map_notify_handler(xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_map_notify_event_t *>(ev);
             client * c = get::client_from_win(& e->window);
@@ -8275,14 +8333,14 @@ class Event
         }
         
         void 
-        map_req_handler(const xcb_generic_event_t * & ev) 
+        map_req_handler(xcb_generic_event_t * & ev) 
         {
             const auto * e = reinterpret_cast<const xcb_map_request_event_t *>(ev);
             WinManager::manage_new_window(e->window);
         }
         
         void 
-        button_press_handler(const xcb_generic_event_t * & ev) 
+        button_press_handler(xcb_generic_event_t * & ev) 
         {
             const auto * e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
             client * c;
@@ -8393,7 +8451,7 @@ class Event
         }
 
         void
-        configure_request_handler(const xcb_generic_event_t * & ev)
+        configure_request_handler(xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_configure_request_event_t *>(ev);
             data.width     = e->width;
@@ -8403,9 +8461,10 @@ class Event
         }
 
         void
-        focus_in_handler(const xcb_generic_event_t * & ev)
+        focus_in_handler(xcb_generic_event_t * ev)
         {
-            const auto * e = reinterpret_cast<const xcb_focus_in_event_t *>(ev);
+            // const auto * e = reinterpret_cast<const xcb_focus_in_event_t *>(ev);
+            auto e = make_unique_event<xcb_focus_in_event_t>(ev);
             // log_win("e->event: ", e->event);
             
             client * c = get::client_from_win(& e->event);
@@ -8420,7 +8479,7 @@ class Event
         }
 
         void
-        focus_out_handler(const xcb_generic_event_t * & ev)
+        focus_out_handler(xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_focus_out_event_t *>(ev);
             // log_win("e->event: ", e->event);
@@ -8440,7 +8499,7 @@ class Event
         }
 
         void
-        destroy_notify_handler(const xcb_generic_event_t * & ev)
+        destroy_notify_handler(xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_destroy_notify_event_t *>(ev);
 
@@ -8460,7 +8519,7 @@ class Event
         }
 
         void
-        unmap_notify_handler(const xcb_generic_event_t * & ev)
+        unmap_notify_handler(xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_unmap_notify_event_t *>(ev);
             
@@ -8480,27 +8539,27 @@ class Event
         }
 
         void 
-        reparent_notify_handler(const xcb_generic_event_t * & ev)
+        reparent_notify_handler(xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_reparent_notify_event_t *>(ev);
         }
         
         void
-        enter_notify_handler(const xcb_generic_event_t * & ev)
+        enter_notify_handler(xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_enter_notify_event_t *>(ev);
             log_win("e->event: ", e->event);
         }
 
         void
-        leave_notify_handler(const xcb_generic_event_t * & ev)
+        leave_notify_handler(xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_leave_notify_event_t *>(ev);
             // log_win("e->event: ", e->event);
         }
 
         void 
-        motion_notify_handler(const xcb_generic_event_t * & ev)
+        motion_notify_handler(xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
             // log_win("e->event: ", e->event);
