@@ -5194,9 +5194,9 @@ class max_win
             (
                 c, 
                 - BORDER_SIZE, 
-                - TITLE_BAR_SIZE, 
+                - TITLE_BAR_SIZE - BORDER_SIZE, 
                 screen->width_in_pixels + (BORDER_SIZE * 2), 
-                screen->height_in_pixels + TITLE_BAR_SIZE + BORDER_SIZE
+                screen->height_in_pixels + TITLE_BAR_SIZE + (BORDER_SIZE * 2)
             );
             xcb_change_property
             (
