@@ -6008,9 +6008,6 @@ class WinDecoretor
                 0,
                 NULL
             );
-            xcb_map_window(conn, c->border.left);
-            xcb_flush(conn);
-
             xcb_change_window_attributes
             (
                 conn, 
@@ -6021,6 +6018,7 @@ class WinDecoretor
                     color::get(BLACK) 
                 }
             );
+            xcb_map_window(conn, c->border.left);
             xcb_flush(conn);
         }
     ;
