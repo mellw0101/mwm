@@ -6109,7 +6109,7 @@ class WinDecoretor
                     color::get(RED) 
                 }
             );
-            mxb::set::cursor(c->border.left, CURSOR::pirate);
+            mxb::set::cursor(c->border.left, CURSOR::left_side);
             xcb_map_window(conn, c->border.left);
             xcb_flush(conn);
 
@@ -6140,6 +6140,7 @@ class WinDecoretor
                     color::get(RED) 
                 }
             );
+            mxb::set::cursor(c->border.right, CURSOR::right_side);
             xcb_map_window(conn, c->border.right);
             xcb_flush(conn);
 
@@ -6170,6 +6171,7 @@ class WinDecoretor
                     color::get(RED) 
                 }
             );
+            mxb::set::cursor(c->border.bottom, CURSOR::bottom_side);
             xcb_map_window(conn, c->border.bottom);
             xcb_flush(conn);
         }
