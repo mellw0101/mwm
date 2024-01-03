@@ -7141,7 +7141,17 @@ class WinManager
                 c->y      = 0;
                 c->width  = screen->width_in_pixels;
                 c->height = screen->height_in_pixels;
-                c->ismax  = true;
+                xcb_change_property
+                (
+                    conn,
+                    XCB_PROP_MODE_REPLACE,
+                    c->win,
+                    ewmh->_NET_WM_STATE,
+                    XCB_ATOM_ATOM,
+                    32,
+                    1,
+                    &ewmh->_NET_WM_STATE_FULLSCREEN
+                );
             }
             else 
             {
