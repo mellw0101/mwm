@@ -5818,12 +5818,12 @@ class max_win
         void
         ewmh_unmax_win(client * c)
         {
-            if (c->max_ewmh_ogsize.width >= screen->width_in_pixels)
+            if (c->max_ewmh_ogsize.width > screen->width_in_pixels)
             {
                 c->max_ewmh_ogsize.width = screen->width_in_pixels / 2;
             }
 
-            if (c->max_ewmh_ogsize.height >= screen->height_in_pixels)
+            if (c->max_ewmh_ogsize.height > screen->height_in_pixels)
             {
                 c->max_ewmh_ogsize.height = screen->height_in_pixels / 2;
             }
