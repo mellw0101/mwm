@@ -8462,8 +8462,8 @@ class Event
         void
         focus_in_handler(xcb_generic_event_t * ev)
         {
-            // const auto * e = reinterpret_cast<const xcb_focus_in_event_t *>(ev);
-            auto e = make_unique_event<xcb_focus_in_event_t>(ev);
+            const auto * e = reinterpret_cast<const xcb_focus_in_event_t *>(ev);
+            // auto e = make_unique_event<xcb_focus_in_event_t>(ev);
             if (!e)
             {
                 return;
