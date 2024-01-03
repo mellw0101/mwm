@@ -1,6 +1,7 @@
 #ifndef STRUCTS_HPP
 #define STRUCTS_HPP
 #include "include.hpp"
+#include <xcb/xproto.h>
 
 enum 
 {
@@ -119,6 +120,13 @@ struct size_pos
     uint16_t x, y, width, height;
 };
 
+struct client_border_decor
+{
+    xcb_window_t left;
+    xcb_window_t right;
+    xcb_window_t bottom;
+};
+
 struct client 
 {
     const char * name = "";
@@ -129,10 +137,12 @@ struct client
     xcb_window_t close_button;
     xcb_window_t max_button;
     xcb_window_t min_button;
+    
+    client_border_decor border;
 
-	int16_t x, y;                   
-	uint16_t width,height;          
-	uint8_t  depth;  
+	int16_t x, y;     
+	uint16_t width,height;
+	uint8_t  depth;
     
     size_pos ogsize;
     size_pos tile_ogsize;

@@ -5985,6 +5985,12 @@ class WinDecoretor
             xcb_map_window(conn, c->min_button);
             xcb_flush(conn);
         }
+
+        void
+        make_borders(client * & c)
+        {
+            
+        }
     ;
 };
 
