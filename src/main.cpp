@@ -3152,6 +3152,7 @@ class XCPPBAnimator
         {
             const uint32_t x = currentX, y = currentY, w = currentWidth, h = currentHeight;
 
+            // c->win
             xcb_configure_window
             (
                 connection,
@@ -3165,6 +3166,7 @@ class XCPPBAnimator
             );
             xcb_flush(connection);
 
+            // c->frame
             xcb_configure_window
             (
                 connection,
@@ -3180,6 +3182,7 @@ class XCPPBAnimator
             );
             xcb_flush(connection);
 
+            // c->titlebar
             xcb_configure_window
             (
                 connection,
@@ -3192,6 +3195,7 @@ class XCPPBAnimator
             );
             xcb_flush(connection);
 
+            // c->close_button
             xcb_configure_window
             (
                 connection,
@@ -3204,6 +3208,7 @@ class XCPPBAnimator
             );
             xcb_flush(connection);
 
+            // c->max_button
             xcb_configure_window
             (
                 connection,
@@ -3216,6 +3221,7 @@ class XCPPBAnimator
             );
             xcb_flush(connection);
 
+            // c->min_button
             xcb_configure_window
             (
                 connection,
@@ -4695,7 +4701,7 @@ class resize_client
         void
         resize_win(const uint16_t & width, const uint16_t & height)
         {
-            // CONFIGURE THE WINDOW WITH THE NEW WIDTH AND HEIGHT
+            // c->win
             xcb_configure_window 
             (
                 conn,
@@ -4708,6 +4714,7 @@ class resize_client
                 }
             );
 
+            // c->frame
             xcb_configure_window 
             (
                 conn,
@@ -4720,6 +4727,7 @@ class resize_client
                 }
             );
 
+            // c->titlebar
             xcb_configure_window 
             (
                 conn,
@@ -4731,6 +4739,7 @@ class resize_client
                 }
             );
 
+            // c->close_button
             xcb_configure_window 
             (
                 conn,
@@ -4742,6 +4751,7 @@ class resize_client
                 }
             );
 
+            // c->max_button
             xcb_configure_window 
             (
                 conn,
@@ -4753,6 +4763,7 @@ class resize_client
                 }
             );
 
+            // c->min_button
             xcb_configure_window 
             (
                 conn,
@@ -4761,6 +4772,44 @@ class resize_client
                 (const uint32_t[2])
                 {
                     static_cast<const uint32_t &>(width - 60)
+                }
+            );
+
+            // c->border.left
+            xcb_configure_window
+            (
+                conn,
+                c->border.left,
+                XCB_CONFIG_WINDOW_HEIGHT,
+                (const uint32_t[1])
+                {
+                    static_cast<const uint32_t &>(height - TITLE_BAR_SIZE)
+                }
+            );
+
+            // c->border.right
+            xcb_configure_window
+            (
+                conn, 
+                c->border.right, 
+                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_HEIGHT,
+                (const uint32_t[2])
+                {
+                    static_cast<const uint32_t &>(width - BORDER_SIZE),
+                    static_cast<const uint32_t &>(height - TITLE_BAR_SIZE)
+                }
+            );
+
+            // c->border.bottom
+            xcb_configure_window
+            (
+                conn, 
+                c->border.bottom, 
+                XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH, 
+                (const uint32_t[2]) 
+                { 
+                    static_cast<const uint32_t &>(height - BORDER_SIZE),
+                    static_cast<const uint32_t &>(width - (BORDER_SIZE * 2))
                 }
             );
         }
