@@ -5818,6 +5818,26 @@ class max_win
         void
         ewmh_unmax_win(client * c)
         {
+            if (c->max_ewmh_ogsize.width >= screen->width_in_pixels)
+            {
+                c->max_ewmh_ogsize.width = screen->width_in_pixels / 2;
+            }
+
+            if (c->max_ewmh_ogsize.height >= screen->height_in_pixels)
+            {
+                c->max_ewmh_ogsize.height = screen->height_in_pixels / 2;
+            }
+
+            if (c->max_ewmh_ogsize.x >= screen->width_in_pixels - 1)
+            {
+                c->max_ewmh_ogsize.x = (screen->width_in_pixels / 2) - (c->max_ewmh_ogsize.width / 2) - BORDER_SIZE;
+            }
+
+            if (c->max_ewmh_ogsize.y >= screen->height_in_pixels - 1)
+            {
+                c->max_ewmh_ogsize.y = (screen->height_in_pixels / 2) - (c->max_ewmh_ogsize.height / 2) - TITLE_BAR_HEIGHT - BORDER_SIZE;
+            }
+
             max_win_animate
             (
                 c, 
