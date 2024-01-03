@@ -71,136 +71,6 @@ enum class CURSOR
     bottom_right_arrow
 };
 
-namespace test 
-{
-	#define NEW_EVENT_TYPE(name, type) \
-		using name = std::unique_ptr<type, decltype(&std::free)>;
-
-	// event types.
-	NEW_EVENT_TYPE(KeyPressEvent, xcb_key_press_event_t)
-	NEW_EVENT_TYPE(KeyReleaseEvent, xcb_key_release_event_t)
-	NEW_EVENT_TYPE(KeymapNotifyEvent, xcb_keymap_notify_event_t)
-
-	NEW_EVENT_TYPE(ButtonPressEvent, xcb_button_press_event_t)
-	NEW_EVENT_TYPE(ButtonReleaseEvent, xcb_button_release_event_t)
-
-	NEW_EVENT_TYPE(MotionNotifyEvent, xcb_motion_notify_event_t)
-	NEW_EVENT_TYPE(EnterNotifyEvent, xcb_enter_notify_event_t)
-	NEW_EVENT_TYPE(LeaveNotifyEvent, xcb_leave_notify_event_t)
-
-	NEW_EVENT_TYPE(FocusInEvent, xcb_focus_in_event_t)
-	NEW_EVENT_TYPE(FocusOutEvent, xcb_focus_out_event_t)
-
-	NEW_EVENT_TYPE(ExposeEvent, xcb_expose_event_t)
-	NEW_EVENT_TYPE(GraphicsExposureEvent, xcb_graphics_exposure_event_t)
-	NEW_EVENT_TYPE(NoExposureEvent, xcb_no_exposure_event_t)
-
-	NEW_EVENT_TYPE(VisibilityNotifyEvent, xcb_visibility_notify_event_t)
-	NEW_EVENT_TYPE(ReparentNotifyEvent, xcb_reparent_notify_event_t)
-	NEW_EVENT_TYPE(PropertyNotifyEvent, xcb_property_notify_event_t)
-	NEW_EVENT_TYPE(ResizeRequestEvent, xcb_resize_request_event_t)
-	NEW_EVENT_TYPE(GravityNotifyEvent, xcb_gravity_notify_event_t)
-	NEW_EVENT_TYPE(ColormapNotifyEvent, xcb_colormap_notify_event_t)
-	NEW_EVENT_TYPE(ClientMessageEvent, xcb_client_message_event_t)
-
-	NEW_EVENT_TYPE(CreateNotifyEvent, xcb_create_notify_event_t)
-	NEW_EVENT_TYPE(DestroyNotifyEvent, xcb_destroy_notify_event_t)
-
-	NEW_EVENT_TYPE(UnmapNotifyEvent, xcb_unmap_notify_event_t)
-	NEW_EVENT_TYPE(MapNotifyEvent, xcb_map_notify_event_t)
-	NEW_EVENT_TYPE(MapRequestEvent, xcb_map_request_event_t)
-	NEW_EVENT_TYPE(MappingNotifyEvent, xcb_mapping_notify_event_t)
-
-	NEW_EVENT_TYPE(ConfigureNotifyEvent, xcb_configure_notify_event_t)
-	NEW_EVENT_TYPE(ConfigureRequestEvent, xcb_configure_request_event_t)
-
-	NEW_EVENT_TYPE(CirculateRequestEvent, xcb_circulate_request_event_t)
-	NEW_EVENT_TYPE(CirculateNotifyEvent, xcb_circulate_notify_event_t)
-
-	NEW_EVENT_TYPE(SelectionClearEvent, xcb_selection_clear_event_t)
-	NEW_EVENT_TYPE(SelectionRequestEvent, xcb_selection_request_event_t)
-	NEW_EVENT_TYPE(SelectionNotifyEvent, xcb_selection_notify_event_t)
-
-	NEW_EVENT_TYPE(RandrScreenChangeNotifyEvent, xcb_randr_screen_change_notify_event_t)
-	NEW_EVENT_TYPE(RandrNotifyEvent, xcb_randr_notify_event_t)
-
-	NEW_EVENT_TYPE(GeEvent, xcb_ge_generic_event_t)
-	NEW_EVENT_TYPE(Event, xcb_generic_event_t)
-
-	NEW_EVENT_TYPE(Error, xcb_generic_error_t)
-
-	#undef NEW_EVENT_TYPE
-}
-
-// // Factory function to create a unique_ptr for xcb_focus_in_event_t
-// std::unique_ptr<xcb_focus_in_event_t, decltype(&std::free)> make_unique_focus_in_event(xcb_generic_event_t* event) {
-//     if (!event) {
-//         return nullptr;
-//     }
-
-//     // Check if the event is a focus in event
-//     if ((event->response_type & ~0x80) == XCB_FOCUS_IN) {
-//         // Cast and return as unique_ptr with custom deleter
-//         return std::unique_ptr<xcb_focus_in_event_t, decltype(&std::free)>(
-//             reinterpret_cast<xcb_focus_in_event_t*>(event), std::free);
-//     } else {
-//         // Not a focus in event, free the event and return nullptr
-//         std::free(event);
-//         return nullptr;
-//     }
-// }
-
-template<typename Type>
-std::unique_ptr<Type, decltype(&std::free)> make_unique_event(xcb_generic_event_t * event) {
-    if (!event) {
-        // If the event is nullptr, return an equivalent unique_ptr
-        return std::unique_ptr<Type, decltype(&std::free)>(nullptr, std::free);
-    }
-
-    // Create a unique_ptr with custom deleter for the generic event
-    std::unique_ptr<xcb_generic_event_t, decltype(&std::free)> uniqueEvent(event, std::free);
-
-    // Cast the generic event to the specific type and return
-    return std::unique_ptr<Type, decltype(&std::free)>
-    (
-        reinterpret_cast<Type*>(uniqueEvent.release()), std::free
-    );
-}
-
-template<typename Type>
-std::unique_ptr<Type> make_unique_ev(Type * event) {
-    // Return a unique_ptr with custom deleter
-    return std::unique_ptr<Type>(event);
-}
-
-// functions to cast between event types
-namespace test 
-{
-	// Use custom deleter
-	template <typename To, typename From, typename Del>
-	inline decltype(auto) event_cast(std::unique_ptr<From, Del>&& ptr) 
-    {
-		return std::unique_ptr<typename To::element_type, Del>
-        {
-			reinterpret_cast<typename To::element_type*>(ptr.release()), std::move(ptr.get_deleter())
-		};
-	}
-
-
-	// Use default deleter
-	template <typename To, typename From>
-	inline decltype(auto) event_cast(std::unique_ptr<From>&& ptr) 
-    {
-		return std::unique_ptr<typename To::element_type>
-        {
-			reinterpret_cast<typename To::element_type*>(ptr.release())
-		};
-	}
-
-    
-}
-
-
 class mxb 
 {
     public: 
@@ -7813,7 +7683,7 @@ class Event
          * @param ev The XCB event to be handled.
          *
          */
-        handler(xcb_generic_event_t * ev)
+        handler(const xcb_generic_event_t * ev)
         {
             switch (ev->response_type & ~0x80) 
             {
@@ -7910,7 +7780,7 @@ class Event
         xcb_keycode_t t{}, q{}, f{}, f11{}, n_1{}, n_2{}, n_3{}, n_4{}, n_5{}, r_arrow{}, l_arrow{}, u_arrow{}, d_arrow{}, tab{}, k{}; 
         
         void 
-        key_press_handler(xcb_generic_event_t * & ev)
+        key_press_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
             
@@ -8327,7 +8197,7 @@ class Event
         }
         
         void 
-        map_notify_handler(xcb_generic_event_t * & ev)
+        map_notify_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_map_notify_event_t *>(ev);
             client * c = get::client_from_win(& e->window);
@@ -8338,14 +8208,14 @@ class Event
         }
         
         void 
-        map_req_handler(xcb_generic_event_t * & ev) 
+        map_req_handler(const xcb_generic_event_t * & ev) 
         {
             const auto * e = reinterpret_cast<const xcb_map_request_event_t *>(ev);
             WinManager::manage_new_window(e->window);
         }
         
         void 
-        button_press_handler(xcb_generic_event_t * & ev) 
+        button_press_handler(const xcb_generic_event_t * & ev) 
         {
             const auto * e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
             client * c;
@@ -8456,7 +8326,7 @@ class Event
         }
 
         void
-        configure_request_handler(xcb_generic_event_t * & ev)
+        configure_request_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_configure_request_event_t *>(ev);
             data.width     = e->width;
@@ -8466,11 +8336,9 @@ class Event
         }
 
         void
-        focus_in_handler(xcb_generic_event_t * & ev)
+        focus_in_handler(const xcb_generic_event_t * & ev)
         {
-            const auto * event = reinterpret_cast<const xcb_focus_in_event_t *>(ev);
-            auto e = make_unique_ev(event);
-            
+            const auto * e = reinterpret_cast<const xcb_focus_in_event_t *>(ev);
             if (!e)
             {
                 return;
@@ -8489,7 +8357,7 @@ class Event
         }
 
         void
-        focus_out_handler(xcb_generic_event_t * & ev)
+        focus_out_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_focus_out_event_t *>(ev);
             // log_win("e->event: ", e->event);
@@ -8509,7 +8377,7 @@ class Event
         }
 
         void
-        destroy_notify_handler(xcb_generic_event_t * & ev)
+        destroy_notify_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_destroy_notify_event_t *>(ev);
 
@@ -8529,7 +8397,7 @@ class Event
         }
 
         void
-        unmap_notify_handler(xcb_generic_event_t * & ev)
+        unmap_notify_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_unmap_notify_event_t *>(ev);
             
@@ -8549,27 +8417,27 @@ class Event
         }
 
         void 
-        reparent_notify_handler(xcb_generic_event_t * & ev)
+        reparent_notify_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_reparent_notify_event_t *>(ev);
         }
         
         void
-        enter_notify_handler(xcb_generic_event_t * & ev)
+        enter_notify_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_enter_notify_event_t *>(ev);
             log_win("e->event: ", e->event);
         }
 
         void
-        leave_notify_handler(xcb_generic_event_t * & ev)
+        leave_notify_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_leave_notify_event_t *>(ev);
             // log_win("e->event: ", e->event);
         }
 
         void 
-        motion_notify_handler(xcb_generic_event_t * & ev)
+        motion_notify_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
             // log_win("e->event: ", e->event);
