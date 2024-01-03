@@ -8303,8 +8303,8 @@ class Event
         motion_notify_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
-            log_win("e->event: ", e->event);
-            log_info(e->event_x);
+            // log_win("e->event: ", e->event);
+            // log_info(e->event_x);
         }
     ;
 };
