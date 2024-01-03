@@ -3244,7 +3244,7 @@ class XCPPBAnimator
             // c->border.right
             xcb_configure_window
             (
-                conn, 
+                connection, 
                 c->border.right, 
                 XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_HEIGHT,
                 (const uint32_t[2])
@@ -3253,17 +3253,18 @@ class XCPPBAnimator
                     static_cast<const uint32_t &>(h - TITLE_BAR_SIZE)
                 }
             );
+            xcb_flush(connection);
 
             // c->border.bottom
             xcb_configure_window
             (
-                conn, 
+                connection, 
                 c->border.bottom, 
-                XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_Y, 
+                XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH, 
                 (const uint32_t[2]) 
                 { 
-                    static_cast<const uint32_t &>(w - (BORDER_SIZE * 2)),
-                    static_cast<const uint32_t &>(h - TITLE_BAR_SIZE - BORDER_SIZE) 
+                    static_cast<const uint32_t &>(h - TITLE_BAR_SIZE - BORDER_SIZE),
+                    static_cast<const uint32_t &>(w - (BORDER_SIZE * 2))
                 }
             );
             xcb_flush(connection);
