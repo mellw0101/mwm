@@ -1271,7 +1271,16 @@ namespace get
     {
         for (const auto & c : client_list) 
         {
-            if (* w == c->win || * w == c->frame || * w == c->titlebar || * w == c->close_button || * w == c->max_button || * w == c->min_button) 
+            if (* w == c->win 
+             || * w == c->frame 
+             || * w == c->titlebar 
+             || * w == c->close_button 
+             || * w == c->max_button 
+             || * w == c->min_button 
+             || * w == c->border.left 
+             || * w == c->border.right 
+             || * w == c->border.top 
+             || * w == c->border.bottom) 
             {
                 return c;
             }
