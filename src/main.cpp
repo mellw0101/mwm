@@ -168,9 +168,9 @@ std::unique_ptr<Type, decltype(&std::free)> make_unique_event(xcb_generic_event_
 }
 
 template<typename Type>
-std::unique_ptr<Type, decltype(&std::free)> make_unique_ev(Type * event) {
+std::unique_ptr<Type> make_unique_ev(Type * event) {
     // Return a unique_ptr with custom deleter
-    return std::unique_ptr<Type, decltype(&std::free)>(event, std::free);
+    return std::unique_ptr<Type>(event);
 }
 
 // functions to cast between event types
