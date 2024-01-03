@@ -73,6 +73,12 @@ enum TILE_ANIMATION
     TILE_ANIMATION_DURATION = 80
 };
 
+typedef enum Decor_data 
+{
+    TITLE_BAR_SIZE = 20,
+    BORDER_SIZE = 1
+} Decor_data;
+
 enum MAXWIN_ANIMATION 
 {
     MAXWIN_ANIMATION_DURATION = 80
