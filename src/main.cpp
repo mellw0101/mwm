@@ -24,9 +24,6 @@ static xcb_gcontext_t gc;
 static void 
 draw_text(const char * str , const COLOR & text_color, const COLOR & bg_color, const xcb_window_t & win, const int16_t & x, const int16_t & y);
 
-static xcb_gcontext_t 
-create_graphical_context(xcb_window_t window);
-
 enum class CURSOR
 {
     arrow,
@@ -1240,6 +1237,53 @@ class mxb
 
                             return edge::NONE;
                         }
+                    ;
+                };
+            ;
+        };
+
+        class create
+        {
+            public:
+                class gc
+                {
+                    public:
+                        class graphics_exposure
+                        {
+                            public:
+                                graphics_exposure(const xcb_window_t & window)
+                                {
+                                    gc = xcb_generate_id(conn);
+                                    mask = XCB_GC_FOREGROUND | XCB_GC_BACKGROUND | XCB_GC_GRAPHICS_EXPOSURES;
+                                    uint32_t values[3] =
+                                    {
+                                        screen->black_pixel,
+                                        screen->white_pixel,
+                                        0
+                                    };
+
+                                    xcb_create_gc
+                                    (
+                                        conn,
+                                        gc,
+                                        window,
+                                        mask,
+                                        values
+                                    );
+                                }
+
+                                operator xcb_gcontext_t() const 
+                                {
+                                    return gc;
+                                }
+                            ;
+
+                            private:
+                                xcb_gcontext_t gc;
+                                xcb_window_t window;
+                                uint32_t mask;
+                            ;
+                        };
                     ;
                 };
             ;
@@ -6379,7 +6423,7 @@ set_png(xcb_window_t win, const char * imagePath)
         screen->width_in_pixels, 
         screen->height_in_pixels
     );
-    xcb_gcontext_t gc = create_graphical_context(win);
+    xcb_gcontext_t gc = mxb::create::gc::graphics_exposure(win);
     xcb_rectangle_t rect = {0, 0, screen->width_in_pixels, screen->height_in_pixels};
     xcb_poly_fill_rectangle
     (
@@ -8574,34 +8618,6 @@ draw_text(const char * str , const COLOR & text_color, const COLOR & bg_color, c
 
     // Flush the connection
     xcb_flush(conn);
-}
-  
-xcb_gcontext_t 
-create_graphical_context(xcb_window_t window) 
-{
-    // Generate an ID for the GC
-    xcb_gcontext_t gc = xcb_generate_id(conn);
-
-    // Set the values for the GC
-    uint32_t mask = XCB_GC_FOREGROUND | XCB_GC_BACKGROUND | XCB_GC_GRAPHICS_EXPOSURES;
-    uint32_t values[3] = 
-    {
-        screen->black_pixel, 
-        screen->white_pixel, 
-        0
-    };
-
-    // Create the GC
-    xcb_create_gc
-    (
-        conn, 
-        gc, 
-        window, 
-        mask, 
-        values
-    );
-
-    return gc;
 }
 
 void 
