@@ -4982,7 +4982,7 @@ class resize_client
                         XCB_CONFIG_WINDOW_HEIGHT,
                         (const uint32_t[1])
                         {
-                            static_cast<const uint32_t &>((c->height - 20 + c->y - y) - (BORDER_SIZE * 2))
+                            static_cast<const uint32_t &>((c->height - TITLE_BAR_HEIGHT + c->y - y) - (BORDER_SIZE * 2))
                         }
                     );
 
@@ -4996,6 +4996,42 @@ class resize_client
                         {
                             static_cast<const uint32_t &>(y),
                             static_cast<const uint32_t &>(c->height + c->y - y)
+                        }
+                    );
+
+                    // c->border.left
+                    xcb_configure_window
+                    (
+                        conn, 
+                        c->border.left, 
+                        XCB_CONFIG_WINDOW_HEIGHT, 
+                        (const uint32_t[1])
+                        {
+                            static_cast<const uint32_t &>((c->height + c->y - y) - (BORDER_SIZE * 2))
+                        }
+                    );
+
+                    // c->border.right
+                    xcb_configure_window
+                    (
+                        conn, 
+                        c->border.right, 
+                        XCB_CONFIG_WINDOW_HEIGHT, 
+                        (const uint32_t[1])
+                        {
+                            static_cast<const uint32_t &>((c->height + c->y - y) - (BORDER_SIZE * 2))
+                        }
+                    );
+
+                    // c->border.bottom
+                    xcb_configure_window
+                    (
+                        conn, 
+                        c->border.bottom, 
+                        XCB_CONFIG_WINDOW_Y, 
+                        (const uint32_t[1])
+                        {
+                            static_cast<const uint32_t &>((c->height + c->y - y) - BORDER_SIZE)
                         }
                     );
                 }
