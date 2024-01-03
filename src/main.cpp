@@ -1,7 +1,3 @@
-#include "structs.hpp"
-#include <cstdint>
-#include <xcb/xcb.h>
-#include <xcb/xproto.h>
 #define main_cpp
 #include "include.hpp"
 // #include "mxb.hpp"
@@ -2000,7 +1996,7 @@ class mv_client
 
         /* DEFENITIONS TO REDUCE REDUNDENT CODE IN 'snap' FUNCTION */
         #define RIGHT_  screen->width_in_pixels  - c->width
-        #define BOTTOM  screen->height_in_pixels - c->height
+        #define BOTTOM_ screen->height_in_pixels - c->height
 
         void 
         snap(const int16_t & x, const int16_t & y)
@@ -2106,9 +2102,9 @@ class mv_client
             {
                 move_client(RIGHT_, 0);
             }
-            else if ((y < BOTTOM + N && y > BOTTOM - N) && (x < N && x > -N))
+            else if ((y < BOTTOM_ + N && y > BOTTOM_ - N) && (x < N && x > -N))
             {
-                move_client(0, BOTTOM);
+                move_client(0, BOTTOM_);
             }
             else if ((x < N) && (x > -N))
             { 
@@ -2118,17 +2114,17 @@ class mv_client
             {
                 move_client(x, 0);
             }
-            else if ((x < RIGHT_ + N && x > RIGHT_ - N) && (y < BOTTOM + N && y > BOTTOM - N))
+            else if ((x < RIGHT_ + N && x > RIGHT_ - N) && (y < BOTTOM_ + N && y > BOTTOM_ - N))
             {
-                move_client(RIGHT_, BOTTOM);
+                move_client(RIGHT_, BOTTOM_);
             }
             else if ((x < RIGHT_ + N) && (x > RIGHT_ - N))
             { 
                 move_client(RIGHT_, y);
             }
-            else if (y < BOTTOM + N && y > BOTTOM - N)
+            else if (y < BOTTOM_ + N && y > BOTTOM_ - N)
             {
-                move_client(x, BOTTOM);
+                move_client(x, BOTTOM_);
             }
             else 
             {
@@ -4646,6 +4642,450 @@ class resize_client
                 }
             ;
         };
+
+        class border
+        {
+            public:   
+                border(client * & c, edge edge)
+                : c(c)
+                {
+                    if (mxb::EWMH::check::is_window_fullscreen(c->win))
+                    {
+                        return;
+                    }
+                    
+                    grab_pointer();
+                    teleport_mouse(edge);
+                    run(edge);
+                    xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
+                    xcb_flush(conn);
+                }
+            ;
+
+            private:
+                client * & c;
+                
+                void
+                grab_pointer()
+                {
+                    // Grab the pointer to track mouse events for window resizing
+                    xcb_grab_pointer_cookie_t cookie = xcb_grab_pointer
+                    (
+                        conn,
+                        false, // owner_events: false to not propagate events to other clients
+                        c->win,
+                        XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_POINTER_MOTION,
+                        XCB_GRAB_MODE_ASYNC,
+                        XCB_GRAB_MODE_ASYNC,
+                        XCB_NONE,
+                        XCB_NONE,
+                        XCB_CURRENT_TIME
+                    );
+
+                    // CHECK IF THE POINTER GRAB WAS SUCCESSFULL
+                    xcb_grab_pointer_reply_t* reply = xcb_grab_pointer_reply(conn, cookie, NULL);
+                    if (!reply || reply->status != XCB_GRAB_STATUS_SUCCESS) 
+                    {
+                        LOG_error("Could not grab pointer");
+                        free(reply);
+                        return;
+                    }
+                    free(reply);
+                }
+
+                void 
+                teleport_mouse(edge edge) 
+                {
+                    switch (edge) 
+                    {
+                        case edge::TOP:
+                        {
+
+                            xcb_warp_pointer
+                            (
+                                conn, 
+                                XCB_NONE, 
+                                screen->root, 
+                                0, 
+                                0, 
+                                0, 
+                                0, 
+                                mxb::get::pointer::x(), 
+                                c->y
+                            );
+                            xcb_flush(conn);
+                        }
+                        case edge::BOTTOM_edge:
+                        {
+                            xcb_warp_pointer
+                            (
+                                conn, 
+                                XCB_NONE, 
+                                screen->root, 
+                                0, 
+                                0, 
+                                0, 
+                                0, 
+                                mxb::get::pointer::x(), 
+                                c->y + c->height
+                            );
+                            xcb_flush(conn);
+                        } 
+                        case edge::LEFT:
+                        {
+                            xcb_warp_pointer
+                            (
+                                conn, 
+                                XCB_NONE, 
+                                screen->root, 
+                                0, 
+                                0, 
+                                0, 
+                                0, 
+                                c->x, 
+                                mxb::get::pointer::y()
+                            );
+                            xcb_flush(conn);
+                        }
+                        case edge::RIGHT:
+                        {
+                            xcb_warp_pointer
+                            (
+                                conn, 
+                                XCB_NONE, 
+                                screen->root, 
+                                0, 
+                                0, 
+                                0, 
+                                0, 
+                                c->x + c->width, 
+                                mxb::get::pointer::y()
+                            );
+                            xcb_flush(conn);
+                        }
+                        case edge::NONE:
+                        {
+                            return;
+                        }
+                    }
+                }
+
+                void
+                resize_win_left(const uint16_t & x)
+                {
+                    // c->win
+                    xcb_configure_window 
+                    (
+                        conn,
+                        c->win,
+                        XCB_CONFIG_WINDOW_WIDTH,
+                        (const uint32_t[1])
+                        {
+                            static_cast<const uint32_t &>((c->width + c->x - x) - (BORDER_SIZE * 2))
+                        }
+                    );
+
+                    // c->frame
+                    xcb_configure_window 
+                    (
+                        conn,
+                        c->frame,
+                        XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_WIDTH,
+                        (const uint32_t[2])
+                        {
+                            static_cast<const uint32_t &>(x),
+                            static_cast<const uint32_t &>(c->width + c->x - x) 
+                        }
+                    );
+
+                    // c->titlebar
+                    xcb_configure_window 
+                    (
+                        conn,
+                        c->titlebar,
+                        XCB_CONFIG_WINDOW_WIDTH,
+                        (const uint32_t[1])
+                        {
+                            static_cast<const uint32_t &>(c->width + c->x - x)
+                        }
+                    );
+
+                    // c->close_button
+                    xcb_configure_window 
+                    (
+                        conn,
+                        c->close_button,
+                        XCB_CONFIG_WINDOW_X,
+                        (const uint32_t[1])
+                        {
+                            static_cast<const uint32_t &>(c->width - 20 + c->x - x)
+                        }
+                    );
+
+                    // c->max_button
+                    xcb_configure_window 
+                    (
+                        conn,
+                        c->max_button,
+                        XCB_CONFIG_WINDOW_X,
+                        (const uint32_t[1])
+                        {
+                            static_cast<const uint32_t &>(c->width - 40 + c->x - x)
+                        }
+                    );
+
+                    // c->min_button
+                    xcb_configure_window 
+                    (
+                        conn,
+                        c->min_button,
+                        XCB_CONFIG_WINDOW_X,
+                        (const uint32_t[1])
+                        {
+                            static_cast<const uint32_t &>(c->width - 60 + c->x - x)
+                        }
+                    );
+                }
+
+                void
+                resize_win_width(const uint16_t & width)
+                {
+                    // c->win
+                    xcb_configure_window 
+                    (
+                        conn,
+                        c->win,
+                        XCB_CONFIG_WINDOW_WIDTH,
+                        (const uint32_t[1])
+                        {
+                            static_cast<const uint32_t &>(width - (BORDER_SIZE * 2)) 
+                        }
+                    );
+
+                    // c->frame
+                    xcb_configure_window 
+                    (
+                        conn,
+                        c->frame,
+                        XCB_CONFIG_WINDOW_WIDTH,
+                        (const uint32_t[1])
+                        {
+                            static_cast<const uint32_t &>(width) 
+                        }
+                    );
+
+                    // c->titlebar
+                    xcb_configure_window 
+                    (
+                        conn,
+                        c->titlebar,
+                        XCB_CONFIG_WINDOW_WIDTH,
+                        (const uint32_t[1])
+                        {
+                            static_cast<const uint32_t &>(width)
+                        }
+                    );
+
+                    // c->close_button
+                    xcb_configure_window 
+                    (
+                        conn,
+                        c->close_button,
+                        XCB_CONFIG_WINDOW_X,
+                        (const uint32_t[1])
+                        {
+                            static_cast<const uint32_t &>(width - 20)
+                        }
+                    );
+
+                    // c->max_button
+                    xcb_configure_window 
+                    (
+                        conn,
+                        c->max_button,
+                        XCB_CONFIG_WINDOW_X,
+                        (const uint32_t[1])
+                        {
+                            static_cast<const uint32_t &>(width - 40)
+                        }
+                    );
+
+                    // c->min_button
+                    xcb_configure_window 
+                    (
+                        conn,
+                        c->min_button,
+                        XCB_CONFIG_WINDOW_X,
+                        (const uint32_t[1])
+                        {
+                            static_cast<const uint32_t &>(width - 60)
+                        }
+                    );
+                }
+
+                void
+                resize_win_top(const uint16_t & y)
+                {
+                    // c->win
+                    xcb_configure_window 
+                    (
+                        conn,
+                        c->win,
+                        XCB_CONFIG_WINDOW_HEIGHT,
+                        (const uint32_t[1])
+                        {
+                            static_cast<const uint32_t &>((c->height - 20 + c->y - y) - BORDER_SIZE)
+                        }
+                    );
+
+                    // c->frame
+                    xcb_configure_window 
+                    (
+                        conn,
+                        c->frame,
+                        XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT,
+                        (const uint32_t[2])
+                        {
+                            static_cast<const uint32_t &>(y),
+                            static_cast<const uint32_t &>(c->height + c->y - y)
+                        }
+                    );
+                }
+
+                void
+                resize_win_height(const uint16_t & height)
+                {
+                    // c->win
+                    xcb_configure_window 
+                    (
+                        conn,
+                        c->win,
+                        XCB_CONFIG_WINDOW_HEIGHT,
+                        (const uint32_t[1])
+                        {
+                            static_cast<const uint32_t &>(height - 20 - BORDER_SIZE)
+                        }
+                    );
+
+                    // c->frame
+                    xcb_configure_window 
+                    (
+                        conn,
+                        c->frame,
+                        XCB_CONFIG_WINDOW_HEIGHT,
+                        (const uint32_t[2])
+                        {
+                            static_cast<const uint32_t &>(height)
+                        }
+                    );
+                }
+
+                void /* 
+                    THIS IS THE MAIN EVENT LOOP FOR 'resize_client'
+                */
+                run(edge edge)
+                {
+                    if (edge == edge::NONE)
+                    {
+                        return;
+                    }
+
+                    xcb_generic_event_t * ev;
+                    bool shouldContinue = true;
+
+                    // Wait for motion events and handle window resizing
+                    while (shouldContinue) 
+                    {
+                        ev = xcb_wait_for_event(conn);
+                        if (!ev) 
+                        {
+                            continue;
+                        }
+
+                        switch (ev->response_type & ~0x80) 
+                        {
+                            case XCB_MOTION_NOTIFY: 
+                            {
+                                const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
+                                if (isTimeToRender())
+                                {
+                                    switch (edge)
+                                    {
+                                        case edge::TOP:
+                                        {
+                                            resize_win_top(e->root_y);
+                                            break;
+                                        }
+                                        case edge::BOTTOM_edge:
+                                        {
+                                            resize_win_height(e->root_y - c->y);
+                                            break;
+                                        }
+                                        case edge::LEFT:
+                                        {
+                                            resize_win_left(e->root_x);
+                                            break;
+                                        }
+                                        case edge::RIGHT:
+                                        {
+                                            resize_win_width(e->root_x - c->x);
+                                            break;
+                                        }
+                                        case edge::NONE:
+                                        {
+                                            return;
+                                            break;
+                                        }
+                                    }
+                                    xcb_flush(conn); 
+                                }
+                                break;
+                            }
+                            case XCB_BUTTON_RELEASE: 
+                            {
+                                shouldContinue = false;                        
+                                wm::update_client(c); 
+                                break;
+                            }
+                        }
+                        // Free the event memory after processing
+                        free(ev); 
+                    }
+                }
+
+                /* FRAMERATE */
+                const double frameRate = 120.0;
+
+                /* HIGH_PRECISION_CLOCK AND TIME_POINT */
+                std::chrono::high_resolution_clock::time_point lastUpdateTime = std::chrono::high_resolution_clock::now();
+                
+                /* DURATION IN MILLISECONDS THAT EACH FRAME SHOULD LAST */
+                const double frameDuration = 1000.0 / frameRate; 
+                
+                bool 
+                isTimeToRender() 
+                {
+                    // CALCULATE ELAPSED TIME SINCE THE LAST UPDATE
+                    const auto & currentTime = std::chrono::high_resolution_clock::now();
+                    const std::chrono::duration<double, std::milli> & elapsedTime = currentTime - lastUpdateTime;
+
+                    /*
+                        CHECK IF THE ELAPSED TIME EXCEEDS THE FRAME DURATION
+                    */ 
+                    if (elapsedTime.count() >= frameDuration) 
+                    {
+                        // UPDATE THE LAST_UPDATE_TIME TO THE 
+                        // CURRENT TIME FOR THE NEXT CHECK
+                        lastUpdateTime = currentTime; 
+                        
+                        // RETURN TRUE IF IT'S TIME TO RENDER
+                        return true; 
+                    }
+                    // RETURN FALSE IF NOT ENOUGH TIME HAS PASSED
+                    return false; 
+                }
+            ;
+        };
     ;
 
     private:
@@ -6139,6 +6579,7 @@ class WinDecoretor
                 }
             );
             mxb::set::cursor(c->border.left, CURSOR::left_side);
+            win_tools::grab_buttons(c->border.left, {{ L_MOUSE_BUTTON, NULL }});
             xcb_map_window(conn, c->border.left);
             xcb_flush(conn);
 
@@ -6170,6 +6611,7 @@ class WinDecoretor
                 }
             );
             mxb::set::cursor(c->border.right, CURSOR::right_side);
+            win_tools::grab_buttons(c->border.right, {{ L_MOUSE_BUTTON, NULL }});
             xcb_map_window(conn, c->border.right);
             xcb_flush(conn);
 
@@ -6201,6 +6643,7 @@ class WinDecoretor
                 }
             );
             mxb::set::cursor(c->border.top, CURSOR::top_side);
+            win_tools::grab_buttons(c->border.top, {{ L_MOUSE_BUTTON, NULL }});
             xcb_map_window(conn, c->border.top);
             xcb_flush(conn);
 
@@ -6232,6 +6675,7 @@ class WinDecoretor
                 }
             );
             mxb::set::cursor(c->border.bottom, CURSOR::bottom_side);
+            win_tools::grab_buttons(c->border.bottom, {{ L_MOUSE_BUTTON, NULL }});
             xcb_map_window(conn, c->border.bottom);
             xcb_flush(conn);
         }
@@ -7660,30 +8104,6 @@ class Event
             
             if (e->detail == L_MOUSE_BUTTON)
             {
-                if (e->event == c->close_button)
-                {
-                    // log_info("L_MOUSE_BUTTON + close_button");
-                    win_tools::close_button_kill(c);
-                    return;
-                }
-
-                if (e->event == c->max_button)
-                {
-                    // log_info("L_MOUSE_BUTTON + max_button");
-                    client * c = get::client_from_all_win(& e->event);
-                    max_win(c, max_win::BUTTON_MAXWIN);
-                    return;
-                }
-
-                if (e->event == c->titlebar)
-                {
-                    // log_info("L_MOUSE_BUTTON + titlebar");
-                    wm::raise_client(c);
-                    mv_client(c, e->event_x, e->event_y);
-                    focus::client(c);
-                    return;
-                }
-
                 if (e->event == c->win)
                 {
                     switch (e->state) 
@@ -7700,6 +8120,54 @@ class Event
                     // log_info("L_MOUSE_BUTTON + win");
                     wm::raise_client(c);
                     focus::client(c);
+                    return;
+                }
+
+                if (e->event == c->titlebar)
+                {
+                    // log_info("L_MOUSE_BUTTON + titlebar");
+                    wm::raise_client(c);
+                    mv_client(c, e->event_x, e->event_y);
+                    focus::client(c);
+                    return;
+                }
+
+                if (e->event == c->close_button)
+                {
+                    // log_info("L_MOUSE_BUTTON + close_button");
+                    win_tools::close_button_kill(c);
+                    return;
+                }
+
+                if (e->event == c->max_button)
+                {
+                    // log_info("L_MOUSE_BUTTON + max_button");
+                    client * c = get::client_from_all_win(& e->event);
+                    max_win(c, max_win::BUTTON_MAXWIN);
+                    return;
+                }
+
+                if (e->event == c->border.left)
+                {
+                    resize_client::border(c, edge::LEFT);
+                    return;
+                }
+
+                if (e->event == c->border.right)
+                {
+                    resize_client::border(c, edge::RIGHT);
+                    return;
+                }
+
+                if (e->event == c->border.top)
+                {
+                    resize_client::border(c, edge::TOP);
+                    return;
+                }
+
+                if (e->event == c->border.bottom)
+                {
+                    resize_client::border(c, edge::BOTTOM_edge);
                     return;
                 }
             }
