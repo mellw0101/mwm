@@ -3263,7 +3263,7 @@ class XCPPBAnimator
                 XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH, 
                 (const uint32_t[2]) 
                 { 
-                    static_cast<const uint32_t &>(h - TITLE_BAR_SIZE - BORDER_SIZE),
+                    static_cast<const uint32_t &>(h - BORDER_SIZE),
                     static_cast<const uint32_t &>(w - (BORDER_SIZE * 2))
                 }
             );
