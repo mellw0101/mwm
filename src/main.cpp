@@ -6001,7 +6001,7 @@ class WinDecoretor
                 0,
                 TITLE_BAR_SIZE,
                 BORDER_SIZE,
-                c->height - TITLE_BAR_SIZE + BORDER_SIZE,
+                c->height + BORDER_SIZE,
                 0,
                 XCB_WINDOW_CLASS_INPUT_OUTPUT,
                 screen->root_visual,
