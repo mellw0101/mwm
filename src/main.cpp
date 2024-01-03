@@ -7907,7 +7907,7 @@ class Event
         void 
         key_press_handler(xcb_generic_event_t * & ev)
         {
-            const auto * e = reinterpret_cast<xcb_key_press_event_t * &>(ev);
+            const auto * e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
             
             /*
                 CHECK IF 'ALT+CTRL+T' WAS PRESSED
