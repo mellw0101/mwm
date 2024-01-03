@@ -5989,7 +5989,25 @@ class WinDecoretor
         void
         make_borders(client * & c)
         {
-            
+            c->border.left = xcb_generate_id(conn);
+            xcb_create_window
+            (
+                conn,
+                XCB_COPY_FROM_PARENT,
+                c->border.left,
+                c->frame,
+                TITLE_BAR_SIZE,
+                0,
+                BORDER_SIZE,
+                c->height - TITLE_BAR_SIZE + BORDER_SIZE,
+                0,
+                XCB_WINDOW_CLASS_INPUT_OUTPUT,
+                screen->root_visual,
+                0,
+                NULL
+            );
+            xcb_map_window(conn, c->border.left);
+            xcb_flush(conn);
         }
     ;
 };
