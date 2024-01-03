@@ -4660,7 +4660,7 @@ class resize_client
                 XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
                 (const uint32_t[2])
                 {
-                    static_cast<const uint32_t &>(width), 
+                    static_cast<const uint32_t &>(width - (BORDER_SIZE * 2)), 
                     static_cast<const uint32_t &>(height - 20)
                 }
             );
