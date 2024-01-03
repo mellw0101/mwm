@@ -3161,7 +3161,7 @@ class XCPPBAnimator
                 (const uint32_t[2])
                 {
                     static_cast<const uint32_t &>(w - (BORDER_SIZE * 2)),
-                    static_cast<const uint32_t &>(h - 20 - BORDER_SIZE)
+                    static_cast<const uint32_t &>(h - TITLE_BAR_SIZE - (BORDER_SIZE * 2))
                 }
             );
             xcb_flush(connection);
@@ -3190,7 +3190,7 @@ class XCPPBAnimator
                 XCB_CONFIG_WINDOW_WIDTH,
                 (const uint32_t[1])
                 {
-                    static_cast<const uint32_t &>(w)
+                    static_cast<const uint32_t &>(w - (BORDER_SIZE * 2))
                 }
             );
             xcb_flush(connection);
@@ -3203,7 +3203,7 @@ class XCPPBAnimator
                 XCB_CONFIG_WINDOW_X,
                 (const uint32_t[1])
                 {
-                    static_cast<const uint32_t &>(w - 20)
+                    static_cast<const uint32_t &>(w - 20 - (BORDER_SIZE * 2))
                 }
             );
             xcb_flush(connection);
@@ -3216,7 +3216,7 @@ class XCPPBAnimator
                 XCB_CONFIG_WINDOW_X,
                 (const uint32_t[1])
                 {
-                    static_cast<const uint32_t &>(w - 40)
+                    static_cast<const uint32_t &>(w - 40 - (BORDER_SIZE * 2))
                 }
             );
             xcb_flush(connection);
@@ -3229,7 +3229,7 @@ class XCPPBAnimator
                 XCB_CONFIG_WINDOW_X,
                 (const uint32_t[1])
                 {
-                    static_cast<const uint32_t &>(w - 60)
+                    static_cast<const uint32_t &>(w - 60 - (BORDER_SIZE * 2))
                 }
             );
             xcb_flush(connection);
@@ -3242,7 +3242,7 @@ class XCPPBAnimator
                 XCB_CONFIG_WINDOW_HEIGHT,
                 (const uint32_t[1])
                 {
-                    static_cast<const uint32_t &>(h - TITLE_BAR_SIZE)
+                    static_cast<const uint32_t &>(h - (BORDER_SIZE * 2))
                 }
             );
             xcb_flush(connection);
@@ -3256,7 +3256,7 @@ class XCPPBAnimator
                 (const uint32_t[2])
                 {
                     static_cast<const uint32_t &>(w - BORDER_SIZE),
-                    static_cast<const uint32_t &>(h - TITLE_BAR_SIZE)
+                    static_cast<const uint32_t &>(h - (BORDER_SIZE * 2))
                 }
             );
             xcb_flush(connection);
@@ -4710,7 +4710,7 @@ class resize_client
                 (const uint32_t[2])
                 {
                     static_cast<const uint32_t &>(width - (BORDER_SIZE * 2)), 
-                    static_cast<const uint32_t &>(height - 20 - BORDER_SIZE)
+                    static_cast<const uint32_t &>(height - TITLE_BAR_SIZE - (BORDER_SIZE * 2))
                 }
             );
 
@@ -4735,7 +4735,7 @@ class resize_client
                 XCB_CONFIG_WINDOW_WIDTH,
                 (const uint32_t[2])
                 {
-                    static_cast<const uint32_t &>(width)
+                    static_cast<const uint32_t &>(width - (BORDER_SIZE * 2))
                 }
             );
 
@@ -4747,7 +4747,7 @@ class resize_client
                 XCB_CONFIG_WINDOW_X,
                 (const uint32_t[2])
                 {
-                    static_cast<const uint32_t &>(width - 20)
+                    static_cast<const uint32_t &>(width - 20 - (BORDER_SIZE * 2))
                 }
             );
 
@@ -4759,7 +4759,7 @@ class resize_client
                 XCB_CONFIG_WINDOW_X,
                 (const uint32_t[2])
                 {
-                    static_cast<const uint32_t &>(width - 40)
+                    static_cast<const uint32_t &>(width - 40 - (BORDER_SIZE * 2))
                 }
             );
 
@@ -4771,7 +4771,7 @@ class resize_client
                 XCB_CONFIG_WINDOW_X,
                 (const uint32_t[2])
                 {
-                    static_cast<const uint32_t &>(width - 60)
+                    static_cast<const uint32_t &>(width - 60 - (BORDER_SIZE * 2))
                 }
             );
 
@@ -4783,7 +4783,7 @@ class resize_client
                 XCB_CONFIG_WINDOW_HEIGHT,
                 (const uint32_t[1])
                 {
-                    static_cast<const uint32_t &>(height - TITLE_BAR_SIZE)
+                    static_cast<const uint32_t &>(height - (BORDER_SIZE * 2))
                 }
             );
 
@@ -4796,7 +4796,7 @@ class resize_client
                 (const uint32_t[2])
                 {
                     static_cast<const uint32_t &>(width - BORDER_SIZE),
-                    static_cast<const uint32_t &>(height - TITLE_BAR_SIZE)
+                    static_cast<const uint32_t &>(height - (BORDER_SIZE * 2))
                 }
             );
 
