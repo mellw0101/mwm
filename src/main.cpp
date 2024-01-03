@@ -167,6 +167,12 @@ std::unique_ptr<Type, decltype(&std::free)> make_unique_event(xcb_generic_event_
     );
 }
 
+template<typename Type>
+std::unique_ptr<Type, decltype(&std::free)> make_unique_ev(Type * event) {
+    // Return a unique_ptr with custom deleter
+    return std::unique_ptr<Type, decltype(&std::free)>(event, std::free);
+}
+
 // functions to cast between event types
 namespace test 
 {
@@ -7837,9 +7843,8 @@ class Event
                     break;
                 }
                 case XCB_FOCUS_IN:
-                {
-                    auto e = make_unique_event<xcb_focus_in_event_t>(ev);
-                    focus_in_handler(e);
+                {;
+                    focus_in_handler(ev);
                     break;
                 }
                 case XCB_FOCUS_OUT:
@@ -8461,9 +8466,11 @@ class Event
         }
 
         void
-        focus_in_handler(const std::unique_ptr<xcb_focus_in_event_t, decltype(&std::free)>& e)
+        focus_in_handler(xcb_generic_event_t * & ev)
         {
-            // const auto * e = reinterpret_cast<const xcb_focus_in_event_t *>(ev);
+            const auto * event = reinterpret_cast<const xcb_focus_in_event_t *>(ev);
+            auto e = make_unique_ev(event);
+            
             if (!e)
             {
                 return;
