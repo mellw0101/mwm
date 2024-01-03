@@ -2562,7 +2562,7 @@ class XCPPBAnimator
         std::chrono::high_resolution_clock::time_point HlastUpdateTime;
         
         /* FRAMERATE */
-        const double frameRate = 400;
+        const double frameRate = 120;
         
         /* DURATION IN MILLISECONDS THAT EACH FRAME SHOULD LAST */
         const double frameDuration = 1000.0 / frameRate; 
@@ -3257,6 +3257,19 @@ class XCPPBAnimator
                 {
                     static_cast<const uint32_t &>(w - BORDER_SIZE),
                     static_cast<const uint32_t &>(h - (BORDER_SIZE * 2))
+                }
+            );
+            xcb_flush(connection);
+
+            // c->border.top
+            xcb_configure_window
+            (
+                connection, 
+                c->border.top, 
+                XCB_CONFIG_WINDOW_WIDTH, 
+                (const uint32_t[1]) 
+                { 
+                    static_cast<const uint32_t &>(w - (BORDER_SIZE * 2)) 
                 }
             );
             xcb_flush(connection);
