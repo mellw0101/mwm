@@ -4969,6 +4969,42 @@ class resize_client
                             static_cast<const uint32_t &>(width - 60)
                         }
                     );
+
+                    // c->borrom.right
+                    xcb_configure_window
+                    (
+                        conn, 
+                        c->border.right, 
+                        XCB_CONFIG_WINDOW_X,
+                        (const uint32_t[1])
+                        {
+                            static_cast<const uint32_t &>(width - BORDER_SIZE)
+                        }
+                    );
+
+                    // c->bottom.top
+                    xcb_configure_window
+                    (
+                        conn, 
+                        c->border.top, 
+                        XCB_CONFIG_WINDOW_WIDTH, 
+                        (const uint32_t[1])
+                        {
+                            static_cast<const uint32_t &>(width - (BORDER_SIZE * 2))
+                        }
+                    );
+
+                    // c->bottom.bottom
+                    xcb_configure_window
+                    (
+                        conn, 
+                        c->border.bottom, 
+                        XCB_CONFIG_WINDOW_WIDTH, 
+                        (const uint32_t[1])
+                        {
+                            static_cast<const uint32_t &>(width - (BORDER_SIZE * 2))
+                        }
+                    );
                 }
 
                 void
@@ -5095,14 +5131,14 @@ class resize_client
                         XCB_CONFIG_WINDOW_Y, 
                         (const uint32_t[1])
                         {
-                            static_cast<const uint32_t &>(height - (BORDER_SIZE * 2))
+                            static_cast<const uint32_t &>(height - BORDER_SIZE)
                         }
                     );
                 }
 
                 void /* 
                     THIS IS THE MAIN EVENT LOOP FOR 'resize_client'
-                */
+                 */
                 run(edge edge)
                 {
                     if (edge == edge::NONE)
