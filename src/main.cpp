@@ -1,5 +1,6 @@
 #include "structs.hpp"
 #include <cstdint>
+#include <xcb/xcb.h>
 #include <xcb/xproto.h>
 #define main_cpp
 #include "include.hpp"
@@ -6019,6 +6020,66 @@ class WinDecoretor
                 }
             );
             xcb_map_window(conn, c->border.left);
+            xcb_flush(conn);
+
+            c->border.right = xcb_generate_id(conn);
+            xcb_create_window
+            (
+                conn,
+                XCB_COPY_FROM_PARENT,
+                c->border.right,
+                c->frame,
+                c->width + BORDER_SIZE,
+                TITLE_BAR_SIZE,
+                BORDER_SIZE,
+                c->height + BORDER_SIZE,
+                0,
+                XCB_WINDOW_CLASS_INPUT_OUTPUT,
+                screen->root_visual,
+                0,
+                NULL
+            );
+            xcb_change_window_attributes
+            (
+                conn, 
+                c->border.right, 
+                XCB_CW_BACK_PIXEL, 
+                (const uint32_t[1])
+                {
+                    color::get(BLACK) 
+                }
+            );
+            xcb_map_window(conn, c->border.right);
+            xcb_flush(conn);
+
+            c->border.bottom = xcb_generate_id(conn);
+            xcb_create_window
+            (
+                conn, 
+                XCB_COPY_FROM_PARENT, 
+                c->border.bottom, 
+                c->frame, 
+                c->width + TITLE_BAR_SIZE, 
+                BORDER_SIZE, 
+                c->width - (BORDER_SIZE * 2), 
+                BORDER_SIZE, 
+                0, 
+                XCB_WINDOW_CLASS_INPUT_OUTPUT, 
+                screen->root_visual, 
+                0, 
+                NULL
+            );
+            xcb_change_window_attributes
+            (
+                conn, 
+                c->border.bottom, 
+                XCB_CW_BACK_PIXEL, 
+                (const uint32_t[1])
+                { 
+                    color::get(BLACK) 
+                }
+            );
+            xcb_map_window(conn, c->border.bottom);
             xcb_flush(conn);
         }
     ;
