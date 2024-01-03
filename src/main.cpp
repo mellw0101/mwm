@@ -6090,9 +6090,9 @@ class WinDecoretor
                 c->border.left,
                 c->frame,
                 0,
-                TITLE_BAR_SIZE,
                 BORDER_SIZE,
-                c->height + BORDER_SIZE,
+                BORDER_SIZE,
+                c->height + TITLE_BAR_SIZE,
                 0,
                 XCB_WINDOW_CLASS_INPUT_OUTPUT,
                 screen->root_visual,
@@ -6106,7 +6106,7 @@ class WinDecoretor
                 XCB_CW_BACK_PIXEL, 
                 (const uint32_t[1])
                 {
-                    color::get(BLACK) 
+                    color::get(RED) 
                 }
             );
             mxb::set::cursor(c->border.left, CURSOR::pirate);
@@ -6121,9 +6121,9 @@ class WinDecoretor
                 c->border.right,
                 c->frame,
                 c->width + BORDER_SIZE,
-                TITLE_BAR_SIZE,
                 BORDER_SIZE,
-                c->height + BORDER_SIZE,
+                BORDER_SIZE,
+                c->height + TITLE_BAR_SIZE,
                 0,
                 XCB_WINDOW_CLASS_INPUT_OUTPUT,
                 screen->root_visual,
@@ -6137,7 +6137,7 @@ class WinDecoretor
                 XCB_CW_BACK_PIXEL, 
                 (const uint32_t[1])
                 {
-                    color::get(BLACK) 
+                    color::get(RED) 
                 }
             );
             xcb_map_window(conn, c->border.right);
@@ -6151,7 +6151,7 @@ class WinDecoretor
                 c->border.bottom, 
                 c->frame, 
                 BORDER_SIZE, 
-                c->height + TITLE_BAR_SIZE, 
+                c->height + TITLE_BAR_SIZE + BORDER_SIZE, 
                 c->width, 
                 BORDER_SIZE, 
                 0, 
@@ -6167,7 +6167,7 @@ class WinDecoretor
                 XCB_CW_BACK_PIXEL, 
                 (const uint32_t[1])
                 { 
-                    color::get(BLACK) 
+                    color::get(RED) 
                 }
             );
             xcb_map_window(conn, c->border.bottom);
