@@ -3227,6 +3227,18 @@ class XCPPBAnimator
                 }
             );
             xcb_flush(connection);
+
+            xcb_configure_window
+            (
+                conn, 
+                c->border.bottom, 
+                XCB_CONFIG_WINDOW_Y, 
+                (const uint32_t[1]) 
+                { 
+                    static_cast<const uint32_t &>(h - BORDER_SIZE) 
+                }
+            );
+            xcb_flush(connection);
         }
 
         void 
