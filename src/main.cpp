@@ -3161,7 +3161,7 @@ class XCPPBAnimator
                 (const uint32_t[2])
                 {
                     static_cast<const uint32_t &>(w - (BORDER_SIZE * 2)),
-                    static_cast<const uint32_t &>(h - TITLE_BAR_SIZE - (BORDER_SIZE * 2))
+                    static_cast<const uint32_t &>(h - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2))
                 }
             );
             xcb_flush(connection);
@@ -4715,7 +4715,7 @@ class resize_client
                 (const uint32_t[2])
                 {
                     static_cast<const uint32_t &>(width - (BORDER_SIZE * 2)), 
-                    static_cast<const uint32_t &>(height - TITLE_BAR_SIZE - (BORDER_SIZE * 2))
+                    static_cast<const uint32_t &>(height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2))
                 }
             );
 
@@ -5211,9 +5211,9 @@ class max_win
             (
                 c, 
                 - BORDER_SIZE, 
-                - TITLE_BAR_SIZE - BORDER_SIZE, 
+                - TITLE_BAR_HEIGHT - BORDER_SIZE, 
                 screen->width_in_pixels + (BORDER_SIZE * 2), 
-                screen->height_in_pixels + TITLE_BAR_SIZE + (BORDER_SIZE * 2)
+                screen->height_in_pixels + TITLE_BAR_HEIGHT + (BORDER_SIZE * 2)
             );
             xcb_change_property
             (
@@ -5886,7 +5886,7 @@ class WinDecoretor
                 c->x, 
                 c->y, 
                 c->width + (BORDER_SIZE * 2), 
-                c->height + TITLE_BAR_SIZE + (BORDER_SIZE * 2), 
+                c->height + TITLE_BAR_HEIGHT + (BORDER_SIZE * 2), 
                 0, 
                 XCB_WINDOW_CLASS_INPUT_OUTPUT, 
                 screen->root_visual, 
@@ -5912,7 +5912,7 @@ class WinDecoretor
                 c->win, 
                 c->frame, 
                 BORDER_SIZE, 
-                TITLE_BAR_SIZE + BORDER_SIZE
+                TITLE_BAR_HEIGHT + BORDER_SIZE
             );
 
             xcb_map_window(conn, c->frame);
@@ -5936,7 +5936,7 @@ class WinDecoretor
                 BORDER_SIZE, 
                 BORDER_SIZE, 
                 c->width, 
-                TITLE_BAR_SIZE, 
+                TITLE_BAR_HEIGHT, 
                 0, 
                 XCB_WINDOW_CLASS_INPUT_OUTPUT, 
                 screen->root_visual, 
@@ -6108,7 +6108,7 @@ class WinDecoretor
                 0,
                 BORDER_SIZE,
                 BORDER_SIZE,
-                c->height + TITLE_BAR_SIZE,
+                c->height + TITLE_BAR_HEIGHT,
                 0,
                 XCB_WINDOW_CLASS_INPUT_OUTPUT,
                 screen->root_visual,
@@ -6139,7 +6139,7 @@ class WinDecoretor
                 c->width + BORDER_SIZE,
                 BORDER_SIZE,
                 BORDER_SIZE,
-                c->height + TITLE_BAR_SIZE,
+                c->height + TITLE_BAR_HEIGHT,
                 0,
                 XCB_WINDOW_CLASS_INPUT_OUTPUT,
                 screen->root_visual,
@@ -6199,7 +6199,7 @@ class WinDecoretor
                 c->border.bottom, 
                 c->frame, 
                 BORDER_SIZE, 
-                c->height + TITLE_BAR_SIZE + BORDER_SIZE, 
+                c->height + TITLE_BAR_HEIGHT + BORDER_SIZE, 
                 c->width, 
                 BORDER_SIZE, 
                 0, 
