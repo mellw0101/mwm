@@ -997,6 +997,32 @@ class mxb
                         rgb_color_code color;
                     ;
                 };
+
+                class font
+                {
+                    public:
+                        font(const char * font_name)
+                        {
+                            _font = xcb_generate_id(conn);
+                            xcb_open_font
+                            (
+                                conn, 
+                                _font, 
+                                strlen(font_name),
+                                font_name
+                            );
+                        }
+
+                        operator xcb_font_t() const 
+                        {
+                            return _font;
+                        }
+                    ;
+
+                    private:
+                        xcb_font_t _font;
+                    ;
+                };
             ;
         };
 
@@ -1642,32 +1668,6 @@ class mxb
                             cur_d       = d;
                             desktop_list.push_back(d);
                         }
-                    ;
-                };
-
-                class font
-                {
-                    public:
-                        font(const char * font_name)
-                        {
-                            _font = xcb_generate_id(conn);
-                            xcb_open_font
-                            (
-                                conn, 
-                                _font, 
-                                strlen(font_name),
-                                font_name
-                            );
-                        }
-
-                        operator xcb_font_t() const 
-                        {
-                            return _font;
-                        }
-                    ;
-
-                    private:
-                        xcb_font_t _font;
                     ;
                 };
             ;
@@ -8814,7 +8814,7 @@ draw_text(const char * str , const COLOR & text_color, const COLOR & bg_color, c
     //     }
     // );
 
-    xcb_gcontext_t gc = mxb::create::gc::font(win, text_color, bg_color, mxb::create::font("7x14"));
+    xcb_gcontext_t gc = mxb::create::gc::font(win, text_color, bg_color, mxb::get::font("7x14"));
 
     // Draw text
     xcb_image_text_8
