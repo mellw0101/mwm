@@ -6572,8 +6572,6 @@ class WinDecoretor
             make_titlebar(c);
             make_close_button(c);
             mxb::set::win::backround::as_png("/home/mellw/mwm_png/window_decoration_icons/close_button/1.png", c->close_button);
-            // set_png(c->close_button, "/home/mellw/mwm_png/window_decoration_icons/close_button/1.png");
-            // set_png(c->close_button, "/home/mellw/mwm_png/galaxy17.png");
             make_max_button(c);
             make_min_button(c);
             
@@ -8825,8 +8823,8 @@ setup_wm()
     Compositor compositor(conn, screen);
     gCompositor = &compositor;
 
-    // test(screen->root, "/home/mellw/mwm_png/galaxy17.png");
-    set_png(screen->root, "/home/mellw/mwm_png/galaxy17.png");
+    // set_png(screen->root, "/home/mellw/mwm_png/galaxy17.png");
+    mxb::set::win::backround::as_png("/home/mellw/mwm_png/galaxy17.png", screen->root);
     return 0;
 }
 
