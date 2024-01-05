@@ -2168,12 +2168,12 @@ show_hide_client(client * c, const show_hide & mode)
     {
         case HIDE:
         {
-            xcb_unmap_window(conn, c->win);
+            xcb_unmap_window(conn, c->frame);
             break;
         }
         case SHOW:
         {
-            xcb_map_window(conn, c->win);
+            xcb_map_window(conn, c->frame);
             break;
         }
     }
@@ -8549,17 +8549,6 @@ ewmh_init()
 }
 
 void
-make_desktop(const uint16_t & n)
-{
-    desktop * d = new desktop;
-    d->desktop  = n;
-    d->width    = screen->width_in_pixels;
-    d->height   = screen->height_in_pixels;
-    cur_d       = d;
-    desktop_list.push_back(d);
-}
-
-void
 draw_text(const char * str , const COLOR & text_color, const COLOR & bg_color, const xcb_window_t & win, const int16_t & x, const int16_t & y)
 {
     xcb_gcontext_t gc = xcb_generate_id(conn);
@@ -8708,7 +8697,6 @@ setup_wm()
         A WAY TO ADD AND REMOVE 
         DESKTOPS DURING RUNTIME
      */
-    // make_desktop(1);
     mxb::create::new_desktop(1);
     mxb::create::new_desktop(2);
     mxb::create::new_desktop(3);
