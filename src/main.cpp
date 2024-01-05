@@ -8710,11 +8710,11 @@ setup_wm()
      */
     // make_desktop(1);
     mxb::create::new_desktop(1);
-    make_desktop(2);
-    make_desktop(3);
-    make_desktop(4);
-    make_desktop(5);
-
+    mxb::create::new_desktop(2);
+    mxb::create::new_desktop(3);
+    mxb::create::new_desktop(4);
+    mxb::create::new_desktop(5);
+    
     move_desktop(1);
 
     mxb::set::win::backround::as_png("/home/mellw/mwm_png/galaxy17.png", screen->root);
