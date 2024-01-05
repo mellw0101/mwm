@@ -6377,7 +6377,7 @@ set_png(xcb_window_t win, const char * imagePath)
         screen->height_in_pixels
     );
     xcb_gcontext_t gc = mxb::create::gc::graphics_exposure(win);
-    xcb_rectangle_t rect = {0, 0, screen->width_in_pixels, screen->height_in_pixels};
+    xcb_rectangle_t rect = {0, 0, mxb::get::win::width(win), mxb::get::win::height(win)};
     xcb_poly_fill_rectangle
     (
         conn, 
@@ -8579,11 +8579,7 @@ draw_text(const char * str , const COLOR & text_color, const COLOR & bg_color, c
 void 
 configureRootWindow()
 {
-    set_win_color
-    (
-        screen->root, 
-        DARK_GREY
-    );
+    set_win_color(screen->root, DARK_GREY);
 
     // APPLY THE EVENT MASKS TO THE ROOT WINDOW
     xcb_change_window_attributes
