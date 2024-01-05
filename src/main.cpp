@@ -6441,127 +6441,6 @@ class Compositor
     ;
 };
 
-Compositor * gCompositor = nullptr;
-
-void 
-set_png(xcb_window_t win, const char * imagePath)
-{
-    // Load an image using Imlib2
-    Imlib_Image image = imlib_load_image(imagePath);
-    if (!image) 
-    {
-        log_error("Failed to load image: " + std::string(imagePath));
-        return;
-    }
-
-    // Get the original image size
-    imlib_context_set_image(image);
-    int originalWidth = imlib_image_get_width();
-    int originalHeight = imlib_image_get_height();
-
-    // Calculate new size maintaining aspect ratio
-    float aspectRatio = (float)originalWidth / originalHeight;
-    int newHeight = mxb::get::win::height(win);
-    int newWidth = (int)(newHeight * aspectRatio);
-
-    // Scale the image if it is wider than the screen
-    if (newWidth > mxb::get::win::width(win)) 
-    {
-        newWidth = mxb::get::win::width(win);
-        newHeight = (int)(newWidth / aspectRatio);
-    }
-
-    Imlib_Image scaledImage = imlib_create_cropped_scaled_image
-    (
-        0, 
-        0, 
-        originalWidth, 
-        originalHeight, 
-        newWidth, 
-        newHeight
-    );
-    imlib_free_image(); // Free original image
-    imlib_context_set_image(scaledImage);
-
-    // Get the scaled image data
-    DATA32* data = imlib_image_get_data();
-
-    // Create an XCB image from the scaled data
-    xcb_image_t* xcb_image = xcb_image_create_native
-    (
-        conn, 
-        newWidth, 
-        newHeight, 
-        XCB_IMAGE_FORMAT_Z_PIXMAP, 
-        screen->root_depth, 
-        NULL, 
-        ~0, (uint8_t*)data
-    );
-
-    // Create a pixmap for the screen size with a black background
-    xcb_pixmap_t pixmap = xcb_generate_id(conn);
-    xcb_create_pixmap
-    (
-        conn, 
-        screen->root_depth, 
-        pixmap, 
-        screen->root, 
-        mxb::get::win::width(win), 
-        mxb::get::win::height(win)
-    );
-    xcb_gcontext_t gc = mxb::create::gc::graphics_exposure(win);
-    xcb_rectangle_t rect = {0, 0, mxb::get::win::width(win), mxb::get::win::height(win)};
-    xcb_poly_fill_rectangle
-    (
-        conn, 
-        pixmap, 
-        gc, 
-        1, 
-        &rect
-    );
-
-    // Calculate position to center the image
-    int x = (mxb::get::win::width(win) - newWidth) / 2;
-    int y = (mxb::get::win::height(win) - newHeight) / 2;
-
-    // Put the scaled image onto the pixmap at the calculated position
-    xcb_image_put
-    (
-        conn, 
-        pixmap, 
-        gc, 
-        xcb_image, 
-        x,
-        y, 
-        0
-    );
-
-    // Set the pixmap as the background of the window
-    xcb_change_window_attributes
-    (
-        conn, 
-        win, 
-        XCB_CW_BACK_PIXMAP, 
-        &pixmap
-    );
-
-    // Cleanup
-    xcb_free_gc(conn, gc); // Free the GC
-    xcb_image_destroy(xcb_image);
-    imlib_free_image(); // Free scaled image
-
-    xcb_clear_area
-    (
-        conn, 
-        0, 
-        win, 
-        0, 
-        0, 
-        mxb::get::win::width(win), 
-        mxb::get::win::height(win)
-    );
-}
-
 class WinDecoretor
 {
     public:
@@ -8821,8 +8700,6 @@ setup_wm()
     make_desktop(5);
 
     move_desktop(1);
-    Compositor compositor(conn, screen);
-    gCompositor = &compositor;
 
     mxb::set::win::backround::as_png("/home/mellw/mwm_png/galaxy17.png", screen->root);
     return 0;
