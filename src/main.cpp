@@ -822,6 +822,181 @@ class mxb
 
                     return setMasks;
                 }
+
+                class color
+                {
+                    public:
+                        color(COLOR color)
+                        {
+                            xcb_colormap_t colormap = screen->default_colormap;
+                            rgb_color_code color_code = mxb::get::rgb_code(color);
+                            xcb_alloc_color_reply_t * reply = xcb_alloc_color_reply
+                            (
+                                conn, 
+                                xcb_alloc_color
+                                (
+                                    conn,
+                                    colormap,
+                                    scale::from_8_to_16_bit(color_code.r), 
+                                    scale::from_8_to_16_bit(color_code.g),
+                                    scale::from_8_to_16_bit(color_code.b)
+                                ), 
+                                NULL
+                            );
+                            color_pixel = reply->pixel;
+                        }
+
+                        operator uint32_t()
+                        {
+                            return color_pixel;
+                        }
+                    ;
+
+                    private:
+                        uint32_t color_pixel;
+                    ;
+                };
+
+                class rgb_code
+                {
+                    public:
+                        rgb_code(COLOR rgb_code)
+                        {
+                            uint8_t r;
+                            uint8_t g;
+                            uint8_t b;
+                            
+                            switch (rgb_code) 
+                            {
+                                case COLOR::WHITE:
+                                {
+                                    r = 255;
+                                    g = 255;
+                                    b = 255;
+                                    break;
+                                }
+                                case COLOR::BLACK:
+                                {
+                                    r = 0;
+                                    g = 0;
+                                    b = 0;
+                                    break;
+                                }
+                                case COLOR::RED:
+                                {
+                                    r = 255;
+                                    g = 0;
+                                    b = 0;
+                                    break;
+                                }
+                                case COLOR::GREEN:
+                                {
+                                    r = 0;
+                                    g = 255;
+                                    b = 0;
+                                    break;
+                                }
+                                case COLOR::BLUE:
+                                {
+                                    r = 0;
+                                    g = 0;
+                                    b = 255;
+                                    break;
+                                }
+                                case COLOR::YELLOW:
+                                {
+                                    r = 255;
+                                    g = 255;
+                                    b = 0;
+                                    break;
+                                }
+                                case COLOR::CYAN:
+                                {
+                                    r = 0;
+                                    g = 255;
+                                    b = 255;
+                                    break;
+                                }
+                                case COLOR::MAGENTA:
+                                {
+                                    r = 255;
+                                    g = 0;
+                                    b = 255;
+                                    break;
+                                }
+                                case COLOR::GREY:
+                                {
+                                    r = 128;
+                                    g = 128;
+                                    b = 128;
+                                    break;
+                                }
+                                case COLOR::LIGHT_GREY:
+                                {
+                                    r = 192;
+                                    g = 192;
+                                    b = 192;
+                                    break;
+                                }
+                                case COLOR::DARK_GREY:
+                                {
+                                    r = 64;
+                                    g = 64;
+                                    b = 64;
+                                    break;
+                                }
+                                case COLOR::ORANGE:
+                                {
+                                    r = 255;
+                                    g = 165;
+                                    b = 0;
+                                    break;
+                                }
+                                case COLOR::PURPLE:
+                                {
+                                    r = 128;
+                                    g = 0;
+                                    b = 128;
+                                    break;
+                                }
+                                case COLOR::BROWN:
+                                {
+                                    r = 165;
+                                    g = 42;
+                                    b = 42;
+                                    break;
+                                }
+                                case COLOR::PINK:
+                                {
+                                    r = 255;
+                                    g = 192;
+                                    b = 203;
+                                    break;
+                                }
+                                default:
+                                {
+                                    r = 0;
+                                    g = 0;
+                                    b = 0;
+                                    break;
+                                }
+                            }
+
+                            color.r = r;
+                            color.g = g;
+                            color.b = b;
+                        }
+
+                        operator rgb_color_code()
+                        {
+                            return color;
+                        }
+                    ;
+
+                    private:
+                        rgb_color_code color;
+                    ;
+                };
             ;
         };
 
@@ -1417,6 +1592,50 @@ class mxb
                                 xcb_gcontext_t gc;
                                 xcb_window_t window;
                                 uint32_t mask;
+                            ;
+                        };
+
+                        class font
+                        {
+                            public:
+                                font(xcb_window_t window, const COLOR & text_color, const COLOR & bg_color)
+                                {
+                                    xcb_gcontext_t gc = xcb_generate_id(conn);
+
+                                    // Load font
+                                    const char * font_name = "7x14";
+                                    xcb_font_t font = xcb_generate_id(conn);
+                                    xcb_open_font
+                                    (
+                                        conn, 
+                                        font, 
+                                        strlen(font_name),
+                                        font_name
+                                    );
+
+                                    xcb_create_gc
+                                    (
+                                        conn, 
+                                        gc, 
+                                        window, 
+                                        XCB_GC_FOREGROUND | XCB_GC_BACKGROUND | XCB_GC_FONT, 
+                                        (const uint32_t[3])
+                                        {
+                                            mxb::get::color(text_color),
+                                            mxb::get::color(bg_color),
+                                            font
+                                        }
+                                    );
+                                }
+
+                                operator xcb_gcontext_t() const 
+                                {
+                                    return gc;
+                                }
+                            ;
+
+                            private:
+                                xcb_gcontext_t gc;
                             ;
                         };
                     ;
@@ -6595,7 +6814,7 @@ class WinDecoretor
             xcb_map_window(conn, c->titlebar);
             xcb_flush(conn);
 
-            // draw_text("sug", WHITE, BLACK, c->titlebar, 2, 14);
+            draw_text("sug", WHITE, BLACK, c->titlebar, 2, 14);
         }
 
         void
