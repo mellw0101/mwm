@@ -1598,20 +1598,9 @@ class mxb
                         class font
                         {
                             public:
-                                font(xcb_window_t window, const COLOR & text_color, const COLOR & bg_color)
+                                font(xcb_window_t window, const COLOR & text_color, const COLOR & bg_color, xcb_font_t font)
                                 {
                                     xcb_gcontext_t gc = xcb_generate_id(conn);
-
-                                    // Load font
-                                    const char * font_name = "7x14";
-                                    xcb_font_t font = xcb_generate_id(conn);
-                                    xcb_open_font
-                                    (
-                                        conn, 
-                                        font, 
-                                        strlen(font_name),
-                                        font_name
-                                    );
 
                                     xcb_create_gc
                                     (
@@ -8796,34 +8785,36 @@ ewmh_init()
 void
 draw_text(const char * str , const COLOR & text_color, const COLOR & bg_color, const xcb_window_t & win, const int16_t & x, const int16_t & y)
 {
-    xcb_gcontext_t gc = xcb_generate_id(conn);
+    // xcb_gcontext_t gc = xcb_generate_id(conn);
 
-    // // Load font
-    // const char * font_name = "7x14";
-    // xcb_font_t font = xcb_generate_id(conn);
-    // xcb_open_font
+    // // // Load font
+    // // const char * font_name = "7x14";
+    // // xcb_font_t font = xcb_generate_id(conn);
+    // // xcb_open_font
+    // // (
+    // //     conn, 
+    // //     font, 
+    // //     strlen(font_name), 
+    // //     font_name
+    // // );
+
+    // xcb_font_t font = mxb::create::font("7x14");
+
+    // xcb_create_gc
     // (
     //     conn, 
-    //     font, 
-    //     strlen(font_name), 
-    //     font_name
+    //     gc, 
+    //     win, 
+    //     XCB_GC_FOREGROUND | XCB_GC_BACKGROUND | XCB_GC_FONT, 
+    //     (const uint32_t[3])
+    //     {
+    //         mxb::get::color(text_color),
+    //         color::get(bg_color),
+    //         font
+    //     }
     // );
 
-    xcb_font_t font = mxb::create::font("7x14");
-
-    xcb_create_gc
-    (
-        conn, 
-        gc, 
-        win, 
-        XCB_GC_FOREGROUND | XCB_GC_BACKGROUND | XCB_GC_FONT, 
-        (const uint32_t[3])
-        {
-            mxb::get::color(text_color),
-            color::get(bg_color),
-            font
-        }
-    );
+    xcb_gcontext_t gc = mxb::create::gc::font(win, text_color, bg_color, mxb::create::font("7x14"));
 
     // Draw text
     xcb_image_text_8
