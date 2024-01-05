@@ -6571,7 +6571,6 @@ class WinDecoretor
             make_frame(c);
             make_titlebar(c);
             make_close_button(c);
-            mxb::set::win::backround::as_png("/home/mellw/mwm_png/window_decoration_icons/close_button/1.png", c->close_button);
             make_max_button(c);
             make_min_button(c);
             
@@ -6747,6 +6746,8 @@ class WinDecoretor
             uint mask = XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW;
             apply_event_mask(& mask, c->close_button);
             xcb_flush(conn);
+
+            mxb::set::win::backround::as_png("/home/mellw/mwm_png/window_decoration_icons/close_button/1.png", c->close_button);
         }
 
         void
@@ -8823,7 +8824,6 @@ setup_wm()
     Compositor compositor(conn, screen);
     gCompositor = &compositor;
 
-    // set_png(screen->root, "/home/mellw/mwm_png/galaxy17.png");
     mxb::set::win::backround::as_png("/home/mellw/mwm_png/galaxy17.png", screen->root);
     return 0;
 }
