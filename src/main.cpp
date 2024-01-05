@@ -979,6 +979,26 @@ class mxb
                         }
                     ;
                 };
+
+                class win
+                {
+                    public:
+                        class backround
+                        {
+                            public:
+                                class as_png
+                                {
+                                    public:
+                                        as_png(const char * path, const xcb_window_t & win)
+                                        {
+                                            
+                                        }
+                                    ;
+                                };
+                            ;
+                        };
+                    ;
+                };
             ;
         };
 
@@ -6317,7 +6337,7 @@ set_png(xcb_window_t win, const char * imagePath)
     Imlib_Image image = imlib_load_image(imagePath);
     if (!image) 
     {
-        // Handle error...
+        log_error("Failed to load image: " + std::string(imagePath));
         return;
     }
 
@@ -6328,13 +6348,13 @@ set_png(xcb_window_t win, const char * imagePath)
 
     // Calculate new size maintaining aspect ratio
     float aspectRatio = (float)originalWidth / originalHeight;
-    int newHeight = screen->height_in_pixels;
+    int newHeight = mxb::get::win::height(win);
     int newWidth = (int)(newHeight * aspectRatio);
 
     // Scale the image if it is wider than the screen
-    if (newWidth > screen->width_in_pixels) 
+    if (newWidth > mxb::get::win::width(win)) 
     {
-        newWidth = screen->width_in_pixels;
+        newWidth = mxb::get::win::width(win);
         newHeight = (int)(newWidth / aspectRatio);
     }
 
@@ -6373,8 +6393,8 @@ set_png(xcb_window_t win, const char * imagePath)
         screen->root_depth, 
         pixmap, 
         screen->root, 
-        screen->width_in_pixels, 
-        screen->height_in_pixels
+        mxb::get::win::width(win), 
+        mxb::get::win::height(win)
     );
     xcb_gcontext_t gc = mxb::create::gc::graphics_exposure(win);
     xcb_rectangle_t rect = {0, 0, mxb::get::win::width(win), mxb::get::win::height(win)};
@@ -6388,8 +6408,8 @@ set_png(xcb_window_t win, const char * imagePath)
     );
 
     // Calculate position to center the image
-    int x = (screen->width_in_pixels - newWidth) / 2;
-    int y = (screen->height_in_pixels - newHeight) / 2;
+    int x = (mxb::get::win::width(win) - newWidth) / 2;
+    int y = (mxb::get::win::height(win) - newHeight) / 2;
 
     // Put the scaled image onto the pixmap at the calculated position
     xcb_image_put
@@ -6439,7 +6459,7 @@ class WinDecoretor
             make_titlebar(c);
             make_close_button(c);
             // set_png(c->close_button, "/home/admin/mwm_png/window_decoration_icons/close_button/1.png");
-            set_png(c->close_button, "/home/mellw/mwm_png/galaxy17.png");
+            // set_png(c->close_button, "/home/mellw/mwm_png/galaxy17.png");
             make_max_button(c);
             make_min_button(c);
             
