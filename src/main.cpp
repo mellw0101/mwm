@@ -1600,7 +1600,7 @@ class mxb
                             public:
                                 font(xcb_window_t window, const COLOR & text_color, const COLOR & bg_color, xcb_font_t font)
                                 {
-                                    xcb_gcontext_t gc = xcb_generate_id(conn);
+                                    gc = xcb_generate_id(conn);
 
                                     xcb_create_gc
                                     (
