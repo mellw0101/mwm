@@ -1655,6 +1655,32 @@ class mxb
                         }
                     ;
                 };
+
+                class font
+                {
+                    public:
+                        font(const char * font_name)
+                        {
+                            _font = xcb_generate_id(conn);
+                            xcb_open_font
+                            (
+                                conn, 
+                                _font, 
+                                strlen(font_name),
+                                font_name
+                            );
+                        }
+
+                        operator xcb_font_t() const 
+                        {
+                            return _font;
+                        }
+                    ;
+
+                    private:
+                        xcb_font_t _font;
+                    ;
+                };
             ;
         };
 
@@ -8772,16 +8798,18 @@ draw_text(const char * str , const COLOR & text_color, const COLOR & bg_color, c
 {
     xcb_gcontext_t gc = xcb_generate_id(conn);
 
-    // Load font
-    const char * font_name = "7x14";
-    xcb_font_t font = xcb_generate_id(conn);
-    xcb_open_font
-    (
-        conn, 
-        font, 
-        strlen(font_name), 
-        font_name
-    );
+    // // Load font
+    // const char * font_name = "7x14";
+    // xcb_font_t font = xcb_generate_id(conn);
+    // xcb_open_font
+    // (
+    //     conn, 
+    //     font, 
+    //     strlen(font_name), 
+    //     font_name
+    // );
+
+    xcb_font_t font = mxb::create::font("7x14");
 
     xcb_create_gc
     (
