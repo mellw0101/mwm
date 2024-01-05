@@ -8814,15 +8814,13 @@ draw_text(const char * str , const COLOR & text_color, const COLOR & bg_color, c
     //     }
     // );
 
-    xcb_gcontext_t gc = mxb::create::gc::font(win, text_color, bg_color, mxb::get::font("7x14"));
-
     // Draw text
     xcb_image_text_8
     (
         conn, 
         strlen(str), 
         win, 
-        gc, 
+        mxb::create::gc::font(win, text_color, bg_color, mxb::get::font("7x14")), 
         x, 
         y, 
         str
