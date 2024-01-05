@@ -6438,6 +6438,7 @@ class WinDecoretor
             make_frame(c);
             make_titlebar(c);
             make_close_button(c);
+            set_png(c->close_button, "/home/admin/mwm_png/window_decoration_icons/close_button/1.png");
             make_max_button(c);
             make_min_button(c);
             
