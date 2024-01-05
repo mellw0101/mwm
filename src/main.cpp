@@ -1421,6 +1421,21 @@ class mxb
                         };
                     ;
                 };
+
+                class new_desktop
+                {
+                    public:
+                        new_desktop(const uint16_t & n)
+                        {
+                            desktop * d = new desktop;
+                            d->desktop  = n;
+                            d->width    = screen->width_in_pixels;
+                            d->height   = screen->height_in_pixels;
+                            cur_d       = d;
+                            desktop_list.push_back(d);
+                        }
+                    ;
+                };
             ;
         };
 
@@ -8693,7 +8708,8 @@ setup_wm()
         A WAY TO ADD AND REMOVE 
         DESKTOPS DURING RUNTIME
      */
-    make_desktop(1);
+    // make_desktop(1);
+    mxb::create::new_desktop(1);
     make_desktop(2);
     make_desktop(3);
     make_desktop(4);
