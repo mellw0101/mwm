@@ -1754,35 +1754,15 @@ class mxb
                 class win
                 {
                     public:
-                        win(xcb_window_t window, const std::vector<uint32_t> & parameters, const std::vector<uint32_t> & values)
+                        win(xcb_window_t window, uint32_t mask, const uint32_t * values)
                         {
-                            if (parameters.size() != values.size()) {
-                                std::cerr << "Error: The sizes of the parameters and values vectors do not match.\n";
-                                return;
-                            }
-
-                            // Create a mask
-                            uint32_t mask = 0;
-                            for (const auto& param : parameters) {
-                                mask |= param;
-                            }
-
-                            // Order values according to the mask
-                            std::vector<uint32_t> orderedValues;
-                            for (uint32_t i = 0; mask != 0; mask >>= 1, ++i) {
-                                if (mask & 1) {
-                                    if (i < parameters.size()) {
-                                        orderedValues.push_back(values[i]);
-                                    } else {
-                                        std::cerr << "Error: Parameter index out of range.\n";
-                                        return;
-                                    }
-                                }
-                            }
-
-                            // Apply changes
-                            xcb_change_window_attributes(conn, window, mask, orderedValues.data());
-                            xcb_flush(conn);
+                            xcb_change_window_attributes
+                            (
+                                conn, 
+                                window, 
+                                mask, 
+                                values
+                            );
                         }
                     ;
                 };
@@ -2547,7 +2527,7 @@ class mv_client
             //         static_cast<const uint32_t>(y)
             //     }
             // );
-            mxb::modf::win(c->frame, {XCB_CONFIG_WINDOW_X, XCB_CONFIG_WINDOW_Y}, {x, y});
+            mxb::modf::win(c->frame, XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, (const uint32_t[2]){static_cast<const uint32_t>(x), static_cast<const uint32_t>(y)});
         }
 
         /* DEFENITIONS TO REDUCE REDUNDENT CODE IN 'snap' FUNCTION */
