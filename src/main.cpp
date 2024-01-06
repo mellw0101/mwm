@@ -2419,17 +2419,6 @@ class wm
 {
     public:
         static void
-        launchTerminal() 
-        {
-            if (fork()) 
-            {
-                return;
-            }
-            setsid();
-            execlp("/usr/bin/konsole", "/usr/bin/konsole");
-        }
-
-        static void
         kill_session()
         {
             if (fork() == 0) 
@@ -7272,7 +7261,6 @@ class Event
                     case CTRL + ALT:
                     {
                         log.log(INFO, __func__, "ALT+CTRL+T");
-                        // wm::launchTerminal();
                         mxb::launch::program((char *) "/usr/bin/konsole");
                         break;
                     }
@@ -7290,7 +7278,7 @@ class Event
                     case SHIFT + ALT:
                     {
                         log.log(INFO, __func__, "ALT+SHIFT+Q");
-                        wm::kill_session();
+                        mxb::launch::program((char *) "/usr/bin/mwm-KILL");
                     }
                 }
             }
