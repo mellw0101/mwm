@@ -6352,16 +6352,11 @@ class WinManager
             {
                 log_error("could not make client");
                 return;
-            }
-            
-            log_win("c->win: " , c->win);
+            }            
             mxb::conf::win::x_y_width_height(c->win, c->x, c->y, c->width, c->height);
-
             xcb_map_window(conn, c->win);  
             xcb_flush(conn);
 
-            // GRAB MOUSE BUTTONS FOR THE WINDOW 
-            // SO WINDOW CAN BE INTERACTED WITH
             grab_buttons(c, 
             {
                 {   L_MOUSE_BUTTON,     ALT },
@@ -6369,7 +6364,6 @@ class WinManager
                 {   L_MOUSE_BUTTON,     0   }
             });
             
-            // GRAB KEYS FOR THE WINDOW SO THAT KEYBINDINGS WORK
             grab_keys(c, 
             {
                 {   T,          ALT | CTRL              },
@@ -6589,9 +6583,7 @@ class WinManager
         static client * 
         make_client(const xcb_window_t & win) 
         {
-            // client * c = static_cast<client *>(malloc(sizeof(client)));
             client * c = new client;
-            
             if (!c) 
             {
                 log_error("Could not allocate memory for client");
@@ -6603,11 +6595,14 @@ class WinManager
             c->width  = (data.width < 400)  ? 400 : data.width;
             c->x      = (data.x <= 0)       ? (screen->width_in_pixels / 2)  - (c->width / 2)  : data.x;
             c->y      = (data.y <= 0)       ? (screen->height_in_pixels / 2) - (c->height / 2) : data.y;
-            
-            // DEFAULT DEPTH IS 24 BIT
-            // THIS CAN BE ADJUSTED IF NESSESARY
-            c->depth   = 24; 
+            c->depth   = 24;
             c->desktop = cur_d->desktop;
+            c->ismax   = false;
+
+            for (int i = 0; i < 256; ++i)
+            {
+                c->name[i] = '\0';
+            }
 
             if (is_exclusive_fullscreen(c)) 
             {
@@ -6616,11 +6611,7 @@ class WinManager
                 c->width  = screen->width_in_pixels;
                 c->height = screen->height_in_pixels;
             }
-            else 
-            {
-                c->ismax = false;
-            }
-        
+            
             client_list.push_back(c);
             cur_d->current_clients.push_back(c);
             return c;
@@ -7191,7 +7182,6 @@ class Event
                 {
                     case CTRL + ALT:
                     {
-                        log_info("ALT+CTRL+T");
                         mxb::launch::program((char *) "/usr/bin/konsole");
                         break;
                     }
@@ -7208,7 +7198,6 @@ class Event
                 {
                     case SHIFT + ALT:
                     {
-                        log_info("ALT+SHIFT+Q");
                         mxb::launch::program((char *) "/usr/bin/mwm-KILL");
                         break;
                     }
@@ -7221,7 +7210,6 @@ class Event
              */ 
             if (e->detail == f11)
             {
-                log_info("F11");
                 client * c = get::client_from_win(& e->event);
                 max_win(c, max_win::EWMH_MAXWIN);
             }
@@ -7236,8 +7224,8 @@ class Event
                 {
                     case ALT:
                     {
-                        log_info("ALT+1");
                         change_desktop::teleport_to(1);
+                        break;
                     }
                 }
             }
@@ -7252,8 +7240,8 @@ class Event
                 {
                     case ALT:
                     {
-                        log_info("ALT+2");
                         change_desktop::teleport_to(2);
+                        break;
                     }
                 }
             }
@@ -7268,8 +7256,8 @@ class Event
                 {
                     case ALT:
                     {
-                        log_info("ALT+3");
                         change_desktop::teleport_to(3);
+                        break;
                     }
                 }
             }
@@ -7284,8 +7272,8 @@ class Event
                 {
                     case ALT:
                     {
-                        log_info("ALT+4");
                         change_desktop::teleport_to(4);
+                        break;
                     }
                 }
             }
@@ -7300,8 +7288,8 @@ class Event
                 {
                     case ALT:
                     {
-                        log_info("ALT+5");
                         change_desktop::teleport_to(5);
+                        break;
                     }
                 }
             }
@@ -7363,7 +7351,6 @@ class Event
                     case SUPER:
                     {
                         client * c = get::client_from_win(& e->event);
-                        log_win("e->event", e->event);
                         tile(c, TILE::LEFT);
                         break;
                     }
