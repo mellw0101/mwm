@@ -6664,6 +6664,8 @@ class WinDecoretor
 
             xcb_map_window(conn, c->max_button);
             xcb_flush(conn);
+
+            mxb::set::win::backround::as_png("/home/mellw/mwm_png/window_decoration_icons/max_button/1_12x12.png", c->max_button);
         }
 
         void
@@ -6707,6 +6709,8 @@ class WinDecoretor
 
             xcb_map_window(conn, c->min_button);
             xcb_flush(conn);
+
+            mxb::set::win::backround::as_png("/home/mellw/mwm_png/window_decoration_icons/min_button/1_12x12.png", c->min_button);
         }
 
         void
