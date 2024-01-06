@@ -6620,7 +6620,7 @@ class WinDecoretor
             apply_event_mask(& mask, c->close_button);
             xcb_flush(conn);
 
-            mxb::set::win::backround::as_png("/home/mellw/mwm_png/window_decoration_icons/close_button/1_8x8.png", c->close_button);
+            mxb::set::win::backround::as_png("/home/mellw/mwm_png/window_decoration_icons/close_button/1_10x10.png", c->close_button);
         }
 
         void
