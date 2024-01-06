@@ -4830,7 +4830,6 @@ class resize_client
                     }
                     
                     grab_pointer();
-                    teleport_mouse(edge);
                     run(edge);
                     xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
                     xcb_flush(conn);
