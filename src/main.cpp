@@ -1754,7 +1754,7 @@ class mxb
                 class win
                 {
                     public:
-                        win(xcb_window_t window, uint32_t mask, const uint32_t * values)
+                        win(xcb_window_t window, uint16_t mask, const uint32_t * values)
                         {
                             xcb_change_window_attributes
                             (
