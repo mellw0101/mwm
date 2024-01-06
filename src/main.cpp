@@ -1592,6 +1592,20 @@ class mxb
                         c->x = c->y = c->width = c->height = 200;
                     }
                 }
+
+                static void 
+                raise(client * c) 
+                {
+                    uint32_t values[1] = {XCB_STACK_MODE_ABOVE};
+                    xcb_configure_window
+                    (
+                        conn,
+                        c->frame,
+                        XCB_CONFIG_WINDOW_STACK_MODE, 
+                        values
+                    );
+                    xcb_flush(conn);
+                }
             ;
         };
 
@@ -2418,78 +2432,46 @@ class focus
 class wm 
 {
     public:
-        static void
-        kill_session()
-        {
-            if (fork() == 0) 
-            {
-                setsid();
-                xcb_disconnect(conn);
-                execlp("/bin/mwm-KILL", "mwm-KILL", (char *)nullptr);
-                exit(1); // Exit if exec fails
-            }
-        }
-
-        static void 
-        flush_server(const char * function_name)
-        {
-            const uint8_t & status = xcb_flush(conn);
-            if (status == 0) 
-            {
-                Log::ERROR(function_name, "]:[Failed to flush server");
-                return;
-            }
-        }
-
-        static void 
-        raise_client(client * c) 
-        {
-            uint32_t values[1] = 
-            {
-                XCB_STACK_MODE_ABOVE
-            };
-            xcb_configure_window
-            (
-                conn,
-                c->frame,
-                XCB_CONFIG_WINDOW_STACK_MODE, 
-                values
-            );
-            flush_server(__func__);
-        }
-
         // static void
-        // save_ogsize(client * c)
+        // kill_session()
         // {
-        //     c->ogsize.x         = c->x; 
-        //     c->ogsize.y         = c->y;
-        //     c->ogsize.width     = c->width;
-        //     c->ogsize.height    = c->height;
-        // }
-
-        /* TODO */
-        // MUST CHECK VALUES SOMETHING IS OFF
-       
-
-        // static void 
-        // getWindowSize(xcb_window_t window, uint16_t & x, uint16_t & y, uint16_t & width, uint16_t & height) 
-        // {
-        //     xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
-        //     xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
-
-        //     if (geometry) 
+        //     if (fork() == 0) 
         //     {
-        //         x = geometry->x;
-        //         y = geometry->y;
-        //         width = geometry->width;
-        //         height = geometry->height;
-        //         free(geometry);
-        //     } 
-        //     else 
-        //     {
-        //         width = height = x = y = 200;
+        //         setsid();
+        //         xcb_disconnect(conn);
+        //         execlp("/bin/mwm-KILL", "mwm-KILL", (char *)nullptr);
+        //         exit(1); // Exit if exec fails
         //     }
         // }
+
+        // static void 
+        // flush_server(const char * function_name)
+        // {
+        //     const uint8_t & status = xcb_flush(conn);
+        //     if (status == 0) 
+        //     {
+        //         Log::ERROR(function_name, "]:[Failed to flush server");
+        //         return;
+        //     }
+        // }
+
+        // static void 
+        // raise_client(client * c) 
+        // {
+        //     uint32_t values[1] = 
+        //     {
+        //         XCB_STACK_MODE_ABOVE
+        //     };
+        //     xcb_configure_window
+        //     (
+        //         conn,
+        //         c->frame,
+        //         XCB_CONFIG_WINDOW_STACK_MODE, 
+        //         values
+        //     );
+        //     xcb_flush(conn);
+        // }
+
 
         static void
         ungrab_button(client * c, const uint8_t & mouse_button, const uint16_t & modifiers)
@@ -4064,7 +4046,7 @@ move_to_previus_desktop_w_app()
     }
 
     move_desktop(cur_d->desktop - 1);
-    wm::raise_client(focused_client);
+    mxb::Client::raise(focused_client);
 }
 
 class resize_client
@@ -7260,7 +7242,7 @@ class Event
                 {
                     case CTRL + ALT:
                     {
-                        log.log(INFO, __func__, "ALT+CTRL+T");
+                        log_info("ALT+CTRL+T");
                         mxb::launch::program((char *) "/usr/bin/konsole");
                         break;
                     }
@@ -7277,8 +7259,9 @@ class Event
                 {
                     case SHIFT + ALT:
                     {
-                        log.log(INFO, __func__, "ALT+SHIFT+Q");
+                        log_info("ALT+SHIFT+Q");
                         mxb::launch::program((char *) "/usr/bin/mwm-KILL");
+                        break;
                     }
                 }
             }
@@ -7289,11 +7272,9 @@ class Event
              */ 
             if (e->detail == f11)
             {
-                log.log(INFO, __func__, "F11");
-                client *c = get::client_from_win(&e->event);
+                log_info("F11");
+                client *c = get::client_from_win(& e->event);
                 max_win(c, max_win::EWMH_MAXWIN);
-                
-                // borrowed::maxwin(c, 0);
             }
 
             /*
@@ -7691,7 +7672,7 @@ class Event
                 c = mxb::Client::calc::client_edge_prox_to_pointer(10);
                 if (c)
                 {
-                    wm::raise_client(c);
+                    mxb::Client::raise(c);
                     resize_client::no_border(c, 0, 0);
                     focus::client(c);
                     return;
@@ -7714,14 +7695,14 @@ class Event
                         case ALT:
                         {
                             // log_info("ALT + L_MOUSE_BUTTON + win");
-                            wm::raise_client(c);
+                            mxb::Client::raise(c);
                             mv_client(c, e->event_x, e->event_y + 20);
                             focus::client(c);
                             break;
                         }
                     }
                     // log_info("L_MOUSE_BUTTON + win");
-                    wm::raise_client(c);
+                    mxb::Client::raise(c);
                     focus::client(c);
                     return;
                 }
@@ -7729,7 +7710,7 @@ class Event
                 if (e->event == c->titlebar)
                 {
                     // log_info("L_MOUSE_BUTTON + titlebar");
-                    wm::raise_client(c);
+                    mxb::Client::raise(c);
                     mv_client(c, e->event_x, e->event_y);
                     focus::client(c);
                     return;
@@ -7782,7 +7763,7 @@ class Event
                     case ALT:
                     {
                         log_error("ALT + R_MOUSE_BUTTON");
-                        wm::raise_client(c);
+                        mxb::Client::raise(c);
                         resize_client(c, 0);
                         focus::client(c);
                         return;
@@ -7809,15 +7790,13 @@ class Event
             {
                 return;
             }
-            // log_win("e->event: ", e->event);
             
             client * c = get::client_from_win( & e->event);
             if (c)
             {
                 wm::ungrab_button(c, L_MOUSE_BUTTON, 0);
-                wm::raise_client(c);
+                mxb::Client::raise(c);
                 mxb::EWMH::set::active_window(c->win);
-                log_win("active_window: ", mxb::EWMH::get::active_window());
                 focused_client = c;
             }
         }
@@ -7826,7 +7805,6 @@ class Event
         focus_out_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_focus_out_event_t *>(ev);
-            // log_win("e->event: ", e->event);
             
             client * c = get::client_from_win(& e->event);
             if (!c)
@@ -7850,15 +7828,11 @@ class Event
             log_win("e->window: ", e->window);
             log_win("e->event: ", e->event);
             client * c = get::client_from_all_win(& e->window);
-            // if (!c)
-            // {
-            //     return;
-            // }
-
+        
             int result = win_tools::send_sigterm_to_client(c);
             if (result == -1)
             {
-                log_error("send_sigterm_to_client: faild");
+                log_error("send_sigterm_to_client: failed");
             }
         }
 
@@ -7939,7 +7913,7 @@ ewmh_init()
     if (!(ewmh = static_cast<xcb_ewmh_connection_t *>(calloc(1, sizeof(xcb_ewmh_connection_t)))))
     {
         LOG_error("ewmh faild to initialize");
-        wm::kill_session();
+        mxb::launch::program((char *) "/usr/bin/mwm-KILL");
     }    
     
     xcb_intern_atom_cookie_t *cookie = xcb_ewmh_init_atoms(conn, ewmh);
