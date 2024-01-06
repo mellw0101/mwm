@@ -1907,6 +1907,24 @@ class mxb
                                 }
                             );
                         }
+
+                        static void
+                        x_y_width_height(const xcb_window_t & window, const uint32_t & x, const uint32_t & y, const uint32_t & width, const uint32_t & height)
+                        {
+                            xcb_configure_window
+                            (
+                                conn, 
+                                window, 
+                                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
+                                (const uint32_t[4])
+                                {
+                                    x,
+                                    y,
+                                    width,
+                                    height
+                                }
+                            );
+                        }
                     ;
                 };
             ;
@@ -2385,39 +2403,39 @@ class focus
 class wm 
 {
     public:
-        static void 
-        setWindowSize(client * c) 
-        {
-            xcb_configure_window
-            (
-                conn, 
-                c->win, 
-                XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, 
-                (const uint32_t[2])
-                {
-                    static_cast<const uint32_t>(c->width), 
-                    static_cast<const uint32_t>(c->height)
-                }
-            );
-            xcb_flush(conn);
-        }
+        // static void 
+        // setWindowSize(client * c) 
+        // {
+        //     xcb_configure_window
+        //     (
+        //         conn, 
+        //         c->win, 
+        //         XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, 
+        //         (const uint32_t[2])
+        //         {
+        //             static_cast<const uint32_t>(c->width), 
+        //             static_cast<const uint32_t>(c->height)
+        //         }
+        //     );
+        //     xcb_flush(conn);
+        // }
 
-        static void 
-        setWindowPosition(client * c) 
-        {
-            xcb_configure_window
-            (
-                conn, 
-                c->win, 
-                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, 
-                (const uint32_t[2])
-                {
-                    static_cast<uint32_t>(c->x), 
-                    static_cast<uint32_t>(c->y)           
-                }
-            );
-            xcb_flush(conn);
-        }
+        // static void 
+        // setWindowPosition(client * c) 
+        // {
+        //     xcb_configure_window
+        //     (
+        //         conn, 
+        //         c->win, 
+        //         XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, 
+        //         (const uint32_t[2])
+        //         {
+        //             static_cast<uint32_t>(c->x), 
+        //             static_cast<uint32_t>(c->y)           
+        //         }
+        //     );
+        //     xcb_flush(conn);
+        // }
 
         static void
         launchTerminal() 
@@ -2470,38 +2488,38 @@ class wm
             flush_server(__func__);
         }
 
-        static void
-        save_ogsize(client * c)
-        {
-            c->ogsize.x         = c->x; 
-            c->ogsize.y         = c->y;
-            c->ogsize.width     = c->width;
-            c->ogsize.height    = c->height;
-        }
+        // static void
+        // save_ogsize(client * c)
+        // {
+        //     c->ogsize.x         = c->x; 
+        //     c->ogsize.y         = c->y;
+        //     c->ogsize.width     = c->width;
+        //     c->ogsize.height    = c->height;
+        // }
 
         /* TODO */
         // MUST CHECK VALUES SOMETHING IS OFF
        
 
-        static void 
-        getWindowSize(xcb_window_t window, uint16_t & x, uint16_t & y, uint16_t & width, uint16_t & height) 
-        {
-            xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
-            xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
+        // static void 
+        // getWindowSize(xcb_window_t window, uint16_t & x, uint16_t & y, uint16_t & width, uint16_t & height) 
+        // {
+        //     xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
+        //     xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
 
-            if (geometry) 
-            {
-                x = geometry->x;
-                y = geometry->y;
-                width = geometry->width;
-                height = geometry->height;
-                free(geometry);
-            } 
-            else 
-            {
-                width = height = x = y = 200;
-            }
-        }
+        //     if (geometry) 
+        //     {
+        //         x = geometry->x;
+        //         y = geometry->y;
+        //         width = geometry->width;
+        //         height = geometry->height;
+        //         free(geometry);
+        //     } 
+        //     else 
+        //     {
+        //         width = height = x = y = 200;
+        //     }
+        // }
 
         static void
         ungrab_button(client * c, const uint8_t & mouse_button, const uint16_t & modifiers)
@@ -6403,9 +6421,10 @@ class WinManager
             }
             
             log.log(INFO, __func__, "c->win: " + std::to_string(c->win));
-            wm::setWindowPosition(c);
-            wm::setWindowSize(c);
-            
+            // wm::setWindowPosition(c);
+            // wm::setWindowSize(c);
+            mxb::conf::win::x_y_width_height(c->win, c->x, c->y, c->width, c->height);
+
             xcb_map_window(conn, c->win);  
             xcb_flush(conn);
 
