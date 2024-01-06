@@ -131,7 +131,7 @@ struct client_border_decor
 
 struct client 
 {
-    const char * name = "";
+    char name[256];
 
 	xcb_window_t win;
     xcb_window_t frame;
