@@ -6576,17 +6576,7 @@ class WinDecoretor
                 NULL
             );
 
-            // xcb_change_window_attributes
-            // (
-            //     conn, 
-            //     c->titlebar, 
-            //     XCB_CW_BACK_PIXEL, 
-            //     (const uint32_t[1])
-            //     {
-            //         color::get(BLACK)
-            //     }
-            // );
-            mxb::set::win::backround::as_color(c->titlebar, WHITE);
+            mxb::set::win::backround::as_color(c->titlebar, BLACK);
 
             win_tools::grab_buttons(c->titlebar, {
                {   L_MOUSE_BUTTON,     NULL }
@@ -6754,16 +6744,7 @@ class WinDecoretor
                 0,
                 NULL
             );
-            xcb_change_window_attributes
-            (
-                conn, 
-                c->border.left, 
-                XCB_CW_BACK_PIXEL, 
-                (const uint32_t[1])
-                {
-                    color::get(BLACK) 
-                }
-            );
+            mxb::set::win::backround::as_color(c->border.left, BLACK);
             mxb::set::cursor(c->border.left, CURSOR::left_side);
             win_tools::grab_buttons(c->border.left, {{ L_MOUSE_BUTTON, NULL }});
             xcb_map_window(conn, c->border.left);
@@ -6786,16 +6767,7 @@ class WinDecoretor
                 0,
                 NULL
             );
-            xcb_change_window_attributes
-            (
-                conn, 
-                c->border.right, 
-                XCB_CW_BACK_PIXEL, 
-                (const uint32_t[1])
-                {
-                    color::get(BLACK) 
-                }
-            );
+            mxb::set::win::backround::as_color(c->border.right, BLACK);
             mxb::set::cursor(c->border.right, CURSOR::right_side);
             win_tools::grab_buttons(c->border.right, {{ L_MOUSE_BUTTON, NULL }});
             xcb_map_window(conn, c->border.right);
@@ -6818,16 +6790,7 @@ class WinDecoretor
                 0,
                 NULL
             );
-            xcb_change_window_attributes
-            (
-                conn, 
-                c->border.top, 
-                XCB_CW_BACK_PIXEL, 
-                (const uint32_t[1])
-                {
-                    color::get(BLACK)
-                }
-            );
+            mxb::set::win::backround::as_color(c->border.top, BLACK);
             mxb::set::cursor(c->border.top, CURSOR::top_side);
             win_tools::grab_buttons(c->border.top, {{ L_MOUSE_BUTTON, NULL }});
             xcb_map_window(conn, c->border.top);
@@ -6850,16 +6813,7 @@ class WinDecoretor
                 0, 
                 NULL
             );
-            xcb_change_window_attributes
-            (
-                conn, 
-                c->border.bottom, 
-                XCB_CW_BACK_PIXEL, 
-                (const uint32_t[1])
-                { 
-                    color::get(BLACK) 
-                }
-            );
+            mxb::set::win::backround::as_color(c->border.bottom, BLACK);
             mxb::set::cursor(c->border.bottom, CURSOR::bottom_side);
             win_tools::grab_buttons(c->border.bottom, {{ L_MOUSE_BUTTON, NULL }});
             xcb_map_window(conn, c->border.bottom);
