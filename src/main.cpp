@@ -1756,27 +1756,33 @@ class mxb
                     public:
                         win(xcb_window_t window, const std::vector<uint32_t> & parameters, const std::vector<uint32_t> & values)
                         {
-                            if (parameters.size() != values.size()) 
-                            {
-                                log_error("The sizes of the parameters and values vectors do not match.");
+                            if (parameters.size() != values.size()) {
+                                std::cerr << "Error: The sizes of the parameters and values vectors do not match.\n";
                                 return;
                             }
 
+                            // Create a mask
                             uint32_t mask = 0;
-                            for (const auto & param : parameters) 
-                            {
+                            for (const auto& param : parameters) {
                                 mask |= param;
                             }
 
-                            xcb_change_window_attributes
-                            (
-                                conn, 
-                                window, 
-                                mask, 
-                                values.data()
-                            );
+                            // Order values according to the mask
+                            std::vector<uint32_t> orderedValues;
+                            for (uint32_t i = 0; mask != 0; mask >>= 1, ++i) {
+                                if (mask & 1) {
+                                    if (i < parameters.size()) {
+                                        orderedValues.push_back(values[i]);
+                                    } else {
+                                        std::cerr << "Error: Parameter index out of range.\n";
+                                        return;
+                                    }
+                                }
+                            }
+
+                            // Apply changes
+                            xcb_change_window_attributes(conn, window, mask, orderedValues.data());
                             xcb_flush(conn);
-                                                
                         }
                     ;
                 };
