@@ -6586,7 +6586,7 @@ class WinDecoretor
             //         color::get(BLACK)
             //     }
             // );
-            mxb::set::win::backround::as_color(c->titlebar, BLACK);
+            mxb::set::win::backround::as_color(c->titlebar, WHITE);
 
             win_tools::grab_buttons(c->titlebar, {
                {   L_MOUSE_BUTTON,     NULL }
