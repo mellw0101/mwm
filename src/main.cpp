@@ -1958,6 +1958,61 @@ class mxb
                 }
             ;
         };
+
+        class win
+        {
+            public:
+                class grab
+                {
+                    public:
+                        class button
+                        {
+                            public:
+                                button(const xcb_window_t & window, const uint8_t & button, const uint16_t & modifiers)
+                                {
+                                    xcb_grab_button
+                                    (
+                                        conn, 
+                                        1, // 'owner_events'. Set to 0 for no event propagation
+                                        window, 
+                                        XCB_EVENT_MASK_BUTTON_PRESS, // Event mask
+                                        XCB_GRAB_MODE_ASYNC, // Pointer mode
+                                        XCB_GRAB_MODE_ASYNC, // Keyboard mode
+                                        XCB_NONE, // Confine to window: none
+                                        XCB_NONE, // Cursor: none
+                                        button, 
+                                        modifiers
+                                    );
+                                    xcb_flush(conn); // Flush the request to the X server
+                                }
+                            ;
+                        };
+                    ;
+                };
+
+                class ungrab
+                {
+                    public:
+                        class button
+                        {
+                            public:
+                                button(const xcb_window_t & window, const uint8_t & button, const uint16_t & modifiers)
+                                {
+                                    xcb_ungrab_button
+                                    (
+                                        conn, 
+                                        button, 
+                                        window, 
+                                        modifiers
+                                    );
+                                    xcb_flush(conn); // Flush the request to the X server
+                                }
+                            ;
+                        };
+                    ;
+                };
+            ;
+        };
     ;
 };
 
@@ -2393,6 +2448,30 @@ class focus
             focused_client = c;
         }
 
+        static void
+        cycle()
+        {
+            bool focus = false;
+            for (auto & c : client_list)
+            {
+                if (c)
+                {
+                    if (c == focused_client)
+                    {
+                        focus = true;
+                        continue;
+                    }
+                    
+                    if (focus)
+                    {
+                        focus::client(c);
+                        return;  
+                    }
+                }
+            }
+        }
+    ;
+
     private:
         static void  
         raise_client(struct client * c) 
@@ -2427,105 +2506,7 @@ class focus
             );
             xcb_flush(conn);
         }
-};
-
-class wm 
-{
-    public:
-        // static void
-        // kill_session()
-        // {
-        //     if (fork() == 0) 
-        //     {
-        //         setsid();
-        //         xcb_disconnect(conn);
-        //         execlp("/bin/mwm-KILL", "mwm-KILL", (char *)nullptr);
-        //         exit(1); // Exit if exec fails
-        //     }
-        // }
-
-        // static void 
-        // flush_server(const char * function_name)
-        // {
-        //     const uint8_t & status = xcb_flush(conn);
-        //     if (status == 0) 
-        //     {
-        //         Log::ERROR(function_name, "]:[Failed to flush server");
-        //         return;
-        //     }
-        // }
-
-        // static void 
-        // raise_client(client * c) 
-        // {
-        //     uint32_t values[1] = 
-        //     {
-        //         XCB_STACK_MODE_ABOVE
-        //     };
-        //     xcb_configure_window
-        //     (
-        //         conn,
-        //         c->frame,
-        //         XCB_CONFIG_WINDOW_STACK_MODE, 
-        //         values
-        //     );
-        //     xcb_flush(conn);
-        // }
-
-
-        static void
-        ungrab_button(client * c, const uint8_t & mouse_button, const uint16_t & modifiers)
-        {
-            xcb_ungrab_button(
-                conn,
-                mouse_button, // Button to ungrab (e.g., left mouse button)
-                c->win,
-                modifiers // Modifiers to ungrab (e.g., Shift, Control, Alt, Super)
-            );
-            xcb_flush(conn); // Flush the request to the X server
-        }
-
-        static void
-        grab_button(client * c, const uint8_t & mouse_button, const uint16_t & modifiers) 
-        {
-            // LOG_func
-            xcb_grab_button(
-                conn, 
-                1, // 'owner_events'. Set to 0 for no event propagation
-                c->win, 
-                XCB_EVENT_MASK_BUTTON_PRESS, // Event mask
-                XCB_GRAB_MODE_ASYNC, // Pointer mode
-                XCB_GRAB_MODE_ASYNC, // Keyboard mode
-                XCB_NONE, // Confine to window: none
-                XCB_NONE, // Cursor: none
-                mouse_button, 
-                modifiers
-            );
-            xcb_flush(conn); // Flush the request to the X server
-        }
-
-        static void
-        cycle_focus()
-        {
-            bool focus = false;
-            for (auto & c : client_list)
-            {
-                if (c)
-                {
-                    if (c == focused_client)
-                    {
-                        focus = true;
-                        continue;
-                    }
-                    
-                    if (focus)
-                    {
-                        focus::client(c);
-                        return;  
-                    }
-                }
-            }
-        }
+    ;
 };
 
 class mv_client 
@@ -7461,7 +7442,7 @@ class Event
                 {
                     case ALT:
                     {
-                        wm::cycle_focus();
+                        focus::cycle();
                         break;
                     }
                 }
@@ -7786,15 +7767,10 @@ class Event
         focus_in_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_focus_in_event_t *>(ev);
-            if (!e)
-            {
-                return;
-            }
-            
             client * c = get::client_from_win( & e->event);
             if (c)
             {
-                wm::ungrab_button(c, L_MOUSE_BUTTON, 0);
+                mxb::win::ungrab::button(c->win, L_MOUSE_BUTTON, 0);
                 mxb::Client::raise(c);
                 mxb::EWMH::set::active_window(c->win);
                 focused_client = c;
@@ -7817,7 +7793,7 @@ class Event
                 return;
             }
             
-            wm::grab_button(c, L_MOUSE_BUTTON, 0);
+            mxb::win::grab::button(c->win, L_MOUSE_BUTTON, 0);
         }
 
         void
