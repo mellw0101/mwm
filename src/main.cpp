@@ -6605,9 +6605,10 @@ class WinManager
             }
 
             int i = 0;
-            while(mxb::get::win::property(c->win, "_NET_WM_NAME")[i] != '\0' && i < 255)
+            const char * name = mxb::get::win::property(c->win, "_NET_WM_NAME");
+            while(name[i] != '\0' && i < 255)
             {
-                c->name[i] = mxb::get::win::property(c->win, "_NET_WM_NAME")[i];
+                c->name[i] = name[i];
                 ++i;
             }
             c->name[i] = '\0';
