@@ -7465,8 +7465,8 @@ class Event
 
                         // log_info(mxb::get::event_mask(mxb::get::event_mask_sum(c->win)));
 
-                        std::string name = "";
-                        for (int i = 0; c->name[i] == '\0'; ++i)
+                        std::string name;
+                        for (int i = 0; c->name[i] != '\0'; ++i)
                         {
                             name += c->name[i];
                         }
