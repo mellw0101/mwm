@@ -71,6 +71,20 @@ enum class CURSOR
     bottom_right_arrow
 };
 
+typedef enum modf_win
+{
+    MODF_WIN_X = 1,
+    MODF_WIN_Y = 2,
+    MODF_WIN_WIDTH = 4,
+    MODF_WIN_HEIGHT = 8,
+    MODF_WIN_BORDER_WIDTH = 16,
+    MODF_WIN_SIBLING = 32,
+    MODF_WIN_STACK_MODE = 64
+} 
+modf_win;
+
+typedef uint32_t modf_win_t;
+
 class mxb 
 {
     public: 
@@ -1733,6 +1747,41 @@ class mxb
                 }
             ;
         };
+
+        class modf
+        {
+            public:
+                class win
+                {
+                    public:
+                        win(xcb_window_t window, const std::vector<uint32_t> & parameters, const std::vector<uint32_t> & values)
+                        {
+                            if (parameters.size() != values.size()) 
+                            {
+                                log_error("The sizes of the parameters and values vectors do not match.");
+                                return;
+                            }
+
+                            uint32_t mask = 0;
+                            for (const auto & param : parameters) 
+                            {
+                                mask |= param;
+                            }
+
+                            xcb_change_window_attributes
+                            (
+                                conn, 
+                                window, 
+                                mask, 
+                                values.data()
+                            );
+                            xcb_flush(conn);
+                                                
+                        }
+                    ;
+                };
+            ;
+        };
     ;
 };
 
@@ -2481,17 +2530,18 @@ class mv_client
         void 
         move_client(const uint16_t & x, const uint16_t & y)
         {
-            xcb_configure_window
-            (
-                conn,
-                c->frame,
-                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y,
-                (const uint32_t[2])
-                {
-                    static_cast<const uint32_t>(x), 
-                    static_cast<const uint32_t>(y)
-                }
-            );
+            // xcb_configure_window
+            // (
+            //     conn,
+            //     c->frame,
+            //     XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y,
+            //     (const uint32_t[2])
+            //     {
+            //         static_cast<const uint32_t>(x), 
+            //         static_cast<const uint32_t>(y)
+            //     }
+            // );
+            mxb::modf::win(c->frame, {XCB_CONFIG_WINDOW_X, XCB_CONFIG_WINDOW_Y}, {x, y});
         }
 
         /* DEFENITIONS TO REDUCE REDUNDENT CODE IN 'snap' FUNCTION */
