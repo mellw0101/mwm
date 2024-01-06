@@ -8087,7 +8087,7 @@ class Event
 
             log_win("e->window: ", e->window);
             log_win("e->event: ", e->event);
-            client * c = get::client_from_win(& e->window);
+            client * c = get::client_from_all_win(& e->window);
             if (!c)
             {
                 return;
