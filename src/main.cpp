@@ -2707,18 +2707,18 @@ class mv_client
                     // SNAP WINDOW TO 'RIGHT_TOP' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
                     if (y > cli->y - NC && y < cli->y + NC)
                     {  
-                        move_client(cli->x + cli->width, cli->y);
+                        mxb::conf::win::x_y(c->frame, (cli->x + cli->width), cli->y);
                         return;
                     }
 
                     // SNAP WINDOW TO 'RIGHT_BOTTOM' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
                     if (y + c->height > cli->y + cli->height - NC && y + c->height < cli->y + cli->height + NC)
                     {
-                        move_client(cli->x + cli->width, (cli->y + cli->height) - c->height);
+                        mxb::conf::win::x_y(c->frame, (cli->x + cli->width), (cli->y + cli->height) - c->height);
                         return;
                     }
 
-                    move_client(cli->x + cli->width, y);
+                    mxb::conf::win::x_y(c->frame, (cli->x + cli->width), y);
                     return;
                 }
 
@@ -2792,39 +2792,38 @@ class mv_client
             // WINDOW TO EDGE OF SCREEN SNAPPING
             if (((x < N) && (x > -N)) && ((y < N) && (y > -N)))
             {
-                move_client(0, 0);
+                mxb::conf::win::x_y(c->frame, 0, 0);
             }
             else if ((x < RIGHT_ + N && x > RIGHT_ - N) && (y < N && y > -N))
             {
-                move_client(RIGHT_, 0);
+                mxb::conf::win::x_y(c->frame, RIGHT_, 0);
             }
             else if ((y < BOTTOM_ + N && y > BOTTOM_ - N) && (x < N && x > -N))
             {
-                move_client(0, BOTTOM_);
+                mxb::conf::win::x_y(c->frame, 0, BOTTOM_);
             }
             else if ((x < N) && (x > -N))
             { 
-                move_client(0, y);
+                mxb::conf::win::x_y(c->frame, 0, y);
             }
             else if (y < N && y > -N)
             {
-                move_client(x, 0);
+                mxb::conf::win::x_y(c->frame, x, 0);
             }
             else if ((x < RIGHT_ + N && x > RIGHT_ - N) && (y < BOTTOM_ + N && y > BOTTOM_ - N))
             {
-                move_client(RIGHT_, BOTTOM_);
+                mxb::conf::win::x_y(c->frame, RIGHT_, BOTTOM_);
             }
             else if ((x < RIGHT_ + N) && (x > RIGHT_ - N))
             { 
-                move_client(RIGHT_, y);
+                mxb::conf::win::x_y(c->frame, RIGHT_, y);
             }
             else if (y < BOTTOM_ + N && y > BOTTOM_ - N)
             {
-                move_client(x, BOTTOM_);
+                mxb::conf::win::x_y(c->frame, x, BOTTOM_);
             }
             else 
             {
-                // move_client(x, y);
                 mxb::conf::win::x_y(c->frame, x, y);
             }
         }
