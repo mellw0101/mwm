@@ -3848,6 +3848,35 @@ class change_desktop
             joinAndClearThreads();
             mtx.unlock();
         }
+
+        static void
+        teleport_to(const uint8_t & n)
+        {
+            if (cur_d == desktop_list[n - 1] || n == 0 || n == desktop_list.size())
+            {
+                return;
+            }
+            
+            for (const auto & c : cur_d->current_clients)
+            {
+                if (c)
+                {
+                    if (c->desktop == cur_d->desktop)
+                    {
+                        mxb::Client::unmap(c);
+                    }
+                }
+            }
+
+            cur_d = desktop_list[n - 1];
+            for (const auto & c : cur_d->current_clients)
+            {
+                if (c)
+                {
+                    mxb::Client::map(c);
+                }
+            }
+        }
     ;
 
     private:
@@ -3966,35 +3995,6 @@ class change_desktop
     ;
 };
 
-void 
-move_desktop(const uint8_t & n)
-{
-    if (cur_d == desktop_list[n - 1] || n == 0 || n == desktop_list.size())
-    {
-        return;
-    }
-    
-    for (const auto & c : cur_d->current_clients)
-    {
-        if (c)
-        {
-            if (c->desktop == cur_d->desktop)
-            {
-                mxb::Client::unmap(c);
-            }
-        }
-    }
-
-    cur_d = desktop_list[n - 1];
-    for (const auto & c : cur_d->current_clients)
-    {
-        if (c)
-        {
-            mxb::Client::map(c);
-        }
-    }
-}
-
 void
 move_to_next_desktop_w_app()
 {
@@ -4009,7 +4009,7 @@ move_to_next_desktop_w_app()
         focused_client->desktop = cur_d->desktop + 1;
     }
 
-    move_desktop(cur_d->desktop + 1);
+    change_desktop::teleport_to(cur_d->desktop + 1);
 }
 
 void
@@ -4026,7 +4026,7 @@ move_to_previus_desktop_w_app()
         focused_client->desktop = cur_d->desktop - 1;
     }
 
-    move_desktop(cur_d->desktop - 1);
+    change_desktop::teleport_to(cur_d->desktop - 1);
     mxb::Client::raise(focused_client);
 }
 
@@ -6400,41 +6400,9 @@ class WinManager
             XCB_EVENT_MASK_LEAVE_WINDOW  ;
             mxb::set::event_mask(& mask, c->win);
 
-            get::name(c);
+            mxb::get::win::property(c->win, "_NET_WM_NAME");
             mxb::Client::update(c);
             focus::client(c);
-        }
- 
-        static void 
-        kill_client(xcb_connection_t *conn, xcb_window_t window) 
-        {
-            xcb_intern_atom_cookie_t protocols_cookie = xcb_intern_atom(conn, 1, 12, "WM_PROTOCOLS");
-            xcb_intern_atom_reply_t *protocols_reply = xcb_intern_atom_reply(conn, protocols_cookie, NULL);
-
-            xcb_intern_atom_cookie_t delete_cookie = xcb_intern_atom(conn, 0, 16, "WM_DELETE_WINDOW");
-            xcb_intern_atom_reply_t *delete_reply = xcb_intern_atom_reply(conn, delete_cookie, NULL);
-
-            if (!protocols_reply || !delete_reply) 
-            {
-                log.log(ERROR, __func__, "Could not create atoms.");
-                free(protocols_reply);
-                free(delete_reply);
-                return;
-            }
-
-            xcb_client_message_event_t ev = {0};
-            ev.response_type = XCB_CLIENT_MESSAGE;
-            ev.window = window;
-            ev.format = 32;
-            ev.sequence = 0;
-            ev.type = protocols_reply->atom;
-            ev.data.data32[0] = delete_reply->atom;
-            ev.data.data32[1] = XCB_CURRENT_TIME;
-
-            xcb_send_event(conn, 0, window, XCB_EVENT_MASK_NO_EVENT, (char *) & ev);
-
-            free(protocols_reply);
-            free(delete_reply);
         }
 
     private:
@@ -7254,7 +7222,7 @@ class Event
             if (e->detail == f11)
             {
                 log_info("F11");
-                client *c = get::client_from_win(& e->event);
+                client * c = get::client_from_win(& e->event);
                 max_win(c, max_win::EWMH_MAXWIN);
             }
 
@@ -7268,8 +7236,8 @@ class Event
                 {
                     case ALT:
                     {
-                        log.log(INFO, __func__, "ALT+1");
-                        move_desktop(1);
+                        log_info("ALT+1");
+                        change_desktop::teleport_to(1);
                     }
                 }
             }
@@ -7284,8 +7252,8 @@ class Event
                 {
                     case ALT:
                     {
-                        log.log(INFO, __func__, "ALT+2");
-                        move_desktop(2);
+                        log_info("ALT+2");
+                        change_desktop::teleport_to(2);
                     }
                 }
             }
@@ -7300,8 +7268,8 @@ class Event
                 {
                     case ALT:
                     {
-                        log.log(INFO, __func__, "ALT+3");
-                        move_desktop(3);
+                        log_info("ALT+3");
+                        change_desktop::teleport_to(3);
                     }
                 }
             }
@@ -7316,8 +7284,8 @@ class Event
                 {
                     case ALT:
                     {
-                        log.log(INFO, __func__, "ALT+4");
-                        move_desktop(4);
+                        log_info("ALT+4");
+                        change_desktop::teleport_to(4);
                     }
                 }
             }
@@ -7332,8 +7300,8 @@ class Event
                 {
                     case ALT:
                     {
-                        log.log(INFO, __func__, "ALT+5");
-                        move_desktop(5);
+                        log_info("ALT+5");
+                        change_desktop::teleport_to(5);
                     }
                 }
             }
@@ -8074,7 +8042,7 @@ setup_wm()
     mxb::create::new_desktop(4);
     mxb::create::new_desktop(5);
     
-    move_desktop(1);
+    change_desktop::teleport_to(1);
 
     mxb::set::win::backround::as_png("/home/mellw/mwm_png/galaxy17.png", screen->root);
     return 0;
