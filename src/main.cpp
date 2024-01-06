@@ -1776,13 +1776,52 @@ class mxb
                     public:
                         win(xcb_window_t window, uint16_t mask, const uint32_t * values)
                         {
-                            xcb_change_window_attributes
+                            xcb_configure_window
                             (
                                 conn, 
                                 window, 
-                                mask, 
+                                mask,
                                 values
                             );
+                        }
+
+                        
+                        win(xcb_window_t window, const std::vector<uint32_t> & parameters, const std::vector<uint32_t> & values) 
+                        {
+                            if (parameters.size() != values.size()) 
+                            {
+                                log_error("The sizes of the parameters and values vectors do not match.");
+                                return;
+                            }
+
+                            // Create a mask
+                            uint32_t mask = 0;
+                            for (const auto & param : parameters) 
+                            {
+                                mask |= param;
+                            }
+
+                            // Order values according to the mask
+                            std::vector<uint32_t> orderedValues;
+                            for (uint32_t i = 0; mask != 0; mask >>= 1, ++i) 
+                            {
+                                if (mask & 1) 
+                                {
+                                    if (i < parameters.size()) 
+                                    {
+                                        orderedValues.push_back(values[i]);
+                                    } 
+                                    else 
+                                    {
+                                        log_error("Parameter index out of range.");
+                                        return;
+                                    }
+                                }
+                            }
+
+                            // Apply changes
+                            xcb_configure_window(conn, window, mask, orderedValues.data());
+                            xcb_flush(conn);
                         }
                     ;
                 };
@@ -2536,17 +2575,18 @@ class mv_client
         void 
         move_client(const uint16_t & x, const uint16_t & y)
         {
-            xcb_configure_window
-            (
-                conn,
-                c->frame,
-                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y,
-                (const uint32_t[2])
-                {
-                    static_cast<const uint32_t>(x), 
-                    static_cast<const uint32_t>(y)
-                }
-            );
+            // xcb_configure_window
+            // (
+            //     conn,
+            //     c->frame,
+            //     XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y,
+            //     (const uint32_t[2])
+            //     {
+            //         static_cast<const uint32_t>(x), 
+            //         static_cast<const uint32_t>(y)
+            //     }
+            // );
+            mxb::modf::win(c->frame, {XCB_CONFIG_WINDOW_X, XCB_CONFIG_WINDOW_Y}, {x, y});
         }
 
         /* DEFENITIONS TO REDUCE REDUNDENT CODE IN 'snap' FUNCTION */
@@ -8557,7 +8597,7 @@ draw_text(const char * str , const COLOR & text_color, const COLOR & bg_color, c
 void 
 configureRootWindow()
 {
-    // set_win_color(screen->root, DARK_GREY);
+    // SET THE ROOT WINDOW BACKROUND COLOR TO 'DARK_GREY'(0x222222, THE DEFAULT COLOR) SO THAT IF SETTING THE PNG AS BACKROUND FAILS THE ROOT WINDOW WILL STILL HAVE A COLOR
     mxb::set::win::backround::as_color(screen->root, DARK_GREY);
 
     // APPLY THE EVENT MASKS TO THE ROOT WINDOW
@@ -8666,7 +8706,7 @@ setup_wm()
     
     move_desktop(1);
 
-    // mxb::set::win::backround::as_png("/home/mellw/mwm_png/galaxy17.png", screen->root);
+    mxb::set::win::backround::as_png("/home/mellw/mwm_png/galaxy17.png", screen->root);
     return 0;
 }
 
