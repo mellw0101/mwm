@@ -1609,6 +1609,28 @@ class mxb
                         }
                     ;
                 };
+
+                static void
+                unmap(client * c)
+                {
+                    xcb_unmap_window(conn, c->frame);
+                    xcb_flush(conn);
+                }
+
+                static void
+                map(client * c)
+                {
+                    xcb_map_window(conn, c->frame);
+                    xcb_flush(conn);
+                }
+
+                static void
+                remove(client * c)
+                {
+                    client_list.erase(std::remove(client_list.begin(), client_list.end(), c), client_list.end());
+                    cur_d->current_clients.erase(std::remove(cur_d->current_clients.begin(), cur_d->current_clients.end(), c), cur_d->current_clients.end());
+                    delete c;
+                }
             ;
         };
 
@@ -1650,7 +1672,6 @@ class mxb
 
                             private:
                                 xcb_gcontext_t gc;
-                                xcb_window_t window;
                                 uint32_t mask;
                             ;
                         };
@@ -2589,37 +2610,6 @@ class wm
             }
         }
 };
-
-void /**
- *
- * @brief Function to remove a client based on its window ID 
- *
- */
-removeClient(client * c) 
-{
-    client_list.erase(std::remove(client_list.begin(), client_list.end(), c), client_list.end());
-    cur_d->current_clients.erase(std::remove(cur_d->current_clients.begin(), cur_d->current_clients.end(), c), cur_d->current_clients.end());
-    delete c;
-}
-
-void 
-show_hide_client(client * c, const show_hide & mode) 
-{
-    switch (mode) 
-    {
-        case HIDE:
-        {
-            xcb_unmap_window(conn, c->frame);
-            break;
-        }
-        case SHOW:
-        {
-            xcb_map_window(conn, c->frame);
-            break;
-        }
-    }
-    xcb_flush(conn);    
-}
 
 class mv_client 
 {
@@ -4092,7 +4082,7 @@ move_desktop(const uint8_t & n)
         {
             if (c->desktop == cur_d->desktop)
             {
-                show_hide_client(c, HIDE);
+                mxb::Client::unmap(c);
             }
         }
     }
@@ -4102,7 +4092,7 @@ move_desktop(const uint8_t & n)
     {
         if (c)
         {
-            show_hide_client(c, SHOW);           
+            mxb::Client::map(c);
         }
     }
 }
@@ -6060,7 +6050,7 @@ namespace win_tools
         kill_client(conn, c->frame);
         xcb_flush(conn);
         
-        removeClient(c);
+        mxb::Client::remove(c);
 
         return 0;
     }
