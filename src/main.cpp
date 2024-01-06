@@ -6901,7 +6901,7 @@ class WinManager
             
             if (!c) 
             {
-                log.log(ERROR, __func__, "Could not allocate memory for client");
+                log_error("Could not allocate memory for client");
                 return nullptr;
             }
 
