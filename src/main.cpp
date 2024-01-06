@@ -466,7 +466,7 @@ class mxb
                             return children;
                         }
 
-                        static std::string 
+                        static const char * 
                         property(xcb_window_t window, const char * atom_name) 
                         {
                             xcb_get_property_reply_t *reply;
@@ -496,12 +496,12 @@ class mxb
                             {
                                 if (reply != nullptr) 
                                 {
-                                    log.log(ERROR, __func__, "reply length for property(" + std::string(atom_name) + ") = 0");
+                                    log_error("reply length for property(" + std::string(atom_name) + ") = 0");
                                     free(reply);
                                     return "";
                                 }
 
-                                log.log(ERROR, __func__, "reply == nullptr");
+                                log_error("reply == nullptr");
                                 return "";
                             }
 
@@ -515,8 +515,8 @@ class mxb
                                 free(reply);
                             }
 
-                            log.log(INFO, __func__, "property(" + std::string(atom_name) + ") = " + std::string(propertyValue));
-                            std::string spropertyValue = std::string(propertyValue);
+                            log_info("property(" + std::string(atom_name) + ") = " + std::string(propertyValue));
+                            const char * spropertyValue = propertyValue;
                             free(propertyValue);
 
                             return spropertyValue;
@@ -6604,6 +6604,14 @@ class WinManager
                 c->name[i] = '\0';
             }
 
+            int i = 0;
+            while(mxb::get::win::property(c->win, "_NET_WM_NAME")[i] != '\0' && i < 255)
+            {
+                c->name[i] = mxb::get::win::property(c->win, "_NET_WM_NAME")[i];
+                ++i;
+            }
+            c->name[i] = '\0';
+
             if (is_exclusive_fullscreen(c)) 
             {
                 c->x      = 0;
@@ -7416,46 +7424,52 @@ class Event
                     {
                         client * c = get::client_from_win(& e->event);
                         
-                        mxb::EWMH ewmhChecker(conn, ewmh);
-                        if (ewmhChecker.checkWindowDecorations(c->win))
-                        {
-                            log_info("has decorations");
-                        }
-                        else
-                        {
-                            log_info("does not have decorations");
-                        }
+                        // mxb::EWMH ewmhChecker(conn, ewmh);
+                        // if (ewmhChecker.checkWindowDecorations(c->win))
+                        // {
+                        //     log_info("has decorations");
+                        // }
+                        // else
+                        // {
+                        //     log_info("does not have decorations");
+                        // }
 
-                        if (ewmhChecker.checkWindowFrameExtents(c->win))
-                        {
-                            log_info("has frame extents");
-                        }
-                        else
-                        {
-                            log_info("does not have frame extents");
-                        }
+                        // if (ewmhChecker.checkWindowFrameExtents(c->win))
+                        // {
+                        //     log_info("has frame extents");
+                        // }
+                        // else
+                        // {
+                        //     log_info("does not have frame extents");
+                        // }
 
-                        mxb::get::win::property(c->win, "WM_CLASS"); // works
-                        mxb::get::win::property(c->win, "WM_NAME"); //works
-                        mxb::get::win::property(c->win, "WM_PROTOCOLS"); // works
-                        mxb::get::win::property(c->win, "WM_HINTS"); // works
-                        mxb::get::win::property(c->win, "WM_NORMAL_HINTS"); // works
-                        mxb::get::win::property(c->win, "_NET_WM_NAME"); // works, gives (WM_NAME WM_CLASS) 
-                        mxb::get::win::property(c->win, "_NET_WM_WINDOW_TYPE"); // works
-                        mxb::get::win::property(c->win, "_NET_WM_PID"); // works, needs conversion to pid_t or other integer type 
-                        mxb::get::win::property(c->win, "_NET_WM_USER_TIME"); // works, needs conversion to int or other integer type
+                        // mxb::get::win::property(c->win, "WM_CLASS"); // works
+                        // mxb::get::win::property(c->win, "WM_NAME"); //works
+                        // mxb::get::win::property(c->win, "WM_PROTOCOLS"); // works
+                        // mxb::get::win::property(c->win, "WM_HINTS"); // works
+                        // mxb::get::win::property(c->win, "WM_NORMAL_HINTS"); // works
+                        // mxb::get::win::property(c->win, "_NET_WM_NAME"); // works, gives (WM_NAME WM_CLASS) 
+                        // mxb::get::win::property(c->win, "_NET_WM_WINDOW_TYPE"); // works
+                        // mxb::get::win::property(c->win, "_NET_WM_PID"); // works, needs conversion to pid_t or other integer type 
+                        // mxb::get::win::property(c->win, "_NET_WM_USER_TIME"); // works, needs conversion to int or other integer type
 
-                        if (mxb::EWMH::check::isWindowNormalType(c->win))
+                        // if (mxb::EWMH::check::isWindowNormalType(c->win))
+                        // {
+                        //     log_info("is normal type");
+                        // }
+                        // else
+                        // {
+                        //     log_info("is not normal type");
+                        // }
+
+                        // log_info(mxb::get::event_mask(mxb::get::event_mask_sum(c->win)));
+
+                        std::string name = "";
+                        for (int i = 0; c->name[i] != '\0'; ++i)
                         {
-                            log_info("is normal type");
+                            name += c->name[i];
                         }
-                        else
-                        {
-                            log_info("is not normal type");
-                        }
-
-                        log_info(mxb::get::event_mask(mxb::get::event_mask_sum(c->win)));
-
+                        log_info(name);
                         break;
                     }
                 }
