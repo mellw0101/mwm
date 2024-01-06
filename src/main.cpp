@@ -466,12 +466,12 @@ class mxb
                             return children;
                         }
 
-                        static const char * 
+                        static char * 
                         property(xcb_window_t window, const char * atom_name) 
                         {
                             xcb_get_property_reply_t *reply;
                             unsigned int reply_len;
-                            char *propertyValue;
+                            char * propertyValue;
 
                             reply = xcb_get_property_reply
                             (
@@ -498,11 +498,11 @@ class mxb
                                 {
                                     log_error("reply length for property(" + std::string(atom_name) + ") = 0");
                                     free(reply);
-                                    return "";
+                                    return (char *) "";
                                 }
 
                                 log_error("reply == nullptr");
-                                return "";
+                                return (char *) "";
                             }
 
                             reply_len = xcb_get_property_value_length(reply);
@@ -516,10 +516,7 @@ class mxb
                             }
 
                             log_info("property(" + std::string(atom_name) + ") = " + std::string(propertyValue));
-                            const char * spropertyValue = propertyValue;
-                            free(propertyValue);
-
-                            return spropertyValue;
+                            return propertyValue;
                         }
 
                         static void
@@ -6605,13 +6602,14 @@ class WinManager
             }
 
             int i = 0;
-            const char * name = mxb::get::win::property(c->win, "_NET_WM_NAME");
+            char * name = mxb::get::win::property(c->win, "_NET_WM_NAME");
             while(name[i] != '\0' && i < 255)
             {
                 c->name[i] = name[i];
                 ++i;
             }
             c->name[i] = '\0';
+            free(name);
 
             if (is_exclusive_fullscreen(c)) 
             {
