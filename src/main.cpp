@@ -1827,6 +1827,108 @@ class mxb
                 };
             ;
         };
+
+        class conf
+        {
+            public:
+                class win
+                {
+                    public:
+                        static void
+                        x(const xcb_window_t & window, const uint32_t & x)
+                        {
+                            xcb_configure_window
+                            (
+                                conn, 
+                                window, 
+                                XCB_CONFIG_WINDOW_X,
+                                (const uint32_t[1])
+                                {
+                                    x
+                                }
+                            );
+                        }
+
+                        static void
+                        y(const xcb_window_t & window, const uint32_t & y)
+                        {
+                            xcb_configure_window
+                            (
+                                conn, 
+                                window, 
+                                XCB_CONFIG_WINDOW_Y,
+                                (const uint32_t[1])
+                                {
+                                    y
+                                }
+                            );
+                        }
+
+                        static void
+                        width(const xcb_window_t & window, const uint32_t & width)
+                        {
+                            xcb_configure_window
+                            (
+                                conn, 
+                                window, 
+                                XCB_CONFIG_WINDOW_WIDTH,
+                                (const uint32_t[1])
+                                {
+                                    width
+                                }
+                            );
+                        }
+
+                        static void
+                        height(const xcb_window_t & window, const uint32_t & height)
+                        {
+                            xcb_configure_window
+                            (
+                                conn, 
+                                window, 
+                                XCB_CONFIG_WINDOW_HEIGHT,
+                                (const uint32_t[1])
+                                {
+                                    height
+                                }
+                            );
+                        }
+
+                        static void
+                        x_y(const xcb_window_t & window, const uint32_t & x, const uint32_t & y)
+                        {
+                            xcb_configure_window
+                            (
+                                conn, 
+                                window, 
+                                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y,
+                                (const uint32_t[2])
+                                {
+                                    x,
+                                    y
+                                }
+                            );
+                        }
+
+                        static void
+                        width_height(const xcb_window_t & window, const uint32_t & width, const uint32_t & height)
+                        {
+                            xcb_configure_window
+                            (
+                                conn, 
+                                window, 
+                                XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
+                                (const uint32_t[2])
+                                {
+                                    width,
+                                    height
+                                }
+                            );
+                        }
+                    ;
+                };
+            ;
+        };
     ;
 };
 
@@ -2722,7 +2824,8 @@ class mv_client
             }
             else 
             {
-                move_client(x, y);
+                // move_client(x, y);
+                mxb::conf::win::x_y(c->frame, x, y);
             }
         }
 
