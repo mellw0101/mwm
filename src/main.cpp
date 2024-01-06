@@ -8088,10 +8088,10 @@ class Event
             log_win("e->window: ", e->window);
             log_win("e->event: ", e->event);
             client * c = get::client_from_all_win(& e->window);
-            if (!c)
-            {
-                return;
-            }
+            // if (!c)
+            // {
+            //     return;
+            // }
 
             int result = win_tools::send_sigterm_to_client(c);
             if (result == -1)
