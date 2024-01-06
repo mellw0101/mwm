@@ -2673,22 +2673,6 @@ class mv_client
             }
             free(reply); 
         }
-    
-        void 
-        move_client(const uint16_t & x, const uint16_t & y)
-        {
-            xcb_configure_window
-            (
-                conn,
-                c->frame,
-                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y,
-                (const uint32_t[2])
-                {
-                    static_cast<const uint32_t>(x), 
-                    static_cast<const uint32_t>(y)
-                }
-            );
-        }
 
         /* DEFENITIONS TO REDUCE REDUNDENT CODE IN 'snap' FUNCTION */
         #define RIGHT_  screen->width_in_pixels  - c->width
@@ -2729,18 +2713,18 @@ class mv_client
                     // SNAP WINDOW TO 'LEFT_TOP' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
                     if (y > cli->y - NC && y < cli->y + NC)
                     {  
-                        move_client(cli->x - c->width, cli->y);
+                        mxb::conf::win::x_y(c->frame, (cli->x - c->width), cli->y);
                         return;
                     }
 
                     // SNAP WINDOW TO 'LEFT_BOTTOM' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
                     if (y + c->height > cli->y + cli->height - NC && y + c->height < cli->y + cli->height + NC)
                     {
-                        move_client(cli->x - c->width, (cli->y + cli->height) - c->height);
+                        mxb::conf::win::x_y(c->frame, (cli->x - c->width), (cli->y + cli->height) - c->height);
                         return;
                     }                
 
-                    move_client(cli->x - c->width, y);
+                    mxb::conf::win::x_y(c->frame, (cli->x - c->width), y);
                     return;
                 }
 
@@ -2751,18 +2735,18 @@ class mv_client
                     // SNAP WINDOW TO 'BOTTOM_LEFT' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
                     if (x > cli->x - NC && x < cli->x + NC)
                     {  
-                        move_client(cli->x, cli->y + cli->height);
+                        mxb::conf::win::x_y(c->frame, cli->x, (cli->y + cli->height));
                         return;
                     }
 
                     // SNAP WINDOW TO 'BOTTOM_RIGHT' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
                     if (x + c->width > cli->x + cli->width - NC && x + c->width < cli->x + cli->width + NC)
                     {
-                        move_client((cli->x + cli->width) - c->width, cli->y + cli->height);
+                        mxb::conf::win::x_y(c->frame, ((cli->x + cli->width) - c->width), (cli->y + cli->height));
                         return;
                     }
 
-                    move_client(x ,cli->y + cli->height);
+                    mxb::conf::win::x_y(c->frame, x, (cli->y + cli->height));
                     return;
                 }
 
@@ -2773,18 +2757,18 @@ class mv_client
                     // SNAP WINDOW TO 'TOP_LEFT' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
                     if (x > cli->x - NC && x < cli->x + NC)
                     {  
-                        move_client(cli->x, cli->y - c->height);
+                        mxb::conf::win::x_y(c->frame, cli->x, (cli->y - c->height));
                         return;
                     }
 
                     // SNAP WINDOW TO 'TOP_RIGHT' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
                     if (x + c->width > cli->x + cli->width - NC && x + c->width < cli->x + cli->width + NC)
                     {
-                        move_client((cli->x + cli->width) - c->width, cli->y - c->height);
+                        mxb::conf::win::x_y(c->frame, ((cli->x + cli->width) - c->width), (cli->y - c->height));
                         return;
                     }
 
-                    move_client(x ,cli->y - c->height);
+                    mxb::conf::win::x_y(c->frame, x, (cli->y - c->height));
                     return;
                 }
             }
