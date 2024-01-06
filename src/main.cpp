@@ -6395,6 +6395,7 @@ class WinManager
             mxb::Client::update(c);
             focus::client(c);
         }
+    ;
 
     private:
         static void
@@ -6564,8 +6565,8 @@ class WinManager
                 for (unsigned int i = 0; i < wm_state.atoms_len; i++) 
                 {
                     if ((wm_state.atoms[i] == ewmh->_NET_WM_STATE_FULLSCREEN) 
-                    && (i + 1 < wm_state.atoms_len) 
-                    && (wm_state.atoms[i + 1] == XCB_NONE)) 
+                     && (i + 1 < wm_state.atoms_len) 
+                     && (wm_state.atoms[i + 1] == XCB_NONE)) 
                     {
                         // EXCLUSIVE FULLSCREEN STATE DETECTED
                         xcb_ewmh_get_atoms_reply_wipe(& wm_state);
@@ -6663,6 +6664,7 @@ class WinManager
             get::WindowProperty(c, "_NET_FRAME_EXTENTS");
             get::WindowProperty(c, "_NET_SUPPORTED");
         }
+    ;
 };
 
 /**
@@ -6802,7 +6804,8 @@ class tile
                     }
                 }
             }
-        } 
+        }
+    ;
 
     private:
         void 
@@ -7041,6 +7044,7 @@ class tile
             );
             mxb::Client::update(c);
         }
+    ;
 };
 
 class Event
