@@ -1929,6 +1929,21 @@ class mxb
                 };
             ;
         };
+
+        class launch
+        {
+            public:
+                static void
+                program(char * program)
+                {
+                    if (fork() == 0) 
+                    {
+                        setsid();
+                        execvp(program, (char *[]) { program, NULL });
+                    }
+                }
+            ;
+        };
     ;
 };
 
@@ -2403,40 +2418,6 @@ class focus
 class wm 
 {
     public:
-        // static void 
-        // setWindowSize(client * c) 
-        // {
-        //     xcb_configure_window
-        //     (
-        //         conn, 
-        //         c->win, 
-        //         XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, 
-        //         (const uint32_t[2])
-        //         {
-        //             static_cast<const uint32_t>(c->width), 
-        //             static_cast<const uint32_t>(c->height)
-        //         }
-        //     );
-        //     xcb_flush(conn);
-        // }
-
-        // static void 
-        // setWindowPosition(client * c) 
-        // {
-        //     xcb_configure_window
-        //     (
-        //         conn, 
-        //         c->win, 
-        //         XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, 
-        //         (const uint32_t[2])
-        //         {
-        //             static_cast<uint32_t>(c->x), 
-        //             static_cast<uint32_t>(c->y)           
-        //         }
-        //     );
-        //     xcb_flush(conn);
-        // }
-
         static void
         launchTerminal() 
         {
@@ -6417,12 +6398,11 @@ class WinManager
             client * c = make_client(w);
             if (!c)
             {
+                log_error("could not make client");
                 return;
             }
             
-            log.log(INFO, __func__, "c->win: " + std::to_string(c->win));
-            // wm::setWindowPosition(c);
-            // wm::setWindowSize(c);
+            log_win("c->win: " , c->win);
             mxb::conf::win::x_y_width_height(c->win, c->x, c->y, c->width, c->height);
 
             xcb_map_window(conn, c->win);  
@@ -7292,7 +7272,8 @@ class Event
                     case CTRL + ALT:
                     {
                         log.log(INFO, __func__, "ALT+CTRL+T");
-                        wm::launchTerminal();
+                        // wm::launchTerminal();
+                        mxb::launch::program((char *) "/usr/bin/konsole");
                         break;
                     }
                 }
