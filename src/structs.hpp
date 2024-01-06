@@ -171,6 +171,51 @@ struct desktop
     uint16_t height;
 };
 
+enum class CURSOR
+{
+    arrow,
+    hand1,
+    hand2,
+    watch,
+    xterm,
+    cross,
+    left_ptr,
+    right_ptr,
+    center_ptr,
+    sb_v_double_arrow,
+    sb_h_double_arrow,
+    fleur,
+    question_arrow,
+    pirate,
+    coffee_mug,
+    umbrella,
+    circle,
+    xsb_left_arrow,
+    xsb_right_arrow,
+    xsb_up_arrow,
+    xsb_down_arrow,
+    top_left_corner,
+    top_right_corner,
+    bottom_left_corner,
+    bottom_right_corner,
+    sb_left_arrow,
+    sb_right_arrow,
+    sb_up_arrow,
+    sb_down_arrow,
+    top_side,
+    bottom_side,
+    left_side,
+    right_side,
+    top_tee,
+    bottom_tee,
+    left_tee,
+    right_tee,
+    top_left_arrow,
+    top_right_arrow,
+    bottom_left_arrow,
+    bottom_right_arrow
+};
+
 // template <typename T>
 // using u_Ptr = std::unique_ptr<T>;
 // template <typename T>

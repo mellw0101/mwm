@@ -26,65 +26,6 @@ static xcb_gcontext_t gc;
 static void 
 draw_text(const char * str , const COLOR & text_color, const COLOR & bg_color, const xcb_window_t & win, const int16_t & x, const int16_t & y);
 
-enum class CURSOR
-{
-    arrow,
-    hand1,
-    hand2,
-    watch,
-    xterm,
-    cross,
-    left_ptr,
-    right_ptr,
-    center_ptr,
-    sb_v_double_arrow,
-    sb_h_double_arrow,
-    fleur,
-    question_arrow,
-    pirate,
-    coffee_mug,
-    umbrella,
-    circle,
-    xsb_left_arrow,
-    xsb_right_arrow,
-    xsb_up_arrow,
-    xsb_down_arrow,
-    top_left_corner,
-    top_right_corner,
-    bottom_left_corner,
-    bottom_right_corner,
-    sb_left_arrow,
-    sb_right_arrow,
-    sb_up_arrow,
-    sb_down_arrow,
-    top_side,
-    bottom_side,
-    left_side,
-    right_side,
-    top_tee,
-    bottom_tee,
-    left_tee,
-    right_tee,
-    top_left_arrow,
-    top_right_arrow,
-    bottom_left_arrow,
-    bottom_right_arrow
-};
-
-typedef enum modf_win
-{
-    MODF_WIN_X = 1,
-    MODF_WIN_Y = 2,
-    MODF_WIN_WIDTH = 4,
-    MODF_WIN_HEIGHT = 8,
-    MODF_WIN_BORDER_WIDTH = 16,
-    MODF_WIN_SIBLING = 32,
-    MODF_WIN_STACK_MODE = 64
-} 
-modf_win;
-
-typedef uint32_t modf_win_t;
-
 class mxb 
 {
     public: 
@@ -1631,6 +1572,26 @@ class mxb
                     cur_d->current_clients.erase(std::remove(cur_d->current_clients.begin(), cur_d->current_clients.end(), c), cur_d->current_clients.end());
                     delete c;
                 }
+
+                static void
+                update(client * c)
+                {
+                    xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, c->frame);
+                    xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
+
+                    if (geometry) 
+                    {
+                        c->x = geometry->x;
+                        c->y = geometry->y;
+                        c->width = geometry->width;
+                        c->height = geometry->height;
+                        free(geometry);
+                    } 
+                    else 
+                    {
+                        c->x = c->y = c->width = c->height = 200;
+                    }
+                }
             ;
         };
 
@@ -2520,21 +2481,7 @@ class wm
 
         /* TODO */
         // MUST CHECK VALUES SOMETHING IS OFF
-        static void 
-        update_client(client * c) 
-        {
-            if (c == nullptr)
-            {
-                return;
-            }
-
-            uint16_t x, y, width, height;
-            getWindowSize(c->frame, x, y, width, height);
-            c->x        = x;
-            c->y        = y;
-            c->width    = width;
-            c->height   = height;
-        }
+       
 
         static void 
         getWindowSize(xcb_window_t window, uint16_t & x, uint16_t & y, uint16_t & width, uint16_t & height) 
@@ -2833,7 +2780,7 @@ class mv_client
                     case XCB_BUTTON_RELEASE:
                     {
                         shouldContinue = false;
-                        wm::update_client(c);
+                        mxb::Client::update(c);
                         break;
                     }
                 }
@@ -3870,7 +3817,7 @@ animate(client * & c, const int & endX, const int & endY, const int & endWidth, 
         endHeight, 
         duration
     );
-    wm::update_client(c);
+    mxb::Client::update(c);
 }
 
 void
@@ -3889,7 +3836,7 @@ animate_client(client * & c, const int & endX, const int & endY, const int & end
         endHeight,
         duration
     );
-    wm::update_client(c);
+    mxb::Client::update(c);
 }
 
 std::mutex mtx;
@@ -4021,7 +3968,7 @@ class change_desktop
         {
             XCPPBAnimator anim(conn, c);
             anim.animate_client_x(c->x, endx, DURATION);
-            wm::update_client(c);
+            mxb::Client::update(c);
         }
 
         void
@@ -4567,7 +4514,7 @@ class resize_client
                             case XCB_BUTTON_RELEASE: 
                             {
                                 shouldContinue = false;                        
-                                wm::update_client(c); 
+                                mxb::Client::update(c);
                                 break;
                             }
                         }
@@ -5154,7 +5101,7 @@ class resize_client
                             case XCB_BUTTON_RELEASE: 
                             {
                                 shouldContinue = false;                        
-                                wm::update_client(c); 
+                                mxb::Client::update(c);
                                 break;
                             }
                         }
@@ -5451,7 +5398,7 @@ class resize_client
                     case XCB_BUTTON_RELEASE: 
                     {
                         shouldContinue = false;                        
-                        wm::update_client(c); 
+                        mxb::Client::update(c);
                         break;
                     }
                 }
@@ -5493,179 +5440,6 @@ class resize_client
         }
     ;
 };
-
-namespace borrowed
-{
-    bool
-    getgeom(const xcb_drawable_t * win, int16_t * x, int16_t * y, uint16_t * width, uint16_t * height, uint8_t * depth)
-    {
-        xcb_get_geometry_reply_t * geom = xcb_get_geometry_reply
-        (
-            conn,
-            xcb_get_geometry
-            (
-                conn, 
-                * win
-            ), 
-            NULL
-        );
-
-        if (NULL == geom)
-        {
-            return false;
-        }
-
-        * x      = geom->x;
-        * y      = geom->y;
-        * width  = geom->width;
-        * height = geom->height;
-        * depth  = geom->depth;
-
-        free(geom);
-        return true;
-    }
-    
-    void
-    moveresize(xcb_drawable_t win, const uint16_t & x, const uint16_t & y, const uint16_t & width, const uint16_t & height)
-    {
-        if (win == screen->root || win == 0)
-        {
-            return;
-        }
-            
-        xcb_configure_window
-        (
-            conn,
-            win,
-            XCB_CONFIG_WINDOW_WIDTH | 
-            XCB_CONFIG_WINDOW_HEIGHT,
-            (const uint32_t[2])
-            {
-                static_cast<const uint32_t &>(width),
-                static_cast<const uint32_t &>(height)
-            }
-        );
-
-        xcb_configure_window
-        (
-            conn,
-            win,
-            XCB_CONFIG_WINDOW_X |
-            XCB_CONFIG_WINDOW_Y,
-            (const uint32_t[2])
-            {
-                static_cast<const uint32_t &>(x),
-                static_cast<const uint32_t &>(y)
-            }
-        );
-
-        xcb_flush(conn);
-    }
-
-    void
-    maxwin_animate(client * c, const int & endX, const int & endY, const int & endWidth, const int & endHeight)
-    {
-        if (!c)
-        {
-            return;
-        }
-        
-        animate_client
-        (
-            c, 
-            endX, 
-            endY, 
-            endWidth, 
-            endHeight, 
-            MAXWIN_ANIMATION_DURATION
-        );
-    }
-    
-    void
-    unmax(client * c)
-    {
-        if (c == nullptr)
-        {
-            return;
-        }
-    
-        maxwin_animate
-        (
-            c, 
-            c->ogsize.x, 
-            c->ogsize.y, 
-            c->ogsize.width, 
-            c->ogsize.height
-        );
-        c->ismax = false;
-    }
-
-    void
-    unmaxwin(client * c)
-    {
-        unmax(c);
-        xcb_change_property
-        (
-            conn,
-            XCB_PROP_MODE_REPLACE,
-            c->win,
-            ewmh->_NET_WM_STATE, 
-            XCB_ATOM_ATOM,
-            32,
-            0,
-            0
-        );
-    }
-
-    void 
-    maxwin(client * c, const uint8_t & with_offsets) 
-    {
-        if (c == nullptr)
-        {
-            LOG_error("client is nullptr");
-            return;
-        }
-
-        if (c->ismax)
-        {
-            unmaxwin(c);
-            return;
-        }
-
-        const uint16_t & mon_x      = 0; 
-        const uint16_t & mon_y      = 0;
-        const uint16_t & mon_width  = screen->width_in_pixels;
-        const uint16_t & mon_height = screen->height_in_pixels;
-        wm::save_ogsize(c);
-
-        maxwin_animate
-        (
-            c, 
-            mon_x, 
-            mon_y, 
-            mon_width, 
-            mon_height
-        );
-
-        if (!with_offsets) 
-        {
-            xcb_change_property
-            (
-                conn,
-                XCB_PROP_MODE_REPLACE,
-                c->win,
-                ewmh->_NET_WM_STATE,
-                XCB_ATOM_ATOM,
-                32,
-                1,
-                &ewmh->_NET_WM_STATE_FULLSCREEN
-            );
-        }
-        c->ismax = true;
-        xcb_flush(conn);
-        focus::client(c);
-    }
-}
 
 namespace error
 {
@@ -6676,7 +6450,7 @@ class WinManager
             mxb::set::event_mask(& mask, c->win);
 
             get::name(c);
-            wm::update_client(c);
+            mxb::Client::update(c);
             focus::client(c);
         }
  
@@ -7329,7 +7103,7 @@ class tile
                 endHeight, 
                 TILE_ANIMATION_DURATION
             );
-            wm::update_client(c);
+            mxb::Client::update(c);
         }
 
         void
@@ -7348,7 +7122,7 @@ class tile
                 endHeight, 
                 TILE_ANIMATION_DURATION
             );
-            wm::update_client(c);
+            mxb::Client::update(c);
         }
 };
 
@@ -7907,7 +7681,7 @@ class Event
             client * c = get::client_from_win(& e->window);
             if (c)
             {
-                wm::update_client(c);
+                mxb::Client::update(c);
             }
         }
         
