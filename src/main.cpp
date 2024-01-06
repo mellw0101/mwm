@@ -1323,6 +1323,26 @@ class mxb
                                         }
                                     ;
                                 };
+
+                                class as_color
+                                {
+                                    public:
+                                        as_color(const xcb_window_t & win, COLOR color)
+                                        {
+                                            xcb_change_window_attributes
+                                            (
+                                                conn, 
+                                                win, 
+                                                XCB_CW_BACK_PIXEL, 
+                                                (const uint32_t[1])
+                                                {
+                                                    mxb::get::color(color)
+                                                }
+                                            );
+                                            xcb_flush(conn);
+                                        }
+                                    ;
+                                };
                             ;
                         };
                     ;
@@ -6556,16 +6576,17 @@ class WinDecoretor
                 NULL
             );
 
-            xcb_change_window_attributes
-            (
-                conn, 
-                c->titlebar, 
-                XCB_CW_BACK_PIXEL, 
-                (const uint32_t[1])
-                {
-                    color::get(BLACK)
-                }
-            );
+            // xcb_change_window_attributes
+            // (
+            //     conn, 
+            //     c->titlebar, 
+            //     XCB_CW_BACK_PIXEL, 
+            //     (const uint32_t[1])
+            //     {
+            //         color::get(BLACK)
+            //     }
+            // );
+            mxb::set::win::backround::as_color(c->titlebar, BLACK);
 
             win_tools::grab_buttons(c->titlebar, {
                {   L_MOUSE_BUTTON,     NULL }
