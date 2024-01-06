@@ -2575,18 +2575,17 @@ class mv_client
         void 
         move_client(const uint16_t & x, const uint16_t & y)
         {
-            // xcb_configure_window
-            // (
-            //     conn,
-            //     c->frame,
-            //     XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y,
-            //     (const uint32_t[2])
-            //     {
-            //         static_cast<const uint32_t>(x), 
-            //         static_cast<const uint32_t>(y)
-            //     }
-            // );
-            mxb::modf::win(c->frame, {XCB_CONFIG_WINDOW_X, XCB_CONFIG_WINDOW_Y}, {x, y});
+            xcb_configure_window
+            (
+                conn,
+                c->frame,
+                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y,
+                (const uint32_t[2])
+                {
+                    static_cast<const uint32_t>(x), 
+                    static_cast<const uint32_t>(y)
+                }
+            );
         }
 
         /* DEFENITIONS TO REDUCE REDUNDENT CODE IN 'snap' FUNCTION */
