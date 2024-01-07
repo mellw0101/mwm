@@ -5245,6 +5245,11 @@ class resize_client
 
                     for (const auto & c : cur_d->current_clients)
                     {
+                        if (c == this->c)
+                        {
+                            continue;
+                        }
+
                         left_border = c->x;
                         right_border = (c->x + c->width);
                         top_border = c->y;
@@ -5255,7 +5260,28 @@ class resize_client
                         {
                             resize_client(right_border, y, edge);
                             return;
-                        } 
+                        }
+                        
+                        if ((x > left_border - prox && x < left_border + prox)
+                         && (y > top_border && y < bottom_border))
+                        {
+                            resize_client(left_border, y, edge);
+                            return;
+                        }
+
+                        if ((y > bottom_border - prox && y < bottom_border + prox)
+                         && (x > left_border && x < right_border))
+                        {
+                            resize_client(x, bottom_border, edge);
+                            return;
+                        }
+
+                        if ((y > top_border - prox && y < top_border + prox)
+                         && (x > left_border && x < right_border))
+                        {
+                            resize_client(x, top_border, edge);
+                            return;
+                        }
                     }
                     resize_client(x, y, edge);
                 }
