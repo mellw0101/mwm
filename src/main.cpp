@@ -2110,6 +2110,23 @@ class mxb
                         }
 
                         static void
+                        y_width_height(const xcb_window_t & window, const uint32_t & y, const uint32_t & width, const uint32_t & height)
+                        {
+                            xcb_configure_window
+                            (
+                                conn, 
+                                window, 
+                                XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
+                                (const uint32_t[3])
+                                {
+                                    y,
+                                    width,
+                                    height
+                                }
+                            );
+                        }
+
+                        static void
                         x_width(const xcb_window_t & window, const uint32_t & x, const uint32_t & width)
                         {
                             xcb_configure_window
@@ -5146,12 +5163,17 @@ class resize_client
                             mxb::conf::win::x(c->border.top_right, (width - BORDER_SIZE));
                             mxb::conf::win::y(c->border.bottom_left, (height - BORDER_SIZE));
                             mxb::conf::win::x_y(c->border.bottom_right, (width - BORDER_SIZE), (height - BORDER_SIZE));
-                            
+
                             break;
                         }
                         case edge::TOP_RIGHT:
                         {
-                            return;
+                            const uint32_t width = (x - c->x);
+                            const uint32_t height = (c->height + c->y - y);
+
+                            mxb::conf::win::y_width_height(c->frame, y, width, height);
+                            
+                            break;
                         }
                         case edge::BOTTOM_LEFT:
                         {
