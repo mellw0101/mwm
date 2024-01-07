@@ -1902,6 +1902,11 @@ class mxb
                     fclose(fp);
                     png_destroy_write_struct(&png_ptr, &info_ptr);
                 }
+
+                class bitmap
+                {
+
+                };
             ;
         };
 
