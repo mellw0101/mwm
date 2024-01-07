@@ -5266,12 +5266,17 @@ class resize_client
                                 return;
                             }
                         }
-                        
-                        if ((x > left_border - prox && x < left_border + prox)
-                         && (y > top_border && y < bottom_border))
+
+                        if (edge != edge::LEFT
+                         && edge != edge::TOP_LEFT
+                         && edge != edge::BOTTOM_LEFT)
                         {
-                            resize_client(left_border, y, edge);
-                            return;
+                            if ((x > left_border - prox && x < left_border + prox)
+                            && (y > top_border && y < bottom_border))
+                            {
+                                resize_client(left_border, y, edge);
+                                return;
+                            }
                         }
 
                         if (edge != edge::BOTTOM_edge 
@@ -5286,11 +5291,16 @@ class resize_client
                             }
                         }
 
-                        if ((y > top_border - prox && y < top_border + prox)
-                         && (x > left_border && x < right_border))
+                        if (edge != edge::TOP
+                         && edge != edge::TOP_LEFT
+                         && edge != edge::TOP_RIGHT)
                         {
-                            resize_client(x, top_border, edge);
-                            return;
+                            if ((y > top_border - prox && y < top_border + prox)
+                            && (x > left_border && x < right_border))
+                            {
+                                resize_client(x, top_border, edge);
+                                return;
+                            }
                         }
                     }
                     resize_client(x, y, edge);
