@@ -2359,7 +2359,11 @@ namespace get
              || * w == c->border.left 
              || * w == c->border.right 
              || * w == c->border.top 
-             || * w == c->border.bottom) 
+             || * w == c->border.bottom
+             || * w == c->border.top_left
+             || * w == c->border.top_right
+             || * w == c->border.bottom_left
+             || * w == c->border.bottom_right) 
             {
                 return c;
             }
@@ -7899,6 +7903,12 @@ class Event
                 if (e->event == c->border.bottom)
                 {
                     resize_client::border(c, edge::BOTTOM_edge);
+                    return;
+                }
+
+                if (e->event == c->border.bottom_right)
+                {
+                    resize_client::border(c, edge::BOTTOM_RIGHT);
                     return;
                 }
             }
