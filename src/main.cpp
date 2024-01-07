@@ -4951,10 +4951,10 @@ class resize_client
                 }
 
                 void
-                resize_client_left(const uint16_t & width)
+                resize_client_left(const uint16_t & width, const uint16_t x)
                 {
                     mxb::conf::win::width(c->win, (width - (BORDER_SIZE * 2)));
-                    mxb::conf::win::x_width(c->frame, (width + c->width), (width));
+                    mxb::conf::win::x_width(c->frame, x, (width));
                     mxb::conf::win::width(c->titlebar, (width));
                     mxb::conf::win::x(c->close_button, (width - BUTTON_SIZE - BORDER_SIZE));
                     mxb::conf::win::x(c->max_button, (width - (BUTTON_SIZE * 2) - BORDER_SIZE));
@@ -5049,7 +5049,7 @@ class resize_client
                                         }
                                         case edge::LEFT:
                                         {
-                                            resize_client_left(c->width + c->x - e->root_x);
+                                            resize_client_left(c->width + c->x - e->root_x, e->root_x);
                                             break;
                                         }
                                         case edge::RIGHT:
