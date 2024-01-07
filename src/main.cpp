@@ -2013,94 +2013,62 @@ class mxb
     ;
 };
 
-// // Define a simple bitmap for uppercase letters (A-Z)
-// const int FONT_WIDTH = 5;
-// const int FONT_HEIGHT = 7;
-// const int CHAR_BITMAPS[26][FONT_HEIGHT] = {
-//     // Bitmap for 'A', 'B', 'C', ..., 'Z'
-//     {0x1F, 0x05, 0x05, 0x1F, 0x00},  // Example bitmap for 'A'
-//     // ... add bitmaps for other letters ...
-// };
+const int FONT_WIDTH = 7;
+const int FONT_HEIGHT = 14;
 
-// void 
-// create_png_with_char(const std::string& file_name, char character) 
-// {
-//     if (character < 'A' || character > 'Z') {
-//         throw std::runtime_error("Character not supported");
-//     }
-
-//     FILE *fp = fopen(file_name.c_str(), "wb");
-//     if (!fp) {
-//         throw std::runtime_error("Failed to create PNG file");
-//     }
-
-//     png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-//     if (!png_ptr) {
-//         fclose(fp);
-//         throw std::runtime_error("Failed to create PNG write struct");
-//     }
-
-//     png_infop info_ptr = png_create_info_struct(png_ptr);
-//     if (!info_ptr) {
-//         fclose(fp);
-//         png_destroy_write_struct(&png_ptr, NULL);
-//         throw std::runtime_error("Failed to create PNG info struct");
-//     }
-
-//     if (setjmp(png_jmpbuf(png_ptr))) {
-//         fclose(fp);
-//         png_destroy_write_struct(&png_ptr, &info_ptr);
-//         throw std::runtime_error("Error during PNG creation");
-//     }
-
-//     png_init_io(png_ptr, fp);
-//     png_set_IHDR(png_ptr, info_ptr, FONT_WIDTH, FONT_HEIGHT, 8, PNG_COLOR_TYPE_GRAY, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
-//     png_write_info(png_ptr, info_ptr);
-
-//     // Write character bitmap to PNG
-//     int char_index = character - 'A';
-//     png_bytep row = new png_byte[FONT_WIDTH];
-//     for (int y = 0; y < FONT_HEIGHT; y++) {
-//         for (int x = 0; x < FONT_WIDTH; x++) {
-//             row[x] = (CHAR_BITMAPS[char_index][y] & (1 << (FONT_WIDTH - 1 - x))) ? 0xFF : 0x00;
-//         }
-//         png_write_row(png_ptr, row);
-//     }
-//     delete[] row;
-
-//     png_write_end(png_ptr, NULL);
-
-//     fclose(fp);
-//     png_destroy_write_struct(&png_ptr, &info_ptr);
-// }
-
-const int FONT_WIDTH = 20;
-const int FONT_HEIGHT = 20;
-
-// Define a bitmap for the letter 'A' (20x20 grid)
-const bool CHAR_BITMAP_A[FONT_HEIGHT][FONT_WIDTH] = {    
-    {0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0}
+const bool CHAR_BITMAP_A[FONT_HEIGHT][FONT_WIDTH] = 
+{    
+    {0,0,0,1,0,0,0},
+    {0,0,1,0,1,0,0},
+    {0,0,1,0,1,0,0},
+    {0,1,0,0,0,1,0},
+    {0,1,0,0,0,1,0},
+    {1,0,0,0,0,0,1},
+    {1,1,1,1,1,1,1},
+    {1,0,0,0,0,0,1},
+    {1,0,0,0,0,0,1},
+    {1,0,0,0,0,0,1},
+    {1,0,0,0,0,0,1},
+    {1,0,0,0,0,0,1},
+    {1,0,0,0,0,0,1},
+    {1,0,0,0,0,0,1},
 };
 
+const bool CHAR_BITMAP_B[FONT_HEIGHT][FONT_WIDTH] = 
+{
+    {1, 1, 1, 1, 1, 0, 0},
+    {1, 0, 0, 0, 0, 1, 0},
+    {1, 0, 0, 0, 0, 1, 0},
+    {1, 0, 0, 0, 0, 1, 0},
+    {1, 1, 1, 1, 1, 0, 0},
+    {1, 0, 0, 0, 0, 1, 0},
+    {1, 0, 0, 0, 0, 1, 0},
+    {1, 0, 0, 0, 0, 1, 0},
+    {1, 0, 0, 0, 0, 1, 0},
+    {1, 0, 0, 0, 0, 1, 0},
+    {1, 0, 0, 0, 0, 1, 0},
+    {1, 0, 0, 0, 0, 1, 0},
+    {1, 1, 1, 1, 1, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0},
+};
+
+const bool CHAR_BITMAP_C[FONT_HEIGHT][FONT_WIDTH] = 
+{
+    {0, 1, 1, 1, 1, 1, 0},
+    {1, 0, 0, 0, 0, 0, 1},
+    {1, 0, 0, 0, 0, 0, 0},
+    {1, 0, 0, 0, 0, 0, 0},
+    {1, 0, 0, 0, 0, 0, 0},
+    {1, 0, 0, 0, 0, 0, 0},
+    {1, 0, 0, 0, 0, 0, 0},
+    {1, 0, 0, 0, 0, 0, 0},
+    {1, 0, 0, 0, 0, 0, 0},
+    {1, 0, 0, 0, 0, 0, 0},
+    {1, 0, 0, 0, 0, 0, 0},
+    {1, 0, 0, 0, 0, 0, 1},
+    {0, 1, 1, 1, 1, 1, 0},
+    {0, 0, 0, 0, 0, 0, 0},
+};
 
 void 
 create_png_with_char(const std::string& file_name, const bool bitmap[FONT_HEIGHT][FONT_WIDTH]) 
@@ -2111,13 +2079,15 @@ create_png_with_char(const std::string& file_name, const bool bitmap[FONT_HEIGHT
     }
 
     png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-    if (!png_ptr) {
+    if (!png_ptr) 
+    {
         fclose(fp);
         throw std::runtime_error("Failed to create PNG write struct");
     }
 
     png_infop info_ptr = png_create_info_struct(png_ptr);
-    if (!info_ptr) {
+    if (!info_ptr) 
+    {
         fclose(fp);
         png_destroy_write_struct(&png_ptr, NULL);
         throw std::runtime_error("Failed to create PNG info struct");
@@ -2135,8 +2105,10 @@ create_png_with_char(const std::string& file_name, const bool bitmap[FONT_HEIGHT
 
     // Write character bitmap to PNG
     png_bytep row = new png_byte[FONT_WIDTH];
-    for (int y = 0; y < FONT_HEIGHT; y++) {
-        for (int x = 0; x < FONT_WIDTH; x++) {
+    for (int y = 0; y < FONT_HEIGHT; y++) 
+    {
+        for (int x = 0; x < FONT_WIDTH; x++) 
+        {
             row[x] = bitmap[y][x] ? 0xFF : 0x00;
         }
         png_write_row(png_ptr, row);
@@ -7606,6 +7578,8 @@ class Event
                         try 
                         {
                             create_png_with_char("/home/mellw/a.png", CHAR_BITMAP_A);
+                            create_png_with_char("/home/mellw/b.png", CHAR_BITMAP_B);
+                            create_png_with_char("/home/mellw/c.png", CHAR_BITMAP_C);
                         }
                         catch (const std::exception & e)
                         {
