@@ -99,7 +99,11 @@ enum class edge
     LEFT,
     RIGHT,
     TOP,
-    BOTTOM_edge
+    BOTTOM_edge,
+    TOP_LEFT,
+    TOP_RIGHT,
+    BOTTOM_LEFT,
+    BOTTOM_RIGHT
 };
 
 enum Direction 
@@ -127,7 +131,7 @@ struct client_border_decor
     xcb_window_t right;
     xcb_window_t top;
     xcb_window_t bottom;
-    
+
     xcb_window_t top_left;
     xcb_window_t top_right;
     xcb_window_t bottom_left;
