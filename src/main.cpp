@@ -5574,6 +5574,15 @@ class resize_client
                     static_cast<const uint32_t &>(width - (BORDER_SIZE * 2))
                 }
             );
+
+            mxb::conf::win::x(c->border.top_right, (width - BORDER_SIZE));
+            xcb_flush(conn);
+
+            mxb::conf::win::x_y(c->border.bottom_right, (width - BORDER_SIZE), (height - BORDER_SIZE));
+            xcb_flush(conn);
+
+            mxb::conf::win::y(c->border.bottom_left, (height - BORDER_SIZE));
+            xcb_flush(conn);
         }
 
         void
