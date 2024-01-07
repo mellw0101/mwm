@@ -4008,6 +4008,9 @@ class XCPPBAnimator
                 }
             );
             xcb_flush(connection);
+
+            mxb::conf::win::x(c->border.top_left, w - BORDER_SIZE);
+            xcb_flush(connection);
         }
 
         void 
