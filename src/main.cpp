@@ -6678,16 +6678,12 @@ class WinDecoretor
             xcb_map_window(conn, c->min_button);
             xcb_flush(conn);
 
-            mxb::create::Bitmap bitmap(20, 20);
-            
+            mxb::create::Bitmap bitmap(20, 20);            
             bitmap.modify(9, 4, 15, true);
             bitmap.modify(10, 4, 15, true);
             bitmap.exportToPng("/home/mellw/min.png");
 
-            // mxb::create::png("/home/mellw/min.png", bitmap::CHAR_BITMAP_MIN_BUTTON);
             mxb::set::win::backround::as_png("/home/mellw/min.png", c->min_button);
-
-            // mxb::set::win::backround::as_png("/home/mellw/mwm_png/window_decoration_icons/min_button/1_12x12.png", c->min_button);
         }
 
         void
