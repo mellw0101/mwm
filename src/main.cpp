@@ -6641,6 +6641,75 @@ class WinDecoretor
             win_tools::grab_buttons(c->border.top_left, {{ L_MOUSE_BUTTON, NULL }});
             xcb_map_window(conn, c->border.top_left);
             xcb_flush(conn);
+
+            c->border.top_right = xcb_generate_id(conn);
+            xcb_create_window
+            (
+                conn, 
+                XCB_COPY_FROM_PARENT, 
+                c->border.top_right, 
+                c->frame, 
+                c->width + BORDER_SIZE, 
+                0, 
+                BORDER_SIZE, 
+                BORDER_SIZE, 
+                0, 
+                XCB_WINDOW_CLASS_INPUT_OUTPUT, 
+                screen->root_visual, 
+                0, 
+                NULL
+            );
+            mxb::set::win::backround::as_color(c->border.top_right, BLACK);
+            mxb::set::cursor(c->border.top_right, CURSOR::top_right_corner);
+            win_tools::grab_buttons(c->border.top_right, {{ L_MOUSE_BUTTON, NULL }});
+            xcb_map_window(conn, c->border.top_right);
+            xcb_flush(conn);
+            
+            c->border.bottom_left = xcb_generate_id(conn);
+            xcb_create_window
+            (
+                conn, 
+                XCB_COPY_FROM_PARENT, 
+                c->border.bottom_left, 
+                c->frame, 
+                0, 
+                c->height + TITLE_BAR_HEIGHT + BORDER_SIZE, 
+                BORDER_SIZE, 
+                BORDER_SIZE, 
+                0, 
+                XCB_WINDOW_CLASS_INPUT_OUTPUT, 
+                screen->root_visual, 
+                0, 
+                NULL
+            );
+            mxb::set::win::backround::as_color(c->border.bottom_left, BLACK);
+            mxb::set::cursor(c->border.bottom_left, CURSOR::bottom_left_corner);
+            win_tools::grab_buttons(c->border.bottom_left, {{ L_MOUSE_BUTTON, NULL }});
+            xcb_map_window(conn, c->border.bottom_left);
+            xcb_flush(conn);
+
+            c->border.bottom_right = xcb_generate_id(conn);
+            xcb_create_window
+            (
+                conn, 
+                XCB_COPY_FROM_PARENT, 
+                c->border.bottom_right, 
+                c->frame, 
+                c->width + BORDER_SIZE, 
+                c->height + TITLE_BAR_HEIGHT + BORDER_SIZE, 
+                BORDER_SIZE, 
+                BORDER_SIZE, 
+                0, 
+                XCB_WINDOW_CLASS_INPUT_OUTPUT, 
+                screen->root_visual, 
+                0, 
+                NULL
+            );
+            mxb::set::win::backround::as_color(c->border.bottom_right, BLACK);
+            mxb::set::cursor(c->border.bottom_right, CURSOR::bottom_right_corner);
+            win_tools::grab_buttons(c->border.bottom_right, {{ L_MOUSE_BUTTON, NULL }});
+            xcb_map_window(conn, c->border.bottom_right);
+            xcb_flush(conn);
         }
     ;
 };
