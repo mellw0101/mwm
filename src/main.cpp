@@ -2052,7 +2052,7 @@ const bool CHAR_BITMAP_B[FONT_HEIGHT][FONT_WIDTH] =
     {0, 0, 0, 0, 0, 0, 0},
 };
 
-const bool CHAR_BITMAP_C[FONT_HEIGHT][FONT_WIDTH] = 
+const bool CHAR_BITMAP_C[20][20] = 
 {
     {0, 1, 1, 1, 1, 1, 0},
     {1, 0, 0, 0, 0, 0, 1},
@@ -2070,7 +2070,7 @@ const bool CHAR_BITMAP_C[FONT_HEIGHT][FONT_WIDTH] =
     {0, 0, 0, 0, 0, 0, 0},
 };
 
-const bool CHAR_BITMAP_CLOSE_BUTTON[FONT_HEIGHT][FONT_WIDTH] = 
+const bool CHAR_BITMAP_CLOSE_BUTTON[20][20] = 
 {
     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
@@ -2094,7 +2094,7 @@ const bool CHAR_BITMAP_CLOSE_BUTTON[FONT_HEIGHT][FONT_WIDTH] =
     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
 };
 
-const bool CHAR_BITMAP_MIN_BUTTON[FONT_HEIGHT][FONT_WIDTH] = 
+const bool CHAR_BITMAP_MIN_BUTTON[20][20] = 
 {
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -2119,7 +2119,7 @@ const bool CHAR_BITMAP_MIN_BUTTON[FONT_HEIGHT][FONT_WIDTH] =
 };
 
 void 
-create_png_with_char(const std::string& file_name, const bool bitmap[FONT_HEIGHT][FONT_WIDTH]) 
+create_png_with_char(const std::string& file_name, const bool bitmap[20][20]) 
 {
     FILE *fp = fopen(file_name.c_str(), "wb");
     if (!fp) {
