@@ -2013,8 +2013,8 @@ class mxb
     ;
 };
 
-const int FONT_WIDTH = 7;
-const int FONT_HEIGHT = 14;
+const int FONT_WIDTH = 20;
+const int FONT_HEIGHT = 20;
 
 const bool CHAR_BITMAP_A[FONT_HEIGHT][FONT_WIDTH] = 
 {    
@@ -2068,6 +2068,30 @@ const bool CHAR_BITMAP_C[FONT_HEIGHT][FONT_WIDTH] =
     {1, 0, 0, 0, 0, 0, 1},
     {0, 1, 1, 1, 1, 1, 0},
     {0, 0, 0, 0, 0, 0, 0},
+};
+
+const bool CHAR_BITMAP_CLOSE_BUTTON[FONT_HEIGHT][FONT_WIDTH] = 
+{
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0},
+    {0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 };
 
 void 
@@ -6345,7 +6369,10 @@ class WinDecoretor
             xcb_map_window(conn, c->min_button);
             xcb_flush(conn);
 
-            mxb::set::win::backround::as_png("/home/mellw/mwm_png/window_decoration_icons/min_button/1_12x12.png", c->min_button);
+            create_png_with_char("/home/mellw/close.png", CHAR_BITMAP_CLOSE_BUTTON);
+            mxb::set::win::backround::as_png("/home/mellw/close.png", c->min_button);
+
+            // mxb::set::win::backround::as_png("/home/mellw/mwm_png/window_decoration_icons/min_button/1_12x12.png", c->min_button);
         }
 
         void
