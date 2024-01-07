@@ -1,6 +1,7 @@
 #include "structs.hpp"
 #include <algorithm>
 #include <cstdint>
+#include <vector>
 #include <xcb/xcb.h>
 #include <xcb/xproto.h>
 #define main_cpp
@@ -1903,9 +1904,77 @@ class mxb
                     png_destroy_write_struct(&png_ptr, &info_ptr);
                 }
 
-                class bitmap
+                class Bitmap
                 {
+                    public:
+                        Bitmap(int width, int height) 
+                        : width(width), height(height), bitmap(height, std::vector<bool>(width, false)) {}
 
+                        void 
+                        modify(int row, int startCol, int endCol, bool value) 
+                        {
+                            if (row < 0 || row >= height || startCol < 0 || endCol > width) 
+                            {
+                                throw std::runtime_error("Invalid row or column indices");
+                            }
+                        
+                            for (int i = startCol; i < endCol; ++i) 
+                            {
+                                bitmap[row][i] = value;
+                            }
+                        }
+
+                        void 
+                        exportToPng(const std::string& file_name) const 
+                        {
+                            FILE *fp = fopen(file_name.c_str(), "wb");
+                            if (!fp) {
+                                throw std::runtime_error("Failed to create PNG file");
+                            }
+
+                            png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+                            if (!png_ptr) {
+                                fclose(fp);
+                                throw std::runtime_error("Failed to create PNG write struct");
+                            }
+
+                            png_infop info_ptr = png_create_info_struct(png_ptr);
+                            if (!info_ptr) {
+                                fclose(fp);
+                                png_destroy_write_struct(&png_ptr, NULL);
+                                throw std::runtime_error("Failed to create PNG info struct");
+                            }
+
+                            if (setjmp(png_jmpbuf(png_ptr))) {
+                                fclose(fp);
+                                png_destroy_write_struct(&png_ptr, &info_ptr);
+                                throw std::runtime_error("Error during PNG creation");
+                            }
+
+                            png_init_io(png_ptr, fp);
+                            png_set_IHDR(png_ptr, info_ptr, width, height, 8, PNG_COLOR_TYPE_GRAY, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
+                            png_write_info(png_ptr, info_ptr);
+
+                            png_bytep row = new png_byte[width];
+                            for (int y = 0; y < height; y++) {
+                                for (int x = 0; x < width; x++) {
+                                    row[x] = bitmap[y][x] ? 0xFF : 0x00;
+                                }
+                                png_write_row(png_ptr, row);
+                            }
+                            delete[] row;
+
+                            png_write_end(png_ptr, NULL);
+
+                            fclose(fp);
+                            png_destroy_write_struct(&png_ptr, &info_ptr);
+                        }
+                    ;
+                    
+                    private:
+                        int width, height;
+                        std::vector<std::vector<bool>> bitmap;
+                    ;
                 };
             ;
         };
@@ -6609,11 +6678,11 @@ class WinDecoretor
             xcb_map_window(conn, c->min_button);
             xcb_flush(conn);
 
-            auto b = bitmap::create_bool_bitmap(20, 20);
-
-            bitmap::modify_bitmap(b, 9, 4, 15, true);
-            bitmap::modify_bitmap(b, 10, 4, 15, true);
-            mxb::create::png("/home/mellw/min.png", b);
+            mxb::create::Bitmap bitmap(20, 20);
+            
+            bitmap.modify(9, 4, 15, true);
+            bitmap.modify(10, 4, 15, true);
+            bitmap.exportToPng("/home/mellw/min.png");
 
             // mxb::create::png("/home/mellw/min.png", bitmap::CHAR_BITMAP_MIN_BUTTON);
             mxb::set::win::backround::as_png("/home/mellw/min.png", c->min_button);
