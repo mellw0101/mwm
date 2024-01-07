@@ -4950,7 +4950,10 @@ class resize_client
 
             private:
                 client * & c;
-                
+                const double frameRate = 120.0;
+                std::chrono::high_resolution_clock::time_point lastUpdateTime = std::chrono::high_resolution_clock::now();
+                const double frameDuration = 1000.0 / frameRate; 
+
                 void
                 grab_pointer()
                 {
@@ -5073,7 +5076,7 @@ class resize_client
                 }
 
                 void
-                resize_client(const uint16_t x, const uint16_t y, edge edge)
+                resize_client(const uint32_t x, const uint32_t y, edge edge)
                 {
                     switch (edge) 
                     {
@@ -5232,6 +5235,28 @@ class resize_client
                     }
                 }
 
+                void
+                snap(const uint32_t x, const uint32_t y, edge edge, const uint8_t & prox)
+                {
+                    for (const auto & c : cur_d->current_clients)
+                    {
+                        if (c == this->c)
+                        {
+                            continue;
+                        }
+
+                        const uint16_t right_border = (c->x + c->width);
+
+                        if (x > right_border + prox && x < right_border - prox)
+                        {
+                            resize_client(right_border, y, edge);
+                            return;
+                        } 
+                    }
+                    resize_client(x, y, edge);
+                }
+
+
                 void /* 
                     THIS IS THE MAIN EVENT LOOP FOR 'resize_client'
                  */
@@ -5256,7 +5281,7 @@ class resize_client
                                 const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
                                 if (isTimeToRender())
                                 {
-                                    resize_client(e->root_x, e->root_y, edge);
+                                    snap(e->root_x, e->root_y, edge, 12);
                                     xcb_flush(conn); 
                                 }
                                 break;
@@ -5273,15 +5298,6 @@ class resize_client
                     }
                 }
 
-                /* FRAMERATE */
-                const double frameRate = 120.0;
-
-                /* HIGH_PRECISION_CLOCK AND TIME_POINT */
-                std::chrono::high_resolution_clock::time_point lastUpdateTime = std::chrono::high_resolution_clock::now();
-                
-                /* DURATION IN MILLISECONDS THAT EACH FRAME SHOULD LAST */
-                const double frameDuration = 1000.0 / frameRate; 
-                
                 bool 
                 isTimeToRender() 
                 {
