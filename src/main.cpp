@@ -7530,13 +7530,13 @@ class Event
 
                         try 
                         {
-                            create_png_with_char("/home/mellw/a.png", 'a');
+                            create_png_with_char("/home/mellw/a.png", 'A');
                         }
                         catch (const std::exception & e)
                         {
                             log_error(e.what());
                         }
-                        
+
                         break;
                     }
                 }
