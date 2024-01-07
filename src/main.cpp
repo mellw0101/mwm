@@ -5056,6 +5056,132 @@ class resize_client
                 }
 
                 void
+                resize_client(const uint16_t x, const uint16_t y, edge edge)
+                {
+                    switch (edge) 
+                    {
+                        case edge::LEFT:
+                        {
+                            const uint32_t width = (c->width + c->x - x);
+
+                            mxb::conf::win::width(c->win, (width - (BORDER_SIZE * 2)));
+                            mxb::conf::win::x_width(c->frame, x, (width));
+                            mxb::conf::win::width(c->titlebar, (width));
+                            mxb::conf::win::x(c->close_button, (width - BUTTON_SIZE - BORDER_SIZE));
+                            mxb::conf::win::x(c->max_button, (width - (BUTTON_SIZE * 2) - BORDER_SIZE));
+                            mxb::conf::win::x(c->min_button, (width - (BUTTON_SIZE * 3) - BORDER_SIZE));
+                            mxb::conf::win::x(c->border.right, (width - BORDER_SIZE));
+                            mxb::conf::win::width(c->border.top, (width - (BORDER_SIZE * 2)));
+                            mxb::conf::win::width(c->border.bottom, (width - (BORDER_SIZE * 2)));
+                            mxb::conf::win::x(c->border.top_right, (width - BORDER_SIZE));
+                            mxb::conf::win::x(c->border.bottom_right, (width - BORDER_SIZE));
+                            
+                            break;
+                        }
+                        case edge::RIGHT:
+                        {
+                            const uint32_t width = (x - c->x);
+
+                            mxb::conf::win::width(c->win, (width - (BORDER_SIZE * 2)));
+                            mxb::conf::win::width(c->frame, width);
+                            mxb::conf::win::width(c->titlebar, (width - BORDER_SIZE));
+                            mxb::conf::win::x(c->close_button, (width - BUTTON_SIZE - BORDER_SIZE));
+                            mxb::conf::win::x(c->max_button, (width - (BUTTON_SIZE * 2) - BORDER_SIZE));
+                            mxb::conf::win::x(c->min_button, (width - (BUTTON_SIZE * 3) - BORDER_SIZE));
+                            mxb::conf::win::x(c->border.right, (width - BORDER_SIZE));
+                            mxb::conf::win::width(c->border.top, (width - (BORDER_SIZE * 2)));
+                            mxb::conf::win::width(c->border.bottom, (width - (BORDER_SIZE * 2)));
+                            mxb::conf::win::x(c->border.top_right, (width - BORDER_SIZE));
+                            mxb::conf::win::x(c->border.bottom_right, (width - BORDER_SIZE));
+                            
+                            break;
+                        }
+                        case edge::TOP:
+                        {
+                            const uint32_t height = (c->height + c->y - y);
+
+                            mxb::conf::win::height(c->win, (height - TITLE_BAR_HEIGHT) - (BORDER_SIZE * 2));
+                            mxb::conf::win::y_height(c->frame, y, height);
+                            mxb::conf::win::height(c->border.left, (height - (BORDER_SIZE * 2)));
+                            mxb::conf::win::height(c->border.right, (height - (BORDER_SIZE * 2)));
+                            mxb::conf::win::y(c->border.bottom, (height - BORDER_SIZE));
+                            mxb::conf::win::y(c->border.bottom_left, (height - BORDER_SIZE));
+                            mxb::conf::win::y(c->border.bottom_right, (height - BORDER_SIZE));
+                            
+                            break;
+                        }
+                        case edge::BOTTOM_edge:
+                        {
+                            const uint32_t height = (y - c->y);
+
+                            mxb::conf::win::height(c->win, (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
+                            mxb::conf::win::height(c->frame, height);
+                            mxb::conf::win::height(c->border.left, (height - (BORDER_SIZE * 2)));
+                            mxb::conf::win::height(c->border.right, (height - (BORDER_SIZE * 2)));
+                            mxb::conf::win::y(c->border.bottom, (height - BORDER_SIZE));
+                            mxb::conf::win::y(c->border.bottom_left, (height - BORDER_SIZE));
+                            mxb::conf::win::y(c->border.bottom_right, (height - BORDER_SIZE));
+                            
+                            break;
+                        }
+                        case edge::NONE:
+                        {
+                            return;
+                        }
+                        case edge::TOP_LEFT:
+                        {
+                            return;
+                        }
+                        case edge::TOP_RIGHT:
+                        {
+                            return;
+                        }
+                        case edge::BOTTOM_LEFT:
+                        {
+                            const uint32_t width = (c->width + c->x - x);
+                            const uint32_t height = (y - c->y);
+
+                            mxb::conf::win::x_width_height(c->frame, x, width, height);
+                            mxb::conf::win::width_height(c->win, (width - (BORDER_SIZE * 2)), (height - (BORDER_SIZE * 2)));
+                            mxb::conf::win::width(c->titlebar, (width - BORDER_SIZE));
+                            mxb::conf::win::x(c->close_button, (width - BUTTON_SIZE - BORDER_SIZE));
+                            mxb::conf::win::x(c->max_button, (width - (BUTTON_SIZE * 2) - BORDER_SIZE));
+                            mxb::conf::win::x(c->min_button, (width - (BUTTON_SIZE * 3) - BORDER_SIZE));
+                            mxb::conf::win::height(c->border.left, (height - (BORDER_SIZE * 2)));
+                            mxb::conf::win::x_height(c->border.right, (width - BORDER_SIZE), (height - (BORDER_SIZE * 2)));
+                            mxb::conf::win::width(c->border.top, (width - (BORDER_SIZE * 2)));
+                            mxb::conf::win::y_width(c->border.bottom, (height - BORDER_SIZE), (width - (BORDER_SIZE * 2)));
+                            mxb::conf::win::x(c->border.top_right, (width - BORDER_SIZE));
+                            mxb::conf::win::y(c->border.bottom_left, (height - BORDER_SIZE));
+                            mxb::conf::win::x_y(c->border.bottom_right, (width - BORDER_SIZE), (height - BORDER_SIZE));
+                            
+                            break;
+                        }
+                        case edge::BOTTOM_RIGHT:
+                        {
+                            const uint32_t width = (x - c->x);
+                            const uint32_t height = (y - c->y);
+
+                            mxb::conf::win::width_height(c->frame, width, height);
+                            mxb::conf::win::width_height(c->win, (width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
+                            mxb::conf::win::width(c->titlebar, (width - BORDER_SIZE));
+                            mxb::conf::win::x(c->close_button, (width - BUTTON_SIZE - BORDER_SIZE));
+                            mxb::conf::win::x(c->max_button, (width - (BUTTON_SIZE * 2) - BORDER_SIZE));
+                            mxb::conf::win::x(c->min_button, (width - (BUTTON_SIZE * 3) - BORDER_SIZE));
+                            mxb::conf::win::height(c->border.left, (height - (BORDER_SIZE * 2)));
+                            mxb::conf::win::x_height(c->border.right, (width - BORDER_SIZE), (height - (BORDER_SIZE * 2)));
+                            mxb::conf::win::width(c->border.top, (width - (BORDER_SIZE * 2)));
+                            mxb::conf::win::y_width(c->border.bottom, (height - BORDER_SIZE), (width - (BORDER_SIZE * 2)));
+                            mxb::conf::win::x(c->border.top_right, (width - BORDER_SIZE));
+                            mxb::conf::win::y(c->border.bottom_left, (height - BORDER_SIZE));
+                            mxb::conf::win::x_y(c->border.bottom_right, (width - BORDER_SIZE), (height - BORDER_SIZE));
+                            
+                            break;
+                        }
+                    }
+                }
+
+                void
                 resize_client_left(const uint16_t & width, const uint16_t x)
                 {
                     mxb::conf::win::width(c->win, (width - (BORDER_SIZE * 2)));
@@ -5152,11 +5278,6 @@ class resize_client
                  */
                 run(edge edge)
                 {
-                    if (edge == edge::NONE)
-                    {
-                        return;
-                    }
-
                     xcb_generic_event_t * ev;
                     bool shouldContinue = true;
 
@@ -5176,54 +5297,55 @@ class resize_client
                                 const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
                                 if (isTimeToRender())
                                 {
-                                    switch (edge)
-                                    {
-                                        case edge::TOP:
-                                        {
-                                            resize_client_top((c->height + c->y - e->root_y), e->root_y);
-                                            break;
-                                        }
-                                        case edge::BOTTOM_edge:
-                                        {
-                                            resize_client_bottom(e->root_y - c->y);
-                                            break;
-                                        }
-                                        case edge::LEFT:
-                                        {
-                                            resize_client_left((c->width + c->x - e->root_x), e->root_x);
-                                            break;
-                                        }
-                                        case edge::RIGHT:
-                                        {
-                                            resize_client_right(e->root_x - c->x);
-                                            break;
-                                        }
-                                        case edge::NONE:
-                                        {
-                                            return;
-                                            break;
-                                        }
-                                        case edge::TOP_LEFT:
-                                        {
-                                            return;
-                                            break;
-                                        }
-                                        case edge::TOP_RIGHT:
-                                        {
-                                            return;
-                                            break;
-                                        }
-                                        case edge::BOTTOM_LEFT:
-                                        {
-                                            resize_client_botton_left(e->root_x, e->root_y, (c->width + c->x - e->root_x), (e->root_y - c->y));
-                                            break;
-                                        }
-                                        case edge::BOTTOM_RIGHT:
-                                        {
-                                            resize_client_bottom_right((e->root_x - c->x), (e->root_y - c->y));
-                                            break;
-                                        }
-                                    }
+                                    resize_client(e->root_x, e->root_y, edge);
+                                    // switch (edge)
+                                    // {
+                                    //     case edge::TOP:
+                                    //     {
+                                    //         resize_client_top((c->height + c->y - e->root_y), e->root_y);
+                                    //         break;
+                                    //     }
+                                    //     case edge::BOTTOM_edge:
+                                    //     {
+                                    //         resize_client_bottom(e->root_y - c->y);
+                                    //         break;
+                                    //     }
+                                    //     case edge::LEFT:
+                                    //     {
+                                    //         resize_client_left((c->width + c->x - e->root_x), e->root_x);
+                                    //         break;
+                                    //     }
+                                    //     case edge::RIGHT:
+                                    //     {
+                                    //         resize_client_right(e->root_x - c->x);
+                                    //         break;
+                                    //     }
+                                    //     case edge::NONE:
+                                    //     {
+                                    //         return;
+                                    //         break;
+                                    //     }
+                                    //     case edge::TOP_LEFT:
+                                    //     {
+                                    //         return;
+                                    //         break;
+                                    //     }
+                                    //     case edge::TOP_RIGHT:
+                                    //     {
+                                    //         return;
+                                    //         break;
+                                    //     }
+                                    //     case edge::BOTTOM_LEFT:
+                                    //     {
+                                    //         resize_client_botton_left(e->root_x, e->root_y, (c->width + c->x - e->root_x), (e->root_y - c->y));
+                                    //         break;
+                                    //     }
+                                    //     case edge::BOTTOM_RIGHT:
+                                    //     {
+                                    //         resize_client_bottom_right((e->root_x - c->x), (e->root_y - c->y));
+                                    //         break;
+                                    //     }
+                                    // }
                                     xcb_flush(conn); 
                                 }
                                 break;
