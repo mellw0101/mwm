@@ -5269,11 +5269,14 @@ class resize_client
                             return;
                         }
 
-                        if ((y > bottom_border - prox && y < bottom_border + prox)
-                         && (x > left_border && x < right_border))
+                        if (edge != edge::BOTTOM_edge || edge != edge::BOTTOM_LEFT || edge != edge::BOTTOM_RIGHT)
                         {
-                            resize_client(x, bottom_border, edge);
-                            return;
+                            if ((y > bottom_border - prox && y < bottom_border + prox)
+                            && (x > left_border && x < right_border))
+                            {
+                                resize_client(x, bottom_border, edge);
+                                return;
+                            }
                         }
 
                         if ((y > top_border - prox && y < top_border + prox)
