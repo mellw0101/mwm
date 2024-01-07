@@ -4946,6 +4946,8 @@ class resize_client
                     mxb::conf::win::x(c->border.right, (c->width - BORDER_SIZE + c->x - x));
                     mxb::conf::win::width(c->border.top, (c->width + c->x - x) - (BORDER_SIZE * 2));
                     mxb::conf::win::width(c->border.bottom, (c->width + c->x - x) - (BORDER_SIZE * 2));
+                    mxb::conf::win::x(c->border.top_right, (c->width - BORDER_SIZE + c->x - x));
+                    mxb::conf::win::x(c->border.bottom_right, (c->width - BORDER_SIZE + c->x - x));
                 }
 
                 void
