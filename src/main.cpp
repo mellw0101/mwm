@@ -5238,16 +5238,12 @@ class resize_client
                 void
                 snap(const uint32_t x, const uint32_t y, edge edge, const uint8_t & prox)
                 {
+                    uint16_t right_border = 0;
                     for (const auto & c : cur_d->current_clients)
                     {
-                        if (c == this->c)
-                        {
-                            continue;
-                        }
+                        right_border = (c->x + c->width);
 
-                        const uint16_t right_border = (c->x + c->width);
-
-                        if (x > right_border + prox && x < right_border - prox)
+                        if (x > right_border - prox && x < right_border + prox)
                         {
                             resize_client(right_border, y, edge);
                             return;
