@@ -4009,7 +4009,13 @@ class XCPPBAnimator
             );
             xcb_flush(connection);
 
-            mxb::conf::win::x(c->border.top_right, w - BORDER_SIZE);
+            mxb::conf::win::x(c->border.top_right, (w - BORDER_SIZE));
+            xcb_flush(connection);
+
+            mxb::conf::win::x_y(c->border.bottom_right, (w - BORDER_SIZE), (h - BORDER_SIZE));
+            xcb_flush(connection);
+
+            mxb::conf::win::y(c->border.bottom_left, (h - BORDER_SIZE));
             xcb_flush(connection);
         }
 
