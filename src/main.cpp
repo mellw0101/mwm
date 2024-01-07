@@ -1751,6 +1751,58 @@ class mxb
                 }
 
                 static void 
+                png(const std::string& file_name, bool** bitmap, int width, int height) 
+                {
+                    FILE *fp = fopen(file_name.c_str(), "wb");
+                    if (!fp) 
+                    {
+                        throw std::runtime_error("Failed to create PNG file");
+                    }
+
+                    png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+                    if (!png_ptr) 
+                    {
+                        fclose(fp);
+                        throw std::runtime_error("Failed to create PNG write struct");
+                    }
+
+                    png_infop info_ptr = png_create_info_struct(png_ptr);
+                    if (!info_ptr) 
+                    {
+                        fclose(fp);
+                        png_destroy_write_struct(&png_ptr, NULL);
+                        throw std::runtime_error("Failed to create PNG info struct");
+                    }
+
+                    if (setjmp(png_jmpbuf(png_ptr))) {
+                        fclose(fp);
+                        png_destroy_write_struct(&png_ptr, &info_ptr);
+                        throw std::runtime_error("Error during PNG creation");
+                    }
+
+                    png_init_io(png_ptr, fp);
+                    png_set_IHDR(png_ptr, info_ptr, width, height, 8, PNG_COLOR_TYPE_GRAY, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
+                    png_write_info(png_ptr, info_ptr);
+
+                    // Write character bitmap to PNG
+                    png_bytep row = new png_byte[width];
+                    for (int y = 0; y < height; y++) 
+                    {
+                        for (int x = 0; x < width; x++) 
+                        {
+                            row[x] = bitmap[y][x] ? 0xFF : 0x00;
+                        }
+                        png_write_row(png_ptr, row);
+                    }
+                    delete[] row;
+
+                    png_write_end(png_ptr, NULL);
+
+                    fclose(fp);
+                    png_destroy_write_struct(&png_ptr, &info_ptr);
+                }
+
+                static void 
                 png(const std::string& file_name, const int bitmap[20][20]) 
                 {
                     FILE *fp = fopen(file_name.c_str(), "wb");
@@ -2219,6 +2271,24 @@ namespace bitmap
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
     };
+
+    namespace letter
+    {
+        const bool h[11][7] =
+        {
+            {1,0,0,0,0,0,0},
+            {1,0,0,0,0,0,0},
+            {1,0,0,0,0,0,0},
+            {1,0,0,0,0,0,0},
+            {1,1,1,1,1,1,0},
+            {1,0,0,0,0,1,0},
+            {1,0,0,0,0,1,0},
+            {1,0,0,0,0,1,0},
+            {1,0,0,0,0,1,0},
+            {1,0,0,0,0,1,0},
+            {1,0,0,0,0,1,0}
+        };
+    }
 }
 
 namespace get
@@ -6547,6 +6617,29 @@ class WinDecoretor
             mxb::set::cursor(c->border.bottom, CURSOR::bottom_side);
             win_tools::grab_buttons(c->border.bottom, {{ L_MOUSE_BUTTON, NULL }});
             xcb_map_window(conn, c->border.bottom);
+            xcb_flush(conn);
+
+            c->border.top_left = xcb_generate_id(conn);
+            xcb_create_window
+            (
+                conn, 
+                XCB_COPY_FROM_PARENT, 
+                c->border.top_left, 
+                c->frame, 
+                0, 
+                0, 
+                BORDER_SIZE, 
+                BORDER_SIZE, 
+                0, 
+                XCB_WINDOW_CLASS_INPUT_OUTPUT, 
+                screen->root_visual, 
+                0, 
+                NULL
+            );
+            mxb::set::win::backround::as_color(c->border.top_left, BLACK);
+            mxb::set::cursor(c->border.top_left, CURSOR::top_left_corner);
+            win_tools::grab_buttons(c->border.top_left, {{ L_MOUSE_BUTTON, NULL }});
+            xcb_map_window(conn, c->border.top_left);
             xcb_flush(conn);
         }
     ;

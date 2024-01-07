@@ -127,6 +127,11 @@ struct client_border_decor
     xcb_window_t right;
     xcb_window_t top;
     xcb_window_t bottom;
+    
+    xcb_window_t top_left;
+    xcb_window_t top_right;
+    xcb_window_t bottom_left;
+    xcb_window_t bottom_right;
 };
 
 struct client 
