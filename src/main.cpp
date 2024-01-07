@@ -7969,6 +7969,17 @@ class Event
                 if (e->event == c->border.bottom)
                 {
                     resize_client::border(c, edge::BOTTOM_edge);
+                }
+
+                if (e->event == c->border.top_left)
+                {
+                    resize_client::border(c, edge::TOP_LEFT);
+                    return;
+                }
+
+                if (e->event == c->border.top_right)
+                {
+                    resize_client::border(c, edge::TOP_RIGHT);
                     return;
                 }
 
