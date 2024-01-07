@@ -5255,11 +5255,16 @@ class resize_client
                         top_border = c->y;
                         bottom_border = (c->y + c->height);
 
-                        if ((x > right_border - prox && x < right_border + prox)
-                         && (y > top_border && y < bottom_border))
+                        if (edge != edge::RIGHT
+                         && edge != edge::BOTTOM_RIGHT
+                         && edge != edge::TOP_RIGHT)
                         {
-                            resize_client(right_border, y, edge);
-                            return;
+                            if ((x > right_border - prox && x < right_border + prox)
+                            && (y > top_border && y < bottom_border))
+                            {
+                                resize_client(right_border, y, edge);
+                                return;
+                            }
                         }
                         
                         if ((x > left_border - prox && x < left_border + prox)
@@ -5269,7 +5274,9 @@ class resize_client
                             return;
                         }
 
-                        if (edge != edge::BOTTOM_edge && edge != edge::BOTTOM_LEFT && edge != edge::BOTTOM_RIGHT)
+                        if (edge != edge::BOTTOM_edge 
+                         && edge != edge::BOTTOM_LEFT 
+                         && edge != edge::BOTTOM_RIGHT)
                         {
                             if ((y > bottom_border - prox && y < bottom_border + prox)
                             && (x > left_border && x < right_border))
