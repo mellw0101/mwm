@@ -6322,7 +6322,7 @@ class WinDecoretor
             xcb_flush(conn);
 
             create_png_with_char("/home/mellw/close.png", CHAR_BITMAP_CLOSE_BUTTON);
-            mxb::set::win::backround::as_png("/home/mellw/min.png", c->close_button);
+            mxb::set::win::backround::as_png("/home/mellw/close.png", c->close_button);
 
             // mxb::set::win::backround::as_png("/home/mellw/mwm_png/window_decoration_icons/close_button/1_10x10.png", c->close_button);
         }
