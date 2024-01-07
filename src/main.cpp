@@ -2093,6 +2093,23 @@ class mxb
                         }
 
                         static void
+                        x_width_height(const xcb_window_t & window, const uint32_t & x, const uint32_t & width, const uint32_t & height)
+                        {
+                            xcb_configure_window
+                            (
+                                conn, 
+                                window, 
+                                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
+                                (const uint32_t[3])
+                                {
+                                    x,
+                                    width,
+                                    height
+                                }
+                            );
+                        }
+
+                        static void
                         x_width(const xcb_window_t & window, const uint32_t & x, const uint32_t & width)
                         {
                             xcb_configure_window
@@ -5095,6 +5112,12 @@ class resize_client
                 }
 
                 void
+                resize_client_botton_left(const uint16_t & x, const uint16_t & y, const uint16_t & width, const uint16_t & height)
+                {
+                    mxb::conf::win::x_width_height(c->frame, x, width, height);
+                }
+
+                void
                 resize_client_bottom_right(const uint16_t & width, const uint16_t height)
                 {
                     mxb::conf::win::width_height(c->frame, width, height);
@@ -5180,7 +5203,7 @@ class resize_client
                                         }
                                         case edge::BOTTOM_LEFT:
                                         {
-                                            return;
+                                            resize_client_botton_left(e->root_x, e->root_y, (c->width + c->x - e->root_x), (e->root_y - c->y));
                                             break;
                                         }
                                         case edge::BOTTOM_RIGHT:
@@ -7947,6 +7970,12 @@ class Event
                 if (e->event == c->border.bottom)
                 {
                     resize_client::border(c, edge::BOTTOM_edge);
+                    return;
+                }
+
+                if (e->event == c->border.bottom_left)
+                {
+                    resize_client::border(c, edge::BOTTOM_LEFT);
                     return;
                 }
 
