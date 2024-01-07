@@ -1956,8 +1956,10 @@ class mxb
                             png_write_info(png_ptr, info_ptr);
 
                             png_bytep row = new png_byte[width];
-                            for (int y = 0; y < height; y++) {
-                                for (int x = 0; x < width; x++) {
+                            for (int y = 0; y < height; y++) 
+                            {
+                                for (int x = 0; x < width; x++) 
+                                {
                                     row[x] = bitmap[y][x] ? 0xFF : 0x00;
                                 }
                                 png_write_row(png_ptr, row);
