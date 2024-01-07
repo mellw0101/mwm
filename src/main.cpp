@@ -4922,16 +4922,18 @@ class resize_client
                 resize_win_left(const uint16_t & x)
                 {
                     // c->win
-                    xcb_configure_window 
-                    (
-                        conn,
-                        c->win,
-                        XCB_CONFIG_WINDOW_WIDTH,
-                        (const uint32_t[1])
-                        {
-                            static_cast<const uint32_t &>((c->width + c->x - x) - (BORDER_SIZE * 2))
-                        }
-                    );
+                    // xcb_configure_window 
+                    // (
+                    //     conn,
+                    //     c->win,
+                    //     XCB_CONFIG_WINDOW_WIDTH,
+                    //     (const uint32_t[1])
+                    //     {
+                    //         static_cast<const uint32_t &>((c->width + c->x - x) - (BORDER_SIZE * 2))
+                    //     }
+                    // );
+
+                    mxb::conf::win::width(c->win, (c->width + c->x - x) - (BORDER_SIZE * 2));
 
                     // c->frame
                     xcb_configure_window 
@@ -5576,13 +5578,8 @@ class resize_client
             );
 
             mxb::conf::win::x(c->border.top_right, (width - BORDER_SIZE));
-            xcb_flush(conn);
-
             mxb::conf::win::x_y(c->border.bottom_right, (width - BORDER_SIZE), (height - BORDER_SIZE));
-            xcb_flush(conn);
-
             mxb::conf::win::y(c->border.bottom_left, (height - BORDER_SIZE));
-            xcb_flush(conn);
         }
 
         void
