@@ -4951,23 +4951,23 @@ class resize_client
                 }
 
                 void
-                resize_win_left(const uint16_t & x)
+                resize_client_left(const uint16_t & width)
                 {
-                    mxb::conf::win::width(c->win, (c->width + c->x - x) - (BORDER_SIZE * 2));
-                    mxb::conf::win::x_width(c->frame, x, (c->width + c->x - x));
-                    mxb::conf::win::width(c->titlebar, (c->width + c->x - x));
-                    mxb::conf::win::x(c->close_button, (c->width - BUTTON_SIZE + c->x - x) - BORDER_SIZE);
-                    mxb::conf::win::x(c->max_button, (c->width - (BUTTON_SIZE * 2) + c->x - x) - BORDER_SIZE);
-                    mxb::conf::win::x(c->min_button, (c->width - (BUTTON_SIZE * 3) + c->x - x) - BORDER_SIZE);
-                    mxb::conf::win::x(c->border.right, (c->width - BORDER_SIZE + c->x - x));
-                    mxb::conf::win::width(c->border.top, (c->width + c->x - x) - (BORDER_SIZE * 2));
-                    mxb::conf::win::width(c->border.bottom, (c->width + c->x - x) - (BORDER_SIZE * 2));
-                    mxb::conf::win::x(c->border.top_right, (c->width - BORDER_SIZE + c->x - x));
-                    mxb::conf::win::x(c->border.bottom_right, (c->width - BORDER_SIZE + c->x - x));
+                    mxb::conf::win::width(c->win, (width - (BORDER_SIZE * 2)));
+                    mxb::conf::win::x_width(c->frame, (width + c->width), (width));
+                    mxb::conf::win::width(c->titlebar, (width));
+                    mxb::conf::win::x(c->close_button, (width - BUTTON_SIZE - BORDER_SIZE));
+                    mxb::conf::win::x(c->max_button, (width - (BUTTON_SIZE * 2) - BORDER_SIZE));
+                    mxb::conf::win::x(c->min_button, (width - (BUTTON_SIZE * 3) - BORDER_SIZE));
+                    mxb::conf::win::x(c->border.right, (width - BORDER_SIZE));
+                    mxb::conf::win::width(c->border.top, (width - (BORDER_SIZE * 2)));
+                    mxb::conf::win::width(c->border.bottom, (width - (BORDER_SIZE * 2)));
+                    mxb::conf::win::x(c->border.top_right, (width - BORDER_SIZE));
+                    mxb::conf::win::x(c->border.bottom_right, (width - BORDER_SIZE));
                 }
 
                 void
-                resize_win_width(const uint16_t & width)
+                resize_client_right(const uint16_t & width)
                 {
                     mxb::conf::win::width(c->win, (width - (BORDER_SIZE * 2)));
                     mxb::conf::win::width(c->frame, width);
@@ -4983,7 +4983,7 @@ class resize_client
                 }
 
                 void
-                resize_win_top(const uint16_t & y)
+                resize_client_top(const uint16_t & y)
                 {
                     mxb::conf::win::height(c->win, (c->height - TITLE_BAR_HEIGHT + c->y - y) - (BORDER_SIZE * 2));
                     mxb::conf::win::y_height(c->frame, y, (c->height + c->y - y));
@@ -4995,7 +4995,7 @@ class resize_client
                 }
 
                 void
-                resize_win_height(const uint16_t & height)
+                resize_client_bottom(const uint16_t & height)
                 {
                     mxb::conf::win::height(c->win, (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
                     mxb::conf::win::height(c->frame, height);
@@ -5039,22 +5039,22 @@ class resize_client
                                     {
                                         case edge::TOP:
                                         {
-                                            resize_win_top(e->root_y);
+                                            resize_client_top(e->root_y);
                                             break;
                                         }
                                         case edge::BOTTOM_edge:
                                         {
-                                            resize_win_height(e->root_y - c->y);
+                                            resize_client_bottom(e->root_y - c->y);
                                             break;
                                         }
                                         case edge::LEFT:
                                         {
-                                            resize_win_left(e->root_x);
+                                            resize_client_left(c->width + c->x - e->root_x);
                                             break;
                                         }
                                         case edge::RIGHT:
                                         {
-                                            resize_win_width(e->root_x - c->x);
+                                            resize_client_right(e->root_x - c->x);
                                             break;
                                         }
                                         case edge::NONE:
