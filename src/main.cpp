@@ -1697,6 +1697,109 @@ class mxb
                         }
                     ;
                 };
+
+                static void
+                png(const std::string& file_name, const bool bitmap[20][20]) 
+                {
+                    FILE *fp = fopen(file_name.c_str(), "wb");
+                    if (!fp) 
+                    {
+                        throw std::runtime_error("Failed to create PNG file");
+                    }
+
+                    png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+                    if (!png_ptr) 
+                    {
+                        fclose(fp);
+                        throw std::runtime_error("Failed to create PNG write struct");
+                    }
+
+                    png_infop info_ptr = png_create_info_struct(png_ptr);
+                    if (!info_ptr) 
+                    {
+                        fclose(fp);
+                        png_destroy_write_struct(&png_ptr, NULL);
+                        throw std::runtime_error("Failed to create PNG info struct");
+                    }
+
+                    if (setjmp(png_jmpbuf(png_ptr))) {
+                        fclose(fp);
+                        png_destroy_write_struct(&png_ptr, &info_ptr);
+                        throw std::runtime_error("Error during PNG creation");
+                    }
+
+                    png_init_io(png_ptr, fp);
+                    png_set_IHDR(png_ptr, info_ptr, 20, 20, 8, PNG_COLOR_TYPE_GRAY, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
+                    png_write_info(png_ptr, info_ptr);
+
+                    // Write character bitmap to PNG
+                    png_bytep row = new png_byte[20];
+                    for (int y = 0; y < 20; y++) 
+                    {
+                        for (int x = 0; x < 20; x++) 
+                        {
+                            row[x] = bitmap[y][x] ? 0xFF : 0x00;
+                        }
+                        png_write_row(png_ptr, row);
+                    }
+                    delete[] row;
+
+                    png_write_end(png_ptr, NULL);
+
+                    fclose(fp);
+                    png_destroy_write_struct(&png_ptr, &info_ptr);
+                }
+
+                static void 
+                png(const std::string& file_name, const int bitmap[20][20]) 
+                {
+                    FILE *fp = fopen(file_name.c_str(), "wb");
+                    if (!fp) {
+                        throw std::runtime_error("Failed to create PNG file");
+                    }
+
+                    png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+                    if (!png_ptr) {
+                        fclose(fp);
+                        throw std::runtime_error("Failed to create PNG write struct");
+                    }
+
+                    png_infop info_ptr = png_create_info_struct(png_ptr);
+                    if (!info_ptr) {
+                        fclose(fp);
+                        png_destroy_write_struct(&png_ptr, NULL);
+                        throw std::runtime_error("Failed to create PNG info struct");
+                    }
+
+                    if (setjmp(png_jmpbuf(png_ptr))) {
+                        fclose(fp);
+                        png_destroy_write_struct(&png_ptr, &info_ptr);
+                        throw std::runtime_error("Error during PNG creation");
+                    }
+
+                    png_init_io(png_ptr, fp);
+                    png_set_IHDR(png_ptr, info_ptr, 20, 20, 8, PNG_COLOR_TYPE_GRAY, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
+                    png_write_info(png_ptr, info_ptr);
+
+                    // Write character bitmap to PNG
+                    png_bytep row = new png_byte[20];
+                    for (int y = 0; y < 20; y++) {
+                        for (int x = 0; x < 20; x++) {
+                            if (bitmap[y][x] < 0 || bitmap[y][x] > 10) {
+                                throw std::runtime_error("Invalid bitmap value");
+                            }
+                            // Scale the value to the range 0x00 to 0xFF
+                            row[x] = static_cast<png_byte>((bitmap[y][x] * 255) / 10);
+                        }
+                        png_write_row(png_ptr, row);
+                    }
+                    delete[] row;
+
+                    png_write_end(png_ptr, NULL);
+
+                    fclose(fp);
+                    png_destroy_write_struct(&png_ptr, &info_ptr);
+                }
             ;
         };
 
@@ -2013,163 +2116,112 @@ class mxb
     ;
 };
 
-const int FONT_WIDTH = 20;
-const int FONT_HEIGHT = 20;
-
-const bool CHAR_BITMAP_A[FONT_HEIGHT][FONT_WIDTH] = 
-{    
-    {0,0,0,1,0,0,0},
-    {0,0,1,0,1,0,0},
-    {0,0,1,0,1,0,0},
-    {0,1,0,0,0,1,0},
-    {0,1,0,0,0,1,0},
-    {1,0,0,0,0,0,1},
-    {1,1,1,1,1,1,1},
-    {1,0,0,0,0,0,1},
-    {1,0,0,0,0,0,1},
-    {1,0,0,0,0,0,1},
-    {1,0,0,0,0,0,1},
-    {1,0,0,0,0,0,1},
-    {1,0,0,0,0,0,1},
-    {1,0,0,0,0,0,1},
-};
-
-const bool CHAR_BITMAP_B[FONT_HEIGHT][FONT_WIDTH] = 
+namespace bitmap
 {
-    {1, 1, 1, 1, 1, 0, 0},
-    {1, 0, 0, 0, 0, 1, 0},
-    {1, 0, 0, 0, 0, 1, 0},
-    {1, 0, 0, 0, 0, 1, 0},
-    {1, 1, 1, 1, 1, 0, 0},
-    {1, 0, 0, 0, 0, 1, 0},
-    {1, 0, 0, 0, 0, 1, 0},
-    {1, 0, 0, 0, 0, 1, 0},
-    {1, 0, 0, 0, 0, 1, 0},
-    {1, 0, 0, 0, 0, 1, 0},
-    {1, 0, 0, 0, 0, 1, 0},
-    {1, 0, 0, 0, 0, 1, 0},
-    {1, 1, 1, 1, 1, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0},
-};
+    const bool CHAR_BITMAP_A[20][20] = 
+    {    
+        {0,0,0,1,0,0,0},
+        {0,0,1,0,1,0,0},
+        {0,0,1,0,1,0,0},
+        {0,1,0,0,0,1,0},
+        {0,1,0,0,0,1,0},
+        {1,0,0,0,0,0,1},
+        {1,1,1,1,1,1,1},
+        {1,0,0,0,0,0,1},
+        {1,0,0,0,0,0,1},
+        {1,0,0,0,0,0,1},
+        {1,0,0,0,0,0,1},
+        {1,0,0,0,0,0,1},
+        {1,0,0,0,0,0,1},
+        {1,0,0,0,0,0,1},
+    };
 
-const bool CHAR_BITMAP_C[20][20] = 
-{
-    {0, 1, 1, 1, 1, 1, 0},
-    {1, 0, 0, 0, 0, 0, 1},
-    {1, 0, 0, 0, 0, 0, 0},
-    {1, 0, 0, 0, 0, 0, 0},
-    {1, 0, 0, 0, 0, 0, 0},
-    {1, 0, 0, 0, 0, 0, 0},
-    {1, 0, 0, 0, 0, 0, 0},
-    {1, 0, 0, 0, 0, 0, 0},
-    {1, 0, 0, 0, 0, 0, 0},
-    {1, 0, 0, 0, 0, 0, 0},
-    {1, 0, 0, 0, 0, 0, 0},
-    {1, 0, 0, 0, 0, 0, 1},
-    {0, 1, 1, 1, 1, 1, 0},
-    {0, 0, 0, 0, 0, 0, 0},
-};
-
-const bool CHAR_BITMAP_CLOSE_BUTTON[20][20] = 
-{
-    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0},
-    {0,0,0,0,1,1,1,0,0,0,0,0,0,1,1,1,0,0,0,0},
-    {0,0,0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0,0,0},
-    {0,0,0,0,0,0,1,1,1,0,0,1,1,1,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,1,1,1,0,0,1,1,1,0,0,0,0,0,0},
-    {0,0,0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0,0,0},
-    {0,0,0,0,1,1,1,0,0,0,0,0,0,1,1,1,0,0,0,0},
-    {0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
-};
-
-const bool CHAR_BITMAP_MIN_BUTTON[20][20] = 
-{
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0},
-    {0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-};
-
-void 
-create_png_with_char(const std::string& file_name, const bool bitmap[20][20]) 
-{
-    FILE *fp = fopen(file_name.c_str(), "wb");
-    if (!fp) {
-        throw std::runtime_error("Failed to create PNG file");
-    }
-
-    png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-    if (!png_ptr) 
+    const bool CHAR_BITMAP_B[20][20] = 
     {
-        fclose(fp);
-        throw std::runtime_error("Failed to create PNG write struct");
-    }
+        {1, 1, 1, 1, 1, 0, 0},
+        {1, 0, 0, 0, 0, 1, 0},
+        {1, 0, 0, 0, 0, 1, 0},
+        {1, 0, 0, 0, 0, 1, 0},
+        {1, 1, 1, 1, 1, 0, 0},
+        {1, 0, 0, 0, 0, 1, 0},
+        {1, 0, 0, 0, 0, 1, 0},
+        {1, 0, 0, 0, 0, 1, 0},
+        {1, 0, 0, 0, 0, 1, 0},
+        {1, 0, 0, 0, 0, 1, 0},
+        {1, 0, 0, 0, 0, 1, 0},
+        {1, 0, 0, 0, 0, 1, 0},
+        {1, 1, 1, 1, 1, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0},
+    };
 
-    png_infop info_ptr = png_create_info_struct(png_ptr);
-    if (!info_ptr) 
+    const bool CHAR_BITMAP_C[20][20] = 
     {
-        fclose(fp);
-        png_destroy_write_struct(&png_ptr, NULL);
-        throw std::runtime_error("Failed to create PNG info struct");
-    }
+        {0, 1, 1, 1, 1, 1, 0},
+        {1, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 0, 0, 0, 0},
+        {1, 0, 0, 0, 0, 0, 0},
+        {1, 0, 0, 0, 0, 0, 0},
+        {1, 0, 0, 0, 0, 0, 0},
+        {1, 0, 0, 0, 0, 0, 0},
+        {1, 0, 0, 0, 0, 0, 0},
+        {1, 0, 0, 0, 0, 0, 0},
+        {1, 0, 0, 0, 0, 0, 0},
+        {1, 0, 0, 0, 0, 0, 0},
+        {1, 0, 0, 0, 0, 0, 1},
+        {0, 1, 1, 1, 1, 1, 0},
+        {0, 0, 0, 0, 0, 0, 0},
+    };
 
-    if (setjmp(png_jmpbuf(png_ptr))) {
-        fclose(fp);
-        png_destroy_write_struct(&png_ptr, &info_ptr);
-        throw std::runtime_error("Error during PNG creation");
-    }
-
-    png_init_io(png_ptr, fp);
-    png_set_IHDR(png_ptr, info_ptr, FONT_WIDTH, FONT_HEIGHT, 8, PNG_COLOR_TYPE_GRAY, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
-    png_write_info(png_ptr, info_ptr);
-
-    // Write character bitmap to PNG
-    png_bytep row = new png_byte[FONT_WIDTH];
-    for (int y = 0; y < FONT_HEIGHT; y++) 
+    const bool CHAR_BITMAP_CLOSE_BUTTON[20][20] = 
     {
-        for (int x = 0; x < FONT_WIDTH; x++) 
-        {
-            row[x] = bitmap[y][x] ? 0xFF : 0x00;
-        }
-        png_write_row(png_ptr, row);
-    }
-    delete[] row;
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0},
+        {0,0,0,0,1,1,1,0,0,0,0,0,0,1,1,1,0,0,0,0},
+        {0,0,0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0,0,0},
+        {0,0,0,0,0,0,1,1,1,0,0,1,1,1,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,1,1,1,0,0,1,1,1,0,0,0,0,0,0},
+        {0,0,0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0,0,0},
+        {0,0,0,0,1,1,1,0,0,0,0,0,0,1,1,1,0,0,0,0},
+        {0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
+    };
 
-    png_write_end(png_ptr, NULL);
-
-    fclose(fp);
-    png_destroy_write_struct(&png_ptr, &info_ptr);
+    const bool CHAR_BITMAP_MIN_BUTTON[20][20] = 
+    {
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0},
+        {0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+    };
 }
 
-namespace get 
+namespace get
 {
     client * 
     client_from_win(const xcb_window_t * w) 
@@ -6321,7 +6373,7 @@ class WinDecoretor
             apply_event_mask(& mask, c->close_button);
             xcb_flush(conn);
 
-            create_png_with_char("/home/mellw/close.png", CHAR_BITMAP_CLOSE_BUTTON);
+            mxb::create::png("/home/mellw/close.png", bitmap::CHAR_BITMAP_CLOSE_BUTTON);
             mxb::set::win::backround::as_png("/home/mellw/close.png", c->close_button);
 
             // mxb::set::win::backround::as_png("/home/mellw/mwm_png/window_decoration_icons/close_button/1_10x10.png", c->close_button);
@@ -6396,7 +6448,7 @@ class WinDecoretor
             xcb_map_window(conn, c->min_button);
             xcb_flush(conn);
 
-            create_png_with_char("/home/mellw/min.png", CHAR_BITMAP_MIN_BUTTON);
+            mxb::create::png("/home/mellw/min.png", bitmap::CHAR_BITMAP_MIN_BUTTON);
             mxb::set::win::backround::as_png("/home/mellw/min.png", c->min_button);
 
             // mxb::set::win::backround::as_png("/home/mellw/mwm_png/window_decoration_icons/min_button/1_12x12.png", c->min_button);
@@ -7628,18 +7680,6 @@ class Event
                         // }
 
                         // log_info(mxb::get::event_mask(mxb::get::event_mask_sum(c->win)));
-
-                        try 
-                        {
-                            create_png_with_char("/home/mellw/a.png", CHAR_BITMAP_A);
-                            create_png_with_char("/home/mellw/b.png", CHAR_BITMAP_B);
-                            create_png_with_char("/home/mellw/c.png", CHAR_BITMAP_C);
-                        }
-                        catch (const std::exception & e)
-                        {
-                            log_error(e.what());
-                        }
-
                         break;
                     }
                 }
