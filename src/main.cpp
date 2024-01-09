@@ -7182,7 +7182,7 @@ class WinManager
             c->name[i] = '\0';
             free(name);
 
-            if (is_exclusive_fullscreen(c)) 
+            if (mxb::EWMH::check::is_window_fullscreen(c->win))
             {
                 c->x      = 0;
                 c->y      = 0;
