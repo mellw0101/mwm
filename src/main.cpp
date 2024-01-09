@@ -6646,28 +6646,28 @@ class WinDecoretor
             xcb_flush(conn);
 
             mxb::create::Bitmap bitmap(20, 20);
-            bitmap.modify(4, 4, 15, true);
+            bitmap.modify(4, 4, 16, true);
             bitmap.modify(5, 4, 5, true);
-            bitmap.modify(5, 14, 15, true);
+            bitmap.modify(5, 15, 16, true);
             bitmap.modify(6, 4, 5, true);
-            bitmap.modify(6, 14, 15, true);
+            bitmap.modify(6, 15, 16, true);
             bitmap.modify(7, 4, 5, true);
-            bitmap.modify(7, 14, 15, true);
+            bitmap.modify(7, 15, 16, true);
             bitmap.modify(8, 4, 5, true);
-            bitmap.modify(8, 14, 15, true);
+            bitmap.modify(8, 15, 16, true);
             bitmap.modify(9, 4, 5, true);
-            bitmap.modify(9, 14, 15, true);
+            bitmap.modify(9, 15, 16, true);
             bitmap.modify(10, 4, 5, true);
-            bitmap.modify(10, 14, 15, true);
+            bitmap.modify(10, 15, 16, true);
             bitmap.modify(11, 4, 5, true);
-            bitmap.modify(11, 14, 15, true);
+            bitmap.modify(11, 15, 16, true);
             bitmap.modify(12, 4, 5, true);
-            bitmap.modify(12, 14, 15, true);
+            bitmap.modify(12, 15, 16, true);
             bitmap.modify(13, 4, 5, true);
-            bitmap.modify(13, 14, 15, true);
+            bitmap.modify(13, 15, 16, true);
             bitmap.modify(14, 4, 5, true);
-            bitmap.modify(14, 14, 15, true);
-            bitmap.modify(15, 4, 15, true);
+            bitmap.modify(14, 15, 16, true);
+            bitmap.modify(15, 4, 16, true);
             bitmap.exportToPng("/home/mellw/max.png");
 
             mxb::set::win::backround::as_png("/home/mellw/max.png", c->max_button);
@@ -6709,8 +6709,8 @@ class WinDecoretor
             xcb_flush(conn);
 
             mxb::create::Bitmap bitmap(20, 20);            
-            bitmap.modify(9, 4, 15, true);
-            bitmap.modify(10, 4, 15, true);
+            bitmap.modify(9, 4, 16, true);
+            bitmap.modify(10, 4, 16, true);
             bitmap.exportToPng("/home/mellw/min.png");
 
             mxb::set::win::backround::as_png("/home/mellw/min.png", c->min_button);
