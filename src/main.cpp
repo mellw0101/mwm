@@ -2538,6 +2538,38 @@ class mxb
                         mxb::get::win::height(window)
                     );
                 }
+
+                static void 
+                kill(xcb_window_t window)
+                {
+                    xcb_intern_atom_cookie_t protocols_cookie = xcb_intern_atom(conn, 1, 12, "WM_PROTOCOLS");
+                    xcb_intern_atom_reply_t *protocols_reply = xcb_intern_atom_reply(conn, protocols_cookie, NULL);
+
+                    xcb_intern_atom_cookie_t delete_cookie = xcb_intern_atom(conn, 0, 16, "WM_DELETE_WINDOW");
+                    xcb_intern_atom_reply_t *delete_reply = xcb_intern_atom_reply(conn, delete_cookie, NULL);
+
+                    if (!protocols_reply || !delete_reply) 
+                    {
+                        log.log(ERROR, __func__, "Could not create atoms.");
+                        free(protocols_reply);
+                        free(delete_reply);
+                        return;
+                    }
+
+                    xcb_client_message_event_t ev = {0};
+                    ev.response_type = XCB_CLIENT_MESSAGE;
+                    ev.window = window;
+                    ev.format = 32;
+                    ev.sequence = 0;
+                    ev.type = protocols_reply->atom;
+                    ev.data.data32[0] = delete_reply->atom;
+                    ev.data.data32[1] = XCB_CURRENT_TIME;
+
+                    xcb_send_event(conn, 0, window, XCB_EVENT_MASK_NO_EVENT, (char *) & ev);
+
+                    free(protocols_reply);
+                    free(delete_reply);
+                }
             ;
         };
 
@@ -2551,19 +2583,20 @@ class mxb
                     {
                         if (c)
                         {
-                            xcb_destroy_window(conn, c->frame);
-                            xcb_destroy_window(conn, c->titlebar);
-                            xcb_destroy_window(conn, c->close_button);
-                            xcb_destroy_window(conn, c->max_button);
-                            xcb_destroy_window(conn, c->min_button);
-                            xcb_destroy_window(conn, c->border.left);
-                            xcb_destroy_window(conn, c->border.right);
-                            xcb_destroy_window(conn, c->border.top);
-                            xcb_destroy_window(conn, c->border.bottom);
-                            xcb_destroy_window(conn, c->border.top_left);
-                            xcb_destroy_window(conn, c->border.top_right);
-                            xcb_destroy_window(conn, c->border.bottom_left);
-                            xcb_destroy_window(conn, c->border.bottom_right);
+                            mxb::win::kill(c->win);
+                            mxb::win::kill(c->frame);
+                            mxb::win::kill(c->titlebar);
+                            mxb::win::kill(c->close_button);
+                            mxb::win::kill(c->max_button);
+                            mxb::win::kill(c->min_button);
+                            mxb::win::kill(c->border.left);
+                            mxb::win::kill(c->border.right);
+                            mxb::win::kill(c->border.top);
+                            mxb::win::kill(c->border.bottom);
+                            mxb::win::kill(c->border.top_left);
+                            mxb::win::kill(c->border.top_right);
+                            mxb::win::kill(c->border.bottom_left);
+                            mxb::win::kill(c->border.bottom_right);
                             xcb_flush(conn);
                         }
                         delete c;
@@ -2607,8 +2640,8 @@ class mxb
         quit(const int & status)
         {
             xcb_flush(conn);
-            mxb::Delete::ptr_vector(client_list);
-            mxb::Delete::ptr_vector(desktop_list);
+            mxb::Delete::client_vec(client_list);
+            mxb::Delete::desktop_vec(desktop_list);
             xcb_ewmh_connection_wipe(ewmh);
             xcb_disconnect(conn);
             exit(status);
@@ -6426,6 +6459,13 @@ namespace win_tools
         xcb_unmap_window(conn, c->min_button);
         xcb_unmap_window(conn, c->titlebar);
         xcb_unmap_window(conn, c->frame);
+        xcb_unmap_window(conn, c->border.left);
+        xcb_unmap_window(conn, c->border.right);
+        xcb_unmap_window(conn, c->border.top);
+        xcb_unmap_window(conn, c->border.bottom);
+        xcb_unmap_window(conn, c->border.top_right);
+        xcb_unmap_window(conn, c->border.bottom_left);
+        xcb_unmap_window(conn, c->border.bottom_right);
         xcb_flush(conn);
 
         kill_client(conn, c->win);
@@ -6434,6 +6474,13 @@ namespace win_tools
         kill_client(conn, c->min_button);
         kill_client(conn, c->titlebar);
         kill_client(conn, c->frame);
+        kill_client(conn, c->border.left);
+        kill_client(conn, c->border.right);
+        kill_client(conn, c->border.top);
+        kill_client(conn, c->border.bottom);
+        kill_client(conn, c->border.top_right);
+        kill_client(conn, c->border.bottom_left);
+        kill_client(conn, c->border.bottom_right);
         xcb_flush(conn);
         
         mxb::Client::remove(c);
