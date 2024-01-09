@@ -988,17 +988,44 @@ class mxb
                 {
                     conn = xcb_connect(displayname, screenp);
                     int status = xcb_connection_has_error(conn);
+                    mxb::check::error(status);
                     if (status > 0)
                     {
-                        log_error("Unable to make connection to the X server. ERROR_CODE: " + std::to_string(status));
                         mxb::quit(status);
                     }
                 }
 
                 static void 
-                ewmh_connection(xcb_ewmh_connection_t * c) 
+                _ewmh() 
                 {
-                    ewmh = c;
+                    if (!(ewmh = static_cast<xcb_ewmh_connection_t *>(calloc(1, sizeof(xcb_ewmh_connection_t)))))
+                    {
+                        log_error("ewmh faild to initialize");
+                        mxb::launch::program((char *) "/usr/bin/mwm-KILL");
+                    }    
+                    
+                    xcb_intern_atom_cookie_t * cookie = xcb_ewmh_init_atoms(conn, ewmh);
+                    
+                    if (!(xcb_ewmh_init_atoms_replies(ewmh, cookie, 0)))
+                    {
+                        log_error("xcb_ewmh_init_atoms_replies:faild");
+                        exit(1);
+                    }
+
+                    const char * str = "mwm";
+                    mxb::check::err
+                    (
+                        conn, 
+                        xcb_ewmh_set_wm_name
+                        (
+                            ewmh, 
+                            screen->root, 
+                            strlen(str), 
+                            str
+                        ), 
+                        __func__, 
+                        "xcb_ewmh_set_wm_name"
+                    );
                 }
 
                 static void 
@@ -2508,14 +2535,7 @@ class mxb
             mxb::Delete::ptr_vector(client_list);
             mxb::Delete::ptr_vector(desktop_list);
             xcb_ewmh_connection_wipe(ewmh);
-
-            int conn_err = xcb_connection_has_error(conn);
-            mxb::check::error(conn_err);
-            if (conn_err == 0)
-            {
-                xcb_disconnect(conn);
-            }
-
+            xcb_disconnect(conn);
             exit(status);
         }
     ;
@@ -8737,7 +8757,8 @@ setup_wm()
     configureRootWindow();
     mxb::set::cursor(screen->root, CURSOR::arrow);
 
-    ewmh_init();
+    mxb::set::_ewmh();
+    // ewmh_init();
 
     /* 
         MAKE ('5') DESKTOPS 
