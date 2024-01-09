@@ -128,7 +128,8 @@ enum class MAX
 
 struct size_pos 
 {
-    uint16_t x, y, width, height;
+    int16_t x, y;
+    uint16_t width, height;
 };
 
 struct client_border_decor
