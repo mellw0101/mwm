@@ -4986,7 +4986,7 @@ class resize_client
                 return;
             }
 
-            mxb::pointer::grab(c->win);
+            mxb::pointer::grab(c->frame);
             // grab_pointer();
             mxb::pointer::teleport(c->x + c->width, c->y + c->height);
             run();
