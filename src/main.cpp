@@ -987,12 +987,7 @@ class mxb
                 _conn(const char * displayname, int * screenp) 
                 {
                     conn = xcb_connect(displayname, screenp);
-                    int status = xcb_connection_has_error(conn);
-                    mxb::check::error(status);
-                    if (status > 0)
-                    {
-                        mxb::quit(status);
-                    }
+                    mxb::check::_conn();
                 }
 
                 static void 
@@ -1326,39 +1321,53 @@ class mxb
                         case CONN_ERR:
                         {
                             log_error("Connection error.");
+                            quit(CONN_ERR);
                             break;
                         }
                         case EXTENTION_NOT_SUPPORTED_ERR:
                         {
                             log_error("Extension not supported.");
+                            quit(EXTENTION_NOT_SUPPORTED_ERR);
                             break;
                         }
                         case MEMORY_INSUFFICIENT_ERR:
                         {
                             log_error("Insufficient memory.");
+                            quit(MEMORY_INSUFFICIENT_ERR);
                             break;
                         }
                         case REQUEST_TO_LONG_ERR:
                         {
                             log_error("Request to long.");
+                            quit(REQUEST_TO_LONG_ERR);
                             break;
                         }
                         case PARSE_ERR:
                         {
                             log_error("Parse error.");
+                            quit(PARSE_ERR);
                             break;
                         }
                         case SCREEN_NOT_FOUND_ERR:
                         {
                             log_error("Screen not found.");
+                            quit(SCREEN_NOT_FOUND_ERR);
                             break;
                         }
                         case FD_ERR:
                         {
                             log_error("File descriptor error.");
+                            quit(FD_ERR);
                             break;
                         }
                     }
+                }
+
+                static void
+                _conn()
+                {
+                    int status = xcb_connection_has_error(conn);
+                    mxb::check::error(status);
                 }
             ;
         };
@@ -1445,7 +1454,6 @@ class mxb
                         {
                             xcb_ewmh_set_active_window(ewmh, 0, window); // 0 for the first (default) screen
                             xcb_flush(conn);
-                            // xcb_ewmh_request_change_active_window(ewmh, 0, window, XCB_EWMH_CLIENT_SOURCE_TYPE_NORMAL, XCB_CURRENT_TIME, XCB_NONE);
                         }
                     ;
                 };
@@ -8585,41 +8593,6 @@ run()
     }
 }
 
-void /**
- *INITIALIZES AN EWMH CONNECTION 
- */
-ewmh_init()
-{
-    if (!(ewmh = static_cast<xcb_ewmh_connection_t *>(calloc(1, sizeof(xcb_ewmh_connection_t)))))
-    {
-        LOG_error("ewmh faild to initialize");
-        mxb::launch::program((char *) "/usr/bin/mwm-KILL");
-    }    
-    
-    xcb_intern_atom_cookie_t *cookie = xcb_ewmh_init_atoms(conn, ewmh);
-    
-    if (!(xcb_ewmh_init_atoms_replies(ewmh, cookie, 0)))
-    {
-        log_error("xcb_ewmh_init_atoms_replies:faild");
-        exit(1);
-    }
-
-    const char * str = "mwm";
-    mxb::check::err
-    (
-        conn, 
-        xcb_ewmh_set_wm_name
-        (
-            ewmh, 
-            screen->root, 
-            strlen(str), 
-            str
-        ), 
-        __func__, 
-        "xcb_ewmh_set_wm_name"
-    );
-}
-
 void
 draw_text(const char * str , const COLOR & text_color, const COLOR & bg_color, const xcb_window_t & win, const int16_t & x, const int16_t & y)
 {
@@ -8758,7 +8731,6 @@ setup_wm()
     mxb::set::cursor(screen->root, CURSOR::arrow);
 
     mxb::set::_ewmh();
-    // ewmh_init();
 
     /* 
         MAKE ('5') DESKTOPS 
