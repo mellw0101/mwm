@@ -1250,16 +1250,7 @@ class mxb
                                             xcb_image_destroy(xcb_image);
                                             imlib_free_image(); // Free scaled image
 
-                                            xcb_clear_area
-                                            (
-                                                conn, 
-                                                0, 
-                                                win, 
-                                                0, 
-                                                0, 
-                                                mxb::get::win::width(win), 
-                                                mxb::get::win::height(win)
-                                            );
+                                            mxb::win::clear(win);
                                         }
                                     ;
                                 };
@@ -8584,21 +8575,8 @@ configureRootWindow()
                     XCB_EVENT_MASK_KEY_RELEASE           |
                     XCB_EVENT_MASK_POINTER_MOTION
     ;
-    // APPLY THE EVENT MASKS TO THE ROOT WINDOW
     mxb::set::event_mask(& mask, screen->root);
-
     mxb::win::clear(screen->root);
-    // // CLEAR THE ROOT WINDOW TO APPLY THE CHANGES
-    // xcb_clear_area
-    // (
-    //     conn, 
-    //     0,
-    //     screen->root,
-    //     0, 
-    //     0,
-    //     screen->width_in_pixels,
-    //     screen->height_in_pixels
-    // );
 
     // FLUSH TO MAKE X SERVER HANDEL REQUEST NOW
     xcb_flush(conn);
