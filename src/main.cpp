@@ -8273,7 +8273,6 @@ class Event
                         resize_client::no_border(c, 0, 0);
                         focus::client(c);
                     }
-                        
                     return;
                 }
             }
