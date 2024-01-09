@@ -1671,6 +1671,47 @@ class mxb
                     );
                     xcb_flush(conn);
                 }
+
+                static void
+                send_sigterm(client * c)
+                {
+                    if (!c)
+                    {
+                        return;
+                    }
+
+                    xcb_unmap_window(conn, c->win);
+                    xcb_unmap_window(conn, c->close_button);
+                    xcb_unmap_window(conn, c->max_button);
+                    xcb_unmap_window(conn, c->min_button);
+                    xcb_unmap_window(conn, c->titlebar);
+                    xcb_unmap_window(conn, c->frame);
+                    xcb_unmap_window(conn, c->border.left);
+                    xcb_unmap_window(conn, c->border.right);
+                    xcb_unmap_window(conn, c->border.top);
+                    xcb_unmap_window(conn, c->border.bottom);
+                    xcb_unmap_window(conn, c->border.top_right);
+                    xcb_unmap_window(conn, c->border.bottom_left);
+                    xcb_unmap_window(conn, c->border.bottom_right);
+                    xcb_flush(conn);
+
+                    mxb::win::kill(c->win);
+                    mxb::win::kill(c->close_button);
+                    mxb::win::kill(c->max_button);
+                    mxb::win::kill(c->min_button);
+                    mxb::win::kill(c->titlebar);
+                    mxb::win::kill(c->frame);
+                    mxb::win::kill(c->border.left);
+                    mxb::win::kill(c->border.right);
+                    mxb::win::kill(c->border.top);
+                    mxb::win::kill(c->border.bottom);
+                    mxb::win::kill(c->border.top_right);
+                    mxb::win::kill(c->border.bottom_left);
+                    mxb::win::kill(c->border.bottom_right);
+                    xcb_flush(conn);
+                    
+                    mxb::Client::remove(c);
+                }
             ;
         };
 
@@ -2591,23 +2632,9 @@ class mxb
                     {
                         if (c)
                         {
-                            mxb::win::kill(c->win);
-                            mxb::win::kill(c->frame);
-                            mxb::win::kill(c->titlebar);
-                            mxb::win::kill(c->close_button);
-                            mxb::win::kill(c->max_button);
-                            mxb::win::kill(c->min_button);
-                            mxb::win::kill(c->border.left);
-                            mxb::win::kill(c->border.right);
-                            mxb::win::kill(c->border.top);
-                            mxb::win::kill(c->border.bottom);
-                            mxb::win::kill(c->border.top_left);
-                            mxb::win::kill(c->border.top_right);
-                            mxb::win::kill(c->border.bottom_left);
-                            mxb::win::kill(c->border.bottom_right);
+                            mxb::Client::send_sigterm(c);
                             xcb_flush(conn);
                         }
-                        delete c;
                     }
 
                     vec.clear();
