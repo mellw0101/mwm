@@ -5030,7 +5030,7 @@ class resize_client
                         return;
                     }
                     
-                    grab_pointer();
+                    mxb::pointer::grab(c->frame);
 
                     // teleport_mouse(mxb::Client::get::client_edge(c, 10));
 
@@ -5046,34 +5046,6 @@ class resize_client
                 uint32_t x;
                 uint32_t y;
 
-                void
-                grab_pointer()
-                {
-                    // Grab the pointer to track mouse events for window resizing
-                    xcb_grab_pointer_cookie_t cookie = xcb_grab_pointer
-                    (
-                        conn,
-                        false, // owner_events: false to not propagate events to other clients
-                        c->win,
-                        XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_POINTER_MOTION,
-                        XCB_GRAB_MODE_ASYNC,
-                        XCB_GRAB_MODE_ASYNC,
-                        XCB_NONE,
-                        XCB_NONE,
-                        XCB_CURRENT_TIME
-                    );
-
-                    // CHECK IF THE POINTER GRAB WAS SUCCESSFULL
-                    xcb_grab_pointer_reply_t* reply = xcb_grab_pointer_reply(conn, cookie, NULL);
-                    if (!reply || reply->status != XCB_GRAB_STATUS_SUCCESS) 
-                    {
-                        LOG_error("Could not grab pointer");
-                        free(reply);
-                        return;
-                    }
-                    free(reply);
-                }
-
                 void 
                 teleport_mouse(edge edge) 
                 {
@@ -5081,20 +5053,7 @@ class resize_client
                     {
                         case edge::TOP:
                         {
-
-                            xcb_warp_pointer
-                            (
-                                conn, 
-                                XCB_NONE, 
-                                screen->root, 
-                                0, 
-                                0, 
-                                0, 
-                                0, 
-                                mxb::pointer::get::x(), 
-                                y
-                            );
-                            xcb_flush(conn);
+                            mxb::pointer::teleport(mxb::pointer::get::x(), c->y);
                         }
                         case edge::BOTTOM_edge:
                         {
