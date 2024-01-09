@@ -2507,12 +2507,15 @@ class mxb
             xcb_flush(conn);
             mxb::Delete::ptr_vector(client_list);
             mxb::Delete::ptr_vector(desktop_list);
+            xcb_ewmh_connection_wipe(ewmh);
 
             int conn_err = xcb_connection_has_error(conn);
             mxb::check::error(conn_err);
-            
-            xcb_ewmh_connection_wipe(ewmh);
-            xcb_disconnect(conn);
+            if (conn_err == 0)
+            {
+                xcb_disconnect(conn);
+            }
+
             exit(status);
         }
     ;
