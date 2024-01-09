@@ -7184,6 +7184,8 @@ class WinManager
 
             if (mxb::EWMH::check::is_window_fullscreen(c->win))
             {
+                log_info("window is fullscreen");
+                
                 c->x      = 0;
                 c->y      = 0;
                 c->width  = screen->width_in_pixels;
