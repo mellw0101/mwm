@@ -5608,7 +5608,7 @@ class resize_client
                             const uint32_t height = (y - c->y);
 
                             mxb::conf::win::x_width_height(c->frame, x, width, height);
-                            mxb::conf::win::width_height(c->win, (width - (BORDER_SIZE * 2)), (height - (BORDER_SIZE * 2)));
+                            mxb::conf::win::width_height(c->win, (width - (BORDER_SIZE * 2)), (height - (BORDER_SIZE * 2) - TITLE_BAR_HEIGHT));
                             mxb::conf::win::width(c->titlebar, (width - BORDER_SIZE));
                             mxb::conf::win::x(c->close_button, (width - BUTTON_SIZE - BORDER_SIZE));
                             mxb::conf::win::x(c->max_button, (width - (BUTTON_SIZE * 2) - BORDER_SIZE));
