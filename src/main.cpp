@@ -2543,14 +2543,14 @@ class mxb
                 kill(xcb_window_t window)
                 {
                     xcb_intern_atom_cookie_t protocols_cookie = xcb_intern_atom(conn, 1, 12, "WM_PROTOCOLS");
-                    xcb_intern_atom_reply_t *protocols_reply = xcb_intern_atom_reply(conn, protocols_cookie, NULL);
+                    xcb_intern_atom_reply_t * protocols_reply = xcb_intern_atom_reply(conn, protocols_cookie, NULL);
 
                     xcb_intern_atom_cookie_t delete_cookie = xcb_intern_atom(conn, 0, 16, "WM_DELETE_WINDOW");
-                    xcb_intern_atom_reply_t *delete_reply = xcb_intern_atom_reply(conn, delete_cookie, NULL);
+                    xcb_intern_atom_reply_t * delete_reply = xcb_intern_atom_reply(conn, delete_cookie, NULL);
 
                     if (!protocols_reply || !delete_reply) 
                     {
-                        log.log(ERROR, __func__, "Could not create atoms.");
+                        log_error("Could not create atoms.");
                         free(protocols_reply);
                         free(delete_reply);
                         return;
@@ -2565,7 +2565,14 @@ class mxb
                     ev.data.data32[0] = delete_reply->atom;
                     ev.data.data32[1] = XCB_CURRENT_TIME;
 
-                    xcb_send_event(conn, 0, window, XCB_EVENT_MASK_NO_EVENT, (char *) & ev);
+                    xcb_send_event
+                    (
+                        conn,
+                        0,
+                        window,
+                        XCB_EVENT_MASK_NO_EVENT,
+                        (char *) & ev
+                    );
 
                     free(protocols_reply);
                     free(delete_reply);
