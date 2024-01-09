@@ -5351,71 +5351,22 @@ class resize_client
                     {
                         case edge::TOP:
                         {
-
-                            xcb_warp_pointer
-                            (
-                                conn, 
-                                XCB_NONE, 
-                                screen->root, 
-                                0, 
-                                0, 
-                                0, 
-                                0, 
-                                mxb::pointer::get::x(), 
-                                c->y
-                            );
-                            xcb_flush(conn);
+                            mxb::pointer::teleport(mxb::pointer::get::x(), c->y);
                             break;
                         }
                         case edge::BOTTOM_edge:
                         {
-                            xcb_warp_pointer
-                            (
-                                conn, 
-                                XCB_NONE, 
-                                screen->root, 
-                                0, 
-                                0, 
-                                0, 
-                                0, 
-                                mxb::pointer::get::x(), 
-                                c->y + c->height
-                            );
-                            xcb_flush(conn);
+                            mxb::pointer::teleport(mxb::pointer::get::x(), (c->y + c->height));
                             break;
                         } 
                         case edge::LEFT:
                         {
-                            xcb_warp_pointer
-                            (
-                                conn, 
-                                XCB_NONE, 
-                                screen->root, 
-                                0, 
-                                0, 
-                                0, 
-                                0, 
-                                c->x, 
-                                mxb::pointer::get::y()
-                            );
-                            xcb_flush(conn);
+                            mxb::pointer::teleport(c->x, mxb::pointer::get::y());
                             break;
                         }
                         case edge::RIGHT:
                         {
-                            xcb_warp_pointer
-                            (
-                                conn, 
-                                XCB_NONE, 
-                                screen->root, 
-                                0, 
-                                0, 
-                                0, 
-                                0, 
-                                c->x + c->width, 
-                                mxb::pointer::get::y()
-                            );
-                            xcb_flush(conn);
+                            mxb::pointer::teleport((c->x + c->width), mxb::pointer::get::y());
                             break;
                         }
                         case edge::NONE:
