@@ -1325,6 +1325,45 @@ class mxb
                             xcb_ewmh_set_active_window(ewmh, 0, window); // 0 for the first (default) screen
                             xcb_flush(conn);
                         }
+
+                        static void
+                        max_win_state(const xcb_window_t & window)
+                        {
+                            xcb_change_property
+                            (
+                                conn,
+                                XCB_PROP_MODE_REPLACE,
+                                window,
+                                ewmh->_NET_WM_STATE,
+                                XCB_ATOM_ATOM,
+                                32,
+                                1,
+                                &ewmh->_NET_WM_STATE_FULLSCREEN
+                            );
+                            xcb_flush(conn);
+                        }
+                    ;
+                };
+
+                class unset
+                {
+                    public:
+                        static void
+                        max_win_state(const xcb_window_t & window)
+                        {
+                            xcb_change_property
+                            (
+                                conn,
+                                XCB_PROP_MODE_REPLACE,
+                                window,
+                                ewmh->_NET_WM_STATE, 
+                                XCB_ATOM_ATOM,
+                                32,
+                                0,
+                                0
+                            );
+                            xcb_flush(conn);
+                        }
                     ;
                 };
 
@@ -5925,17 +5964,18 @@ class max_win
                 screen->width_in_pixels + (BORDER_SIZE * 2), 
                 screen->height_in_pixels + TITLE_BAR_HEIGHT + (BORDER_SIZE * 2)
             );
-            xcb_change_property
-            (
-                conn,
-                XCB_PROP_MODE_REPLACE,
-                c->win,
-                ewmh->_NET_WM_STATE,
-                XCB_ATOM_ATOM,
-                32,
-                1,
-                &ewmh->_NET_WM_STATE_FULLSCREEN
-            );
+            mxb::EWMH::set::max_win_state(c->win);
+            // xcb_change_property
+            // (
+            //     conn,
+            //     XCB_PROP_MODE_REPLACE,
+            //     c->win,
+            //     ewmh->_NET_WM_STATE,
+            //     XCB_ATOM_ATOM,
+            //     32,
+            //     1,
+            //     &ewmh->_NET_WM_STATE_FULLSCREEN
+            // );
             xcb_flush(conn);
         }
 
@@ -5970,17 +6010,18 @@ class max_win
                 c->max_ewmh_ogsize.width, 
                 c->max_ewmh_ogsize.height
             );
-            xcb_change_property
-            (
-                conn,
-                XCB_PROP_MODE_REPLACE,
-                c->win,
-                ewmh->_NET_WM_STATE, 
-                XCB_ATOM_ATOM,
-                32,
-                0,
-                0
-            );
+            mxb::EWMH::unset::max_win_state(c->win);
+            // xcb_change_property
+            // (
+            //     conn,
+            //     XCB_PROP_MODE_REPLACE,
+            //     c->win,
+            //     ewmh->_NET_WM_STATE, 
+            //     XCB_ATOM_ATOM,
+            //     32,
+            //     0,
+            //     0
+            // );
             xcb_flush(conn);
         }
 
@@ -5997,7 +6038,6 @@ class max_win
         button_max_win(client * c)
         {
             save_max_button_ogsize(c);
-            c->ismax = true;
             max_win_animate
             (
                 c,
@@ -6012,7 +6052,6 @@ class max_win
         void
         button_unmax_win(client * c)
         {
-            c->ismax = false;
             max_win_animate
             (
                 c, 
@@ -7149,7 +7188,6 @@ class WinManager
             c->y      = (data.y <= 0)       ? (screen->height_in_pixels / 2) - (c->height / 2) : data.y;
             c->depth   = 24;
             c->desktop = cur_d->desktop;
-            c->ismax   = false;
 
             for (int i = 0; i < 256; ++i)
             {
