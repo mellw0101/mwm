@@ -2063,7 +2063,7 @@ class mxb
                         }
                         
                         static void
-                        max_button(const char * file_name)
+                        max_button(const char * file_creation_path)
                         {
                             mxb::create::Bitmap bitmap(20, 20);
                             bitmap.modify(4, 4, 16, true);
@@ -2088,7 +2088,7 @@ class mxb
                             bitmap.modify(14, 4, 5, true);
                             bitmap.modify(14, 15, 16, true);
                             bitmap.modify(15, 4, 16, true);
-                            bitmap.exportToPng(file_name);
+                            bitmap.exportToPng(file_creation_path);
                         }
                         
                         static void
@@ -2544,6 +2544,42 @@ class mxb
         class Delete
         {
             public:
+                static void
+                client_vec(std::vector<client *> & vec)
+                {
+                    for (client * c : vec)
+                    {
+                        if (c)
+                        {
+                            xcb_destroy_window(conn, c->frame);
+                            xcb_destroy_window(conn, c->titlebar);
+                            xcb_destroy_window(conn, c->close_button);
+                            xcb_destroy_window(conn, c->max_button);
+                            xcb_destroy_window(conn, c->min_button);
+                            xcb_flush(conn);
+                        }
+                        delete c;
+                    }
+
+                    vec.clear();
+
+                    std::vector<client *>().swap(vec);
+                }
+
+                static void
+                desktop_vec(std::vector<desktop *> & vec)
+                {
+                    for (desktop * d : vec)
+                    {
+                        mxb::Delete::client_vec(d->current_clients);
+                        delete d;
+                    }
+
+                    vec.clear();
+
+                    std::vector<desktop *>().swap(vec);
+                }
+
                 template <typename Type>
                 static void 
                 ptr_vector(std::vector<Type *>& vec) 
@@ -2563,8 +2599,8 @@ class mxb
         quit(const int & status)
         {
             xcb_flush(conn);
-            mxb::Delete::ptr_vector(client_list);
-            mxb::Delete::ptr_vector(desktop_list);
+            mxb::Delete::client_vec(client_list);
+            mxb::Delete::desktop_vec(desktop_list);
             xcb_ewmh_connection_wipe(ewmh);
             xcb_disconnect(conn);
             exit(status);
@@ -6825,10 +6861,7 @@ class WinDecoretor
             xcb_flush(conn);
 
             mxb::create::icon::max_button("/home/mellw/max.png");
-
             mxb::set::win::backround::as_png("/home/mellw/max.png", c->max_button);
-            // mxb::set::win::backround::as_png("/home/mellw/mwm_png/window_decoration_icons/max_button/1_12x12.png", c->max_button);
-            
         }
 
         void
