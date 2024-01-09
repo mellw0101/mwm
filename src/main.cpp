@@ -656,45 +656,6 @@ class mxb
                     ;
                 };
 
-                class pointer
-                {
-                    public:
-                        static uint32_t
-                        x()
-                        {
-                            xcb_query_pointer_cookie_t cookie = xcb_query_pointer(conn, screen->root);
-                            xcb_query_pointer_reply_t * reply = xcb_query_pointer_reply(conn, cookie, nullptr);
-                            if (!reply) 
-                            {
-                                log_error("reply is nullptr.");
-                                return 0;                            
-                            } 
-
-                            uint32_t x;
-                            x = reply->root_x;
-                            free(reply);
-                            return x;
-                        }
-                        
-                        static uint32_t
-                        y()
-                        {
-                            xcb_query_pointer_cookie_t cookie = xcb_query_pointer(conn, screen->root);
-                            xcb_query_pointer_reply_t * reply = xcb_query_pointer_reply(conn, cookie, nullptr);
-                            if (!reply) 
-                            {
-                                log_error("reply is nullptr.");
-                                return 0;                            
-                            } 
-
-                            uint32_t y;
-                            y = reply->root_y;
-                            free(reply);
-                            return y;
-                        }
-                    ;
-                };
-
                 static xcb_atom_t
                 atom(const char * atom_name) 
                 {
@@ -1074,96 +1035,6 @@ class mxb
                     xcb_flush(conn);
                 }
 
-                class cursor
-                {
-                    public:
-                        cursor(xcb_window_t window, CURSOR cursor_type) 
-                        {
-                            xcb_cursor_context_t * ctx;
-
-                            if (xcb_cursor_context_new(conn, screen, &ctx) < 0) 
-                            {
-                                log.log(ERROR, __func__, "Unable to create cursor context.");
-                                return;
-                            }
-
-                            xcb_cursor_t cursor = xcb_cursor_load_cursor(ctx, cursor_from_enum(cursor_type));
-                            if (!cursor) 
-                            {
-                                log.log(ERROR, __func__, "Unable to load cursor.");
-                                return;
-                            }
-
-                            xcb_change_window_attributes
-                            (
-                                conn, 
-                                window, 
-                                XCB_CW_CURSOR, 
-                                (uint32_t[1])
-                                {
-                                    cursor 
-                                }
-                            );
-                            xcb_flush(conn);
-
-                            xcb_cursor_context_free(ctx);
-                            xcb_free_cursor(conn, cursor);
-                        }
-                    ;
-    
-                    private:
-                        const char *
-                        cursor_from_enum(CURSOR CURSOR)
-                        {
-                            switch (CURSOR) 
-                            {
-                                case CURSOR::arrow: return "arrow";
-                                case CURSOR::hand1: return "hand1";
-                                case CURSOR::hand2: return "hand2";
-                                case CURSOR::watch: return "watch";
-                                case CURSOR::xterm: return "xterm";
-                                case CURSOR::cross: return "cross";
-                                case CURSOR::left_ptr: return "left_ptr";
-                                case CURSOR::right_ptr: return "right_ptr";
-                                case CURSOR::center_ptr: return "center_ptr";
-                                case CURSOR::sb_v_double_arrow: return "sb_v_double_arrow";
-                                case CURSOR::sb_h_double_arrow: return "sb_h_double_arrow";
-                                case CURSOR::fleur: return "fleur";
-                                case CURSOR::question_arrow: return "question_arrow";
-                                case CURSOR::pirate: return "pirate";
-                                case CURSOR::coffee_mug: return "coffee_mug";
-                                case CURSOR::umbrella: return "umbrella";
-                                case CURSOR::circle: return "circle";
-                                case CURSOR::xsb_left_arrow: return "xsb_left_arrow";
-                                case CURSOR::xsb_right_arrow: return "xsb_right_arrow";
-                                case CURSOR::xsb_up_arrow: return "xsb_up_arrow";
-                                case CURSOR::xsb_down_arrow: return "xsb_down_arrow";
-                                case CURSOR::top_left_corner: return "top_left_corner";
-                                case CURSOR::top_right_corner: return "top_right_corner";
-                                case CURSOR::bottom_left_corner: return "bottom_left_corner";
-                                case CURSOR::bottom_right_corner: return "bottom_right_corner";
-                                case CURSOR::sb_left_arrow: return "sb_left_arrow";
-                                case CURSOR::sb_right_arrow: return "sb_right_arrow";
-                                case CURSOR::sb_up_arrow: return "sb_up_arrow";
-                                case CURSOR::sb_down_arrow: return "sb_down_arrow";
-                                case CURSOR::top_side: return "top_side";
-                                case CURSOR::bottom_side: return "bottom_side";
-                                case CURSOR::left_side: return "left_side";
-                                case CURSOR::right_side: return "right_side";
-                                case CURSOR::top_tee: return "top_tee";
-                                case CURSOR::bottom_tee: return "bottom_tee";
-                                case CURSOR::left_tee: return "left_tee";
-                                case CURSOR::right_tee: return "right_tee";
-                                case CURSOR::top_left_arrow: return "top_left_arrow";
-                                case CURSOR::top_right_arrow: return "top_right_arrow";
-                                case CURSOR::bottom_left_arrow: return "bottom_left_arrow";
-                                case CURSOR::bottom_right_arrow: return "bottom_right_arrow";
-                                default: return "left_ptr";
-                            }
-                        }
-                    ;
-                };
-
                 class win
                 {
                     public:
@@ -1541,8 +1412,8 @@ class mxb
                         static client *
                         client_edge_prox_to_pointer(const int & prox)
                         {
-                            const uint32_t & x = mxb::get::pointer::x();
-                            const uint32_t & y = mxb::get::pointer::y();
+                            const uint32_t & x = mxb::pointer::get::x();
+                            const uint32_t & y = mxb::pointer::get::y();
                             for (const auto & c : cur_d->current_clients)
                             {
                                 // LEFT EDGE OF CLIENT
@@ -1580,8 +1451,8 @@ class mxb
                         static edge
                         client_edge(client * c, const int & prox)
                         {
-                            const uint32_t & x = mxb::get::pointer::x();
-                            const uint32_t & y = mxb::get::pointer::y();
+                            const uint32_t & x = mxb::pointer::get::x();
+                            const uint32_t & y = mxb::pointer::get::y();
 
                             const uint32_t & top_border = c->y;
                             const uint32_t & bottom_border = (c->y + c->height);
@@ -2662,6 +2533,139 @@ class mxb
                     free(protocols_reply);
                     free(delete_reply);
                 }
+            ;
+        };
+
+        class pointer
+        {
+            public:
+                class set
+                {
+                    public:
+                        set(xcb_window_t window, CURSOR cursor_type) 
+                        {
+                            xcb_cursor_context_t * ctx;
+
+                            if (xcb_cursor_context_new(conn, screen, &ctx) < 0) 
+                            {
+                                log.log(ERROR, __func__, "Unable to create cursor context.");
+                                return;
+                            }
+
+                            xcb_cursor_t cursor = xcb_cursor_load_cursor(ctx, pointer_from_enum(cursor_type));
+                            if (!cursor) 
+                            {
+                                log.log(ERROR, __func__, "Unable to load cursor.");
+                                return;
+                            }
+
+                            xcb_change_window_attributes
+                            (
+                                conn, 
+                                window, 
+                                XCB_CW_CURSOR, 
+                                (uint32_t[1])
+                                {
+                                    cursor 
+                                }
+                            );
+                            xcb_flush(conn);
+
+                            xcb_cursor_context_free(ctx);
+                            xcb_free_cursor(conn, cursor);
+                        }
+
+                    private:
+                        const char *
+                        pointer_from_enum(CURSOR CURSOR)
+                        {
+                            switch (CURSOR) 
+                            {
+                                case CURSOR::arrow: return "arrow";
+                                case CURSOR::hand1: return "hand1";
+                                case CURSOR::hand2: return "hand2";
+                                case CURSOR::watch: return "watch";
+                                case CURSOR::xterm: return "xterm";
+                                case CURSOR::cross: return "cross";
+                                case CURSOR::left_ptr: return "left_ptr";
+                                case CURSOR::right_ptr: return "right_ptr";
+                                case CURSOR::center_ptr: return "center_ptr";
+                                case CURSOR::sb_v_double_arrow: return "sb_v_double_arrow";
+                                case CURSOR::sb_h_double_arrow: return "sb_h_double_arrow";
+                                case CURSOR::fleur: return "fleur";
+                                case CURSOR::question_arrow: return "question_arrow";
+                                case CURSOR::pirate: return "pirate";
+                                case CURSOR::coffee_mug: return "coffee_mug";
+                                case CURSOR::umbrella: return "umbrella";
+                                case CURSOR::circle: return "circle";
+                                case CURSOR::xsb_left_arrow: return "xsb_left_arrow";
+                                case CURSOR::xsb_right_arrow: return "xsb_right_arrow";
+                                case CURSOR::xsb_up_arrow: return "xsb_up_arrow";
+                                case CURSOR::xsb_down_arrow: return "xsb_down_arrow";
+                                case CURSOR::top_left_corner: return "top_left_corner";
+                                case CURSOR::top_right_corner: return "top_right_corner";
+                                case CURSOR::bottom_left_corner: return "bottom_left_corner";
+                                case CURSOR::bottom_right_corner: return "bottom_right_corner";
+                                case CURSOR::sb_left_arrow: return "sb_left_arrow";
+                                case CURSOR::sb_right_arrow: return "sb_right_arrow";
+                                case CURSOR::sb_up_arrow: return "sb_up_arrow";
+                                case CURSOR::sb_down_arrow: return "sb_down_arrow";
+                                case CURSOR::top_side: return "top_side";
+                                case CURSOR::bottom_side: return "bottom_side";
+                                case CURSOR::left_side: return "left_side";
+                                case CURSOR::right_side: return "right_side";
+                                case CURSOR::top_tee: return "top_tee";
+                                case CURSOR::bottom_tee: return "bottom_tee";
+                                case CURSOR::left_tee: return "left_tee";
+                                case CURSOR::right_tee: return "right_tee";
+                                case CURSOR::top_left_arrow: return "top_left_arrow";
+                                case CURSOR::top_right_arrow: return "top_right_arrow";
+                                case CURSOR::bottom_left_arrow: return "bottom_left_arrow";
+                                case CURSOR::bottom_right_arrow: return "bottom_right_arrow";
+                                default: return "left_ptr";
+                            }
+                        }
+                    ;
+                };
+
+                class get
+                {
+                    public:
+                        static uint32_t
+                        x()
+                        {
+                            xcb_query_pointer_cookie_t cookie = xcb_query_pointer(conn, screen->root);
+                            xcb_query_pointer_reply_t * reply = xcb_query_pointer_reply(conn, cookie, nullptr);
+                            if (!reply) 
+                            {
+                                log_error("reply is nullptr.");
+                                return 0;                            
+                            } 
+
+                            uint32_t x;
+                            x = reply->root_x;
+                            free(reply);
+                            return x;
+                        }
+                        
+                        static uint32_t
+                        y()
+                        {
+                            xcb_query_pointer_cookie_t cookie = xcb_query_pointer(conn, screen->root);
+                            xcb_query_pointer_reply_t * reply = xcb_query_pointer_reply(conn, cookie, nullptr);
+                            if (!reply) 
+                            {
+                                log_error("reply is nullptr.");
+                                return 0;                            
+                            } 
+
+                            uint32_t y;
+                            y = reply->root_y;
+                            free(reply);
+                            return y;
+                        }
+                    ;
+                };
             ;
         };
 
@@ -5014,7 +5018,7 @@ class resize_client
                                 0, 
                                 0, 
                                 0, 
-                                mxb::get::pointer::x(), 
+                                mxb::pointer::get::x(), 
                                 y
                             );
                             xcb_flush(conn);
@@ -5030,7 +5034,7 @@ class resize_client
                                 0, 
                                 0, 
                                 0, 
-                                mxb::get::pointer::x(), 
+                                mxb::pointer::get::x(), 
                                 c->y + c->height
                             );
                             xcb_flush(conn);
@@ -5047,7 +5051,7 @@ class resize_client
                                 0, 
                                 0, 
                                 c->x, 
-                                mxb::get::pointer::y()
+                                mxb::pointer::get::y()
                             );
                             xcb_flush(conn);
                         }
@@ -5063,7 +5067,7 @@ class resize_client
                                 0, 
                                 0, 
                                 c->x + c->width, 
-                                mxb::get::pointer::y()
+                                mxb::pointer::get::y()
                             );
                             xcb_flush(conn);
                         }
@@ -5352,7 +5356,7 @@ class resize_client
                                 0, 
                                 0, 
                                 0, 
-                                mxb::get::pointer::x(), 
+                                mxb::pointer::get::x(), 
                                 c->y
                             );
                             xcb_flush(conn);
@@ -5368,7 +5372,7 @@ class resize_client
                                 0, 
                                 0, 
                                 0, 
-                                mxb::get::pointer::x(), 
+                                mxb::pointer::get::x(), 
                                 c->y + c->height
                             );
                             xcb_flush(conn);
@@ -5385,7 +5389,7 @@ class resize_client
                                 0, 
                                 0, 
                                 c->x, 
-                                mxb::get::pointer::y()
+                                mxb::pointer::get::y()
                             );
                             xcb_flush(conn);
                         }
@@ -5401,7 +5405,7 @@ class resize_client
                                 0, 
                                 0, 
                                 c->x + c->width, 
-                                mxb::get::pointer::y()
+                                mxb::pointer::get::y()
                             );
                             xcb_flush(conn);
                         }
@@ -6921,7 +6925,7 @@ class WinDecoretor
                 NULL
             );
             mxb::set::win::backround::as_color(c->border.left, BLACK);
-            mxb::set::cursor(c->border.left, CURSOR::left_side);
+            mxb::pointer::set(c->border.left, CURSOR::left_side);
             win_tools::grab_buttons(c->border.left, {{ L_MOUSE_BUTTON, NULL }});
             xcb_map_window(conn, c->border.left);
             xcb_flush(conn);
@@ -6944,7 +6948,7 @@ class WinDecoretor
                 NULL
             );
             mxb::set::win::backround::as_color(c->border.right, BLACK);
-            mxb::set::cursor(c->border.right, CURSOR::right_side);
+            mxb::pointer::set(c->border.right, CURSOR::right_side);
             win_tools::grab_buttons(c->border.right, {{ L_MOUSE_BUTTON, NULL }});
             xcb_map_window(conn, c->border.right);
             xcb_flush(conn);
@@ -6967,7 +6971,7 @@ class WinDecoretor
                 NULL
             );
             mxb::set::win::backround::as_color(c->border.top, BLACK);
-            mxb::set::cursor(c->border.top, CURSOR::top_side);
+            mxb::pointer::set(c->border.top, CURSOR::top_side);
             win_tools::grab_buttons(c->border.top, {{ L_MOUSE_BUTTON, NULL }});
             xcb_map_window(conn, c->border.top);
             xcb_flush(conn);
@@ -6990,7 +6994,7 @@ class WinDecoretor
                 NULL
             );
             mxb::set::win::backround::as_color(c->border.bottom, BLACK);
-            mxb::set::cursor(c->border.bottom, CURSOR::bottom_side);
+            mxb::pointer::set(c->border.bottom, CURSOR::bottom_side);
             win_tools::grab_buttons(c->border.bottom, {{ L_MOUSE_BUTTON, NULL }});
             xcb_map_window(conn, c->border.bottom);
             xcb_flush(conn);
@@ -7013,7 +7017,7 @@ class WinDecoretor
                 NULL
             );
             mxb::set::win::backround::as_color(c->border.top_left, BLACK);
-            mxb::set::cursor(c->border.top_left, CURSOR::top_left_corner);
+            mxb::pointer::set(c->border.top_left, CURSOR::top_left_corner);
             win_tools::grab_buttons(c->border.top_left, {{ L_MOUSE_BUTTON, NULL }});
             xcb_map_window(conn, c->border.top_left);
             xcb_flush(conn);
@@ -7036,7 +7040,7 @@ class WinDecoretor
                 NULL
             );
             mxb::set::win::backround::as_color(c->border.top_right, BLACK);
-            mxb::set::cursor(c->border.top_right, CURSOR::top_right_corner);
+            mxb::pointer::set(c->border.top_right, CURSOR::top_right_corner);
             win_tools::grab_buttons(c->border.top_right, {{ L_MOUSE_BUTTON, NULL }});
             xcb_map_window(conn, c->border.top_right);
             xcb_flush(conn);
@@ -7059,7 +7063,7 @@ class WinDecoretor
                 NULL
             );
             mxb::set::win::backround::as_color(c->border.bottom_left, BLACK);
-            mxb::set::cursor(c->border.bottom_left, CURSOR::bottom_left_corner);
+            mxb::pointer::set(c->border.bottom_left, CURSOR::bottom_left_corner);
             win_tools::grab_buttons(c->border.bottom_left, {{ L_MOUSE_BUTTON, NULL }});
             xcb_map_window(conn, c->border.bottom_left);
             xcb_flush(conn);
@@ -7082,7 +7086,7 @@ class WinDecoretor
                 NULL
             );
             mxb::set::win::backround::as_color(c->border.bottom_right, BLACK);
-            mxb::set::cursor(c->border.bottom_right, CURSOR::bottom_right_corner);
+            mxb::pointer::set(c->border.bottom_right, CURSOR::bottom_right_corner);
             win_tools::grab_buttons(c->border.bottom_right, {{ L_MOUSE_BUTTON, NULL }});
             xcb_map_window(conn, c->border.bottom_right);
             xcb_flush(conn);
@@ -8756,7 +8760,7 @@ setup_wm()
     mxb::set::_screen();
     setSubstructureRedirectMask(); 
     configureRootWindow();
-    mxb::set::cursor(screen->root, CURSOR::arrow);
+    mxb::pointer::set(screen->root, CURSOR::arrow);
 
     mxb::set::_ewmh();
 
