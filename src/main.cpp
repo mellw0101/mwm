@@ -1479,6 +1479,40 @@ class mxb
                             }
                             return nullptr;
                         }
+
+                        static client *
+                        if_client_is_next_to_other_client(client * c)
+                        {
+                            for (client * c2 : cur_d->current_clients)
+                            {
+                                if (c == c2)
+                                {
+                                    continue;
+                                }
+
+                                if (c->x == c2->x + c2->width)
+                                {
+                                    return c2;
+                                }
+
+                                if (c->x + c->width == c2->x)
+                                {
+                                    return c2;
+                                }
+
+                                if (c->y == c2->y + c2->height)
+                                {
+                                    return c2;
+                                }
+
+                                if (c->y + c->height == c2->y)
+                                {
+                                    return c2;
+                                }
+                            }
+
+                            return nullptr;
+                        }
                     ;
                 };  
 
@@ -5102,11 +5136,9 @@ class resize_client
                     }
                     
                     mxb::pointer::grab(c->frame);
-
-                    // teleport_mouse(mxb::Client::get::client_edge(c, 10));
-
-                    run(mxb::Client::get::client_edge(c, 10));
-
+                    edge edge = mxb::Client::get::client_edge(c, 10);
+                    teleport_mouse(edge);
+                    run(edge);
                     xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
                     xcb_flush(conn);
                 }

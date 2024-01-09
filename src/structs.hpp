@@ -82,7 +82,7 @@ enum TILE_ANIMATION
 
 typedef enum Decor_data 
 {
-    BORDER_SIZE      = 4,
+    BORDER_SIZE      = 0,
     TITLE_BAR_HEIGHT = 20,
     BUTTON_SIZE      = TITLE_BAR_HEIGHT
 } 
@@ -166,7 +166,7 @@ struct client
     size_pos tile_ogsize;
     size_pos max_ewmh_ogsize;
     size_pos max_button_ogsize;
-    
+
     uint16_t desktop;
 };
 
