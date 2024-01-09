@@ -2721,6 +2721,34 @@ class mxb
             ;
         };
 
+        class draw
+        {
+            public:
+                static void 
+                text(const xcb_window_t & window, const char * str , const COLOR & text_color, const COLOR & backround_color,const char * font_name, const int16_t & x, const int16_t & y)
+                {
+                    /*
+                     *  font names
+                     *
+                     *  '7x14'
+                     *
+                     */
+                    xcb_image_text_8
+                    (
+                        conn, 
+                        strlen(str), 
+                        window, 
+                        mxb::create::gc::font(window, text_color, backround_color, mxb::get::font(font_name)),
+                        x, 
+                        y, 
+                        str
+                    );
+
+                    xcb_flush(conn);
+                }
+            ;
+        };
+
         class Delete
         {
             public:
@@ -6676,7 +6704,9 @@ class WinDecoretor
             xcb_map_window(conn, c->titlebar);
             xcb_flush(conn);
 
-            draw_text("sug", WHITE, BLACK, c->titlebar, 2, 14);
+            mxb::draw::text(c->titlebar, "sug", WHITE, BLACK, "7x14", 2, 14);
+
+            // draw_text("sug", WHITE, BLACK, c->titlebar, 2, 14);
         }
 
         void
