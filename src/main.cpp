@@ -8538,9 +8538,9 @@ configureRootWindow()
                     XCB_EVENT_MASK_KEY_RELEASE           |
                     XCB_EVENT_MASK_POINTER_MOTION
     ;
-
     // APPLY THE EVENT MASKS TO THE ROOT WINDOW
     mxb::set::event_mask(& mask, screen->root);
+
     // CLEAR THE ROOT WINDOW TO APPLY THE CHANGES
     xcb_clear_area
     (
