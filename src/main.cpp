@@ -2063,9 +2063,32 @@ class mxb
                         }
                         
                         static void
-                        max_button()
+                        max_button(const char * file_name)
                         {
-
+                            mxb::create::Bitmap bitmap(20, 20);
+                            bitmap.modify(4, 4, 16, true);
+                            bitmap.modify(5, 4, 5, true);
+                            bitmap.modify(5, 15, 16, true);
+                            bitmap.modify(6, 4, 5, true);
+                            bitmap.modify(6, 15, 16, true);
+                            bitmap.modify(7, 4, 5, true);
+                            bitmap.modify(7, 15, 16, true);
+                            bitmap.modify(8, 4, 5, true);
+                            bitmap.modify(8, 15, 16, true);
+                            bitmap.modify(9, 4, 5, true);
+                            bitmap.modify(9, 15, 16, true);
+                            bitmap.modify(10, 4, 5, true);
+                            bitmap.modify(10, 15, 16, true);
+                            bitmap.modify(11, 4, 5, true);
+                            bitmap.modify(11, 15, 16, true);
+                            bitmap.modify(12, 4, 5, true);
+                            bitmap.modify(12, 15, 16, true);
+                            bitmap.modify(13, 4, 5, true);
+                            bitmap.modify(13, 15, 16, true);
+                            bitmap.modify(14, 4, 5, true);
+                            bitmap.modify(14, 15, 16, true);
+                            bitmap.modify(15, 4, 16, true);
+                            bitmap.exportToPng(file_name);
                         }
                         
                         static void
@@ -6801,30 +6824,7 @@ class WinDecoretor
             xcb_map_window(conn, c->max_button);
             xcb_flush(conn);
 
-            mxb::create::Bitmap bitmap(20, 20);
-            bitmap.modify(4, 4, 16, true);
-            bitmap.modify(5, 4, 5, true);
-            bitmap.modify(5, 15, 16, true);
-            bitmap.modify(6, 4, 5, true);
-            bitmap.modify(6, 15, 16, true);
-            bitmap.modify(7, 4, 5, true);
-            bitmap.modify(7, 15, 16, true);
-            bitmap.modify(8, 4, 5, true);
-            bitmap.modify(8, 15, 16, true);
-            bitmap.modify(9, 4, 5, true);
-            bitmap.modify(9, 15, 16, true);
-            bitmap.modify(10, 4, 5, true);
-            bitmap.modify(10, 15, 16, true);
-            bitmap.modify(11, 4, 5, true);
-            bitmap.modify(11, 15, 16, true);
-            bitmap.modify(12, 4, 5, true);
-            bitmap.modify(12, 15, 16, true);
-            bitmap.modify(13, 4, 5, true);
-            bitmap.modify(13, 15, 16, true);
-            bitmap.modify(14, 4, 5, true);
-            bitmap.modify(14, 15, 16, true);
-            bitmap.modify(15, 4, 16, true);
-            bitmap.exportToPng("/home/mellw/max.png");
+            mxb::create::icon::max_button("/home/mellw/max.png");
 
             mxb::set::win::backround::as_png("/home/mellw/max.png", c->max_button);
             // mxb::set::win::backround::as_png("/home/mellw/mwm_png/window_decoration_icons/max_button/1_12x12.png", c->max_button);
