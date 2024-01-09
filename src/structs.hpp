@@ -46,8 +46,14 @@ enum COLOR
 
 typedef enum Error_codes 
 {
-    CONN_ERR = -1,
-    OK  = 0
+    OK                          = 0,
+    CONN_ERR                    = 1,
+    EXTENTION_NOT_SUPPORTED_ERR = 2,
+    MEMORY_INSUFFICIENT_ERR     = 3,
+    REQUEST_TO_LONG_ERR         = 4,
+    PARSE_ERR                   = 5,
+    SCREEN_NOT_FOUND_ERR        = 6,
+    FD_ERR                      = 7
 } 
 Error_codes;
 

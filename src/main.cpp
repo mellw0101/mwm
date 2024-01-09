@@ -1301,6 +1301,36 @@ class mxb
                             log_error("Connection error.");
                             break;
                         }
+                        case EXTENTION_NOT_SUPPORTED_ERR:
+                        {
+                            log_error("Extension not supported.");
+                            break;
+                        }
+                        case MEMORY_INSUFFICIENT_ERR:
+                        {
+                            log_error("Insufficient memory.");
+                            break;
+                        }
+                        case REQUEST_TO_LONG_ERR:
+                        {
+                            log_error("Request to long.");
+                            break;
+                        }
+                        case PARSE_ERR:
+                        {
+                            log_error("Parse error.");
+                            break;
+                        }
+                        case SCREEN_NOT_FOUND_ERR:
+                        {
+                            log_error("Screen not found.");
+                            break;
+                        }
+                        case FD_ERR:
+                        {
+                            log_error("File descriptor error.");
+                            break;
+                        }
                     }
                 }
             ;
@@ -2474,8 +2504,13 @@ class mxb
         static void
         quit(const int & status)
         {
+            xcb_flush(conn);
             mxb::Delete::ptr_vector(client_list);
             mxb::Delete::ptr_vector(desktop_list);
+
+            int conn_err = xcb_connection_has_error(conn);
+            mxb::check::error(conn_err);
+            
             xcb_ewmh_connection_wipe(ewmh);
             xcb_disconnect(conn);
             exit(status);
