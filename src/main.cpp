@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <cstdlib>
+#include <map>
 #include <thread>
 #include <vector>
 #include <xcb/xcb.h>
@@ -1480,9 +1481,10 @@ class mxb
                             return nullptr;
                         }
 
-                        static client *
+                        static std::map<client *, edge>
                         if_client_is_next_to_other_client(client * c)
                         {
+                            std::map<client *, edge> map;
                             for (client * c2 : cur_d->current_clients)
                             {
                                 if (c == c2)
@@ -1492,26 +1494,31 @@ class mxb
 
                                 if (c->x == c2->x + c2->width)
                                 {
-                                    return c2;
+                                    map[c2] = edge::LEFT;
+                                    return map;
                                 }
 
                                 if (c->x + c->width == c2->x)
                                 {
-                                    return c2;
+                                    map[c2] = edge::RIGHT;
+                                    return map;
                                 }
 
                                 if (c->y == c2->y + c2->height)
                                 {
-                                    return c2;
+                                    map[c2] = edge::TOP;
+                                    return map;
                                 }
 
                                 if (c->y + c->height == c2->y)
                                 {
-                                    return c2;
+                                    map[c2] = edge::BOTTOM_edge;
+                                    return map;
                                 }
                             }
 
-                            return nullptr;
+                            map[nullptr] = edge::NONE;
+                            return map;
                         }
                     ;
                 };  
@@ -5391,17 +5398,32 @@ class resize_client
         class border
         {
             public:   
-                border(client * & c, edge edge)
+                border(client * & c, edge _edge)
                 : c(c)
                 {
                     if (mxb::EWMH::check::is_window_fullscreen(c->win))
                     {
                         return;
                     }
+
+                    std::map<client *, edge> map = mxb::Client::calc::if_client_is_next_to_other_client(c);
+                    for (const auto & pair : map)
+                    {
+                        if (pair.first == nullptr)
+                        {
+                            log_info("pair.first == nullptr");
+                            break;
+                        }
+                        else 
+                        {
+                            log_info("pair.first != nullptr");
+                            break;
+                        }
+                    }
                     
                     mxb::pointer::grab(c->frame);
-                    teleport_mouse(edge);
-                    run(edge);
+                    teleport_mouse(_edge);
+                    run(_edge);
                     xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
                     xcb_flush(conn);
                 }
