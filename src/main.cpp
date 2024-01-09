@@ -2556,6 +2556,14 @@ class mxb
                             xcb_destroy_window(conn, c->close_button);
                             xcb_destroy_window(conn, c->max_button);
                             xcb_destroy_window(conn, c->min_button);
+                            xcb_destroy_window(conn, c->border.left);
+                            xcb_destroy_window(conn, c->border.right);
+                            xcb_destroy_window(conn, c->border.top);
+                            xcb_destroy_window(conn, c->border.bottom);
+                            xcb_destroy_window(conn, c->border.top_left);
+                            xcb_destroy_window(conn, c->border.top_right);
+                            xcb_destroy_window(conn, c->border.bottom_left);
+                            xcb_destroy_window(conn, c->border.bottom_right);
                             xcb_flush(conn);
                         }
                         delete c;
