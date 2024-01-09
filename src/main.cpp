@@ -2607,8 +2607,8 @@ class mxb
         quit(const int & status)
         {
             xcb_flush(conn);
-            mxb::Delete::client_vec(client_list);
-            mxb::Delete::desktop_vec(desktop_list);
+            mxb::Delete::ptr_vector(client_list);
+            mxb::Delete::ptr_vector(desktop_list);
             xcb_ewmh_connection_wipe(ewmh);
             xcb_disconnect(conn);
             exit(status);
