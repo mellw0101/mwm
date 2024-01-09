@@ -1144,7 +1144,7 @@ class mxb
                                 class as_png
                                 {
                                     public:
-                                        as_png(const char * imagePath, const xcb_window_t & win)
+                                        as_png(const char * imagePath, const xcb_window_t & window)
                                         {
                                             // Load an image using Imlib2
                                             Imlib_Image image = imlib_load_image(imagePath);
@@ -1161,13 +1161,13 @@ class mxb
 
                                             // Calculate new size maintaining aspect ratio
                                             double aspectRatio = (double)originalWidth / originalHeight;
-                                            int newHeight = mxb::get::win::height(win);
+                                            int newHeight = mxb::get::win::height(window);
                                             int newWidth = (int)(newHeight * aspectRatio);
 
                                             // Scale the image if it is wider than the screen
-                                            if (newWidth > mxb::get::win::width(win)) 
+                                            if (newWidth > mxb::get::win::width(window)) 
                                             {
-                                                newWidth = mxb::get::win::width(win);
+                                                newWidth = mxb::get::win::width(window);
                                                 newHeight = (int)(newWidth / aspectRatio);
                                             }
 
@@ -1205,12 +1205,13 @@ class mxb
                                                 conn, 
                                                 screen->root_depth, 
                                                 pixmap, 
-                                                screen->root, 
-                                                mxb::get::win::width(win), 
-                                                mxb::get::win::height(win)
+                                                window, 
+                                                mxb::get::win::width(window), 
+                                                mxb::get::win::height(window)
                                             );
-                                            xcb_gcontext_t gc = mxb::create::gc::graphics_exposure(win);
-                                            xcb_rectangle_t rect = {0, 0, mxb::get::win::width(win), mxb::get::win::height(win)};
+
+                                            xcb_gcontext_t gc = mxb::create::gc::graphics_exposure(window);
+                                            xcb_rectangle_t rect = {0, 0, mxb::get::win::width(window), mxb::get::win::height(window)};
                                             xcb_poly_fill_rectangle
                                             (
                                                 conn, 
@@ -1221,8 +1222,8 @@ class mxb
                                             );
 
                                             // Calculate position to center the image
-                                            int x = (mxb::get::win::width(win) - newWidth) / 2;
-                                            int y = (mxb::get::win::height(win) - newHeight) / 2;
+                                            int x = (mxb::get::win::width(window) - newWidth) / 2;
+                                            int y = (mxb::get::win::height(window) - newHeight) / 2;
 
                                             // Put the scaled image onto the pixmap at the calculated position
                                             xcb_image_put
@@ -1240,7 +1241,7 @@ class mxb
                                             xcb_change_window_attributes
                                             (
                                                 conn, 
-                                                win, 
+                                                window, 
                                                 XCB_CW_BACK_PIXMAP, 
                                                 &pixmap
                                             );
@@ -1250,7 +1251,7 @@ class mxb
                                             xcb_image_destroy(xcb_image);
                                             imlib_free_image(); // Free scaled image
 
-                                            mxb::win::clear(win);
+                                            mxb::win::clear(window);
                                         }
                                     ;
                                 };
