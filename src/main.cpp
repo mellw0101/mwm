@@ -5365,6 +5365,7 @@ class resize_client
                                 c->y
                             );
                             xcb_flush(conn);
+                            break;
                         }
                         case edge::BOTTOM_edge:
                         {
@@ -5381,6 +5382,7 @@ class resize_client
                                 c->y + c->height
                             );
                             xcb_flush(conn);
+                            break;
                         } 
                         case edge::LEFT:
                         {
@@ -5397,6 +5399,7 @@ class resize_client
                                 mxb::pointer::get::y()
                             );
                             xcb_flush(conn);
+                            break;
                         }
                         case edge::RIGHT:
                         {
@@ -5413,6 +5416,7 @@ class resize_client
                                 mxb::pointer::get::y()
                             );
                             xcb_flush(conn);
+                            break;
                         }
                         case edge::NONE:
                         {
