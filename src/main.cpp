@@ -5057,19 +5057,81 @@ class resize_client
                 }
 
                 void
+                resize_client(const uint32_t x, const uint32_t y, edge edge)
+                {
+                    switch (edge) 
+                    {
+                        case edge::LEFT:
+                        {
+                            const uint32_t width = (c->width + c->x - x);
+
+                            mxb::conf::win::width(c->win, (width - (BORDER_SIZE * 2)));
+                            mxb::conf::win::x_width(c->frame, x, (width));
+                            mxb::conf::win::width(c->titlebar, (width));
+                            mxb::conf::win::x(c->close_button, (width - BUTTON_SIZE - BORDER_SIZE));
+                            mxb::conf::win::x(c->max_button, (width - (BUTTON_SIZE * 2) - BORDER_SIZE));
+                            mxb::conf::win::x(c->min_button, (width - (BUTTON_SIZE * 3) - BORDER_SIZE));
+                            
+                            break;
+                        }
+                        case edge::RIGHT:
+                        {
+                            const uint32_t width = (x - c->x);
+
+                            mxb::conf::win::width(c->win, (width - (BORDER_SIZE * 2)));
+                            mxb::conf::win::width(c->frame, width);
+                            mxb::conf::win::width(c->titlebar, (width - BORDER_SIZE));
+                            mxb::conf::win::x(c->close_button, (width - BUTTON_SIZE - BORDER_SIZE));
+                            mxb::conf::win::x(c->max_button, (width - (BUTTON_SIZE * 2) - BORDER_SIZE));
+                            mxb::conf::win::x(c->min_button, (width - (BUTTON_SIZE * 3) - BORDER_SIZE));
+                            
+                            break;
+                        }
+                        case edge::TOP:
+                        {
+                            const uint32_t height = (c->height + c->y - y);
+
+                            mxb::conf::win::height(c->win, (height - TITLE_BAR_HEIGHT) - (BORDER_SIZE * 2));
+                            mxb::conf::win::y_height(c->frame, y, height);
+
+                            break;
+                        }
+                        case edge::BOTTOM_edge:
+                        {
+                            const uint32_t height = (y - c->y);
+
+                            mxb::conf::win::height(c->win, (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
+                            mxb::conf::win::height(c->frame, height);
+                            
+                            break;
+                        }
+                        case edge::NONE:
+                        {
+                            return;
+                        }
+                        case edge::TOP_LEFT:
+                        {
+                            break;
+                        }
+                        case edge::TOP_RIGHT:
+                        {   
+                            break;
+                        }
+                        case edge::BOTTOM_LEFT:
+                        {
+                            break;
+                        }
+                        case edge::BOTTOM_RIGHT:
+                        {   
+                            break;
+                        }
+                    }
+                }
+
+                void
                 resize_win_left(const uint16_t & x)
                 {
-                    // c->win
-                    xcb_configure_window 
-                    (
-                        conn,
-                        c->win,
-                        XCB_CONFIG_WINDOW_WIDTH,
-                        (const uint32_t[1])
-                        {
-                            static_cast<const uint32_t &>((c->width + c->x - x) - (BORDER_SIZE * 2))
-                        }
-                    );
+                    mxb::conf::win::width(c->win, (c->width + c->x - x - (BORDER_SIZE * 2)));
 
                     // c->frame
                     xcb_configure_window 
@@ -5273,6 +5335,7 @@ class resize_client
                 {
                     if (edge == edge::NONE)
                     {
+                        log_info("edge == edge::NONE");
                         return;
                     }
 
@@ -5295,54 +5358,7 @@ class resize_client
                                 const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
                                 if (isTimeToRender())
                                 {
-                                    switch (edge)
-                                    {
-                                        case edge::TOP:
-                                        {
-                                            resize_win_top(e->root_y);
-                                            break;
-                                        }
-                                        case edge::BOTTOM_edge:
-                                        {
-                                            resize_win_height(e->root_y - c->y);
-                                            break;
-                                        }
-                                        case edge::LEFT:
-                                        {
-                                            resize_win_left(e->root_x);
-                                            break;
-                                        }
-                                        case edge::RIGHT:
-                                        {
-                                            resize_win_width(e->root_x - c->x);
-                                            break;
-                                        }
-                                        case edge::NONE:
-                                        {
-                                            return;
-                                            break;
-                                        }
-                                        case edge::TOP_LEFT:
-                                        {
-                                            return;
-                                            break;
-                                        }
-                                        case edge::TOP_RIGHT:
-                                        {
-                                            return;
-                                            break;
-                                        }
-                                        case edge::BOTTOM_LEFT:
-                                        {
-                                            return;
-                                            break;
-                                        }
-                                        case edge::BOTTOM_RIGHT:
-                                        {
-                                            return;
-                                            break;
-                                        }
-                                    }
+                                    resize_client(e->root_x, e->root_y, edge);
                                     xcb_flush(conn); 
                                 }
                                 break;
