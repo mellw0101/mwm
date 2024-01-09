@@ -1184,33 +1184,21 @@ class mxb
                                             imlib_context_set_image(scaledImage);
 
                                             // Get the scaled image data
-                                            DATA32* data = imlib_image_get_data();
+                                            DATA32 * data = imlib_image_get_data();
 
                                             // Create an XCB image from the scaled data
-                                            xcb_image_t* xcb_image = xcb_image_create_native
+                                            xcb_image_t * xcb_image = xcb_image_create_native
                                             (
                                                 conn, 
                                                 newWidth, 
-                                                newHeight, 
+                                                newHeight,
                                                 XCB_IMAGE_FORMAT_Z_PIXMAP, 
                                                 screen->root_depth, 
                                                 NULL, 
                                                 ~0, (uint8_t*)data
                                             );
 
-                                            // // Create a pixmap for the screen size with a black background
-                                            // xcb_pixmap_t pixmap = xcb_generate_id(conn);
-                                            // xcb_create_pixmap
-                                            // (
-                                            //     conn, 
-                                            //     screen->root_depth, 
-                                            //     pixmap, 
-                                            //     window, 
-                                            //     mxb::get::win::width(window), 
-                                            //     mxb::get::win::height(window)
-                                            // );
                                             xcb_pixmap_t pixmap = mxb::create::pixmap(window);
-
                                             xcb_gcontext_t gc = mxb::create::gc::graphics_exposure(window);
                                             xcb_rectangle_t rect = {0, 0, mxb::get::win::width(window), mxb::get::win::height(window)};
                                             xcb_poly_fill_rectangle
