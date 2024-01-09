@@ -5330,7 +5330,8 @@ class resize_client
                         return;
                     }
                     
-                    grab_pointer();
+                    mxb::pointer::grab(c->frame);
+                    teleport_mouse(edge);
                     run(edge);
                     xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
                     xcb_flush(conn);
@@ -5341,35 +5342,7 @@ class resize_client
                 client * & c;
                 const double frameRate = 120.0;
                 std::chrono::high_resolution_clock::time_point lastUpdateTime = std::chrono::high_resolution_clock::now();
-                const double frameDuration = 1000.0 / frameRate; 
-
-                void
-                grab_pointer()
-                {
-                    // Grab the pointer to track mouse events for window resizing
-                    xcb_grab_pointer_cookie_t cookie = xcb_grab_pointer
-                    (
-                        conn,
-                        false, // owner_events: false to not propagate events to other clients
-                        c->win,
-                        XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_POINTER_MOTION,
-                        XCB_GRAB_MODE_ASYNC,
-                        XCB_GRAB_MODE_ASYNC,
-                        XCB_NONE,
-                        XCB_NONE,
-                        XCB_CURRENT_TIME
-                    );
-
-                    // CHECK IF THE POINTER GRAB WAS SUCCESSFULL
-                    xcb_grab_pointer_reply_t* reply = xcb_grab_pointer_reply(conn, cookie, NULL);
-                    if (!reply || reply->status != XCB_GRAB_STATUS_SUCCESS) 
-                    {
-                        LOG_error("Could not grab pointer");
-                        free(reply);
-                        return;
-                    }
-                    free(reply);
-                }
+                const double frameDuration = 1000.0 / frameRate;
 
                 void 
                 teleport_mouse(edge edge) 
