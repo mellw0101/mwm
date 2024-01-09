@@ -1583,30 +1583,35 @@ class mxb
                             const uint32_t & x = mxb::get::pointer::x();
                             const uint32_t & y = mxb::get::pointer::y();
 
+                            const uint32_t & top_border = c->y;
+                            const uint32_t & bottom_border = (c->y + c->height);
+                            const uint32_t & left_border = c->x;
+                            const uint32_t & right_border = (c->x + c->width);
+
                             // TOP EDGE OF CLIENT
-                            if (y > c->y - prox && y <= c->y
-                             && x > c->x && x < c->x + c->width)
+                            if (((y > top_border - prox) && (y <= top_border))
+                             && ((x > left_border + prox) && (x < right_border - prox)))
                             {
                                 return edge::TOP;
                             }
 
                             // BOTTOM EDGE OF CLIENT
-                            if (y >= c->y + c->height && y < c->y + c->height + prox
-                             && x > c->x && x < c->x + c->width)
+                            if (((y >= bottom_border) && (y < bottom_border + prox))
+                             && ((x > left_border + prox) && (x < right_border - prox)))
                             {
                                 return edge::BOTTOM_edge;
                             }
 
                             // LEFT EDGE OF CLIENT
-                            if (x > c->x - prox && x <= c->x
-                             && y > c->y && y < c->y + c->height)
+                            if (((x > left_border) - prox && (x <= left_border))
+                             && ((y > top_border + prox) && (y < bottom_border - prox)))
                             {
                                 return edge::LEFT;
                             }
 
                             // RIGHT EDGE OF CLIENT
-                            if (x >= c->x + c->width && x < c->x + c->width + prox
-                             && y > c->y && y < c->y + c->height)
+                            if (((x >= right_border) && (x < right_border + prox))
+                             && ((y > top_border + prox) && (y < bottom_border - prox)))
                             {
                                 return edge::RIGHT;
                             }
@@ -5111,221 +5116,61 @@ class resize_client
                         }
                         case edge::TOP_LEFT:
                         {
+                            const uint32_t height = (c->height + c->y - y);
+                            const uint32_t width = (c->width + c->x - x);
+
+                            mxb::conf::win::x_y_width_height(c->frame, x, y, width, height);
+                            mxb::conf::win::width_height(c->win, (width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
+                            mxb::conf::win::width(c->titlebar, (width - (BORDER_SIZE * 2)));
+                            mxb::conf::win::x(c->close_button, (width - BUTTON_SIZE - BORDER_SIZE));
+                            mxb::conf::win::x(c->max_button, (width - (BUTTON_SIZE * 2) - BORDER_SIZE));
+                            mxb::conf::win::x(c->min_button, (width - (BUTTON_SIZE * 3) - BORDER_SIZE));
+
                             break;
                         }
                         case edge::TOP_RIGHT:
                         {   
+                            const uint32_t width = (x - c->x);
+                            const uint32_t height = (c->height + c->y - y);
+
+                            mxb::conf::win::y_width_height(c->frame, y, width, height);
+                            mxb::conf::win::width_height(c->win, (width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
+                            mxb::conf::win::width(c->titlebar, (width - BORDER_SIZE));
+                            mxb::conf::win::x(c->close_button, (width - BUTTON_SIZE - BORDER_SIZE));
+                            mxb::conf::win::x(c->max_button, (width - (BUTTON_SIZE * 2) - BORDER_SIZE));
+                            mxb::conf::win::x(c->min_button, (width - (BUTTON_SIZE * 3) - BORDER_SIZE));
+
                             break;
                         }
                         case edge::BOTTOM_LEFT:
                         {
+                            const uint32_t width = (c->width + c->x - x);
+                            const uint32_t height = (y - c->y);
+
+                            mxb::conf::win::x_width_height(c->frame, x, width, height);
+                            mxb::conf::win::width_height(c->win, (width - (BORDER_SIZE * 2)), (height - (BORDER_SIZE * 2)));
+                            mxb::conf::win::width(c->titlebar, (width - BORDER_SIZE));
+                            mxb::conf::win::x(c->close_button, (width - BUTTON_SIZE - BORDER_SIZE));
+                            mxb::conf::win::x(c->max_button, (width - (BUTTON_SIZE * 2) - BORDER_SIZE));
+                            mxb::conf::win::x(c->min_button, (width - (BUTTON_SIZE * 3) - BORDER_SIZE));
+
                             break;
                         }
                         case edge::BOTTOM_RIGHT:
                         {   
+                            const uint32_t width = (x - c->x);
+                            const uint32_t height = (y - c->y);
+
+                            mxb::conf::win::width_height(c->frame, width, height);
+                            mxb::conf::win::width_height(c->win, (width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
+                            mxb::conf::win::width(c->titlebar, (width - BORDER_SIZE));
+                            mxb::conf::win::x(c->close_button, (width - BUTTON_SIZE - BORDER_SIZE));
+                            mxb::conf::win::x(c->max_button, (width - (BUTTON_SIZE * 2) - BORDER_SIZE));
+                            mxb::conf::win::x(c->min_button, (width - (BUTTON_SIZE * 3) - BORDER_SIZE));
+
                             break;
                         }
                     }
-                }
-
-                void
-                resize_win_left(const uint16_t & x)
-                {
-                    mxb::conf::win::width(c->win, (c->width + c->x - x - (BORDER_SIZE * 2)));
-
-                    // c->frame
-                    xcb_configure_window 
-                    (
-                        conn,
-                        c->frame,
-                        XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_WIDTH,
-                        (const uint32_t[2])
-                        {
-                            static_cast<const uint32_t &>(x),
-                            static_cast<const uint32_t &>(c->width + c->x - x) 
-                        }
-                    );
-
-                    // c->titlebar
-                    xcb_configure_window 
-                    (
-                        conn,
-                        c->titlebar,
-                        XCB_CONFIG_WINDOW_WIDTH,
-                        (const uint32_t[1])
-                        {
-                            static_cast<const uint32_t &>(c->width + c->x - x)
-                        }
-                    );
-
-                    // c->close_button
-                    xcb_configure_window 
-                    (
-                        conn,
-                        c->close_button,
-                        XCB_CONFIG_WINDOW_X,
-                        (const uint32_t[1])
-                        {
-                            static_cast<const uint32_t &>(c->width - 20 + c->x - x)
-                        }
-                    );
-
-                    // c->max_button
-                    xcb_configure_window 
-                    (
-                        conn,
-                        c->max_button,
-                        XCB_CONFIG_WINDOW_X,
-                        (const uint32_t[1])
-                        {
-                            static_cast<const uint32_t &>(c->width - 40 + c->x - x)
-                        }
-                    );
-
-                    // c->min_button
-                    xcb_configure_window 
-                    (
-                        conn,
-                        c->min_button,
-                        XCB_CONFIG_WINDOW_X,
-                        (const uint32_t[1])
-                        {
-                            static_cast<const uint32_t &>(c->width - 60 + c->x - x)
-                        }
-                    );
-                }
-
-                void
-                resize_win_width(const uint16_t & width)
-                {
-                    // c->win
-                    xcb_configure_window 
-                    (
-                        conn,
-                        c->win,
-                        XCB_CONFIG_WINDOW_WIDTH,
-                        (const uint32_t[1])
-                        {
-                            static_cast<const uint32_t &>(width - (BORDER_SIZE * 2)) 
-                        }
-                    );
-
-                    // c->frame
-                    xcb_configure_window 
-                    (
-                        conn,
-                        c->frame,
-                        XCB_CONFIG_WINDOW_WIDTH,
-                        (const uint32_t[1])
-                        {
-                            static_cast<const uint32_t &>(width) 
-                        }
-                    );
-
-                    // c->titlebar
-                    xcb_configure_window 
-                    (
-                        conn,
-                        c->titlebar,
-                        XCB_CONFIG_WINDOW_WIDTH,
-                        (const uint32_t[1])
-                        {
-                            static_cast<const uint32_t &>(width)
-                        }
-                    );
-
-                    // c->close_button
-                    xcb_configure_window 
-                    (
-                        conn,
-                        c->close_button,
-                        XCB_CONFIG_WINDOW_X,
-                        (const uint32_t[1])
-                        {
-                            static_cast<const uint32_t &>(width - 20)
-                        }
-                    );
-
-                    // c->max_button
-                    xcb_configure_window 
-                    (
-                        conn,
-                        c->max_button,
-                        XCB_CONFIG_WINDOW_X,
-                        (const uint32_t[1])
-                        {
-                            static_cast<const uint32_t &>(width - 40)
-                        }
-                    );
-
-                    // c->min_button
-                    xcb_configure_window 
-                    (
-                        conn,
-                        c->min_button,
-                        XCB_CONFIG_WINDOW_X,
-                        (const uint32_t[1])
-                        {
-                            static_cast<const uint32_t &>(width - 60)
-                        }
-                    );
-                }
-
-                void
-                resize_win_top(const uint16_t & y)
-                {
-                    // c->win
-                    xcb_configure_window 
-                    (
-                        conn,
-                        c->win,
-                        XCB_CONFIG_WINDOW_HEIGHT,
-                        (const uint32_t[1])
-                        {
-                            static_cast<const uint32_t &>((c->height - 20 + c->y - y) - BORDER_SIZE)
-                        }
-                    );
-
-                    // c->frame
-                    xcb_configure_window 
-                    (
-                        conn,
-                        c->frame,
-                        XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT,
-                        (const uint32_t[2])
-                        {
-                            static_cast<const uint32_t &>(y),
-                            static_cast<const uint32_t &>(c->height + c->y - y)
-                        }
-                    );
-                }
-
-                void
-                resize_win_height(const uint16_t & height)
-                {
-                    // c->win
-                    xcb_configure_window 
-                    (
-                        conn,
-                        c->win,
-                        XCB_CONFIG_WINDOW_HEIGHT,
-                        (const uint32_t[1])
-                        {
-                            static_cast<const uint32_t &>(height - 20 - BORDER_SIZE)
-                        }
-                    );
-
-                    // c->frame
-                    xcb_configure_window 
-                    (
-                        conn,
-                        c->frame,
-                        XCB_CONFIG_WINDOW_HEIGHT,
-                        (const uint32_t[2])
-                        {
-                            static_cast<const uint32_t &>(height)
-                        }
-                    );
                 }
 
                 void /* 
@@ -5784,7 +5629,6 @@ class resize_client
                     }
                     resize_client(x, y, edge);
                 }
-
 
                 void /* 
                     THIS IS THE MAIN EVENT LOOP FOR 'resize_client'
