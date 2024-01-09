@@ -8267,16 +8267,13 @@ class Event
                 c = mxb::Client::calc::client_edge_prox_to_pointer(10);
                 if (c)
                 {
-                    switch (e->state) 
+                    if (e->detail == L_MOUSE_BUTTON)
                     {
-                        case L_MOUSE_BUTTON:
-                        {
-                            mxb::Client::raise(c);
-                            resize_client::no_border(c, 0, 0);
-                            focus::client(c);
-                            break;
-                        }
+                        mxb::Client::raise(c);
+                        resize_client::no_border(c, 0, 0);
+                        focus::client(c);
                     }
+                        
                     return;
                 }
             }
