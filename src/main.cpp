@@ -1639,6 +1639,17 @@ class mxb
                 }
 
                 static void
+                remove(client * c, std::vector<client *> & vec)
+                {
+                    if (!c)
+                    {
+                        log_error("client is nullptr.");
+                    }
+                    vec.erase(std::remove(vec.begin(), vec.end(), c), vec.end());
+                    delete c;
+                }
+
+                static void
                 update(client * c)
                 {
                     xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, c->frame);
@@ -1709,8 +1720,6 @@ class mxb
                     mxb::win::kill(c->border.bottom_left);
                     mxb::win::kill(c->border.bottom_right);
                     xcb_flush(conn);
-                    
-                    mxb::Client::remove(c);
                 }
             ;
         };
@@ -2635,6 +2644,7 @@ class mxb
                             mxb::Client::send_sigterm(c);
                             xcb_flush(conn);
                         }
+                        mxb::Client::remove(c, vec);
                     }
 
                     vec.clear();
