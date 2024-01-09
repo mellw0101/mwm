@@ -6644,7 +6644,34 @@ class WinDecoretor
             xcb_map_window(conn, c->max_button);
             xcb_flush(conn);
 
-            mxb::set::win::backround::as_png("/home/mellw/mwm_png/window_decoration_icons/max_button/1_12x12.png", c->max_button);
+            mxb::create::Bitmap bitmap(20, 20);
+            bitmap.modify(4, 4, 15, true);
+            bitmap.modify(5, 4, 4, true);
+            bitmap.modify(5, 15, 15, true);
+            bitmap.modify(6, 4, 4, true);
+            bitmap.modify(6, 15, 15, true);
+            bitmap.modify(7, 4, 4, true);
+            bitmap.modify(7, 15, 15, true);
+            bitmap.modify(8, 4, 4, true);
+            bitmap.modify(8, 15, 15, true);
+            bitmap.modify(9, 4, 4, true);
+            bitmap.modify(9, 15, 15, true);
+            bitmap.modify(10, 4, 4, true);
+            bitmap.modify(10, 15, 15, true);
+            bitmap.modify(11, 4, 4, true);
+            bitmap.modify(11, 15, 15, true);
+            bitmap.modify(12, 4, 4, true);
+            bitmap.modify(12, 15, 15, true);
+            bitmap.modify(13, 4, 4, true);
+            bitmap.modify(13, 15, 15, true);
+            bitmap.modify(14, 4, 4, true);
+            bitmap.modify(14, 15, 15, true);
+            bitmap.modify(15, 4, 15, true);
+            bitmap.exportToPng("/home/mellw/max.png");
+
+            mxb::set::win::backround::as_png("/home/mellw/max.png", c->max_button);
+            // mxb::set::win::backround::as_png("/home/mellw/mwm_png/window_decoration_icons/max_button/1_12x12.png", c->max_button);
+            
         }
 
         void
@@ -8563,11 +8590,16 @@ setSubstructureRedirectMask()
     return true;
 }
 
+int
+start_screen_window()
+{
+    return 0;
+}
+
 const int8_t
 setup_wm()
 {
     mxb::set::_conn(nullptr, nullptr);
-    
     if (xcb_connection_has_error(conn)) 
     {
         LOG_error("Error opening XCB connection")
@@ -8577,10 +8609,6 @@ setup_wm()
     mxb::set::_setup();
     mxb::set::_iter();
     mxb::set::_screen();
-    // setup = xcb_get_setup(conn);
-    // iter = xcb_setup_roots_iterator(setup);
-    // screen = iter.data;
-
     setSubstructureRedirectMask(); 
     configureRootWindow();
     mxb::set::cursor(screen->root, CURSOR::arrow);
