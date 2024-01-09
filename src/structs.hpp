@@ -46,7 +46,7 @@ enum COLOR
 
 typedef enum Error_codes 
 {
-    CONN_ERR = -28,
+    CONN_ERR = -1,
     OK  = 0
 } 
 Error_codes;

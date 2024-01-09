@@ -1284,6 +1284,19 @@ class mxb
                         free(err);
                     }
                 }
+
+                static void
+                error(const int & code)
+                {
+                    switch (code) 
+                    {
+                        case CONN_ERR:
+                        {
+                            log_error("Connection error.");
+                            break;
+                        }
+                    }
+                }
             ;
         };
 
@@ -7820,7 +7833,9 @@ class Event
                 {
                     case SHIFT + ALT:
                     {
-                        mxb::launch::program((char *) "/usr/bin/mwm-KILL");
+                        xcb_disconnect(conn);
+                        exit(0);
+                        // mxb::launch::program((char *) "/usr/bin/mwm-KILL");
                         break;
                     }
                 }
@@ -8566,7 +8581,7 @@ draw_text(const char * str , const COLOR & text_color, const COLOR & bg_color, c
 void 
 configureRootWindow()
 {
-    // SET THE ROOT WINDOW BACKROUND COLOR TO 'DARK_GREY'(0x222222, THE DEFAULT COLOR) SO THAT IF SETTING THE PNG AS BACKROUND FAILS THE ROOT WINDOW WILL STILL HAVE A COLOR
+    // SET THE ROOT WINDOW BACKROUND COLOR TO 'DARK_GREY'(0x222222, THE DEFAULT COLOR) SO THAT IF SETTING THE PNG AS BACKROUND FAILS THE ROOT WINDOW WILL BE THE DEFAULT COLOR
     mxb::set::win::backround::as_color(screen->root, DARK_GREY);
 
     uint32_t mask = XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT |
@@ -8597,10 +8612,9 @@ setSubstructureRedirectMask()
         conn,
         screen->root,
         XCB_CW_EVENT_MASK,
-        (const uint32_t[2])
+        (const uint32_t[1])
         {
-            XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY,
-            XCB_EVENT_MASK_ENTER_WINDOW
+            XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY
         }
     );
 
@@ -8642,7 +8656,7 @@ start_screen_window()
     return 0;
 }
 
-const int8_t
+int
 setup_wm()
 {
     mxb::set::_conn(nullptr, nullptr);
@@ -8686,7 +8700,7 @@ int
 main() 
 {
     LOG_start()
-    const int8_t & err = setup_wm();
+    int err = setup_wm();
     if (err != 0)
     {
         return err;
