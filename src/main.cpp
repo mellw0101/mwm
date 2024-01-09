@@ -1916,7 +1916,7 @@ class mxb
                         {
                             if (row < 0 || row >= height || startCol < 0 || endCol > width) 
                             {
-                                throw std::runtime_error("Invalid row or column indices");
+                                log_error("Invalid row or column indices");
                             }
                         
                             for (int i = startCol; i < endCol; ++i) 
@@ -1926,30 +1926,38 @@ class mxb
                         }
 
                         void 
-                        exportToPng(const std::string& file_name) const 
+                        exportToPng(const char * file_name) const
                         {
-                            FILE *fp = fopen(file_name.c_str(), "wb");
-                            if (!fp) {
-                                throw std::runtime_error("Failed to create PNG file");
+                            FILE *fp = fopen(file_name, "wb");
+                            if (!fp) 
+                            {
+                                log_error("Failed to create PNG file");
+                                return;
                             }
 
                             png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-                            if (!png_ptr) {
+                            if (!png_ptr) 
+                            {
                                 fclose(fp);
-                                throw std::runtime_error("Failed to create PNG write struct");
+                                log_error("Failed to create PNG write struct");
+                                return;
                             }
 
                             png_infop info_ptr = png_create_info_struct(png_ptr);
-                            if (!info_ptr) {
+                            if (!info_ptr) 
+                            {
                                 fclose(fp);
                                 png_destroy_write_struct(&png_ptr, NULL);
-                                throw std::runtime_error("Failed to create PNG info struct");
+                                log_error("Failed to create PNG info struct");
+                                return;
                             }
 
-                            if (setjmp(png_jmpbuf(png_ptr))) {
+                            if (setjmp(png_jmpbuf(png_ptr))) 
+                            {
                                 fclose(fp);
                                 png_destroy_write_struct(&png_ptr, &info_ptr);
-                                throw std::runtime_error("Error during PNG creation");
+                                log_error("Error during PNG creation");
+                                return;
                             }
 
                             png_init_io(png_ptr, fp);
@@ -8526,10 +8534,10 @@ configureRootWindow()
     // SET THE ROOT WINDOW BACKROUND COLOR TO 'DARK_GREY'(0x222222, THE DEFAULT COLOR) SO THAT IF SETTING THE PNG AS BACKROUND FAILS THE ROOT WINDOW WILL STILL HAVE A COLOR
     mxb::set::win::backround::as_color(screen->root, DARK_GREY);
 
-    uint32_t mask = XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT | 
-                    XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY   | 
-                    XCB_EVENT_MASK_ENTER_WINDOW          | 
-                    XCB_EVENT_MASK_LEAVE_WINDOW          | 
+    uint32_t mask = XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT |
+                    XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY   |
+                    XCB_EVENT_MASK_ENTER_WINDOW          |
+                    XCB_EVENT_MASK_LEAVE_WINDOW          |
                     XCB_EVENT_MASK_STRUCTURE_NOTIFY      |
                     XCB_EVENT_MASK_BUTTON_PRESS          |
                     XCB_EVENT_MASK_BUTTON_RELEASE        |
