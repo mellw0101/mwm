@@ -1616,8 +1616,8 @@ class mxb
                                 return edge::RIGHT;
                             }
 
-                            if (((x > left_border - prox) && x <= left_border)
-                             && ((y > top_border - prox) && y <= top_border))
+                            if (((x > left_border - prox) && x < left_border + prox)
+                             && ((y > top_border - prox) && y < top_border + prox))
                             {
                                 return edge::TOP_LEFT;
                             }
