@@ -1160,7 +1160,7 @@ class mxb
                                             int originalHeight = imlib_image_get_height();
 
                                             // Calculate new size maintaining aspect ratio
-                                            float aspectRatio = (float)originalWidth / originalHeight;
+                                            double aspectRatio = (double)originalWidth / originalHeight;
                                             int newHeight = mxb::get::win::height(win);
                                             int newWidth = (int)(newHeight * aspectRatio);
 
