@@ -23,6 +23,7 @@ static const xcb_setup_t * setup;
 static xcb_screen_iterator_t iter;
 static xcb_screen_t * screen;
 static xcb_gcontext_t gc;
+static xcb_window_t start_win;
 
 static void 
 draw_text(const char * str , const COLOR & text_color, const COLOR & bg_color, const xcb_window_t & win, const int16_t & x, const int16_t & y);
@@ -8525,28 +8526,21 @@ configureRootWindow()
     // SET THE ROOT WINDOW BACKROUND COLOR TO 'DARK_GREY'(0x222222, THE DEFAULT COLOR) SO THAT IF SETTING THE PNG AS BACKROUND FAILS THE ROOT WINDOW WILL STILL HAVE A COLOR
     mxb::set::win::backround::as_color(screen->root, DARK_GREY);
 
-    // APPLY THE EVENT MASKS TO THE ROOT WINDOW
-    xcb_change_window_attributes
-    (
-        conn,
-        screen->root,
-        XCB_CW_EVENT_MASK,
-        (const uint32_t[1])
-        {
-            XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT    | 
-            XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY          | 
-            XCB_EVENT_MASK_ENTER_WINDOW                 | 
-            XCB_EVENT_MASK_LEAVE_WINDOW                 | 
-            XCB_EVENT_MASK_STRUCTURE_NOTIFY             |
-            XCB_EVENT_MASK_BUTTON_PRESS                 |
-            XCB_EVENT_MASK_BUTTON_RELEASE               |
-            XCB_EVENT_MASK_KEY_PRESS                    |
-            XCB_EVENT_MASK_FOCUS_CHANGE                 |
-            XCB_EVENT_MASK_KEY_RELEASE                  |
-            XCB_EVENT_MASK_POINTER_MOTION
-        }
-    );
+    uint32_t mask = XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT | 
+                    XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY   | 
+                    XCB_EVENT_MASK_ENTER_WINDOW          | 
+                    XCB_EVENT_MASK_LEAVE_WINDOW          | 
+                    XCB_EVENT_MASK_STRUCTURE_NOTIFY      |
+                    XCB_EVENT_MASK_BUTTON_PRESS          |
+                    XCB_EVENT_MASK_BUTTON_RELEASE        |
+                    XCB_EVENT_MASK_KEY_PRESS             |
+                    XCB_EVENT_MASK_FOCUS_CHANGE          |
+                    XCB_EVENT_MASK_KEY_RELEASE           |
+                    XCB_EVENT_MASK_POINTER_MOTION
+    ;
 
+    // APPLY THE EVENT MASKS TO THE ROOT WINDOW
+    mxb::set::event_mask(& mask, screen->root);
     // CLEAR THE ROOT WINDOW TO APPLY THE CHANGES
     xcb_clear_area
     (
@@ -8583,7 +8577,7 @@ setSubstructureRedirectMask()
     xcb_generic_error_t * error = xcb_request_check(conn, cookie);
     if (error) 
     {
-        LOG_error("Error: Another window manager is already running or failed to set SubstructureRedirect mask.") 
+        log_error("Error: Another window manager is already running or failed to set SubstructureRedirect mask."); 
         free(error);
         return false;
     }
@@ -8593,6 +8587,27 @@ setSubstructureRedirectMask()
 int
 start_screen_window()
 {
+    start_win = xcb_generate_id(conn);
+    xcb_create_window
+    (
+        conn,
+        XCB_COPY_FROM_PARENT,
+        start_win,
+        screen->root,
+        0,
+        0,
+        screen->width_in_pixels,
+        screen->height_in_pixels,
+        0,
+        XCB_WINDOW_CLASS_INPUT_OUTPUT,
+        screen->root_visual,
+        0,
+        nullptr
+    );
+
+    mxb::set::win::backround::as_color(start_win, DARK_GREY);
+    xcb_map_window(conn, start_win);
+    xcb_flush(conn);
     return 0;
 }
 
@@ -8602,7 +8617,7 @@ setup_wm()
     mxb::set::_conn(nullptr, nullptr);
     if (xcb_connection_has_error(conn)) 
     {
-        LOG_error("Error opening XCB connection")
+        log_error("Error opening XCB connection");
         return -1;
     }
 
