@@ -1,6 +1,7 @@
 #include "structs.hpp"
 #include <algorithm>
 #include <cstdint>
+#include <thread>
 #include <vector>
 #include <xcb/xcb.h>
 #include <xcb/xproto.h>
@@ -4786,9 +4787,9 @@ class change_desktop
         }
 
         void 
-        joinAndClearThreads() 
+        joinAndClearThreads()
         {
-            for (auto & t : animation_threads) 
+            for (std::thread & t : animation_threads)
             {
                 if (t.joinable()) 
                 {
@@ -4796,6 +4797,12 @@ class change_desktop
                 }
             }
             animation_threads.clear();
+            show.clear();
+            hide.clear();
+
+            std::vector<std::thread>().swap(animation_threads);
+            std::vector<client *>().swap(show);
+            std::vector<client *>().swap(hide);
         }
     ;
 };
