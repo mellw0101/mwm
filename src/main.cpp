@@ -1198,17 +1198,18 @@ class mxb
                                                 ~0, (uint8_t*)data
                                             );
 
-                                            // Create a pixmap for the screen size with a black background
-                                            xcb_pixmap_t pixmap = xcb_generate_id(conn);
-                                            xcb_create_pixmap
-                                            (
-                                                conn, 
-                                                screen->root_depth, 
-                                                pixmap, 
-                                                window, 
-                                                mxb::get::win::width(window), 
-                                                mxb::get::win::height(window)
-                                            );
+                                            // // Create a pixmap for the screen size with a black background
+                                            // xcb_pixmap_t pixmap = xcb_generate_id(conn);
+                                            // xcb_create_pixmap
+                                            // (
+                                            //     conn, 
+                                            //     screen->root_depth, 
+                                            //     pixmap, 
+                                            //     window, 
+                                            //     mxb::get::win::width(window), 
+                                            //     mxb::get::win::height(window)
+                                            // );
+                                            xcb_pixmap_t pixmap = mxb::create::pixmap(window);
 
                                             xcb_gcontext_t gc = mxb::create::gc::graphics_exposure(window);
                                             xcb_rectangle_t rect = {0, 0, mxb::get::win::width(window), mxb::get::win::height(window)};
@@ -2002,6 +2003,22 @@ class mxb
                         }
                     ;
                 };
+
+                static xcb_pixmap_t
+                pixmap(const xcb_window_t & window)
+                {
+                    xcb_pixmap_t pixmap = xcb_generate_id(conn);
+                    xcb_create_pixmap
+                    (
+                        conn, 
+                        screen->root_depth, 
+                        pixmap, 
+                        window, 
+                        mxb::get::win::width(window), 
+                        mxb::get::win::height(window)
+                    );
+                    return pixmap;
+                }
             ;
         };
 
