@@ -1947,7 +1947,7 @@ class mxb
                             if (!info_ptr) 
                             {
                                 fclose(fp);
-                                png_destroy_write_struct(&png_ptr, NULL);
+                                png_destroy_write_struct(&png_ptr, nullptr);
                                 log_error("Failed to create PNG info struct");
                                 return;
                             }
@@ -1975,7 +1975,7 @@ class mxb
                             }
                             delete[] row;
 
-                            png_write_end(png_ptr, NULL);
+                            png_write_end(png_ptr, nullptr);
 
                             fclose(fp);
                             png_destroy_write_struct(&png_ptr, &info_ptr);
@@ -1985,6 +1985,29 @@ class mxb
                     private:
                         int width, height;
                         std::vector<std::vector<bool>> bitmap;
+                    ;
+                };
+
+                class icon
+                {
+                    public:
+                        static void
+                        close_button()
+                        {
+
+                        }
+                        
+                        static void
+                        max_button()
+                        {
+
+                        }
+                        
+                        static void
+                        min_button()
+                        {
+
+                        }
                     ;
                 };
             ;
@@ -2396,6 +2419,21 @@ class mxb
                         };
                     ;
                 };
+
+                static void
+                clear(const xcb_window_t & window)
+                {
+                    xcb_clear_area
+                    (
+                        conn, 
+                        0,
+                        window,
+                        0, 
+                        0,
+                        mxb::get::win::width(window),
+                        mxb::get::win::height(window)
+                    );
+                }
             ;
         };
     ;
@@ -8549,17 +8587,18 @@ configureRootWindow()
     // APPLY THE EVENT MASKS TO THE ROOT WINDOW
     mxb::set::event_mask(& mask, screen->root);
 
-    // CLEAR THE ROOT WINDOW TO APPLY THE CHANGES
-    xcb_clear_area
-    (
-        conn, 
-        0,
-        screen->root,
-        0, 
-        0,
-        screen->width_in_pixels,
-        screen->height_in_pixels
-    );
+    mxb::win::clear(screen->root);
+    // // CLEAR THE ROOT WINDOW TO APPLY THE CHANGES
+    // xcb_clear_area
+    // (
+    //     conn, 
+    //     0,
+    //     screen->root,
+    //     0, 
+    //     0,
+    //     screen->width_in_pixels,
+    //     screen->height_in_pixels
+    // );
 
     // FLUSH TO MAKE X SERVER HANDEL REQUEST NOW
     xcb_flush(conn);
