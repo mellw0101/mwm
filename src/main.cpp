@@ -1928,14 +1928,14 @@ class mxb
                         void 
                         exportToPng(const char * file_name) const
                         {
-                            FILE *fp = fopen(file_name, "wb");
+                            FILE * fp = fopen(file_name, "wb");
                             if (!fp) 
                             {
                                 log_error("Failed to create PNG file");
                                 return;
                             }
 
-                            png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+                            png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
                             if (!png_ptr) 
                             {
                                 fclose(fp);
