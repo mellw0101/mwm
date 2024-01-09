@@ -1,6 +1,7 @@
 #include "structs.hpp"
 #include <algorithm>
 #include <cstdint>
+#include <cstdlib>
 #include <thread>
 #include <vector>
 #include <xcb/xcb.h>
@@ -2548,14 +2549,14 @@ class mxb
 
                             if (xcb_cursor_context_new(conn, screen, &ctx) < 0) 
                             {
-                                log.log(ERROR, __func__, "Unable to create cursor context.");
+                                log_error("Unable to create cursor context.");
                                 return;
                             }
 
                             xcb_cursor_t cursor = xcb_cursor_load_cursor(ctx, pointer_from_enum(cursor_type));
                             if (!cursor) 
                             {
-                                log.log(ERROR, __func__, "Unable to load cursor.");
+                                log_error("Unable to load cursor.");
                                 return;
                             }
 
@@ -2683,6 +2684,39 @@ class mxb
                         y
                     );
                     xcb_flush(conn);
+                }
+
+                static void
+                grab(const xcb_window_t & window)
+                {
+                    xcb_grab_pointer_cookie_t cookie = xcb_grab_pointer
+                    (
+                        conn,
+                        false,
+                        window,
+                        XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_POINTER_MOTION,
+                        XCB_GRAB_MODE_ASYNC,
+                        XCB_GRAB_MODE_ASYNC,
+                        XCB_NONE,
+                        XCB_NONE,
+                        XCB_CURRENT_TIME
+                    );
+
+                    xcb_grab_pointer_reply_t * reply = xcb_grab_pointer_reply(conn, cookie, nullptr);
+                    if (!reply)
+                    {
+                        log_error("reply is nullptr.");
+                        free(reply);
+                        return;
+                    }
+                    if (reply->status != XCB_GRAB_STATUS_SUCCESS) 
+                    {
+                        log_error("Could not grab pointer");
+                        free(reply);
+                        return;
+                    }
+
+                    free(reply);
                 }
             ;
         };
@@ -4952,12 +4986,10 @@ class resize_client
                 return;
             }
 
-            grab_pointer();
-            
+            mxb::pointer::grab(c->win);
+            // grab_pointer();
             mxb::pointer::teleport(c->x + c->width, c->y + c->height);
             run();
-            
-            // Release the pointer grab and flush the connection
             xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
             xcb_flush(conn);
         }
@@ -5750,7 +5782,10 @@ class resize_client
         client * & c;
         uint32_t x;
         uint32_t y;
-        
+        const double frameRate = 120.0;
+        std::chrono::high_resolution_clock::time_point lastUpdateTime = std::chrono::high_resolution_clock::now();
+        const double frameDuration = 1000.0 / frameRate; 
+
         void
         grab_pointer()
         {
@@ -5772,29 +5807,11 @@ class resize_client
             xcb_grab_pointer_reply_t* reply = xcb_grab_pointer_reply(conn, cookie, NULL);
             if (!reply || reply->status != XCB_GRAB_STATUS_SUCCESS) 
             {
-                LOG_error("Could not grab pointer");
+                log_error("Could not grab pointer");
                 free(reply);
                 return;
             }
             free(reply);
-        }
-
-        void 
-        teleport_mouse(const uint16_t & x, const uint16_t & y) 
-        {
-            xcb_warp_pointer
-            (
-                conn, 
-                XCB_NONE, 
-                screen->root, 
-                0, 
-                0, 
-                0, 
-                0, 
-                x, 
-                y
-            );
-            xcb_flush(conn);
         }
 
         void
@@ -5881,15 +5898,6 @@ class resize_client
             }
         }
 
-        /* FRAMERATE */
-        const double frameRate = 120.0;
-
-        /* HIGH_PRECISION_CLOCK AND TIME_POINT */
-        std::chrono::high_resolution_clock::time_point lastUpdateTime = std::chrono::high_resolution_clock::now();
-        
-        /* DURATION IN MILLISECONDS THAT EACH FRAME SHOULD LAST */
-        const double frameDuration = 1000.0 / frameRate; 
-        
         bool 
         isTimeToRender() 
         {
