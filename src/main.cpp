@@ -1616,10 +1616,32 @@ class mxb
                                 return edge::RIGHT;
                             }
 
+                            // TOP LEFT CORNER OF CLIENT
                             if (((x > left_border - prox) && x < left_border + prox)
                              && ((y > top_border - prox) && y < top_border + prox))
                             {
                                 return edge::TOP_LEFT;
+                            }
+
+                            // TOP RIGHT CORNER OF CLIENT
+                            if (((x > right_border - prox) && x < right_border + prox)
+                             && ((y > top_border - prox) && y < top_border + prox))
+                            {
+                                return edge::TOP_RIGHT;
+                            }
+
+                            // BOTTOM LEFT CORNER OF CLIENT
+                            if (((x > left_border - prox) && x < left_border + prox)
+                             && ((y > bottom_border - prox) && y < bottom_border + prox))
+                            {
+                                return edge::BOTTOM_LEFT;
+                            }
+
+                            // BOTTOM RIGHT CORNER OF CLIENT
+                            if (((x > right_border - prox) && x < right_border + prox)
+                             && ((y > bottom_border - prox) && y < bottom_border + prox))
+                            {
+                                return edge::BOTTOM_RIGHT;
                             }
 
 
