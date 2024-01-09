@@ -5371,23 +5371,27 @@ class resize_client
                         }
                         case edge::NONE:
                         {
-                            return;
+                            break;
                         }
                         case edge::TOP_LEFT:
                         {
-                            return;
+                            mxb::pointer::teleport(c->x, c->y);
+                            break;
                         }
                         case edge::TOP_RIGHT:
                         {
-                            return;
+                            mxb::pointer::teleport((c->x + c->width), c->y);
+                            break;
                         }
                         case edge::BOTTOM_LEFT:
                         {
-                            return;
+                            mxb::pointer::teleport(c->x, (c->y + c->height));
+                            break;
                         }
                         case edge::BOTTOM_RIGHT:
                         {
-                            return;
+                            mxb::pointer::teleport((c->x + c->width), (c->y + c->height));
+                            break;
                         }
                     }
                 }
