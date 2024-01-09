@@ -5965,17 +5965,6 @@ class max_win
                 screen->height_in_pixels + TITLE_BAR_HEIGHT + (BORDER_SIZE * 2)
             );
             mxb::EWMH::set::max_win_state(c->win);
-            // xcb_change_property
-            // (
-            //     conn,
-            //     XCB_PROP_MODE_REPLACE,
-            //     c->win,
-            //     ewmh->_NET_WM_STATE,
-            //     XCB_ATOM_ATOM,
-            //     32,
-            //     1,
-            //     &ewmh->_NET_WM_STATE_FULLSCREEN
-            // );
             xcb_flush(conn);
         }
 
@@ -6011,17 +6000,6 @@ class max_win
                 c->max_ewmh_ogsize.height
             );
             mxb::EWMH::unset::max_win_state(c->win);
-            // xcb_change_property
-            // (
-            //     conn,
-            //     XCB_PROP_MODE_REPLACE,
-            //     c->win,
-            //     ewmh->_NET_WM_STATE, 
-            //     XCB_ATOM_ATOM,
-            //     32,
-            //     0,
-            //     0
-            // );
             xcb_flush(conn);
         }
 
@@ -7210,6 +7188,7 @@ class WinManager
                 c->y      = 0;
                 c->width  = screen->width_in_pixels;
                 c->height = screen->height_in_pixels;
+                mxb::EWMH::set::max_win_state(c->win);
             }
             
             client_list.push_back(c);
