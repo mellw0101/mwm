@@ -987,6 +987,12 @@ class mxb
                 _conn(const char * displayname, int * screenp) 
                 {
                     conn = xcb_connect(displayname, screenp);
+                    int status = xcb_connection_has_error(conn);
+                    if (status > 0)
+                    {
+                        log_error("Unable to make connection to the X server. ERROR_CODE: " + std::to_string(status));
+                        mxb::quit(status);
+                    }
                 }
 
                 static void 
@@ -2446,6 +2452,34 @@ class mxb
                 }
             ;
         };
+
+        class Delete
+        {
+            public:
+                template <typename Type>
+                static void 
+                ptr_vector(std::vector<Type *>& vec) 
+                {
+                    for (Type * ptr : vec) 
+                    {
+                        delete ptr;
+                    }
+                    vec.clear();
+
+                    std::vector<Type *>().swap(vec);
+                }
+            ;
+        };
+
+        static void
+        quit(const int & status)
+        {
+            mxb::Delete::ptr_vector(client_list);
+            mxb::Delete::ptr_vector(desktop_list);
+            xcb_ewmh_connection_wipe(ewmh);
+            xcb_disconnect(conn);
+            exit(status);
+        }
     ;
 };
 
@@ -7833,9 +7867,7 @@ class Event
                 {
                     case SHIFT + ALT:
                     {
-                        xcb_disconnect(conn);
-                        exit(0);
-                        // mxb::launch::program((char *) "/usr/bin/mwm-KILL");
+                        mxb::quit(0);
                         break;
                     }
                 }
@@ -8656,16 +8688,10 @@ start_screen_window()
     return 0;
 }
 
-int
+void
 setup_wm()
 {
     mxb::set::_conn(nullptr, nullptr);
-    if (xcb_connection_has_error(conn)) 
-    {
-        log_error("Error opening XCB connection");
-        return -1;
-    }
-
     mxb::set::_setup();
     mxb::set::_iter();
     mxb::set::_screen();
@@ -8693,19 +8719,13 @@ setup_wm()
     change_desktop::teleport_to(1);
 
     mxb::set::win::backround::as_png("/home/mellw/mwm_png/galaxy17.png", screen->root);
-    return 0;
 }
 
 int
 main() 
 {
     LOG_start()
-    int err = setup_wm();
-    if (err != 0)
-    {
-        return err;
-    }
-
+    setup_wm();
     run();
     xcb_disconnect(conn);
     return 0;
