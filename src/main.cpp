@@ -409,11 +409,13 @@ class mxb
                 xcb_window_t dialog_window;
                 size_pos size_pos;
                 window_borders border;
+                
                 class DialogEntry 
                 {
                     public:
                         DialogEntry() {}
-
+                        xcb_window_t window;
+                        
                         void
                         add_name(const char * name)
                         {
@@ -436,6 +438,31 @@ class mxb
                         getName() const 
                         {
                             return entryName;
+                        }
+
+                        void 
+                        make_window(const xcb_window_t & parent_window, const int16_t & x, const int16_t & y, const uint16_t & width, const uint16_t & height)
+                        {
+                            window = xcb_generate_id(conn);
+                            xcb_create_window
+                            (
+                                conn,
+                                XCB_COPY_FROM_PARENT,
+                                window,
+                                parent_window,
+                                x,
+                                y,
+                                width,
+                                height,
+                                0,
+                                XCB_WINDOW_CLASS_INPUT_OUTPUT,
+                                XCB_COPY_FROM_PARENT,
+                                0,
+                                nullptr
+                            );
+                            mxb::set::win::backround::as_color(window, RED);
+                            xcb_map_window(conn, window);
+                            xcb_flush(conn);
                         }
                     ;
 
@@ -534,6 +561,17 @@ class mxb
                         ++n;
                     }
                     return n;
+                }
+
+                void
+                make_entries()
+                {
+                    int n = 0;
+                    for (auto & entry : entries)
+                    {
+                        ++n;
+                        entry.make_window(dialog_window, size_pos.x, ((size_pos.y * n) - size_pos.y), size_pos.width, size_pos.height);
+                    }
                 }
             ;
         };
