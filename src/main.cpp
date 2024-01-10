@@ -464,6 +464,7 @@ class mxb
                                 nullptr
                             );
                             mxb::set::win::backround::as_color(window, RED);
+                            mxb::win::grab::button(window, {{L_MOUSE_BUTTON, NULL}});
                             xcb_map_window(conn, window);
                             xcb_flush(conn);
                         }
@@ -534,17 +535,12 @@ class mxb
 
                         switch (ev->response_type & ~0x80)
                         {
-                            // case XCB_MOTION_NOTIFY:
-                            // {
-                            //     const auto & e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
-                            //     if (e->root_x >! size_pos.x && e->root_x <! (size_pos.x + size_pos.width)
-                            //      && e->root_y >! size_pos.y && e->event_y <! (size_pos.y + size_pos.height))
-                            //     {
-                            //         shouldContinue = false;
-                            //         hide();
-                            //     }
-                            //     break;
-                            // }
+                            case XCB_BUTTON_PRESS:
+                            {
+                                const auto & e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
+                                run_action(e->event);
+                                break;
+                            }
                             case XCB_LEAVE_NOTIFY: 
                             {
                                 const auto * e = reinterpret_cast<const xcb_leave_notify_event_t *>(ev);
@@ -569,6 +565,18 @@ class mxb
                         ++n;
                     }
                     return n;
+                }
+
+                void
+                run_action(const xcb_window_t & window)
+                {
+                    for (const auto & entry : entries)
+                    {
+                        if (entry.window == window)
+                        {
+                            entry.activate();
+                        }
+                    }
                 }
 
                 void
@@ -8749,7 +8757,12 @@ class Event
                 {
                     mxb::Dialog_win dialog;
                     dialog.addEntry("HELLO", nullptr);
-                    dialog.addEntry("HELLO_2", nullptr);
+                    dialog.addEntry
+                    ("HELLO_2", 
+                    []() 
+                    {
+                        mxb::launch::program((char *) "konsole");
+                    });
                     dialog.show();
                 }
             }
