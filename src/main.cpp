@@ -385,7 +385,7 @@ class mxb
                         (const uint32_t[3])
                         {
                             static_cast<const uint32_t &>(size_pos.x - BORDER_SIZE),
-                            static_cast<const uint32_t &>(size_pos.y),
+                            static_cast<const uint32_t &>(size_pos.y - BORDER_SIZE),
                             height
                         }
                     );
@@ -489,8 +489,8 @@ class mxb
                         screen->root,
                         0,
                         0,
-                        size_pos.width,
-                        size_pos.height,
+                        size_pos.width + BORDER_SIZE,
+                        size_pos.height + BORDER_SIZE,
                         0,
                         XCB_WINDOW_CLASS_INPUT_OUTPUT,
                         XCB_COPY_FROM_PARENT, 
