@@ -8569,6 +8569,15 @@ class Event
                 }
             }
 
+            if (e->event == screen->root)
+            {
+                if (e->detail == R_MOUSE_BUTTON)
+                {
+                    mxb::Dialog_win dialog;
+                    dialog.show();
+                }
+            }
+
             c = get::client_from_all_win(& e->event);
             if (!c)
             {
