@@ -5956,6 +5956,7 @@ class resize_client
                             {
                                 shouldContinue = false;                        
                                 mxb::Client::update(c);
+                                mxb::Client::update(c2);
                                 break;
                             }
                         }
