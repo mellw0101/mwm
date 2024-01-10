@@ -464,7 +464,7 @@ class mxb
                                 0,
                                 nullptr
                             );
-                            mxb::set::win::backround::as_color(window, RED);
+                            mxb::set::win::backround::as_color(window, BLACK);
                             mxb::win::grab::button(window, {{L_MOUSE_BUTTON, NULL}});
                             xcb_map_window(conn, window);
                             xcb_flush(conn);
@@ -596,7 +596,7 @@ class mxb
                     for (auto & entry : entries)
                     {
                         entry.make_window(dialog_window, 0, y, size_pos.width, size_pos.height);
-                        mxb::draw::text(entry.window, entry.getName(), WHITE, RED, "7x14", 2, 14);
+                        mxb::draw::text(entry.window, entry.getName(), WHITE, BLACK, "7x14", 2, 14);
                         y += size_pos.height;
                     }
                 }
@@ -8766,9 +8766,8 @@ class Event
                 if (e->detail == R_MOUSE_BUTTON)
                 {
                     mxb::Dialog_win dialog;
-                    dialog.addEntry("HELLO", nullptr);
                     dialog.addEntry
-                    ("HELLO_2", 
+                    ("konsole",
                     []() 
                     {
                         mxb::launch::program((char *) "/usr/bin/konsole");
