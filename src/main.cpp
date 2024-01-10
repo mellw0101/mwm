@@ -540,7 +540,7 @@ class mxb
                                 if (e->root_x > size_pos.x && e->root_x < (size_pos.x + size_pos.width)
                                  && e->root_y > size_pos.y && e->event_y < (size_pos.y + size_pos.height))
                                 {
-                                    break;
+                                    continue;
                                 }
                                 shouldContinue = false;
                                 hide();
