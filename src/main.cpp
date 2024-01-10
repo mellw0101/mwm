@@ -537,13 +537,12 @@ class mxb
                             case XCB_MOTION_NOTIFY:
                             {
                                 const auto & e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
-                                if (e->root_x > size_pos.x && e->root_x < (size_pos.x + size_pos.width)
-                                 && e->root_y > size_pos.y && e->event_y < (size_pos.y + size_pos.height))
+                                if (e->root_x >! size_pos.x && e->root_x <! (size_pos.x + size_pos.width)
+                                 && e->root_y >! size_pos.y && e->event_y <! (size_pos.y + size_pos.height))
                                 {
-                                    continue;
+                                    shouldContinue = false;
+                                    hide();
                                 }
-                                shouldContinue = false;
-                                hide();
                                 break;
                             }
                             // case XCB_LEAVE_NOTIFY: 
