@@ -384,7 +384,7 @@ class mxb
                         XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT, 
                         (const uint32_t[3])
                         {
-                            static_cast<const uint32_t &>(size_pos.x),
+                            static_cast<const uint32_t &>(size_pos.x - BORDER_SIZE),
                             static_cast<const uint32_t &>(size_pos.y),
                             height
                         }
@@ -567,7 +567,7 @@ class mxb
                     int y = 0;
                     for (auto & entry : entries)
                     {
-                        entry.make_window(dialog_window, entry.border_size, y, (size_pos.width - (entry.border_size * 2)), size_pos.height);
+                        entry.make_window(dialog_window, BORDER_SIZE, (y + BORDER_SIZE), (size_pos.width - (BORDER_SIZE * 2)), (size_pos.height - BORDER_SIZE * 2));
                         mxb::draw::text(entry.window, entry.getName(), WHITE, RED, "7x14", 2, 14);
                         y += size_pos.height;
                     }
