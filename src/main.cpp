@@ -362,8 +362,8 @@ class mxb
                 {
                     size_pos.x      = mxb::pointer::get::x();
                     size_pos.y      = mxb::pointer::get::y();
-                    size_pos.width  = 120 + BORDER_SIZE;
-                    size_pos.height = 20 + BORDER_SIZE;
+                    size_pos.width  = 120;
+                    size_pos.height = 20;
 
                     border.left = size_pos.x;
                     border.right = (size_pos.x + size_pos.width);
@@ -410,6 +410,7 @@ class mxb
                 xcb_window_t dialog_window;
                 size_pos size_pos;
                 window_borders border;
+                int border_size = 1;
                 
 
                 
@@ -567,7 +568,7 @@ class mxb
                     int y = 0;
                     for (auto & entry : entries)
                     {
-                        entry.make_window(dialog_window, BORDER_SIZE, (y + BORDER_SIZE), (size_pos.width - (BORDER_SIZE * 2)), (size_pos.height - BORDER_SIZE * 2));
+                        entry.make_window(dialog_window, border_size, (y + border_size), (size_pos.width - (border_size * 2)), (size_pos.height - border_size * 2));
                         mxb::draw::text(entry.window, entry.getName(), WHITE, RED, "7x14", 2, 14);
                         y += size_pos.height;
                     }
