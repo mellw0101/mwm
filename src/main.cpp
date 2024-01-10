@@ -362,8 +362,8 @@ class mxb
                 {
                     size_pos.x      = mxb::pointer::get::x();
                     size_pos.y      = mxb::pointer::get::y();
-                    size_pos.width  = 120;
-                    size_pos.height = 20;
+                    size_pos.width  = 120 + BORDER_SIZE;
+                    size_pos.height = 20 + BORDER_SIZE;
 
                     border.left = size_pos.x;
                     border.right = (size_pos.x + size_pos.width);
@@ -489,8 +489,8 @@ class mxb
                         screen->root,
                         0,
                         0,
-                        size_pos.width + BORDER_SIZE,
-                        size_pos.height + BORDER_SIZE,
+                        size_pos.width,
+                        size_pos.height,
                         0,
                         XCB_WINDOW_CLASS_INPUT_OUTPUT,
                         XCB_COPY_FROM_PARENT, 
