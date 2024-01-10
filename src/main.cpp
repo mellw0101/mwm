@@ -411,12 +411,15 @@ class mxb
                 size_pos size_pos;
                 window_borders border;
                 
+
+                
                 class DialogEntry 
                 {
                     public:
                         DialogEntry() {}
                         xcb_window_t window;
-                        
+                        uint8_t border_size = 1;
+
                         void
                         add_name(const char * name)
                         {
@@ -532,16 +535,6 @@ class mxb
 
                         switch (ev->response_type & ~0x80)
                         {
-                            // case XCB_MOTION_NOTIFY: 
-                            // {
-                            //     const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
-                                
-                            //     break;
-                            // }
-                            case XCB_BUTTON_PRESS:
-                            {
-                                break;
-                            }
                             case XCB_LEAVE_NOTIFY: 
                             {
                                 const auto * e = reinterpret_cast<const xcb_leave_notify_event_t *>(ev);
@@ -574,7 +567,7 @@ class mxb
                     int y = 0;
                     for (auto & entry : entries)
                     {
-                        entry.make_window(dialog_window, 0, y, size_pos.width, size_pos.height);
+                        entry.make_window(dialog_window, entry.border_size, y, (size_pos.width - (entry.border_size * 2)), size_pos.height);
                         mxb::draw::text(entry.window, entry.getName(), WHITE, RED, "7x14", 2, 14);
                         y += size_pos.height;
                     }
