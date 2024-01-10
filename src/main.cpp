@@ -534,27 +534,27 @@ class mxb
 
                         switch (ev->response_type & ~0x80)
                         {
-                            case XCB_MOTION_NOTIFY:
-                            {
-                                const auto & e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
-                                if (e->root_x >! size_pos.x && e->root_x <! (size_pos.x + size_pos.width)
-                                 && e->root_y >! size_pos.y && e->event_y <! (size_pos.y + size_pos.height))
-                                {
-                                    shouldContinue = false;
-                                    hide();
-                                }
-                                break;
-                            }
-                            // case XCB_LEAVE_NOTIFY: 
+                            // case XCB_MOTION_NOTIFY:
                             // {
-                            //     const auto * e = reinterpret_cast<const xcb_leave_notify_event_t *>(ev);
-                            //     if (e->event == dialog_window)
+                            //     const auto & e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
+                            //     if (e->root_x >! size_pos.x && e->root_x <! (size_pos.x + size_pos.width)
+                            //      && e->root_y >! size_pos.y && e->event_y <! (size_pos.y + size_pos.height))
                             //     {
                             //         shouldContinue = false;
                             //         hide();
-                            //     } 
+                            //     }
                             //     break;
                             // }
+                            case XCB_LEAVE_NOTIFY: 
+                            {
+                                const auto * e = reinterpret_cast<const xcb_leave_notify_event_t *>(ev);
+                                if (e->event == dialog_window)
+                                {
+                                    shouldContinue = false;
+                                    hide();
+                                } 
+                                break;
+                            }
                         }
                         free(ev); 
                     }
