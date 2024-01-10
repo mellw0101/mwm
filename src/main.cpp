@@ -571,7 +571,7 @@ class mxb
                     for (auto & entry : entries)
                     {
                         ++n;
-                        entry.make_window(dialog_window, size_pos.x, ((size_pos.y * n) - size_pos.y), size_pos.width, size_pos.height);
+                        entry.make_window(dialog_window, 0, ((size_pos.y * n) - size_pos.y), size_pos.width, size_pos.height);
                     }
                 }
             ;
