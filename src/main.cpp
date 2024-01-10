@@ -355,6 +355,77 @@ class mxb
             return 0;
         }
 
+        class Dialog_win
+        {
+            public:
+                Dialog_win()
+                {
+                    create_dialog_win();
+                }
+
+                void
+                show()
+                {
+                    xcb_configure_window
+                    (
+                        conn,
+                        dialog_window,
+                        XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, 
+                        (const uint32_t[2])
+                        {
+                            mxb::pointer::get::x(),
+                            mxb::pointer::get::y()
+                        }
+                    );
+                    xcb_map_window(conn, dialog_window);
+                    xcb_flush(conn);
+                }
+
+                void
+                hide()
+                {
+                    xcb_unmap_window(conn, dialog_window);
+                    xcb_flush(conn);
+                    mxb::win::kill(dialog_window);
+                    xcb_flush(conn);
+                }
+            ;
+
+            private:
+                xcb_window_t dialog_window;
+
+                void
+                create_dialog_win()
+                {
+                    dialog_window = xcb_generate_id(conn);
+                    xcb_create_window
+                    (
+                        conn,
+                        XCB_COPY_FROM_PARENT,
+                        dialog_window,
+                        screen->root,
+                        0,
+                        0,
+                        50,
+                        20,
+                        0,
+                        XCB_WINDOW_CLASS_INPUT_OUTPUT,
+                        XCB_COPY_FROM_PARENT, 
+                        0, 
+                        nullptr
+                    );
+
+                    uint32_t mask = 
+                        XCB_EVENT_MASK_FOCUS_CHANGE  | 
+                        XCB_EVENT_MASK_ENTER_WINDOW  |
+                        XCB_EVENT_MASK_LEAVE_WINDOW  
+                    ;
+                    mxb::set::event_mask(& mask, dialog_window);
+                    xcb_flush(conn);
+                }
+            ;
+        };
+
         class get 
         {
             public: 
