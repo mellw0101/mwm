@@ -8741,7 +8741,7 @@ class Event
                 {
                     mxb::Dialog_win dialog;
                     dialog.addEntry("HELLO", nullptr);
-                    dialog.addEntry("HELLO_2", nullptr);
+                    // dialog.addEntry("HELLO_2", nullptr);
                     dialog.show();
                 }
             }
