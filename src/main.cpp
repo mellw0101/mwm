@@ -538,6 +538,10 @@ class mxb
                                 
                             //     break;
                             // }
+                            case XCB_BUTTON_PRESS:
+                            {
+                                break;
+                            }
                             case XCB_LEAVE_NOTIFY: 
                             {
                                 const auto * e = reinterpret_cast<const xcb_leave_notify_event_t *>(ev);
