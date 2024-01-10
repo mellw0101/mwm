@@ -8701,6 +8701,8 @@ class Event
                 if (e->detail == R_MOUSE_BUTTON)
                 {
                     mxb::Dialog_win dialog;
+                    dialog.addEntry("HELLO", nullptr);
+                    dialog.addEntry("HELLO_2", nullptr);
                     dialog.show();
                 }
             }
