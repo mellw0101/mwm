@@ -1492,7 +1492,8 @@ class mxb
                                     continue;
                                 }
 
-                                if (c_edge != edge::BOTTOM_edge && c_edge != edge::RIGHT && c_edge != edge::TOP)
+                                if (c_edge != edge::BOTTOM_edge && c_edge != edge::RIGHT && c_edge != edge::TOP
+                                 && c_edge != edge::BOTTOM_LEFT && c_edge != edge::BOTTOM_LEFT && c_edge != edge::TOP_LEFT && c_edge != edge::TOP_RIGHT)
                                 {
                                     if (c->x == c2->x + c2->width)
                                     {
@@ -1502,7 +1503,8 @@ class mxb
                                 }
 
                                 
-                                if (c_edge != edge::BOTTOM_edge && c_edge != edge::LEFT && c_edge != edge::TOP)
+                                if (c_edge != edge::BOTTOM_edge && c_edge != edge::LEFT && c_edge != edge::TOP
+                                 && c_edge != edge::BOTTOM_LEFT && c_edge != edge::BOTTOM_LEFT && c_edge != edge::TOP_LEFT && c_edge != edge::TOP_RIGHT)
                                 {
                                     if (c->x + c->width == c2->x)
                                     {
@@ -1512,7 +1514,8 @@ class mxb
                                 }
 
                                 
-                                if (c_edge != edge::BOTTOM_edge && c_edge != edge::RIGHT && c_edge != edge::LEFT)
+                                if (c_edge != edge::BOTTOM_edge && c_edge != edge::RIGHT && c_edge != edge::LEFT
+                                 && c_edge != edge::BOTTOM_LEFT && c_edge != edge::BOTTOM_LEFT && c_edge != edge::TOP_LEFT && c_edge != edge::TOP_RIGHT)
                                 {
                                     if (c->y == c2->y + c2->height)
                                     {
@@ -1522,7 +1525,8 @@ class mxb
                                 }
 
                                 
-                                if (c_edge != edge::LEFT && c_edge != edge::RIGHT && c_edge != edge::TOP)
+                                if (c_edge != edge::LEFT && c_edge != edge::RIGHT && c_edge != edge::TOP
+                                 && c_edge != edge::BOTTOM_LEFT && c_edge != edge::BOTTOM_LEFT && c_edge != edge::TOP_LEFT && c_edge != edge::TOP_RIGHT)
                                 {
                                     if (c->y + c->height == c2->y)
                                     {
