@@ -538,7 +538,11 @@ class mxb
                             case XCB_BUTTON_PRESS:
                             {
                                 const auto & e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
-                                run_action(e->event);
+                                if (e->detail == L_MOUSE_BUTTON)
+                                {
+                                    log_info("running entry action");
+                                    run_action(e->event);
+                                }
                                 break;
                             }
                             case XCB_LEAVE_NOTIFY: 
