@@ -418,7 +418,7 @@ class mxb
                     public:
                         DialogEntry() {}
                         xcb_window_t window;
-                        uint8_t border_size = 1;
+                        int16_t border_size = 1;
 
                         void
                         add_name(const char * name)
