@@ -468,6 +468,8 @@ class mxb
                             mxb::win::grab::button(window, {{L_MOUSE_BUTTON, NULL}});
                             xcb_map_window(conn, window);
                             xcb_flush(conn);
+
+                            log_win("window: ", window);
                         }
                     ;
 
@@ -542,6 +544,7 @@ class mxb
                                 if (e->detail == L_MOUSE_BUTTON)
                                 {
                                     log_info("running entry action");
+                                    log_win("e->event:", e->event);
                                     run_action(& e->event);
                                 }
                                 break;
