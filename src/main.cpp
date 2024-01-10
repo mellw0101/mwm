@@ -8761,7 +8761,7 @@ class Event
                     ("HELLO_2", 
                     []() 
                     {
-                        mxb::launch::program((char *) "konsole");
+                        mxb::launch::program((char *) "/usr/bin/konsole");
                     });
                     dialog.show();
                 }
