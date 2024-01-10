@@ -571,7 +571,7 @@ class mxb
                     for (auto & entry : entries)
                     {
                         entry.make_window(dialog_window, 0, y, size_pos.width, size_pos.height);
-                        mxb::draw::text(entry.window, entry.getName(), WHITE, RED, "7x14", 0, 0);
+                        mxb::draw::text(entry.window, entry.getName(), WHITE, RED, "7x14", 2, 14);
                         y += size_pos.height;
                     }
                 }
