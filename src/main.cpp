@@ -1494,25 +1494,25 @@ class mxb
 
                                 if (c->x == c2->x + c2->width)
                                 {
-                                    map[c2] = edge::LEFT;
+                                    map[c2] = edge::RIGHT;
                                     return map;
                                 }
 
                                 if (c->x + c->width == c2->x)
                                 {
-                                    map[c2] = edge::RIGHT;
+                                    map[c2] = edge::LEFT;
                                     return map;
                                 }
 
                                 if (c->y == c2->y + c2->height)
                                 {
-                                    map[c2] = edge::TOP;
+                                    map[c2] = edge::BOTTOM_edge;
                                     return map;
                                 }
 
                                 if (c->y + c->height == c2->y)
                                 {
-                                    map[c2] = edge::BOTTOM_edge;
+                                    map[c2] = edge::TOP;
                                     return map;
                                 }
                             }
@@ -5409,15 +5409,16 @@ class resize_client
                     std::map<client *, edge> map = mxb::Client::calc::if_client_is_next_to_other_client(c);
                     for (const auto & pair : map)
                     {
-                        if (pair.first == nullptr)
+                        if (pair.first != nullptr)
                         {
-                            log_info("pair.first == nullptr");
-                            break;
-                        }
-                        else 
-                        {
-                            log_info("pair.first != nullptr");
-                            break;
+                            c2 = pair.first;
+                            c2_edge = pair.second;
+                            mxb::pointer::grab(c->frame);
+                            teleport_mouse(_edge);
+                            run_double(_edge);
+                            xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
+                            xcb_flush(conn);
+                            return;
                         }
                     }
                     
@@ -5431,6 +5432,8 @@ class resize_client
 
             private:
                 client * & c;
+                client * c2;
+                edge c2_edge; 
                 const double frameRate = 120.0;
                 std::chrono::high_resolution_clock::time_point lastUpdateTime = std::chrono::high_resolution_clock::now();
                 const double frameDuration = 1000.0 / frameRate;
@@ -5743,6 +5746,49 @@ class resize_client
                                 if (isTimeToRender())
                                 {
                                     snap(e->root_x, e->root_y, edge, 12);
+                                    xcb_flush(conn); 
+                                }
+                                break;
+                            }
+                            case XCB_BUTTON_RELEASE: 
+                            {
+                                shouldContinue = false;                        
+                                mxb::Client::update(c);
+                                break;
+                            }
+                        }
+                        // Free the event memory after processing
+                        free(ev); 
+                    }
+                }
+
+                void /* 
+                    THIS IS THE MAIN EVENT LOOP FOR 'resize_client'
+                 */
+                run_double(edge edge)
+                {
+                    xcb_generic_event_t * ev;
+                    bool shouldContinue = true;
+
+                    // Wait for motion events and handle window resizing
+                    while (shouldContinue) 
+                    {
+                        ev = xcb_wait_for_event(conn);
+                        if (!ev) 
+                        {
+                            continue;
+                        }
+
+                        switch (ev->response_type & ~0x80) 
+                        {
+                            case XCB_MOTION_NOTIFY: 
+                            {
+                                const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
+                                if (isTimeToRender())
+                                {
+                                    resize_client(e->root_x, e->root_y, edge);
+                                    c = c2;
+                                    resize_client(e->root_x, e->root_y, c2_edge);
                                     xcb_flush(conn); 
                                 }
                                 break;
