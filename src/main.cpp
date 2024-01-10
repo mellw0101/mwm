@@ -362,7 +362,7 @@ class mxb
                 {
                     size_pos.x      = mxb::pointer::get::x();
                     size_pos.y      = mxb::pointer::get::y();
-                    size_pos.width  = 80;
+                    size_pos.width  = 120;
                     size_pos.height = 20;
 
                     border.left = size_pos.x;
