@@ -126,6 +126,11 @@ enum class MAX
     HEIGHT  = 4
 };
 
+struct window_borders
+{
+    int16_t left, right, top, bottom;
+};
+
 struct size_pos 
 {
     int16_t x, y;

@@ -360,6 +360,16 @@ class mxb
             public:
                 Dialog_win()
                 {
+                    size_pos.x      = mxb::pointer::get::x();
+                    size_pos.y      = mxb::pointer::get::y();
+                    size_pos.width  = 80;
+                    size_pos.height = 20;
+
+                    border.left = size_pos.x;
+                    border.right = (size_pos.x + size_pos.width);
+                    border.top = size_pos.y;
+                    border.bottom = (size_pos.y + size_pos.height);
+
                     create_dialog_win();
                 }
 
@@ -373,8 +383,8 @@ class mxb
                         XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, 
                         (const uint32_t[2])
                         {
-                            mxb::pointer::get::x(),
-                            mxb::pointer::get::y()
+                            static_cast<const uint32_t &>(size_pos.x),
+                            static_cast<const uint32_t &>(size_pos.y)
                         }
                     );
                     xcb_map_window(conn, dialog_window);
@@ -386,6 +396,8 @@ class mxb
 
             private:
                 xcb_window_t dialog_window;
+                size_pos size_pos;
+                window_borders border;
 
                 void
                 create_dialog_win()
@@ -433,21 +445,32 @@ class mxb
                 run()
                 {
                     xcb_generic_event_t * ev;
-                    bool running = true;
+                    bool shouldContinue = true;
 
-                    while (running)
+                    while (shouldContinue) 
                     {
                         ev = xcb_wait_for_event(conn);
+                        if (!ev) 
+                        {
+                            continue;
+                        }
+
                         switch (ev->response_type & ~0x80)
                         {
-                            case XCB_EVENT_MASK_LEAVE_WINDOW:
+                            // case XCB_MOTION_NOTIFY: 
+                            // {
+                            //     const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
+                                
+                            //     break;
+                            // }
+                            case XCB_LEAVE_NOTIFY: 
                             {
+                                shouldContinue = false;
                                 hide();
-                                running = false;
                                 break;
                             }
                         }
-                        free(ev);
+                        free(ev); 
                     }
                 }
             ;
