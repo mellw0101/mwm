@@ -422,7 +422,9 @@ class mxb
                     ;
                     mxb::set::event_mask(& mask, dialog_window);
                     mxb::win::grab::button(dialog_window, {{L_MOUSE_BUTTON, NULL}});
+                    mxb::set::win::backround::as_color(dialog_window, DARK_GREY);
                     xcb_flush(conn);
+                    mxb::win::raise(dialog_window);
                 }
             ;
         };
@@ -2753,6 +2755,22 @@ class mxb
 
                     free(protocols_reply);
                     free(delete_reply);
+                }
+
+                static void  
+                raise(const xcb_window_t & window) 
+                {
+                    xcb_configure_window
+                    (
+                        conn,
+                        window,
+                        XCB_CONFIG_WINDOW_STACK_MODE, 
+                        (const uint32_t[1])
+                        {
+                            XCB_STACK_MODE_ABOVE
+                        }
+                    );
+                    xcb_flush(conn);
                 }
             ;
         };
