@@ -568,7 +568,7 @@ class mxb
                     int y = 0;
                     for (auto & entry : entries)
                     {
-                        entry.make_window(dialog_window, border_size, (y + border_size), (size_pos.width - (border_size * 2)), (size_pos.height - border_size * 2));
+                        entry.make_window(dialog_window, 0, y, size_pos.width, size_pos.height);
                         mxb::draw::text(entry.window, entry.getName(), WHITE, RED, "7x14", 2, 14);
                         y += size_pos.height;
                     }
