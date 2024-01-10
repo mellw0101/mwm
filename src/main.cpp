@@ -421,6 +421,7 @@ class mxb
                         XCB_EVENT_MASK_LEAVE_WINDOW  
                     ;
                     mxb::set::event_mask(& mask, dialog_window);
+                    mxb::win::grab::button(dialog_window, {{L_MOUSE_BUTTON, NULL}});
                     xcb_flush(conn);
                 }
             ;
@@ -2649,6 +2650,29 @@ class mxb
                                         modifiers
                                     );
                                     xcb_flush(conn); // Flush the request to the X server
+                                }
+
+                                button(const xcb_window_t & window, std::initializer_list<std::pair<const uint8_t, const uint16_t>> bindings)
+                                {
+                                    for (const auto & binding : bindings)
+                                    {
+                                        const uint8_t & button = binding.first;
+                                        const uint16_t & modifier = binding.second;
+                                        xcb_grab_button
+                                        (
+                                            conn, 
+                                            1, 
+                                            window, 
+                                            XCB_EVENT_MASK_BUTTON_PRESS, 
+                                            XCB_GRAB_MODE_ASYNC, 
+                                            XCB_GRAB_MODE_ASYNC, 
+                                            XCB_NONE, 
+                                            XCB_NONE, 
+                                            button, 
+                                            modifier    
+                                        );
+                                        xcb_flush(conn); 
+                                    }
                                 }
                             ;
                         };
