@@ -508,7 +508,6 @@ class mxb
                         XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY;
                     ;
                     mxb::set::event_mask(& mask, dialog_window);
-                    mxb::win::grab::button(dialog_window, {{L_MOUSE_BUTTON, NULL}});
                     mxb::set::win::backround::as_color(dialog_window, DARK_GREY);
                     xcb_flush(conn);
                     mxb::win::raise(dialog_window);
