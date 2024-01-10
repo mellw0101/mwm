@@ -392,6 +392,7 @@ class mxb
                     xcb_map_window(conn, dialog_window);
                     xcb_flush(conn);
 
+                    make_entries();
                     run();
                 }
 
