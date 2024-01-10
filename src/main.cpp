@@ -567,11 +567,11 @@ class mxb
                 void
                 make_entries()
                 {
-                    int n = 0;
+                    int y = 0;
                     for (auto & entry : entries)
                     {
-                        ++n;
-                        entry.make_window(dialog_window, 0, ((size_pos.y * n) - size_pos.y), size_pos.width, size_pos.height);
+                        entry.make_window(dialog_window, 0, y, size_pos.width, size_pos.height);
+                        y += size_pos.height;
                     }
                 }
             ;
@@ -8741,7 +8741,7 @@ class Event
                 {
                     mxb::Dialog_win dialog;
                     dialog.addEntry("HELLO", nullptr);
-                    // dialog.addEntry("HELLO_2", nullptr);
+                    dialog.addEntry("HELLO_2", nullptr);
                     dialog.show();
                 }
             }
