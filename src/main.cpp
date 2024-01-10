@@ -546,6 +546,8 @@ class mxb
                                     log_info("running entry action");
                                     log_win("e->event:", e->event);
                                     run_action(& e->event);
+                                    shouldContinue = false;
+                                    hide();
                                 }
                                 break;
                             }
