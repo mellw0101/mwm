@@ -434,6 +434,7 @@ class mxb
                         void 
                         activate() const 
                         {
+                            LOG_func
                             entryAction();
                         }
 
@@ -541,7 +542,7 @@ class mxb
                                 if (e->detail == L_MOUSE_BUTTON)
                                 {
                                     log_info("running entry action");
-                                    run_action(e->event);
+                                    run_action(& e->event);
                                 }
                                 break;
                             }
@@ -572,11 +573,11 @@ class mxb
                 }
 
                 void
-                run_action(const xcb_window_t & window)
+                run_action(const xcb_window_t * w) 
                 {
-                    for (const auto & entry : entries)
+                    for (const auto & entry : entries) 
                     {
-                        if (entry.window == window)
+                        if (* w == entry.window)
                         {
                             entry.activate();
                         }
