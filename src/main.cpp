@@ -380,15 +380,6 @@ class mxb
                     xcb_map_window(conn, dialog_window);
                     xcb_flush(conn);
                 }
-
-                void
-                hide()
-                {
-                    xcb_unmap_window(conn, dialog_window);
-                    xcb_flush(conn);
-                    mxb::win::kill(dialog_window);
-                    xcb_flush(conn);
-                }
             ;
 
             private:
@@ -406,7 +397,7 @@ class mxb
                         screen->root,
                         0,
                         0,
-                        50,
+                        80,
                         20,
                         0,
                         XCB_WINDOW_CLASS_INPUT_OUTPUT,
@@ -425,6 +416,35 @@ class mxb
                     mxb::set::win::backround::as_color(dialog_window, DARK_GREY);
                     xcb_flush(conn);
                     mxb::win::raise(dialog_window);
+                }
+                
+                void
+                hide()
+                {
+                    xcb_unmap_window(conn, dialog_window);
+                    xcb_flush(conn);
+                    mxb::win::kill(dialog_window);
+                    xcb_flush(conn);
+                }
+                
+                void
+                run()
+                {
+                    xcb_generic_event_t * ev;
+                    bool running = true;
+
+                    while (running)
+                    {
+                        ev = xcb_wait_for_event(conn);
+                        switch (ev->response_type & ~0x80)
+                        {
+                            case XCB_EVENT_MASK_LEAVE_WINDOW:
+                            {
+                                hide();
+                            }
+                        }
+                        free(ev);
+                    }
                 }
             ;
         };
@@ -6067,7 +6087,7 @@ class resize_client
                             continue;
                         }
 
-                        switch (ev->response_type & ~0x80) 
+                        switch (ev->response_type & ~0x80)
                         {
                             case XCB_MOTION_NOTIFY: 
                             {
