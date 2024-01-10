@@ -1482,7 +1482,7 @@ class mxb
                         }
 
                         static std::map<client *, edge>
-                        if_client_is_next_to_other_client(client * c)
+                        if_client_is_next_to_other_client(client * c, edge c_edge)
                         {
                             std::map<client *, edge> map;
                             for (client * c2 : cur_d->current_clients)
@@ -1492,28 +1492,43 @@ class mxb
                                     continue;
                                 }
 
-                                if (c->x == c2->x + c2->width)
+                                if (c_edge != edge::BOTTOM_edge && c_edge != edge::RIGHT && c_edge != edge::TOP)
                                 {
-                                    map[c2] = edge::RIGHT;
-                                    return map;
+                                    if (c->x == c2->x + c2->width)
+                                    {
+                                        map[c2] = edge::RIGHT;
+                                        return map;
+                                    }
                                 }
 
-                                if (c->x + c->width == c2->x)
+                                
+                                if (c_edge != edge::BOTTOM_edge && c_edge != edge::LEFT && c_edge != edge::TOP)
                                 {
-                                    map[c2] = edge::LEFT;
-                                    return map;
+                                    if (c->x + c->width == c2->x)
+                                    {
+                                        map[c2] = edge::LEFT;
+                                        return map;
+                                    }
                                 }
 
-                                if (c->y == c2->y + c2->height)
+                                
+                                if (c_edge != edge::BOTTOM_edge && c_edge != edge::RIGHT && c_edge != edge::LEFT)
                                 {
-                                    map[c2] = edge::BOTTOM_edge;
-                                    return map;
+                                    if (c->y == c2->y + c2->height)
+                                    {
+                                        map[c2] = edge::BOTTOM_edge;
+                                        return map;
+                                    }
                                 }
 
-                                if (c->y + c->height == c2->y)
+                                
+                                if (c_edge != edge::LEFT && c_edge != edge::RIGHT && c_edge != edge::TOP)
                                 {
-                                    map[c2] = edge::TOP;
-                                    return map;
+                                    if (c->y + c->height == c2->y)
+                                    {
+                                        map[c2] = edge::TOP;
+                                        return map;
+                                    }
                                 }
                             }
 
@@ -5406,7 +5421,7 @@ class resize_client
                         return;
                     }
 
-                    std::map<client *, edge> map = mxb::Client::calc::if_client_is_next_to_other_client(c);
+                    std::map<client *, edge> map = mxb::Client::calc::if_client_is_next_to_other_client(c, _edge);
                     for (const auto & pair : map)
                     {
                         if (pair.first != nullptr)
