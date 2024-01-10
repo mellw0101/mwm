@@ -443,6 +443,8 @@ class mxb
                             case XCB_EVENT_MASK_LEAVE_WINDOW:
                             {
                                 hide();
+                                running = false;
+                                break;
                             }
                         }
                         free(ev);
