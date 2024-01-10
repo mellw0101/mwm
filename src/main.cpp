@@ -465,8 +465,12 @@ class mxb
                             // }
                             case XCB_LEAVE_NOTIFY: 
                             {
-                                shouldContinue = false;
-                                hide();
+                                const auto * e = reinterpret_cast<const xcb_leave_notify_event_t *>(ev);
+                                if (e->event == dialog_window)
+                                {
+                                    shouldContinue = false;
+                                    hide();
+                                } 
                                 break;
                             }
                         }
