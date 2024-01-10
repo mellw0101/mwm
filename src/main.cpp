@@ -376,15 +376,17 @@ class mxb
                 void
                 show()
                 {
+                    uint32_t height = get_num_of_entries() * size_pos.height;
                     xcb_configure_window
                     (
                         conn,
                         dialog_window,
-                        XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, 
-                        (const uint32_t[2])
+                        XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT, 
+                        (const uint32_t[3])
                         {
                             static_cast<const uint32_t &>(size_pos.x),
-                            static_cast<const uint32_t &>(size_pos.y)
+                            static_cast<const uint32_t &>(size_pos.y),
+                            height
                         }
                     );
                     xcb_map_window(conn, dialog_window);
@@ -392,12 +394,57 @@ class mxb
 
                     run();
                 }
+
+                void 
+                addEntry(const char * name, std::function<void()> action) 
+                {
+                    DialogEntry entry;
+                    entry.add_name(name);
+                    entry.add_action(action);
+                    entries.push_back(entry);
+                }
             ;
 
             private:
                 xcb_window_t dialog_window;
                 size_pos size_pos;
                 window_borders border;
+                class DialogEntry 
+                {
+                    public:
+                        DialogEntry() {}
+
+                        void
+                        add_name(const char * name)
+                        {
+                            entryName = name;
+                        }
+
+                        void
+                        add_action(std::function<void()> action)
+                        {
+                            entryAction = action;
+                        }
+
+                        void 
+                        activate() const 
+                        {
+                            entryAction();
+                        }
+
+                        const char * 
+                        getName() const 
+                        {
+                            return entryName;
+                        }
+                    ;
+
+                    private:
+                        const char * entryName;
+                        std::function<void()> entryAction;
+                    ;
+                };
+                std::vector<DialogEntry> entries;
 
                 void
                 create_dialog_win()
@@ -476,6 +523,17 @@ class mxb
                         }
                         free(ev); 
                     }
+                }
+
+                int
+                get_num_of_entries()
+                {
+                    int n = 0;
+                    for (const auto & entry : entries)
+                    {
+                        ++n;
+                    }
+                    return n;
                 }
             ;
         };
