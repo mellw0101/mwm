@@ -823,22 +823,8 @@ class mxb
                         void
                         setup_dock()
                         {
-                            // uint32_t mask = 
-                            //     XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT |
-                            //     XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY   |
-                            //     XCB_EVENT_MASK_ENTER_WINDOW          |
-                            //     XCB_EVENT_MASK_LEAVE_WINDOW          |
-                            //     XCB_EVENT_MASK_STRUCTURE_NOTIFY      |
-                            //     XCB_EVENT_MASK_BUTTON_PRESS          |
-                            //     XCB_EVENT_MASK_BUTTON_RELEASE        |
-                            //     XCB_EVENT_MASK_KEY_PRESS             |
-                            //     XCB_EVENT_MASK_FOCUS_CHANGE          |
-                            //     XCB_EVENT_MASK_KEY_RELEASE           |
-                            //     XCB_EVENT_MASK_POINTER_MOTION 
-                            // ;
-                            // main_window.apply_event_mask(& mask);
                             main_window.grab_button({{R_MOUSE_BUTTON, NULL}});
-                            mxb::set::win::backround::as_color(main_window, DARK_GREY);
+                            mxb::set::win::backround::as_color(main_window, RED);
                             calc_size_pos();
                             mxb::conf::win::x_y_width_height(main_window, x, y, width, height);
                             main_window.map();
