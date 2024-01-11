@@ -814,6 +814,7 @@ class mxb
                                 0,
                                 NULL
                             );
+                            main_window.map();
                         }
 
                         void
@@ -837,8 +838,6 @@ class mxb
                             mxb::set::win::backround::as_color(main_window, DARK_GREY);
                             calc_size_pos();
                             mxb::conf::win::x_y_width_height(main_window, x, y, width, height);
-                            xcb_flush(conn);
-                            main_window.map();
                         }
 
                         void
