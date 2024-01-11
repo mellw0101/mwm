@@ -1036,7 +1036,7 @@ class mxb
                         }
 
                         void 
-                        add_app(mxb::str app_name, const char * action)
+                        add_app(const char * app_name, const char * action)
                         {
                             app_data app;
                             app.name = app_name;
