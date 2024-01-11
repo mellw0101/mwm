@@ -597,21 +597,267 @@ class mxb
                         }
                     }
 
-                    void
-                    set_backround_color(COLOR color)
-                    {
-                        xcb_change_window_attributes
-                        (
-                            conn,
-                            _window,
-                            XCB_CW_BACK_PIXEL,
-                            (const uint32_t[1])
-                            {
-                                mxb::get::color(color)
-                            }
-                        );
-                        xcb_flush(conn);
-                    }
+                    public: // size_pos configuration methods 
+                        void
+                        x(const uint32_t & x)
+                        {
+                            xcb_configure_window
+                            (
+                                conn, 
+                                _window, 
+                                XCB_CONFIG_WINDOW_X,
+                                (const uint32_t[1])
+                                {
+                                    x
+                                }
+                            );
+                        }
+
+                        void
+                        y(const uint32_t & y)
+                        {
+                            xcb_configure_window
+                            (
+                                conn, 
+                                _window, 
+                                XCB_CONFIG_WINDOW_Y,
+                                (const uint32_t[1])
+                                {
+                                    y
+                                }
+                            );
+                        }
+
+                        void
+                        width(const uint32_t & width)
+                        {
+                            xcb_configure_window
+                            (
+                                conn, 
+                                _window, 
+                                XCB_CONFIG_WINDOW_WIDTH,
+                                (const uint32_t[1])
+                                {
+                                    width
+                                }
+                            );
+                        }
+
+                        void
+                        height(const uint32_t & height)
+                        {
+                            xcb_configure_window
+                            (
+                                conn, 
+                                _window, 
+                                XCB_CONFIG_WINDOW_HEIGHT,
+                                (const uint32_t[1])
+                                {
+                                    height
+                                }
+                            );
+                        }
+
+                        void
+                        x_y(const uint32_t & x, const uint32_t & y)
+                        {
+                            xcb_configure_window
+                            (
+                                conn, 
+                                _window, 
+                                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y,
+                                (const uint32_t[2])
+                                {
+                                    x,
+                                    y
+                                }
+                            );
+                        }
+
+                        void
+                        width_height(const uint32_t & width, const uint32_t & height)
+                        {
+                            xcb_configure_window
+                            (
+                                conn, 
+                                _window, 
+                                XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
+                                (const uint32_t[2])
+                                {
+                                    width,
+                                    height
+                                }
+                            );
+                        }
+
+                        void
+                        x_y_width_height(const uint32_t & x, const uint32_t & y, const uint32_t & width, const uint32_t & height)
+                        {
+                            xcb_configure_window
+                            (
+                                conn, 
+                                _window, 
+                                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
+                                (const uint32_t[4])
+                                {
+                                    x,
+                                    y,
+                                    width,
+                                    height
+                                }
+                            );
+                        }
+
+                        void
+                        x_width_height(const uint32_t & x, const uint32_t & width, const uint32_t & height)
+                        {
+                            xcb_configure_window
+                            (
+                                conn, 
+                                _window, 
+                                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
+                                (const uint32_t[3])
+                                {
+                                    x,
+                                    width,
+                                    height
+                                }
+                            );
+                        }
+
+                        void
+                        y_width_height(const uint32_t & y, const uint32_t & width, const uint32_t & height)
+                        {
+                            xcb_configure_window
+                            (
+                                conn, 
+                                _window, 
+                                XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
+                                (const uint32_t[3])
+                                {
+                                    y,
+                                    width,
+                                    height
+                                }
+                            );
+                        }
+
+                        void
+                        x_width(const uint32_t & x, const uint32_t & width)
+                        {
+                            xcb_configure_window
+                            (
+                                conn, 
+                                _window, 
+                                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_WIDTH,
+                                (const uint32_t[2])
+                                {
+                                    x,
+                                    width
+                                }
+                            );
+                        }
+
+                        void
+                        x_height(const uint32_t & x, const uint32_t & height)
+                        {
+                            xcb_configure_window
+                            (
+                                conn, 
+                                _window, 
+                                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_HEIGHT,
+                                (const uint32_t[2])
+                                {
+                                    x,
+                                    height
+                                }
+                            );
+                        }
+                        
+                        void
+                        y_width(const uint32_t & y, const uint32_t & width)
+                        {
+                            xcb_configure_window
+                            (
+                                conn, 
+                                _window, 
+                                XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH,
+                                (const uint32_t[2])
+                                {
+                                    y,
+                                    width
+                                }
+                            );
+                        }
+                        
+                        void 
+                        y_height(const uint32_t & y, const uint32_t & height)
+                        {
+                            xcb_configure_window
+                            (
+                                conn, 
+                                _window, 
+                                XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT,
+                                (const uint32_t[2])
+                                {
+                                    y,
+                                    height
+                                }
+                            );
+                        }
+
+                        void
+                        x_y_width(const uint32_t & x, const uint32_t & y, const uint32_t & width)
+                        {
+                            xcb_configure_window
+                            (
+                                conn, 
+                                _window, 
+                                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH,
+                                (const uint32_t[3])
+                                {
+                                    x,
+                                    y,
+                                    width
+                                }
+                            );
+                        }
+
+                        void
+                        x_y_height(const uint32_t & x, const uint32_t & y, const uint32_t & height)
+                        {
+                            xcb_configure_window
+                            (
+                                conn,
+                                _window,
+                                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT,
+                                (const uint32_t[3])
+                                {
+                                    x,
+                                    y,
+                                    height
+                                }  
+                            );
+                        }
+                    ;
+
+                    public: // backround methods 
+                        void
+                        set_backround_color(COLOR color)
+                        {
+                            xcb_change_window_attributes
+                            (
+                                conn,
+                                _window,
+                                XCB_CW_BACK_PIXEL,
+                                (const uint32_t[1])
+                                {
+                                    mxb::get::color(color)
+                                }
+                            );
+                            xcb_flush(conn);
+                        }
+                    ;
                 ;
             ;
 
@@ -686,22 +932,23 @@ class mxb
                             size_pos.x = mxb::pointer::get::x();
                             size_pos.y = mxb::pointer::get::y();
                             uint32_t height = get_num_of_entries() * size_pos.height;
-                            xcb_configure_window
-                            (
-                                conn,
-                                window,
-                                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT, 
-                                (const uint32_t[3])
-                                {
-                                    static_cast<const uint32_t &>(size_pos.x - BORDER_SIZE),
-                                    static_cast<const uint32_t &>(size_pos.y - BORDER_SIZE),
-                                    height
-                                }
-                            );
+                            window.x_y_height((size_pos.x - BORDER_SIZE), (size_pos.y - BORDER_SIZE), height);
+                            // xcb_configure_window
+                            // (
+                            //     conn,
+                            //     window,
+                            //     XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT, 
+                            //     (const uint32_t[3])
+                            //     {
+                            //         static_cast<const uint32_t &>(size_pos.x - BORDER_SIZE),
+                            //         static_cast<const uint32_t &>(size_pos.y - BORDER_SIZE),
+                            //         height
+                            //     }
+                            // );
                             window.map();
                             xcb_flush(conn);
 
-                            mxb::win::raise(window);
+                            window.raise();
 
                             make_entries();
                             run();
