@@ -544,24 +544,32 @@ class mxb
                                 const auto & e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
                                 if (e->detail == L_MOUSE_BUTTON)
                                 {
-                                    log_info("running entry action");
-                                    log_win("e->event:", e->event);
                                     run_action(& e->event);
                                     shouldContinue = false;
                                     hide();
                                 }
                                 break;
                             }
-                            case XCB_LEAVE_NOTIFY: 
+                            case XCB_MOTION_NOTIFY:
                             {
-                                const auto * e = reinterpret_cast<const xcb_leave_notify_event_t *>(ev);
-                                if (e->event == dialog_window)
+                                const auto & e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
+                                if (e->event != dialog_window)
                                 {
                                     shouldContinue = false;
                                     hide();
-                                } 
+                                }
                                 break;
                             }
+                            // case XCB_LEAVE_NOTIFY: 
+                            // {
+                            //     const auto * e = reinterpret_cast<const xcb_leave_notify_event_t *>(ev);
+                            //     if (e->event == dialog_window)
+                            //     {
+                            //         shouldContinue = false;
+                            //         hide();
+                            //     } 
+                            //     break;
+                            // }
                         }
                         free(ev); 
                     }
