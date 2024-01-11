@@ -9579,6 +9579,7 @@ setup_wm()
     
     dock = new mxb::Dialog_win::Dock;
     dock->add_app("konsole");
+    dock->add_app("alacritty");
     dock->add_app("falkon");
     dock->init();
 }
