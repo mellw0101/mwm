@@ -9445,7 +9445,7 @@ setup_wm()
     
     dock = new mxb::Dialog_win::Dock;
     dock->add_app("konsole", "/usr/bin/konsole");
-    dock->add_app("falkon", "/usr/bin/falkon");
+    dock->add_app("falkon", "falkon");
     dock->init();
 }
 
