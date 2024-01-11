@@ -3305,7 +3305,7 @@ class mxb
     ;
 };
 
-mxb::Dialog_win::Dock dock;
+static mxb::Dialog_win::Dock dock;
 
 namespace bitmap
 {
