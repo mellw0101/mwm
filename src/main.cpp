@@ -7994,10 +7994,9 @@ class WinManager
             WinDecoretor(conn ,c);
             
             uint32_t mask = 
-            XCB_EVENT_MASK_FOCUS_CHANGE     | 
-            XCB_EVENT_MASK_ENTER_WINDOW     |
-            XCB_EVENT_MASK_LEAVE_WINDOW     |
-            XCB_EVENT_MASK_STRUCTURE_NOTIFY ;
+            XCB_EVENT_MASK_FOCUS_CHANGE | 
+            XCB_EVENT_MASK_ENTER_WINDOW |
+            XCB_EVENT_MASK_LEAVE_WINDOW ;
             mxb::set::event_mask(& mask, c->win);
 
             mxb::get::win::property(c->win, "_NET_WM_NAME");
