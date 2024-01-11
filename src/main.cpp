@@ -1036,11 +1036,10 @@ class mxb
                         }
 
                         void 
-                        add_app(const char * app_name, const char * action)
+                        add_app(const char * app_name)
                         {
                             app_data app;
                             app.name = app_name;
-                            app.action = app_name;
                             app.index = apps.size();
                             apps.push_back(app);
                         }
@@ -1050,7 +1049,6 @@ class mxb
                         struct app_data
                         {
                             const char * name;
-                            const char * action;
                             int index;
                         };
                         std::vector<app_data> apps;
@@ -1115,14 +1113,13 @@ class mxb
                         {
                             for (const auto & app : apps)
                             {
-                                const char * action = app.action;
                                 buttons.add
                                 (
                                     app.name,
-                                    [action] () 
+                                    [app] () 
                                     {
                                         {
-                                            mxb::launch::program((char *) action);
+                                            mxb::launch::program((char *) app.name);
                                         }
                                     }    
                                 );
@@ -9581,8 +9578,8 @@ setup_wm()
     mxb::set::win::backround::as_png("/home/mellw/mwm_png/galaxy17.png", screen->root);
     
     dock = new mxb::Dialog_win::Dock;
-    dock->add_app("konsole", "/usr/bin/konsole");
-    dock->add_app("falkon", "falkon");
+    dock->add_app("konsole");
+    dock->add_app("falkon");
     dock->init();
 }
 
