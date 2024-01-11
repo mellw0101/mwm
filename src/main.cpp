@@ -982,7 +982,7 @@ class mxb
                                 buttons.add
                                 (
                                     app.name, 
-                                    [app] 
+                                    [app] () 
                                     {
                                         {
                                             mxb::launch::program((char *) app.action);
