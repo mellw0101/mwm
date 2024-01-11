@@ -437,11 +437,13 @@ class mxb
                     return *this;
                 }
 
-                operator const char*() 
+                operator const char*()
                 {
                     return data;
                 }
+            ;
 
+            public: // public methods 
                 const char* c_str() const 
                 {
                     return data;
@@ -1034,11 +1036,13 @@ class mxb
                         }
 
                         void 
-                        add_app(mxb::str name, const char * action)
+                        add_app(mxb::str app_name)
                         {
                             app_data app;
-                            app.name = name;
-                            app.action = action;
+                            app.name = app_name;
+                            mxb::str file = "/usr/bin/";
+                            file.append(app_name);
+                            app.file = file;
                             app.index = apps.size();
                             apps.push_back(app);
                         }
@@ -1048,7 +1052,7 @@ class mxb
                         struct app_data
                         {
                             const char * name;
-                            const char * action;
+                            const char * file;
                             int index;
                         };
                         std::vector<app_data> apps;
@@ -1119,7 +1123,7 @@ class mxb
                                     [app] () 
                                     {
                                         {
-                                            mxb::launch::program((char *) app.action);
+                                            mxb::launch::program((char *) app.name);
                                         }
                                     }    
                                 );
@@ -9578,8 +9582,8 @@ setup_wm()
     mxb::set::win::backround::as_png("/home/mellw/mwm_png/galaxy17.png", screen->root);
     
     dock = new mxb::Dialog_win::Dock;
-    dock->add_app("konsole", "/usr/bin/konsole");
-    dock->add_app("falkon", "falkon");
+    dock->add_app("konsole");
+    dock->add_app("falkon");
     dock->init();
 }
 
