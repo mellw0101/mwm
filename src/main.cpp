@@ -775,6 +775,8 @@ class mxb
                             uint32_t mask = XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY;
                             mxb::set::event_mask(& mask, window);
                             mxb::set::win::backround::as_color(window, DARK_GREY);
+                            calc_size_pos();
+                            mxb::conf::win::x_y_width_height(window, x, y, width, height);
                             window.map();
                         }
 
