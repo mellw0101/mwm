@@ -955,7 +955,16 @@ class mxb
                         void
                         make_apps()
                         {
-                            buttons.add("test", nullptr);
+                            buttons.add
+                            (
+                                "test", 
+                                [] 
+                                {
+                                    {
+                                        mxb::launch::program((char *) "/usr/bin/konsole");
+                                    }
+                                }    
+                            );
                             buttons.list[0].create(main_window, 2, 2, width - 4, height - 4, GREEN);
                         }
                     ;
