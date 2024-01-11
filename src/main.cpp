@@ -869,6 +869,7 @@ class mxb
                             create_dock();
                             setup_dock();
                             configure_context_menu();
+                            make_apps();
                         }
                     ;
 
