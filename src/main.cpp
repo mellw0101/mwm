@@ -1040,9 +1040,6 @@ class mxb
                         {
                             app_data app;
                             app.name = app_name;
-                            mxb::str file = "/usr/bin/";
-                            file.append(app_name);
-                            app.file = file;
                             app.index = apps.size();
                             apps.push_back(app);
                         }
@@ -1052,7 +1049,6 @@ class mxb
                         struct app_data
                         {
                             const char * name;
-                            const char * file;
                             int index;
                         };
                         std::vector<app_data> apps;
