@@ -915,6 +915,9 @@ class mxb
 
                             x = ((screen->width_in_pixels / 2) - (calc_width / 2));
                             y = (screen->height_in_pixels - height);
+
+                            mxb::conf::win::x_y_width_height(main_window, x, y, width, height);
+                            xcb_flush(conn);
                         }
 
                         void
@@ -942,7 +945,6 @@ class mxb
                             main_window.grab_button({{R_MOUSE_BUTTON, NULL}});
                             main_window.set_backround_color(RED);
                             calc_size_pos();
-                            mxb::conf::win::x_y_width_height(main_window, x, y, width, height);
                             main_window.map();
                         }
 
@@ -978,6 +980,8 @@ class mxb
                                 }    
                             );
                             buttons.list[1].create(main_window, ((buttons.size() - 1) * width) + 2, 2, width - 4, height - 4, GREEN);
+
+                            calc_size_pos();
                         }
                     ;
                 };
