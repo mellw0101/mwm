@@ -8761,7 +8761,21 @@ class Event
                 }
             }
 
-           
+            if (e->event == screen->root)
+            {
+                if (e->detail == R_MOUSE_BUTTON)
+                {
+                    mxb::Dialog_win dialog;
+                    dialog.addEntry
+                    ("konsole",
+                    []() 
+                    {
+                        mxb::launch::program((char *) "/usr/bin/konsole");
+                    });
+                    dialog.show();
+                }
+            }
+
             c = get::client_from_all_win(& e->event);
             if (!c)
             {
@@ -8864,18 +8878,6 @@ class Event
 
             if (e->detail == R_MOUSE_BUTTON) 
             {
-                if (e->event == screen->root)
-                {
-                    mxb::Dialog_win dialog;
-                    dialog.addEntry
-                    ("konsole",
-                    []() 
-                    {
-                        mxb::launch::program((char *) "/usr/bin/konsole");
-                    });
-                    dialog.show();
-                }
-
                 switch (e->state) 
                 {
                     case ALT:
