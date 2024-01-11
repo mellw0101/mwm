@@ -1,4 +1,5 @@
 #include "structs.hpp"
+#include <X11/Xlib.h>
 #include <algorithm>
 #include <cstdint>
 #include <cstdlib>
@@ -355,6 +356,105 @@ class mxb
             return 0;
         }
 
+        class window
+        {
+            public: // construcers and operators 
+                window() {}
+
+                operator xcb_window_t() const 
+                {
+                    return _window;
+                }
+            ;
+
+            public: // public methods 
+                void
+                create( 
+                    const uint8_t        & depth,
+                    const xcb_window_t   & parent_window,
+                    const int16_t        & x,
+                    const int16_t        & y,
+                    const uint16_t       & width,
+                    const uint16_t       & height,
+                    const uint16_t       & border_width,
+                    const uint16_t       & _class,
+                    const xcb_visualid_t & visual,
+                    const uint32_t       & value_mask,
+                    const void           * value_list)
+                {
+                    _depth = depth;
+                    _parent = parent_window;
+                    _x = x;
+                    _y = y;
+                    _width = width;
+                    _height = height;
+                    _border_width = border_width;
+                    __class = _class;
+                    _visual = visual;
+                    _value_mask = value_mask;
+                    _value_list = value_list;
+
+                    make_window();
+                }
+
+                void  
+                raise() 
+                {
+                    xcb_configure_window
+                    (
+                        conn,
+                        _window,
+                        XCB_CONFIG_WINDOW_STACK_MODE, 
+                        (const uint32_t[1])
+                        {
+                            XCB_STACK_MODE_ABOVE
+                        }
+                    );
+                    xcb_flush(conn);
+                }
+            ;
+
+            private: // private variables 
+                uint8_t        _depth;
+                xcb_window_t   _window;
+                xcb_window_t   _parent;
+                int16_t        _x;
+                int16_t        _y;
+                uint16_t       _width;
+                uint16_t       _height;
+                uint16_t       _border_width;
+                uint16_t       __class;
+                xcb_visualid_t _visual;
+                uint32_t       _value_mask;
+                const void     * _value_list;
+            ;
+
+            private: // private methods 
+                void
+                make_window()
+                {
+                    _window = xcb_generate_id(conn);
+                    xcb_create_window
+                    (
+                        conn,
+                        _depth,
+                        _window,
+                        _parent,
+                        _x,
+                        _y,
+                        _width,
+                        _height,
+                        _border_width,
+                        __class,
+                        _visual,
+                        _value_mask,
+                        _value_list
+                    );
+                    xcb_flush(conn);
+                }
+            ;
+        };
+
         class Dialog_win
         {
             public:
@@ -601,6 +701,81 @@ class mxb
                                 mxb::draw::text(entry.window, entry.getName(), WHITE, BLACK, "7x14", 2, 14);
                                 y += size_pos.height;
                             }
+                        }
+                    ;
+                };
+
+                class button
+                {
+                    public:
+                        xcb_window_t window;
+                        uint32_t x, y, width, height;
+                    ;
+                };
+
+                class Dock
+                {
+                    public: // public variables 
+                        mxb::Dialog_win::context_menu context_menu;
+                        mxb::window window;
+                        uint32_t x = 0, y = 0, width = 70, height = 70;
+                        int n_apps = 0;
+                    ;
+
+                    public: // public methods 
+                        Dock() {}
+
+                        void
+                        init()
+                        {
+                            create_window();
+                            setup_window();
+                        }
+                    ;
+
+                    private: // private methods 
+                        void
+                        calc_size_pos()
+                        {
+                            x = ((screen->width_in_pixels / 2) - ((width) / 2));
+                            y = (screen->height_in_pixels - height);
+                        }
+
+                        void
+                        create_window()
+                        {
+                            window.create
+                            (
+                                XCB_COPY_FROM_PARENT,
+                                screen->root,
+                                0,
+                                0,
+                                width,
+                                height,
+                                0,
+                                XCB_WINDOW_CLASS_INPUT_OUTPUT,
+                                XCB_COPY_FROM_PARENT,
+                                0,
+                                NULL
+                            );
+                            xcb_flush(conn);
+                        }
+
+                        void
+                        setup_window()
+                        {
+                            uint32_t mask = XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY;
+                            mxb::set::event_mask(& mask, window);
+                            mxb::set::win::backround::as_color(window, DARK_GREY);
+
+                            calc_size_pos();
+                            mxb::conf::win::x_y_width_height(window, x, y, width, height);
+                        }
+
+                        void
+                        make_context_menu()
+                        {
+                            context_menu.addEntry("test with nullptr", nullptr);
                         }
                     ;
                 };
@@ -1272,14 +1447,14 @@ class mxb
                 }
 
                 static void
-                event_mask(const uint32_t * values, const xcb_window_t & win)
+                event_mask(const uint32_t * mask, const xcb_window_t & window)
                 {
                     xcb_change_window_attributes
                     (
                         conn,
-                        win,
+                        window,
                         XCB_CW_EVENT_MASK,
-                        values
+                        mask
                     );
                 }
 
@@ -1410,13 +1585,13 @@ class mxb
                                 class as_color
                                 {
                                     public:
-                                        as_color(const xcb_window_t & win, COLOR color)
+                                        as_color(const xcb_window_t & window, COLOR color)
                                         {
                                             xcb_change_window_attributes
                                             (
-                                                conn, 
-                                                win, 
-                                                XCB_CW_BACK_PIXEL, 
+                                                conn,
+                                                window,
+                                                XCB_CW_BACK_PIXEL,
                                                 (const uint32_t[1])
                                                 {
                                                     mxb::get::color(color)
@@ -9034,6 +9209,9 @@ setup_wm()
     change_desktop::teleport_to(1);
 
     mxb::set::win::backround::as_png("/home/mellw/mwm_png/galaxy17.png", screen->root);
+
+    mxb::Dialog_win::Dock dock;
+    dock.init();
 }
 
 int
