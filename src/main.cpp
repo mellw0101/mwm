@@ -9444,9 +9444,8 @@ setup_wm()
     mxb::set::win::backround::as_png("/home/mellw/mwm_png/galaxy17.png", screen->root);
     
     dock = new mxb::Dialog_win::Dock;
-    dock->add_app("test", "/usr/bin/konsole");
-    dock->add_app("test2", "/usr/bin/konsole");
-    dock->add_app("test3", "/usr/bin/konsole");
+    dock->add_app("konsole", "/usr/bin/konsole");
+    dock->add_app("falkon", "/usr/bin/falkon");
     dock->init();
 }
 
