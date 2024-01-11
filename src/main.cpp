@@ -553,7 +553,7 @@ class mxb
                             case XCB_MOTION_NOTIFY:
                             {
                                 const auto & e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
-                                if (e->event != dialog_window)
+                                if (e->root_x >= border.left && e->root_x <= border.right && e->root_y >= border.top && e->root_y <= border.bottom)
                                 {
                                     shouldContinue = false;
                                     hide();
