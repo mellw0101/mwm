@@ -9445,8 +9445,8 @@ setup_wm()
     
     dock = new mxb::Dialog_win::Dock;
     dock->add_app("test", "/usr/bin/konsole", 0);
-    dock->add_app("test2", "/usr/bin/konsole", 0);
-    dock->add_app("test3", "/usr/bin/konsole", 0);
+    dock->add_app("test2", "/usr/bin/konsole", 1);
+    dock->add_app("test3", "/usr/bin/konsole", 2);
     dock->init();
 }
 
