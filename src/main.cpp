@@ -900,12 +900,12 @@ class mxb
                         }
 
                         void 
-                        add_app(const char * name, const char * action, const int & index)
+                        add_app(const char * name, const char * action)
                         {
                             app_data app;
                             app.name = name;
                             app.action = action;
-                            app.index = index;
+                            app.index = apps.size();
                             apps.push_back(app);
                         }
                     ;
@@ -9444,9 +9444,9 @@ setup_wm()
     mxb::set::win::backround::as_png("/home/mellw/mwm_png/galaxy17.png", screen->root);
     
     dock = new mxb::Dialog_win::Dock;
-    dock->add_app("test", "/usr/bin/konsole", 0);
-    dock->add_app("test2", "/usr/bin/konsole", 1);
-    dock->add_app("test3", "/usr/bin/konsole", 2);
+    dock->add_app("test", "/usr/bin/konsole");
+    dock->add_app("test2", "/usr/bin/konsole");
+    dock->add_app("test3", "/usr/bin/konsole");
     dock->init();
 }
 
