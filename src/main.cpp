@@ -916,7 +916,7 @@ class mxb
                             x = ((screen->width_in_pixels / 2) - (calc_width / 2));
                             y = (screen->height_in_pixels - height);
 
-                            mxb::conf::win::x_y_width_height(main_window, x, y, width, height);
+                            mxb::conf::win::x_y_width_height(main_window, x, y, calc_width, height);
                             xcb_flush(conn);
                         }
 
