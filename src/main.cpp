@@ -9444,8 +9444,8 @@ setup_wm()
     mxb::set::win::backround::as_png("/home/mellw/mwm_png/galaxy17.png", screen->root);
     
     dock = new mxb::Dialog_win::Dock;
-    dock->init();
     dock->add_app("test", "/usr/bin/konsole", 0);
+    dock->init();
 }
 
 int
