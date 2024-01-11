@@ -851,6 +851,10 @@ class mxb
 
                 class Dock
                 {
+                    public: // constructor
+                        Dock() {}
+                    ;
+
                     public: // public variables 
                         mxb::Dialog_win::context_menu context_menu;
                         mxb::window main_window;
@@ -859,13 +863,12 @@ class mxb
                     ;
 
                     public: // public methods 
-                        Dock() {}
-
                         void
                         init()
                         {
                             create_dock();
                             setup_dock();
+                            configure_context_menu();
                         }
                     ;
 
@@ -880,7 +883,9 @@ class mxb
                                 num_of_buttons = 1;
                             }
 
-                            x = ((screen->width_in_pixels / 2) - ((width * num_of_buttons) / 2));
+                            uint32_t calc_width = width * num_of_buttons;
+
+                            x = ((screen->width_in_pixels / 2) - (calc_width / 2));
                             y = (screen->height_in_pixels - height);
                         }
 
@@ -914,9 +919,16 @@ class mxb
                         }
 
                         void
-                        make_context_menu()
+                        configure_context_menu()
                         {
                             context_menu.addEntry("test with nullptr", nullptr);
+                        }
+
+                        void
+                        make_apps()
+                        {
+                            buttons.add("test", nullptr);
+                            buttons.list[0].create(main_window, 0, 0, width, height, GREEN);
                         }
                     ;
                 };
@@ -9365,7 +9377,6 @@ setup_wm()
     
     dock = new mxb::Dialog_win::Dock;
     dock->init();
-    dock->context_menu.addEntry("test", nullptr);
 }
 
 int
