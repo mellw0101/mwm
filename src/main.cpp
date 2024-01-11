@@ -528,6 +528,8 @@ class mxb
                         void
                         show()
                         {
+                            size_pos.x = mxb::pointer::get::x();
+                            size_pos.y = mxb::pointer::get::y();
                             uint32_t height = get_num_of_entries() * size_pos.height;
                             xcb_configure_window
                             (
