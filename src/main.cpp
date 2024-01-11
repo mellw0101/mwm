@@ -662,7 +662,7 @@ class mxb
             public:
                 class context_menu
                 {
-                    public:
+                    public: // consructor 
                         context_menu()
                         {
                             size_pos.x      = mxb::pointer::get::x();
@@ -677,7 +677,9 @@ class mxb
 
                             create_dialog_win();
                         }
+                    ;
 
+                    public: // public methods 
                         void
                         show()
                         {
@@ -687,7 +689,7 @@ class mxb
                             xcb_configure_window
                             (
                                 conn,
-                                dialog_window,
+                                window,
                                 XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT, 
                                 (const uint32_t[3])
                                 {
@@ -696,10 +698,10 @@ class mxb
                                     height
                                 }
                             );
-                            xcb_map_window(conn, dialog_window);
+                            window.map();
                             xcb_flush(conn);
 
-                            mxb::win::raise(dialog_window);
+                            mxb::win::raise(window);
 
                             make_entries();
                             run();
@@ -715,12 +717,7 @@ class mxb
                         }
                     ;
 
-                    private:
-                        xcb_window_t dialog_window;
-                        size_pos size_pos;
-                        window_borders border;
-                        int border_size = 1;
-                        
+                    private: // private subclasses 
                         class DialogEntry 
                         {
                             public:
@@ -787,17 +784,23 @@ class mxb
                                 std::function<void()> entryAction;
                             ;
                         };
-                        std::vector<DialogEntry> entries;
+                    ;
 
+                    private: // private variables 
+                        mxb::window window;
+                        size_pos size_pos;
+                        window_borders border;
+                        int border_size = 1;
+                        std::vector<DialogEntry> entries;
+                    ;
+                    
+                    private: // private methods 
                         void
                         create_dialog_win()
                         {
-                            dialog_window = xcb_generate_id(conn);
-                            xcb_create_window
+                            window.create
                             (
-                                conn,
                                 XCB_COPY_FROM_PARENT,
-                                dialog_window,
                                 screen->root,
                                 0,
                                 0,
@@ -817,18 +820,18 @@ class mxb
                                 XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY |
                                 XCB_EVENT_MASK_POINTER_MOTION      
                             ;
-                            mxb::set::event_mask(& mask, dialog_window);
-                            mxb::set::win::backround::as_color(dialog_window, DARK_GREY);
+                            window.apply_event_mask(& mask);
+                            window.set_backround_color(DARK_GREY);
                             xcb_flush(conn);
-                            mxb::win::raise(dialog_window);
+                            window.raise();
                         }
                         
                         void
                         hide()
                         {
-                            xcb_unmap_window(conn, dialog_window);
+                            xcb_unmap_window(conn, window);
                             xcb_flush(conn);
-                            mxb::win::kill(dialog_window);
+                            mxb::win::kill(window);
                             xcb_flush(conn);
                         }
                         
@@ -862,7 +865,7 @@ class mxb
                                     case XCB_LEAVE_NOTIFY: 
                                     {
                                         const auto * e = reinterpret_cast<const xcb_leave_notify_event_t *>(ev);
-                                        if (e->event == dialog_window)
+                                        if (e->event == window)
                                         {
                                             shouldContinue = false;
                                             hide();
@@ -903,7 +906,7 @@ class mxb
                             int y = 0;
                             for (auto & entry : entries)
                             {
-                                entry.make_window(dialog_window, 0, y, size_pos.width, size_pos.height);
+                                entry.make_window(window, 0, y, size_pos.width, size_pos.height);
                                 mxb::draw::text(entry.window, entry.getName(), WHITE, BLACK, "7x14", 2, 14);
                                 y += size_pos.height;
                             }
@@ -1059,7 +1062,7 @@ class mxb
                         std::vector<app_data> apps;
                     ;
 
-                    private: // private methods 
+                    private: // private methods
                         void
                         calc_size_pos()
                         {
