@@ -805,6 +805,7 @@ class mxb
                                 NULL
                             );
                             window.set_backround_color(color);
+                            window.grab_button({{L_MOUSE_BUTTON, NULL}});
                             window.map();
                             xcb_flush(conn);
                         }
@@ -813,6 +814,13 @@ class mxb
                         action(std::function<void()> action)
                         {
                             button_action = action;
+                        }
+
+                        void 
+                        activate() const 
+                        {
+                            LOG_func
+                            button_action();
                         }
                     ;
 
@@ -842,6 +850,19 @@ class mxb
                         {
                             return list.size();
                         }
+
+                        void
+                        run_action(const uint32_t & window)
+                        {
+                            for (const auto & button : list) 
+                            {
+                                if (window == button.window)
+                                {
+                                    button.activate();
+                                    return;
+                                }
+                            }
+                        }
                     ;
 
                     private: // private variables
@@ -870,6 +891,12 @@ class mxb
                             setup_dock();
                             configure_context_menu();
                             make_apps();
+                        }
+
+                        void 
+                        button_press_handler(const uint32_t & window)
+                        {
+                            buttons.run_action(window);
                         }
                     ;
 
@@ -8996,14 +9023,19 @@ class Event
                     return;
                 }
             }
-
+            
+            if (e->detail == L_MOUSE_BUTTON)
+            {
+                dock->button_press_handler(e->event);
+            }
+            
             if (e->event == dock->main_window)
             {
                 if (e->detail == R_MOUSE_BUTTON)
                 {
                     dock->context_menu.show();
                     return;
-                }
+                }    
             }
 
             if (e->event == screen->root)
