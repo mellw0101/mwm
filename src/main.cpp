@@ -965,7 +965,7 @@ class mxb
                                     }
                                 }    
                             );
-                            buttons.list[0].create(main_window, 2, 2, width - 4, height - 4, GREEN);
+                            buttons.list[0].create(main_window, ((buttons.size() - 1) * width) + 2, 2, width - 4, height - 4, GREEN);
                         }
                     ;
                 };
