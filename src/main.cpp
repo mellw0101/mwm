@@ -898,6 +898,16 @@ class mxb
                         {
                             buttons.run_action(window);
                         }
+
+                        void 
+                        add_app(const char * name, const char * action, const int & index)
+                        {
+                            app_data app;
+                            app.name = name;
+                            app.action = action;
+                            app.index = index;
+                            apps.push_back(app);
+                        }
                     ;
 
                     private: // private variables
@@ -962,16 +972,6 @@ class mxb
                         configure_context_menu()
                         {
                             context_menu.addEntry("test with nullptr", nullptr);
-                        }
-
-                        void 
-                        add_app(const char * name, const char * action, const int & index)
-                        {
-                            app_data app;
-                            app.name = name;
-                            app.action = action;
-                            app.index = index;
-                            apps.push_back(app);
                         }
 
                         void
