@@ -813,8 +813,7 @@ class mxb
                                 XCB_COPY_FROM_PARENT,
                                 0,
                                 NULL
-                            );
-                            main_window.map();
+                            );   
                         }
 
                         void
@@ -836,9 +835,9 @@ class mxb
                             // main_window.apply_event_mask(& mask);
                             main_window.grab_button({{R_MOUSE_BUTTON, NULL}});
                             mxb::set::win::backround::as_color(main_window, DARK_GREY);
-                            calc_size_pos();
-                            mxb::conf::win::x_y_width_height(main_window, x, y, width, height);
-                            xcb_flush(conn);
+                            // calc_size_pos();
+                            // mxb::conf::win::x_y_width_height(main_window, x, y, width, height);
+                            main_window.map();
                         }
 
                         void
