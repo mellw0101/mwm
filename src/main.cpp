@@ -935,9 +935,7 @@ class mxb
                             window.x_y_height((size_pos.x - BORDER_SIZE), (size_pos.y - BORDER_SIZE), height);
                             window.map();
                             xcb_flush(conn);
-
                             window.raise();
-
                             make_entries();
                             run();
                         }
@@ -1313,7 +1311,7 @@ class mxb
                             x = ((screen->width_in_pixels / 2) - (calc_width / 2));
                             y = (screen->height_in_pixels - height);
 
-                            mxb::conf::win::x_y_width_height(main_window, x, y, calc_width, height);
+                            main_window.x_y_width_height(x, y, calc_width, height);
                             xcb_flush(conn);
                         }
 
@@ -1340,7 +1338,7 @@ class mxb
                         setup_dock()
                         {
                             main_window.grab_button({{R_MOUSE_BUTTON, NULL}});
-                            main_window.set_backround_color(RED);
+                            main_window.set_backround_color(DARK_GREY);
                             calc_size_pos();
                             main_window.map();
                         }
@@ -1366,7 +1364,7 @@ class mxb
                                         }
                                     }    
                                 );
-                                buttons.list[app.index].create(main_window, ((buttons.size() - 1) * width) + 2, 2, width - 4, height - 4, GREEN);
+                                buttons.list[app.index].create(main_window, ((buttons.size() - 1) * width) + 2, 2, width - 4, height - 4, BLACK);
                             }
                             calc_size_pos();
                         }
