@@ -550,26 +550,16 @@ class mxb
                                 }
                                 break;
                             }
-                            case XCB_MOTION_NOTIFY:
+                            case XCB_LEAVE_NOTIFY: 
                             {
-                                const auto & e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
-                                if (e->root_x >= border.left && e->root_x <= border.right && e->root_y >= border.top && e->root_y <= border.bottom)
+                                const auto * e = reinterpret_cast<const xcb_leave_notify_event_t *>(ev);
+                                if (e->event == dialog_window)
                                 {
                                     shouldContinue = false;
                                     hide();
-                                }
+                                } 
                                 break;
                             }
-                            // case XCB_LEAVE_NOTIFY: 
-                            // {
-                            //     const auto * e = reinterpret_cast<const xcb_leave_notify_event_t *>(ev);
-                            //     if (e->event == dialog_window)
-                            //     {
-                            //         shouldContinue = false;
-                            //         hide();
-                            //     } 
-                            //     break;
-                            // }
                         }
                         free(ev); 
                     }
