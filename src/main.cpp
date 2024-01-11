@@ -465,11 +465,11 @@ class mxb
                                 nullptr
                             );
                             mxb::set::win::backround::as_color(window, BLACK);
+                            uint32_t mask = XCB_EVENT_MASK_POINTER_MOTION;
+                            mxb::set::event_mask(& mask, window);
                             mxb::win::grab::button(window, {{L_MOUSE_BUTTON, NULL}});
                             xcb_map_window(conn, window);
                             xcb_flush(conn);
-
-                            log_win("window: ", window);
                         }
                     ;
 
@@ -502,10 +502,11 @@ class mxb
                     );
 
                     uint32_t mask = 
-                        XCB_EVENT_MASK_FOCUS_CHANGE  | 
-                        XCB_EVENT_MASK_ENTER_WINDOW  |
-                        XCB_EVENT_MASK_LEAVE_WINDOW  |
-                        XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY;
+                        XCB_EVENT_MASK_FOCUS_CHANGE        | 
+                        XCB_EVENT_MASK_ENTER_WINDOW        |
+                        XCB_EVENT_MASK_LEAVE_WINDOW        |
+                        XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY |
+                        XCB_EVENT_MASK_POINTER_MOTION      
                     ;
                     mxb::set::event_mask(& mask, dialog_window);
                     mxb::set::win::backround::as_color(dialog_window, DARK_GREY);
