@@ -414,6 +414,13 @@ class mxb
                     );
                     xcb_flush(conn);
                 }
+
+                void
+                map()
+                {
+                    xcb_map_window(conn, _window);
+                    xcb_flush(conn);
+                }
             ;
 
             private: // private variables 
@@ -770,7 +777,7 @@ class mxb
                             uint32_t mask = XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY;
                             mxb::set::event_mask(& mask, window);
                             mxb::set::win::backround::as_color(window, DARK_GREY);
-                            
+                            window.map();
                         }
 
                         void
