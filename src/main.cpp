@@ -602,6 +602,17 @@ class mxb
             ;
         };
 
+        class Root
+        {
+            public:
+                xcb_window_t window = screen->root;
+                int16_t x = 0;
+                int16_t y = 0;
+                uint16_t width = screen->width_in_pixels;
+                uint16_t height = screen->height_in_pixels;
+            ;
+        };
+
         class get 
         {
             public: 
@@ -2446,56 +2457,6 @@ class mxb
             ;
         };
 
-        class uppscale
-        {
-            public:    
-                struct Pixel 
-                {
-                    uint8_t r, g, b;
-                };
-
-                struct Image 
-                {
-                    int width, height;
-                    std::vector<Pixel> pixels;
-
-                    Pixel getPixel(int x, int y) const 
-                    {
-                        return pixels[y * width + x];
-                    }
-
-                    void setPixel(int x, int y, const Pixel& pixel) 
-                    {
-                        pixels[y * width + x] = pixel;
-                    }
-                };
-
-                Image 
-                upscaleImage(const Image& input, int newWidth, int newHeight) 
-                {
-                    Image output;
-                    output.width = newWidth;
-                    output.height = newHeight;
-                    output.pixels.resize(newWidth * newHeight);
-
-                    for (int y = 0; y < newHeight; ++y) 
-                    {
-                        for (int x = 0; x < newWidth; ++x) 
-                        {
-                            // Find the nearest pixel in the input image
-                            int srcX = x * input.width / newWidth;
-                            int srcY = y * input.height / newHeight;
-                            Pixel nearestPixel = input.getPixel(srcX, srcY);
-
-                            output.setPixel(x, y, nearestPixel);
-                        }
-                    }
-
-                    return output;
-                }
-            ;
-        };
-
         class scale
         {
             public:
@@ -2504,66 +2465,6 @@ class mxb
                 {
                     return (n << 8) | n;
                 }
-            ;
-        };
-
-        class modf
-        {
-            public:
-                class win
-                {
-                    public:
-                        win(xcb_window_t window, uint16_t mask, const uint32_t * values)
-                        {
-                            xcb_configure_window
-                            (
-                                conn, 
-                                window, 
-                                mask,
-                                values
-                            );
-                        }
-
-                        
-                        win(xcb_window_t window, const std::vector<uint32_t> & parameters, const std::vector<uint32_t> & values) 
-                        {
-                            if (parameters.size() != values.size()) 
-                            {
-                                log_error("The sizes of the parameters and values vectors do not match.");
-                                return;
-                            }
-
-                            // Create a mask
-                            uint32_t mask = 0;
-                            for (const auto & param : parameters) 
-                            {
-                                mask |= param;
-                            }
-
-                            // Order values according to the mask
-                            std::vector<uint32_t> orderedValues;
-                            for (uint32_t i = 0; mask != 0; mask >>= 1, ++i) 
-                            {
-                                if (mask & 1) 
-                                {
-                                    if (i < parameters.size()) 
-                                    {
-                                        orderedValues.push_back(values[i]);
-                                    } 
-                                    else 
-                                    {
-                                        log_error("Parameter index out of range.");
-                                        return;
-                                    }
-                                }
-                            }
-
-                            // Apply changes
-                            xcb_configure_window(conn, window, mask, orderedValues.data());
-                            xcb_flush(conn);
-                        }
-                    ;
-                };
             ;
         };
 
@@ -9104,7 +9005,7 @@ setup_wm()
     mxb::set::_setup();
     mxb::set::_iter();
     mxb::set::_screen();
-    setSubstructureRedirectMask(); 
+    setSubstructureRedirectMask();
     configureRootWindow();
     mxb::pointer::set(screen->root, CURSOR::arrow);
 
