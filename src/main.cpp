@@ -1038,6 +1038,11 @@ class mxb
                         void 
                         add_app(const char * app_name)
                         {
+                            if (!check_if_app_exists(app_name))
+                            {
+                                return;
+                            }
+
                             app_data app;
                             app.name = app_name;
                             app.index = apps.size();
@@ -1126,6 +1131,44 @@ class mxb
                                 buttons.list[app.index].create(main_window, ((buttons.size() - 1) * width) + 2, 2, width - 4, height - 4, GREEN);
                             }
                             calc_size_pos();
+                        }
+
+                        bool
+                        check_if_app_exists(const char * app_name)
+                        {
+                            std::string name = app_name;
+
+                            if (mxb::File::search("/usr/bin/" + name))
+                            {
+                                return true;
+                            }
+
+                            if (mxb::File::search("/usr/local/bin/" + name))
+                            {
+                                return true;
+                            }
+
+                            if (mxb::File::search("/usr/local/sbin/" + name))
+                            {
+                                return true;
+                            }
+
+                            if (mxb::File::search("/usr/sbin/" + name))
+                            {
+                                return true;
+                            }
+
+                            if (mxb::File::search("/sbin/" + name))
+                            {
+                                return true;
+                            }
+
+                            if (mxb::File::search("/bin/" + name))
+                            {
+                                return true;
+                            }
+
+                            return false;
                         }
                     ;
                 };
