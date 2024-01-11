@@ -772,6 +772,7 @@ class mxb
                 class Dock
                 {
                     public: // public variables 
+                        mxb::Dialog_win::context_menu context_menu;
                         mxb::window main_window;
                         uint32_t x = 0, y = 0, width = 48, height = 48;
                         int n_apps = 0;
@@ -785,13 +786,6 @@ class mxb
                         {
                             create_dock();
                             setup_dock();
-                        }
-
-                        void
-                        show_context_menu()
-                        {
-                            mxb::Dialog_win::context_menu context_menu;
-                            context_menu.addEntry("test with nullptr", nullptr);
                         }
                     ;
 
@@ -841,9 +835,15 @@ class mxb
                             // main_window.apply_event_mask(& mask);
                             main_window.grab_button({{R_MOUSE_BUTTON, NULL}});
                             mxb::set::win::backround::as_color(main_window, DARK_GREY);
-                            // calc_size_pos();
-                            // mxb::conf::win::x_y_width_height(main_window, x, y, width, height);
+                            calc_size_pos();
+                            mxb::conf::win::x_y_width_height(main_window, x, y, width, height);
                             main_window.map();
+                        }
+
+                        void
+                        make_context_menu()
+                        {
+                            context_menu.addEntry("test with nullptr", nullptr);
                         }
                     ;
                 };
@@ -8915,7 +8915,7 @@ class Event
             {
                 if (e->detail == R_MOUSE_BUTTON)
                 {
-                    dock->show_context_menu();
+                    dock->context_menu.show();
                     return;
                 }
             }
@@ -9292,6 +9292,7 @@ setup_wm()
     
     dock = new mxb::Dialog_win::Dock;
     dock->init();
+    dock->context_menu.addEntry("test", nullptr);
 }
 
 int
