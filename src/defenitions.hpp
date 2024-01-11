@@ -22,6 +22,7 @@
 #define log_error(message)                  log.log(ERROR, __FUNCTION__, message)
 #define log_error_code(message, err_code)   log.log(ERROR, __FUNCTION__, message, err_code)
 #define log_win(win_name ,window)           log.log(INFO, __func__, win_name + std::to_string(window))
+#define log_func                            log.log(FUNC, __func__)
 
 /* MOD_MASK DEFENITIONS */
 #define SHIFT   XCB_MOD_MASK_SHIFT

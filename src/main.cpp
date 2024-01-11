@@ -363,6 +363,7 @@ class mxb
 
                 operator xcb_window_t() const 
                 {
+                    log_info("window::operator xcb_window_t() const. ('HAS BEEN CALLED')");
                     return _window;
                 }
             ;
@@ -400,6 +401,7 @@ class mxb
                 void  
                 raise() 
                 {
+                    log_func;
                     xcb_configure_window
                     (
                         conn,
@@ -433,6 +435,7 @@ class mxb
                 void
                 make_window()
                 {
+                    log_func;
                     _window = xcb_generate_id(conn);
                     xcb_create_window
                     (
@@ -767,10 +770,7 @@ class mxb
                             uint32_t mask = XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY;
                             mxb::set::event_mask(& mask, window);
                             mxb::set::win::backround::as_color(window, DARK_GREY);
-
-                            calc_size_pos();
-                            mxb::conf::win::x_y_width_height(window, x, y, width, height);
-                            window.raise();
+                            
                         }
 
                         void
