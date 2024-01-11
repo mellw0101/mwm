@@ -363,7 +363,6 @@ class mxb
 
                 operator uint32_t() const 
                 {
-                    log_info("window::operator xcb_window_t() const. ('HAS BEEN CALLED')");
                     return _window;
                 }
             ;
@@ -401,7 +400,6 @@ class mxb
                 void  
                 raise() 
                 {
-                    log_func;
                     xcb_configure_window
                     (
                         conn,
@@ -425,8 +423,8 @@ class mxb
 
             private: // private variables 
                 uint8_t        _depth;
-                xcb_window_t   _window;
-                xcb_window_t   _parent;
+                uint32_t       _window;
+                uint32_t       _parent;
                 int16_t        _x;
                 int16_t        _y;
                 uint16_t       _width;
