@@ -770,6 +770,7 @@ class mxb
 
                             calc_size_pos();
                             mxb::conf::win::x_y_width_height(window, x, y, width, height);
+                            window.raise();
                         }
 
                         void
