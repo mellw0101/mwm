@@ -435,6 +435,30 @@ class mxb
                         );
                         xcb_flush(conn);
                     }
+                    
+                    void
+                    grab_button(std::initializer_list<std::pair<const uint8_t, const uint16_t>> bindings)
+                    {
+                        for (const auto & binding : bindings)
+                        {
+                            const uint8_t & button = binding.first;
+                            const uint16_t & modifier = binding.second;
+                            xcb_grab_button
+                            (
+                                conn, 
+                                1, 
+                                _window, 
+                                XCB_EVENT_MASK_BUTTON_PRESS, 
+                                XCB_GRAB_MODE_ASYNC, 
+                                XCB_GRAB_MODE_ASYNC, 
+                                XCB_NONE, 
+                                XCB_NONE, 
+                                button, 
+                                modifier    
+                            );
+                            xcb_flush(conn); 
+                        }
+                    }
                 ;
             ;
 
@@ -797,6 +821,7 @@ class mxb
                         {
                             uint32_t mask = XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY;
                             main_window.apply_event_mask(& mask);
+                            main_window.grab_button({{R_MOUSE_BUTTON, NULL}});
                             mxb::set::win::backround::as_color(main_window, DARK_GREY);
                             calc_size_pos();
                             mxb::conf::win::x_y_width_height(main_window, x, y, width, height);
