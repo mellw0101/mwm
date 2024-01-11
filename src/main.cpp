@@ -361,7 +361,7 @@ class mxb
             public: // construcers and operators 
                 window() {}
 
-                operator xcb_window_t() const 
+                operator uint32_t() const 
                 {
                     log_info("window::operator xcb_window_t() const. ('HAS BEEN CALLED')");
                     return _window;
