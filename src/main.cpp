@@ -932,6 +932,10 @@ class mxb
                             size_pos.x = mxb::pointer::get::x();
                             size_pos.y = mxb::pointer::get::y();
                             uint32_t height = get_num_of_entries() * size_pos.height;
+                            if (size_pos.y + height > screen->height_in_pixels)
+                            {
+                                size_pos.y = (screen->height_in_pixels - height);
+                            }
                             window.x_y_height((size_pos.x - BORDER_SIZE), (size_pos.y - BORDER_SIZE), height);
                             window.map();
                             xcb_flush(conn);
