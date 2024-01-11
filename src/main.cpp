@@ -9212,7 +9212,8 @@ setup_wm()
     change_desktop::teleport_to(1);
 
     mxb::set::win::backround::as_png("/home/mellw/mwm_png/galaxy17.png", screen->root);
-
+    mxb::Dialog_win::Dock _dock;
+    dock = _dock;
     dock.init();
 }
 
