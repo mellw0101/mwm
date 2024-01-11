@@ -819,7 +819,10 @@ class mxb
                         void
                         setup_dock()
                         {
-                            uint32_t mask = XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY;
+                            uint32_t mask = 
+                                XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY |
+                                XCB_EVENT_MASK_POINTER_MOTION
+                            ;
                             main_window.apply_event_mask(& mask);
                             main_window.grab_button({{R_MOUSE_BUTTON, NULL}});
                             mxb::set::win::backround::as_color(main_window, DARK_GREY);
