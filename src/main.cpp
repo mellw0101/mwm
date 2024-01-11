@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <cstdlib>
+#include <fstream>
 #include <functional>
 #include <map>
 #include <thread>
@@ -357,6 +358,134 @@ class mxb
             return 0;
         }
 
+        class File
+        {
+            public: // subclasses
+                class search
+                {
+                    public: // construcers and operators
+                        search(const std::string& filename)
+                        : file(filename) {}
+
+                        operator bool() const
+                        {
+                            return file.good();
+                        }
+                    ;
+
+                    private: // private variables
+                        std::ifstream file;
+                    ;
+                };
+            ;
+        };
+
+        class str 
+        {
+            public:
+                str(const char* str = "") 
+                {
+                    length = manualStrlen(str);
+                    data = new char[length + 1];
+                    manualStrcpy(data, str);
+                }
+
+                // Move Constructor
+                str(str&& other) noexcept
+                : data(other.data), length(other.length) 
+                {
+                    other.data = nullptr;
+                    other.length = 0;
+                }
+
+                // Move Assignment Operator
+                str& operator=(str&& other) noexcept 
+                {
+                    if (this != &other) 
+                    {
+                        delete[] data;
+                        data = other.data;
+                        length = other.length;
+
+                        other.data = nullptr;
+                        other.length = 0;
+                    }
+                    return *this;
+                }
+
+                ~str() 
+                {
+                    delete[] data;
+                }
+
+                str(const str& other) 
+                {
+                    length = other.length;
+                    data = new char[length + 1];
+                    manualStrcpy(data, other.data);
+                }
+
+                str& operator=(const str& other) 
+                {
+                    if (this != &other) 
+                    {
+                        delete[] data;
+                        length = other.length;
+                        data = new char[length + 1];
+                        manualStrcpy(data, other.data);
+                    }
+                    return *this;
+                }
+
+                const char* c_str() const 
+                {
+                    return data;
+                }
+
+                void 
+                append(const char* str) 
+                {
+                    size_t newLength = length + manualStrlen(str);
+                    char* newData = new char[newLength + 1];
+
+                    manualStrcpy(newData, data);
+                    manualStrcpy(newData + length, str);
+
+                    delete[] data;
+                    data = newData;
+                    length = newLength;
+                }
+            ;
+
+            private: // private variables
+                char* data;
+                size_t length;
+            ;
+
+            private: // private methods
+                static 
+                size_t manualStrlen(const char* str) 
+                {
+                    size_t len = 0;
+                    while (str && str[len] != '\0') 
+                    {
+                        ++len;
+                    }
+                    return len;
+                }
+
+                static void 
+                manualStrcpy(char* dest, const char* src) 
+                {
+                    while (*src) 
+                    {
+                        *dest++ = *src++;
+                    }
+                    *dest = '\0';
+                }
+            ;
+        };
+        
         class window
         {
             public: // construcers and operators 
@@ -900,10 +1029,10 @@ class mxb
                         }
 
                         void 
-                        add_app(const char * name, const char * action)
+                        add_app(mxb::str name, const char * action)
                         {
                             app_data app;
-                            app.name = name;
+                            app.name = name.c_str();
                             app.action = action;
                             app.index = apps.size();
                             apps.push_back(app);
