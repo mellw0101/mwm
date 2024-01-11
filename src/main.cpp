@@ -368,57 +368,74 @@ class mxb
             ;
 
             public: // public methods 
-                void
-                create( 
-                    const uint8_t        & depth,
-                    const xcb_window_t   & parent_window,
-                    const int16_t        & x,
-                    const int16_t        & y,
-                    const uint16_t       & width,
-                    const uint16_t       & height,
-                    const uint16_t       & border_width,
-                    const uint16_t       & _class,
-                    const xcb_visualid_t & visual,
-                    const uint32_t       & value_mask,
-                    const void           * value_list)
-                {
-                    _depth = depth;
-                    _parent = parent_window;
-                    _x = x;
-                    _y = y;
-                    _width = width;
-                    _height = height;
-                    _border_width = border_width;
-                    __class = _class;
-                    _visual = visual;
-                    _value_mask = value_mask;
-                    _value_list = value_list;
+                public: // main public methods 
+                    void
+                    create( 
+                        const uint8_t        & depth,
+                        const xcb_window_t   & parent_window,
+                        const int16_t        & x,
+                        const int16_t        & y,
+                        const uint16_t       & width,
+                        const uint16_t       & height,
+                        const uint16_t       & border_width,
+                        const uint16_t       & _class,
+                        const xcb_visualid_t & visual,
+                        const uint32_t       & value_mask,
+                        const void           * value_list)
+                    {
+                        _depth = depth;
+                        _parent = parent_window;
+                        _x = x;
+                        _y = y;
+                        _width = width;
+                        _height = height;
+                        _border_width = border_width;
+                        __class = _class;
+                        _visual = visual;
+                        _value_mask = value_mask;
+                        _value_list = value_list;
 
-                    make_window();
-                }
+                        make_window();
+                    }
 
-                void  
-                raise() 
-                {
-                    xcb_configure_window
-                    (
-                        conn,
-                        _window,
-                        XCB_CONFIG_WINDOW_STACK_MODE, 
-                        (const uint32_t[1])
-                        {
-                            XCB_STACK_MODE_ABOVE
-                        }
-                    );
-                    xcb_flush(conn);
-                }
+                    void  
+                    raise() 
+                    {
+                        xcb_configure_window
+                        (
+                            conn,
+                            _window,
+                            XCB_CONFIG_WINDOW_STACK_MODE, 
+                            (const uint32_t[1])
+                            {
+                                XCB_STACK_MODE_ABOVE
+                            }
+                        );
+                        xcb_flush(conn);
+                    }
 
-                void
-                map()
-                {
-                    xcb_map_window(conn, _window);
-                    xcb_flush(conn);
-                }
+                    void
+                    map()
+                    {
+                        xcb_map_window(conn, _window);
+                        xcb_flush(conn);
+                    }
+                ;
+
+                public: // configuration public methods
+                    void
+                    apply_event_mask(const uint32_t * mask)
+                    {
+                        xcb_change_window_attributes
+                        (
+                            conn,
+                            _window,
+                            XCB_CW_EVENT_MASK,
+                            mask
+                        );
+                        xcb_flush(conn);
+                    }
+                ;
             ;
 
             private: // private variables 
@@ -716,8 +733,15 @@ class mxb
                 class button
                 {
                     public:
-                        xcb_window_t window;
-                        uint32_t x, y, width, height;
+                        void
+                        add_button(const char * name, std::function<void()> action)
+                        {
+                            
+                        }
+                    ;
+
+                    private:
+                        mxb::window window;
                     ;
                 };
 
@@ -725,8 +749,8 @@ class mxb
                 {
                     public: // public variables 
                         mxb::Dialog_win::context_menu context_menu;
-                        mxb::window window;
-                        uint32_t x = 0, y = 0, width = 70, height = 70;
+                        mxb::window main_window;
+                        uint32_t x = 0, y = 0, width = 48, height = 48;
                         int n_apps = 0;
                     ;
 
@@ -736,8 +760,8 @@ class mxb
                         void
                         init()
                         {
-                            create_window();
-                            setup_window();
+                            create_dock();
+                            setup_dock();
                         }
                     ;
 
@@ -750,9 +774,9 @@ class mxb
                         }
 
                         void
-                        create_window()
+                        create_dock()
                         {
-                            window.create
+                            main_window.create
                             (
                                 XCB_COPY_FROM_PARENT,
                                 screen->root,
@@ -766,18 +790,17 @@ class mxb
                                 0,
                                 NULL
                             );
-                            xcb_flush(conn);
                         }
 
                         void
-                        setup_window()
+                        setup_dock()
                         {
                             uint32_t mask = XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY;
-                            mxb::set::event_mask(& mask, window);
-                            mxb::set::win::backround::as_color(window, DARK_GREY);
+                            main_window.apply_event_mask(& mask);
+                            mxb::set::win::backround::as_color(main_window, DARK_GREY);
                             calc_size_pos();
-                            mxb::conf::win::x_y_width_height(window, x, y, width, height);
-                            window.map();
+                            mxb::conf::win::x_y_width_height(main_window, x, y, width, height);
+                            main_window.map();
                         }
 
                         void
@@ -8866,6 +8889,11 @@ class Event
                 }
             }
 
+            if (e->event == dock->main_window)
+            {
+                dock->context_menu.show();
+            }
+
             c = get::client_from_all_win(& e->event);
             if (!c)
             {
@@ -9222,6 +9250,7 @@ setup_wm()
     
     dock = new mxb::Dialog_win::Dock;
     dock->init();
+    dock->context_menu.addEntry("test", nullptr);
 }
 
 int
