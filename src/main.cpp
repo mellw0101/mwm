@@ -1347,6 +1347,11 @@ class mxb
                         configure_context_menu()
                         {
                             context_menu.addEntry("test with nullptr", nullptr);
+                            context_menu.addEntry("test with nullptr", nullptr);
+                            context_menu.addEntry("test with nullptr", nullptr);
+                            context_menu.addEntry("test with nullptr", nullptr);
+                            context_menu.addEntry("test with nullptr", nullptr);
+                            context_menu.addEntry("test with nullptr", nullptr);
                         }
 
                         void
