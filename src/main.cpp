@@ -1040,7 +1040,7 @@ class mxb
                         {
                             app_data app;
                             app.name = app_name;
-                            app.action = app_name.c_str();
+                            app.action = action;
                             app.index = apps.size();
                             apps.push_back(app);
                         }
@@ -1115,13 +1115,14 @@ class mxb
                         {
                             for (const auto & app : apps)
                             {
+                                const char * action = app.action;
                                 buttons.add
                                 (
-                                    app.name, 
-                                    [app] () 
+                                    app.name,
+                                    [action] () 
                                     {
                                         {
-                                            mxb::launch::program((char *) app.action);
+                                            mxb::launch::program((char *) action);
                                         }
                                     }    
                                 );
