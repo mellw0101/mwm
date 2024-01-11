@@ -900,6 +900,16 @@ class mxb
                         }
                     ;
 
+                    private: // private variables
+                        struct app_data
+                        {
+                            const char * name;
+                            const char * action;
+                            int index;
+                        };
+                        std::vector<app_data> apps;
+                    ;
+
                     private: // private methods 
                         void
                         calc_size_pos()
@@ -954,33 +964,33 @@ class mxb
                             context_menu.addEntry("test with nullptr", nullptr);
                         }
 
+                        void 
+                        add_app(const char * name, const char * action, const int & index)
+                        {
+                            app_data app;
+                            app.name = name;
+                            app.action = action;
+                            app.index = index;
+                            apps.push_back(app);
+                        }
+
                         void
                         make_apps()
                         {
-                            buttons.add
-                            (
-                                "test", 
-                                [] 
-                                {
+                            for (const auto & app : apps)
+                            {
+                                buttons.add
+                                (
+                                    app.name, 
+                                    [app] 
                                     {
-                                        mxb::launch::program((char *) "/usr/bin/konsole");
-                                    }
-                                }    
-                            );
-                            buttons.list[0].create(main_window, ((buttons.size() - 1) * width) + 2, 2, width - 4, height - 4, GREEN);
-
-                            buttons.add
-                            (
-                                "test", 
-                                [] 
-                                {
-                                    {
-                                        mxb::launch::program((char *) "/usr/bin/konsole");
-                                    }
-                                }    
-                            );
-                            buttons.list[1].create(main_window, ((buttons.size() - 1) * width) + 2, 2, width - 4, height - 4, GREEN);
-
+                                        {
+                                            mxb::launch::program((char *) app.action);
+                                        }
+                                    }    
+                                );
+                                buttons.list[app.index].create(main_window, ((buttons.size() - 1) * width) + 2, 2, width - 4, height - 4, GREEN);
+                            }
                             calc_size_pos();
                         }
                     ;
