@@ -459,6 +459,22 @@ class mxb
                             xcb_flush(conn); 
                         }
                     }
+
+                    void
+                    set_backround_color(COLOR color)
+                    {
+                        xcb_change_window_attributes
+                        (
+                            conn,
+                            _window,
+                            XCB_CW_BACK_PIXEL,
+                            (const uint32_t[1])
+                            {
+                                mxb::get::color(color)
+                            }
+                        );
+                        xcb_flush(conn);
+                    }
                 ;
             ;
 
