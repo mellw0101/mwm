@@ -1040,7 +1040,7 @@ class mxb
                         {
                             app_data app;
                             app.name = app_name;
-                            app.action = app_name;
+                            app.action = app_name.c_str();
                             app.index = apps.size();
                             apps.push_back(app);
                         }
