@@ -821,7 +821,7 @@ class mxb
                         {
                             uint32_t mask = XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY;
                             main_window.apply_event_mask(& mask);
-                            main_window.grab_button({{R_MOUSE_BUTTON, NULL}});
+                            // main_window.grab_button({{R_MOUSE_BUTTON, NULL}});
                             mxb::set::win::backround::as_color(main_window, DARK_GREY);
                             calc_size_pos();
                             mxb::conf::win::x_y_width_height(main_window, x, y, width, height);
@@ -8899,6 +8899,14 @@ class Event
                 }
             }
 
+            if (e->event == dock->main_window)
+            {
+                if (e->detail == R_MOUSE_BUTTON)
+                {
+                    dock->context_menu.show();
+                }
+            }
+
             if (e->event == screen->root)
             {
                 if (e->detail == R_MOUSE_BUTTON)
@@ -8911,12 +8919,8 @@ class Event
                         mxb::launch::program((char *) "/usr/bin/konsole");
                     });
                     main_context_menu.show();
+                    return;
                 }
-            }
-
-            if (e->event == dock->main_window)
-            {
-                dock->context_menu.show();
             }
 
             c = get::client_from_all_win(& e->event);
