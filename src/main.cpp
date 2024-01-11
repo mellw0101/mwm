@@ -437,6 +437,11 @@ class mxb
                     return *this;
                 }
 
+                operator const char*() 
+                {
+                    return data;
+                }
+
                 const char* c_str() const 
                 {
                     return data;
@@ -1032,7 +1037,7 @@ class mxb
                         add_app(mxb::str name, const char * action)
                         {
                             app_data app;
-                            app.name = name.c_str();
+                            app.name = name;
                             app.action = action;
                             app.index = apps.size();
                             apps.push_back(app);
