@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <cstdlib>
+#include <functional>
 #include <map>
 #include <thread>
 #include <vector>
@@ -776,16 +777,75 @@ class mxb
 
                 class button
                 {
-                    public:
+                    public: // constructor 
+                        button() {}
+                    ;
+
+                    public: // public variables 
+                        mxb::window window;
+                        const char * name;
+                    ;
+
+                    public: // public methods 
                         void
-                        add_button(const char * name, std::function<void()> action)
+                        create(const xcb_window_t & parent_window, const int16_t & x, const int16_t & y, const uint16_t & width, const uint16_t & height, COLOR color)
                         {
-                            
+                            window.create
+                            (
+                                XCB_COPY_FROM_PARENT,
+                                parent_window,
+                                x,
+                                y,
+                                width,
+                                height,
+                                0,
+                                XCB_WINDOW_CLASS_INPUT_OUTPUT,
+                                XCB_COPY_FROM_PARENT,
+                                0,
+                                NULL
+                            );
+                            window.set_backround_color(color);
+                            window.map();
+                            xcb_flush(conn);
+                        }
+
+                        void
+                        action(std::function<void()> action)
+                        {
+                            button_action = action;
                         }
                     ;
 
-                    private:
-                        mxb::window window;
+                    private: // private variables 
+                        std::function<void()> button_action;
+                    ;
+                };
+
+                class buttons
+                {
+                    public: // public variables
+                        std::vector<mxb::Dialog_win::button> list;
+                    ;
+
+                    public: // public methods
+                        void
+                        add(const char * name, std::function<void()> action)
+                        {
+                            mxb::Dialog_win::button button;
+                            button.name = name;
+                            button.action(action);
+                            list.push_back(button);
+                        }
+
+                        int
+                        size()
+                        {
+                            return list.size();
+                        }
+                    ;
+
+                    private: // private variables
+                        int button_index = 0;
                     ;
                 };
 
@@ -794,8 +854,8 @@ class mxb
                     public: // public variables 
                         mxb::Dialog_win::context_menu context_menu;
                         mxb::window main_window;
+                        mxb::Dialog_win::buttons buttons;
                         uint32_t x = 0, y = 0, width = 48, height = 48;
-                        int n_apps = 0;
                     ;
 
                     public: // public methods 
@@ -813,7 +873,14 @@ class mxb
                         void
                         calc_size_pos()
                         {
-                            x = ((screen->width_in_pixels / 2) - ((width) / 2));
+                            int num_of_buttons = buttons.size();
+
+                            if (num_of_buttons == 0)
+                            {
+                                num_of_buttons = 1;
+                            }
+
+                            x = ((screen->width_in_pixels / 2) - ((width * num_of_buttons) / 2));
                             y = (screen->height_in_pixels - height);
                         }
 
@@ -840,7 +907,7 @@ class mxb
                         setup_dock()
                         {
                             main_window.grab_button({{R_MOUSE_BUTTON, NULL}});
-                            mxb::set::win::backround::as_color(main_window, RED);
+                            main_window.set_backround_color(RED);
                             calc_size_pos();
                             mxb::conf::win::x_y_width_height(main_window, x, y, width, height);
                             main_window.map();
