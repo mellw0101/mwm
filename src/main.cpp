@@ -3305,6 +3305,8 @@ class mxb
     ;
 };
 
+mxb::Dialog_win::Dock dock;
+
 namespace bitmap
 {
     const bool CHAR_BITMAP_A[20][20] = 
@@ -9211,7 +9213,6 @@ setup_wm()
 
     mxb::set::win::backround::as_png("/home/mellw/mwm_png/galaxy17.png", screen->root);
 
-    mxb::Dialog_win::Dock dock;
     dock.init();
 }
 
