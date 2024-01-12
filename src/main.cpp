@@ -7241,16 +7241,7 @@ class resize_client
                         }
                         case edge::BOTTOM_edge:
                         {
-                            const uint32_t height = (y - c->y);
-
-                            mxb::conf::win::height(c->win, (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
-                            mxb::conf::win::height(c->frame, height);
-                            mxb::conf::win::height(c->border.left, (height - (BORDER_SIZE * 2)));
-                            mxb::conf::win::height(c->border.right, (height - (BORDER_SIZE * 2)));
-                            mxb::conf::win::y(c->border.bottom, (height - BORDER_SIZE));
-                            mxb::conf::win::y(c->border.bottom_left, (height - BORDER_SIZE));
-                            mxb::conf::win::y(c->border.bottom_right, (height - BORDER_SIZE));
-                            
+                            c->_height((y - c->y));
                             break;
                         }
                         case edge::NONE:
@@ -7259,86 +7250,22 @@ class resize_client
                         }
                         case edge::TOP_LEFT:
                         {
-                            const uint32_t height = (c->height + c->y - y);
-                            const uint32_t width = (c->width + c->x - x);
-
-                            mxb::conf::win::x_y_width_height(c->frame, x, y, width, height);
-                            mxb::conf::win::width_height(c->win, (width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
-                            mxb::conf::win::width(c->titlebar, (width - (BORDER_SIZE * 2)));
-                            mxb::conf::win::x(c->close_button, (width - BUTTON_SIZE - BORDER_SIZE));
-                            mxb::conf::win::x(c->max_button, (width - (BUTTON_SIZE * 2) - BORDER_SIZE));
-                            mxb::conf::win::x(c->min_button, (width - (BUTTON_SIZE * 3) - BORDER_SIZE));
-                            mxb::conf::win::height(c->border.left, (height - (BORDER_SIZE * 2)));
-                            mxb::conf::win::x_height(c->border.right, (width - BORDER_SIZE), (height - (BORDER_SIZE * 2)));
-                            mxb::conf::win::width(c->border.top, (width - (BORDER_SIZE * 2)));
-                            mxb::conf::win::y_width(c->border.bottom, (height - BORDER_SIZE), (width - (BORDER_SIZE * 2)));
-                            mxb::conf::win::x(c->border.top_right, (width - BORDER_SIZE));
-                            mxb::conf::win::y(c->border.bottom_left, (height - BORDER_SIZE));
-                            mxb::conf::win::x_y(c->border.bottom_right, (width - BORDER_SIZE), (height - BORDER_SIZE));
-
+                            c->x_y_width_height(x, y, (c->width + c->x - x), (c->height + c->y - y));
                             break;
                         }
                         case edge::TOP_RIGHT:
                         {
-                            const uint32_t width = (x - c->x);
-                            const uint32_t height = (c->height + c->y - y);
-
-                            mxb::conf::win::y_width_height(c->frame, y, width, height);
-                            mxb::conf::win::width_height(c->win, (width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
-                            mxb::conf::win::width(c->titlebar, (width - BORDER_SIZE));
-                            mxb::conf::win::x(c->close_button, (width - BUTTON_SIZE - BORDER_SIZE));
-                            mxb::conf::win::x(c->max_button, (width - (BUTTON_SIZE * 2) - BORDER_SIZE));
-                            mxb::conf::win::x(c->min_button, (width - (BUTTON_SIZE * 3) - BORDER_SIZE));
-                            mxb::conf::win::height(c->border.left, (height - (BORDER_SIZE * 2)));
-                            mxb::conf::win::x_height(c->border.right, (width - BORDER_SIZE), (height - (BORDER_SIZE * 2)));
-                            mxb::conf::win::width(c->border.top, (width - (BORDER_SIZE * 2)));
-                            mxb::conf::win::y_width(c->border.bottom, (height - BORDER_SIZE), (width - (BORDER_SIZE * 2)));
-                            mxb::conf::win::x(c->border.top_right, (width - BORDER_SIZE));
-                            mxb::conf::win::y(c->border.bottom_left, (height - BORDER_SIZE));
-                            mxb::conf::win::x_y(c->border.bottom_right, (width - BORDER_SIZE), (height - BORDER_SIZE));
-                            
+                            c->y_width_height(y, (x - c->x), (c->height + c->y - y));
                             break;
                         }
                         case edge::BOTTOM_LEFT:
                         {
-                            const uint32_t width = (c->width + c->x - x);
-                            const uint32_t height = (y - c->y);
-
-                            mxb::conf::win::x_width_height(c->frame, x, width, height);
-                            mxb::conf::win::width_height(c->win, (width - (BORDER_SIZE * 2)), (height - (BORDER_SIZE * 2) - TITLE_BAR_HEIGHT));
-                            mxb::conf::win::width(c->titlebar, (width - BORDER_SIZE));
-                            mxb::conf::win::x(c->close_button, (width - BUTTON_SIZE - BORDER_SIZE));
-                            mxb::conf::win::x(c->max_button, (width - (BUTTON_SIZE * 2) - BORDER_SIZE));
-                            mxb::conf::win::x(c->min_button, (width - (BUTTON_SIZE * 3) - BORDER_SIZE));
-                            mxb::conf::win::height(c->border.left, (height - (BORDER_SIZE * 2)));
-                            mxb::conf::win::x_height(c->border.right, (width - BORDER_SIZE), (height - (BORDER_SIZE * 2)));
-                            mxb::conf::win::width(c->border.top, (width - (BORDER_SIZE * 2)));
-                            mxb::conf::win::y_width(c->border.bottom, (height - BORDER_SIZE), (width - (BORDER_SIZE * 2)));
-                            mxb::conf::win::x(c->border.top_right, (width - BORDER_SIZE));
-                            mxb::conf::win::y(c->border.bottom_left, (height - BORDER_SIZE));
-                            mxb::conf::win::x_y(c->border.bottom_right, (width - BORDER_SIZE), (height - BORDER_SIZE));
-                            
+                            c->x_width_height(x, (c->width + c->x - x), (y - c->y));   
                             break;
                         }
                         case edge::BOTTOM_RIGHT:
                         {
-                            const uint32_t width = (x - c->x);
-                            const uint32_t height = (y - c->y);
-
-                            mxb::conf::win::width_height(c->frame, width, height);
-                            mxb::conf::win::width_height(c->win, (width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
-                            mxb::conf::win::width(c->titlebar, (width - BORDER_SIZE));
-                            mxb::conf::win::x(c->close_button, (width - BUTTON_SIZE - BORDER_SIZE));
-                            mxb::conf::win::x(c->max_button, (width - (BUTTON_SIZE * 2) - BORDER_SIZE));
-                            mxb::conf::win::x(c->min_button, (width - (BUTTON_SIZE * 3) - BORDER_SIZE));
-                            mxb::conf::win::height(c->border.left, (height - (BORDER_SIZE * 2)));
-                            mxb::conf::win::x_height(c->border.right, (width - BORDER_SIZE), (height - (BORDER_SIZE * 2)));
-                            mxb::conf::win::width(c->border.top, (width - (BORDER_SIZE * 2)));
-                            mxb::conf::win::y_width(c->border.bottom, (height - BORDER_SIZE), (width - (BORDER_SIZE * 2)));
-                            mxb::conf::win::x(c->border.top_right, (width - BORDER_SIZE));
-                            mxb::conf::win::y(c->border.bottom_left, (height - BORDER_SIZE));
-                            mxb::conf::win::x_y(c->border.bottom_right, (width - BORDER_SIZE), (height - BORDER_SIZE));
-                            
+                            c->width_height((x - c->x), (y - c->y));   
                             break;
                         }
                     }
