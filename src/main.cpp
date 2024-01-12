@@ -714,6 +714,188 @@ class window
     ;
 };
 
+static void make_close_button_png(window window);
+static void make_max_button_png(window window);
+static void make_min_button_png(window window);
+
+class pointer
+{
+    public: // methods
+        void
+        set(xcb_window_t window, CURSOR cursor_type) 
+        {
+            xcb_cursor_context_t * ctx;
+
+            if (xcb_cursor_context_new(conn, screen, &ctx) < 0) 
+            {
+                log_error("Unable to create cursor context.");
+                return;
+            }
+
+            xcb_cursor_t cursor = xcb_cursor_load_cursor(ctx, pointer_from_enum(cursor_type));
+            if (!cursor) 
+            {
+                log_error("Unable to load cursor.");
+                return;
+            }
+
+            xcb_change_window_attributes
+            (
+                conn, 
+                window, 
+                XCB_CW_CURSOR, 
+                (uint32_t[1])
+                {
+                    cursor 
+                }
+            );
+            xcb_flush(conn);
+
+            xcb_cursor_context_free(ctx);
+            xcb_free_cursor(conn, cursor);
+        }
+
+        uint32_t
+        x()
+        {
+            xcb_query_pointer_cookie_t cookie = xcb_query_pointer(conn, screen->root);
+            xcb_query_pointer_reply_t * reply = xcb_query_pointer_reply(conn, cookie, nullptr);
+            if (!reply) 
+            {
+                log_error("reply is nullptr.");
+                return 0;                            
+            } 
+
+            uint32_t x;
+            x = reply->root_x;
+            free(reply);
+            return x;
+        }
+        
+        uint32_t
+        y()
+        {
+            xcb_query_pointer_cookie_t cookie = xcb_query_pointer(conn, screen->root);
+            xcb_query_pointer_reply_t * reply = xcb_query_pointer_reply(conn, cookie, nullptr);
+            if (!reply) 
+            {
+                log_error("reply is nullptr.");
+                return 0;                            
+            } 
+
+            uint32_t y;
+            y = reply->root_y;
+            free(reply);
+            return y;
+        }
+
+        void 
+        teleport(const int16_t & x, const int16_t & y) 
+        {
+            xcb_warp_pointer
+            (
+                conn, 
+                XCB_NONE, 
+                screen->root, 
+                0, 
+                0, 
+                0, 
+                0, 
+                x, 
+                y
+            );
+            xcb_flush(conn);
+        }
+
+        void
+        grab(const xcb_window_t & window)
+        {
+            xcb_grab_pointer_cookie_t cookie = xcb_grab_pointer
+            (
+                conn,
+                false,
+                window,
+                XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_POINTER_MOTION,
+                XCB_GRAB_MODE_ASYNC,
+                XCB_GRAB_MODE_ASYNC,
+                XCB_NONE,
+                XCB_NONE,
+                XCB_CURRENT_TIME
+            );
+
+            xcb_grab_pointer_reply_t * reply = xcb_grab_pointer_reply(conn, cookie, nullptr);
+            if (!reply)
+            {
+                log_error("reply is nullptr.");
+                free(reply);
+                return;
+            }
+            if (reply->status != XCB_GRAB_STATUS_SUCCESS) 
+            {
+                log_error("Could not grab pointer");
+                free(reply);
+                return;
+            }
+
+            free(reply);
+        }
+    ; 
+    
+    private:
+        const char *
+        pointer_from_enum(CURSOR CURSOR)
+        {
+            switch (CURSOR) 
+            {
+                case CURSOR::arrow: return "arrow";
+                case CURSOR::hand1: return "hand1";
+                case CURSOR::hand2: return "hand2";
+                case CURSOR::watch: return "watch";
+                case CURSOR::xterm: return "xterm";
+                case CURSOR::cross: return "cross";
+                case CURSOR::left_ptr: return "left_ptr";
+                case CURSOR::right_ptr: return "right_ptr";
+                case CURSOR::center_ptr: return "center_ptr";
+                case CURSOR::sb_v_double_arrow: return "sb_v_double_arrow";
+                case CURSOR::sb_h_double_arrow: return "sb_h_double_arrow";
+                case CURSOR::fleur: return "fleur";
+                case CURSOR::question_arrow: return "question_arrow";
+                case CURSOR::pirate: return "pirate";
+                case CURSOR::coffee_mug: return "coffee_mug";
+                case CURSOR::umbrella: return "umbrella";
+                case CURSOR::circle: return "circle";
+                case CURSOR::xsb_left_arrow: return "xsb_left_arrow";
+                case CURSOR::xsb_right_arrow: return "xsb_right_arrow";
+                case CURSOR::xsb_up_arrow: return "xsb_up_arrow";
+                case CURSOR::xsb_down_arrow: return "xsb_down_arrow";
+                case CURSOR::top_left_corner: return "top_left_corner";
+                case CURSOR::top_right_corner: return "top_right_corner";
+                case CURSOR::bottom_left_corner: return "bottom_left_corner";
+                case CURSOR::bottom_right_corner: return "bottom_right_corner";
+                case CURSOR::sb_left_arrow: return "sb_left_arrow";
+                case CURSOR::sb_right_arrow: return "sb_right_arrow";
+                case CURSOR::sb_up_arrow: return "sb_up_arrow";
+                case CURSOR::sb_down_arrow: return "sb_down_arrow";
+                case CURSOR::top_side: return "top_side";
+                case CURSOR::bottom_side: return "bottom_side";
+                case CURSOR::left_side: return "left_side";
+                case CURSOR::right_side: return "right_side";
+                case CURSOR::top_tee: return "top_tee";
+                case CURSOR::bottom_tee: return "bottom_tee";
+                case CURSOR::left_tee: return "left_tee";
+                case CURSOR::right_tee: return "right_tee";
+                case CURSOR::top_left_arrow: return "top_left_arrow";
+                case CURSOR::top_right_arrow: return "top_right_arrow";
+                case CURSOR::bottom_left_arrow: return "bottom_left_arrow";
+                case CURSOR::bottom_right_arrow: return "bottom_right_arrow";
+                default: return "left_ptr";
+            }
+        }
+    ;
+};
+
+static pointer * pointer;
+
 class client
 {
     public: // subclasses
@@ -777,7 +959,335 @@ class client
             border.bottom_left.y((height - BORDER_SIZE));
             xcb_flush(conn);
         }
+
+        void 
+        make_decorations()
+        {
+            make_frame();
+            make_titlebar();
+            make_close_button();
+            make_max_button();
+            make_min_button();
+            
+            if (BORDER_SIZE > 0)
+            {
+                make_borders();
+            }
+        }
     ;
+
+    private: // functions
+        void 
+        make_frame()
+        {
+            frame.create
+            (
+                XCB_COPY_FROM_PARENT,
+                screen->root,
+                x - BORDER_SIZE,
+                y - TITLE_BAR_HEIGHT - BORDER_SIZE,
+                width + (BORDER_SIZE * 2),
+                height + TITLE_BAR_HEIGHT + (BORDER_SIZE * 2),
+                0,
+                XCB_WINDOW_CLASS_INPUT_OUTPUT,
+                screen->root_visual,
+                0,
+                nullptr
+            );
+            frame.set_backround_color(DARK_GREY);
+            xcb_reparent_window
+            (
+                conn, 
+                win, 
+                frame, 
+                BORDER_SIZE, 
+                TITLE_BAR_HEIGHT + BORDER_SIZE
+            );
+            frame.apply_event_mask({XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY});
+            frame.map();
+        }
+
+        void
+        make_titlebar()
+        {
+            titlebar.create
+            (
+                XCB_COPY_FROM_PARENT, 
+                frame, 
+                BORDER_SIZE, 
+                BORDER_SIZE, 
+                width, 
+                TITLE_BAR_HEIGHT, 
+                0, 
+                XCB_WINDOW_CLASS_INPUT_OUTPUT, 
+                screen->root_visual, 
+                0, 
+                nullptr
+            );
+            titlebar.set_backround_color(BLACK);
+            titlebar.grab_button
+            (
+                {
+                    {   L_MOUSE_BUTTON,     NULL }
+                }
+            );
+            titlebar.map();
+        }
+
+        void
+        make_close_button()
+        {
+            close_button.create
+            (
+                XCB_COPY_FROM_PARENT,
+                frame,
+                (width - BUTTON_SIZE) + BORDER_SIZE,
+                BORDER_SIZE,
+                BUTTON_SIZE,
+                BUTTON_SIZE,
+                0,
+                XCB_WINDOW_CLASS_INPUT_OUTPUT,
+                screen->root_visual,
+                0,
+                nullptr
+            );
+
+            close_button.apply_event_mask({XCB_EVENT_MASK_ENTER_WINDOW, XCB_EVENT_MASK_LEAVE_WINDOW});
+            close_button.set_backround_color(BLUE);
+            
+            close_button.grab_button
+            (
+                {
+                    {   L_MOUSE_BUTTON,     NULL }
+                }
+            );
+
+            close_button.map();
+
+            make_close_button_png(close_button);
+        }
+
+        void
+        make_max_button()
+        {
+            max_button.create
+            (
+                XCB_COPY_FROM_PARENT,
+                frame,
+                (width - (BUTTON_SIZE * 2)) + BORDER_SIZE,
+                BORDER_SIZE,
+                BUTTON_SIZE,
+                BUTTON_SIZE,
+                0,
+                XCB_WINDOW_CLASS_INPUT_OUTPUT,
+                screen->root_visual,
+                0,
+                nullptr
+            );
+
+            max_button.set_backround_color(RED);
+            max_button.apply_event_mask({XCB_EVENT_MASK_ENTER_WINDOW, XCB_EVENT_MASK_LEAVE_WINDOW});
+
+            max_button.grab_button
+            (
+                {
+                    {   L_MOUSE_BUTTON,     NULL }
+                }
+            );
+
+            max_button.map();
+
+            make_max_button_png(max_button);
+        }
+
+        void
+        make_min_button()
+        {
+            min_button.create
+            (
+                XCB_COPY_FROM_PARENT,
+                frame,
+                (width - (BUTTON_SIZE * 3)) + BORDER_SIZE,
+                BORDER_SIZE,
+                BUTTON_SIZE,
+                BUTTON_SIZE,
+                0,
+                XCB_WINDOW_CLASS_INPUT_OUTPUT,
+                screen->root_visual,
+                0,
+                nullptr
+            );
+
+            min_button.set_backround_color(GREEN);
+            min_button.apply_event_mask({XCB_EVENT_MASK_ENTER_WINDOW, XCB_EVENT_MASK_LEAVE_WINDOW});
+
+            min_button.grab_button
+            ( 
+                {
+                    {   L_MOUSE_BUTTON,     NULL }
+                }
+            );
+
+            min_button.map();
+
+            make_min_button_png(min_button);
+        }
+
+        void
+        make_borders()
+        {
+            border.left.create
+            (
+                XCB_COPY_FROM_PARENT,
+                frame,
+                0,
+                BORDER_SIZE,
+                BORDER_SIZE,
+                height + TITLE_BAR_HEIGHT,
+                0,
+                XCB_WINDOW_CLASS_INPUT_OUTPUT,
+                screen->root_visual,
+                0,
+                nullptr
+            );
+            border.left.set_backround_color(BLACK);
+            pointer->set(border.left, CURSOR::left_side);
+            border.left.grab_button({ { L_MOUSE_BUTTON, NULL } });
+            border.left.map();
+
+            border.right.create
+            (
+                XCB_COPY_FROM_PARENT,
+                frame,
+                width + BORDER_SIZE,
+                BORDER_SIZE,
+                BORDER_SIZE,
+                height + TITLE_BAR_HEIGHT,
+                0,
+                XCB_WINDOW_CLASS_INPUT_OUTPUT,
+                screen->root_visual,
+                0,
+                nullptr
+            );
+            border.right.set_backround_color(BLACK);
+            pointer->set(border.right, CURSOR::right_side);
+            border.right.grab_button({ { L_MOUSE_BUTTON, NULL } });
+            border.right.map();
+
+            border.top.create
+            (
+                XCB_COPY_FROM_PARENT,
+                frame,
+                BORDER_SIZE,
+                0,
+                width,
+                BORDER_SIZE,
+                0,
+                XCB_WINDOW_CLASS_INPUT_OUTPUT,
+                screen->root_visual,
+                0,
+                NULL
+            );
+            border.top.set_backround_color(BLACK);
+            pointer->set(border.top, CURSOR::top_side);
+            border.top.grab_button({ { L_MOUSE_BUTTON, NULL } });
+            border.top.map();
+
+            border.bottom.create
+            (
+                XCB_COPY_FROM_PARENT,
+                frame,
+                BORDER_SIZE,
+                height + TITLE_BAR_HEIGHT + BORDER_SIZE,
+                width,
+                BORDER_SIZE,
+                0,
+                XCB_WINDOW_CLASS_INPUT_OUTPUT,
+                screen->root_visual,
+                0,
+                nullptr
+            );
+            border.bottom.set_backround_color(BLACK);
+            pointer->set(border.bottom, CURSOR::bottom_side);
+            border.bottom.grab_button({ { L_MOUSE_BUTTON, NULL } });
+            border.bottom.map();
+
+            border.top_left.create
+            (
+                XCB_COPY_FROM_PARENT,
+                frame,
+                0,
+                0,
+                BORDER_SIZE,
+                BORDER_SIZE,
+                0,
+                XCB_WINDOW_CLASS_INPUT_OUTPUT,
+                screen->root_visual,
+                0,
+                nullptr
+            );
+            border.top_left.set_backround_color(BLACK);
+            pointer->set(border.top_left, CURSOR::top_left_corner);
+            border.top_left.grab_button({ { L_MOUSE_BUTTON, NULL } });
+            border.top_left.map();
+
+            border.top_right.create
+            (
+                XCB_COPY_FROM_PARENT,
+                frame,
+                width + BORDER_SIZE,
+                0,
+                BORDER_SIZE,
+                BORDER_SIZE,
+                0,
+                XCB_WINDOW_CLASS_INPUT_OUTPUT,
+                screen->root_visual,
+                0,
+                nullptr
+            );
+            border.top_right.set_backround_color(BLACK);
+            pointer->set(border.top_right, CURSOR::top_right_corner);
+            border.top_right.grab_button({ { L_MOUSE_BUTTON, NULL } });
+            border.top_right.map();
+            
+            border.bottom_left.create
+            (
+                XCB_COPY_FROM_PARENT,
+                frame,
+                0,
+                height + TITLE_BAR_HEIGHT + BORDER_SIZE,
+                BORDER_SIZE,
+                BORDER_SIZE,
+                0,
+                XCB_WINDOW_CLASS_INPUT_OUTPUT,
+                screen->root_visual,
+                0,
+                nullptr
+            );
+            border.bottom_left.set_backround_color(BLACK);
+            pointer->set(border.bottom_left, CURSOR::bottom_left_corner);
+            border.bottom_left.grab_button({ { L_MOUSE_BUTTON, NULL } });
+            border.bottom_left.map();
+
+            border.bottom_right.create
+            (
+                XCB_COPY_FROM_PARENT,
+                frame,
+                width + BORDER_SIZE,
+                height + TITLE_BAR_HEIGHT + BORDER_SIZE,
+                BORDER_SIZE,
+                BORDER_SIZE,
+                0,
+                XCB_WINDOW_CLASS_INPUT_OUTPUT,
+                screen->root_visual,
+                0,
+                nullptr
+            );
+            border.bottom_right.set_backround_color(BLACK);
+            pointer->set(border.bottom_right, CURSOR::bottom_right_corner);
+            border.bottom_right.grab_button({ { L_MOUSE_BUTTON, NULL } });
+            border.bottom_right.map();
+        }
 };
 
 std::vector<client *> client_list; // global list of clients
@@ -4279,6 +4789,31 @@ namespace bitmap
             bitmap[row][i] = value;
         }
     }
+}
+
+void
+make_close_button_png(window window)
+{
+    mxb::create::png("/home/mellw/close.png", bitmap::CHAR_BITMAP_CLOSE_BUTTON);
+    mxb::set::win::backround::as_png("/home/mellw/close.png", window);
+}
+
+void
+make_max_button_png(window window)
+{
+    mxb::create::icon::max_button("/home/mellw/max.png");
+    mxb::set::win::backround::as_png("/home/mellw/max.png", window);
+}
+
+void
+make_min_button_png(window window)
+{
+    mxb::create::Bitmap bitmap(20, 20);            
+    bitmap.modify(9, 4, 16, true);
+    bitmap.modify(10, 4, 16, true);
+    bitmap.exportToPng("/home/mellw/min.png");
+
+    mxb::set::win::backround::as_png("/home/mellw/min.png", window);
 }
 
 namespace get
@@ -8166,7 +8701,8 @@ class WinManager
                 }
             );
 
-            WinDecoretor(conn ,c);
+            // WinDecoretor(conn ,c);
+            c->make_decorations();
 
             c->win.apply_event_mask({XCB_EVENT_MASK_FOCUS_CHANGE, XCB_EVENT_MASK_ENTER_WINDOW, XCB_EVENT_MASK_LEAVE_WINDOW});
 
@@ -9645,6 +10181,8 @@ setup_wm()
     dock->add_app("alacritty");
     dock->add_app("falkon");
     dock->init();
+
+    pointer = new class pointer;
 }
 
 int
