@@ -376,159 +376,63 @@ class window
                 void
                 x_y_width_height(const uint32_t & x, const uint32_t & y, const uint32_t & width, const uint32_t & height)
                 {
-                    xcb_configure_window
-                    (
-                        conn, 
-                        _window, 
-                        XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
-                        (const uint32_t[4])
-                        {
-                            x,
-                            y,
-                            width,
-                            height
-                        }
-                    );
+                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, {x, y, width, height});
                     update(x, y, width, height);
                 }
 
                 void
                 x_width_height(const uint32_t & x, const uint32_t & width, const uint32_t & height)
                 {
-                    xcb_configure_window
-                    (
-                        conn, 
-                        _window, 
-                        XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
-                        (const uint32_t[3])
-                        {
-                            x,
-                            width,
-                            height
-                        }
-                    );
+                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, {x, width, height});
                     update(x, _y, width, height);
                 }
 
                 void
                 y_width_height(const uint32_t & y, const uint32_t & width, const uint32_t & height)
                 {
-                    xcb_configure_window
-                    (
-                        conn, 
-                        _window, 
-                        XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
-                        (const uint32_t[3])
-                        {
-                            y,
-                            width,
-                            height
-                        }
-                    );
+                    config_window(XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, {y, width, height});
                     update(_x, y, width, height);
                 }
 
                 void
                 x_width(const uint32_t & x, const uint32_t & width)
                 {
-                    xcb_configure_window
-                    (
-                        conn, 
-                        _window, 
-                        XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_WIDTH,
-                        (const uint32_t[2])
-                        {
-                            x,
-                            width
-                        }
-                    );
+                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_WIDTH, {x, width});
                     update(x, _y, width, _height);
                 }
 
                 void
                 x_height(const uint32_t & x, const uint32_t & height)
                 {
-                    xcb_configure_window
-                    (
-                        conn, 
-                        _window, 
-                        XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_HEIGHT,
-                        (const uint32_t[2])
-                        {
-                            x,
-                            height
-                        }
-                    );
+                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_HEIGHT, {x, height});
                     update(x, _y, _width, height);
                 }
                 
                 void
                 y_width(const uint32_t & y, const uint32_t & width)
                 {
-                    xcb_configure_window
-                    (
-                        conn, 
-                        _window, 
-                        XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH,
-                        (const uint32_t[2])
-                        {
-                            y,
-                            width
-                        }
-                    );
+                    config_window(XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH, {y, width});
                     update(_x, y, width, _height);
                 }
                 
                 void 
                 y_height(const uint32_t & y, const uint32_t & height)
                 {
-                    xcb_configure_window
-                    (
-                        conn, 
-                        _window, 
-                        XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT,
-                        (const uint32_t[2])
-                        {
-                            y,
-                            height
-                        }
-                    );
+                    config_window(XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT, {y, height});
                     update(_x, y, _width, height);
                 }
 
                 void
                 x_y_width(const uint32_t & x, const uint32_t & y, const uint32_t & width)
                 {
-                    xcb_configure_window
-                    (
-                        conn, 
-                        _window, 
-                        XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH,
-                        (const uint32_t[3])
-                        {
-                            x,
-                            y,
-                            width
-                        }
-                    );
+                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH, {x, y, width});
                     update(x, y, width, _height);
                 }
 
                 void
                 x_y_height(const uint32_t & x, const uint32_t & y, const uint32_t & height)
                 {
-                    xcb_configure_window
-                    (
-                        conn,
-                        _window,
-                        XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT,
-                        (const uint32_t[3])
-                        {
-                            x,
-                            y,
-                            height
-                        }  
-                    );
+                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT, {x, y, height});
                     update(x, y, _width, height);
                 }
             ;
