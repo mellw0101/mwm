@@ -7095,20 +7095,6 @@ class resize_client
                         case edge::LEFT:
                         {
                             c->x_width(x, (c->width + c->x - x));
-                            // const uint32_t width = (c->width + c->x - x);
-
-                            // mxb::conf::win::width(c->win, (width - (BORDER_SIZE * 2)));
-                            // mxb::conf::win::x_width(c->frame, x, (width));
-                            // mxb::conf::win::width(c->titlebar, (width));
-                            // mxb::conf::win::x(c->close_button, (width - BUTTON_SIZE - BORDER_SIZE));
-                            // mxb::conf::win::x(c->max_button, (width - (BUTTON_SIZE * 2) - BORDER_SIZE));
-                            // mxb::conf::win::x(c->min_button, (width - (BUTTON_SIZE * 3) - BORDER_SIZE));
-                            // mxb::conf::win::x(c->border.right, (width - BORDER_SIZE));
-                            // mxb::conf::win::width(c->border.top, (width - (BORDER_SIZE * 2)));
-                            // mxb::conf::win::width(c->border.bottom, (width - (BORDER_SIZE * 2)));
-                            // mxb::conf::win::x(c->border.top_right, (width - BORDER_SIZE));
-                            // mxb::conf::win::x(c->border.bottom_right, (width - BORDER_SIZE));
-                            
                             break;
                         }
                         case edge::RIGHT:
