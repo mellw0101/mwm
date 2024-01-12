@@ -714,6 +714,8 @@ class window
     ;
 };
 
+static window root;
+
 class client
 {
     public: // subclasses
@@ -9561,8 +9563,11 @@ run()
 void 
 configureRootWindow()
 {
+    root = screen->root;
+
     // SET THE ROOT WINDOW BACKROUND COLOR TO 'DARK_GREY'(0x222222, THE DEFAULT COLOR) SO THAT IF SETTING THE PNG AS BACKROUND FAILS THE ROOT WINDOW WILL BE THE DEFAULT COLOR
-    mxb::set::win::backround::as_color(screen->root, DARK_GREY);
+    // mxb::set::win::backround::as_color(screen->root, DARK_GREY);
+    root.set_backround_color(DARK_GREY);
 
     uint32_t mask = XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT |
                     XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY   |
