@@ -4790,7 +4790,6 @@ class mv_client
             }
 
             mxb::pointer::grab(c->frame);
-
             run();
             xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
             xcb_flush(conn);
@@ -4818,32 +4817,6 @@ class mv_client
     ;
 
     private: // functions 
-        void 
-        grab_pointer()
-        {
-            xcb_grab_pointer_cookie_t cookie = xcb_grab_pointer
-            (
-                conn,
-                false, // owner_events: false to not propagate events to other clients
-                c->frame,
-                XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_POINTER_MOTION,
-                XCB_GRAB_MODE_ASYNC,
-                XCB_GRAB_MODE_ASYNC,
-                XCB_NONE,
-                XCB_NONE, 
-                XCB_CURRENT_TIME
-            );
-
-            xcb_grab_pointer_reply_t * reply = xcb_grab_pointer_reply(conn, cookie, NULL);
-            if (!reply || reply->status != XCB_GRAB_STATUS_SUCCESS) 
-            {
-                log.log(ERROR, __func__, "Could not grab pointer");
-                free(reply);
-                return;
-            }
-            free(reply); 
-        }
-
         void 
         snap(const int16_t & x, const int16_t & y)
         {
@@ -7805,15 +7778,15 @@ class WinDecoretor
         WinDecoretor(xcb_connection_t * connection, client * c)
         : c(c)
         {
-            make_frame(c);
-            make_titlebar(c);
-            make_close_button(c);
-            make_max_button(c);
-            make_min_button(c);
+            make_frame();
+            make_titlebar();
+            make_close_button();
+            make_max_button();
+            make_min_button();
             
             if (BORDER_SIZE > 0)
             {
-                make_borders(c);
+                make_borders();
             }
         }
     ;
@@ -7822,7 +7795,7 @@ class WinDecoretor
         client * c;
 
         void 
-        make_frame(client * & c)
+        make_frame()
         {
             c->frame.create
             (
@@ -7852,7 +7825,7 @@ class WinDecoretor
         }
 
         void
-        make_titlebar(client * & c)
+        make_titlebar()
         {
             c->titlebar.create
             (
@@ -7880,7 +7853,7 @@ class WinDecoretor
         }
 
         void
-        make_close_button(client * & c)
+        make_close_button()
         {
             c->close_button.create
             (
@@ -7914,7 +7887,7 @@ class WinDecoretor
         }
 
         void
-        make_max_button(client * & c)
+        make_max_button()
         {
             c->max_button.create
             (
@@ -7948,7 +7921,7 @@ class WinDecoretor
         }
 
         void
-        make_min_button(client * & c)
+        make_min_button()
         {
             c->min_button.create
             (
@@ -7986,7 +7959,7 @@ class WinDecoretor
         }
 
         void
-        make_borders(client * & c)
+        make_borders()
         {
             c->border.left.create
             (
