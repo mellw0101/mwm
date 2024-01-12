@@ -5785,42 +5785,19 @@ class XCPPBAnimator
             const uint32_t x = currentX, y = currentY, w = currentWidth, h = currentHeight;
 
             c->win.width_height((w - (BORDER_SIZE * 2)), (h - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
-            xcb_flush(connection);
-
             c->frame.x_y_width_height(x, y, w, h);
-            xcb_flush(connection);
-
             c->titlebar.width((w - (BORDER_SIZE * 2)));
-            xcb_flush(connection);
-
             c->close_button.x((w - BUTTON_SIZE - BORDER_SIZE));
-            xcb_flush(connection);
-
             c->max_button.x((w - (BUTTON_SIZE * 2) - BORDER_SIZE));
-            xcb_flush(connection);
-
             c->min_button.x((w - (BUTTON_SIZE * 3) - BORDER_SIZE));
-            xcb_flush(connection);
-
             c->border.left.height((h - (BORDER_SIZE * 2)));
-            xcb_flush(connection);
-
             c->border.right.x_height((w - BORDER_SIZE), (h - (BORDER_SIZE * 2)));
-            xcb_flush(connection);
-
             c->border.top.width((w - (BORDER_SIZE * 2)));
-            xcb_flush(connection);
-
             c->border.bottom.y_width((h - BORDER_SIZE), (w - (BORDER_SIZE * 2)));
-            xcb_flush(connection);
-
             c->border.top_right.x((w - BORDER_SIZE));
-            xcb_flush(connection);
-
             c->border.bottom_right.x_y((w - BORDER_SIZE), (h - BORDER_SIZE));
-            xcb_flush(connection);
-
             c->border.bottom_left.y((h - BORDER_SIZE));
+            
             xcb_flush(connection);
         }
 
