@@ -5784,149 +5784,43 @@ class XCPPBAnimator
         {
             const uint32_t x = currentX, y = currentY, w = currentWidth, h = currentHeight;
 
-            // c->win
-            xcb_configure_window
-            (
-                connection,
-                c->win,
-                XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
-                (const uint32_t[2])
-                {
-                    static_cast<const uint32_t &>(w - (BORDER_SIZE * 2)),
-                    static_cast<const uint32_t &>(h - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2))
-                }
-            );
+            c->win.width_height((w - (BORDER_SIZE * 2)), (h - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
             xcb_flush(connection);
 
-            // c->frame
-            xcb_configure_window
-            (
-                connection,
-                c->frame,
-                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
-                (const uint32_t[4])
-                {
-                    static_cast<const uint32_t &>(x),
-                    static_cast<const uint32_t &>(y),
-                    static_cast<const uint32_t &>(w),
-                    static_cast<const uint32_t &>(h)
-                }
-            );
+            c->frame.x_y_width_height(x, y, w, h);
             xcb_flush(connection);
 
-            // c->titlebar
-            xcb_configure_window
-            (
-                connection,
-                c->titlebar,
-                XCB_CONFIG_WINDOW_WIDTH,
-                (const uint32_t[1])
-                {
-                    static_cast<const uint32_t &>(w - (BORDER_SIZE * 2))
-                }
-            );
+            c->titlebar.width((w - (BORDER_SIZE * 2)));
             xcb_flush(connection);
 
-            // c->close_button
-            xcb_configure_window
-            (
-                connection,
-                c->close_button,
-                XCB_CONFIG_WINDOW_X,
-                (const uint32_t[1])
-                {
-                    static_cast<const uint32_t &>(w - 20 - BORDER_SIZE)
-                }
-            );
+            c->close_button.x((w - BUTTON_SIZE - BORDER_SIZE));
             xcb_flush(connection);
 
-            // c->max_button
-            xcb_configure_window
-            (
-                connection,
-                c->max_button,
-                XCB_CONFIG_WINDOW_X,
-                (const uint32_t[1])
-                {
-                    static_cast<const uint32_t &>(w - 40 - BORDER_SIZE)
-                }
-            );
+            c->max_button.x((w - (BUTTON_SIZE * 2) - BORDER_SIZE));
             xcb_flush(connection);
 
-            // c->min_button
-            xcb_configure_window
-            (
-                connection,
-                c->min_button,
-                XCB_CONFIG_WINDOW_X,
-                (const uint32_t[1])
-                {
-                    static_cast<const uint32_t &>(w - 60 - BORDER_SIZE)
-                }
-            );
+            c->min_button.x((w - (BUTTON_SIZE * 3) - BORDER_SIZE));
             xcb_flush(connection);
 
-            // c->border.left
-            xcb_configure_window
-            (
-                connection,
-                c->border.left,
-                XCB_CONFIG_WINDOW_HEIGHT,
-                (const uint32_t[1])
-                {
-                    static_cast<const uint32_t &>(h - (BORDER_SIZE * 2))
-                }
-            );
+            c->border.left.height((h - (BORDER_SIZE * 2)));
             xcb_flush(connection);
 
-            // c->border.right
-            xcb_configure_window
-            (
-                connection, 
-                c->border.right, 
-                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_HEIGHT,
-                (const uint32_t[2])
-                {
-                    static_cast<const uint32_t &>(w - BORDER_SIZE),
-                    static_cast<const uint32_t &>(h - (BORDER_SIZE * 2))
-                }
-            );
+            c->border.right.x_height((w - BORDER_SIZE), (h - (BORDER_SIZE * 2)));
             xcb_flush(connection);
 
-            // c->border.top
-            xcb_configure_window
-            (
-                connection, 
-                c->border.top, 
-                XCB_CONFIG_WINDOW_WIDTH, 
-                (const uint32_t[1]) 
-                { 
-                    static_cast<const uint32_t &>(w - (BORDER_SIZE * 2)) 
-                }
-            );
+            c->border.top.width((w - (BORDER_SIZE * 2)));
             xcb_flush(connection);
 
-            // c->border.bottom
-            xcb_configure_window
-            (
-                connection, 
-                c->border.bottom, 
-                XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH, 
-                (const uint32_t[2]) 
-                { 
-                    static_cast<const uint32_t &>(h - BORDER_SIZE),
-                    static_cast<const uint32_t &>(w - (BORDER_SIZE * 2))
-                }
-            );
+            c->border.bottom.y_width((h - BORDER_SIZE), (w - (BORDER_SIZE * 2)));
             xcb_flush(connection);
 
-            mxb::conf::win::x(c->border.top_right, (w - BORDER_SIZE));
+            c->border.top_right.x((w - BORDER_SIZE));
             xcb_flush(connection);
 
-            mxb::conf::win::x_y(c->border.bottom_right, (w - BORDER_SIZE), (h - BORDER_SIZE));
+            c->border.bottom_right.x_y((w - BORDER_SIZE), (h - BORDER_SIZE));
             xcb_flush(connection);
 
-            mxb::conf::win::y(c->border.bottom_left, (h - BORDER_SIZE));
+            c->border.bottom_left.y((h - BORDER_SIZE));
             xcb_flush(connection);
         }
 
@@ -5934,14 +5828,7 @@ class XCPPBAnimator
         conf_client_x()
         {
             const uint32_t x = currentX;
-
-            xcb_configure_window
-            (
-                connection, 
-                c->frame, 
-                XCB_CONFIG_WINDOW_X, 
-                (const uint32_t[1]) { x }
-            );
+            c->frame.x(x);
             xcb_flush(connection);
         }
     ;
@@ -6233,7 +6120,7 @@ move_to_previus_desktop_w_app()
 
 class resize_client
 {
-    public:
+    public: // constructor
         /* 
             THE REASON FOR THE 'retard_int' IS BECUSE WITHOUT IT 
             I CANNOT CALL THIS CLASS LIKE THIS 'resize_client(c)' 
@@ -6254,10 +6141,12 @@ class resize_client
             xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
             xcb_flush(conn);
         }
+    ;
 
+    public: // subclasses 
         class no_border
         {
-            public:   
+            public: // constructor
                 no_border(client * & c, const uint32_t & x, const uint32_t & y)
                 : c(c)
                 {
@@ -6275,14 +6164,16 @@ class resize_client
                 }
             ;
 
-            private:
+            private: // variables
                 client * & c;
                 uint32_t x;
                 uint32_t y;
                 const double frameRate = 120.0;
                 std::chrono::high_resolution_clock::time_point lastUpdateTime = std::chrono::high_resolution_clock::now();
-                const double frameDuration = 1000.0 / frameRate; 
+                const double frameDuration = 1000.0 / frameRate;
+            ;
 
+            private: // functions
                 void 
                 teleport_mouse(edge edge) 
                 {
@@ -6344,12 +6235,12 @@ class resize_client
                         {
                             const uint32_t width = (c->width + c->x - x);
 
-                            mxb::conf::win::width(c->win, (width - (BORDER_SIZE * 2)));
-                            mxb::conf::win::x_width(c->frame, x, (width));
-                            mxb::conf::win::width(c->titlebar, (width));
-                            mxb::conf::win::x(c->close_button, (width - BUTTON_SIZE - BORDER_SIZE));
-                            mxb::conf::win::x(c->max_button, (width - (BUTTON_SIZE * 2) - BORDER_SIZE));
-                            mxb::conf::win::x(c->min_button, (width - (BUTTON_SIZE * 3) - BORDER_SIZE));
+                            c->win.width((width - (BORDER_SIZE * 2)));
+                            c->frame.x_width(x, width);
+                            c->titlebar.width(width);
+                            c->close_button.x((width - BUTTON_SIZE - BORDER_SIZE));
+                            c->max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
+                            c->min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
                             
                             break;
                         }
@@ -6521,7 +6412,7 @@ class resize_client
 
         class border
         {
-            public:   
+            public: // constructor 
                 border(client * & c, edge _edge)
                 : c(c)
                 {
@@ -6554,14 +6445,16 @@ class resize_client
                 }
             ;
 
-            private:
+            private: // variables
                 client * & c;
                 client * c2;
                 edge c2_edge; 
                 const double frameRate = 120.0;
                 std::chrono::high_resolution_clock::time_point lastUpdateTime = std::chrono::high_resolution_clock::now();
                 const double frameDuration = 1000.0 / frameRate;
+            ;
 
+            private: // methods
                 void 
                 teleport_mouse(edge edge) 
                 {
@@ -7115,14 +7008,16 @@ class resize_client
         };
     ;
 
-    private:
+    private: // variabels 
         client * & c;
         uint32_t x;
         uint32_t y;
         const double frameRate = 120.0;
         std::chrono::high_resolution_clock::time_point lastUpdateTime = std::chrono::high_resolution_clock::now();
         const double frameDuration = 1000.0 / frameRate; 
+    ;
 
+    private: // functions
         void
         resize_win(const uint16_t & width, const uint16_t & height)
         {
