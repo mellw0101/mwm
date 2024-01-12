@@ -7527,14 +7527,9 @@ namespace win_tools
         return true;
     }
 
-    int
+    void
     send_sigterm_to_client(client * c)
     {
-        if (!c)
-        {
-            return - 1;
-        }
-
         c->win.unmap();
         c->close_button.unmap();
         c->max_button.unmap();
@@ -7566,19 +7561,17 @@ namespace win_tools
         c->frame.kill();
         
         mxb::Client::remove(c);
-
-        return 0;
     }
 
     void
     close_button_kill(client * c)
     {
-        int result = send_sigterm_to_client(c);
-
-        if (result == -1)
+        if (!c)
         {
             log_error("client is nullptr");
         }
+
+        send_sigterm_to_client(c);
     }
 }
 
@@ -9481,12 +9474,12 @@ class Event
             log_win("e->window: ", e->window);
             log_win("e->event: ", e->event);
             client * c = get::client_from_all_win(& e->window);
-        
-            int result = win_tools::send_sigterm_to_client(c);
-            if (result == -1)
+            if (!c)
             {
-                log_error("send_sigterm_to_client: failed");
+                log_error("client == nullptr");
             }
+
+            win_tools::send_sigterm_to_client(c);
         }
 
         void
