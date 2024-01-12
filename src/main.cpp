@@ -283,6 +283,13 @@ class window
                 xcb_map_window(conn, _window);
                 xcb_flush(conn);
             }
+
+            void
+            unmap()
+            {
+                xcb_unmap_window(conn, _window);
+                xcb_flush(conn);
+            }
         ;
 
         public: // configuration public methods
@@ -327,16 +334,17 @@ class window
                 void
                 x(const uint32_t & x)
                 {
-                    xcb_configure_window
-                    (
-                        conn, 
-                        _window, 
-                        XCB_CONFIG_WINDOW_X,
-                        (const uint32_t[1])
-                        {
-                            x
-                        }
-                    );
+                    // xcb_configure_window
+                    // (
+                    //     conn, 
+                    //     _window, 
+                    //     XCB_CONFIG_WINDOW_X,
+                    //     (const uint32_t[1])
+                    //     {
+                    //         x
+                    //     }
+                    // );
+                    config_window(XCB_CONFIG_WINDOW_X, x);
                     update(x, _y, _width, _height);
                 }
 
@@ -617,7 +625,7 @@ class window
         const void     * _value_list;
     ;
 
-    private: // private methods 
+    private: // functions
         void
         make_window()
         {
@@ -649,6 +657,49 @@ class window
             _y = y;
             _width = width;
             _height = height;
+        }
+
+        void /**
+         *
+         * @brief Configures the window with the specified mask and value.
+         * 
+         * This function configures the window using the XCB library. It takes in a mask and a value
+         * as parameters and applies the configuration to the window.
+         * 
+         * @param mask The mask specifying which attributes to configure.
+         * @param value The value to set for the specified attributes.
+         * 
+         */
+        config_window(const uint32_t & mask, const uint32_t & value)
+        {
+            xcb_configure_window
+            (
+                conn,
+                _window,
+                mask,
+                (const uint32_t[1])
+                {
+                    static_cast<const uint32_t &>(value)
+                }
+            );
+        }
+
+        void 
+        config_window(uint32_t mask, const std::vector<uint32_t> & values) 
+        {
+            if (values.empty()) 
+            {
+                log_error("values vector is empty");
+                return;
+            }
+
+            xcb_configure_window
+            (
+                conn,
+                _window,
+                mask,
+                values.data()
+            );
         }
     ;
 };
@@ -5785,7 +5836,6 @@ class XCPPBAnimator
             const uint32_t x = currentX, y = currentY, w = currentWidth, h = currentHeight;
 
             c->win.width_height((w - (BORDER_SIZE * 2)), (h - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
-            xcb_flush(conn);
             c->frame.x_y_width_height(x, y, w, h);
             c->titlebar.width((w - (BORDER_SIZE * 2)));
             c->close_button.x((w - BUTTON_SIZE - BORDER_SIZE));
