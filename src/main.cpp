@@ -4789,8 +4789,7 @@ class mv_client
                 return;
             }
 
-            // log.log(FUNC, __func__);
-            grab_pointer();
+            mxb::pointer::grab(c->frame);
 
             run();
             xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
