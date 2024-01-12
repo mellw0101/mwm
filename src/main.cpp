@@ -5785,6 +5785,7 @@ class XCPPBAnimator
             const uint32_t x = currentX, y = currentY, w = currentWidth, h = currentHeight;
 
             c->win.width_height((w - (BORDER_SIZE * 2)), (h - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
+            xcb_flush(conn);
             c->frame.x_y_width_height(x, y, w, h);
             c->titlebar.width((w - (BORDER_SIZE * 2)));
             c->close_button.x((w - BUTTON_SIZE - BORDER_SIZE));
@@ -5797,7 +5798,7 @@ class XCPPBAnimator
             c->border.top_right.x((w - BORDER_SIZE));
             c->border.bottom_right.x_y((w - BORDER_SIZE), (h - BORDER_SIZE));
             c->border.bottom_left.y((h - BORDER_SIZE));
-            
+
             xcb_flush(connection);
         }
 
