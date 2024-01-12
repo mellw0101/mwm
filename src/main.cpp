@@ -952,7 +952,7 @@ class client
         }
 
         void
-        width_height(const uint16_t & width, const uint16_t & height)
+        width_height(const uint32_t & width, const uint32_t & height)
         {
             win.width_height((width - (BORDER_SIZE * 2)), (height - (BORDER_SIZE * 2)));
             xcb_flush(conn);
