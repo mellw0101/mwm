@@ -659,8 +659,8 @@ class client
         char name[256];
 
         window win;
-        xcb_window_t frame;
-        xcb_window_t titlebar;
+        window frame;
+        window titlebar;
         xcb_window_t close_button;
         xcb_window_t max_button;
         xcb_window_t min_button;
