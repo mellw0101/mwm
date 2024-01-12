@@ -291,6 +291,46 @@ class window
                 xcb_unmap_window(conn, _window);
                 xcb_flush(conn);
             }
+
+            void 
+            kill() 
+            {
+                xcb_intern_atom_cookie_t protocols_cookie = xcb_intern_atom(conn, 1, 12, "WM_PROTOCOLS");
+                xcb_intern_atom_reply_t *protocols_reply = xcb_intern_atom_reply(conn, protocols_cookie, NULL);
+
+                xcb_intern_atom_cookie_t delete_cookie = xcb_intern_atom(conn, 0, 16, "WM_DELETE_WINDOW");
+                xcb_intern_atom_reply_t *delete_reply = xcb_intern_atom_reply(conn, delete_cookie, NULL);
+
+                if (!protocols_reply)
+                {
+                    log_error("protocols reply is null");
+                    free(protocols_reply);
+                    free(delete_reply);
+                    return;
+                }
+                if (!delete_reply)
+                {
+                    log_error("delete reply is null");
+                    free(protocols_reply);
+                    free(delete_reply);
+                    return;
+                }
+
+                send_event
+                (
+                    make_client_message_event
+                    (
+                        32,
+                        protocols_reply->atom,
+                        delete_reply->atom
+                    )
+                );
+
+                free(protocols_reply);
+                free(delete_reply);
+
+                xcb_flush(conn);
+            }
         ;
 
         public: // configuration public methods
@@ -642,6 +682,34 @@ class window
                 mask,
                 values.data()
             );
+        }
+
+        void
+        send_event(xcb_client_message_event_t ev)
+        {
+            xcb_send_event
+            (
+                conn,
+                0,
+                _window,
+                XCB_EVENT_MASK_NO_EVENT,
+                (char *) & ev
+            );
+        }
+
+        xcb_client_message_event_t
+        make_client_message_event(const uint32_t & format, const uint32_t & type, const uint32_t & data)
+        {
+            xcb_client_message_event_t ev = {0};
+            ev.response_type = XCB_CLIENT_MESSAGE;
+            ev.window = _window;
+            ev.format = format;
+            ev.sequence = 0;
+            ev.type = type;
+            ev.data.data32[0] = data;
+            ev.data.data32[1] = XCB_CURRENT_TIME;
+
+            return ev;
         }
     ;
 };
@@ -7467,35 +7535,35 @@ namespace win_tools
             return - 1;
         }
 
-        xcb_unmap_window(conn, c->win);
-        xcb_unmap_window(conn, c->close_button);
-        xcb_unmap_window(conn, c->max_button);
-        xcb_unmap_window(conn, c->min_button);
-        xcb_unmap_window(conn, c->titlebar);
-        xcb_unmap_window(conn, c->frame);
-        xcb_unmap_window(conn, c->border.left);
-        xcb_unmap_window(conn, c->border.right);
-        xcb_unmap_window(conn, c->border.top);
-        xcb_unmap_window(conn, c->border.bottom);
-        xcb_unmap_window(conn, c->border.top_right);
-        xcb_unmap_window(conn, c->border.bottom_left);
-        xcb_unmap_window(conn, c->border.bottom_right);
-        xcb_flush(conn);
+        c->win.unmap();
+        c->close_button.unmap();
+        c->max_button.unmap();
+        c->min_button.unmap();
+        c->titlebar.unmap();
+        c->border.left.unmap();
+        c->border.right.unmap();
+        c->border.top.unmap();
+        c->border.bottom.unmap();
+        c->border.top_left.unmap();
+        c->border.top_right.unmap();
+        c->border.bottom_left.unmap();
+        c->border.bottom_right.unmap();
+        c->frame.unmap();
 
-        kill_client(conn, c->win);
-        kill_client(conn, c->close_button);
-        kill_client(conn, c->max_button);
-        kill_client(conn, c->min_button);
-        kill_client(conn, c->titlebar);
-        kill_client(conn, c->frame);
-        kill_client(conn, c->border.left);
-        kill_client(conn, c->border.right);
-        kill_client(conn, c->border.top);
-        kill_client(conn, c->border.bottom);
-        kill_client(conn, c->border.top_right);
-        kill_client(conn, c->border.bottom_left);
-        kill_client(conn, c->border.bottom_right);
-        xcb_flush(conn);
+        c->win.kill();
+        c->close_button.kill();
+        c->max_button.kill();
+        c->min_button.kill();
+        c->titlebar.kill();
+        c->border.left.kill();
+        c->border.right.kill();
+        c->border.top.kill();
+        c->border.bottom.kill();
+        c->border.top_left.kill();
+        c->border.top_right.kill();
+        c->border.bottom_left.kill();
+        c->border.bottom_right.kill();
+        c->frame.kill();
         
         mxb::Client::remove(c);
 
