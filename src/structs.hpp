@@ -137,18 +137,18 @@ struct size_pos
     uint16_t width, height;
 };
 
-struct client_border_decor
-{
-    xcb_window_t left;
-    xcb_window_t right;
-    xcb_window_t top;
-    xcb_window_t bottom;
+// struct client_border_decor
+// {
+//     xcb_window_t left;
+//     xcb_window_t right;
+//     xcb_window_t top;
+//     xcb_window_t bottom;
 
-    xcb_window_t top_left;
-    xcb_window_t top_right;
-    xcb_window_t bottom_left;
-    xcb_window_t bottom_right;
-};
+//     xcb_window_t top_left;
+//     xcb_window_t top_right;
+//     xcb_window_t bottom_left;
+//     xcb_window_t bottom_right;
+// };
 
 // struct client 
 // {

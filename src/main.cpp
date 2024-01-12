@@ -655,7 +655,24 @@ class window
 
 class client
 {
-    public:
+    public: // subclasses
+        class client_border_decor
+        {
+            public:    
+                xcb_window_t left;
+                xcb_window_t right;
+                xcb_window_t top;
+                xcb_window_t bottom;
+
+                xcb_window_t top_left;
+                xcb_window_t top_right;
+                xcb_window_t bottom_left;
+                xcb_window_t bottom_right;
+            ;
+        };
+    ;
+    
+    public: // variabels
         char name[256];
 
         window win;
@@ -678,6 +695,7 @@ class client
 
         uint16_t desktop;
     ;
+
 };
 
 std::vector<client *> client_list; // global list of clients
