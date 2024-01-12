@@ -7581,25 +7581,6 @@ class resize_client
 
     private: // functions
         void
-        resize_win(const uint16_t & width, const uint16_t & height)
-        {
-            // c->win.width_height((width - (BORDER_SIZE * 2)), (height - (BORDER_SIZE * 2)));
-            // c->frame.width_height(width, height);
-            // c->titlebar.width((width - (BORDER_SIZE * 2)));
-            // c->close_button.x((width - BUTTON_SIZE - BORDER_SIZE));
-            // c->max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
-            // c->min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
-            // c->border.left.height((height - (BORDER_SIZE * 2)));
-            // c->border.right.x_height((width - BORDER_SIZE), (height - (BORDER_SIZE * 2)));
-            // c->border.top.width((width - (BORDER_SIZE * 2)));
-            // c->border.bottom.y_width((height - BORDER_SIZE), (width - (BORDER_SIZE * 2)));
-            // c->border.top_right.x((width - BORDER_SIZE));
-            // c->border.bottom_right.x_y((width - BORDER_SIZE), (height - BORDER_SIZE));
-            // c->border.bottom_left.y((height - BORDER_SIZE));
-            c->width_height(width, height);
-        }
-
-        void
         snap(const uint16_t & x, const uint16_t & y)
         {
             // WINDOW TO WINDOW SNAPPING 
@@ -7614,7 +7595,7 @@ class resize_client
                 if ((x > cli->x - N && x < cli->x + N) 
                  && (y + this->c->height > cli->y && y < cli->y + cli->height))
                 {
-                    resize_win(cli->x - this->c->x, y - this->c->y);
+                    c->width_height((cli->x - this->c->x), (y - this->c->y));
                     return;
                 }
 
@@ -7622,11 +7603,11 @@ class resize_client
                 if ((y > cli->y - N && y < cli->y + N) 
                  && (x + this->c->width > cli->x && x < cli->x + cli->width))
                 {
-                    resize_win(x - this->c->x ,cli->y - this->c->y);
+                    c->width_height((x - this->c->x), (cli->y - this->c->y));
                     return;
                 }
             }
-            resize_win(x - this->c->x, y - this->c->y);
+            c->width_height((x - this->c->x), (y - this->c->y));
         }
 
         void /* 
