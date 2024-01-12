@@ -150,30 +150,30 @@ struct client_border_decor
     xcb_window_t bottom_right;
 };
 
-struct client 
-{
-    char name[256];
+// struct client 
+// {
+//     char name[256];
 
-	xcb_window_t win;
-    xcb_window_t frame;
-    xcb_window_t titlebar;
-    xcb_window_t close_button;
-    xcb_window_t max_button;
-    xcb_window_t min_button;
+// 	xcb_window_t win;
+//     xcb_window_t frame;
+//     xcb_window_t titlebar;
+//     xcb_window_t close_button;
+//     xcb_window_t max_button;
+//     xcb_window_t min_button;
 
-    client_border_decor border;
+//     client_border_decor border;
 
-	int16_t x, y;     
-	uint16_t width,height;
-	uint8_t  depth;
+// 	int16_t x, y;     
+// 	uint16_t width,height;
+// 	uint8_t  depth;
     
-    size_pos ogsize;
-    size_pos tile_ogsize;
-    size_pos max_ewmh_ogsize;
-    size_pos max_button_ogsize;
+//     size_pos ogsize;
+//     size_pos tile_ogsize;
+//     size_pos max_ewmh_ogsize;
+//     size_pos max_button_ogsize;
 
-    uint16_t desktop;
-};
+//     uint16_t desktop;
+// };
 
 struct win_data 
 {
@@ -181,15 +181,15 @@ struct win_data
     uint16_t x, y, width, height;
 };
 
-struct desktop 
-{
-    std::vector<client *> current_clients;
-    uint16_t desktop;
-    const uint16_t x = 0;
-    const uint16_t y = 0;
-    uint16_t width;
-    uint16_t height;
-};
+// struct desktop 
+// {
+//     std::vector<client *> current_clients;
+//     uint16_t desktop;
+//     const uint16_t x = 0;
+//     const uint16_t y = 0;
+//     uint16_t width;
+//     uint16_t height;
+// };
 
 enum class CURSOR
 {

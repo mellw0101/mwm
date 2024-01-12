@@ -16,11 +16,9 @@
 
 Logger log;
 
-std::vector<client *> client_list; // global list of clients
-std::vector<desktop *> desktop_list;
 
-desktop * cur_d;
-client * focused_client;
+
+
 win_data data;
 
 static xcb_connection_t * conn;
@@ -30,6 +28,50 @@ static xcb_screen_iterator_t iter;
 static xcb_screen_t * screen;
 static xcb_gcontext_t gc;
 static xcb_window_t start_win;
+
+class client
+{
+    public:
+        char name[256];
+
+        xcb_window_t win;
+        xcb_window_t frame;
+        xcb_window_t titlebar;
+        xcb_window_t close_button;
+        xcb_window_t max_button;
+        xcb_window_t min_button;
+
+        client_border_decor border;
+
+        int16_t x, y;     
+        uint16_t width,height;
+        uint8_t  depth;
+        
+        size_pos ogsize;
+        size_pos tile_ogsize;
+        size_pos max_ewmh_ogsize;
+        size_pos max_button_ogsize;
+
+        uint16_t desktop;
+    ;
+};
+
+class desktop
+{
+    public:
+        std::vector<client *> current_clients;
+        uint16_t desktop;
+        const uint16_t x = 0;
+        const uint16_t y = 0;
+        uint16_t width;
+        uint16_t height;
+    ;
+};
+
+std::vector<client *> client_list; // global list of clients
+std::vector<desktop *> desktop_list;
+desktop * cur_d;
+client * focused_client;
 
 class mxb 
 {
@@ -1298,12 +1340,6 @@ class mxb
                             setup_dock();
                             configure_context_menu();
                             make_apps();
-                        }
-
-                        void 
-                        button_press_handler(const uint32_t & window)
-                        {
-                            buttons.run_action(window);
                         }
 
                         void 
