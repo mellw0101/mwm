@@ -8116,8 +8116,8 @@ class WinManager
                 log_error("could not make client");
                 return;
             }            
-            mxb::conf::win::x_y_width_height(c->win, c->x, c->y, c->width, c->height);
-            xcb_map_window(conn, c->win);  
+            c->win.x_y_width_height(c->x, c->y, c->width, c->height);
+            c->win.map();
             xcb_flush(conn);
 
             grab_buttons(c, 
