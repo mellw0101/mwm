@@ -932,7 +932,7 @@ class client
 
     public: // methods
         void
-        _width(const uint32_t & width)
+        x_width(const uint32_t & x, const uint32_t & width)
         {
             win.width((width - (BORDER_SIZE * 2)));
             xcb_flush(conn);
@@ -7094,7 +7094,7 @@ class resize_client
                     {
                         case edge::LEFT:
                         {
-                            c->_width(c->width + c->x - x);
+                            c->x_width(x, (c->width + c->x - x));
                             // const uint32_t width = (c->width + c->x - x);
 
                             // mxb::conf::win::width(c->win, (width - (BORDER_SIZE * 2)));
