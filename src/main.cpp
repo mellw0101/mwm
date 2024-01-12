@@ -661,9 +661,9 @@ class client
         window win;
         window frame;
         window titlebar;
-        xcb_window_t close_button;
-        xcb_window_t max_button;
-        xcb_window_t min_button;
+        window close_button;
+        window max_button;
+        window min_button;
 
         client_border_decor border;
 
