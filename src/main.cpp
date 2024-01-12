@@ -458,105 +458,105 @@ class window
                 ;    
                 
                 void
-                x(const uint16_t & x)
+                x(const uint32_t & x)
                 {
                     config_window(XCB_CONFIG_WINDOW_X, x);
                     update(x, _y, _width, _height);
                 }
 
                 void
-                y(const uint16_t & y)
+                y(const uint32_t & y)
                 {
                     config_window(XCB_CONFIG_WINDOW_Y, y);
                     update(_x, y, _width, _height);
                 }                
 
                 void
-                width(const uint16_t & width)
+                width(const uint32_t & width)
                 {
                     config_window(XCB_CONFIG_WINDOW_WIDTH, width);
                     update(_x, _y, width, _height);
                 }
 
                 void
-                height(const uint16_t & height)
+                height(const uint32_t & height)
                 {
                     config_window(XCB_CONFIG_WINDOW_HEIGHT, height);
                     update(_x, _y, _width, height);
                 }
 
                 void
-                x_y(const uint16_t & x, const uint16_t & y)
+                x_y(const uint32_t & x, const uint32_t & y)
                 {
                     config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, {x, y});
                     update(x, y, _width, _height);
                 }
 
                 void
-                width_height(const uint16_t & width, const uint16_t & height)
+                width_height(const uint32_t & width, const uint32_t & height)
                 {
                     config_window(XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, {width, height});
                     update(_x, _y, width, height);
                 }
 
                 void
-                x_y_width_height(const uint16_t & x, const uint16_t & y, const uint16_t & width, const uint16_t & height)
+                x_y_width_height(const uint32_t & x, const uint32_t & y, const uint32_t & width, const uint32_t & height)
                 {
                     config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, {x, y, width, height});
                     update(x, y, width, height);
                 }
 
                 void
-                x_width_height(const uint16_t & x, const uint16_t & width, const uint16_t & height)
+                x_width_height(const uint32_t & x, const uint32_t & width, const uint32_t & height)
                 {
                     config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, {x, width, height});
                     update(x, _y, width, height);
                 }
 
                 void
-                y_width_height(const uint16_t & y, const uint16_t & width, const uint16_t & height)
+                y_width_height(const uint32_t & y, const uint32_t & width, const uint32_t & height)
                 {
                     config_window(XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, {y, width, height});
                     update(_x, y, width, height);
                 }
 
                 void
-                x_width(const uint16_t & x, const uint16_t & width)
+                x_width(const uint32_t & x, const uint32_t & width)
                 {
                     config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_WIDTH, {x, width});
                     update(x, _y, width, _height);
                 }
 
                 void
-                x_height(const uint16_t & x, const uint16_t & height)
+                x_height(const uint32_t & x, const uint32_t & height)
                 {
                     config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_HEIGHT, {x, height});
                     update(x, _y, _width, height);
                 }
                 
                 void
-                y_width(const uint16_t & y, const uint16_t & width)
+                y_width(const uint32_t & y, const uint32_t & width)
                 {
                     config_window(XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH, {y, width});
                     update(_x, y, width, _height);
                 }
                 
                 void 
-                y_height(const uint16_t & y, const uint16_t & height)
+                y_height(const uint32_t & y, const uint32_t & height)
                 {
                     config_window(XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT, {y, height});
                     update(_x, y, _width, height);
                 }
 
                 void
-                x_y_width(const uint16_t & x, const uint16_t & y, const uint16_t & width)
+                x_y_width(const uint32_t & x, const uint32_t & y, const uint32_t & width)
                 {
                     config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH, {x, y, width});
                     update(x, y, width, _height);
                 }
 
                 void
-                x_y_height(const uint16_t & x, const uint16_t & y, const uint16_t & height)
+                x_y_height(const uint32_t & x, const uint32_t & y, const uint32_t & height)
                 {
                     config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT, {x, y, height});
                     update(x, y, _width, height);
@@ -658,7 +658,7 @@ class window
         }
 
         void 
-        config_window(uint16_t mask, const std::vector<uint16_t> & values) 
+        config_window(uint32_t mask, const std::vector<uint32_t> & values) 
         {
             if (values.empty()) 
             {
@@ -932,7 +932,7 @@ class client
 
     public: // methods
         void
-        x_y_width_height(const uint16_t & x, const uint16_t & y, const uint16_t & width, const uint16_t & height)
+        x_y_width_height(const uint32_t & x, const uint32_t & y, const uint32_t & width, const uint32_t & height)
         {
             win.width_height((width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
             xcb_flush(conn);
