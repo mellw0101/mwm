@@ -611,6 +611,7 @@ class mxb
                                     x
                                 }
                             );
+                            update(x, _y, _width, _height);
                         }
 
                         void
@@ -626,6 +627,7 @@ class mxb
                                     y
                                 }
                             );
+                            update(_x, y, _width, _height);
                         }
 
                         void
@@ -641,6 +643,7 @@ class mxb
                                     width
                                 }
                             );
+                            update(_x, _y, width, _height);
                         }
 
                         void
@@ -656,6 +659,7 @@ class mxb
                                     height
                                 }
                             );
+                            update(_x, _y, _width, height);
                         }
 
                         void
@@ -672,6 +676,7 @@ class mxb
                                     y
                                 }
                             );
+                            update(x, y, _width, _height);
                         }
 
                         void
@@ -688,6 +693,7 @@ class mxb
                                     height
                                 }
                             );
+                            update(_x, _y, width, height);
                         }
 
                         void
@@ -706,6 +712,7 @@ class mxb
                                     height
                                 }
                             );
+                            update(x, y, width, height);
                         }
 
                         void
@@ -723,6 +730,7 @@ class mxb
                                     height
                                 }
                             );
+                            update(x, _y, width, height);
                         }
 
                         void
@@ -740,6 +748,7 @@ class mxb
                                     height
                                 }
                             );
+                            update(_x, y, width, height);
                         }
 
                         void
@@ -756,6 +765,7 @@ class mxb
                                     width
                                 }
                             );
+                            update(x, _y, width, _height);
                         }
 
                         void
@@ -772,6 +782,7 @@ class mxb
                                     height
                                 }
                             );
+                            update(x, _y, _width, height);
                         }
                         
                         void
@@ -788,6 +799,7 @@ class mxb
                                     width
                                 }
                             );
+                            update(_x, y, width, _height);
                         }
                         
                         void 
@@ -804,6 +816,7 @@ class mxb
                                     height
                                 }
                             );
+                            update(_x, y, _width, height);
                         }
 
                         void
@@ -821,6 +834,7 @@ class mxb
                                     width
                                 }
                             );
+                            update(x, y, width, _height);
                         }
 
                         void
@@ -838,6 +852,7 @@ class mxb
                                     height
                                 }  
                             );
+                            update(x, y, _width, height);
                         }
                     ;
 
@@ -899,6 +914,15 @@ class mxb
                         _value_list
                     );
                     xcb_flush(conn);
+                }
+
+                void
+                update(const uint32_t & x, const uint32_t & y, const uint32_t & width, const uint32_t & height)
+                {
+                    _x = x;
+                    _y = y;
+                    _width = width;
+                    _height = height;
                 }
             ;
         };
