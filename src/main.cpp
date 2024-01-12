@@ -659,19 +659,19 @@ class client
         class client_border_decor
         {
             public:    
-                xcb_window_t left;
-                xcb_window_t right;
-                xcb_window_t top;
-                xcb_window_t bottom;
+                window left;
+                window right;
+                window top;
+                window bottom;
 
-                xcb_window_t top_left;
-                xcb_window_t top_right;
-                xcb_window_t bottom_left;
-                xcb_window_t bottom_right;
+                window top_left;
+                window top_right;
+                window bottom_left;
+                window bottom_right;
             ;
         };
     ;
-    
+
     public: // variabels
         char name[256];
 
