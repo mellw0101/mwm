@@ -7256,34 +7256,12 @@ class resize_client
                         }
                         case edge::RIGHT:
                         {
-                            const uint32_t width = (x - c->x);
-
-                            mxb::conf::win::width(c->win, (width - (BORDER_SIZE * 2)));
-                            mxb::conf::win::width(c->frame, width);
-                            mxb::conf::win::width(c->titlebar, (width - BORDER_SIZE));
-                            mxb::conf::win::x(c->close_button, (width - BUTTON_SIZE - BORDER_SIZE));
-                            mxb::conf::win::x(c->max_button, (width - (BUTTON_SIZE * 2) - BORDER_SIZE));
-                            mxb::conf::win::x(c->min_button, (width - (BUTTON_SIZE * 3) - BORDER_SIZE));
-                            mxb::conf::win::x(c->border.right, (width - BORDER_SIZE));
-                            mxb::conf::win::width(c->border.top, (width - (BORDER_SIZE * 2)));
-                            mxb::conf::win::width(c->border.bottom, (width - (BORDER_SIZE * 2)));
-                            mxb::conf::win::x(c->border.top_right, (width - BORDER_SIZE));
-                            mxb::conf::win::x(c->border.bottom_right, (width - BORDER_SIZE));
-                            
+                            c->_width((x - c->x));
                             break;
                         }
                         case edge::TOP:
                         {
-                            const uint32_t height = (c->height + c->y - y);
-
-                            mxb::conf::win::height(c->win, (height - TITLE_BAR_HEIGHT) - (BORDER_SIZE * 2));
-                            mxb::conf::win::y_height(c->frame, y, height);
-                            mxb::conf::win::height(c->border.left, (height - (BORDER_SIZE * 2)));
-                            mxb::conf::win::height(c->border.right, (height - (BORDER_SIZE * 2)));
-                            mxb::conf::win::y(c->border.bottom, (height - BORDER_SIZE));
-                            mxb::conf::win::y(c->border.bottom_left, (height - BORDER_SIZE));
-                            mxb::conf::win::y(c->border.bottom_right, (height - BORDER_SIZE));
-                            
+                            c->y_height(y, (c->height + c->y - y));   
                             break;
                         }
                         case edge::BOTTOM_edge:
