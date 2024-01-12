@@ -1,6 +1,7 @@
 #include "structs.hpp"
 #include <X11/Xlib.h>
 #include <algorithm>
+#include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <fstream>
@@ -303,6 +304,7 @@ class window
                     XCB_CW_EVENT_MASK,
                     mask
                 );
+
                 xcb_flush(conn);
             }
 
@@ -322,6 +324,8 @@ class window
                     XCB_CW_EVENT_MASK,
                     values.data()
                 );
+
+                xcb_flush(conn);
             }
             
             void
@@ -344,8 +348,46 @@ class window
                         button, 
                         modifier    
                     );
+
                     xcb_flush(conn); 
                 }
+            }
+
+            void 
+            grab_keys(std::initializer_list<std::pair<const uint32_t, const uint16_t>> bindings) 
+            {
+                xcb_key_symbols_t * keysyms = xcb_key_symbols_alloc(conn);
+            
+                if (!keysyms) 
+                {
+                    log_error("keysyms could not get initialized");
+                    return;
+                }
+
+                for (const auto & binding : bindings) 
+                {
+                    xcb_keycode_t * keycodes = xcb_key_symbols_get_keycode(keysyms, binding.first);
+                    if (keycodes)
+                    {
+                        for (auto * kc = keycodes; * kc; kc++) 
+                        {
+                            xcb_grab_key
+                            (
+                                conn,
+                                1,
+                                _window,
+                                binding.second, 
+                                *kc,        
+                                XCB_GRAB_MODE_ASYNC, 
+                                XCB_GRAB_MODE_ASYNC  
+                            );
+                        }
+                        free(keycodes);
+                    }
+                }
+                xcb_key_symbols_free(keysyms);
+
+                xcb_flush(conn); 
             }
 
             public: // size_pos configuration methods 
@@ -7712,58 +7754,24 @@ class WinDecoretor
     private:
         client * c;
 
-        void
-        apply_event_mask(const xcb_event_mask_t ev_mask, const xcb_window_t & win)
-        {
-            xcb_change_window_attributes
-            (
-                conn,
-                win,
-                XCB_CW_EVENT_MASK,
-                (const uint32_t[1])
-                {
-                    ev_mask
-                }
-            );
-        }
-
-        void
-        apply_event_mask(const uint32_t * values, const xcb_window_t & win)
-        {
-            xcb_change_window_attributes
-            (
-                conn,
-                win,
-                XCB_CW_EVENT_MASK,
-                values
-            );
-        }
-
         void 
         make_frame(client * & c)
         {
-            // CREATE A FRAME WINDOW
-            c->frame = xcb_generate_id(conn);
-            xcb_create_window
+            c->frame.create
             (
-                conn, 
-                XCB_COPY_FROM_PARENT, 
-                c->frame, 
-                screen->root, 
-                c->x - BORDER_SIZE, 
-                c->y - TITLE_BAR_HEIGHT - BORDER_SIZE, 
-                c->width + (BORDER_SIZE * 2), 
-                c->height + TITLE_BAR_HEIGHT + (BORDER_SIZE * 2), 
-                0, 
-                XCB_WINDOW_CLASS_INPUT_OUTPUT, 
-                screen->root_visual, 
-                0, 
-                NULL
+                XCB_COPY_FROM_PARENT,
+                screen->root,
+                c->x - BORDER_SIZE,
+                c->y - TITLE_BAR_HEIGHT - BORDER_SIZE,
+                c->width + (BORDER_SIZE * 2),
+                c->height + TITLE_BAR_HEIGHT + (BORDER_SIZE * 2),
+                0,
+                XCB_WINDOW_CLASS_INPUT_OUTPUT,
+                screen->root_visual,
+                0,
+                nullptr
             );
-
-            mxb::set::win::backround::as_color(c->frame, DARK_GREY);
-
-            // REPARENT THE PROGRAM_WINDOW TO THE FRAME_WINDOW
+            c->frame.set_backround_color(DARK_GREY);
             xcb_reparent_window
             (
                 conn, 
@@ -7772,24 +7780,16 @@ class WinDecoretor
                 BORDER_SIZE, 
                 TITLE_BAR_HEIGHT + BORDER_SIZE
             );
-
-            xcb_map_window(conn, c->frame);
-            xcb_flush(conn);
-
-            uint32_t mask = XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY;
-            apply_event_mask(&mask, c->frame);
-            xcb_flush(conn);
+            c->frame.apply_event_mask({XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY});
+            c->frame.map();
         }
 
         void
         make_titlebar(client * & c)
         {
-            c->titlebar = xcb_generate_id(conn);
-            xcb_create_window
+            c->titlebar.create
             (
-                conn, 
                 XCB_COPY_FROM_PARENT, 
-                c->titlebar, 
                 c->frame, 
                 BORDER_SIZE, 
                 BORDER_SIZE, 
@@ -7799,30 +7799,25 @@ class WinDecoretor
                 XCB_WINDOW_CLASS_INPUT_OUTPUT, 
                 screen->root_visual, 
                 0, 
-                NULL
+                nullptr
             );
-
-            mxb::set::win::backround::as_color(c->titlebar, BLACK);
-
-            win_tools::grab_buttons(c->titlebar, {
-               {   L_MOUSE_BUTTON,     NULL }
-            });
-
-            xcb_map_window(conn, c->titlebar);
-            xcb_flush(conn);
-
+            c->titlebar.set_backround_color(BLACK);
+            c->titlebar.grab_button
+            (
+                {
+                    {   L_MOUSE_BUTTON,     NULL }
+                }
+            );
+            c->titlebar.map();
             mxb::draw::text(c->titlebar, "sug", WHITE, BLACK, "7x14", 2, 14);
         }
 
         void
         make_close_button(client * & c)
         {
-            c->close_button = xcb_generate_id(conn);
-            xcb_create_window
+            c->close_button.create
             (
-                conn,
                 XCB_COPY_FROM_PARENT,
-                c->close_button,
                 c->frame,
                 (c->width - BUTTON_SIZE) + BORDER_SIZE,
                 BORDER_SIZE,
@@ -7832,37 +7827,31 @@ class WinDecoretor
                 XCB_WINDOW_CLASS_INPUT_OUTPUT,
                 screen->root_visual,
                 0,
-                NULL
+                nullptr
             );
 
-            mxb::set::win::backround::as_color(c->close_button, BLUE);
+            c->close_button.apply_event_mask({XCB_EVENT_MASK_ENTER_WINDOW, XCB_EVENT_MASK_LEAVE_WINDOW});
+            c->close_button.set_backround_color(BLUE);
+            
+            c->close_button.grab_button
+            (
+                {
+                    {   L_MOUSE_BUTTON,     NULL }
+                }
+            );
 
-            win_tools::grab_buttons(c->close_button, {
-               {   L_MOUSE_BUTTON,     NULL }
-            });
-
-            xcb_map_window(conn, c->close_button);
-            xcb_flush(conn);
-
-            uint mask = XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW;
-            apply_event_mask(& mask, c->close_button);
-            xcb_flush(conn);
+            c->close_button.map();
 
             mxb::create::png("/home/mellw/close.png", bitmap::CHAR_BITMAP_CLOSE_BUTTON);
             mxb::set::win::backround::as_png("/home/mellw/close.png", c->close_button);
-
-            // mxb::set::win::backround::as_png("/home/mellw/mwm_png/window_decoration_icons/close_button/1_10x10.png", c->close_button);
         }
 
         void
         make_max_button(client * & c)
         {
-            c->max_button = xcb_generate_id(conn);
-            xcb_create_window
+            c->max_button.create
             (
-                conn,
                 XCB_COPY_FROM_PARENT,
-                c->max_button,
                 c->frame,
                 (c->width - (BUTTON_SIZE * 2)) + BORDER_SIZE,
                 BORDER_SIZE,
@@ -7872,20 +7861,20 @@ class WinDecoretor
                 XCB_WINDOW_CLASS_INPUT_OUTPUT,
                 screen->root_visual,
                 0,
-                NULL
+                nullptr
             );
 
-            mxb::set::win::backround::as_color(c->max_button, RED);
+            c->max_button.set_backround_color(RED);
+            c->max_button.apply_event_mask({XCB_EVENT_MASK_ENTER_WINDOW, XCB_EVENT_MASK_LEAVE_WINDOW});
 
-            uint32_t mask = XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW;
-            apply_event_mask(& mask, c->max_button);
+            c->max_button.grab_button
+            (
+                {
+                    {   L_MOUSE_BUTTON,     NULL }
+                }
+            );
 
-            win_tools::grab_buttons(c->max_button, {
-               {   L_MOUSE_BUTTON,     NULL }
-            });
-
-            xcb_map_window(conn, c->max_button);
-            xcb_flush(conn);
+            c->max_button.map();
 
             mxb::create::icon::max_button("/home/mellw/max.png");
             mxb::set::win::backround::as_png("/home/mellw/max.png", c->max_button);
@@ -7894,12 +7883,9 @@ class WinDecoretor
         void
         make_min_button(client * & c)
         {
-            c->min_button = xcb_generate_id(conn);
-            xcb_create_window
+            c->min_button.create
             (
-                conn,
                 XCB_COPY_FROM_PARENT,
-                c->min_button,
                 c->frame,
                 (c->width - (BUTTON_SIZE * 3)) + BORDER_SIZE,
                 BORDER_SIZE,
@@ -7912,17 +7898,17 @@ class WinDecoretor
                 NULL
             );
 
-            mxb::set::win::backround::as_color(c->min_button, GREEN);
+            c->min_button.set_backround_color(GREEN);
+            c->min_button.apply_event_mask({XCB_EVENT_MASK_ENTER_WINDOW, XCB_EVENT_MASK_LEAVE_WINDOW});
 
-            uint32_t mask = XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW;
-            apply_event_mask(& mask, c->min_button);
+            c->min_button.grab_button
+            ( 
+                {
+                    {   L_MOUSE_BUTTON,     NULL }
+                }
+            );
 
-            win_tools::grab_buttons(c->min_button, {
-               {   L_MOUSE_BUTTON,     NULL }
-            });
-
-            xcb_map_window(conn, c->min_button);
-            xcb_flush(conn);
+            c->min_button.map();
 
             mxb::create::Bitmap bitmap(20, 20);            
             bitmap.modify(9, 4, 16, true);
@@ -7935,12 +7921,9 @@ class WinDecoretor
         void
         make_borders(client * & c)
         {
-            c->border.left = xcb_generate_id(conn);
-            xcb_create_window
+            c->border.left.create
             (
-                conn,
                 XCB_COPY_FROM_PARENT,
-                c->border.left,
                 c->frame,
                 0,
                 BORDER_SIZE,
@@ -7950,20 +7933,16 @@ class WinDecoretor
                 XCB_WINDOW_CLASS_INPUT_OUTPUT,
                 screen->root_visual,
                 0,
-                NULL
+                nullptr
             );
-            mxb::set::win::backround::as_color(c->border.left, BLACK);
+            c->border.left.set_backround_color(BLACK);
             mxb::pointer::set(c->border.left, CURSOR::left_side);
-            win_tools::grab_buttons(c->border.left, {{ L_MOUSE_BUTTON, NULL }});
-            xcb_map_window(conn, c->border.left);
-            xcb_flush(conn);
+            c->border.left.grab_button({ { L_MOUSE_BUTTON, NULL } });
+            c->border.left.map();
 
-            c->border.right = xcb_generate_id(conn);
-            xcb_create_window
+            c->border.right.create
             (
-                conn,
                 XCB_COPY_FROM_PARENT,
-                c->border.right,
                 c->frame,
                 c->width + BORDER_SIZE,
                 BORDER_SIZE,
@@ -7973,151 +7952,126 @@ class WinDecoretor
                 XCB_WINDOW_CLASS_INPUT_OUTPUT,
                 screen->root_visual,
                 0,
-                NULL
+                nullptr
             );
-            mxb::set::win::backround::as_color(c->border.right, BLACK);
+            c->border.right.set_backround_color(BLACK);
             mxb::pointer::set(c->border.right, CURSOR::right_side);
-            win_tools::grab_buttons(c->border.right, {{ L_MOUSE_BUTTON, NULL }});
-            xcb_map_window(conn, c->border.right);
-            xcb_flush(conn);
+            c->border.right.grab_button({ { L_MOUSE_BUTTON, NULL } });
+            c->border.right.map();
 
-            c->border.top = xcb_generate_id(conn);
-            xcb_create_window
+            c->border.top.create
             (
-                conn, 
-                XCB_COPY_FROM_PARENT, 
-                c->border.top, 
-                c->frame, 
-                BORDER_SIZE, 
-                0, 
-                c->width, 
-                BORDER_SIZE, 
-                0, 
-                XCB_WINDOW_CLASS_INPUT_OUTPUT,  
+                XCB_COPY_FROM_PARENT,
+                c->frame,
+                BORDER_SIZE,
+                0,
+                c->width,
+                BORDER_SIZE,
+                0,
+                XCB_WINDOW_CLASS_INPUT_OUTPUT,
                 screen->root_visual,
                 0,
                 NULL
             );
-            mxb::set::win::backround::as_color(c->border.top, BLACK);
+            c->border.top.set_backround_color(BLACK);
             mxb::pointer::set(c->border.top, CURSOR::top_side);
-            win_tools::grab_buttons(c->border.top, {{ L_MOUSE_BUTTON, NULL }});
-            xcb_map_window(conn, c->border.top);
-            xcb_flush(conn);
+            c->border.top.grab_button({ { L_MOUSE_BUTTON, NULL } });
+            c->border.top.map();
 
-            c->border.bottom = xcb_generate_id(conn);
-            xcb_create_window
+            c->border.bottom.create
             (
-                conn, 
-                XCB_COPY_FROM_PARENT, 
-                c->border.bottom, 
-                c->frame, 
-                BORDER_SIZE, 
-                c->height + TITLE_BAR_HEIGHT + BORDER_SIZE, 
-                c->width, 
-                BORDER_SIZE, 
-                0, 
-                XCB_WINDOW_CLASS_INPUT_OUTPUT, 
-                screen->root_visual, 
-                0, 
-                NULL
+                XCB_COPY_FROM_PARENT,
+                c->frame,
+                BORDER_SIZE,
+                c->height + TITLE_BAR_HEIGHT + BORDER_SIZE,
+                c->width,
+                BORDER_SIZE,
+                0,
+                XCB_WINDOW_CLASS_INPUT_OUTPUT,
+                screen->root_visual,
+                0,
+                nullptr
             );
-            mxb::set::win::backround::as_color(c->border.bottom, BLACK);
+            c->border.bottom.set_backround_color(BLACK);
             mxb::pointer::set(c->border.bottom, CURSOR::bottom_side);
-            win_tools::grab_buttons(c->border.bottom, {{ L_MOUSE_BUTTON, NULL }});
-            xcb_map_window(conn, c->border.bottom);
-            xcb_flush(conn);
+            c->border.bottom.grab_button({ { L_MOUSE_BUTTON, NULL } });
+            c->border.bottom.map();
 
-            c->border.top_left = xcb_generate_id(conn);
-            xcb_create_window
+            c->border.top_left.create
             (
-                conn, 
-                XCB_COPY_FROM_PARENT, 
-                c->border.top_left, 
-                c->frame, 
-                0, 
-                0, 
-                BORDER_SIZE, 
-                BORDER_SIZE, 
-                0, 
-                XCB_WINDOW_CLASS_INPUT_OUTPUT, 
-                screen->root_visual, 
-                0, 
-                NULL
+                XCB_COPY_FROM_PARENT,
+                c->frame,
+                0,
+                0,
+                BORDER_SIZE,
+                BORDER_SIZE,
+                0,
+                XCB_WINDOW_CLASS_INPUT_OUTPUT,
+                screen->root_visual,
+                0,
+                nullptr
             );
-            mxb::set::win::backround::as_color(c->border.top_left, BLACK);
+            c->border.top_left.set_backround_color(BLACK);
             mxb::pointer::set(c->border.top_left, CURSOR::top_left_corner);
-            win_tools::grab_buttons(c->border.top_left, {{ L_MOUSE_BUTTON, NULL }});
-            xcb_map_window(conn, c->border.top_left);
-            xcb_flush(conn);
+            c->border.top_left.grab_button({ { L_MOUSE_BUTTON, NULL } });
+            c->border.top_left.map();
 
-            c->border.top_right = xcb_generate_id(conn);
-            xcb_create_window
+            c->border.top_right.create
             (
-                conn, 
-                XCB_COPY_FROM_PARENT, 
-                c->border.top_right, 
-                c->frame, 
-                c->width + BORDER_SIZE, 
-                0, 
-                BORDER_SIZE, 
-                BORDER_SIZE, 
-                0, 
-                XCB_WINDOW_CLASS_INPUT_OUTPUT, 
-                screen->root_visual, 
-                0, 
-                NULL
+                XCB_COPY_FROM_PARENT,
+                c->frame,
+                c->width + BORDER_SIZE,
+                0,
+                BORDER_SIZE,
+                BORDER_SIZE,
+                0,
+                XCB_WINDOW_CLASS_INPUT_OUTPUT,
+                screen->root_visual,
+                0,
+                nullptr
             );
-            mxb::set::win::backround::as_color(c->border.top_right, BLACK);
+            c->border.top_right.set_backround_color(BLACK);
             mxb::pointer::set(c->border.top_right, CURSOR::top_right_corner);
-            win_tools::grab_buttons(c->border.top_right, {{ L_MOUSE_BUTTON, NULL }});
-            xcb_map_window(conn, c->border.top_right);
-            xcb_flush(conn);
+            c->border.top_right.grab_button({ { L_MOUSE_BUTTON, NULL } });
+            c->border.top_right.map();
             
-            c->border.bottom_left = xcb_generate_id(conn);
-            xcb_create_window
+            c->border.bottom_left.create
             (
-                conn, 
-                XCB_COPY_FROM_PARENT, 
-                c->border.bottom_left, 
-                c->frame, 
-                0, 
-                c->height + TITLE_BAR_HEIGHT + BORDER_SIZE, 
-                BORDER_SIZE, 
-                BORDER_SIZE, 
-                0, 
-                XCB_WINDOW_CLASS_INPUT_OUTPUT, 
-                screen->root_visual, 
-                0, 
-                NULL
+                XCB_COPY_FROM_PARENT,
+                c->frame,
+                0,
+                c->height + TITLE_BAR_HEIGHT + BORDER_SIZE,
+                BORDER_SIZE,
+                BORDER_SIZE,
+                0,
+                XCB_WINDOW_CLASS_INPUT_OUTPUT,
+                screen->root_visual,
+                0,
+                nullptr
             );
-            mxb::set::win::backround::as_color(c->border.bottom_left, BLACK);
+            c->border.bottom_left.set_backround_color(BLACK);
             mxb::pointer::set(c->border.bottom_left, CURSOR::bottom_left_corner);
-            win_tools::grab_buttons(c->border.bottom_left, {{ L_MOUSE_BUTTON, NULL }});
-            xcb_map_window(conn, c->border.bottom_left);
-            xcb_flush(conn);
+            c->border.bottom_left.grab_button({ { L_MOUSE_BUTTON, NULL } });
+            c->border.bottom_left.map();
 
-            c->border.bottom_right = xcb_generate_id(conn);
-            xcb_create_window
+            c->border.bottom_right.create
             (
-                conn, 
-                XCB_COPY_FROM_PARENT, 
-                c->border.bottom_right, 
-                c->frame, 
-                c->width + BORDER_SIZE, 
-                c->height + TITLE_BAR_HEIGHT + BORDER_SIZE, 
-                BORDER_SIZE, 
-                BORDER_SIZE, 
-                0, 
-                XCB_WINDOW_CLASS_INPUT_OUTPUT, 
-                screen->root_visual, 
-                0, 
-                NULL
+                XCB_COPY_FROM_PARENT,
+                c->frame,
+                c->width + BORDER_SIZE,
+                c->height + TITLE_BAR_HEIGHT + BORDER_SIZE,
+                BORDER_SIZE,
+                BORDER_SIZE,
+                0,
+                XCB_WINDOW_CLASS_INPUT_OUTPUT,
+                screen->root_visual,
+                0,
+                nullptr
             );
-            mxb::set::win::backround::as_color(c->border.bottom_right, BLACK);
+            c->border.bottom_right.set_backround_color(BLACK);
             mxb::pointer::set(c->border.bottom_right, CURSOR::bottom_right_corner);
-            win_tools::grab_buttons(c->border.bottom_right, {{ L_MOUSE_BUTTON, NULL }});
-            xcb_map_window(conn, c->border.bottom_right);
-            xcb_flush(conn);
+            c->border.bottom_right.grab_button({ { L_MOUSE_BUTTON, NULL } });
+            c->border.bottom_right.map();
         }
     ;
 };
@@ -8126,20 +8080,21 @@ class WinManager
 {
     public:
         static void 
-        manage_new_window(const xcb_window_t & w) 
+        manage_new_window(const xcb_window_t & window)
         {
-            client * c = make_client(w);
+            client * c = make_client(window);
             if (!c)
             {
                 log_error("could not make client");
                 return;
-            }            
+            }
+
             c->win.x_y_width_height(c->x, c->y, c->width, c->height);
             c->win.map();
             xcb_flush(conn);
 
             c->win.grab_button
-            ( 
+            (
                 {
                     {   L_MOUSE_BUTTON,     ALT },
                     {   R_MOUSE_BUTTON,     ALT },
@@ -8147,35 +8102,32 @@ class WinManager
                 }
             );
             
-            grab_keys(c, 
-            {
-                {   T,          ALT | CTRL              },
-                {   Q,          ALT | SHIFT             },
-                {   F11,        NULL                    },
-                {   N_1,        ALT                     },
-                {   N_2,        ALT                     },
-                {   N_3,        ALT                     },
-                {   N_4,        ALT                     },
-                {   N_5,        ALT                     },
-                {   R_ARROW,    CTRL | SUPER            },
-                {   L_ARROW,    CTRL | SUPER            },
-                {   R_ARROW,    CTRL | SUPER | SHIFT    },
-                {   L_ARROW,    CTRL | SUPER | SHIFT    },
-                {   R_ARROW,    SUPER                   },
-                {   L_ARROW,    SUPER                   },
-                {   U_ARROW,    SUPER                   },
-                {   D_ARROW,    SUPER                   },
-                {   TAB,        ALT                     },
-                {   K,          SUPER                   }
-            });
+            c->win.grab_keys
+            (
+                {
+                    {   T,          ALT | CTRL              },
+                    {   Q,          ALT | SHIFT             },
+                    {   F11,        NULL                    },
+                    {   N_1,        ALT                     },
+                    {   N_2,        ALT                     },
+                    {   N_3,        ALT                     },
+                    {   N_4,        ALT                     },
+                    {   N_5,        ALT                     },
+                    {   R_ARROW,    CTRL | SUPER            },
+                    {   L_ARROW,    CTRL | SUPER            },
+                    {   R_ARROW,    CTRL | SUPER | SHIFT    },
+                    {   L_ARROW,    CTRL | SUPER | SHIFT    },
+                    {   R_ARROW,    SUPER                   },
+                    {   L_ARROW,    SUPER                   },
+                    {   U_ARROW,    SUPER                   },
+                    {   D_ARROW,    SUPER                   },
+                    {   TAB,        ALT                     },
+                    {   K,          SUPER                   }
+                }
+            );
 
             WinDecoretor(conn ,c);
-            
-            // uint32_t mask = 
-            // XCB_EVENT_MASK_FOCUS_CHANGE | 
-            // XCB_EVENT_MASK_ENTER_WINDOW |
-            // XCB_EVENT_MASK_LEAVE_WINDOW ;
-            // mxb::set::event_mask(& mask, c->win);
+
             c->win.apply_event_mask({XCB_EVENT_MASK_FOCUS_CHANGE, XCB_EVENT_MASK_ENTER_WINDOW, XCB_EVENT_MASK_LEAVE_WINDOW});
 
             mxb::get::win::property(c->win, "_NET_WM_NAME");
@@ -8185,164 +8137,6 @@ class WinManager
     ;
 
     private:
-        static void
-        grab_buttons(client * & c, std::initializer_list<std::pair<const uint8_t, const uint16_t>> bindings)
-        {
-            for (const auto & binding : bindings)
-            {
-                const uint8_t & button = binding.first;
-                const uint16_t & modifier = binding.second;
-                xcb_grab_button
-                (
-                    conn, 
-                    
-                    // 'OWNER_EVENTS : SET TO 0 FOR NO EVENT PROPAGATION'
-                    1, 
-                    c->win, 
-                    
-                    // EVENT MASK
-                    XCB_EVENT_MASK_BUTTON_PRESS, 
-                    
-                    // POINTER MODE
-                    XCB_GRAB_MODE_ASYNC, 
-                    
-                    // KEYBOARD MODE
-                    XCB_GRAB_MODE_ASYNC, 
-                    
-                    // CONFINE TO WINDOW
-                    XCB_NONE, 
-                    
-                    // CURSOR
-                    XCB_NONE, 
-                    button, 
-                    modifier    
-                );
-                // FLUSH THE REQUEST TO THE X SERVER
-                xcb_flush(conn); 
-            }
-        }
-
-        static void
-        grab_buttons(const xcb_window_t & win, std::initializer_list<std::pair<const uint8_t, const uint16_t>> bindings)
-        {
-            for (const auto & binding : bindings)
-            {
-                const uint8_t & button = binding.first;
-                const uint16_t & modifier = binding.second;
-                xcb_grab_button
-                (
-                    conn, 
-                    
-                    // 'OWNER_EVENTS : SET TO 0 FOR NO EVENT PROPAGATION'
-                    1, 
-                    win, 
-                    
-                    // EVENT MASK
-                    XCB_EVENT_MASK_BUTTON_PRESS, 
-                    
-                    // POINTER MODE
-                    XCB_GRAB_MODE_ASYNC, 
-                    
-                    // KEYBOARD MODE
-                    XCB_GRAB_MODE_ASYNC, 
-                    
-                    // CONFINE TO WINDOW
-                    XCB_NONE, 
-                    
-                    // CURSOR
-                    XCB_NONE, 
-                    button, 
-                    modifier    
-                );
-                // FLUSH THE REQUEST TO THE X SERVER
-                xcb_flush(conn); 
-            }
-        }
-
-        static void 
-        grab_keys(client * & c, std::initializer_list<std::pair<const uint32_t, const uint16_t>> bindings) 
-        {
-            xcb_key_symbols_t * keysyms = xcb_key_symbols_alloc(conn);
-        
-            if (!keysyms) 
-            {
-                LOG_error("keysyms could not get initialized");
-                return;
-            }
-
-            for (const auto & binding : bindings) 
-            {
-                xcb_keycode_t * keycodes = xcb_key_symbols_get_keycode(keysyms, binding.first);
-
-                if (keycodes)
-                {
-                    for (auto * kc = keycodes; * kc; kc++) 
-                    {
-                        xcb_grab_key
-                        (
-                            // CONNECTION TO THE X SERVER
-                            conn,
-                            
-                            // 'OWNER_EVENTS' SET TO 1 TO ALLOW EVENT PROPAGATION 
-                            1,
-
-                            // KEYS WILL BE GRABBED ON THIS WINDOW          
-                            c->win,
-                            
-                            // MODIFIER MASK
-                            binding.second, 
-                            
-                            // KEYCODE
-                            *kc,        
-
-                            // POINTER MODE
-                            XCB_GRAB_MODE_ASYNC, 
-                            
-                            // KEYBOARD MODE
-                            XCB_GRAB_MODE_ASYNC  
-                        );
-                    }
-                    // FREE THE MEMORY THAT WAS ALLOCATED FOR THE KEYCODES
-                    free(keycodes);
-                }
-            }
-            xcb_key_symbols_free(keysyms);
-            
-            // FLUSH THE REQUEST TO THE X SERVER
-            // SO THAT THE X SERVER HANDELS THIS REQUEST NOW
-            xcb_flush(conn); 
-        }
-
-        static void
-        apply_event_mask(client * & c)
-        {
-            xcb_change_window_attributes
-            (
-                conn,
-                c->win,
-                XCB_CW_EVENT_MASK,
-                (const uint32_t[1])
-                {
-                    XCB_EVENT_MASK_FOCUS_CHANGE
-                }
-            );
-        }
-
-        static void
-        apply_event_mask(const xcb_window_t & win)
-        {
-            xcb_change_window_attributes
-            (
-                conn,
-                win,
-                XCB_CW_EVENT_MASK,
-                (const uint32_t[1])
-                {
-                    XCB_EVENT_MASK_FOCUS_CHANGE
-                }
-            );
-        }
-
         static bool 
         is_exclusive_fullscreen(client * & c) 
         {
@@ -8836,7 +8630,7 @@ class tile
 
 class Event
 {
-    public:
+    public: // constructor and destructor 
         /**
          *
          * @brief Constructor for the Event class.
@@ -8861,7 +8655,9 @@ class Event
                 xcb_key_symbols_free(keysyms);
             }
         }
-        
+    ;
+
+    public: // methods 
         void /**
          *
          * @brief Event handler function that processes the incoming XCB events.
@@ -8958,13 +8754,134 @@ class Event
         }
     ;
 
-    private:
+    private: // variabels 
         xcb_key_symbols_t * keysyms;
         /*
             VARIABELS TO STORE KEYCODES
          */ 
         xcb_keycode_t t{}, q{}, f{}, f11{}, n_1{}, n_2{}, n_3{}, n_4{}, n_5{}, r_arrow{}, l_arrow{}, u_arrow{}, d_arrow{}, tab{}, k{}; 
-        
+    ;
+
+    private: // helper functions 
+        void /*
+            INITIALIZES KEYBOARD KEY SYMBOLS AND STORES 
+            THE KEYCODES UNTIL SESSION IS KILLED 
+         */
+        initialize_keysyms() 
+        {
+            keysyms = xcb_key_symbols_alloc(conn);
+            if (keysyms) 
+            {
+                xcb_keycode_t * t_keycodes          = xcb_key_symbols_get_keycode(keysyms, T);
+                xcb_keycode_t * q_keycodes          = xcb_key_symbols_get_keycode(keysyms, Q);
+                xcb_keycode_t * f_keycodes          = xcb_key_symbols_get_keycode(keysyms, F);
+                xcb_keycode_t * f11_keycodes        = xcb_key_symbols_get_keycode(keysyms, F11);
+                xcb_keycode_t * n_1_keycodes        = xcb_key_symbols_get_keycode(keysyms, N_1);
+                xcb_keycode_t * n_2_keycodes        = xcb_key_symbols_get_keycode(keysyms, N_2);
+                xcb_keycode_t * n_3_keycodes        = xcb_key_symbols_get_keycode(keysyms, N_3);
+                xcb_keycode_t * n_4_keycodes        = xcb_key_symbols_get_keycode(keysyms, N_4);
+                xcb_keycode_t * n_5_keycodes        = xcb_key_symbols_get_keycode(keysyms, N_5);
+                xcb_keycode_t * r_arrow_keycodes    = xcb_key_symbols_get_keycode(keysyms, R_ARROW);
+                xcb_keycode_t * l_arrow_keycodes    = xcb_key_symbols_get_keycode(keysyms, L_ARROW);
+                xcb_keycode_t * u_arrow_keycodes    = xcb_key_symbols_get_keycode(keysyms, U_ARROW);
+                xcb_keycode_t * d_arrow_keycodes    = xcb_key_symbols_get_keycode(keysyms, D_ARROW);
+                xcb_keycode_t * tab_keycodes        = xcb_key_symbols_get_keycode(keysyms, TAB);
+                xcb_keycode_t * k_keycodes			= xcb_key_symbols_get_keycode(keysyms, K);
+                
+                if (t_keycodes) 
+                {
+                    t = * t_keycodes;
+                    free(t_keycodes);
+                }
+                
+                if (q_keycodes) 
+                {
+                    q = * q_keycodes;
+                    free(q_keycodes);
+                }
+                
+                if (f_keycodes)
+                {
+                    f = * f_keycodes;
+                    free(f_keycodes);
+                }
+
+                if (f11_keycodes)
+                {
+                    f11 = * f11_keycodes;
+                    free(f11_keycodes);
+                }
+
+                if (n_1_keycodes)
+                {
+                    n_1 = * n_1_keycodes;
+                    free(n_1_keycodes);
+                }
+
+                if (n_2_keycodes)
+                {
+                    n_2 = * n_2_keycodes;
+                    free(n_2_keycodes);
+                }
+
+                if (n_3_keycodes)
+                {
+                    n_3 = * n_3_keycodes;
+                    free(n_3_keycodes);
+                }
+
+                if (n_4_keycodes)
+                {
+                    n_4 = * n_4_keycodes;
+                    free(n_4_keycodes);
+                }
+
+                if (n_5_keycodes)
+                {
+                    n_5 = * n_5_keycodes;
+                    free(n_5_keycodes);
+                }
+
+                if (r_arrow_keycodes)
+                {
+                    r_arrow = * r_arrow_keycodes;
+                    free(r_arrow_keycodes);
+                }
+
+                if (l_arrow_keycodes)
+                {
+                    l_arrow = * l_arrow_keycodes;
+                    free(l_arrow_keycodes);
+                }
+
+                if (u_arrow_keycodes)
+                {
+                    u_arrow = * u_arrow_keycodes;
+                    free(u_arrow_keycodes);
+                }
+
+                if (d_arrow_keycodes)
+                {
+                    d_arrow = * d_arrow_keycodes;
+                    free(d_arrow_keycodes);
+                }
+
+                if (tab_keycodes)
+                {
+                    tab = * tab_keycodes;
+                    free(tab_keycodes);
+                }
+
+                if (k_keycodes)
+				{
+					k = * k_keycodes;
+					free(k_keycodes);
+				}
+            }
+        }
+    ;
+
+    private: // event handling functions 
         void 
         key_press_handler(const xcb_generic_event_t * & ev)
         {
@@ -9259,123 +9176,6 @@ class Event
             }
         }
 
-        void /*
-            INITIALIZES KEYBOARD KEY SYMBOLS AND STORES 
-            THE KEYCODES UNTIL SESSION IS KILLED 
-         */
-        initialize_keysyms() 
-        {
-            keysyms = xcb_key_symbols_alloc(conn);
-            if (keysyms) 
-            {
-                xcb_keycode_t * t_keycodes          = xcb_key_symbols_get_keycode(keysyms, T);
-                xcb_keycode_t * q_keycodes          = xcb_key_symbols_get_keycode(keysyms, Q);
-                xcb_keycode_t * f_keycodes          = xcb_key_symbols_get_keycode(keysyms, F);
-                xcb_keycode_t * f11_keycodes        = xcb_key_symbols_get_keycode(keysyms, F11);
-                xcb_keycode_t * n_1_keycodes        = xcb_key_symbols_get_keycode(keysyms, N_1);
-                xcb_keycode_t * n_2_keycodes        = xcb_key_symbols_get_keycode(keysyms, N_2);
-                xcb_keycode_t * n_3_keycodes        = xcb_key_symbols_get_keycode(keysyms, N_3);
-                xcb_keycode_t * n_4_keycodes        = xcb_key_symbols_get_keycode(keysyms, N_4);
-                xcb_keycode_t * n_5_keycodes        = xcb_key_symbols_get_keycode(keysyms, N_5);
-                xcb_keycode_t * r_arrow_keycodes    = xcb_key_symbols_get_keycode(keysyms, R_ARROW);
-                xcb_keycode_t * l_arrow_keycodes    = xcb_key_symbols_get_keycode(keysyms, L_ARROW);
-                xcb_keycode_t * u_arrow_keycodes    = xcb_key_symbols_get_keycode(keysyms, U_ARROW);
-                xcb_keycode_t * d_arrow_keycodes    = xcb_key_symbols_get_keycode(keysyms, D_ARROW);
-                xcb_keycode_t * tab_keycodes        = xcb_key_symbols_get_keycode(keysyms, TAB);
-                xcb_keycode_t * k_keycodes			= xcb_key_symbols_get_keycode(keysyms, K);
-                
-                if (t_keycodes) 
-                {
-                    t = * t_keycodes;
-                    free(t_keycodes);
-                }
-                
-                if (q_keycodes) 
-                {
-                    q = * q_keycodes;
-                    free(q_keycodes);
-                }
-                
-                if (f_keycodes)
-                {
-                    f = * f_keycodes;
-                    free(f_keycodes);
-                }
-
-                if (f11_keycodes)
-                {
-                    f11 = * f11_keycodes;
-                    free(f11_keycodes);
-                }
-
-                if (n_1_keycodes)
-                {
-                    n_1 = * n_1_keycodes;
-                    free(n_1_keycodes);
-                }
-
-                if (n_2_keycodes)
-                {
-                    n_2 = * n_2_keycodes;
-                    free(n_2_keycodes);
-                }
-
-                if (n_3_keycodes)
-                {
-                    n_3 = * n_3_keycodes;
-                    free(n_3_keycodes);
-                }
-
-                if (n_4_keycodes)
-                {
-                    n_4 = * n_4_keycodes;
-                    free(n_4_keycodes);
-                }
-
-                if (n_5_keycodes)
-                {
-                    n_5 = * n_5_keycodes;
-                    free(n_5_keycodes);
-                }
-
-                if (r_arrow_keycodes)
-                {
-                    r_arrow = * r_arrow_keycodes;
-                    free(r_arrow_keycodes);
-                }
-
-                if (l_arrow_keycodes)
-                {
-                    l_arrow = * l_arrow_keycodes;
-                    free(l_arrow_keycodes);
-                }
-
-                if (u_arrow_keycodes)
-                {
-                    u_arrow = * u_arrow_keycodes;
-                    free(u_arrow_keycodes);
-                }
-
-                if (d_arrow_keycodes)
-                {
-                    d_arrow = * d_arrow_keycodes;
-                    free(d_arrow_keycodes);
-                }
-
-                if (tab_keycodes)
-                {
-                    tab = * tab_keycodes;
-                    free(tab_keycodes);
-                }
-
-                if (k_keycodes)
-				{
-					k = * k_keycodes;
-					free(k_keycodes);
-				}
-            }
-        }
-        
         void 
         map_notify_handler(const xcb_generic_event_t * & ev)
         {
