@@ -716,7 +716,7 @@ class window
 
 class client
 {
-    public: // subclasses 
+    public: // subclasses
         class client_border_decor
         {
             public:    
@@ -733,7 +733,7 @@ class client
         };
     ;
 
-    public: // variabels 
+    public: // variabels
         char name[256];
 
         window win;
@@ -757,7 +757,7 @@ class client
         uint16_t desktop;
     ;
 
-    public: // methods 
+    public: // methods
         void
         x_y_width_height(const uint32_t & x, const uint32_t & y, const uint32_t & width, const uint32_t & height)
         {
@@ -776,40 +776,6 @@ class client
             border.bottom_right.x_y((width - BORDER_SIZE), (height - BORDER_SIZE));
             border.bottom_left.y((height - BORDER_SIZE));
             xcb_flush(conn);
-        }
-
-        void
-        send_sigterm()
-        {
-            win.unmap();
-            close_button.unmap();
-            max_button.unmap();
-            min_button.unmap();
-            titlebar.unmap();
-            border.left.unmap();
-            border.right.unmap();
-            border.top.unmap();
-            border.bottom.unmap();
-            border.top_left.unmap();
-            border.top_right.unmap();
-            border.bottom_left.unmap();
-            border.bottom_right.unmap();
-            frame.unmap();
-
-            win.kill();
-            close_button.kill();
-            max_button.kill();
-            min_button.kill();
-            titlebar.kill();
-            border.left.kill();
-            border.right.kill();
-            border.top.kill();
-            border.bottom.kill();
-            border.top_left.kill();
-            border.top_right.kill();
-            border.bottom_left.kill();
-            border.bottom_right.kill();
-            frame.kill();
         }
     ;
 };
@@ -4162,31 +4128,6 @@ class mxb
 };
 
 static mxb::Dialog_win::Dock * dock;
-
-class client_actions
-{
-    public: // methods 
-        static void
-        close_button_kill(client * c)
-        {
-            c->send_sigterm();
-            remove(c, client_list);
-        }
-    ;
-
-    private: // functions 
-        static void
-        remove(client * c, std::vector<client *> & from_vector)
-        {
-            if (!c)
-            {
-                log_info("client is nullptr.");
-            }
-            from_vector.erase(std::remove(from_vector.begin(), from_vector.end(), c), from_vector.end());
-            delete c;
-        }
-    ;
-};
 
 namespace bitmap
 {
@@ -7586,59 +7527,59 @@ namespace win_tools
         return true;
     }
 
-    // int
-    // send_sigterm_to_client(client * c)
-    // {
-    //     if (!c)
-    //     {
-    //         return - 1;
-    //     }
+    int
+    send_sigterm_to_client(client * c)
+    {
+        if (!c)
+        {
+            return - 1;
+        }
 
-    //     c->win.unmap();
-    //     c->close_button.unmap();
-    //     c->max_button.unmap();
-    //     c->min_button.unmap();
-    //     c->titlebar.unmap();
-    //     c->border.left.unmap();
-    //     c->border.right.unmap();
-    //     c->border.top.unmap();
-    //     c->border.bottom.unmap();
-    //     c->border.top_left.unmap();
-    //     c->border.top_right.unmap();
-    //     c->border.bottom_left.unmap();
-    //     c->border.bottom_right.unmap();
-    //     c->frame.unmap();
+        c->win.unmap();
+        c->close_button.unmap();
+        c->max_button.unmap();
+        c->min_button.unmap();
+        c->titlebar.unmap();
+        c->border.left.unmap();
+        c->border.right.unmap();
+        c->border.top.unmap();
+        c->border.bottom.unmap();
+        c->border.top_left.unmap();
+        c->border.top_right.unmap();
+        c->border.bottom_left.unmap();
+        c->border.bottom_right.unmap();
+        c->frame.unmap();
 
-    //     c->win.kill();
-    //     c->close_button.kill();
-    //     c->max_button.kill();
-    //     c->min_button.kill();
-    //     c->titlebar.kill();
-    //     c->border.left.kill();
-    //     c->border.right.kill();
-    //     c->border.top.kill();
-    //     c->border.bottom.kill();
-    //     c->border.top_left.kill();
-    //     c->border.top_right.kill();
-    //     c->border.bottom_left.kill();
-    //     c->border.bottom_right.kill();
-    //     c->frame.kill();
+        c->win.kill();
+        c->close_button.kill();
+        c->max_button.kill();
+        c->min_button.kill();
+        c->titlebar.kill();
+        c->border.left.kill();
+        c->border.right.kill();
+        c->border.top.kill();
+        c->border.bottom.kill();
+        c->border.top_left.kill();
+        c->border.top_right.kill();
+        c->border.bottom_left.kill();
+        c->border.bottom_right.kill();
+        c->frame.kill();
         
-    //     mxb::Client::remove(c);
+        mxb::Client::remove(c);
 
-    //     return 0;
-    // }
+        return 0;
+    }
 
-    // void
-    // close_button_kill(client * c)
-    // {
-    //     int result = send_sigterm_to_client(c);
+    void
+    close_button_kill(client * c)
+    {
+        int result = send_sigterm_to_client(c);
 
-    //     if (result == -1)
-    //     {
-    //         log_error("client is nullptr");
-    //     }
-    // }
+        if (result == -1)
+        {
+            log_error("client is nullptr");
+        }
+    }
 }
 
 class Compositor
@@ -9413,7 +9354,7 @@ class Event
                 if (e->event == c->close_button)
                 {
                     // log_info("L_MOUSE_BUTTON + close_button");
-                    client_actions::close_button_kill(c);
+                    win_tools::close_button_kill(c);
                     return;
                 }
 
@@ -9541,7 +9482,11 @@ class Event
             log_win("e->event: ", e->event);
             client * c = get::client_from_all_win(& e->window);
         
-            c->send_sigterm();
+            int result = win_tools::send_sigterm_to_client(c);
+            if (result == -1)
+            {
+                log_error("send_sigterm_to_client: failed");
+            }
         }
 
         void
