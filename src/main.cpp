@@ -234,20 +234,20 @@ class window
         public: // main public methods 
             void
             create( 
-                const uint8_t        & depth,
-                const xcb_window_t   & parent_window,
-                const int16_t        & x,
-                const int16_t        & y,
-                const uint16_t       & width,
-                const uint16_t       & height,
-                const uint16_t       & border_width,
-                const uint16_t       & _class,
-                const xcb_visualid_t & visual,
-                const uint32_t       & value_mask,
-                const void           * value_list)
-            {
+                const uint8_t  & depth,
+                const uint32_t & parent,
+                const int16_t  & x,
+                const int16_t  & y,
+                const uint16_t & width,
+                const uint16_t & height,
+                const uint16_t & border_width,
+                const uint16_t & _class,
+                const uint32_t & visual,
+                const uint32_t & value_mask,
+                const void     * value_list)
+            { 
                 _depth = depth;
-                _parent = parent_window;
+                _parent = parent;
                 _x = x;
                 _y = y;
                 _width = width;
@@ -331,12 +331,41 @@ class window
             }
 
             public: // size_pos configuration methods 
+                public: // fetch methods
+                    uint32_t
+                    x()
+                    {
+                        return _x;
+                    }
+                    
+                    uint32_t
+                    y()
+                    {
+                        return _y;
+                    }
+
+                    uint32_t
+                    width()
+                    {
+                        return _width;
+                    }
+
+                    uint32_t
+                    height()
+                    {
+                        return _height;
+                    }
+                ;    
+
+                
                 void
                 x(const uint32_t & x)
                 {
                     config_window(XCB_CONFIG_WINDOW_X, x);
                     update(x, _y, _width, _height);
                 }
+
+                
 
                 void
                 y(const uint32_t & y)
@@ -345,6 +374,8 @@ class window
                     update(_x, y, _width, _height);
                 }
 
+                
+
                 void
                 width(const uint32_t & width)
                 {
@@ -352,12 +383,16 @@ class window
                     update(_x, _y, width, _height);
                 }
 
+                
+
                 void
                 height(const uint32_t & height)
                 {
                     config_window(XCB_CONFIG_WINDOW_HEIGHT, height);
                     update(_x, _y, _width, height);
                 }
+
+                
 
                 void
                 x_y(const uint32_t & x, const uint32_t & y)
