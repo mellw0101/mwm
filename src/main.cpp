@@ -4780,7 +4780,7 @@ class focus
 
 class mv_client 
 {
-    public:
+    public: // constructor 
         mv_client(client * & c, const uint16_t & start_x, const uint16_t & start_y) 
         : c(c), start_x(start_x), start_y(start_y)
         {
@@ -4798,13 +4798,27 @@ class mv_client
         }
     ;
 
-    private:
+    private: // variabels 
         client * & c;
         const uint16_t & start_x;
         const uint16_t & start_y;
         bool shouldContinue = true;
         xcb_generic_event_t * ev;
+        /* DEFENITIONS TO REDUCE REDUNDENT CODE IN 'snap' FUNCTION */
+        #define RIGHT_  screen->width_in_pixels  - c->width
+        #define BOTTOM_ screen->height_in_pixels - c->height
+        const double frameRate = 120.0; /* 
+            FRAMERATE 
+         */
+        std::chrono::high_resolution_clock::time_point lastUpdateTime = std::chrono::high_resolution_clock::now(); /*
+            HIGH_PRECISION_CLOCK AND TIME_POINT 
+         */
+        const double frameDuration = 1000.0 / frameRate; /* 
+            DURATION IN MILLISECONDS THAT EACH FRAME SHOULD LAST 
+        */
+    ;
 
+    private: // functions 
         void 
         grab_pointer()
         {
@@ -4831,10 +4845,6 @@ class mv_client
             free(reply); 
         }
 
-        /* DEFENITIONS TO REDUCE REDUNDENT CODE IN 'snap' FUNCTION */
-        #define RIGHT_  screen->width_in_pixels  - c->width
-        #define BOTTOM_ screen->height_in_pixels - c->height
-
         void 
         snap(const int16_t & x, const int16_t & y)
         {
@@ -4848,18 +4858,18 @@ class mv_client
                     // SNAP WINDOW TO 'RIGHT_TOP' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
                     if (y > cli->y - NC && y < cli->y + NC)
                     {  
-                        mxb::conf::win::x_y(c->frame, (cli->x + cli->width), cli->y);
+                        c->frame.x_y((cli->x + cli->width), cli->y);
                         return;
                     }
 
                     // SNAP WINDOW TO 'RIGHT_BOTTOM' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
                     if (y + c->height > cli->y + cli->height - NC && y + c->height < cli->y + cli->height + NC)
                     {
-                        mxb::conf::win::x_y(c->frame, (cli->x + cli->width), (cli->y + cli->height) - c->height);
+                        c->frame.x_y((cli->x + cli->width), (cli->y + cli->height) - c->height);
                         return;
                     }
 
-                    mxb::conf::win::x_y(c->frame, (cli->x + cli->width), y);
+                    c->frame.x_y((cli->x + cli->width), y);
                     return;
                 }
 
@@ -4870,18 +4880,18 @@ class mv_client
                     // SNAP WINDOW TO 'LEFT_TOP' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
                     if (y > cli->y - NC && y < cli->y + NC)
                     {  
-                        mxb::conf::win::x_y(c->frame, (cli->x - c->width), cli->y);
+                        c->frame.x_y((cli->x - c->width), cli->y);
                         return;
                     }
 
                     // SNAP WINDOW TO 'LEFT_BOTTOM' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
                     if (y + c->height > cli->y + cli->height - NC && y + c->height < cli->y + cli->height + NC)
                     {
-                        mxb::conf::win::x_y(c->frame, (cli->x - c->width), (cli->y + cli->height) - c->height);
+                        c->frame.x_y((cli->x - c->width), (cli->y + cli->height) - c->height);
                         return;
                     }                
 
-                    mxb::conf::win::x_y(c->frame, (cli->x - c->width), y);
+                    c->frame.x_y((cli->x - c->width), y);
                     return;
                 }
 
@@ -4892,18 +4902,18 @@ class mv_client
                     // SNAP WINDOW TO 'BOTTOM_LEFT' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
                     if (x > cli->x - NC && x < cli->x + NC)
                     {  
-                        mxb::conf::win::x_y(c->frame, cli->x, (cli->y + cli->height));
+                        c->frame.x_y(cli->x, (cli->y + cli->height));
                         return;
                     }
 
                     // SNAP WINDOW TO 'BOTTOM_RIGHT' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
                     if (x + c->width > cli->x + cli->width - NC && x + c->width < cli->x + cli->width + NC)
                     {
-                        mxb::conf::win::x_y(c->frame, ((cli->x + cli->width) - c->width), (cli->y + cli->height));
+                        c->frame.x_y(((cli->x + cli->width) - c->width), (cli->y + cli->height));
                         return;
                     }
 
-                    mxb::conf::win::x_y(c->frame, x, (cli->y + cli->height));
+                    c->frame.x_y(x, (cli->y + cli->height));
                     return;
                 }
 
@@ -4914,18 +4924,18 @@ class mv_client
                     // SNAP WINDOW TO 'TOP_LEFT' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
                     if (x > cli->x - NC && x < cli->x + NC)
                     {  
-                        mxb::conf::win::x_y(c->frame, cli->x, (cli->y - c->height));
+                        c->frame.x_y(cli->x, (cli->y - c->height));
                         return;
                     }
 
                     // SNAP WINDOW TO 'TOP_RIGHT' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
                     if (x + c->width > cli->x + cli->width - NC && x + c->width < cli->x + cli->width + NC)
                     {
-                        mxb::conf::win::x_y(c->frame, ((cli->x + cli->width) - c->width), (cli->y - c->height));
+                        c->frame.x_y(((cli->x + cli->width) - c->width), (cli->y - c->height));
                         return;
                     }
 
-                    mxb::conf::win::x_y(c->frame, x, (cli->y - c->height));
+                    c->frame.x_y(x, (cli->y - c->height));
                     return;
                 }
             }
@@ -4933,46 +4943,46 @@ class mv_client
             // WINDOW TO EDGE OF SCREEN SNAPPING
             if (((x < N) && (x > -N)) && ((y < N) && (y > -N)))
             {
-                mxb::conf::win::x_y(c->frame, 0, 0);
+                c->frame.x_y(0, 0);
             }
             else if ((x < RIGHT_ + N && x > RIGHT_ - N) && (y < N && y > -N))
             {
-                mxb::conf::win::x_y(c->frame, RIGHT_, 0);
+                c->frame.x_y(RIGHT_, 0);
             }
             else if ((y < BOTTOM_ + N && y > BOTTOM_ - N) && (x < N && x > -N))
             {
-                mxb::conf::win::x_y(c->frame, 0, BOTTOM_);
+                c->frame.x_y(0, BOTTOM_);
             }
             else if ((x < N) && (x > -N))
             { 
-                mxb::conf::win::x_y(c->frame, 0, y);
+                c->frame.x_y(0, y);
             }
             else if (y < N && y > -N)
             {
-                mxb::conf::win::x_y(c->frame, x, 0);
+                c->frame.x_y(x, 0);
             }
             else if ((x < RIGHT_ + N && x > RIGHT_ - N) && (y < BOTTOM_ + N && y > BOTTOM_ - N))
             {
-                mxb::conf::win::x_y(c->frame, RIGHT_, BOTTOM_);
+                c->frame.x_y(RIGHT_, BOTTOM_);
             }
             else if ((x < RIGHT_ + N) && (x > RIGHT_ - N))
             { 
-                mxb::conf::win::x_y(c->frame, RIGHT_, y);
+                c->frame.x_y(RIGHT_, y);
             }
             else if (y < BOTTOM_ + N && y > BOTTOM_ - N)
             {
-                mxb::conf::win::x_y(c->frame, x, BOTTOM_);
+                c->frame.x_y(x, BOTTOM_);
             }
             else 
             {
-                mxb::conf::win::x_y(c->frame, x, y);
+                c->frame.x_y(x, y);
             }
         }
 
-        void
-        run() /*
+        void /*
             THIS IS THE MAIN EVENT LOOP FOR 'mv_client'
          */ 
+        run() 
         {
             while (shouldContinue) 
             {
@@ -5008,16 +5018,6 @@ class mv_client
             }
         }
         
-        const double frameRate = 120.0; /* 
-            FRAMERATE 
-         */
-        std::chrono::high_resolution_clock::time_point lastUpdateTime = std::chrono::high_resolution_clock::now(); /*
-            HIGH_PRECISION_CLOCK AND TIME_POINT 
-         */
-        const double frameDuration = 1000.0 / frameRate; /* 
-            DURATION IN MILLISECONDS THAT EACH FRAME SHOULD LAST 
-        */
-
         bool 
         isTimeToRender() 
         {
