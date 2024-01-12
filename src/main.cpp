@@ -221,6 +221,13 @@ class window
         {
             return _window;
         }
+
+        // Overload the assignment operator for uint32_t
+        window& operator=(uint32_t new_window) 
+        {
+            _window = new_window;
+            return *this;
+        }
     ;
 
     public: // public methods 
@@ -651,7 +658,7 @@ class client
     public:
         char name[256];
 
-        xcb_window_t win;
+        window win;
         xcb_window_t frame;
         xcb_window_t titlebar;
         xcb_window_t close_button;
@@ -673,6 +680,9 @@ class client
     ;
 };
 
+std::vector<client *> client_list; // global list of clients
+client * focused_client;
+
 class desktop
 {
     public:
@@ -685,10 +695,8 @@ class desktop
     ;
 };
 
-std::vector<client *> client_list; // global list of clients
 std::vector<desktop *> desktop_list;
 desktop * cur_d;
-client * focused_client;
 
 class mxb 
 {
