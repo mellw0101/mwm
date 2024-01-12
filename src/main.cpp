@@ -7153,16 +7153,7 @@ class resize_client
                         }
                         case edge::BOTTOM_edge:
                         {
-                            const uint32_t height = (y - c->y);
-
-                            mxb::conf::win::height(c->win, (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
-                            mxb::conf::win::height(c->frame, height);
-                            mxb::conf::win::height(c->border.left, (height - (BORDER_SIZE * 2)));
-                            mxb::conf::win::height(c->border.right, (height - (BORDER_SIZE * 2)));
-                            mxb::conf::win::y(c->border.bottom, (height - BORDER_SIZE));
-                            mxb::conf::win::y(c->border.bottom_left, (height - BORDER_SIZE));
-                            mxb::conf::win::y(c->border.bottom_right, (height - BORDER_SIZE));
-                            
+                            c->_height((y - c->y));
                             break;
                         }
                         case edge::NONE:
