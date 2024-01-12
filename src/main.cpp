@@ -305,6 +305,24 @@ class window
                 );
                 xcb_flush(conn);
             }
+
+            void 
+            apply_event_mask(const std::vector<uint32_t> & values) 
+            {
+                if (values.empty()) 
+                {
+                    log_error("values vector is empty");
+                    return;
+                }
+
+                xcb_change_window_attributes
+                (
+                    conn,
+                    _window,
+                    XCB_CW_EVENT_MASK,
+                    values.data()
+                );
+            }
             
             void
             grab_button(std::initializer_list<std::pair<const uint8_t, const uint16_t>> bindings)
@@ -8120,12 +8138,14 @@ class WinManager
             c->win.map();
             xcb_flush(conn);
 
-            grab_buttons(c, 
-            {
-                {   L_MOUSE_BUTTON,     ALT },
-                {   R_MOUSE_BUTTON,     ALT },
-                {   L_MOUSE_BUTTON,     0   }
-            });
+            c->win.grab_button
+            ( 
+                {
+                    {   L_MOUSE_BUTTON,     ALT },
+                    {   R_MOUSE_BUTTON,     ALT },
+                    {   L_MOUSE_BUTTON,     0   }
+                }
+            );
             
             grab_keys(c, 
             {
@@ -8151,11 +8171,12 @@ class WinManager
 
             WinDecoretor(conn ,c);
             
-            uint32_t mask = 
-            XCB_EVENT_MASK_FOCUS_CHANGE | 
-            XCB_EVENT_MASK_ENTER_WINDOW |
-            XCB_EVENT_MASK_LEAVE_WINDOW ;
-            mxb::set::event_mask(& mask, c->win);
+            // uint32_t mask = 
+            // XCB_EVENT_MASK_FOCUS_CHANGE | 
+            // XCB_EVENT_MASK_ENTER_WINDOW |
+            // XCB_EVENT_MASK_LEAVE_WINDOW ;
+            // mxb::set::event_mask(& mask, c->win);
+            c->win.apply_event_mask({XCB_EVENT_MASK_FOCUS_CHANGE, XCB_EVENT_MASK_ENTER_WINDOW, XCB_EVENT_MASK_LEAVE_WINDOW});
 
             mxb::get::win::property(c->win, "_NET_WM_NAME");
             mxb::Client::update(c);
