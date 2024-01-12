@@ -7185,7 +7185,7 @@ class resize_client
                         }
                         case edge::TOP_RIGHT:
                         {
-                            c->y_width_height(y, (y - c->x), (c->height + c->y - y));
+                            c->y_width_height(y, (x - c->x), (c->height + c->y - y));
                             break;
                         }
                         case edge::BOTTOM_LEFT:
