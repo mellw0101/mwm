@@ -593,6 +593,26 @@ class client
 
         uint16_t desktop;
     ;
+
+    public: // methods
+        void
+        x_y_width_height(const uint32_t & x, const uint32_t & y, const uint32_t & width, const uint32_t & height)
+        {
+            win.width_height((width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
+            frame.x_y_width_height(x, y, width, height);
+            titlebar.width((width - (BORDER_SIZE * 2)));
+            close_button.x((width - BUTTON_SIZE - BORDER_SIZE));
+            max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
+            min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
+            border.left.height((height - (BORDER_SIZE * 2)));
+            border.right.x_height((width - BORDER_SIZE), (height - (BORDER_SIZE * 2)));
+            border.top.width((width - (BORDER_SIZE * 2)));
+            border.bottom.y_width((height - BORDER_SIZE), (width - (BORDER_SIZE * 2)));
+            border.top_right.x((width - BORDER_SIZE));
+            border.bottom_right.x_y((width - BORDER_SIZE), (height - BORDER_SIZE));
+            border.bottom_left.y((height - BORDER_SIZE));
+        }
+    ;
 };
 
 std::vector<client *> client_list; // global list of clients
@@ -5680,22 +5700,23 @@ class XCPPBAnimator
         void 
         conf_client_test()
         {
-            const uint32_t x = currentX, y = currentY, w = currentWidth, h = currentHeight;
+            // const uint32_t x = currentX, y = currentY, w = currentWidth, h = currentHeight;
 
-            c->win.width_height((w - (BORDER_SIZE * 2)), (h - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
-            c->frame.x_y_width_height(x, y, w, h);
-            c->titlebar.width((w - (BORDER_SIZE * 2)));
-            c->close_button.x((w - BUTTON_SIZE - BORDER_SIZE));
-            c->max_button.x((w - (BUTTON_SIZE * 2) - BORDER_SIZE));
-            c->min_button.x((w - (BUTTON_SIZE * 3) - BORDER_SIZE));
-            c->border.left.height((h - (BORDER_SIZE * 2)));
-            c->border.right.x_height((w - BORDER_SIZE), (h - (BORDER_SIZE * 2)));
-            c->border.top.width((w - (BORDER_SIZE * 2)));
-            c->border.bottom.y_width((h - BORDER_SIZE), (w - (BORDER_SIZE * 2)));
-            c->border.top_right.x((w - BORDER_SIZE));
-            c->border.bottom_right.x_y((w - BORDER_SIZE), (h - BORDER_SIZE));
-            c->border.bottom_left.y((h - BORDER_SIZE));
+            // c->win.width_height((w - (BORDER_SIZE * 2)), (h - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
+            // c->frame.x_y_width_height(x, y, w, h);
+            // c->titlebar.width((w - (BORDER_SIZE * 2)));
+            // c->close_button.x((w - BUTTON_SIZE - BORDER_SIZE));
+            // c->max_button.x((w - (BUTTON_SIZE * 2) - BORDER_SIZE));
+            // c->min_button.x((w - (BUTTON_SIZE * 3) - BORDER_SIZE));
+            // c->border.left.height((h - (BORDER_SIZE * 2)));
+            // c->border.right.x_height((w - BORDER_SIZE), (h - (BORDER_SIZE * 2)));
+            // c->border.top.width((w - (BORDER_SIZE * 2)));
+            // c->border.bottom.y_width((h - BORDER_SIZE), (w - (BORDER_SIZE * 2)));
+            // c->border.top_right.x((w - BORDER_SIZE));
+            // c->border.bottom_right.x_y((w - BORDER_SIZE), (h - BORDER_SIZE));
+            // c->border.bottom_left.y((h - BORDER_SIZE));
 
+            c->x_y_width_height(currentX, currentY, currentWidth, currentHeight);
             xcb_flush(connection);
         }
 
