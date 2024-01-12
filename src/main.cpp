@@ -968,6 +968,20 @@ class client
         }
 
         void
+        y_height(const uint32_t & y, const uint32_t & height)
+        {
+            win.height((height - TITLE_BAR_HEIGHT) - (BORDER_SIZE * 2));
+            xcb_flush(conn);
+            frame.y_height(y, height);
+            border.left.height((height - (BORDER_SIZE * 2)));
+            border.right.height((height - (BORDER_SIZE * 2)));
+            border.bottom.y((height - BORDER_SIZE));
+            border.bottom_left.y((height - BORDER_SIZE));
+            border.bottom_right.y((height - BORDER_SIZE));
+            xcb_flush(conn);
+        }
+
+        void
         x_y_width_height(const uint32_t & x, const uint32_t & y, const uint32_t & width, const uint32_t & height)
         {
             win.width_height((width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
@@ -7122,16 +7136,7 @@ class resize_client
                         }
                         case edge::TOP:
                         {
-                            const uint32_t height = (c->height + c->y - y);
-
-                            mxb::conf::win::height(c->win, (height - TITLE_BAR_HEIGHT) - (BORDER_SIZE * 2));
-                            mxb::conf::win::y_height(c->frame, y, height);
-                            mxb::conf::win::height(c->border.left, (height - (BORDER_SIZE * 2)));
-                            mxb::conf::win::height(c->border.right, (height - (BORDER_SIZE * 2)));
-                            mxb::conf::win::y(c->border.bottom, (height - BORDER_SIZE));
-                            mxb::conf::win::y(c->border.bottom_left, (height - BORDER_SIZE));
-                            mxb::conf::win::y(c->border.bottom_right, (height - BORDER_SIZE));
-                            
+                            c->y_height(y, (c->height + c->y - y));   
                             break;
                         }
                         case edge::BOTTOM_edge:
