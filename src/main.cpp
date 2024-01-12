@@ -7583,19 +7583,20 @@ class resize_client
         void
         resize_win(const uint16_t & width, const uint16_t & height)
         {
-            c->win.width_height((width - (BORDER_SIZE * 2)), (height - (BORDER_SIZE * 2)));
-            c->frame.width_height(width, height);
-            c->titlebar.width((width - (BORDER_SIZE * 2)));
-            c->close_button.x((width - BUTTON_SIZE - BORDER_SIZE));
-            c->max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
-            c->min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
-            c->border.left.height((height - (BORDER_SIZE * 2)));
-            c->border.right.x_height((width - BORDER_SIZE), (height - (BORDER_SIZE * 2)));
-            c->border.top.width((width - (BORDER_SIZE * 2)));
-            c->border.bottom.y_width((height - BORDER_SIZE), (width - (BORDER_SIZE * 2)));
-            c->border.top_right.x((width - BORDER_SIZE));
-            c->border.bottom_right.x_y((width - BORDER_SIZE), (height - BORDER_SIZE));
-            c->border.bottom_left.y((height - BORDER_SIZE));
+            // c->win.width_height((width - (BORDER_SIZE * 2)), (height - (BORDER_SIZE * 2)));
+            // c->frame.width_height(width, height);
+            // c->titlebar.width((width - (BORDER_SIZE * 2)));
+            // c->close_button.x((width - BUTTON_SIZE - BORDER_SIZE));
+            // c->max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
+            // c->min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
+            // c->border.left.height((height - (BORDER_SIZE * 2)));
+            // c->border.right.x_height((width - BORDER_SIZE), (height - (BORDER_SIZE * 2)));
+            // c->border.top.width((width - (BORDER_SIZE * 2)));
+            // c->border.bottom.y_width((height - BORDER_SIZE), (width - (BORDER_SIZE * 2)));
+            // c->border.top_right.x((width - BORDER_SIZE));
+            // c->border.bottom_right.x_y((width - BORDER_SIZE), (height - BORDER_SIZE));
+            // c->border.bottom_left.y((height - BORDER_SIZE));
+            c->width_height(width, height);
         }
 
         void
