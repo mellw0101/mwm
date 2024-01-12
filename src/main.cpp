@@ -950,6 +950,18 @@ class client
         }
 
         void
+        _height(const uint32_t & height)
+        {
+            win.height((height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
+            frame.height(height);
+            border.left.height((height - (BORDER_SIZE * 2)));
+            border.right.height((height - (BORDER_SIZE * 2)));
+            border.bottom.y((height - BORDER_SIZE));
+            border.bottom_left.y((height - BORDER_SIZE));
+            border.bottom_right.y((height - BORDER_SIZE));
+        }
+
+        void
         x_width(const uint32_t & x, const uint32_t & width)
         {
             win.width((width - (BORDER_SIZE * 2)));
