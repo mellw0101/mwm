@@ -2772,20 +2772,7 @@ class mxb
                         void
                         create_dock()
                         {
-                            main_window.create
-                            (
-                                XCB_COPY_FROM_PARENT,
-                                screen->root,
-                                0,
-                                0,
-                                width,
-                                height,
-                                0,
-                                XCB_WINDOW_CLASS_INPUT_OUTPUT,
-                                XCB_COPY_FROM_PARENT,
-                                0,
-                                NULL
-                            );   
+                            main_window.create_default(screen->root, 0, 0, width, height);   
                         }
 
                         void
