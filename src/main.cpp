@@ -2130,6 +2130,15 @@ class client
                 win.focus_input();
                 frame.raise();
             }
+
+            void
+            update()
+            {
+                x = frame.x();
+                y = frame.y();
+                width = frame.width();
+                height = frame.height();
+            }
         ;
     ;
 
@@ -3366,25 +3375,6 @@ class mxb
                     delete c;
                 }
 
-                static void
-                update(client * c)
-                {
-                    xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, c->frame);
-                    xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
-
-                    if (geometry) 
-                    {
-                        c->x = geometry->x;
-                        c->y = geometry->y;
-                        c->width = geometry->width;
-                        c->height = geometry->height;
-                        free(geometry);
-                    } 
-                    else 
-                    {
-                        c->x = c->y = c->width = c->height = 200;
-                    }
-                }
 
                 static void 
                 raise(client * c) 
@@ -4254,7 +4244,7 @@ class Window_Manager
                 c->win.apply_event_mask({XCB_EVENT_MASK_FOCUS_CHANGE, XCB_EVENT_MASK_ENTER_WINDOW, XCB_EVENT_MASK_LEAVE_WINDOW});
 
                 c->win.property("_NET_WM_NAME");
-                mxb::Client::update(c);
+                c->update();
                 focus_client(c);
             }
         ;
@@ -4546,122 +4536,6 @@ class Window_Manager
 
 static Window_Manager * wm;
 
-namespace get
-{
-    client * 
-    client_from_win(const xcb_window_t * w) 
-    {
-        for (const auto & c : client_list) 
-        {
-            if (* w == c->win) 
-            {
-                return c;
-            }
-        }
-        return nullptr; /*
-         *
-         * THIS WILL
-         * RETURN 'nullptr' BECAUSE THE
-         * WINDOW DOES NOT BELONG TO ANY 
-         * CLIENT IN THE CLIENT LIST
-         *  
-         */ 
-    }
-
-    client * 
-    client_from_all_win(const xcb_window_t * w) 
-    {
-        for (const auto & c : client_list) 
-        {
-            if (* w == c->win 
-             || * w == c->frame 
-             || * w == c->titlebar 
-             || * w == c->close_button 
-             || * w == c->max_button 
-             || * w == c->min_button 
-             || * w == c->border.left 
-             || * w == c->border.right 
-             || * w == c->border.top 
-             || * w == c->border.bottom
-             || * w == c->border.top_left
-             || * w == c->border.top_right
-             || * w == c->border.bottom_left
-             || * w == c->border.bottom_right) 
-            {
-                return c;
-            }
-        }
-        return nullptr; /*
-         *
-         * THIS WILL
-         * RETURN 'nullptr' BECAUSE THE
-         * WINDOW DOES NOT BELONG TO ANY 
-         * CLIENT IN THE CLIENT LIST
-         *  
-         */ 
-    }
-
-    client * 
-    client_from_frame(const xcb_window_t * w) 
-    {
-        for (const auto & c : client_list) 
-        {
-            if (* w == c->frame) 
-            {
-                return c;
-            }
-        }
-        return nullptr; /*
-         *
-         * THIS WILL
-         * RETURN 'nullptr' BECAUSE THE
-         * WINDOW DOES NOT BELONG TO ANY 
-         * CLIENT IN THE CLIENT LIST
-         *  
-         */ 
-    }
-
-    client * 
-    client_from_close_button(const xcb_window_t * w) 
-    {
-        for (const auto & c : client_list) 
-        {
-            if (* w == c->close_button) 
-            {
-                return c;
-            }
-        }
-        return nullptr; /*
-         *
-         * THIS WILL
-         * RETURN 'nullptr' BECAUSE THE
-         * WINDOW DOES NOT BELONG TO ANY 
-         * CLIENT IN THE CLIENT LIST
-         *  
-         */ 
-    }
-
-    client * 
-    client_from_titlebar(const xcb_window_t * w) 
-    {
-        for (const auto & c : client_list) 
-        {
-            if (* w == c->titlebar) 
-            {
-                return c;
-            }
-        }
-        return nullptr; /*
-         *
-         * THIS WILL
-         * RETURN 'nullptr' BECAUSE THE
-         * WINDOW DOES NOT BELONG TO ANY 
-         * CLIENT IN THE CLIENT LIST
-         *  
-         */ 
-    }
-}
-
 class mv_client 
 {
     public: // constructor 
@@ -4866,7 +4740,7 @@ class mv_client
                     case XCB_BUTTON_RELEASE:
                     {
                         shouldContinue = false;
-                        mxb::Client::update(c);
+                        c->update();
                         break;
                     }
                 }
@@ -5744,7 +5618,7 @@ animate(client * & c, const int & endX, const int & endY, const int & endWidth, 
         endHeight, 
         duration
     );
-    mxb::Client::update(c);
+    c->update();
 }
 
 void
@@ -5763,7 +5637,7 @@ animate_client(client * & c, const int & endX, const int & endY, const int & end
         endHeight,
         duration
     );
-    mxb::Client::update(c);
+    c->update();
 }
 
 std::mutex mtx;
@@ -5924,7 +5798,7 @@ class change_desktop
         {
             XCPPBAnimator anim(conn, c);
             anim.animate_client_x(c->x, endx, DURATION);
-            mxb::Client::update(c);
+            c->update();
         }
 
         void
@@ -6192,7 +6066,7 @@ class resize_client
                             case XCB_BUTTON_RELEASE: 
                             {
                                 shouldContinue = false;                        
-                                mxb::Client::update(c);
+                                c->update();
                                 break;
                             }
                         }
@@ -6512,7 +6386,7 @@ class resize_client
                             case XCB_BUTTON_RELEASE: 
                             {
                                 shouldContinue = false;                        
-                                mxb::Client::update(c);
+                                c->update();
                                 break;
                             }
                         }
@@ -6553,8 +6427,8 @@ class resize_client
                             case XCB_BUTTON_RELEASE: 
                             {
                                 shouldContinue = false;                        
-                                mxb::Client::update(c);
-                                mxb::Client::update(c2);
+                                c->update();
+                                c2->update();
                                 break;
                             }
                         }
@@ -6652,7 +6526,7 @@ class resize_client
                     case XCB_BUTTON_RELEASE: 
                     {
                         shouldContinue = false;                        
-                        mxb::Client::update(c);
+                        c->update();
                         break;
                     }
                 }
@@ -7535,7 +7409,7 @@ class tile
                 endHeight, 
                 TILE_ANIMATION_DURATION
             );
-            mxb::Client::update(c);
+            c->update();
         }
 
         void
@@ -7554,7 +7428,7 @@ class tile
                 endHeight, 
                 TILE_ANIMATION_DURATION
             );
-            mxb::Client::update(c);
+            c->update();
         }
     ;
 };
@@ -7856,7 +7730,7 @@ class Event
              */ 
             if (e->detail == f11)
             {
-                client * c = get::client_from_win(& e->event);
+                client * c = wm->client_from_window(& e->event);
                 max_win(c, max_win::EWMH_MAXWIN);
             }
 
@@ -7964,7 +7838,7 @@ class Event
                     }
                     case SUPER:
                     {
-                        client * c = get::client_from_win(& e->event);
+                        client * c = wm->client_from_window(& e->event);
                         tile(c, TILE::RIGHT);
                         break;
                     }
@@ -7996,7 +7870,7 @@ class Event
                     }
                     case SUPER:
                     {
-                        client * c = get::client_from_win(& e->event);
+                        client * c = wm->client_from_window(& e->event);
                         tile(c, TILE::LEFT);
                         break;
                     }
@@ -8011,12 +7885,11 @@ class Event
                 switch (e->state) 
                 {
                     case SUPER:
-                    {
-                        client * c = get::client_from_win(& e->event);
+                        client * c = wm->client_from_window(& e->event);
                         tile(c, TILE::DOWN);
                         return;
                         break;
-                    }
+                    ;
                 }
             }
 
@@ -8025,11 +7898,10 @@ class Event
                 switch (e->state) 
                 {
                     case SUPER:
-                    {
-                        client * c = get::client_from_win(& e->event);
+                        client * c = wm->client_from_window(& e->event);
                         tile(c, TILE::UP);
                         break;
-                    }
+                    ;
                 }
             }
 
@@ -8042,10 +7914,9 @@ class Event
                 switch (e->state) 
                 {
                     case ALT:
-                    {
                         wm->cycle_focus();
                         break;
-                    }
+                    ;
                 }
             }
 
@@ -8059,50 +7930,9 @@ class Event
                 switch (e->state) 
                 {
                     case SUPER:
-                    {
-                        client * c = get::client_from_win(& e->event);
-                        
-                        // mxb::EWMH ewmhChecker(conn, ewmh);
-                        // if (ewmhChecker.checkWindowDecorations(c->win))
-                        // {
-                        //     log_info("has decorations");
-                        // }
-                        // else
-                        // {
-                        //     log_info("does not have decorations");
-                        // }
-
-                        // if (ewmhChecker.checkWindowFrameExtents(c->win))
-                        // {
-                        //     log_info("has frame extents");
-                        // }
-                        // else
-                        // {
-                        //     log_info("does not have frame extents");
-                        // }
-
-                        // mxb::get::win::property(c->win, "WM_CLASS"); // works
-                        // mxb::get::win::property(c->win, "WM_NAME"); //works
-                        // mxb::get::win::property(c->win, "WM_PROTOCOLS"); // works
-                        // mxb::get::win::property(c->win, "WM_HINTS"); // works
-                        // mxb::get::win::property(c->win, "WM_NORMAL_HINTS"); // works
-                        // mxb::get::win::property(c->win, "_NET_WM_NAME"); // works, gives (WM_NAME WM_CLASS) 
-                        // mxb::get::win::property(c->win, "_NET_WM_WINDOW_TYPE"); // works
-                        // mxb::get::win::property(c->win, "_NET_WM_PID"); // works, needs conversion to pid_t or other integer type 
-                        // mxb::get::win::property(c->win, "_NET_WM_USER_TIME"); // works, needs conversion to int or other integer type
-
-                        // if (mxb::EWMH::check::isWindowNormalType(c->win))
-                        // {
-                        //     log_info("is normal type");
-                        // }
-                        // else
-                        // {
-                        //     log_info("is not normal type");
-                        // }
-
-                        // log_info(mxb::get::event_mask(mxb::get::event_mask_sum(c->win)));
+                        client * c = wm->client_from_window(& e->event);
                         break;
-                    }
+                    ;
                 }
             }
         }
@@ -8111,10 +7941,10 @@ class Event
         map_notify_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_map_notify_event_t *>(ev);
-            client * c = get::client_from_win(& e->window);
+            client * c = wm->client_from_window(& e->window);
             if (c)
             {
-                mxb::Client::update(c);
+                c->update();
             }
         }
         
@@ -8177,7 +8007,7 @@ class Event
                 }
             }
 
-            c = get::client_from_all_win(& e->event);
+            c = wm->client_from_any_window(& e->event);
             if (!c)
             {
                 // log_error("c == null");
@@ -8191,12 +8021,11 @@ class Event
                     switch (e->state) 
                     {
                         case ALT:
-                        {
                             mxb::Client::raise(c);
                             mv_client(c, e->event_x, e->event_y + 20);
                             wm->focus_client(c);
                             break;
-                        }
+                        ;
                     }
                     mxb::Client::raise(c);
                     wm->focus_client(c);
@@ -8219,8 +8048,7 @@ class Event
 
                 if (e->event == c->max_button)
                 {
-                    // log_info("L_MOUSE_BUTTON + max_button");
-                    client * c = get::client_from_all_win(& e->event);
+                    client * c = wm->client_from_any_window(& e->event);
                     max_win(c, max_win::BUTTON_MAXWIN);
                     return;
                 }
@@ -8303,7 +8131,7 @@ class Event
         focus_in_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_focus_in_event_t *>(ev);
-            client * c = get::client_from_win( & e->event);
+            client * c = wm->client_from_window( & e->event);
             if (c)
             {
                 c->win.ungrab_button({ { L_MOUSE_BUTTON, NULL } });
@@ -8318,7 +8146,7 @@ class Event
         {
             const auto * e = reinterpret_cast<const xcb_focus_out_event_t *>(ev);
             
-            client * c = get::client_from_win(& e->event);
+            client * c = wm->client_from_window(& e->event);
             if (!c)
             {
                 return;
@@ -8336,7 +8164,7 @@ class Event
         destroy_notify_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_destroy_notify_event_t *>(ev);
-            client * c = get::client_from_all_win(& e->window);
+            client * c = wm->client_from_any_window(& e->window);
             int result = win_tools::send_sigterm_to_client(c);
             if (result == -1)
             {
@@ -8349,7 +8177,7 @@ class Event
         {
             const auto * e = reinterpret_cast<const xcb_unmap_notify_event_t *>(ev);
             
-            client * c = get::client_from_win(& e->window);
+            client * c = wm->client_from_window(& e->window);
             if (!c)
             {
                 return;
