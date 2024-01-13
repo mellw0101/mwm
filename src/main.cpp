@@ -2733,40 +2733,6 @@ class mxb
                 class calc
                 {
                     public:
-                        static client *
-                        client_edge_prox_to_pointer(const int & prox)
-                        {
-                            const uint32_t & x = pointer->x();
-                            const uint32_t & y = pointer->y();
-                            for (const auto & c : cur_d->current_clients)
-                            {
-                                // LEFT EDGE OF CLIENT
-                                if (x > c->x - prox && x <= c->x)
-                                {
-                                    return c;
-                                }
-
-                                // RIGHT EDGE OF CLIENT
-                                if (x >= c->x + c->width && x < c->x + c->width + prox)
-                                {
-                                    return c;
-                                }
-
-                                // TOP EDGE OF CLIENT
-                                if (y > c->y - prox && y <= c->y)
-                                {
-                                    return c;
-                                }
-
-                                // BOTTOM EDGE OF CLIENT
-                                if (y >= c->y + c->height && y < c->y + c->height + prox)
-                                {
-                                    return c;
-                                }
-                            }
-                            return nullptr;
-                        }
-
                         static std::map<client *, edge>
                         if_client_is_next_to_other_client(client * c, edge c_edge)
                         {
@@ -3564,6 +3530,40 @@ class Window_Manager
                          || * window == c->border.top_right
                          || * window == c->border.bottom_left
                          || * window == c->border.bottom_right) 
+                        {
+                            return c;
+                        }
+                    }
+                    return nullptr;
+                }
+
+                client *
+                client_from_pointer(const int & prox)
+                {
+                    const uint32_t & x = pointer->x();
+                    const uint32_t & y = pointer->y();
+                    for (const auto & c : cur_d->current_clients)
+                    {
+                        // LEFT EDGE OF CLIENT
+                        if (x > c->x - prox && x <= c->x)
+                        {
+                            return c;
+                        }
+
+                        // RIGHT EDGE OF CLIENT
+                        if (x >= c->x + c->width && x < c->x + c->width + prox)
+                        {
+                            return c;
+                        }
+
+                        // TOP EDGE OF CLIENT
+                        if (y > c->y - prox && y <= c->y)
+                        {
+                            return c;
+                        }
+
+                        // BOTTOM EDGE OF CLIENT
+                        if (y >= c->y + c->height && y < c->y + c->height + prox)
                         {
                             return c;
                         }
@@ -7354,7 +7354,7 @@ class Event
 
             if (BORDER_SIZE == 0)
             {
-                c = mxb::Client::calc::client_edge_prox_to_pointer(10);
+                c = wm->client_from_pointer(10);
                 if (c)
                 {
                     if (e->detail == L_MOUSE_BUTTON)
