@@ -1109,10 +1109,10 @@ class window
             double YAnimDuration;
             double WAnimDuration;
             double HAnimDuration;
-            std::atomic<bool> stopXFlag{false};
-            std::atomic<bool> stopYFlag{false};
-            std::atomic<bool> stopWFlag{false};
-            std::atomic<bool> stopHFlag{false};
+            // std::atomic<bool> stopXFlag{false};
+            // std::atomic<bool> stopYFlag{false};
+            // std::atomic<bool> stopWFlag{false};
+            // std::atomic<bool> stopHFlag{false};
             std::chrono::high_resolution_clock::time_point XlastUpdateTime;
             std::chrono::high_resolution_clock::time_point YlastUpdateTime;
             std::chrono::high_resolution_clock::time_point WlastUpdateTime;
