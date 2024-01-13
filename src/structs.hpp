@@ -2,6 +2,7 @@
 #define STRUCTS_HPP
 #include "include.hpp"
 #include <cstdint>
+#include <xcb/xcb_ewmh.h>
 #include <xcb/xproto.h>
 
 enum 
@@ -205,5 +206,11 @@ typedef enum mwm_config_t
     MWM_CONFIG_height = 8
 
 } mwm_config_t;
+
+static xcb_connection_t * conn;
+static xcb_ewmh_connection_t * ewmh; 
+static const xcb_setup_t * setup;
+static xcb_screen_iterator_t iter;
+static xcb_screen_t * screen;
 
 #endif

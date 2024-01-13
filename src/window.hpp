@@ -48,12 +48,6 @@
 #include "defenitions.hpp"
 #include "structs.hpp"
 
-static xcb_connection_t * conn;
-static xcb_ewmh_connection_t * ewmh; 
-static const xcb_setup_t * setup;
-static xcb_screen_iterator_t iter;
-static xcb_screen_t * screen;
-
 class Bitmap
 {
     public: // constructor 
