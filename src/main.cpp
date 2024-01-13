@@ -1347,156 +1347,51 @@ class client
         void
         make_borders()
         {
-            // border.left.create
-            // (
-            //     XCB_COPY_FROM_PARENT,
-            //     frame,
-            //     0,
-            //     BORDER_SIZE,
-            //     BORDER_SIZE,
-            //     height + TITLE_BAR_HEIGHT,
-            //     0,
-            //     XCB_WINDOW_CLASS_INPUT_OUTPUT,
-            //     screen->root_visual,
-            //     0,
-            //     nullptr
-            // );
-            border.left.create_default(frame, 0, BORDER_SIZE, BORDER_SIZE, height + TITLE_BAR_HEIGHT);
+            border.left.create_default(frame, 0, BORDER_SIZE, BORDER_SIZE, (height + TITLE_BAR_HEIGHT));
             border.left.set_backround_color(BLACK);
             border.left.set_pointer(CURSOR::left_side);
             border.left.grab_button({ { L_MOUSE_BUTTON, NULL } });
             border.left.map();
 
-            border.right.create
-            (
-                XCB_COPY_FROM_PARENT,
-                frame,
-                width + BORDER_SIZE,
-                BORDER_SIZE,
-                BORDER_SIZE,
-                height + TITLE_BAR_HEIGHT,
-                0,
-                XCB_WINDOW_CLASS_INPUT_OUTPUT,
-                screen->root_visual,
-                0,
-                nullptr
-            );
+            border.right.create_default(frame, (width + BORDER_SIZE), BORDER_SIZE, BORDER_SIZE, (height + TITLE_BAR_HEIGHT));
             border.right.set_backround_color(BLACK);
-            pointer->set(border.right, CURSOR::right_side);
+            border.right.set_pointer(CURSOR::right_side);
             border.right.grab_button({ { L_MOUSE_BUTTON, NULL } });
             border.right.map();
 
-            border.top.create
-            (
-                XCB_COPY_FROM_PARENT,
-                frame,
-                BORDER_SIZE,
-                0,
-                width,
-                BORDER_SIZE,
-                0,
-                XCB_WINDOW_CLASS_INPUT_OUTPUT,
-                screen->root_visual,
-                0,
-                nullptr
-            );
+            border.top.create_default(frame, BORDER_SIZE, 0, width, BORDER_SIZE);
             border.top.set_backround_color(BLACK);
-            pointer->set(border.top, CURSOR::top_side);
+            border.top.set_pointer(CURSOR::top_side);
             border.top.grab_button({ { L_MOUSE_BUTTON, NULL } });
             border.top.map();
 
-            border.bottom.create
-            (
-                XCB_COPY_FROM_PARENT,
-                frame,
-                BORDER_SIZE,
-                height + TITLE_BAR_HEIGHT + BORDER_SIZE,
-                width,
-                BORDER_SIZE,
-                0,
-                XCB_WINDOW_CLASS_INPUT_OUTPUT,
-                screen->root_visual,
-                0,
-                nullptr
-            );
+            border.bottom.create_default(frame, BORDER_SIZE, (height + TITLE_BAR_HEIGHT + BORDER_SIZE), width, BORDER_SIZE);
             border.bottom.set_backround_color(BLACK);
-            pointer->set(border.bottom, CURSOR::bottom_side);
+            border.bottom.set_pointer(CURSOR::bottom_side);
             border.bottom.grab_button({ { L_MOUSE_BUTTON, NULL } });
             border.bottom.map();
 
-            border.top_left.create
-            (
-                XCB_COPY_FROM_PARENT,
-                frame,
-                0,
-                0,
-                BORDER_SIZE,
-                BORDER_SIZE,
-                0,
-                XCB_WINDOW_CLASS_INPUT_OUTPUT,
-                screen->root_visual,
-                0,
-                nullptr
-            );
+            border.top_left.create_default(frame, 0, 0, BORDER_SIZE, BORDER_SIZE);
             border.top_left.set_backround_color(BLACK);
-            pointer->set(border.top_left, CURSOR::top_left_corner);
+            border.top_left.set_pointer(CURSOR::top_left_corner);
             border.top_left.grab_button({ { L_MOUSE_BUTTON, NULL } });
             border.top_left.map();
 
-            border.top_right.create
-            (
-                XCB_COPY_FROM_PARENT,
-                frame,
-                width + BORDER_SIZE,
-                0,
-                BORDER_SIZE,
-                BORDER_SIZE,
-                0,
-                XCB_WINDOW_CLASS_INPUT_OUTPUT,
-                screen->root_visual,
-                0,
-                nullptr
-            );
+            border.top_right.create_default(frame, (width + BORDER_SIZE), 0, BORDER_SIZE, BORDER_SIZE);
             border.top_right.set_backround_color(BLACK);
-            pointer->set(border.top_right, CURSOR::top_right_corner);
+            border.top_right.set_pointer(CURSOR::top_right_corner);
             border.top_right.grab_button({ { L_MOUSE_BUTTON, NULL } });
             border.top_right.map();
             
-            border.bottom_left.create
-            (
-                XCB_COPY_FROM_PARENT,
-                frame,
-                0,
-                height + TITLE_BAR_HEIGHT + BORDER_SIZE,
-                BORDER_SIZE,
-                BORDER_SIZE,
-                0,
-                XCB_WINDOW_CLASS_INPUT_OUTPUT,
-                screen->root_visual,
-                0,
-                nullptr
-            );
+            border.bottom_left.create_default(frame, 0, (height + TITLE_BAR_HEIGHT + BORDER_SIZE), BORDER_SIZE, BORDER_SIZE);
             border.bottom_left.set_backround_color(BLACK);
-            pointer->set(border.bottom_left, CURSOR::bottom_left_corner);
+            border.bottom_left.set_pointer(CURSOR::bottom_left_corner);
             border.bottom_left.grab_button({ { L_MOUSE_BUTTON, NULL } });
             border.bottom_left.map();
 
-            border.bottom_right.create
-            (
-                XCB_COPY_FROM_PARENT,
-                frame,
-                width + BORDER_SIZE,
-                height + TITLE_BAR_HEIGHT + BORDER_SIZE,
-                BORDER_SIZE,
-                BORDER_SIZE,
-                0,
-                XCB_WINDOW_CLASS_INPUT_OUTPUT,
-                screen->root_visual,
-                0,
-                nullptr
-            );
+            border.bottom_right.create_default(frame, (width + BORDER_SIZE), (height + TITLE_BAR_HEIGHT + BORDER_SIZE), BORDER_SIZE, BORDER_SIZE);
             border.bottom_right.set_backround_color(BLACK);
-            pointer->set(border.bottom_right, CURSOR::bottom_right_corner);
+            border.bottom_left.set_pointer(CURSOR::bottom_right_corner);
             border.bottom_right.grab_button({ { L_MOUSE_BUTTON, NULL } });
             border.bottom_right.map();
         }
