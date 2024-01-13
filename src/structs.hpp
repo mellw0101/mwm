@@ -1,6 +1,7 @@
 #ifndef STRUCTS_HPP
 #define STRUCTS_HPP
 #include "include.hpp"
+#include <cstdint>
 #include <xcb/xproto.h>
 
 enum 
@@ -187,5 +188,22 @@ enum class CURSOR
     bottom_left_arrow,
     bottom_right_arrow
 };
+
+enum class config : uint32_t
+{
+    x = 1,
+    y = 2,
+    width = 4,
+    height = 8
+};
+
+typedef enum mwm_config_t
+{
+    MWM_CONFIG_x      = 1,
+    MWM_CONFIG_y      = 2,
+    MWM_CONFIG_width  = 4,
+    MWM_CONFIG_height = 8
+
+} mwm_config_t;
 
 #endif

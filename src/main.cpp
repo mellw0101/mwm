@@ -24,7 +24,7 @@ static xcb_ewmh_connection_t * ewmh;
 static const xcb_setup_t * setup;
 static xcb_screen_iterator_t iter;
 static xcb_screen_t * screen;
-static xcb_gcontext_t gc;
+
 static xcb_window_t start_win;
 
 class Bitmap
@@ -819,7 +819,7 @@ class window
                 void
                 x(const uint32_t & x)
                 {
-                    config_window(XCB_CONFIG_WINDOW_X, x);
+                    config_window(MWM_CONFIG_x, x);
                     update(x, _y, _width, _height);
                 }
 
@@ -833,7 +833,7 @@ class window
                 void
                 width(const uint32_t & width)
                 {
-                    config_window(XCB_CONFIG_WINDOW_WIDTH, width);
+                    config_window(MWM_CONFIG_x, width);
                     update(_x, _y, width, _height);
                 }
 
@@ -2593,21 +2593,7 @@ class mxb
                         void
                         create_dialog_win()
                         {
-                            window.create
-                            (
-                                XCB_COPY_FROM_PARENT,
-                                screen->root,
-                                0,
-                                0,
-                                size_pos.width,
-                                size_pos.height,
-                                0,
-                                XCB_WINDOW_CLASS_INPUT_OUTPUT,
-                                XCB_COPY_FROM_PARENT, 
-                                0, 
-                                nullptr
-                            );
-
+                            window.create_default(screen->root, 0, 0, size_pos.width, size_pos.height);
                             window.apply_event_mask({XCB_EVENT_MASK_FOCUS_CHANGE, XCB_EVENT_MASK_ENTER_WINDOW, XCB_EVENT_MASK_LEAVE_WINDOW, XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY, XCB_EVENT_MASK_POINTER_MOTION});
                             window.set_backround_color(DARK_GREY);
                             window.raise();
@@ -2936,42 +2922,6 @@ class mxb
         class get 
         {
             public: 
-                static xcb_connection_t * 
-                connection() 
-                {
-                    return conn;
-                }
-
-                static xcb_ewmh_connection_t * 
-                ewmh_connection() 
-                {
-                    return ewmh;
-                }
-
-                static const xcb_setup_t * 
-                _setup() 
-                {
-                    return setup;
-                }
-
-                static xcb_screen_iterator_t 
-                _iter() 
-                {
-                    return iter;
-                }
-
-                static xcb_screen_t * 
-                _screen() 
-                {
-                    return screen;
-                }
-
-                static xcb_gcontext_t 
-                _gc() 
-                {
-                    return gc;
-                }
-
                 class win 
                 {
                     public:
@@ -3316,8 +3266,6 @@ class mxb
                     return setMasks;
                 }
 
-                
-
                 class font
                 {
                     public:
@@ -3405,12 +3353,6 @@ class mxb
                 _screen() 
                 {
                     screen = iter.data;
-                }
-
-                static void 
-                _gc(xcb_gcontext_t g) 
-                {
-                    gc = g;
                 }
 
                 static void
@@ -4351,17 +4293,6 @@ class mxb
                         mxb::get::win::height(window)
                     );
                     return pixmap;
-                }
-            ;
-        };
-
-        class scale
-        {
-            public:
-                static uint16_t
-                from_8_to_16_bit(const uint8_t & n)
-                {
-                    return (n << 8) | n;
                 }
             ;
         };
