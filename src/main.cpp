@@ -4598,6 +4598,71 @@ class Window_Manager
             window = screen->root;
             width = screen->width_in_pixels;
             height = screen->height_in_pixels;
+
+            _conn(nullptr, nullptr);
+            _setup();
+            _iter();
+            _screen();
+        }
+    ;
+
+    private: // functions
+        void 
+        _conn(const char * displayname, int * screenp) 
+        {
+            conn = xcb_connect(displayname, screenp);
+            mxb::check::_conn();
+        }
+
+        void 
+        _ewmh() 
+        {
+            if (!(ewmh = static_cast<xcb_ewmh_connection_t *>(calloc(1, sizeof(xcb_ewmh_connection_t)))))
+            {
+                log_error("ewmh faild to initialize");
+                mxb::launch::program((char *) "/usr/bin/mwm-KILL");
+            }    
+            
+            xcb_intern_atom_cookie_t * cookie = xcb_ewmh_init_atoms(conn, ewmh);
+            
+            if (!(xcb_ewmh_init_atoms_replies(ewmh, cookie, 0)))
+            {
+                log_error("xcb_ewmh_init_atoms_replies:faild");
+                exit(1);
+            }
+
+            const char * str = "mwm";
+            mxb::check::err
+            (
+                conn, 
+                xcb_ewmh_set_wm_name
+                (
+                    ewmh, 
+                    screen->root, 
+                    strlen(str), 
+                    str
+                ), 
+                __func__, 
+                "xcb_ewmh_set_wm_name"
+            );
+        }
+
+        void 
+        _setup() 
+        {
+            setup = xcb_get_setup(conn);
+        }
+
+        void 
+        _iter() 
+        {
+            iter = xcb_setup_roots_iterator(setup);
+        }
+
+        void 
+        _screen() 
+        {
+            screen = iter.data;
         }
     ;
 };
@@ -9233,10 +9298,13 @@ start_screen_window()
 void
 setup_wm()
 {
-    mxb::set::_conn(nullptr, nullptr);
-    mxb::set::_setup();
-    mxb::set::_iter();
-    mxb::set::_screen();
+    wm = new Window_Manager;
+    wm->init();
+
+    // mxb::set::_conn(nullptr, nullptr);
+    // mxb::set::_setup();
+    // mxb::set::_iter();
+    // mxb::set::_screen();
     setSubstructureRedirectMask();
     configureRootWindow();
     pointer->set(screen->root, CURSOR::arrow);
@@ -9269,8 +9337,6 @@ setup_wm()
     dock->init();
 
     pointer = new class pointer;
-    wm = new Window_Manager;
-    wm->init();
 }
 
 int
