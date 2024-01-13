@@ -3407,56 +3407,56 @@ class Window_Manager
 
                     // TOP EDGE OF CLIENT
                     if (((y > top_border - prox) && (y <= top_border))
-                        && ((x > left_border + prox) && (x < right_border - prox)))
+                     && ((x > left_border + prox) && (x < right_border - prox)))
                     {
                         return edge::TOP;
                     }
 
                     // BOTTOM EDGE OF CLIENT
                     if (((y >= bottom_border) && (y < bottom_border + prox))
-                        && ((x > left_border + prox) && (x < right_border - prox)))
+                     && ((x > left_border + prox) && (x < right_border - prox)))
                     {
                         return edge::BOTTOM_edge;
                     }
 
                     // LEFT EDGE OF CLIENT
                     if (((x > left_border) - prox && (x <= left_border))
-                        && ((y > top_border + prox) && (y < bottom_border - prox)))
+                     && ((y > top_border + prox) && (y < bottom_border - prox)))
                     {
                         return edge::LEFT;
                     }
 
                     // RIGHT EDGE OF CLIENT
                     if (((x >= right_border) && (x < right_border + prox))
-                        && ((y > top_border + prox) && (y < bottom_border - prox)))
+                     && ((y > top_border + prox) && (y < bottom_border - prox)))
                     {
                         return edge::RIGHT;
                     }
 
                     // TOP LEFT CORNER OF CLIENT
                     if (((x > left_border - prox) && x < left_border + prox)
-                        && ((y > top_border - prox) && y < top_border + prox))
+                     && ((y > top_border - prox) && y < top_border + prox))
                     {
                         return edge::TOP_LEFT;
                     }
 
                     // TOP RIGHT CORNER OF CLIENT
                     if (((x > right_border - prox) && x < right_border + prox)
-                        && ((y > top_border - prox) && y < top_border + prox))
+                     && ((y > top_border - prox) && y < top_border + prox))
                     {
                         return edge::TOP_RIGHT;
                     }
 
                     // BOTTOM LEFT CORNER OF CLIENT
                     if (((x > left_border - prox) && x < left_border + prox)
-                        && ((y > bottom_border - prox) && y < bottom_border + prox))
+                     && ((y > bottom_border - prox) && y < bottom_border + prox))
                     {
                         return edge::BOTTOM_LEFT;
                     }
 
                     // BOTTOM RIGHT CORNER OF CLIENT
                     if (((x > right_border - prox) && x < right_border + prox)
-                        && ((y > bottom_border - prox) && y < bottom_border + prox))
+                     && ((y > bottom_border - prox) && y < bottom_border + prox))
                     {
                         return edge::BOTTOM_RIGHT;
                     }
@@ -3505,7 +3505,8 @@ class Window_Manager
                     {   K,          SUPER                   }
                 });
                 c->make_decorations();
-                c->win.apply_event_mask({XCB_EVENT_MASK_FOCUS_CHANGE, XCB_EVENT_MASK_ENTER_WINDOW, XCB_EVENT_MASK_LEAVE_WINDOW});
+                uint32_t mask = XCB_EVENT_MASK_FOCUS_CHANGE | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW;
+                c->win.apply_event_mask(& mask);
 
                 c->win.property("_NET_WM_NAME");
                 c->update();
@@ -7425,11 +7426,6 @@ class Event
             
             client * c = wm->client_from_window(& e->event);
             if (!c)
-            {
-                return;
-            }
-            
-            if (c == focused_client)
             {
                 return;
             }
