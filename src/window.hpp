@@ -1092,10 +1092,10 @@ class window
         Logger log;
 
         private: // animation variables 
-            std::thread XAnimationThread{};
-            std::thread YAnimationThread{};
-            std::thread WAnimationThread{};
-            std::thread HAnimationThread{};
+            // std::thread XAnimationThread{};
+            // std::thread YAnimationThread{};
+            // std::thread WAnimationThread{};
+            // std::thread HAnimationThread{};
             int currentX;
             int currentY;
             int currentWidth;
