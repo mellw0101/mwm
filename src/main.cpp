@@ -3433,6 +3433,7 @@ class Window_Manager
     public: // constructor
         Window_Manager() {}
     ;
+
     public: // variabels 
         Dialog_win::context_menu * context_menu = nullptr;
         window root;
@@ -3461,6 +3462,12 @@ class Window_Manager
                 create_new_desktop(5);
 
                 context_menu = new Dialog_win::context_menu();
+                context_menu->addEntry
+                ("konsole",
+                []() 
+                {
+                    launcher->program((char *) "/usr/bin/konsole");
+                });
             }
 
             void
@@ -7384,12 +7391,6 @@ class Event
             {
                 if (e->detail == R_MOUSE_BUTTON)
                 {
-                    wm->context_menu->addEntry
-                    ("konsole",
-                    []() 
-                    {
-                        launcher->program((char *) "/usr/bin/konsole");
-                    });
                     wm->context_menu->show();
                     return;
                 }
