@@ -865,6 +865,18 @@ class window
 
                 xcb_flush(conn);
             }
+
+            void
+            apply_event_mask(const uint32_t * mask)
+            {
+                xcb_change_window_attributes
+                (
+                    conn,
+                    _window,
+                    XCB_CW_EVENT_MASK,
+                    mask
+                );
+            }
             
             void
             grab_button(std::initializer_list<std::pair<const uint8_t, const uint16_t>> bindings)
@@ -4716,48 +4728,48 @@ class Window_Manager
         configureRootWindow()
         {
             window.set_backround_color(DARK_GREY);
-            window.apply_event_mask
-            ({
-                XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT,
-                XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY,
-                XCB_EVENT_MASK_ENTER_WINDOW,
-                XCB_EVENT_MASK_LEAVE_WINDOW,
-                XCB_EVENT_MASK_STRUCTURE_NOTIFY,
-                XCB_EVENT_MASK_BUTTON_PRESS,
-                XCB_EVENT_MASK_BUTTON_RELEASE,
-                XCB_EVENT_MASK_KEY_PRESS,
-                XCB_EVENT_MASK_KEY_RELEASE,
-                XCB_EVENT_MASK_FOCUS_CHANGE,
+            uint32_t mask = 
+                XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT |
+                XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY |
+                XCB_EVENT_MASK_ENTER_WINDOW |
+                XCB_EVENT_MASK_LEAVE_WINDOW |
+                XCB_EVENT_MASK_STRUCTURE_NOTIFY |
+                XCB_EVENT_MASK_BUTTON_PRESS |
+                XCB_EVENT_MASK_BUTTON_RELEASE |
+                XCB_EVENT_MASK_KEY_PRESS |
+                XCB_EVENT_MASK_KEY_RELEASE |
+                XCB_EVENT_MASK_FOCUS_CHANGE |
                 XCB_EVENT_MASK_POINTER_MOTION
-            });
-            window.clear();
-            window.grab_keys
-            ({
-                {   T,          ALT | CTRL              },
-                {   Q,          ALT | SHIFT             },
-                {   F11,        NULL                    },
-                {   N_1,        ALT                     },
-                {   N_2,        ALT                     },
-                {   N_3,        ALT                     },
-                {   N_4,        ALT                     },
-                {   N_5,        ALT                     },
-                {   R_ARROW,    CTRL | SUPER            },
-                {   L_ARROW,    CTRL | SUPER            },
-                {   R_ARROW,    CTRL | SUPER | SHIFT    },
-                {   L_ARROW,    CTRL | SUPER | SHIFT    },
-                {   R_ARROW,    SUPER                   },
-                {   L_ARROW,    SUPER                   },
-                {   U_ARROW,    SUPER                   },
-                {   D_ARROW,    SUPER                   },
-                {   TAB,        ALT                     },
-                {   K,          SUPER                   }
-            });
+            ; 
+            window.apply_event_mask(& mask);
+            // window.clear();
+            // window.grab_keys
+            // ({
+            //     {   T,          ALT | CTRL              },
+            //     {   Q,          ALT | SHIFT             },
+            //     {   F11,        NULL                    },
+            //     {   N_1,        ALT                     },
+            //     {   N_2,        ALT                     },
+            //     {   N_3,        ALT                     },
+            //     {   N_4,        ALT                     },
+            //     {   N_5,        ALT                     },
+            //     {   R_ARROW,    CTRL | SUPER            },
+            //     {   L_ARROW,    CTRL | SUPER            },
+            //     {   R_ARROW,    CTRL | SUPER | SHIFT    },
+            //     {   L_ARROW,    CTRL | SUPER | SHIFT    },
+            //     {   R_ARROW,    SUPER                   },
+            //     {   L_ARROW,    SUPER                   },
+            //     {   U_ARROW,    SUPER                   },
+            //     {   D_ARROW,    SUPER                   },
+            //     {   TAB,        ALT                     },
+            //     {   K,          SUPER                   }
+            // });
 
-            window.grab_button
-            ({
-                { L_MOUSE_BUTTON, NULL},
-                { R_MOUSE_BUTTON, NULL},
-            });
+            // window.grab_button
+            // ({
+            //     { L_MOUSE_BUTTON, NULL},
+            //     { R_MOUSE_BUTTON, NULL},
+            // });
         }
     ;
 };
