@@ -608,6 +608,57 @@ class window
                 xcb_ewmh_get_active_window_reply(ewmh, xcb_ewmh_get_active_window(ewmh, 0), &active_window, NULL);
                 return _window == active_window;
             }
+            
+            uint32_t
+            check_event_mask_sum() 
+            {
+                uint32_t mask = 0;
+
+                // Get the window attributes
+                xcb_get_window_attributes_cookie_t attr_cookie = xcb_get_window_attributes(conn, _window);
+                xcb_get_window_attributes_reply_t * attr_reply = xcb_get_window_attributes_reply(conn, attr_cookie, NULL);
+
+                // Check if the reply is valid
+                if (attr_reply) 
+                {
+                    mask = attr_reply->all_event_masks;
+                    free(attr_reply);
+                }
+                else 
+                {
+                    log_error("Unable to get window attributes.");
+                }
+                return mask;
+            }
+
+            std::vector<xcb_event_mask_t>
+            check_event_mask_codes()
+            {
+                uint32_t maskSum = check_event_mask_sum();
+                std::vector<xcb_event_mask_t> setMasks;
+                for (int mask = XCB_EVENT_MASK_KEY_PRESS; mask <= XCB_EVENT_MASK_OWNER_GRAB_BUTTON; mask <<= 1) 
+                {
+                    if (maskSum & mask) 
+                    {
+                        setMasks.push_back(static_cast<xcb_event_mask_t>(mask));
+                    }
+                }
+                return setMasks;
+            }
+
+            bool
+            check_if_mask_is_active(const uint32_t & event_mask)
+            {
+                std::vector<xcb_event_mask_t> masks = check_event_mask_codes();
+                for (const auto & ev_mask : masks)
+                {
+                    if (ev_mask == event_mask)
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
         ;
 
         public: // set methods 
@@ -652,6 +703,129 @@ class window
                     0
                 );
                 xcb_flush(conn);
+            }
+        ;
+
+        public: // get methods 
+            char *
+            property(const char * atom_name) 
+            {
+                xcb_get_property_reply_t *reply;
+                unsigned int reply_len;
+                char * propertyValue;
+
+                reply = xcb_get_property_reply
+                (
+                    conn,
+                    xcb_get_property
+                    (
+                        conn,
+                        false,
+                        _window,
+                        atom
+                        (
+                            atom_name
+                        ),
+                        XCB_GET_PROPERTY_TYPE_ANY,
+                        0,
+                        60
+                    ),
+                    NULL
+                );
+
+                if (!reply || xcb_get_property_value_length(reply) == 0) 
+                {
+                    if (reply != nullptr) 
+                    {
+                        log_error("reply length for property(" + std::string(atom_name) + ") = 0");
+                        free(reply);
+                        return (char *) "";
+                    }
+
+                    log_error("reply == nullptr");
+                    return (char *) "";
+                }
+
+                reply_len = xcb_get_property_value_length(reply);
+                propertyValue = static_cast<char *>(malloc(sizeof(char) * (reply_len + 1)));
+                memcpy(propertyValue, xcb_get_property_value(reply), reply_len);
+                propertyValue[reply_len] = '\0';
+
+                if (reply) 
+                {
+                    free(reply);
+                }
+
+                log_info("property(" + std::string(atom_name) + ") = " + std::string(propertyValue));
+                return propertyValue;
+            }
+
+            uint32_t 
+            root_window() 
+            {
+                xcb_query_tree_cookie_t cookie;
+                xcb_query_tree_reply_t *reply;
+
+                cookie = xcb_query_tree(conn, _window);
+                reply = xcb_query_tree_reply(conn, cookie, NULL);
+
+                if (!reply) 
+                {
+                    log_error("Unable to query the window tree.");
+                    return (uint32_t) 0; // Invalid window ID
+                }
+
+                uint32_t root_window = reply->root;
+                free(reply);
+                return root_window;
+            }
+
+            uint32_t
+            parent() 
+            {
+                xcb_query_tree_cookie_t cookie;
+                xcb_query_tree_reply_t *reply;
+
+                cookie = xcb_query_tree(conn, _window);
+                reply = xcb_query_tree_reply(conn, cookie, NULL);
+
+                if (!reply) 
+                {
+                    log_error("Unable to query the window tree.");
+                    return (uint32_t) 0; // Invalid window ID
+                }
+
+                uint32_t parent_window = reply->parent;
+                free(reply);
+                return parent_window;
+            }
+
+            uint32_t *
+            children(uint32_t * child_count) 
+            {
+                * child_count = 0;
+                xcb_query_tree_cookie_t cookie = xcb_query_tree(conn, _window);
+                xcb_query_tree_reply_t *reply = xcb_query_tree_reply(conn, cookie, NULL);
+
+                if (!reply) 
+                {
+                    log_error("Unable to query the window tree.");
+                    return nullptr;
+                }
+
+                * child_count = xcb_query_tree_children_length(reply);
+                uint32_t * children = static_cast<uint32_t *>(malloc(* child_count * sizeof(xcb_window_t)));
+
+                if (!children) 
+                {
+                    log_error("Unable to allocate memory for children.");
+                    free(reply);
+                    return nullptr;
+                }
+
+                memcpy(children, xcb_query_tree_children(reply), * child_count * sizeof(uint32_t));
+                free(reply);
+                return children;
             }
         ;
 
@@ -1371,6 +1545,27 @@ class window
                 xcb_atom_t atom = reply->atom;
                 free(reply);
                 return atom;
+            }
+
+            std::string 
+            AtomName(xcb_atom_t atom) 
+            {
+                xcb_get_atom_name_cookie_t cookie = xcb_get_atom_name(conn, atom);
+                xcb_get_atom_name_reply_t* reply = xcb_get_atom_name_reply(conn, cookie, nullptr);
+
+                if (!reply) 
+                {
+                    log_error("reply is nullptr.");
+                    return "";
+                }
+
+                int name_len = xcb_get_atom_name_name_length(reply);
+                char* name = xcb_get_atom_name_name(reply);
+
+                std::string atomName(name, name + name_len);
+
+                free(reply);
+                return atomName;
             }
         ;
 
@@ -2925,129 +3120,6 @@ class mxb
                 class win 
                 {
                     public:
-                        static xcb_window_t 
-                        root(xcb_window_t window) 
-                        {
-                            xcb_query_tree_cookie_t cookie;
-                            xcb_query_tree_reply_t *reply;
-
-                            cookie = xcb_query_tree(conn, window);
-                            reply = xcb_query_tree_reply(conn, cookie, NULL);
-
-                            if (!reply) 
-                            {
-                                log.log(ERROR, __func__, "Error: Unable to query the window tree.");
-                                return (xcb_window_t) 0; // Invalid window ID
-                            }
-
-                            xcb_window_t root_window = reply->root;
-
-                            free(reply);
-                            return root_window;
-                        }
-
-                        static xcb_window_t
-                        parent(xcb_window_t window) 
-                        {
-                            xcb_query_tree_cookie_t cookie;
-                            xcb_query_tree_reply_t *reply;
-
-                            cookie = xcb_query_tree(conn, window);
-                            reply = xcb_query_tree_reply(conn, cookie, NULL);
-
-                            if (!reply) 
-                            {
-                                log.log(ERROR, __func__, "Error: Unable to query the window tree.");
-                                return (xcb_window_t) 0; // Invalid window ID
-                            }
-
-                            xcb_window_t parent_window = reply->parent;
-
-                            free(reply);
-                            return parent_window;
-                        }
-
-                        static xcb_window_t *
-                        children(xcb_connection_t *conn, xcb_window_t window, uint32_t *child_count) 
-                        {
-                            *child_count = 0;
-                            xcb_query_tree_cookie_t cookie = xcb_query_tree(conn, window);
-                            xcb_query_tree_reply_t *reply = xcb_query_tree_reply(conn, cookie, NULL);
-
-                            if (!reply) 
-                            {
-                                log.log(ERROR, __func__, "Error: Unable to query the window tree.");
-                                return NULL;
-                            }
-
-                            *child_count = xcb_query_tree_children_length(reply);
-                            xcb_window_t *children = static_cast<xcb_window_t *>(malloc(*child_count * sizeof(xcb_window_t)));
-
-                            if (!children) 
-                            {
-                                log.log(ERROR, __func__, "Error: Unable to allocate memory for children.");
-                                free(reply);
-                                return NULL;
-                            }
-
-                            memcpy(children, xcb_query_tree_children(reply), *child_count * sizeof(xcb_window_t));
-                            
-                            free(reply);
-                            return children;
-                        }
-
-                        static char * 
-                        property(xcb_window_t window, const char * atom_name) 
-                        {
-                            xcb_get_property_reply_t *reply;
-                            unsigned int reply_len;
-                            char * propertyValue;
-
-                            reply = xcb_get_property_reply
-                            (
-                                conn,
-                                xcb_get_property
-                                (
-                                    conn,
-                                    false,
-                                    window,
-                                    atom
-                                    (
-                                        atom_name
-                                    ),
-                                    XCB_GET_PROPERTY_TYPE_ANY,
-                                    0,
-                                    60
-                                ),
-                                NULL
-                            );
-
-                            if (!reply || xcb_get_property_value_length(reply) == 0) 
-                            {
-                                if (reply != nullptr) 
-                                {
-                                    log_error("reply length for property(" + std::string(atom_name) + ") = 0");
-                                    free(reply);
-                                    return (char *) "";
-                                }
-
-                                log_error("reply == nullptr");
-                                return (char *) "";
-                            }
-
-                            reply_len = xcb_get_property_value_length(reply);
-                            propertyValue = static_cast<char *>(malloc(sizeof(char) * (reply_len + 1)));
-                            memcpy(propertyValue, xcb_get_property_value(reply), reply_len);
-                            propertyValue[reply_len] = '\0';
-
-                            if (reply) 
-                            {
-                                free(reply);
-                            }
-
-                            log_info("property(" + std::string(atom_name) + ") = " + std::string(propertyValue));
-                            return propertyValue;
-                        }
 
                         static void
                         size_pos(xcb_window_t window, uint16_t & x, uint16_t & y, uint16_t & width, uint16_t & height) 
@@ -3182,89 +3254,6 @@ class mxb
                         }
                     ;
                 };
-
-                static xcb_atom_t
-                atom(const char * atom_name) 
-                {
-                    xcb_intern_atom_cookie_t cookie = xcb_intern_atom
-                    (
-                        conn, 
-                        0, 
-                        strlen(atom_name), 
-                        atom_name
-                    );
-                    
-                    xcb_intern_atom_reply_t * reply = xcb_intern_atom_reply(conn, cookie, NULL);
-                    
-                    if (!reply) 
-                    {
-                        return XCB_ATOM_NONE;
-                    } 
-
-                    xcb_atom_t atom = reply->atom;
-                    free(reply);
-                    return atom;
-                }
-
-                static std::string 
-                AtomName(xcb_atom_t atom) 
-                {
-                    xcb_get_atom_name_cookie_t cookie = xcb_get_atom_name(conn, atom);
-                    xcb_get_atom_name_reply_t* reply = xcb_get_atom_name_reply(conn, cookie, nullptr);
-
-                    if (!reply) 
-                    {
-                        log_error("reply is nullptr.");
-                        return "";
-                    }
-
-                    int name_len = xcb_get_atom_name_name_length(reply);
-                    char* name = xcb_get_atom_name_name(reply);
-
-                    std::string atomName(name, name + name_len);
-
-                    free(reply);
-                    return atomName;
-                }
-
-                static uint32_t
-                event_mask_sum(xcb_window_t window) 
-                {
-                    uint32_t mask = 0;
-
-                    // Get the window attributes
-                    xcb_get_window_attributes_cookie_t attr_cookie = xcb_get_window_attributes(conn, window);
-                    xcb_get_window_attributes_reply_t * attr_reply = xcb_get_window_attributes_reply(conn, attr_cookie, NULL);
-
-                    // Check if the reply is valid
-                    if (attr_reply) 
-                    {
-                        mask = attr_reply->all_event_masks;
-                        free(attr_reply);
-                    }
-                    else 
-                    {
-                        log_error("Unable to get window attributes.");
-                    }
-                    return mask;
-                }
-
-                static std::vector<xcb_event_mask_t>
-                event_mask(uint32_t maskSum)
-                {
-                    std::vector<xcb_event_mask_t> setMasks;
-                    
-                    // Iterate over all enum values
-                    for (int mask = XCB_EVENT_MASK_KEY_PRESS; mask <= XCB_EVENT_MASK_OWNER_GRAB_BUTTON; mask <<= 1) 
-                    {
-                        if (maskSum & mask) 
-                        {
-                            setMasks.push_back(static_cast<xcb_event_mask_t>(mask));
-                        }
-                    }
-
-                    return setMasks;
-                }
 
                 class font
                 {
@@ -4546,190 +4535,6 @@ class mxb
                         mxb::get::win::width(window),
                         mxb::get::win::height(window)
                     );
-                }
-            ;
-        };
-
-        class _pointer
-        {
-            public:
-                class set
-                {
-                    public:
-                        set(xcb_window_t window, CURSOR cursor_type) 
-                        {
-                            xcb_cursor_context_t * ctx;
-
-                            if (xcb_cursor_context_new(conn, screen, &ctx) < 0) 
-                            {
-                                log_error("Unable to create cursor context.");
-                                return;
-                            }
-
-                            xcb_cursor_t cursor = xcb_cursor_load_cursor(ctx, pointer_from_enum(cursor_type));
-                            if (!cursor) 
-                            {
-                                log_error("Unable to load cursor.");
-                                return;
-                            }
-
-                            xcb_change_window_attributes
-                            (
-                                conn, 
-                                window, 
-                                XCB_CW_CURSOR, 
-                                (uint32_t[1])
-                                {
-                                    cursor 
-                                }
-                            );
-                            xcb_flush(conn);
-
-                            xcb_cursor_context_free(ctx);
-                            xcb_free_cursor(conn, cursor);
-                        }
-
-                    private:
-                        const char *
-                        pointer_from_enum(CURSOR CURSOR)
-                        {
-                            switch (CURSOR) 
-                            {
-                                case CURSOR::arrow: return "arrow";
-                                case CURSOR::hand1: return "hand1";
-                                case CURSOR::hand2: return "hand2";
-                                case CURSOR::watch: return "watch";
-                                case CURSOR::xterm: return "xterm";
-                                case CURSOR::cross: return "cross";
-                                case CURSOR::left_ptr: return "left_ptr";
-                                case CURSOR::right_ptr: return "right_ptr";
-                                case CURSOR::center_ptr: return "center_ptr";
-                                case CURSOR::sb_v_double_arrow: return "sb_v_double_arrow";
-                                case CURSOR::sb_h_double_arrow: return "sb_h_double_arrow";
-                                case CURSOR::fleur: return "fleur";
-                                case CURSOR::question_arrow: return "question_arrow";
-                                case CURSOR::pirate: return "pirate";
-                                case CURSOR::coffee_mug: return "coffee_mug";
-                                case CURSOR::umbrella: return "umbrella";
-                                case CURSOR::circle: return "circle";
-                                case CURSOR::xsb_left_arrow: return "xsb_left_arrow";
-                                case CURSOR::xsb_right_arrow: return "xsb_right_arrow";
-                                case CURSOR::xsb_up_arrow: return "xsb_up_arrow";
-                                case CURSOR::xsb_down_arrow: return "xsb_down_arrow";
-                                case CURSOR::top_left_corner: return "top_left_corner";
-                                case CURSOR::top_right_corner: return "top_right_corner";
-                                case CURSOR::bottom_left_corner: return "bottom_left_corner";
-                                case CURSOR::bottom_right_corner: return "bottom_right_corner";
-                                case CURSOR::sb_left_arrow: return "sb_left_arrow";
-                                case CURSOR::sb_right_arrow: return "sb_right_arrow";
-                                case CURSOR::sb_up_arrow: return "sb_up_arrow";
-                                case CURSOR::sb_down_arrow: return "sb_down_arrow";
-                                case CURSOR::top_side: return "top_side";
-                                case CURSOR::bottom_side: return "bottom_side";
-                                case CURSOR::left_side: return "left_side";
-                                case CURSOR::right_side: return "right_side";
-                                case CURSOR::top_tee: return "top_tee";
-                                case CURSOR::bottom_tee: return "bottom_tee";
-                                case CURSOR::left_tee: return "left_tee";
-                                case CURSOR::right_tee: return "right_tee";
-                                case CURSOR::top_left_arrow: return "top_left_arrow";
-                                case CURSOR::top_right_arrow: return "top_right_arrow";
-                                case CURSOR::bottom_left_arrow: return "bottom_left_arrow";
-                                case CURSOR::bottom_right_arrow: return "bottom_right_arrow";
-                                default: return "left_ptr";
-                            }
-                        }
-                    ;
-                };
-
-                class get
-                {
-                    public:
-                        static uint32_t
-                        x()
-                        {
-                            xcb_query_pointer_cookie_t cookie = xcb_query_pointer(conn, screen->root);
-                            xcb_query_pointer_reply_t * reply = xcb_query_pointer_reply(conn, cookie, nullptr);
-                            if (!reply) 
-                            {
-                                log_error("reply is nullptr.");
-                                return 0;                            
-                            } 
-
-                            uint32_t x;
-                            x = reply->root_x;
-                            free(reply);
-                            return x;
-                        }
-                        
-                        static uint32_t
-                        y()
-                        {
-                            xcb_query_pointer_cookie_t cookie = xcb_query_pointer(conn, screen->root);
-                            xcb_query_pointer_reply_t * reply = xcb_query_pointer_reply(conn, cookie, nullptr);
-                            if (!reply) 
-                            {
-                                log_error("reply is nullptr.");
-                                return 0;                            
-                            } 
-
-                            uint32_t y;
-                            y = reply->root_y;
-                            free(reply);
-                            return y;
-                        }
-                    ;
-                };
-
-                static void 
-                teleport(const int16_t & x, const int16_t & y) 
-                {
-                    xcb_warp_pointer
-                    (
-                        conn, 
-                        XCB_NONE, 
-                        screen->root, 
-                        0, 
-                        0, 
-                        0, 
-                        0, 
-                        x, 
-                        y
-                    );
-                    xcb_flush(conn);
-                }
-
-                static void
-                grab(const xcb_window_t & window)
-                {
-                    xcb_grab_pointer_cookie_t cookie = xcb_grab_pointer
-                    (
-                        conn,
-                        false,
-                        window,
-                        XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_POINTER_MOTION,
-                        XCB_GRAB_MODE_ASYNC,
-                        XCB_GRAB_MODE_ASYNC,
-                        XCB_NONE,
-                        XCB_NONE,
-                        XCB_CURRENT_TIME
-                    );
-
-                    xcb_grab_pointer_reply_t * reply = xcb_grab_pointer_reply(conn, cookie, nullptr);
-                    if (!reply)
-                    {
-                        log_error("reply is nullptr.");
-                        free(reply);
-                        return;
-                    }
-                    if (reply->status != XCB_GRAB_STATUS_SUCCESS) 
-                    {
-                        log_error("Could not grab pointer");
-                        free(reply);
-                        return;
-                    }
-
-                    free(reply);
                 }
             ;
         };
@@ -8020,7 +7825,7 @@ class WinManager
             c->make_decorations();
             c->win.apply_event_mask({XCB_EVENT_MASK_FOCUS_CHANGE, XCB_EVENT_MASK_ENTER_WINDOW, XCB_EVENT_MASK_LEAVE_WINDOW});
 
-            mxb::get::win::property(c->win, "_NET_WM_NAME");
+            c->win.property("_NET_WM_NAME");
             mxb::Client::update(c);
             focus::client(c);
         }
@@ -8073,7 +7878,7 @@ class WinManager
             }
 
             int i = 0;
-            char * name = mxb::get::win::property(c->win, "_NET_WM_NAME");
+            char * name = c->win.property("_NET_WM_NAME");
             while(name[i] != '\0' && i < 255)
             {
                 c->name[i] = name[i];
@@ -9462,7 +9267,7 @@ setup_wm()
     mxb::set::_screen();
     setSubstructureRedirectMask();
     configureRootWindow();
-    mxb::_pointer::set(screen->root, CURSOR::arrow);
+    pointer->set(screen->root, CURSOR::arrow);
 
     mxb::set::_ewmh();
 
