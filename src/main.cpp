@@ -7384,14 +7384,13 @@ class Event
             {
                 if (e->detail == R_MOUSE_BUTTON)
                 {
-                    Dialog_win::context_menu main_context_menu;
-                    main_context_menu.addEntry
+                    wm->context_menu->addEntry
                     ("konsole",
                     []() 
                     {
                         launcher->program((char *) "/usr/bin/konsole");
                     });
-                    main_context_menu.show();
+                    wm->context_menu->show();
                     return;
                 }
             }
