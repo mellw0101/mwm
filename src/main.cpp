@@ -488,6 +488,20 @@ class window
                 xcb_flush(conn);
             }
 
+            void
+            reparent(const uint32_t & new_parent)
+            {
+                xcb_reparent_window
+                (
+                    conn, 
+                    _window, 
+                    new_parent, 
+                    BORDER_SIZE, 
+                    TITLE_BAR_HEIGHT + BORDER_SIZE
+                );
+                xcb_flush(conn);
+            }
+
             void 
             kill() 
             {
@@ -1221,126 +1235,42 @@ class client
         void
         make_titlebar()
         {
-            titlebar.create
-            (
-                XCB_COPY_FROM_PARENT, 
-                frame, 
-                BORDER_SIZE, 
-                BORDER_SIZE, 
-                width, 
-                TITLE_BAR_HEIGHT, 
-                0, 
-                XCB_WINDOW_CLASS_INPUT_OUTPUT, 
-                screen->root_visual, 
-                0, 
-                nullptr
-            );
+            titlebar.create_default(frame, BORDER_SIZE, BORDER_SIZE, width, TITLE_BAR_HEIGHT);
             titlebar.set_backround_color(BLACK);
-            titlebar.grab_button
-            (
-                {
-                    {   L_MOUSE_BUTTON,     NULL }
-                }
-            );
+            titlebar.grab_button({ { L_MOUSE_BUTTON, NULL } });
             titlebar.map();
         }
 
         void
         make_close_button()
         {
-            close_button.create
-            (
-                XCB_COPY_FROM_PARENT,
-                frame,
-                (width - BUTTON_SIZE) + BORDER_SIZE,
-                BORDER_SIZE,
-                BUTTON_SIZE,
-                BUTTON_SIZE,
-                0,
-                XCB_WINDOW_CLASS_INPUT_OUTPUT,
-                screen->root_visual,
-                0,
-                nullptr
-            );
-
+            close_button.create_default(frame, (width - BUTTON_SIZE + BORDER_SIZE), BORDER_SIZE, BUTTON_SIZE, BUTTON_SIZE);
             close_button.apply_event_mask({XCB_EVENT_MASK_ENTER_WINDOW, XCB_EVENT_MASK_LEAVE_WINDOW});
             close_button.set_backround_color(BLUE);
-            
-            close_button.grab_button
-            (
-                {
-                    {   L_MOUSE_BUTTON,     NULL }
-                }
-            );
-
+            close_button.grab_button({ { L_MOUSE_BUTTON, NULL } });
             close_button.map();
-
             make_close_button_png(close_button);
         }
 
         void
         make_max_button()
         {
-            max_button.create
-            (
-                XCB_COPY_FROM_PARENT,
-                frame,
-                (width - (BUTTON_SIZE * 2)) + BORDER_SIZE,
-                BORDER_SIZE,
-                BUTTON_SIZE,
-                BUTTON_SIZE,
-                0,
-                XCB_WINDOW_CLASS_INPUT_OUTPUT,
-                screen->root_visual,
-                0,
-                nullptr
-            );
-
+            max_button.create_default(frame, (width - (BUTTON_SIZE * 2) + BORDER_SIZE), BORDER_SIZE, BUTTON_SIZE, BUTTON_SIZE);
             max_button.set_backround_color(RED);
             max_button.apply_event_mask({XCB_EVENT_MASK_ENTER_WINDOW, XCB_EVENT_MASK_LEAVE_WINDOW});
-
-            max_button.grab_button
-            (
-                {
-                    {   L_MOUSE_BUTTON,     NULL }
-                }
-            );
-
+            max_button.grab_button({ { L_MOUSE_BUTTON, NULL } });
             max_button.map();
-
             make_max_button_png(max_button);
         }
 
         void
         make_min_button()
         {
-            min_button.create
-            (
-                XCB_COPY_FROM_PARENT,
-                frame,
-                (width - (BUTTON_SIZE * 3)) + BORDER_SIZE,
-                BORDER_SIZE,
-                BUTTON_SIZE,
-                BUTTON_SIZE,
-                0,
-                XCB_WINDOW_CLASS_INPUT_OUTPUT,
-                screen->root_visual,
-                0,
-                nullptr
-            );
-
+            min_button.create_default(frame, (width - (BUTTON_SIZE * 3) + BORDER_SIZE), BORDER_SIZE, BUTTON_SIZE, BUTTON_SIZE);
             min_button.set_backround_color(GREEN);
             min_button.apply_event_mask({XCB_EVENT_MASK_ENTER_WINDOW, XCB_EVENT_MASK_LEAVE_WINDOW});
-
-            min_button.grab_button
-            ( 
-                {
-                    {   L_MOUSE_BUTTON,     NULL }
-                }
-            );
-
+            min_button.grab_button({ { L_MOUSE_BUTTON, NULL } });
             min_button.map();
-
             make_min_button_png(min_button);
         }
 
