@@ -4756,7 +4756,7 @@ class Window_Manager
             window.grab_button
             ({
                 { L_MOUSE_BUTTON, NULL},
-                { R_MOUSE_BUTTON, NULL}
+                { R_MOUSE_BUTTON, NULL},
             });
         }
     ;
