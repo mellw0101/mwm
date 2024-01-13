@@ -50,117 +50,69 @@ class rgb_code
             switch (rgb_code) 
             {
                 case COLOR::WHITE:
-                {
-                    r = 255;
-                    g = 255;
-                    b = 255;
+                    r = 255; g = 255; b = 255;
                     break;
-                }
+                ;
                 case COLOR::BLACK:
-                {
-                    r = 0;
-                    g = 0;
-                    b = 0;
+                    r = 0; g = 0; b = 0;
                     break;
-                }
+                ;
                 case COLOR::RED:
-                {
-                    r = 255;
-                    g = 0;
-                    b = 0;
+                    r = 255; g = 0; b = 0;
                     break;
-                }
+                ;
                 case COLOR::GREEN:
-                {
-                    r = 0;
-                    g = 255;
-                    b = 0;
+                    r = 0; g = 255; b = 0;
                     break;
-                }
+                ;
                 case COLOR::BLUE:
-                {
-                    r = 0;
-                    g = 0;
-                    b = 255;
+                    r = 0; g = 0; b = 255;
                     break;
-                }
+                ;
                 case COLOR::YELLOW:
-                {
-                    r = 255;
-                    g = 255;
-                    b = 0;
+                    r = 255; g = 255; b = 0;
                     break;
-                }
+                ;
                 case COLOR::CYAN:
-                {
-                    r = 0;
-                    g = 255;
-                    b = 255;
+                    r = 0; g = 255; b = 255;
                     break;
-                }
+                ;
                 case COLOR::MAGENTA:
-                {
-                    r = 255;
-                    g = 0;
-                    b = 255;
+                    r = 255; g = 0; b = 255;
                     break;
-                }
+                ;
                 case COLOR::GREY:
-                {
-                    r = 128;
-                    g = 128;
-                    b = 128;
+                    r = 128; g = 128; b = 128;
                     break;
-                }
+                ;
                 case COLOR::LIGHT_GREY:
-                {
-                    r = 192;
-                    g = 192;
-                    b = 192;
+                    r = 192; g = 192; b = 192;
                     break;
-                }
+                ;
                 case COLOR::DARK_GREY:
-                {
-                    r = 64;
-                    g = 64;
-                    b = 64;
+                    r = 64; g = 64; b = 64;
                     break;
-                }
+                ;
                 case COLOR::ORANGE:
-                {
-                    r = 255;
-                    g = 165;
-                    b = 0;
+                    r = 255; g = 165; b = 0;
                     break;
-                }
+                ;
                 case COLOR::PURPLE:
-                {
-                    r = 128;
-                    g = 0;
-                    b = 128;
+                    r = 128; g = 0; b = 128;
                     break;
-                }
+                ;
                 case COLOR::BROWN:
-                {
-                    r = 165;
-                    g = 42;
-                    b = 42;
+                    r = 165; g = 42; b = 42;
                     break;
-                }
+                ;
                 case COLOR::PINK:
-                {
-                    r = 255;
-                    g = 192;
-                    b = 203;
+                    r = 255; g = 192; b = 203;
                     break;
-                }
+                ;
                 default:
-                {
-                    r = 0;
-                    g = 0;
-                    b = 0;
+                    r = 0; g = 0; b = 0; 
                     break;
-                }
+                ;
             }
 
             color.r = r;
@@ -565,20 +517,6 @@ class window
         ;
 
         public: // configuration methods 
-            void
-            apply_event_mask(const uint32_t * mask)
-            {
-                xcb_change_window_attributes
-                (
-                    conn,
-                    _window,
-                    XCB_CW_EVENT_MASK,
-                    mask
-                );
-
-                xcb_flush(conn);
-            }
-
             void 
             apply_event_mask(const std::vector<uint32_t> & values) 
             {
@@ -834,6 +772,12 @@ class window
                 {
                     change_back_pixel(get_color(color));
                 }
+              
+                void
+                set_backround_color_8_bit(const uint8_t & red_value, const uint8_t & green_value, const uint8_t & blue_value)
+                {
+                    change_back_pixel(get_color(red_value, green_value, blue_value));
+                }
 
                 void
                 set_backround_color_16_bit(const uint16_t & red_value, const uint16_t & green_value, const uint16_t & blue_value)
@@ -842,9 +786,100 @@ class window
                 }
 
                 void
-                set_backround_color_8_bit(const uint8_t & red_value, const uint8_t & green_value, const uint8_t & blue_value)
+                set_backround_png(const char * imagePath)
                 {
-                    change_back_pixel(get_color(red_value, green_value, blue_value));
+                    Imlib_Image image = imlib_load_image(imagePath);
+                    if (!image) 
+                    {
+                        log_error("Failed to load image: " + std::string(imagePath));
+                        return;
+                    }
+
+                    imlib_context_set_image(image);
+                    int originalWidth = imlib_image_get_width();
+                    int originalHeight = imlib_image_get_height();
+
+                    // Calculate new size maintaining aspect ratio
+                    double aspectRatio = (double)originalWidth / originalHeight;
+                    int newHeight = _height;
+                    int newWidth = (int)(newHeight * aspectRatio);
+
+                    if (newWidth > _width) 
+                    {
+                        newWidth = _width;
+                        newHeight = (int)(newWidth / aspectRatio);
+                    }
+
+                    Imlib_Image scaledImage = imlib_create_cropped_scaled_image
+                    (
+                        0, 
+                        0, 
+                        originalWidth, 
+                        originalHeight, 
+                        newWidth, 
+                        newHeight
+                    );
+                    imlib_free_image(); // Free original image
+                    imlib_context_set_image(scaledImage);
+
+                    // Get the scaled image data
+                    DATA32 * data = imlib_image_get_data();
+
+                    // Create an XCB image from the scaled data
+                    xcb_image_t * xcb_image = xcb_image_create_native
+                    (
+                        conn, 
+                        newWidth, 
+                        newHeight,
+                        XCB_IMAGE_FORMAT_Z_PIXMAP, 
+                        screen->root_depth, 
+                        NULL, 
+                        ~0, (uint8_t*)data
+                    );
+
+                    create_pixmap();
+                    create_graphics_exposure_gc();
+                    xcb_rectangle_t rect = {0, 0, _width, _height};
+                    xcb_poly_fill_rectangle
+                    (
+                        conn, 
+                        pixmap, 
+                        gc, 
+                        1, 
+                        &rect
+                    );
+
+                    // Calculate position to center the image
+                    int x = (_width - newWidth) / 2;
+                    int y = (_height - newHeight) / 2;
+
+                    // Put the scaled image onto the pixmap at the calculated position
+                    xcb_image_put
+                    (
+                        conn, 
+                        pixmap, 
+                        gc, 
+                        xcb_image, 
+                        x,
+                        y, 
+                        0
+                    );
+
+                    // Set the pixmap as the background of the window
+                    xcb_change_window_attributes
+                    (
+                        conn,
+                        _window,
+                        XCB_CW_BACK_PIXMAP,
+                        &pixmap
+                    );
+
+                    // Cleanup
+                    xcb_free_gc(conn, gc); // Free the GC
+                    xcb_image_destroy(xcb_image);
+                    imlib_free_image(); // Free scaled image
+
+                    clear();
                 }
             ;
         ;
@@ -863,84 +898,105 @@ class window
         uint32_t       _visual;
         uint32_t       _value_mask;
         const void     * _value_list;
+
+        xcb_gcontext_t gc;
+        xcb_pixmap_t   pixmap;
     ;
 
     private: // functions 
-        void
-        make_window()
-        {
-            log_func;
-            _window = xcb_generate_id(conn);
-            xcb_create_window
-            (
-                conn,
-                _depth,
-                _window,
-                _parent,
-                _x,
-                _y,
-                _width,
-                _height,
-                _border_width,
-                __class,
-                _visual,
-                _value_mask,
-                _value_list
-            );
-            xcb_flush(conn);
-        }
-
-        void
-        update(const uint32_t & x, const uint32_t & y, const uint32_t & width, const uint32_t & height)
-        {
-            _x = x;
-            _y = y;
-            _width = width;
-            _height = height;
-        }
-
-        void /**
-         *
-         * @brief Configures the window with the specified mask and value.
-         * 
-         * This function configures the window using the XCB library. It takes in a mask and a value
-         * as parameters and applies the configuration to the window.
-         * 
-         * @param mask The mask specifying which attributes to configure.
-         * @param value The value to set for the specified attributes.
-         * 
-         */
-        config_window(const uint16_t & mask, const uint16_t & value)
-        {
-            xcb_configure_window
-            (
-                conn,
-                _window,
-                mask,
-                (const uint32_t[1])
-                {
-                    static_cast<const uint32_t &>(value)
-                }
-            );
-        }
-
-        void 
-        config_window(uint32_t mask, const std::vector<uint32_t> & values) 
-        {
-            if (values.empty()) 
+        private: // main functions
+            void
+            make_window()
             {
-                log_error("values vector is empty");
-                return;
+                log_func;
+                _window = xcb_generate_id(conn);
+                xcb_create_window
+                (
+                    conn,
+                    _depth,
+                    _window,
+                    _parent,
+                    _x,
+                    _y,
+                    _width,
+                    _height,
+                    _border_width,
+                    __class,
+                    _visual,
+                    _value_mask,
+                    _value_list
+                );
+                xcb_flush(conn);
             }
 
-            xcb_configure_window
-            (
-                conn,
-                _window,
-                mask,
-                values.data()
-            );
-        }
+            void
+            clear()
+            {
+                xcb_clear_area
+                (
+                    conn, 
+                    0,
+                    _window,
+                    0, 
+                    0,
+                    _width,
+                    _height
+                );
+                xcb_flush(conn);
+            }
+
+            void
+            update(const uint32_t & x, const uint32_t & y, const uint32_t & width, const uint32_t & height)
+            {
+                _x = x;
+                _y = y;
+                _width = width;
+                _height = height;
+            }
+
+            void /**
+            *
+            * @brief Configures the window with the specified mask and value.
+            * 
+            * This function configures the window using the XCB library. It takes in a mask and a value
+            * as parameters and applies the configuration to the window.
+            * 
+            * @param mask The mask specifying which attributes to configure.
+            * @param value The value to set for the specified attributes.
+            * 
+            */
+            config_window(const uint16_t & mask, const uint16_t & value)
+            {
+                xcb_configure_window
+                (
+                    conn,
+                    _window,
+                    mask,
+                    (const uint32_t[1])
+                    {
+                        static_cast<const uint32_t &>(value)
+                    }
+                );
+            }
+
+            void 
+            config_window(uint32_t mask, const std::vector<uint32_t> & values) 
+            {
+                if (values.empty()) 
+                {
+                    log_error("values vector is empty");
+                    return;
+                }
+
+                xcb_configure_window
+                (
+                    conn,
+                    _window,
+                    mask,
+                    values.data()
+                );
+            }
+        ;
 
         void
         send_event(xcb_client_message_event_t ev)
@@ -970,55 +1026,102 @@ class window
             return ev;
         }
 
-        const char *
-        pointer_from_enum(CURSOR CURSOR)
-        {
-            switch (CURSOR) 
+        private: // pointer functions
+            const char *
+            pointer_from_enum(CURSOR CURSOR)
             {
-                case CURSOR::arrow: return "arrow";
-                case CURSOR::hand1: return "hand1";
-                case CURSOR::hand2: return "hand2";
-                case CURSOR::watch: return "watch";
-                case CURSOR::xterm: return "xterm";
-                case CURSOR::cross: return "cross";
-                case CURSOR::left_ptr: return "left_ptr";
-                case CURSOR::right_ptr: return "right_ptr";
-                case CURSOR::center_ptr: return "center_ptr";
-                case CURSOR::sb_v_double_arrow: return "sb_v_double_arrow";
-                case CURSOR::sb_h_double_arrow: return "sb_h_double_arrow";
-                case CURSOR::fleur: return "fleur";
-                case CURSOR::question_arrow: return "question_arrow";
-                case CURSOR::pirate: return "pirate";
-                case CURSOR::coffee_mug: return "coffee_mug";
-                case CURSOR::umbrella: return "umbrella";
-                case CURSOR::circle: return "circle";
-                case CURSOR::xsb_left_arrow: return "xsb_left_arrow";
-                case CURSOR::xsb_right_arrow: return "xsb_right_arrow";
-                case CURSOR::xsb_up_arrow: return "xsb_up_arrow";
-                case CURSOR::xsb_down_arrow: return "xsb_down_arrow";
-                case CURSOR::top_left_corner: return "top_left_corner";
-                case CURSOR::top_right_corner: return "top_right_corner";
-                case CURSOR::bottom_left_corner: return "bottom_left_corner";
-                case CURSOR::bottom_right_corner: return "bottom_right_corner";
-                case CURSOR::sb_left_arrow: return "sb_left_arrow";
-                case CURSOR::sb_right_arrow: return "sb_right_arrow";
-                case CURSOR::sb_up_arrow: return "sb_up_arrow";
-                case CURSOR::sb_down_arrow: return "sb_down_arrow";
-                case CURSOR::top_side: return "top_side";
-                case CURSOR::bottom_side: return "bottom_side";
-                case CURSOR::left_side: return "left_side";
-                case CURSOR::right_side: return "right_side";
-                case CURSOR::top_tee: return "top_tee";
-                case CURSOR::bottom_tee: return "bottom_tee";
-                case CURSOR::left_tee: return "left_tee";
-                case CURSOR::right_tee: return "right_tee";
-                case CURSOR::top_left_arrow: return "top_left_arrow";
-                case CURSOR::top_right_arrow: return "top_right_arrow";
-                case CURSOR::bottom_left_arrow: return "bottom_left_arrow";
-                case CURSOR::bottom_right_arrow: return "bottom_right_arrow";
-                default: return "left_ptr";
+                switch (CURSOR) 
+                {
+                    case CURSOR::arrow: return "arrow";
+                    case CURSOR::hand1: return "hand1";
+                    case CURSOR::hand2: return "hand2";
+                    case CURSOR::watch: return "watch";
+                    case CURSOR::xterm: return "xterm";
+                    case CURSOR::cross: return "cross";
+                    case CURSOR::left_ptr: return "left_ptr";
+                    case CURSOR::right_ptr: return "right_ptr";
+                    case CURSOR::center_ptr: return "center_ptr";
+                    case CURSOR::sb_v_double_arrow: return "sb_v_double_arrow";
+                    case CURSOR::sb_h_double_arrow: return "sb_h_double_arrow";
+                    case CURSOR::fleur: return "fleur";
+                    case CURSOR::question_arrow: return "question_arrow";
+                    case CURSOR::pirate: return "pirate";
+                    case CURSOR::coffee_mug: return "coffee_mug";
+                    case CURSOR::umbrella: return "umbrella";
+                    case CURSOR::circle: return "circle";
+                    case CURSOR::xsb_left_arrow: return "xsb_left_arrow";
+                    case CURSOR::xsb_right_arrow: return "xsb_right_arrow";
+                    case CURSOR::xsb_up_arrow: return "xsb_up_arrow";
+                    case CURSOR::xsb_down_arrow: return "xsb_down_arrow";
+                    case CURSOR::top_left_corner: return "top_left_corner";
+                    case CURSOR::top_right_corner: return "top_right_corner";
+                    case CURSOR::bottom_left_corner: return "bottom_left_corner";
+                    case CURSOR::bottom_right_corner: return "bottom_right_corner";
+                    case CURSOR::sb_left_arrow: return "sb_left_arrow";
+                    case CURSOR::sb_right_arrow: return "sb_right_arrow";
+                    case CURSOR::sb_up_arrow: return "sb_up_arrow";
+                    case CURSOR::sb_down_arrow: return "sb_down_arrow";
+                    case CURSOR::top_side: return "top_side";
+                    case CURSOR::bottom_side: return "bottom_side";
+                    case CURSOR::left_side: return "left_side";
+                    case CURSOR::right_side: return "right_side";
+                    case CURSOR::top_tee: return "top_tee";
+                    case CURSOR::bottom_tee: return "bottom_tee";
+                    case CURSOR::left_tee: return "left_tee";
+                    case CURSOR::right_tee: return "right_tee";
+                    case CURSOR::top_left_arrow: return "top_left_arrow";
+                    case CURSOR::top_right_arrow: return "top_right_arrow";
+                    case CURSOR::bottom_left_arrow: return "bottom_left_arrow";
+                    case CURSOR::bottom_right_arrow: return "bottom_right_arrow";
+                    default: return "left_ptr";
+                }
             }
-        }
+        ;
+
+        private: // create functions 
+            private: // gc functions 
+                void
+                create_graphics_exposure_gc()
+                {
+                    gc = xcb_generate_id(conn);
+                    uint32_t mask = XCB_GC_FOREGROUND | XCB_GC_BACKGROUND | XCB_GC_GRAPHICS_EXPOSURES;
+                    uint32_t values[3] =
+                    {
+                        screen->black_pixel,
+                        screen->white_pixel,
+                        0
+                    };
+
+                    xcb_create_gc
+                    (
+                        conn,
+                        gc,
+                        _window,
+                        mask,
+                        values
+                    );
+                    xcb_flush(conn);
+                }
+            ;
+
+            private: // pixmap functions 
+                void
+                create_pixmap()
+                {
+                    pixmap = xcb_generate_id(conn);
+                    xcb_create_pixmap
+                    (
+                        conn, 
+                        screen->root_depth, 
+                        pixmap, 
+                        _window, 
+                        _width, 
+                        _height
+                    );
+                    xcb_flush(conn);
+                }
+            ;
+        ;
 
         private: // get functions 
             xcb_atom_t
@@ -1046,7 +1149,7 @@ class window
             }
         ;
 
-        private: // backround functions
+        private: // backround functions 
             void
             change_back_pixel(const uint32_t & pixel)
             {
@@ -2079,16 +2182,8 @@ class mxb
                                 nullptr
                             );
 
-                            uint32_t mask = 
-                                XCB_EVENT_MASK_FOCUS_CHANGE        | 
-                                XCB_EVENT_MASK_ENTER_WINDOW        |
-                                XCB_EVENT_MASK_LEAVE_WINDOW        |
-                                XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY |
-                                XCB_EVENT_MASK_POINTER_MOTION      
-                            ;
-                            window.apply_event_mask(& mask);
+                            window.apply_event_mask({XCB_EVENT_MASK_FOCUS_CHANGE, XCB_EVENT_MASK_ENTER_WINDOW, XCB_EVENT_MASK_LEAVE_WINDOW, XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY, XCB_EVENT_MASK_POINTER_MOTION});
                             window.set_backround_color(DARK_GREY);
-                            xcb_flush(conn);
                             window.raise();
                         }
                         
