@@ -213,502 +213,6 @@ class _color
     ;
 };
 
-class window
-{
-    public: // construcers and operators 
-        window() {}
-
-        operator uint32_t() const 
-        {
-            return _window;
-        }
-
-        // Overload the assignment operator for uint32_t
-        window& operator=(uint32_t new_window) 
-        {
-            _window = new_window;
-            return *this;
-        }
-    ;
-
-    public: // public methods 
-        public: // main public methods 
-            void
-            create( 
-                const uint8_t  & depth,
-                const uint32_t & parent,
-                const int16_t  & x,
-                const int16_t  & y,
-                const uint16_t & width,
-                const uint16_t & height,
-                const uint16_t & border_width,
-                const uint16_t & _class,
-                const uint32_t & visual,
-                const uint32_t & value_mask,
-                const void     * value_list)
-            { 
-                _depth = depth;
-                _parent = parent;
-                _x = x;
-                _y = y;
-                _width = width;
-                _height = height;
-                _border_width = border_width;
-                __class = _class;
-                _visual = visual;
-                _value_mask = value_mask;
-                _value_list = value_list;
-
-                make_window();
-            }
-
-            void  
-            raise() 
-            {
-                xcb_configure_window
-                (
-                    conn,
-                    _window,
-                    XCB_CONFIG_WINDOW_STACK_MODE, 
-                    (const uint32_t[1])
-                    {
-                        XCB_STACK_MODE_ABOVE
-                    }
-                );
-                xcb_flush(conn);
-            }
-
-            void
-            map()
-            {
-                xcb_map_window(conn, _window);
-                xcb_flush(conn);
-            }
-
-            void
-            unmap()
-            {
-                xcb_unmap_window(conn, _window);
-                xcb_flush(conn);
-            }
-
-            void 
-            kill() 
-            {
-                xcb_intern_atom_cookie_t protocols_cookie = xcb_intern_atom(conn, 1, 12, "WM_PROTOCOLS");
-                xcb_intern_atom_reply_t *protocols_reply = xcb_intern_atom_reply(conn, protocols_cookie, NULL);
-
-                xcb_intern_atom_cookie_t delete_cookie = xcb_intern_atom(conn, 0, 16, "WM_DELETE_WINDOW");
-                xcb_intern_atom_reply_t *delete_reply = xcb_intern_atom_reply(conn, delete_cookie, NULL);
-
-                if (!protocols_reply)
-                {
-                    log_error("protocols reply is null");
-                    free(protocols_reply);
-                    free(delete_reply);
-                    return;
-                }
-                if (!delete_reply)
-                {
-                    log_error("delete reply is null");
-                    free(protocols_reply);
-                    free(delete_reply);
-                    return;
-                }
-
-                send_event
-                (
-                    make_client_message_event
-                    (
-                        32,
-                        protocols_reply->atom,
-                        delete_reply->atom
-                    )
-                );
-
-                free(protocols_reply);
-                free(delete_reply);
-
-                xcb_flush(conn);
-            }
-        ;
-
-        public: // configuration public methods
-            void
-            apply_event_mask(const uint32_t * mask)
-            {
-                xcb_change_window_attributes
-                (
-                    conn,
-                    _window,
-                    XCB_CW_EVENT_MASK,
-                    mask
-                );
-
-                xcb_flush(conn);
-            }
-
-            void 
-            apply_event_mask(const std::vector<uint32_t> & values) 
-            {
-                if (values.empty()) 
-                {
-                    log_error("values vector is empty");
-                    return;
-                }
-
-                xcb_change_window_attributes
-                (
-                    conn,
-                    _window,
-                    XCB_CW_EVENT_MASK,
-                    values.data()
-                );
-
-                xcb_flush(conn);
-            }
-            
-            void
-            grab_button(std::initializer_list<std::pair<const uint8_t, const uint16_t>> bindings)
-            {
-                for (const auto & binding : bindings)
-                {
-                    const uint8_t & button = binding.first;
-                    const uint16_t & modifier = binding.second;
-                    xcb_grab_button
-                    (
-                        conn, 
-                        1, 
-                        _window, 
-                        XCB_EVENT_MASK_BUTTON_PRESS, 
-                        XCB_GRAB_MODE_ASYNC, 
-                        XCB_GRAB_MODE_ASYNC, 
-                        XCB_NONE, 
-                        XCB_NONE, 
-                        button, 
-                        modifier    
-                    );
-
-                    xcb_flush(conn); 
-                }
-            }
-
-            void 
-            grab_keys(std::initializer_list<std::pair<const uint32_t, const uint16_t>> bindings) 
-            {
-                xcb_key_symbols_t * keysyms = xcb_key_symbols_alloc(conn);
-            
-                if (!keysyms) 
-                {
-                    log_error("keysyms could not get initialized");
-                    return;
-                }
-
-                for (const auto & binding : bindings) 
-                {
-                    xcb_keycode_t * keycodes = xcb_key_symbols_get_keycode(keysyms, binding.first);
-                    if (keycodes)
-                    {
-                        for (auto * kc = keycodes; * kc; kc++) 
-                        {
-                            xcb_grab_key
-                            (
-                                conn,
-                                1,
-                                _window,
-                                binding.second, 
-                                *kc,        
-                                XCB_GRAB_MODE_ASYNC, 
-                                XCB_GRAB_MODE_ASYNC  
-                            );
-                        }
-                        free(keycodes);
-                    }
-                }
-                xcb_key_symbols_free(keysyms);
-
-                xcb_flush(conn); 
-            }
-
-            public: // size_pos configuration methods 
-                public: // fetch methods
-                    uint32_t
-                    x()
-                    {
-                        return _x;
-                    }
-                    
-                    uint32_t
-                    y()
-                    {
-                        return _y;
-                    }
-
-                    uint32_t
-                    width()
-                    {
-                        return _width;
-                    }
-
-                    uint32_t
-                    height()
-                    {
-                        return _height;
-                    }
-                ;    
-                
-                void
-                x(const uint32_t & x)
-                {
-                    config_window(XCB_CONFIG_WINDOW_X, x);
-                    update(x, _y, _width, _height);
-                }
-
-                void
-                y(const uint32_t & y)
-                {
-                    config_window(XCB_CONFIG_WINDOW_Y, y);
-                    update(_x, y, _width, _height);
-                }                
-
-                void
-                width(const uint32_t & width)
-                {
-                    config_window(XCB_CONFIG_WINDOW_WIDTH, width);
-                    update(_x, _y, width, _height);
-                }
-
-                void
-                height(const uint32_t & height)
-                {
-                    config_window(XCB_CONFIG_WINDOW_HEIGHT, height);
-                    update(_x, _y, _width, height);
-                }
-
-                void
-                x_y(const uint32_t & x, const uint32_t & y)
-                {
-                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, {x, y});
-                    update(x, y, _width, _height);
-                }
-
-                void
-                width_height(const uint32_t & width, const uint32_t & height)
-                {
-                    config_window(XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, {width, height});
-                    update(_x, _y, width, height);
-                }
-
-                void
-                x_y_width_height(const uint32_t & x, const uint32_t & y, const uint32_t & width, const uint32_t & height)
-                {
-                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, {x, y, width, height});
-                    update(x, y, width, height);
-                }
-
-                void
-                x_width_height(const uint32_t & x, const uint32_t & width, const uint32_t & height)
-                {
-                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, {x, width, height});
-                    update(x, _y, width, height);
-                }
-
-                void
-                y_width_height(const uint32_t & y, const uint32_t & width, const uint32_t & height)
-                {
-                    config_window(XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, {y, width, height});
-                    update(_x, y, width, height);
-                }
-
-                void
-                x_width(const uint32_t & x, const uint32_t & width)
-                {
-                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_WIDTH, {x, width});
-                    update(x, _y, width, _height);
-                }
-
-                void
-                x_height(const uint32_t & x, const uint32_t & height)
-                {
-                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_HEIGHT, {x, height});
-                    update(x, _y, _width, height);
-                }
-                
-                void
-                y_width(const uint32_t & y, const uint32_t & width)
-                {
-                    config_window(XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH, {y, width});
-                    update(_x, y, width, _height);
-                }
-                
-                void 
-                y_height(const uint32_t & y, const uint32_t & height)
-                {
-                    config_window(XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT, {y, height});
-                    update(_x, y, _width, height);
-                }
-
-                void
-                x_y_width(const uint32_t & x, const uint32_t & y, const uint32_t & width)
-                {
-                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH, {x, y, width});
-                    update(x, y, width, _height);
-                }
-
-                void
-                x_y_height(const uint32_t & x, const uint32_t & y, const uint32_t & height)
-                {
-                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT, {x, y, height});
-                    update(x, y, _width, height);
-                }
-            ;
-
-            public: // backround methods 
-                void
-                set_backround_color(COLOR color)
-                {
-                    xcb_change_window_attributes
-                    (
-                        conn,
-                        _window,
-                        XCB_CW_BACK_PIXEL,
-                        (const uint32_t[1])
-                        {
-                            _color(color)
-                        }
-                    );
-                    xcb_flush(conn);
-                }
-            ;
-        ;
-    ;
-
-    private: // private variables 
-        uint8_t        _depth;
-        uint32_t       _window;
-        uint32_t       _parent;
-        int16_t        _x;
-        int16_t        _y;
-        uint16_t       _width;
-        uint16_t       _height;
-        uint16_t       _border_width;
-        uint16_t       __class;
-        xcb_visualid_t _visual;
-        uint32_t       _value_mask;
-        const void     * _value_list;
-    ;
-
-    private: // functions
-        void
-        make_window()
-        {
-            log_func;
-            _window = xcb_generate_id(conn);
-            xcb_create_window
-            (
-                conn,
-                _depth,
-                _window,
-                _parent,
-                _x,
-                _y,
-                _width,
-                _height,
-                _border_width,
-                __class,
-                _visual,
-                _value_mask,
-                _value_list
-            );
-            xcb_flush(conn);
-        }
-
-        void
-        update(const uint32_t & x, const uint32_t & y, const uint32_t & width, const uint32_t & height)
-        {
-            _x = x;
-            _y = y;
-            _width = width;
-            _height = height;
-        }
-
-        void /**
-         *
-         * @brief Configures the window with the specified mask and value.
-         * 
-         * This function configures the window using the XCB library. It takes in a mask and a value
-         * as parameters and applies the configuration to the window.
-         * 
-         * @param mask The mask specifying which attributes to configure.
-         * @param value The value to set for the specified attributes.
-         * 
-         */
-        config_window(const uint16_t & mask, const uint16_t & value)
-        {
-            xcb_configure_window
-            (
-                conn,
-                _window,
-                mask,
-                (const uint32_t[1])
-                {
-                    static_cast<const uint32_t &>(value)
-                }
-            );
-        }
-
-        void 
-        config_window(uint32_t mask, const std::vector<uint32_t> & values) 
-        {
-            if (values.empty()) 
-            {
-                log_error("values vector is empty");
-                return;
-            }
-
-            xcb_configure_window
-            (
-                conn,
-                _window,
-                mask,
-                values.data()
-            );
-        }
-
-        void
-        send_event(xcb_client_message_event_t ev)
-        {
-            xcb_send_event
-            (
-                conn,
-                0,
-                _window,
-                XCB_EVENT_MASK_NO_EVENT,
-                (char *) & ev
-            );
-        }
-
-        xcb_client_message_event_t
-        make_client_message_event(const uint32_t & format, const uint32_t & type, const uint32_t & data)
-        {
-            xcb_client_message_event_t ev = {0};
-            ev.response_type = XCB_CLIENT_MESSAGE;
-            ev.window = _window;
-            ev.format = format;
-            ev.sequence = 0;
-            ev.type = type;
-            ev.data.data32[0] = data;
-            ev.data.data32[1] = XCB_CURRENT_TIME;
-
-            return ev;
-        }
-    ;
-};
-
-static void make_close_button_png(window window);
-static void make_max_button_png(window window);
-static void make_min_button_png(window window);
-
 class pointer
 {
     public: // methods
@@ -886,6 +390,604 @@ class pointer
 };
 
 static pointer * pointer;
+
+class window
+{
+    public: // construcers and operators 
+        window() {}
+
+        operator uint32_t() const 
+        {
+            return _window;
+        }
+
+        // Overload the assignment operator for uint32_t
+        window& operator=(uint32_t new_window) 
+        {
+            _window = new_window;
+            return *this;
+        }
+    ;
+
+    public: // public methods 
+        public: // main public methods 
+            void
+            create( 
+                const uint8_t  & depth,
+                const uint32_t & parent,
+                const int16_t  & x,
+                const int16_t  & y,
+                const uint16_t & width,
+                const uint16_t & height,
+                const uint16_t & border_width,
+                const uint16_t & _class,
+                const uint32_t & visual,
+                const uint32_t & value_mask,
+                const void     * value_list)
+            { 
+                _depth = depth;
+                _parent = parent;
+                _x = x;
+                _y = y;
+                _width = width;
+                _height = height;
+                _border_width = border_width;
+                __class = _class;
+                _visual = visual;
+                _value_mask = value_mask;
+                _value_list = value_list;
+
+                make_window();
+            }
+
+            void
+            create_default(const uint32_t & parent, const int16_t & x, const int16_t & y, const uint16_t & width, const uint16_t & height)
+            {
+                _depth = 0L;
+                _parent = parent;
+                _x = x;
+                _y = y;
+                _width = width;
+                _height = height;
+                _border_width = 0;
+                __class = XCB_WINDOW_CLASS_INPUT_OUTPUT;
+                _visual = screen->root_visual;
+                _value_mask = 0;
+                _value_list = nullptr;
+
+                make_window();
+            }
+
+            void  
+            raise() 
+            {
+                xcb_configure_window
+                (
+                    conn,
+                    _window,
+                    XCB_CONFIG_WINDOW_STACK_MODE, 
+                    (const uint32_t[1])
+                    {
+                        XCB_STACK_MODE_ABOVE
+                    }
+                );
+                xcb_flush(conn);
+            }
+
+            void
+            map()
+            {
+                xcb_map_window(conn, _window);
+                xcb_flush(conn);
+            }
+
+            void
+            unmap()
+            {
+                xcb_unmap_window(conn, _window);
+                xcb_flush(conn);
+            }
+
+            void 
+            kill() 
+            {
+                xcb_intern_atom_cookie_t protocols_cookie = xcb_intern_atom(conn, 1, 12, "WM_PROTOCOLS");
+                xcb_intern_atom_reply_t *protocols_reply = xcb_intern_atom_reply(conn, protocols_cookie, NULL);
+
+                xcb_intern_atom_cookie_t delete_cookie = xcb_intern_atom(conn, 0, 16, "WM_DELETE_WINDOW");
+                xcb_intern_atom_reply_t *delete_reply = xcb_intern_atom_reply(conn, delete_cookie, NULL);
+
+                if (!protocols_reply)
+                {
+                    log_error("protocols reply is null");
+                    free(protocols_reply);
+                    free(delete_reply);
+                    return;
+                }
+                if (!delete_reply)
+                {
+                    log_error("delete reply is null");
+                    free(protocols_reply);
+                    free(delete_reply);
+                    return;
+                }
+
+                send_event
+                (
+                    make_client_message_event
+                    (
+                        32,
+                        protocols_reply->atom,
+                        delete_reply->atom
+                    )
+                );
+
+                free(protocols_reply);
+                free(delete_reply);
+
+                xcb_flush(conn);
+            }
+        ;
+
+        public: // configuration public methods
+            void
+            apply_event_mask(const uint32_t * mask)
+            {
+                xcb_change_window_attributes
+                (
+                    conn,
+                    _window,
+                    XCB_CW_EVENT_MASK,
+                    mask
+                );
+
+                xcb_flush(conn);
+            }
+
+            void 
+            apply_event_mask(const std::vector<uint32_t> & values) 
+            {
+                if (values.empty()) 
+                {
+                    log_error("values vector is empty");
+                    return;
+                }
+
+                xcb_change_window_attributes
+                (
+                    conn,
+                    _window,
+                    XCB_CW_EVENT_MASK,
+                    values.data()
+                );
+
+                xcb_flush(conn);
+            }
+            
+            void
+            grab_button(std::initializer_list<std::pair<const uint8_t, const uint16_t>> bindings)
+            {
+                for (const auto & binding : bindings)
+                {
+                    const uint8_t & button = binding.first;
+                    const uint16_t & modifier = binding.second;
+                    xcb_grab_button
+                    (
+                        conn, 
+                        1, 
+                        _window, 
+                        XCB_EVENT_MASK_BUTTON_PRESS, 
+                        XCB_GRAB_MODE_ASYNC, 
+                        XCB_GRAB_MODE_ASYNC, 
+                        XCB_NONE, 
+                        XCB_NONE, 
+                        button, 
+                        modifier    
+                    );
+
+                    xcb_flush(conn); 
+                }
+            }
+
+            void 
+            grab_keys(std::initializer_list<std::pair<const uint32_t, const uint16_t>> bindings) 
+            {
+                xcb_key_symbols_t * keysyms = xcb_key_symbols_alloc(conn);
+            
+                if (!keysyms) 
+                {
+                    log_error("keysyms could not get initialized");
+                    return;
+                }
+
+                for (const auto & binding : bindings) 
+                {
+                    xcb_keycode_t * keycodes = xcb_key_symbols_get_keycode(keysyms, binding.first);
+                    if (keycodes)
+                    {
+                        for (auto * kc = keycodes; * kc; kc++) 
+                        {
+                            xcb_grab_key
+                            (
+                                conn,
+                                1,
+                                _window,
+                                binding.second, 
+                                *kc,        
+                                XCB_GRAB_MODE_ASYNC, 
+                                XCB_GRAB_MODE_ASYNC  
+                            );
+                        }
+                        free(keycodes);
+                    }
+                }
+                xcb_key_symbols_free(keysyms);
+
+                xcb_flush(conn); 
+            }
+
+            void
+            set_pointer(CURSOR cursor_type) 
+            {
+                xcb_cursor_context_t * ctx;
+
+                if (xcb_cursor_context_new(conn, screen, &ctx) < 0) 
+                {
+                    log_error("Unable to create cursor context.");
+                    return;
+                }
+
+                xcb_cursor_t cursor = xcb_cursor_load_cursor(ctx, pointer_from_enum(cursor_type));
+                if (!cursor) 
+                {
+                    log_error("Unable to load cursor.");
+                    return;
+                }
+
+                xcb_change_window_attributes
+                (
+                    conn, 
+                    _window, 
+                    XCB_CW_CURSOR, 
+                    (uint32_t[1])
+                    {
+                        cursor 
+                    }
+                );
+                xcb_flush(conn);
+
+                xcb_cursor_context_free(ctx);
+                xcb_free_cursor(conn, cursor);
+            }
+
+            public: // size_pos configuration methods 
+                public: // fetch methods
+                    uint32_t
+                    x()
+                    {
+                        return _x;
+                    }
+                    
+                    uint32_t
+                    y()
+                    {
+                        return _y;
+                    }
+
+                    uint32_t
+                    width()
+                    {
+                        return _width;
+                    }
+
+                    uint32_t
+                    height()
+                    {
+                        return _height;
+                    }
+                ;    
+                
+                void
+                x(const uint32_t & x)
+                {
+                    config_window(XCB_CONFIG_WINDOW_X, x);
+                    update(x, _y, _width, _height);
+                }
+
+                void
+                y(const uint32_t & y)
+                {
+                    config_window(XCB_CONFIG_WINDOW_Y, y);
+                    update(_x, y, _width, _height);
+                }                
+
+                void
+                width(const uint32_t & width)
+                {
+                    config_window(XCB_CONFIG_WINDOW_WIDTH, width);
+                    update(_x, _y, width, _height);
+                }
+
+                void
+                height(const uint32_t & height)
+                {
+                    config_window(XCB_CONFIG_WINDOW_HEIGHT, height);
+                    update(_x, _y, _width, height);
+                }
+
+                void
+                x_y(const uint32_t & x, const uint32_t & y)
+                {
+                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, {x, y});
+                    update(x, y, _width, _height);
+                }
+
+                void
+                width_height(const uint32_t & width, const uint32_t & height)
+                {
+                    config_window(XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, {width, height});
+                    update(_x, _y, width, height);
+                }
+
+                void
+                x_y_width_height(const uint32_t & x, const uint32_t & y, const uint32_t & width, const uint32_t & height)
+                {
+                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, {x, y, width, height});
+                    update(x, y, width, height);
+                }
+
+                void
+                x_width_height(const uint32_t & x, const uint32_t & width, const uint32_t & height)
+                {
+                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, {x, width, height});
+                    update(x, _y, width, height);
+                }
+
+                void
+                y_width_height(const uint32_t & y, const uint32_t & width, const uint32_t & height)
+                {
+                    config_window(XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, {y, width, height});
+                    update(_x, y, width, height);
+                }
+
+                void
+                x_width(const uint32_t & x, const uint32_t & width)
+                {
+                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_WIDTH, {x, width});
+                    update(x, _y, width, _height);
+                }
+
+                void
+                x_height(const uint32_t & x, const uint32_t & height)
+                {
+                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_HEIGHT, {x, height});
+                    update(x, _y, _width, height);
+                }
+                
+                void
+                y_width(const uint32_t & y, const uint32_t & width)
+                {
+                    config_window(XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH, {y, width});
+                    update(_x, y, width, _height);
+                }
+                
+                void 
+                y_height(const uint32_t & y, const uint32_t & height)
+                {
+                    config_window(XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT, {y, height});
+                    update(_x, y, _width, height);
+                }
+
+                void
+                x_y_width(const uint32_t & x, const uint32_t & y, const uint32_t & width)
+                {
+                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH, {x, y, width});
+                    update(x, y, width, _height);
+                }
+
+                void
+                x_y_height(const uint32_t & x, const uint32_t & y, const uint32_t & height)
+                {
+                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT, {x, y, height});
+                    update(x, y, _width, height);
+                }
+            ;
+
+            public: // backround methods 
+                void
+                set_backround_color(COLOR color)
+                {
+                    xcb_change_window_attributes
+                    (
+                        conn,
+                        _window,
+                        XCB_CW_BACK_PIXEL,
+                        (const uint32_t[1])
+                        {
+                            _color(color)
+                        }
+                    );
+                    xcb_flush(conn);
+                }
+            ;
+        ;
+    ;
+
+    private: // private variables 
+        uint8_t        _depth;
+        uint32_t       _window;
+        uint32_t       _parent;
+        int16_t        _x;
+        int16_t        _y;
+        uint16_t       _width;
+        uint16_t       _height;
+        uint16_t       _border_width;
+        uint16_t       __class;
+        uint32_t       _visual;
+        uint32_t       _value_mask;
+        const void     * _value_list;
+    ;
+
+    private: // functions
+        void
+        make_window()
+        {
+            log_func;
+            _window = xcb_generate_id(conn);
+            xcb_create_window
+            (
+                conn,
+                _depth,
+                _window,
+                _parent,
+                _x,
+                _y,
+                _width,
+                _height,
+                _border_width,
+                __class,
+                _visual,
+                _value_mask,
+                _value_list
+            );
+            xcb_flush(conn);
+        }
+
+        void
+        update(const uint32_t & x, const uint32_t & y, const uint32_t & width, const uint32_t & height)
+        {
+            _x = x;
+            _y = y;
+            _width = width;
+            _height = height;
+        }
+
+        void /**
+         *
+         * @brief Configures the window with the specified mask and value.
+         * 
+         * This function configures the window using the XCB library. It takes in a mask and a value
+         * as parameters and applies the configuration to the window.
+         * 
+         * @param mask The mask specifying which attributes to configure.
+         * @param value The value to set for the specified attributes.
+         * 
+         */
+        config_window(const uint16_t & mask, const uint16_t & value)
+        {
+            xcb_configure_window
+            (
+                conn,
+                _window,
+                mask,
+                (const uint32_t[1])
+                {
+                    static_cast<const uint32_t &>(value)
+                }
+            );
+        }
+
+        void 
+        config_window(uint32_t mask, const std::vector<uint32_t> & values) 
+        {
+            if (values.empty()) 
+            {
+                log_error("values vector is empty");
+                return;
+            }
+
+            xcb_configure_window
+            (
+                conn,
+                _window,
+                mask,
+                values.data()
+            );
+        }
+
+        void
+        send_event(xcb_client_message_event_t ev)
+        {
+            xcb_send_event
+            (
+                conn,
+                0,
+                _window,
+                XCB_EVENT_MASK_NO_EVENT,
+                (char *) & ev
+            );
+        }
+
+        xcb_client_message_event_t
+        make_client_message_event(const uint32_t & format, const uint32_t & type, const uint32_t & data)
+        {
+            xcb_client_message_event_t ev = {0};
+            ev.response_type = XCB_CLIENT_MESSAGE;
+            ev.window = _window;
+            ev.format = format;
+            ev.sequence = 0;
+            ev.type = type;
+            ev.data.data32[0] = data;
+            ev.data.data32[1] = XCB_CURRENT_TIME;
+
+            return ev;
+        }
+
+        const char *
+        pointer_from_enum(CURSOR CURSOR)
+        {
+            switch (CURSOR) 
+            {
+                case CURSOR::arrow: return "arrow";
+                case CURSOR::hand1: return "hand1";
+                case CURSOR::hand2: return "hand2";
+                case CURSOR::watch: return "watch";
+                case CURSOR::xterm: return "xterm";
+                case CURSOR::cross: return "cross";
+                case CURSOR::left_ptr: return "left_ptr";
+                case CURSOR::right_ptr: return "right_ptr";
+                case CURSOR::center_ptr: return "center_ptr";
+                case CURSOR::sb_v_double_arrow: return "sb_v_double_arrow";
+                case CURSOR::sb_h_double_arrow: return "sb_h_double_arrow";
+                case CURSOR::fleur: return "fleur";
+                case CURSOR::question_arrow: return "question_arrow";
+                case CURSOR::pirate: return "pirate";
+                case CURSOR::coffee_mug: return "coffee_mug";
+                case CURSOR::umbrella: return "umbrella";
+                case CURSOR::circle: return "circle";
+                case CURSOR::xsb_left_arrow: return "xsb_left_arrow";
+                case CURSOR::xsb_right_arrow: return "xsb_right_arrow";
+                case CURSOR::xsb_up_arrow: return "xsb_up_arrow";
+                case CURSOR::xsb_down_arrow: return "xsb_down_arrow";
+                case CURSOR::top_left_corner: return "top_left_corner";
+                case CURSOR::top_right_corner: return "top_right_corner";
+                case CURSOR::bottom_left_corner: return "bottom_left_corner";
+                case CURSOR::bottom_right_corner: return "bottom_right_corner";
+                case CURSOR::sb_left_arrow: return "sb_left_arrow";
+                case CURSOR::sb_right_arrow: return "sb_right_arrow";
+                case CURSOR::sb_up_arrow: return "sb_up_arrow";
+                case CURSOR::sb_down_arrow: return "sb_down_arrow";
+                case CURSOR::top_side: return "top_side";
+                case CURSOR::bottom_side: return "bottom_side";
+                case CURSOR::left_side: return "left_side";
+                case CURSOR::right_side: return "right_side";
+                case CURSOR::top_tee: return "top_tee";
+                case CURSOR::bottom_tee: return "bottom_tee";
+                case CURSOR::left_tee: return "left_tee";
+                case CURSOR::right_tee: return "right_tee";
+                case CURSOR::top_left_arrow: return "top_left_arrow";
+                case CURSOR::top_right_arrow: return "top_right_arrow";
+                case CURSOR::bottom_left_arrow: return "bottom_left_arrow";
+                case CURSOR::bottom_right_arrow: return "bottom_right_arrow";
+                default: return "left_ptr";
+            }
+        }
+    ;
+};
+
+static void make_close_button_png(window window);
+static void make_max_button_png(window window);
+static void make_min_button_png(window window);
 
 class client
 {
@@ -1085,7 +1187,7 @@ class client
         }
     ;
 
-    private: // functions
+    private: // functions 
         void 
         make_frame()
         {
@@ -1245,22 +1347,23 @@ class client
         void
         make_borders()
         {
-            border.left.create
-            (
-                XCB_COPY_FROM_PARENT,
-                frame,
-                0,
-                BORDER_SIZE,
-                BORDER_SIZE,
-                height + TITLE_BAR_HEIGHT,
-                0,
-                XCB_WINDOW_CLASS_INPUT_OUTPUT,
-                screen->root_visual,
-                0,
-                nullptr
-            );
+            // border.left.create
+            // (
+            //     XCB_COPY_FROM_PARENT,
+            //     frame,
+            //     0,
+            //     BORDER_SIZE,
+            //     BORDER_SIZE,
+            //     height + TITLE_BAR_HEIGHT,
+            //     0,
+            //     XCB_WINDOW_CLASS_INPUT_OUTPUT,
+            //     screen->root_visual,
+            //     0,
+            //     nullptr
+            // );
+            border.left.create_default(frame, 0, BORDER_SIZE, BORDER_SIZE, height + TITLE_BAR_HEIGHT);
             border.left.set_backround_color(BLACK);
-            pointer->set(border.left, CURSOR::left_side);
+            border.left.set_pointer(CURSOR::left_side);
             border.left.grab_button({ { L_MOUSE_BUTTON, NULL } });
             border.left.map();
 
@@ -1295,7 +1398,7 @@ class client
                 XCB_WINDOW_CLASS_INPUT_OUTPUT,
                 screen->root_visual,
                 0,
-                NULL
+                nullptr
             );
             border.top.set_backround_color(BLACK);
             pointer->set(border.top, CURSOR::top_side);
@@ -1397,6 +1500,7 @@ class client
             border.bottom_right.grab_button({ { L_MOUSE_BUTTON, NULL } });
             border.bottom_right.map();
         }
+    ;
 };
 
 std::vector<client *> client_list; // global list of clients
