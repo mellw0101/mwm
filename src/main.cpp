@@ -254,40 +254,6 @@ class _color
 class pointer
 {
     public: // methods
-        void
-        set(xcb_window_t window, CURSOR cursor_type) 
-        {
-            xcb_cursor_context_t * ctx;
-
-            if (xcb_cursor_context_new(conn, screen, &ctx) < 0) 
-            {
-                log_error("Unable to create cursor context.");
-                return;
-            }
-
-            xcb_cursor_t cursor = xcb_cursor_load_cursor(ctx, pointer_from_enum(cursor_type));
-            if (!cursor) 
-            {
-                log_error("Unable to load cursor.");
-                return;
-            }
-
-            xcb_change_window_attributes
-            (
-                conn, 
-                window, 
-                XCB_CW_CURSOR, 
-                (uint32_t[1])
-                {
-                    cursor 
-                }
-            );
-            xcb_flush(conn);
-
-            xcb_cursor_context_free(ctx);
-            xcb_free_cursor(conn, cursor);
-        }
-
         uint32_t
         x()
         {
@@ -3097,143 +3063,6 @@ class mxb
         class get 
         {
             public: 
-                class win 
-                {
-                    public:
-                        static void
-                        size_pos(xcb_window_t window, uint16_t & x, uint16_t & y, uint16_t & width, uint16_t & height) 
-                        {
-                            xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
-                            xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
-
-                            if (geometry) 
-                            {
-                                x = geometry->x;
-                                y = geometry->y;
-                                width = geometry->width;
-                                height = geometry->height;
-                                free(geometry);
-                            } 
-                            else 
-                            {
-                                x = y = width = height = 200;
-                            }
-                        }
-
-                        static void 
-                        x_y(xcb_window_t window, uint16_t & x, uint16_t & y) 
-                        {
-                            xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
-                            xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
-
-                            if (geometry) 
-                            {
-                                x = geometry->x;
-                                y = geometry->y;
-                                free(geometry);
-                            } 
-                            else 
-                            {
-                                x = y = 200;
-                            }
-                        }
-
-                        static void 
-                        width_height(xcb_window_t window, uint16_t & width, uint16_t & height) 
-                        {
-                            xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
-                            xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
-
-                            if (geometry) 
-                            {
-                                width = geometry->width;
-                                height = geometry->height;
-                                free(geometry);
-                            } 
-                            else 
-                            {
-                                width = height = 200;
-                            }
-                        }
-
-                        static uint16_t 
-                        x(xcb_window_t window)
-                        {
-                            xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
-                            xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
-
-                            uint16_t x;
-                            if (geometry) 
-                            {
-                                x = geometry->x;
-                                free(geometry);
-                            } 
-                            else 
-                            {
-                                x = 200;
-                            }
-                            return x;
-                        }
-                        
-                        static uint16_t 
-                        y(xcb_window_t window)
-                        {
-                            xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
-                            xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
-
-                            uint16_t y;
-                            if (geometry) 
-                            {
-                                y = geometry->y;
-                                free(geometry);
-                            } 
-                            else 
-                            {
-                                y = 200;
-                            }
-                            return y;
-                        }
-
-                        static uint16_t 
-                        width(xcb_window_t window) 
-                        {
-                            xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
-                            xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
-
-                            uint16_t width;
-                            if (geometry) 
-                            {
-                                width = geometry->width;
-                                free(geometry);
-                            } 
-                            else 
-                            {
-                                width = 200;
-                            }
-                            return width;
-                        }
-                        
-                        static uint16_t 
-                        height(xcb_window_t window) 
-                        {
-                            xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
-                            xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
-
-                            uint16_t height;
-                            if (geometry) 
-                            {
-                                height = geometry->height;
-                                free(geometry);
-                            } 
-                            else 
-                            {
-                                height = 200;
-                            }
-                            return height;
-                        }
-                    ;
-                };
-
                 class font
                 {
                     public:
@@ -3257,229 +3086,6 @@ class mxb
 
                     private:
                         xcb_font_t _font;
-                    ;
-                };
-            ;
-        };
-
-        class set 
-        {
-            public: 
-                static void 
-                _conn(const char * displayname, int * screenp) 
-                {
-                    conn = xcb_connect(displayname, screenp);
-                    mxb::check::_conn();
-                }
-
-                static void 
-                _ewmh() 
-                {
-                    if (!(ewmh = static_cast<xcb_ewmh_connection_t *>(calloc(1, sizeof(xcb_ewmh_connection_t)))))
-                    {
-                        log_error("ewmh faild to initialize");
-                        mxb::launch::program((char *) "/usr/bin/mwm-KILL");
-                    }    
-                    
-                    xcb_intern_atom_cookie_t * cookie = xcb_ewmh_init_atoms(conn, ewmh);
-                    
-                    if (!(xcb_ewmh_init_atoms_replies(ewmh, cookie, 0)))
-                    {
-                        log_error("xcb_ewmh_init_atoms_replies:faild");
-                        exit(1);
-                    }
-
-                    const char * str = "mwm";
-                    mxb::check::err
-                    (
-                        conn, 
-                        xcb_ewmh_set_wm_name
-                        (
-                            ewmh, 
-                            screen->root, 
-                            strlen(str), 
-                            str
-                        ), 
-                        __func__, 
-                        "xcb_ewmh_set_wm_name"
-                    );
-                }
-
-                static void 
-                _setup() 
-                {
-                    setup = xcb_get_setup(conn);
-                }
-
-                static void 
-                _iter() 
-                {
-                    iter = xcb_setup_roots_iterator(setup);
-                }
-
-                static void 
-                _screen() 
-                {
-                    screen = iter.data;
-                }
-
-                static void
-                event_mask(const uint32_t * mask, const xcb_window_t & window)
-                {
-                    xcb_change_window_attributes
-                    (
-                        conn,
-                        window,
-                        XCB_CW_EVENT_MASK,
-                        mask
-                    );
-                }
-
-                static void 
-                event_mask(xcb_window_t window, const std::vector<xcb_event_mask_t>& masks) 
-                {
-                    uint32_t cumulativeMask = 0;
-                    for (auto mask : masks) 
-                    {
-                        cumulativeMask |= mask;
-                    }
-
-                    uint32_t values[] = { cumulativeMask };
-                    xcb_change_window_attributes(conn, window, XCB_CW_EVENT_MASK, values);
-                    xcb_flush(conn);
-                }
-
-                class win
-                {
-                    public:
-                        class backround
-                        {
-                            public:
-                                class as_png
-                                {
-                                    public:
-                                        as_png(const char * imagePath, const xcb_window_t & window)
-                                        {
-                                            // Load an image using Imlib2
-                                            Imlib_Image image = imlib_load_image(imagePath);
-                                            if (!image) 
-                                            {
-                                                log_error("Failed to load image: " + std::string(imagePath));
-                                                return;
-                                            }
-
-                                            // Get the original image size
-                                            imlib_context_set_image(image);
-                                            int originalWidth = imlib_image_get_width();
-                                            int originalHeight = imlib_image_get_height();
-
-                                            // Calculate new size maintaining aspect ratio
-                                            double aspectRatio = (double)originalWidth / originalHeight;
-                                            int newHeight = mxb::get::win::height(window);
-                                            int newWidth = (int)(newHeight * aspectRatio);
-
-                                            // Scale the image if it is wider than the screen
-                                            if (newWidth > mxb::get::win::width(window)) 
-                                            {
-                                                newWidth = mxb::get::win::width(window);
-                                                newHeight = (int)(newWidth / aspectRatio);
-                                            }
-
-                                            Imlib_Image scaledImage = imlib_create_cropped_scaled_image
-                                            (
-                                                0, 
-                                                0, 
-                                                originalWidth, 
-                                                originalHeight, 
-                                                newWidth, 
-                                                newHeight
-                                            );
-                                            imlib_free_image(); // Free original image
-                                            imlib_context_set_image(scaledImage);
-
-                                            // Get the scaled image data
-                                            DATA32 * data = imlib_image_get_data();
-
-                                            // Create an XCB image from the scaled data
-                                            xcb_image_t * xcb_image = xcb_image_create_native
-                                            (
-                                                conn, 
-                                                newWidth, 
-                                                newHeight,
-                                                XCB_IMAGE_FORMAT_Z_PIXMAP, 
-                                                screen->root_depth, 
-                                                NULL, 
-                                                ~0, (uint8_t*)data
-                                            );
-
-                                            xcb_pixmap_t pixmap = mxb::create::pixmap(window);
-                                            xcb_gcontext_t gc = mxb::create::gc::graphics_exposure(window);
-                                            xcb_rectangle_t rect = {0, 0, mxb::get::win::width(window), mxb::get::win::height(window)};
-                                            xcb_poly_fill_rectangle
-                                            (
-                                                conn, 
-                                                pixmap, 
-                                                gc, 
-                                                1, 
-                                                &rect
-                                            );
-
-                                            // Calculate position to center the image
-                                            int x = (mxb::get::win::width(window) - newWidth) / 2;
-                                            int y = (mxb::get::win::height(window) - newHeight) / 2;
-
-                                            // Put the scaled image onto the pixmap at the calculated position
-                                            xcb_image_put
-                                            (
-                                                conn, 
-                                                pixmap, 
-                                                gc, 
-                                                xcb_image, 
-                                                x,
-                                                y, 
-                                                0
-                                            );
-
-                                            // Set the pixmap as the background of the window
-                                            xcb_change_window_attributes
-                                            (
-                                                conn, 
-                                                window, 
-                                                XCB_CW_BACK_PIXMAP, 
-                                                &pixmap
-                                            );
-
-                                            // Cleanup
-                                            xcb_free_gc(conn, gc); // Free the GC
-                                            xcb_image_destroy(xcb_image);
-                                            imlib_free_image(); // Free scaled image
-
-                                            mxb::win::clear(window);
-                                        }
-                                    ;
-                                };
-
-                                class as_color
-                                {
-                                    public:
-                                        as_color(const xcb_window_t & window, COLOR color)
-                                        {
-                                            xcb_change_window_attributes
-                                            (
-                                                conn,
-                                                window,
-                                                XCB_CW_BACK_PIXEL,
-                                                (const uint32_t[1])
-                                                {
-                                                    _color(color)
-                                                }
-                                            );
-                                            xcb_flush(conn);
-                                        }
-                                    ;
-                                };
-                            ;
-                        };
                     ;
                 };
             ;
@@ -4247,21 +3853,7 @@ class mxb
                     ;
                 };
 
-                static xcb_pixmap_t
-                pixmap(const xcb_window_t & window)
-                {
-                    xcb_pixmap_t pixmap = xcb_generate_id(conn);
-                    xcb_create_pixmap
-                    (
-                        conn, 
-                        screen->root_depth, 
-                        pixmap, 
-                        window, 
-                        mxb::get::win::width(window), 
-                        mxb::get::win::height(window)
-                    );
-                    return pixmap;
-                }
+                
             ;
         };
 
@@ -4498,31 +4090,11 @@ class mxb
             ;
         };
 
-        class win
-        {
-            public:
-                static void
-                clear(const xcb_window_t & window)
-                {
-                    xcb_clear_area
-                    (
-                        conn, 
-                        0,
-                        window,
-                        0, 
-                        0,
-                        mxb::get::win::width(window),
-                        mxb::get::win::height(window)
-                    );
-                }
-            ;
-        };
-
         class draw
         {
             public:
                 static void 
-                text(const xcb_window_t & window, const char * str , const COLOR & text_color, const COLOR & backround_color,const char * font_name, const int16_t & x, const int16_t & y)
+                text(const xcb_window_t & window, const char * str , const COLOR & text_color, const COLOR & backround_color, const char * font_name, const int16_t & x, const int16_t & y)
                 {
                     /*
                      *  font names
@@ -4614,7 +4186,7 @@ static mxb::Dialog_win::Dock * dock;
 class Window_Manager
 {
     public: // variabels
-        window window;
+        window root;
     ;
 
     public: // methods
@@ -4626,17 +4198,22 @@ class Window_Manager
             _iter();
             _screen();
 
-            window = screen->root;
-            window.width(screen->width_in_pixels);
-            window.height(screen->height_in_pixels);
+            root = screen->root;
+            root.width(screen->width_in_pixels);
+            root.height(screen->height_in_pixels);
 
             setSubstructureRedirectMask();
             configureRootWindow();
 
             _ewmh();
 
-            window.set_backround_png("/home/mellw/mwm_png/galaxy17.png");
+            root.set_backround_png("/home/mellw/mwm_png/galaxy17.png");
+            root.set_pointer(CURSOR::arrow);
         }
+    ;
+
+    private: // variables
+        window start_window;
     ;
 
     private: // functions
@@ -4705,7 +4282,7 @@ class Window_Manager
             xcb_void_cookie_t cookie = xcb_change_window_attributes_checked
             (
                 conn,
-                window,
+                root,
                 XCB_CW_EVENT_MASK,
                 (const uint32_t[1])
                 {
@@ -4727,7 +4304,7 @@ class Window_Manager
         void 
         configureRootWindow()
         {
-            window.set_backround_color(DARK_GREY);
+            root.set_backround_color(DARK_GREY);
             uint32_t mask = 
                 XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT |
                 XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY |
@@ -4741,8 +4318,17 @@ class Window_Manager
                 XCB_EVENT_MASK_FOCUS_CHANGE |
                 XCB_EVENT_MASK_POINTER_MOTION
             ; 
-            window.apply_event_mask(& mask);
-            window.clear();
+            root.apply_event_mask(& mask);
+            root.clear();
+        }
+
+        int
+        start_screen_window()
+        {
+            start_window.create_default(root, 0, 0, 0, 0);
+            start_window.set_backround_color(DARK_GREY);
+            start_window.map();
+            return 0;
         }
     ;
 };
@@ -7676,6 +7262,7 @@ namespace win_tools
     }
 }
 
+/*
 class Compositor
 {
     public:
@@ -7873,11 +7460,11 @@ class Compositor
                             format = visual_iter.data->format;
                             if (format)
                             {
-                                return format; /** 
+                                return format; / ** 
                                  *
                                  * If a visual with 32-bit depth is found, return its format 
                                  *
-                                 */
+                                 * /
                             } 
                         }
                     }
@@ -7893,6 +7480,7 @@ class Compositor
         }
     ;
 };
+*/
 
 class WinManager
 {
@@ -9297,92 +8885,12 @@ run()
     }
 }
 
-void 
-configureRootWindow()
-{
-    // SET THE ROOT WINDOW BACKROUND COLOR TO 'DARK_GREY'(0x222222, THE DEFAULT COLOR) SO THAT IF SETTING THE PNG AS BACKROUND FAILS THE ROOT WINDOW WILL BE THE DEFAULT COLOR
-    mxb::set::win::backround::as_color(screen->root, DARK_GREY);
-
-    uint32_t mask = XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT |
-                    XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY   |
-                    XCB_EVENT_MASK_ENTER_WINDOW          |
-                    XCB_EVENT_MASK_LEAVE_WINDOW          |
-                    XCB_EVENT_MASK_STRUCTURE_NOTIFY      |
-                    XCB_EVENT_MASK_BUTTON_PRESS          |
-                    XCB_EVENT_MASK_BUTTON_RELEASE        |
-                    XCB_EVENT_MASK_KEY_PRESS             |
-                    XCB_EVENT_MASK_FOCUS_CHANGE          |
-                    XCB_EVENT_MASK_KEY_RELEASE           |
-                    XCB_EVENT_MASK_POINTER_MOTION
-    ;
-    mxb::set::event_mask(& mask, screen->root);
-    mxb::win::clear(screen->root);
-
-    // FLUSH TO MAKE X SERVER HANDEL REQUEST NOW
-    xcb_flush(conn);
-}
-
-bool 
-setSubstructureRedirectMask() 
-{
-    // ATTEMPT TO SET THE SUBSTRUCTURE REDIRECT MASK
-    xcb_void_cookie_t cookie = xcb_change_window_attributes_checked
-    (
-        conn,
-        screen->root,
-        XCB_CW_EVENT_MASK,
-        (const uint32_t[1])
-        {
-            XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY
-        }
-    );
-
-    // CHECK IF ANOTHER WINDOW MANAGER IS RUNNING
-    xcb_generic_error_t * error = xcb_request_check(conn, cookie);
-    if (error) 
-    {
-        log_error("Error: Another window manager is already running or failed to set SubstructureRedirect mask."); 
-        free(error);
-        return false;
-    }
-    return true;
-}
-
-int
-start_screen_window()
-{
-    start_win = xcb_generate_id(conn);
-    xcb_create_window
-    (
-        conn,
-        XCB_COPY_FROM_PARENT,
-        start_win,
-        screen->root,
-        0,
-        0,
-        screen->width_in_pixels,
-        screen->height_in_pixels,
-        0,
-        XCB_WINDOW_CLASS_INPUT_OUTPUT,
-        screen->root_visual,
-        0,
-        nullptr
-    );
-
-    mxb::set::win::backround::as_color(start_win, DARK_GREY);
-    xcb_map_window(conn, start_win);
-    xcb_flush(conn);
-    return 0;
-}
 
 void
 setup_wm()
 {
     wm = new Window_Manager;
     wm->init();
-
-    // pointer->set(screen->root, CURSOR::arrow);
-    wm->window.set_pointer(CURSOR::arrow);
 
     /* 
         MAKE ('5') DESKTOPS 
