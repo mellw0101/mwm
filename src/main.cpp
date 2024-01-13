@@ -25,8 +25,6 @@ static const xcb_setup_t * setup;
 static xcb_screen_iterator_t iter;
 static xcb_screen_t * screen;
 
-static xcb_window_t start_win;
-
 class Bitmap
 {
     public: // constructor 
@@ -2726,235 +2724,6 @@ class mxb
                 };
             ;
         };
-
-        class Client 
-        {
-            public:
-                class calc
-                {
-                    public:
-                        static std::map<client *, edge>
-                        if_client_is_next_to_other_client(client * c, edge c_edge)
-                        {
-                            std::map<client *, edge> map;
-                            for (client * c2 : cur_d->current_clients)
-                            {
-                                if (c == c2)
-                                {
-                                    continue;
-                                }
-
-                                if (c_edge == edge::LEFT)
-                                {
-                                    if (c->x == c2->x + c2->width)
-                                    {
-                                        map[c2] = edge::RIGHT;
-                                        return map;
-                                    }
-                                }
-
-                                
-                                if (c_edge == edge::RIGHT)
-                                {
-                                    if (c->x + c->width == c2->x)
-                                    {
-                                        map[c2] = edge::LEFT;
-                                        return map;
-                                    }
-                                }
-
-                                
-                                if (c_edge == edge::TOP)
-                                {
-                                    if (c->y == c2->y + c2->height)
-                                    {
-                                        map[c2] = edge::BOTTOM_edge;
-                                        return map;
-                                    }
-                                }
-
-                                
-                                if (c_edge == edge::BOTTOM_edge)
-                                {
-                                    if (c->y + c->height == c2->y)
-                                    {
-                                        map[c2] = edge::TOP;
-                                        return map;
-                                    }
-                                }
-                            }
-
-                            map[nullptr] = edge::NONE;
-                            return map;
-                        }
-                    ;
-                };  
-
-                class get
-                {
-                    public:    
-                        static edge
-                        client_edge(client * c, const int & prox)
-                        {
-                            const uint32_t & x = pointer->x();
-                            const uint32_t & y = pointer->y();
-
-                            const uint32_t & top_border = c->y;
-                            const uint32_t & bottom_border = (c->y + c->height);
-                            const uint32_t & left_border = c->x;
-                            const uint32_t & right_border = (c->x + c->width);
-
-                            // TOP EDGE OF CLIENT
-                            if (((y > top_border - prox) && (y <= top_border))
-                             && ((x > left_border + prox) && (x < right_border - prox)))
-                            {
-                                return edge::TOP;
-                            }
-
-                            // BOTTOM EDGE OF CLIENT
-                            if (((y >= bottom_border) && (y < bottom_border + prox))
-                             && ((x > left_border + prox) && (x < right_border - prox)))
-                            {
-                                return edge::BOTTOM_edge;
-                            }
-
-                            // LEFT EDGE OF CLIENT
-                            if (((x > left_border) - prox && (x <= left_border))
-                             && ((y > top_border + prox) && (y < bottom_border - prox)))
-                            {
-                                return edge::LEFT;
-                            }
-
-                            // RIGHT EDGE OF CLIENT
-                            if (((x >= right_border) && (x < right_border + prox))
-                             && ((y > top_border + prox) && (y < bottom_border - prox)))
-                            {
-                                return edge::RIGHT;
-                            }
-
-                            // TOP LEFT CORNER OF CLIENT
-                            if (((x > left_border - prox) && x < left_border + prox)
-                             && ((y > top_border - prox) && y < top_border + prox))
-                            {
-                                return edge::TOP_LEFT;
-                            }
-
-                            // TOP RIGHT CORNER OF CLIENT
-                            if (((x > right_border - prox) && x < right_border + prox)
-                             && ((y > top_border - prox) && y < top_border + prox))
-                            {
-                                return edge::TOP_RIGHT;
-                            }
-
-                            // BOTTOM LEFT CORNER OF CLIENT
-                            if (((x > left_border - prox) && x < left_border + prox)
-                             && ((y > bottom_border - prox) && y < bottom_border + prox))
-                            {
-                                return edge::BOTTOM_LEFT;
-                            }
-
-                            // BOTTOM RIGHT CORNER OF CLIENT
-                            if (((x > right_border - prox) && x < right_border + prox)
-                             && ((y > bottom_border - prox) && y < bottom_border + prox))
-                            {
-                                return edge::BOTTOM_RIGHT;
-                            }
-
-
-                            return edge::NONE;
-                        }
-
-                        static client * 
-                        client_from_all_win(const xcb_window_t * window) 
-                        {
-                            for (const auto & c : client_list) 
-                            {
-                                if (* window == c->win 
-                                || * window == c->frame 
-                                || * window == c->titlebar 
-                                || * window == c->close_button 
-                                || * window == c->max_button 
-                                || * window == c->min_button 
-                                || * window == c->border.left 
-                                || * window == c->border.right 
-                                || * window == c->border.top 
-                                || * window == c->border.bottom
-                                || * window == c->border.top_left
-                                || * window == c->border.top_right
-                                || * window == c->border.bottom_left
-                                || * window == c->border.bottom_right) 
-                                {
-                                    return c;
-                                }
-                            }
-                            return nullptr; /*
-                             *
-                             * THIS WILL
-                             * RETURN 'nullptr' BECAUSE THE
-                             * WINDOW DOES NOT BELONG TO ANY 
-                             * CLIENT IN THE CLIENT LIST
-                             *  
-                             */ 
-                        }
-                    ;
-                };
-            ;
-        };
-
-        class create
-        {
-            public:
-                static void 
-                png(const std::string& file_name, const std::vector<std::vector<bool>>& bitmap) 
-                {
-                    int width = bitmap[0].size();
-                    int height = bitmap.size();
-
-                    FILE *fp = fopen(file_name.c_str(), "wb");
-                    if (!fp) {
-                        throw std::runtime_error("Failed to create PNG file");
-                    }
-
-                    png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-                    if (!png_ptr) {
-                        fclose(fp);
-                        throw std::runtime_error("Failed to create PNG write struct");
-                    }
-
-                    png_infop info_ptr = png_create_info_struct(png_ptr);
-                    if (!info_ptr) {
-                        fclose(fp);
-                        png_destroy_write_struct(&png_ptr, NULL);
-                        throw std::runtime_error("Failed to create PNG info struct");
-                    }
-
-                    if (setjmp(png_jmpbuf(png_ptr))) {
-                        fclose(fp);
-                        png_destroy_write_struct(&png_ptr, &info_ptr);
-                        throw std::runtime_error("Error during PNG creation");
-                    }
-
-                    png_init_io(png_ptr, fp);
-                    png_set_IHDR(png_ptr, info_ptr, width, height, 8, PNG_COLOR_TYPE_GRAY, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
-                    png_write_info(png_ptr, info_ptr);
-
-                    // Write bitmap to PNG
-                    png_bytep row = new png_byte[width];
-                    for (int y = 0; y < height; y++) {
-                        for (int x = 0; x < width; x++) {
-                            row[x] = bitmap[y][x] ? 0xFF : 0x00;
-                        }
-                        png_write_row(png_ptr, row);
-                    }
-                    delete[] row;
-
-                    png_write_end(png_ptr, NULL);
-
-                    fclose(fp);
-                    png_destroy_write_struct(&png_ptr, &info_ptr);
-                }
-            ;
-        };
     ;
 };
 
@@ -2987,7 +2756,7 @@ class Dialog_win
                     size_pos.x = pointer->x();
                     size_pos.y = pointer->y();
                     
-                    uint32_t height = get_num_of_entries() * size_pos.height;
+                    uint32_t height = entries.size() * size_pos.height;
                     if (size_pos.y + height > screen->height_in_pixels)
                     {
                         size_pos.y = (screen->height_in_pixels - height);
@@ -3059,7 +2828,8 @@ class Dialog_win
                         {
                             window.create_default(parent_window, x, y, width, height);
                             window.set_backround_color(BLACK);
-                            window.apply_event_mask({XCB_EVENT_MASK_POINTER_MOTION, XCB_EVENT_MASK_ENTER_WINDOW, XCB_EVENT_MASK_LEAVE_WINDOW});
+                            uint32_t mask = XCB_EVENT_MASK_POINTER_MOTION | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW;
+                            window.apply_event_mask(& mask);
                             window.grab_button({ { L_MOUSE_BUTTON, NULL } });
                             window.map();
                         }
@@ -3085,7 +2855,8 @@ class Dialog_win
                 create_dialog_win()
                 {
                     window.create_default(screen->root, 0, 0, size_pos.width, size_pos.height);
-                    window.apply_event_mask({XCB_EVENT_MASK_FOCUS_CHANGE, XCB_EVENT_MASK_ENTER_WINDOW, XCB_EVENT_MASK_LEAVE_WINDOW, XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY, XCB_EVENT_MASK_POINTER_MOTION});
+                    uint32_t mask = XCB_EVENT_MASK_FOCUS_CHANGE | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY | XCB_EVENT_MASK_POINTER_MOTION;
+                    window.apply_event_mask(& mask);
                     window.set_backround_color(DARK_GREY);
                     window.raise();
                 }
@@ -3458,7 +3229,7 @@ class Window_Manager
             }
         ;
 
-        public: // client methods
+        public: // client methods 
             public: // focus methods 
                 void 
                 focus_client(client * c)
@@ -3570,6 +3341,128 @@ class Window_Manager
                     }
                     return nullptr;
                 }
+
+                std::map<client *, edge>
+                get_client_next_to_client(client * c, edge c_edge)
+                {
+                    std::map<client *, edge> map;
+                    for (client * c2 : cur_d->current_clients)
+                    {
+                        if (c == c2)
+                        {
+                            continue;
+                        }
+
+                        if (c_edge == edge::LEFT)
+                        {
+                            if (c->x == c2->x + c2->width)
+                            {
+                                map[c2] = edge::RIGHT;
+                                return map;
+                            }
+                        }
+                        
+                        if (c_edge == edge::RIGHT)
+                        {
+                            if (c->x + c->width == c2->x)
+                            {
+                                map[c2] = edge::LEFT;
+                                return map;
+                            }
+                        }
+                        
+                        if (c_edge == edge::TOP)
+                        {
+                            if (c->y == c2->y + c2->height)
+                            {
+                                map[c2] = edge::BOTTOM_edge;
+                                return map;
+                            }
+                        }
+
+                        if (c_edge == edge::BOTTOM_edge)
+                        {
+                            if (c->y + c->height == c2->y)
+                            {
+                                map[c2] = edge::TOP;
+                                return map;
+                            }
+                        }
+                    }
+
+                    map[nullptr] = edge::NONE;
+                    return map;
+                }
+
+                static edge
+                get_client_edge_from_pointer(client * c, const int & prox)
+                {
+                    const uint32_t & x = pointer->x();
+                    const uint32_t & y = pointer->y();
+
+                    const uint32_t & top_border = c->y;
+                    const uint32_t & bottom_border = (c->y + c->height);
+                    const uint32_t & left_border = c->x;
+                    const uint32_t & right_border = (c->x + c->width);
+
+                    // TOP EDGE OF CLIENT
+                    if (((y > top_border - prox) && (y <= top_border))
+                        && ((x > left_border + prox) && (x < right_border - prox)))
+                    {
+                        return edge::TOP;
+                    }
+
+                    // BOTTOM EDGE OF CLIENT
+                    if (((y >= bottom_border) && (y < bottom_border + prox))
+                        && ((x > left_border + prox) && (x < right_border - prox)))
+                    {
+                        return edge::BOTTOM_edge;
+                    }
+
+                    // LEFT EDGE OF CLIENT
+                    if (((x > left_border) - prox && (x <= left_border))
+                        && ((y > top_border + prox) && (y < bottom_border - prox)))
+                    {
+                        return edge::LEFT;
+                    }
+
+                    // RIGHT EDGE OF CLIENT
+                    if (((x >= right_border) && (x < right_border + prox))
+                        && ((y > top_border + prox) && (y < bottom_border - prox)))
+                    {
+                        return edge::RIGHT;
+                    }
+
+                    // TOP LEFT CORNER OF CLIENT
+                    if (((x > left_border - prox) && x < left_border + prox)
+                        && ((y > top_border - prox) && y < top_border + prox))
+                    {
+                        return edge::TOP_LEFT;
+                    }
+
+                    // TOP RIGHT CORNER OF CLIENT
+                    if (((x > right_border - prox) && x < right_border + prox)
+                        && ((y > top_border - prox) && y < top_border + prox))
+                    {
+                        return edge::TOP_RIGHT;
+                    }
+
+                    // BOTTOM LEFT CORNER OF CLIENT
+                    if (((x > left_border - prox) && x < left_border + prox)
+                        && ((y > bottom_border - prox) && y < bottom_border + prox))
+                    {
+                        return edge::BOTTOM_LEFT;
+                    }
+
+                    // BOTTOM RIGHT CORNER OF CLIENT
+                    if (((x > right_border - prox) && x < right_border + prox)
+                        && ((y > bottom_border - prox) && y < bottom_border + prox))
+                    {
+                        return edge::BOTTOM_RIGHT;
+                    }
+
+                    return edge::NONE;
+                }
             ;
 
             void 
@@ -3663,7 +3556,7 @@ class Window_Manager
             }
         ;
 
-        public: // desktop methods
+        public: // desktop methods 
             void
             create_new_desktop(const uint16_t & n)
             {
@@ -5379,7 +5272,7 @@ class resize_client
                     }
                     
                     pointer->grab(c->frame);
-                    edge edge = mxb::Client::get::client_edge(c, 10);
+                    edge edge = wm->get_client_edge_from_pointer(c, 10);
                     teleport_mouse(edge);
                     run(edge);
                     xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
@@ -5566,7 +5459,7 @@ class resize_client
                         return;
                     }
 
-                    std::map<client *, edge> map = mxb::Client::calc::if_client_is_next_to_other_client(c, _edge);
+                    std::map<client *, edge> map = wm->get_client_next_to_client(c, _edge);
                     for (const auto & pair : map)
                     {
                         if (pair.first != nullptr)
