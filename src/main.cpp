@@ -3430,6 +3430,9 @@ static Dialog_win::Dock * dock;
 
 class Window_Manager
 {
+    public: // constructor
+        Window_Manager() {}
+    ;
     public: // variabels 
         Dialog_win::context_menu context_menu;
         window root;
