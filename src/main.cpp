@@ -7654,7 +7654,8 @@ setup_wm()
     wm->create_new_desktop(5);
     
     change_desktop::teleport_to(1);
-    
+    mxb::Dialog_win::Dock d;
+    wm->Dock = d;
     wm->Dock.add_app("konsole");
     wm->Dock.add_app("alacritty");
     wm->Dock.add_app("falkon");
