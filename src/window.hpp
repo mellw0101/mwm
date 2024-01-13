@@ -45,7 +45,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <thread>
-#include <atomic>
+// #include <atomic>
 
 #include "Log.hpp"
 #include "defenitions.hpp"
@@ -329,71 +329,71 @@ class window
                 xcb_flush(conn);
             }
 
-            // void /**
-            //  * @brief Animates the position and size of an object from a starting point to an ending point.
-            //  * 
-            //  * @param startX The starting X coordinate.
-            //  * @param startY The starting Y coordinate.
-            //  * @param startWidth The starting width.
-            //  * @param startHeight The starting height.
-            //  * @param endX The ending X coordinate.
-            //  * @param endY The ending Y coordinate.
-            //  * @param endWidth The ending width.
-            //  * @param endHeight The ending height.
-            //  * @param duration The duration of the animation in milliseconds.
-            //  */
-            // animate(int endX, int endY, int endWidth, int endHeight, int duration) 
-            // {
-            //     /* ENSURE ANY EXISTING ANIMATION IS STOPPED */
-            //     stopAnimations();
+            void /**
+             * @brief Animates the position and size of an object from a starting point to an ending point.
+             * 
+             * @param startX The starting X coordinate.
+             * @param startY The starting Y coordinate.
+             * @param startWidth The starting width.
+             * @param startHeight The starting height.
+             * @param endX The ending X coordinate.
+             * @param endY The ending Y coordinate.
+             * @param endWidth The ending width.
+             * @param endHeight The ending height.
+             * @param duration The duration of the animation in milliseconds.
+             */
+            animate(int endX, int endY, int endWidth, int endHeight, int duration) 
+            {
+                /* ENSURE ANY EXISTING ANIMATION IS STOPPED */
+                stopAnimations();
                 
-            //     /* INITILIZE CLASS VARIABELS WITH INPUT VALUES */
-            //     currentX      = _x;
-            //     currentY      = _y;
-            //     currentWidth  = _width;
-            //     currentHeight = _height;
+                /* INITILIZE CLASS VARIABELS WITH INPUT VALUES */
+                currentX      = _x;
+                currentY      = _y;
+                currentWidth  = _width;
+                currentHeight = _height;
 
-            //     int steps = duration; 
+                int steps = duration; 
 
-            //     /**
-            //      * @brief Calculate if the step is positive or negative for each property.
-            //      *
-            //      * The variables @param stepX, stepY, stepWidth, stepHeight are always set to either 1 or -1.
-            //      * This is determined by dividing the absolute value of the difference between the start and end values
-            //      * by the difference itself. This results in a value of 1 or -1, which is used to determine if the animation 
-            //      * is moving in a positive (increasing) or negative (decreasing) direction for each property.
-            //      */
-            //     stepX      = std::abs(endX - _x)           / (endX - _x);
-            //     stepY      = std::abs(endY - _y)           / (endY - _y);
-            //     stepWidth  = std::abs(endWidth - _width)   / (endWidth - _width);
-            //     stepHeight = std::abs(endHeight - _height) / (endHeight - _height);
+                /**
+                 * @brief Calculate if the step is positive or negative for each property.
+                 *
+                 * The variables @param stepX, stepY, stepWidth, stepHeight are always set to either 1 or -1.
+                 * This is determined by dividing the absolute value of the difference between the start and end values
+                 * by the difference itself. This results in a value of 1 or -1, which is used to determine if the animation 
+                 * is moving in a positive (increasing) or negative (decreasing) direction for each property.
+                 */
+                stepX      = std::abs(endX - _x)           / (endX - _x);
+                stepY      = std::abs(endY - _y)           / (endY - _y);
+                stepWidth  = std::abs(endWidth - _width)   / (endWidth - _width);
+                stepHeight = std::abs(endHeight - _height) / (endHeight - _height);
 
-            //     /**
-            //      * @brief CALCULATE THE DURATION FOR EACH STEP BASED ON THE TOTAL ANIMATION DURATION AND THE ABSOLUTE VALUE OF THE LENGTH OF EACH ANIMATION 
-            //      * 
-            //      * @param XAnimDuration, YAnimDuration, WAnimDuration, HAnimDuration represent the time each step takes to iterate one pixel for each respective thread.
-            //      * 
-            //      * The duration for each step is calculated by dividing the total animation duration by the absolute value of the lengt on the respective animation.
-            //      * This ensures that each thread will iterate each pixel from start to end value,
-            //      * ensuring that all threads will complete at the same time.
-            //      */
-            //     XAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(std::abs(endX - _x));
-            //     YAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(std::abs(endY - _y)); 
-            //     WAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(std::abs(endWidth - _width));
-            //     HAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(std::abs(endHeight - _height)); 
+                /**
+                 * @brief CALCULATE THE DURATION FOR EACH STEP BASED ON THE TOTAL ANIMATION DURATION AND THE ABSOLUTE VALUE OF THE LENGTH OF EACH ANIMATION 
+                 * 
+                 * @param XAnimDuration, YAnimDuration, WAnimDuration, HAnimDuration represent the time each step takes to iterate one pixel for each respective thread.
+                 * 
+                 * The duration for each step is calculated by dividing the total animation duration by the absolute value of the lengt on the respective animation.
+                 * This ensures that each thread will iterate each pixel from start to end value,
+                 * ensuring that all threads will complete at the same time.
+                 */
+                XAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(std::abs(endX - _x));
+                YAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(std::abs(endY - _y)); 
+                WAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(std::abs(endWidth - _width));
+                HAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(std::abs(endHeight - _height)); 
 
-            //     /* START ANIMATION THREADS */
-            //     XAnimationThread = std::thread(&window::XAnimation, this, endX);
-            //     YAnimationThread = std::thread(&window::YAnimation, this, endY);
-            //     WAnimationThread = std::thread(&window::WAnimation, this, endWidth);
-            //     HAnimationThread = std::thread(&window::HAnimation, this, endHeight);
+                /* START ANIMATION THREADS */
+                XAnimationThread = std::thread(&window::XAnimation, this, endX);
+                YAnimationThread = std::thread(&window::YAnimation, this, endY);
+                WAnimationThread = std::thread(&window::WAnimation, this, endWidth);
+                HAnimationThread = std::thread(&window::HAnimation, this, endHeight);
 
-            //     /* WAIT FOR ANIMATION TO COMPLETE */
-            //     std::this_thread::sleep_for(std::chrono::milliseconds(duration));
+                /* WAIT FOR ANIMATION TO COMPLETE */
+                std::this_thread::sleep_for(std::chrono::milliseconds(duration));
 
-            //     /* STOP THE ANIMATION */
-            //     stopAnimations();
-            // }
+                /* STOP THE ANIMATION */
+                stopAnimations();
+            }
         ;
 
         public: // check methods 
@@ -1092,10 +1092,10 @@ class window
         Logger log;
 
         private: // animation variables 
-            // std::thread XAnimationThread{};
-            // std::thread YAnimationThread{};
-            // std::thread WAnimationThread{};
-            // std::thread HAnimationThread{};
+            std::thread XAnimationThread{};
+            std::thread YAnimationThread{};
+            std::thread WAnimationThread{};
+            std::thread HAnimationThread{};
             int currentX;
             int currentY;
             int currentWidth;
@@ -1730,328 +1730,328 @@ class window
             }
         ;
 
-        // private: // animation funcrions 
-        //     void /**
-        //      *
-        //      * @brief Performs animation on window 'x' position until the specified 'endX' is reached.
-        //      * 
-        //      * This function updates the 'x' of a window in a loop until the current 'x'
-        //      * matches the specified end 'x'. It uses the "XStep()" function to incrementally
-        //      * update the 'x' and the "thread_sleep()" function to introduce a delay between updates.
-        //      * 
-        //      * @param endX The desired 'x' position of the window.
-        //      *
-        //      */
-        //     XAnimation(const int & endX) 
-        //     {
-        //         XlastUpdateTime = std::chrono::high_resolution_clock::now();
-        //         while (true) 
-        //         {
-        //             if (currentX == endX) 
-        //             {
-        //                 x(currentX);
-        //                 break;
-        //             }
-        //             XStep();
-        //             thread_sleep(XAnimDuration);
-        //         }
-        //     }
+        private: // animation funcrions 
+            void /**
+             *
+             * @brief Performs animation on window 'x' position until the specified 'endX' is reached.
+             * 
+             * This function updates the 'x' of a window in a loop until the current 'x'
+             * matches the specified end 'x'. It uses the "XStep()" function to incrementally
+             * update the 'x' and the "thread_sleep()" function to introduce a delay between updates.
+             * 
+             * @param endX The desired 'x' position of the window.
+             *
+             */
+            XAnimation(const int & endX) 
+            {
+                XlastUpdateTime = std::chrono::high_resolution_clock::now();
+                while (true) 
+                {
+                    if (currentX == endX) 
+                    {
+                        x(currentX);
+                        break;
+                    }
+                    XStep();
+                    thread_sleep(XAnimDuration);
+                }
+            }
 
-        //     void /**
-        //      * @brief Performs a step in the X direction.
-        //      * 
-        //      * This function increments the currentX variable by the stepX value.
-        //      * If it is time to render, it configures the window's X position using the currentX value.
-        //      * 
-        //      * @note This function assumes that the connection and window variables are properly initialized.
-        //      */
-        //     XStep() 
-        //     {
-        //         currentX += stepX;
+            void /**
+             * @brief Performs a step in the X direction.
+             * 
+             * This function increments the currentX variable by the stepX value.
+             * If it is time to render, it configures the window's X position using the currentX value.
+             * 
+             * @note This function assumes that the connection and window variables are properly initialized.
+             */
+            XStep() 
+            {
+                currentX += stepX;
                 
-        //         if (XisTimeToRender())
-        //         {
-        //             x(currentX);
-        //             xcb_flush(conn);
-        //         }
-        //     }
+                if (XisTimeToRender())
+                {
+                    x(currentX);
+                    xcb_flush(conn);
+                }
+            }
 
-        //     void /**
-        //      *
-        //      * @brief Performs animation on window 'y' position until the specified 'endY' is reached.
-        //      * 
-        //      * This function updates the 'y' of a window in a loop until the current 'y'
-        //      * matches the specified end 'y'. It uses the "YStep()" function to incrementally
-        //      * update the 'y' and the "thread_sleep()" function to introduce a delay between updates.
-        //      * 
-        //      * @param endY The desired 'y' positon of the window.
-        //      *
-        //      */
-        //     YAnimation(const int & endY) 
-        //     {
-        //         YlastUpdateTime = std::chrono::high_resolution_clock::now();
-        //         while (true) 
-        //         {
-        //             if (currentY == endY) 
-        //             {
-        //                 y(endY);
-        //                 break;
-        //             }
-        //             YStep();
-        //             thread_sleep(YAnimDuration);
-        //         }
-        //     }
+            void /**
+             *
+             * @brief Performs animation on window 'y' position until the specified 'endY' is reached.
+             * 
+             * This function updates the 'y' of a window in a loop until the current 'y'
+             * matches the specified end 'y'. It uses the "YStep()" function to incrementally
+             * update the 'y' and the "thread_sleep()" function to introduce a delay between updates.
+             * 
+             * @param endY The desired 'y' positon of the window.
+             *
+             */
+            YAnimation(const int & endY) 
+            {
+                YlastUpdateTime = std::chrono::high_resolution_clock::now();
+                while (true) 
+                {
+                    if (currentY == endY) 
+                    {
+                        y(endY);
+                        break;
+                    }
+                    YStep();
+                    thread_sleep(YAnimDuration);
+                }
+            }
 
-        //     void /**
-        //      * @brief Performs a step in the Y direction.
-        //      * 
-        //      * This function increments the currentY variable by the stepY value.
-        //      * If it is time to render, it configures the window's Y position using xcb_configure_window
-        //      * and flushes the connection using xcb_flush.
-        //      */
-        //     YStep() 
-        //     {
-        //         currentY += stepY;
+            void /**
+             * @brief Performs a step in the Y direction.
+             * 
+             * This function increments the currentY variable by the stepY value.
+             * If it is time to render, it configures the window's Y position using xcb_configure_window
+             * and flushes the connection using xcb_flush.
+             */
+            YStep() 
+            {
+                currentY += stepY;
                 
-        //         if (YisTimeToRender())
-        //         {
-        //             y(currentY);
-        //             xcb_flush(conn);
-        //         }
-        //     }
+                if (YisTimeToRender())
+                {
+                    y(currentY);
+                    xcb_flush(conn);
+                }
+            }
 
-        //     void /**
-        //      *
-        //      * @brief Performs a 'width' animation until the specified end 'width' is reached.
-        //      * 
-        //      * This function updates the 'width' of a window in a loop until the current 'width'
-        //      * matches the specified end 'width'. It uses the "WStep()" function to incrementally
-        //      * update the 'width' and the "thread_sleep()" function to introduce a delay between updates.
-        //      * 
-        //      * @param endWidth The desired 'width' of the window.
-        //      *
-        //      */
-        //     WAnimation(const int & endWidth) 
-        //     {
-        //         WlastUpdateTime = std::chrono::high_resolution_clock::now();
-        //         while (true) 
-        //         {
-        //             if (currentWidth == endWidth) 
-        //             {
-        //                 width(endWidth);
-        //                 break;
-        //             }
-        //             WStep();
-        //             thread_sleep(WAnimDuration);
-        //         }
-        //     }
+            void /**
+             *
+             * @brief Performs a 'width' animation until the specified end 'width' is reached.
+             * 
+             * This function updates the 'width' of a window in a loop until the current 'width'
+             * matches the specified end 'width'. It uses the "WStep()" function to incrementally
+             * update the 'width' and the "thread_sleep()" function to introduce a delay between updates.
+             * 
+             * @param endWidth The desired 'width' of the window.
+             *
+             */
+            WAnimation(const int & endWidth) 
+            {
+                WlastUpdateTime = std::chrono::high_resolution_clock::now();
+                while (true) 
+                {
+                    if (currentWidth == endWidth) 
+                    {
+                        width(endWidth);
+                        break;
+                    }
+                    WStep();
+                    thread_sleep(WAnimDuration);
+                }
+            }
 
-        //     void /**
-        //      *
-        //      * @brief Performs a step in the width calculation and updates the window width if it is time to render.
-        //      * 
-        //      * This function increments the current width by the step width. If it is time to render, it configures the window width
-        //      * using the XCB library and flushes the connection.
-        //      *
-        //      */
-        //     WStep() 
-        //     {
-        //         currentWidth += stepWidth;
+            void /**
+             *
+             * @brief Performs a step in the width calculation and updates the window width if it is time to render.
+             * 
+             * This function increments the current width by the step width. If it is time to render, it configures the window width
+             * using the XCB library and flushes the connection.
+             *
+             */
+            WStep() 
+            {
+                currentWidth += stepWidth;
 
-        //         if (WisTimeToRender())
-        //         {
-        //             width(currentWidth);
-        //             xcb_flush(conn);
-        //         }
-        //     }
+                if (WisTimeToRender())
+                {
+                    width(currentWidth);
+                    xcb_flush(conn);
+                }
+            }
 
-        //     void /**
-        //      *
-        //      * @brief Performs a 'height' animation until the specified end 'height' is reached.
-        //      * 
-        //      * This function updates the 'height' of a window in a loop until the current 'height'
-        //      * matches the specified end 'height'. It uses the "HStep()" function to incrementally
-        //      * update the 'height' and the "thread_sleep()" function to introduce a delay between updates.
-        //      * 
-        //      * @param endWidth The desired 'height' of the window.
-        //      *
-        //      */
-        //     HAnimation(const int & endHeight) 
-        //     {
-        //         HlastUpdateTime = std::chrono::high_resolution_clock::now();
-        //         while (true) 
-        //         {
-        //             if (currentHeight == endHeight) 
-        //             {
-        //                 height(endHeight);
-        //                 break;
-        //             }
-        //             HStep();
-        //             thread_sleep(HAnimDuration);
-        //         }
-        //     }
+            void /**
+             *
+             * @brief Performs a 'height' animation until the specified end 'height' is reached.
+             * 
+             * This function updates the 'height' of a window in a loop until the current 'height'
+             * matches the specified end 'height'. It uses the "HStep()" function to incrementally
+             * update the 'height' and the "thread_sleep()" function to introduce a delay between updates.
+             * 
+             * @param endWidth The desired 'height' of the window.
+             *
+             */
+            HAnimation(const int & endHeight) 
+            {
+                HlastUpdateTime = std::chrono::high_resolution_clock::now();
+                while (true) 
+                {
+                    if (currentHeight == endHeight) 
+                    {
+                        height(endHeight);
+                        break;
+                    }
+                    HStep();
+                    thread_sleep(HAnimDuration);
+                }
+            }
 
-        //     void /**
-        //      *
-        //      * @brief Increases the current height by the step height and updates the window height if it's time to render.
-        //      * 
-        //      * This function is responsible for incrementing the current height by the step height and updating the window height
-        //      * if it's time to render. It uses the xcb_configure_window function to configure the window height and xcb_flush to
-        //      * flush the changes to the X server.
-        //      *
-        //      */
-        //     HStep() 
-        //     {
-        //         currentHeight += stepHeight;
+            void /**
+             *
+             * @brief Increases the current height by the step height and updates the window height if it's time to render.
+             * 
+             * This function is responsible for incrementing the current height by the step height and updating the window height
+             * if it's time to render. It uses the xcb_configure_window function to configure the window height and xcb_flush to
+             * flush the changes to the X server.
+             *
+             */
+            HStep() 
+            {
+                currentHeight += stepHeight;
                 
-        //         if (HisTimeToRender())
-        //         {
-        //             height(currentHeight);
-        //             xcb_flush(conn);
-        //         }
-        //     }
+                if (HisTimeToRender())
+                {
+                    height(currentHeight);
+                    xcb_flush(conn);
+                }
+            }
 
-        //     void /**
-        //      *
-        //      * @brief Stops all animations by setting the corresponding flags to true and joining the animation threads.
-        //      *        After joining the threads, the flags are set back to false.
-        //      *
-        //      */
-        //     stopAnimations() 
-        //     {
-        //         stopHFlag.store(true);
-        //         stopXFlag.store(true);
-        //         stopYFlag.store(true);
-        //         stopWFlag.store(true);
-        //         stopHFlag.store(true);
+            void /**
+             *
+             * @brief Stops all animations by setting the corresponding flags to true and joining the animation threads.
+             *        After joining the threads, the flags are set back to false.
+             *
+             */
+            stopAnimations() 
+            {
+                // stopHFlag.store(true);
+                // stopXFlag.store(true);
+                // stopYFlag.store(true);
+                // stopWFlag.store(true);
+                // stopHFlag.store(true);
 
                 
 
-        //         if (XAnimationThread.joinable()) 
-        //         {
-        //             XAnimationThread.join();
-        //             stopXFlag.store(false);
-        //         }
+                if (XAnimationThread.joinable()) 
+                {
+                    XAnimationThread.join();
+                    // stopXFlag.store(false);
+                }
 
-        //         if (YAnimationThread.joinable()) 
-        //         {
-        //             YAnimationThread.join();
-        //             stopYFlag.store(false);
-        //         }
+                if (YAnimationThread.joinable()) 
+                {
+                    YAnimationThread.join();
+                    // stopYFlag.store(false);
+                }
 
-        //         if (WAnimationThread.joinable()) 
-        //         {
-        //             WAnimationThread.join();
-        //             stopWFlag.store(false);
-        //         }
+                if (WAnimationThread.joinable()) 
+                {
+                    WAnimationThread.join();
+                    // stopWFlag.store(false);
+                }
 
-        //         if (HAnimationThread.joinable()) 
-        //         {
-        //             HAnimationThread.join();
-        //             stopHFlag.store(false);
-        //         }
-        //     }
+                if (HAnimationThread.joinable()) 
+                {
+                    HAnimationThread.join();
+                    // stopHFlag.store(false);
+                }
+            }
 
-        //     void /**
-        //      *
-        //      * @brief Sleeps the current thread for the specified number of milliseconds.
-        //      *
-        //      * @param milliseconds The number of milliseconds to sleep. A double is used to allow for
-        //      *                     fractional milliseconds, providing finer control over animation timing.
-        //      *
-        //      * @note This is needed as the time for each thread to sleep is the main thing to be calculated, 
-        //      *       as this class is designed to iterate every pixel and then only update that to the X-server at the given framerate.
-        //      *
-        //      */
-        //     thread_sleep(const double & milliseconds) 
-        //     {
-        //         // Creating a duration with double milliseconds
-        //         auto duration = std::chrono::duration<double, std::milli>(milliseconds);
+            void /**
+             *
+             * @brief Sleeps the current thread for the specified number of milliseconds.
+             *
+             * @param milliseconds The number of milliseconds to sleep. A double is used to allow for
+             *                     fractional milliseconds, providing finer control over animation timing.
+             *
+             * @note This is needed as the time for each thread to sleep is the main thing to be calculated, 
+             *       as this class is designed to iterate every pixel and then only update that to the X-server at the given framerate.
+             *
+             */
+            thread_sleep(const double & milliseconds) 
+            {
+                // Creating a duration with double milliseconds
+                auto duration = std::chrono::duration<double, std::milli>(milliseconds);
 
-        //         // Sleeping for the duration
-        //         std::this_thread::sleep_for(duration);
-        //     }
+                // Sleeping for the duration
+                std::this_thread::sleep_for(duration);
+            }
 
-        //     bool /**
-        //      *
-        //      * Checks if it is time to render based on the elapsed time since the last update.
-        //      * @return true if it is time to render, @return false otherwise.
-        //      *
-        //      */
-        //     XisTimeToRender() 
-        //     {
-        //         // CALCULATE ELAPSED TIME SINCE THE LAST UPDATE
-        //         const auto & currentTime = std::chrono::high_resolution_clock::now();
-        //         const std::chrono::duration<double, std::milli> & elapsedTime = currentTime - XlastUpdateTime;
+            bool /**
+             *
+             * Checks if it is time to render based on the elapsed time since the last update.
+             * @return true if it is time to render, @return false otherwise.
+             *
+             */
+            XisTimeToRender() 
+            {
+                // CALCULATE ELAPSED TIME SINCE THE LAST UPDATE
+                const auto & currentTime = std::chrono::high_resolution_clock::now();
+                const std::chrono::duration<double, std::milli> & elapsedTime = currentTime - XlastUpdateTime;
 
-        //         if (elapsedTime.count() >= frameDuration) 
-        //         {
-        //             XlastUpdateTime = currentTime; 
-        //             return true; 
-        //         }
-        //         return false; 
-        //     }
+                if (elapsedTime.count() >= frameDuration) 
+                {
+                    XlastUpdateTime = currentTime; 
+                    return true; 
+                }
+                return false; 
+            }
 
-        //     bool /**
-        //      *
-        //      * Checks if it is time to render a frame based on the elapsed time since the last update.
-        //      * @return true if it is time to render, @return false otherwise.
-        //      *
-        //      */
-        //     YisTimeToRender() 
-        //     {
-        //         // CALCULATE ELAPSED TIME SINCE THE LAST UPDATE
-        //         const auto & currentTime = std::chrono::high_resolution_clock::now();
-        //         const std::chrono::duration<double, std::milli> & elapsedTime = currentTime - YlastUpdateTime;
+            bool /**
+             *
+             * Checks if it is time to render a frame based on the elapsed time since the last update.
+             * @return true if it is time to render, @return false otherwise.
+             *
+             */
+            YisTimeToRender() 
+            {
+                // CALCULATE ELAPSED TIME SINCE THE LAST UPDATE
+                const auto & currentTime = std::chrono::high_resolution_clock::now();
+                const std::chrono::duration<double, std::milli> & elapsedTime = currentTime - YlastUpdateTime;
 
-        //         if (elapsedTime.count() >= frameDuration) 
-        //         {
-        //             YlastUpdateTime = currentTime; 
-        //             return true; 
-        //         }
-        //         return false; 
-        //     }
+                if (elapsedTime.count() >= frameDuration) 
+                {
+                    YlastUpdateTime = currentTime; 
+                    return true; 
+                }
+                return false; 
+            }
             
-        //     bool /**
-        //      *
-        //      * Checks if it is time to render based on the elapsed time since the last update.
-        //      * @return true if it is time to render, @return false otherwise.
-        //      *
-        //      */
-        //     WisTimeToRender()
-        //     {
-        //         // CALCULATE ELAPSED TIME SINCE THE LAST UPDATE
-        //         const auto & currentTime = std::chrono::high_resolution_clock::now();
-        //         const std::chrono::duration<double, std::milli> & elapsedTime = currentTime - WlastUpdateTime;
+            bool /**
+             *
+             * Checks if it is time to render based on the elapsed time since the last update.
+             * @return true if it is time to render, @return false otherwise.
+             *
+             */
+            WisTimeToRender()
+            {
+                // CALCULATE ELAPSED TIME SINCE THE LAST UPDATE
+                const auto & currentTime = std::chrono::high_resolution_clock::now();
+                const std::chrono::duration<double, std::milli> & elapsedTime = currentTime - WlastUpdateTime;
 
-        //         if (elapsedTime.count() >= frameDuration) 
-        //         {
-        //             WlastUpdateTime = currentTime; 
-        //             return true; 
-        //         }
-        //         return false; 
-        //     }
+                if (elapsedTime.count() >= frameDuration) 
+                {
+                    WlastUpdateTime = currentTime; 
+                    return true; 
+                }
+                return false; 
+            }
 
-        //     bool /**
-        //      *
-        //      * Checks if it is time to render based on the elapsed time since the last update.
-        //      * @return true if it is time to render, @return false otherwise.
-        //      *
-        //      */
-        //     HisTimeToRender()
-        //     {
-        //         // CALCULATE ELAPSED TIME SINCE THE LAST UPDATE
-        //         const auto & currentTime = std::chrono::high_resolution_clock::now();
-        //         const std::chrono::duration<double, std::milli> & elapsedTime = currentTime - HlastUpdateTime;
+            bool /**
+             *
+             * Checks if it is time to render based on the elapsed time since the last update.
+             * @return true if it is time to render, @return false otherwise.
+             *
+             */
+            HisTimeToRender()
+            {
+                // CALCULATE ELAPSED TIME SINCE THE LAST UPDATE
+                const auto & currentTime = std::chrono::high_resolution_clock::now();
+                const std::chrono::duration<double, std::milli> & elapsedTime = currentTime - HlastUpdateTime;
 
-        //         if (elapsedTime.count() >= frameDuration) 
-        //         {
-        //             HlastUpdateTime = currentTime; 
-        //             return true; 
-        //         }
-        //         return false; 
-        //     }
-        // ;
+                if (elapsedTime.count() >= frameDuration) 
+                {
+                    HlastUpdateTime = currentTime; 
+                    return true; 
+                }
+                return false; 
+            }
+        ;
     ;
 };
 
