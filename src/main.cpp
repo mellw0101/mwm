@@ -4092,62 +4092,138 @@ class Window_Manager
     ;
 
     public: // methods 
-        void
-        init()
-        {
-            _conn(nullptr, nullptr);
-            _setup();
-            _iter();
-            _screen();
-
-            root = screen->root;
-            root.width(screen->width_in_pixels);
-            root.height(screen->height_in_pixels);
-
-            setSubstructureRedirectMask();
-            configureRootWindow();
-
-            _ewmh();
-
-            root.set_backround_png("/home/mellw/mwm_png/galaxy17.png");
-            root.set_pointer(CURSOR::arrow);
-        }
-
-        void
-        quit(const int & status)
-        {
-            xcb_flush(conn);
-            delete_client_vec(client_list);
-            delete_desktop_vec(desktop_list);
-            xcb_ewmh_connection_wipe(ewmh);
-            xcb_disconnect(conn);
-            exit(status);
-        }
-
-        void 
-        focus_client(client * c)
-        {
-            if (!c)
+        public: // main methods 
+            void
+            init()
             {
-                log_error("c is null");
-                return;
+                _conn(nullptr, nullptr);
+                _setup();
+                _iter();
+                _screen();
+
+                root = screen->root;
+                root.width(screen->width_in_pixels);
+                root.height(screen->height_in_pixels);
+
+                setSubstructureRedirectMask();
+                configureRootWindow();
+
+                _ewmh();
+
+                root.set_backround_png("/home/mellw/mwm_png/galaxy17.png");
+                root.set_pointer(CURSOR::arrow);
             }
 
-            if (c == focused_client)
+            void
+            quit(const int & status)
             {
-                return;
+                xcb_flush(conn);
+                delete_client_vec(client_list);
+                delete_desktop_vec(desktop_list);
+                xcb_ewmh_connection_wipe(ewmh);
+                xcb_disconnect(conn);
+                exit(status);
             }
+        ;
 
-            focused_client = c;
-            c->focus();
-        }
+        public: // client methods
+            public: // focus methods 
+                void 
+                focus_client(client * c)
+                {
+                    if (!c)
+                    {
+                        log_error("c is null");
+                        return;
+                    }
+
+                    if (c == focused_client)
+                    {
+                        return;
+                    }
+
+                    focused_client = c;
+                    c->focus();
+                }
+
+                void
+                cycle_focus()
+                {
+                    bool focus = false;
+                    for (auto & c : client_list)
+                    {
+                        if (c)
+                        {
+                            if (c == focused_client)
+                            {
+                                focus = true;
+                                continue;
+                            }
+                            
+                            if (focus)
+                            {
+                                focus_client(c);
+                                return;  
+                            }
+                        }
+                    }
+                }
+            ;
+
+            void 
+            manage_new_client(const uint32_t & window)
+            {
+                client * c = make_client(window);
+                if (!c)
+                {
+                    log_error("could not make client");
+                    return;
+                }
+
+                c->win.x_y_width_height(c->x, c->y, c->width, c->height);
+                c->win.map();
+                c->win.grab_button(
+                {
+                    {   L_MOUSE_BUTTON,     ALT },
+                    {   R_MOUSE_BUTTON,     ALT },
+                    {   L_MOUSE_BUTTON,     0   }
+                });
+                c->win.grab_keys(
+                {
+                    {   T,          ALT | CTRL              },
+                    {   Q,          ALT | SHIFT             },
+                    {   F11,        NULL                    },
+                    {   N_1,        ALT                     },
+                    {   N_2,        ALT                     },
+                    {   N_3,        ALT                     },
+                    {   N_4,        ALT                     },
+                    {   N_5,        ALT                     },
+                    {   R_ARROW,    CTRL | SUPER            },
+                    {   L_ARROW,    CTRL | SUPER            },
+                    {   R_ARROW,    CTRL | SUPER | SHIFT    },
+                    {   L_ARROW,    CTRL | SUPER | SHIFT    },
+                    {   R_ARROW,    SUPER                   },
+                    {   L_ARROW,    SUPER                   },
+                    {   U_ARROW,    SUPER                   },
+                    {   D_ARROW,    SUPER                   },
+                    {   TAB,        ALT                     },
+                    {   K,          SUPER                   }
+                });
+                c->make_decorations();
+                c->win.apply_event_mask({XCB_EVENT_MASK_FOCUS_CHANGE, XCB_EVENT_MASK_ENTER_WINDOW, XCB_EVENT_MASK_LEAVE_WINDOW});
+
+                c->win.property("_NET_WM_NAME");
+                mxb::Client::update(c);
+                focus_client(c);
+            }
+        ;
     ;
 
-    private: // variables
+    private: // variables 
         window start_window;
     ;
 
-    private: // functions
+    private: // functions 
         private: // init functions 
             void 
             _conn(const char * displayname, int * screenp) 
@@ -4373,6 +4449,55 @@ class Window_Manager
                 vec.clear();
 
                 std::vector<Type *>().swap(vec);
+            }
+        ;
+
+        private: // client functions
+            client * 
+            make_client(const uint32_t & window) 
+            {
+                client * c = new client;
+                if (!c) 
+                {
+                    log_error("Could not allocate memory for client");
+                    return nullptr;
+                }
+
+                c->win    = window;
+                c->height = (data.height < 300) ? 300 : data.height;
+                c->width  = (data.width < 400)  ? 400 : data.width;
+                c->x      = (data.x <= 0)       ? (screen->width_in_pixels / 2)  - (c->width / 2)  : data.x;
+                c->y      = (data.y <= 0)       ? (screen->height_in_pixels / 2) - (c->height / 2) : data.y;
+                c->depth   = 24;
+                c->desktop = cur_d->desktop;
+
+                for (int i = 0; i < 256; ++i)
+                {
+                    c->name[i] = '\0';
+                }
+
+                int i = 0;
+                char * name = c->win.property("_NET_WM_NAME");
+                while(name[i] != '\0' && i < 255)
+                {
+                    c->name[i] = name[i];
+                    ++i;
+                }
+                c->name[i] = '\0';
+                free(name);
+
+                if (c->win.check_if_EWMH_fullscreen()) 
+                {
+                    c->x      = 0;
+                    c->y      = 0;
+                    c->width  = screen->width_in_pixels;
+                    c->height = screen->height_in_pixels;
+                    c->win.set_EWMH_fullscreen_state();
+                }
+                
+                client_list.push_back(c);
+                cur_d->current_clients.push_back(c);
+                return c;
             }
         ;
     ;
@@ -4798,70 +4923,6 @@ namespace get
         return spropertyValue;
     }
 }
-
-class focus 
-{
-    public:
-        static void
-        cycle()
-        {
-            bool focus = false;
-            for (auto & c : client_list)
-            {
-                if (c)
-                {
-                    if (c == focused_client)
-                    {
-                        focus = true;
-                        continue;
-                    }
-                    
-                    if (focus)
-                    {
-                        wm->focus_client(c);
-                        return;  
-                    }
-                }
-            }
-        }
-    ;
-
-    private:
-        static void  
-        raise_client(struct client * c) 
-        {
-            xcb_configure_window
-            (
-                conn,
-                c->frame,
-                XCB_CONFIG_WINDOW_STACK_MODE, 
-                (const uint32_t[1])
-                {
-                    XCB_STACK_MODE_ABOVE
-                }
-            );
-            xcb_flush(conn);
-        }
-        
-        static void 
-        focus_input(struct client * c)
-        {
-            if (!c)
-            {
-                LOG_warning("client was nullptr");
-                return;
-            }
-            xcb_set_input_focus
-            (
-                conn, 
-                XCB_INPUT_FOCUS_POINTER_ROOT, 
-                c->win, 
-                XCB_CURRENT_TIME
-            );
-            xcb_flush(conn);
-        }
-    ;
-};
 
 class mv_client 
 {
@@ -7061,102 +7122,6 @@ class max_win
 
 namespace win_tools
 {
-    void 
-    kill_client(xcb_connection_t *conn, xcb_window_t window) 
-    {
-        xcb_intern_atom_cookie_t protocols_cookie = xcb_intern_atom(conn, 1, 12, "WM_PROTOCOLS");
-        xcb_intern_atom_reply_t *protocols_reply = xcb_intern_atom_reply(conn, protocols_cookie, NULL);
-
-        xcb_intern_atom_cookie_t delete_cookie = xcb_intern_atom(conn, 0, 16, "WM_DELETE_WINDOW");
-        xcb_intern_atom_reply_t *delete_reply = xcb_intern_atom_reply(conn, delete_cookie, NULL);
-
-        if (!protocols_reply || !delete_reply) 
-        {
-            log.log(ERROR, __func__, "Could not create atoms.");
-            free(protocols_reply);
-            free(delete_reply);
-            return;
-        }
-
-        xcb_client_message_event_t ev = {0};
-        ev.response_type = XCB_CLIENT_MESSAGE;
-        ev.window = window;
-        ev.format = 32;
-        ev.sequence = 0;
-        ev.type = protocols_reply->atom;
-        ev.data.data32[0] = delete_reply->atom;
-        ev.data.data32[1] = XCB_CURRENT_TIME;
-
-        xcb_send_event(conn, 0, window, XCB_EVENT_MASK_NO_EVENT, (char *) & ev);
-
-        free(protocols_reply);
-        free(delete_reply);
-    }
-
-    void
-    apply_event_mask(const xcb_event_mask_t ev_mask, const xcb_window_t & win)
-    {
-        xcb_change_window_attributes
-        (
-            conn,
-            win,
-            XCB_CW_EVENT_MASK,
-            (const uint32_t[1])
-            {
-                ev_mask
-            }
-        );
-    }
-
-    void
-    apply_event_mask(const uint32_t * ev_mask, const xcb_window_t & win)
-    {
-        xcb_change_window_attributes
-        (
-            conn,
-            win,
-            XCB_CW_EVENT_MASK,
-            ev_mask
-        );
-    }
-
-    void
-    grab_buttons(const xcb_window_t & win, std::initializer_list<std::pair<const uint8_t, const uint16_t>> bindings)
-    {
-        for (const auto & binding : bindings)
-        {
-            const uint8_t & button = binding.first;
-            const uint16_t & modifier = binding.second;
-            xcb_grab_button
-            (
-                conn, 
-                
-                // 'OWNER_EVENTS : SET TO 0 FOR NO EVENT PROPAGATION'
-                1, 
-                win, 
-                
-                // EVENT MASK
-                XCB_EVENT_MASK_BUTTON_PRESS, 
-                
-                // POINTER MODE
-                XCB_GRAB_MODE_ASYNC, 
-                
-                // KEYBOARD MODE
-                XCB_GRAB_MODE_ASYNC, 
-                
-                // CONFINE TO WINDOW
-                XCB_NONE, 
-                
-                // CURSOR
-                XCB_NONE, 
-                button, 
-                modifier    
-            );
-            // FLUSH THE REQUEST TO THE X SERVER
-            xcb_flush(conn); 
-        }
-    }
-
     xcb_visualtype_t * /**
      *
      * @brief Function to find an ARGB visual 
@@ -7475,172 +7440,6 @@ class Compositor
     ;
 };
 */
-
-class WinManager
-{
-    public:
-        static void 
-        manage_new_window(const xcb_window_t & window)
-        {
-            client * c = make_client(window);
-            if (!c)
-            {
-                log_error("could not make client");
-                return;
-            }
-            c->win.x_y_width_height(c->x, c->y, c->width, c->height);
-            c->win.map();
-            c->win.grab_button
-            (
-                {
-                    {   L_MOUSE_BUTTON,     ALT },
-                    {   R_MOUSE_BUTTON,     ALT },
-                    {   L_MOUSE_BUTTON,     0   }
-                }
-            );
-            c->win.grab_keys
-            (
-                {
-                    {   T,          ALT | CTRL              },
-                    {   Q,          ALT | SHIFT             },
-                    {   F11,        NULL                    },
-                    {   N_1,        ALT                     },
-                    {   N_2,        ALT                     },
-                    {   N_3,        ALT                     },
-                    {   N_4,        ALT                     },
-                    {   N_5,        ALT                     },
-                    {   R_ARROW,    CTRL | SUPER            },
-                    {   L_ARROW,    CTRL | SUPER            },
-                    {   R_ARROW,    CTRL | SUPER | SHIFT    },
-                    {   L_ARROW,    CTRL | SUPER | SHIFT    },
-                    {   R_ARROW,    SUPER                   },
-                    {   L_ARROW,    SUPER                   },
-                    {   U_ARROW,    SUPER                   },
-                    {   D_ARROW,    SUPER                   },
-                    {   TAB,        ALT                     },
-                    {   K,          SUPER                   }
-                }
-            );
-            c->make_decorations();
-            c->win.apply_event_mask({XCB_EVENT_MASK_FOCUS_CHANGE, XCB_EVENT_MASK_ENTER_WINDOW, XCB_EVENT_MASK_LEAVE_WINDOW});
-
-            c->win.property("_NET_WM_NAME");
-            mxb::Client::update(c);
-            wm->focus_client(c);
-        }
-    ;
-
-    private:
-        static bool 
-        is_exclusive_fullscreen(client * & c) 
-        {
-            xcb_ewmh_get_atoms_reply_t wm_state;
-            if (xcb_ewmh_get_wm_state_reply(ewmh, xcb_ewmh_get_wm_state(ewmh, c->win), & wm_state, NULL)) 
-            {
-                for (unsigned int i = 0; i < wm_state.atoms_len; i++) 
-                {
-                    if ((wm_state.atoms[i] == ewmh->_NET_WM_STATE_FULLSCREEN) 
-                     && (i + 1 < wm_state.atoms_len) 
-                     && (wm_state.atoms[i + 1] == XCB_NONE)) 
-                    {
-                        // EXCLUSIVE FULLSCREEN STATE DETECTED
-                        xcb_ewmh_get_atoms_reply_wipe(& wm_state);
-                        return true;
-                    }
-                }
-                xcb_ewmh_get_atoms_reply_wipe(& wm_state);
-            }
-            return false;
-        }
-
-        static client * 
-        make_client(const xcb_window_t & win) 
-        {
-            client * c = new client;
-            if (!c) 
-            {
-                log_error("Could not allocate memory for client");
-                return nullptr;
-            }
-
-            c->win    = win;
-            c->height = (data.height < 300) ? 300 : data.height;
-            c->width  = (data.width < 400)  ? 400 : data.width;
-            c->x      = (data.x <= 0)       ? (screen->width_in_pixels / 2)  - (c->width / 2)  : data.x;
-            c->y      = (data.y <= 0)       ? (screen->height_in_pixels / 2) - (c->height / 2) : data.y;
-            c->depth   = 24;
-            c->desktop = cur_d->desktop;
-
-            for (int i = 0; i < 256; ++i)
-            {
-                c->name[i] = '\0';
-            }
-
-            int i = 0;
-            char * name = c->win.property("_NET_WM_NAME");
-            while(name[i] != '\0' && i < 255)
-            {
-                c->name[i] = name[i];
-                ++i;
-            }
-            c->name[i] = '\0';
-            free(name);
-
-            if (is_exclusive_fullscreen(c)) 
-            {
-                c->x      = 0;
-                c->y      = 0;
-                c->width  = screen->width_in_pixels;
-                c->height = screen->height_in_pixels;
-                c->win.set_EWMH_fullscreen_state();
-            }
-            
-            client_list.push_back(c);
-            cur_d->current_clients.push_back(c);
-            return c;
-        }
-
-        static void
-        get_win_info(client * & c)
-        {
-            get::WindowProperty(c, "WINDOW");
-            get::WindowProperty(c, "WM_CLASS");
-            get::WindowProperty(c, "FULL_NAME");
-            get::WindowProperty(c, "ATOM");
-            get::WindowProperty(c, "DRAWABLE");
-            get::WindowProperty(c, "FONT");
-            get::WindowProperty(c, "INTEGER");
-            get::WindowProperty(c, "PIXMAP");
-            get::WindowProperty(c, "VISUALID");
-            get::WindowProperty(c, "WM_COMMAND");
-            get::WindowProperty(c, "WM_HINTS");
-            get::WindowProperty(c, "WM_NORMAL_HINTS");
-            get::WindowProperty(c, "MIN_SPACE");
-            get::WindowProperty(c, "NORM_SPACE");
-            get::WindowProperty(c, "WM_SIZE_HINTS");
-            get::WindowProperty(c, "NOTICE");
-            get::WindowProperty(c, "_NET_WM_NAME");
-            get::WindowProperty(c, "_NET_WM_STATE");
-            get::WindowProperty(c, "_NET_WM_VISIBLE_NAME");
-            get::WindowProperty(c, "_NET_WM_ICON_NAME");
-            get::WindowProperty(c, "_NET_WM_VISIBLE_ICON_NAME");
-            get::WindowProperty(c, "_NET_WM_DESKTOP");
-            get::WindowProperty(c, "_NET_WM_WINDOW_TYPE");
-            get::WindowProperty(c, "_NET_WM_STATE");
-            get::WindowProperty(c, "_NET_WM_ALLOWED_ACTIONS");
-            get::WindowProperty(c, "_NET_WM_STRUT");
-            get::WindowProperty(c, "_NET_WM_STRUT_PARTIAL");
-            get::WindowProperty(c, "_NET_WM_ICON_GEOMETRY");
-            get::WindowProperty(c, "_NET_WM_ICON");
-            get::WindowProperty(c, "_NET_WM_PID");
-            get::WindowProperty(c, "_NET_WM_HANDLED_ICONS");
-            get::WindowProperty(c, "_NET_WM_USER_TIME");
-            get::WindowProperty(c, "_NET_WM_USER_TIME_WINDOW");
-            get::WindowProperty(c, "_NET_FRAME_EXTENTS");
-            get::WindowProperty(c, "_NET_SUPPORTED");
-        }
-    ;
-};
 
 /**
  * @class tile
@@ -8506,7 +8305,7 @@ class Event
                 {
                     case ALT:
                     {
-                        focus::cycle();
+                        wm->cycle_focus();
                         break;
                     }
                 }
@@ -8585,7 +8384,7 @@ class Event
         map_req_handler(const xcb_generic_event_t * & ev) 
         {
             const auto * e = reinterpret_cast<const xcb_map_request_event_t *>(ev);
-            WinManager::manage_new_window(e->window);
+            wm->manage_new_client(e->window);
         }
         
         void 
@@ -8875,7 +8674,6 @@ run()
         free(ev);
     }
 }
-
 
 void
 setup_wm()
