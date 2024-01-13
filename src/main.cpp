@@ -2139,6 +2139,18 @@ class client
                 width = frame.width();
                 height = frame.height();
             }
+
+            void
+            map()
+            {
+                frame.map();
+            }
+
+            void
+            unmap()
+            {
+                frame.unmap();
+            }
         ;
     ;
 
@@ -2298,6 +2310,23 @@ class desktop
 
 std::vector<desktop *> desktop_list;
 desktop * cur_d;
+
+class Launcher
+{
+    public:
+        static void
+        program(char * program)
+        {
+            if (fork() == 0) 
+            {
+                setsid();
+                execvp(program, (char *[]) { program, NULL });
+            }
+        }
+    ;
+};
+
+static Launcher * launcher;
 
 class mxb 
 {
@@ -3038,7 +3067,7 @@ class mxb
                                     [app] () 
                                     {
                                         {
-                                            mxb::launch::program((char *) app);
+                                            launcher->program((char *) app);
                                         }
                                     }    
                                 );
@@ -3117,22 +3146,6 @@ class mxb
                         xcb_font_t _font;
                     ;
                 };
-            ;
-        };
-
-        class check
-        {
-            public: 
-                static void
-                err(xcb_connection_t * connection, xcb_void_cookie_t cookie , const char * sender_function, const char * err_msg)
-                {
-                    xcb_generic_error_t * err = xcb_request_check(connection, cookie);
-                    if (err)
-                    {
-                        log.log(ERROR, sender_function, err_msg, err->error_code);
-                        free(err);
-                    }
-                }
             ;
         };
 
@@ -3343,28 +3356,6 @@ class mxb
                 };
 
                 static void
-                unmap(client * c)
-                {
-                    xcb_unmap_window(conn, c->frame);
-                    xcb_flush(conn);
-                }
-
-                static void
-                map(client * c)
-                {
-                    xcb_map_window(conn, c->frame);
-                    xcb_flush(conn);
-                }
-
-                static void
-                remove(client * c)
-                {
-                    client_list.erase(std::remove(client_list.begin(), client_list.end(), c), client_list.end());
-                    cur_d->current_clients.erase(std::remove(cur_d->current_clients.begin(), cur_d->current_clients.end(), c), cur_d->current_clients.end());
-                    delete c;
-                }
-
-                static void
                 remove(client * c, std::vector<client *> & vec)
                 {
                     if (!c)
@@ -3374,7 +3365,6 @@ class mxb
                     vec.erase(std::remove(vec.begin(), vec.end(), c), vec.end());
                     delete c;
                 }
-
 
                 static void 
                 raise(client * c) 
@@ -4028,21 +4018,6 @@ class mxb
             ;
         };
 
-        class launch
-        {
-            public:
-                static void
-                program(char * program)
-                {
-                    if (fork() == 0) 
-                    {
-                        setsid();
-                        execvp(program, (char *[]) { program, NULL });
-                    }
-                }
-            ;
-        };
-
         class draw
         {
             public:
@@ -4102,6 +4077,16 @@ class Window_Manager
 
                 root.set_backround_png("/home/mellw/mwm_png/galaxy17.png");
                 root.set_pointer(CURSOR::arrow);
+            }
+
+            void
+            launch_program(char * program)
+            {
+                if (fork() == 0) 
+                {
+                    setsid();
+                    execvp(program, (char *[]) { program, NULL });
+                }
             }
 
             void
@@ -4247,6 +4232,49 @@ class Window_Manager
                 c->update();
                 focus_client(c);
             }
+
+            int
+            send_sigterm_to_client(client * c)
+            {
+                if (!c)
+                {
+                    return - 1;
+                }
+
+                c->win.unmap();
+                c->close_button.unmap();
+                c->max_button.unmap();
+                c->min_button.unmap();
+                c->titlebar.unmap();
+                c->border.left.unmap();
+                c->border.right.unmap();
+                c->border.top.unmap();
+                c->border.bottom.unmap();
+                c->border.top_left.unmap();
+                c->border.top_right.unmap();
+                c->border.bottom_left.unmap();
+                c->border.bottom_right.unmap();
+                c->frame.unmap();
+
+                c->win.kill();
+                c->close_button.kill();
+                c->max_button.kill();
+                c->min_button.kill();
+                c->titlebar.kill();
+                c->border.left.kill();
+                c->border.right.kill();
+                c->border.top.kill();
+                c->border.bottom.kill();
+                c->border.top_left.kill();
+                c->border.top_right.kill();
+                c->border.bottom_left.kill();
+                c->border.bottom_right.kill();
+                c->frame.kill();
+                
+                remove_client(c);
+
+                return 0;
+            }
         ;
     ;
 
@@ -4269,7 +4297,7 @@ class Window_Manager
                 if (!(ewmh = static_cast<xcb_ewmh_connection_t *>(calloc(1, sizeof(xcb_ewmh_connection_t)))))
                 {
                     log_error("ewmh faild to initialize");
-                    mxb::launch::program((char *) "/usr/bin/mwm-KILL");
+                    quit(1);
                 }    
                 
                 xcb_intern_atom_cookie_t * cookie = xcb_ewmh_init_atoms(conn, ewmh);
@@ -4281,7 +4309,7 @@ class Window_Manager
                 }
 
                 const char * str = "mwm";
-                mxb::check::err
+                check_error
                 (
                     conn, 
                     xcb_ewmh_set_wm_name
@@ -4425,6 +4453,17 @@ class Window_Manager
                 }
                 return 0;
             }
+
+            void
+            check_error(xcb_connection_t * connection, xcb_void_cookie_t cookie , const char * sender_function, const char * err_msg)
+            {
+                xcb_generic_error_t * err = xcb_request_check(connection, cookie);
+                if (err)
+                {
+                    log_error_code(err_msg, err->error_code);
+                    free(err);
+                }
+            }
         ;
 
         int
@@ -4480,6 +4519,25 @@ class Window_Manager
                 vec.clear();
 
                 std::vector<Type *>().swap(vec);
+            }
+
+            void
+            remove_client(client * c)
+            {
+                client_list.erase(std::remove(client_list.begin(), client_list.end(), c), client_list.end());
+                cur_d->current_clients.erase(std::remove(cur_d->current_clients.begin(), cur_d->current_clients.end(), c), cur_d->current_clients.end());
+                delete c;
+            }
+
+            void
+            remove_client_from_vector(client * c, std::vector<client *> & vec)
+            {
+                if (!c)
+                {
+                    log_error("client is nullptr.");
+                }
+                vec.erase(std::remove(vec.begin(), vec.end(), c), vec.end());
+                delete c;
             }
         ;
 
@@ -5713,7 +5771,7 @@ class change_desktop
                 {
                     if (c->desktop == cur_d->desktop)
                     {
-                        mxb::Client::unmap(c);
+                        c->unmap();
                     }
                 }
             }
@@ -5723,7 +5781,7 @@ class change_desktop
             {
                 if (c)
                 {
-                    mxb::Client::map(c);
+                    c->map();
                 }
             }
         }
@@ -6757,74 +6815,10 @@ namespace win_tools
         return NULL;
     }
 
-    bool 
-    getPointerPosition(xcb_window_t window, int& posX, int& posY) 
-    {
-        // Query pointer
-        xcb_query_pointer_cookie_t cookie = xcb_query_pointer(conn, window);
-        xcb_query_pointer_reply_t* reply = xcb_query_pointer_reply(conn, cookie, nullptr);
-
-        if (!reply) 
-        {
-            log_error("Unable to query pointer position.");
-            return false;
-        }
-
-        // Get pointer coordinates
-        posX = reply->root_x;
-        posY = reply->root_y;
-
-        free(reply);
-        return true;
-    }
-
-    int
-    send_sigterm_to_client(client * c)
-    {
-        if (!c)
-        {
-            return - 1;
-        }
-
-        c->win.unmap();
-        c->close_button.unmap();
-        c->max_button.unmap();
-        c->min_button.unmap();
-        c->titlebar.unmap();
-        c->border.left.unmap();
-        c->border.right.unmap();
-        c->border.top.unmap();
-        c->border.bottom.unmap();
-        c->border.top_left.unmap();
-        c->border.top_right.unmap();
-        c->border.bottom_left.unmap();
-        c->border.bottom_right.unmap();
-        c->frame.unmap();
-
-        c->win.kill();
-        c->close_button.kill();
-        c->max_button.kill();
-        c->min_button.kill();
-        c->titlebar.kill();
-        c->border.left.kill();
-        c->border.right.kill();
-        c->border.top.kill();
-        c->border.bottom.kill();
-        c->border.top_left.kill();
-        c->border.top_right.kill();
-        c->border.bottom_left.kill();
-        c->border.bottom_right.kill();
-        c->frame.kill();
-        
-        mxb::Client::remove(c);
-
-        return 0;
-    }
-
     void
     close_button_kill(client * c)
     {
-        int result = send_sigterm_to_client(c);
+        int result = wm->send_sigterm_to_client(c);
 
         if (result == -1)
         {
@@ -7702,7 +7696,7 @@ class Event
                 {
                     case CTRL + ALT:
                     {
-                        mxb::launch::program((char *) "/usr/bin/konsole");
+                        launcher->program((char *) "/usr/bin/konsole");
                         break;
                     }
                 }
@@ -8000,7 +7994,7 @@ class Event
                     ("konsole",
                     []() 
                     {
-                        mxb::launch::program((char *) "/usr/bin/konsole");
+                        launcher->program((char *) "/usr/bin/konsole");
                     });
                     main_context_menu.show();
                     return;
@@ -8165,7 +8159,7 @@ class Event
         {
             const auto * e = reinterpret_cast<const xcb_destroy_notify_event_t *>(ev);
             client * c = wm->client_from_any_window(& e->window);
-            int result = win_tools::send_sigterm_to_client(c);
+            int result = wm->send_sigterm_to_client(c);
             if (result == -1)
             {
                 log_error("send_sigterm_to_client: failed");
@@ -8271,6 +8265,8 @@ setup_wm()
     dock->init();
 
     pointer = new class pointer;
+
+    launcher = new Launcher;
 }
 
 int
