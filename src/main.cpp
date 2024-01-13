@@ -4667,7 +4667,7 @@ class Window_Manager
     ;
 };
 
-Window_Manager wm;
+static Window_Manager * wm;
 
 namespace get
 {
@@ -9298,7 +9298,8 @@ start_screen_window()
 void
 setup_wm()
 {
-    wm.init();
+    wm = new Window_Manager;
+    wm->init();
 
     setSubstructureRedirectMask();
     configureRootWindow();
