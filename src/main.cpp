@@ -4615,8 +4615,6 @@ class Window_Manager
 {
     public: // variabels
         window window;
-        uint16_t width;
-        uint16_t height;
     ;
 
     public: // methods
@@ -4629,8 +4627,8 @@ class Window_Manager
             _screen();
 
             window = screen->root;
-            width = screen->width_in_pixels;
-            height = screen->height_in_pixels;
+            window.width(screen->width_in_pixels);
+            window.height(screen->height_in_pixels);
 
             setSubstructureRedirectMask();
             configureRootWindow();
