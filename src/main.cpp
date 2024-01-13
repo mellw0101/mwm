@@ -9298,7 +9298,7 @@ start_screen_window()
 void
 setup_wm()
 {
-    wm = new Window_Manager;
+    // wm = new Window_Manager;
     wm->init();
 
     setSubstructureRedirectMask();
