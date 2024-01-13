@@ -1391,7 +1391,7 @@ class client
 
             border.bottom_right.create_default(frame, (width + BORDER_SIZE), (height + TITLE_BAR_HEIGHT + BORDER_SIZE), BORDER_SIZE, BORDER_SIZE);
             border.bottom_right.set_backround_color(BLACK);
-            border.bottom_left.set_pointer(CURSOR::bottom_right_corner);
+            border.bottom_right.set_pointer(CURSOR::bottom_right_corner);
             border.bottom_right.grab_button({ { L_MOUSE_BUTTON, NULL } });
             border.bottom_right.map();
         }
