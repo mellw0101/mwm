@@ -3459,6 +3459,8 @@ class Window_Manager
                 create_new_desktop(3);
                 create_new_desktop(4);
                 create_new_desktop(5);
+
+                context_menu = new Dialog_win::context_menu();
             }
 
             void
