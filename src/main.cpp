@@ -9381,11 +9381,8 @@ setup_wm()
     wm = new Window_Manager;
     wm->init();
 
-    // setSubstructureRedirectMask();
-    // configureRootWindow();
-    pointer->set(screen->root, CURSOR::arrow);
-
-    // mxb::set::_ewmh();
+    // pointer->set(screen->root, CURSOR::arrow);
+    wm->window.set_pointer(CURSOR::arrow);
 
     /* 
         MAKE ('5') DESKTOPS 
@@ -9403,8 +9400,6 @@ setup_wm()
     mxb::create::new_desktop(5);
     
     change_desktop::teleport_to(1);
-
-    // mxb::set::win::backround::as_png("/home/mellw/mwm_png/galaxy17.png", screen->root);
     
     dock = new mxb::Dialog_win::Dock;
     dock->add_app("konsole");
