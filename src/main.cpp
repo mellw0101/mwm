@@ -1972,7 +1972,7 @@ class XCPPBAnimator
          */
         stopAnimations() 
         {
-            stopGFlag.store(true);
+            stopHFlag.store(true);
             stopXFlag.store(true);
             stopYFlag.store(true);
             stopWFlag.store(true);
