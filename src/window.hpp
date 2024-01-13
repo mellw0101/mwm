@@ -33,18 +33,9 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <iostream>
-#include <thread>
-#include <chrono>
-#include <atomic>
-#include <mutex> // Added for thread safety
-#include <future>
-#include <iostream>
-#include <algorithm>
 #include <png.h>
 #include <xcb/xcb_image.h>
 #include <Imlib2.h>
-#include <stdexcept>
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <unistd.h>
@@ -53,20 +44,17 @@
 #include <cstring>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <map>
-
-extern xcb_connection_t * conn;
-extern xcb_ewmh_connection_t * ewmh; 
-extern const xcb_setup_t * setup;
-extern xcb_screen_iterator_t iter;
-extern xcb_screen_t * screen;
-
+#include "Log.hpp"
+#include "defenitions.hpp"
+#include "structs.hpp"
 
 class Bitmap
 {
     public: // constructor 
         Bitmap(int width, int height) 
         : width(width), height(height), bitmap(height, std::vector<bool>(width, false)) {}
+
+        Logger log;
     ;
 
     public: // methods 
@@ -90,7 +78,7 @@ class Bitmap
             FILE * fp = fopen(file_name, "wb");
             if (!fp) 
             {
-                log_error("Failed to create PNG file");
+                // log_error("Failed to create PNG file");
                 return;
             }
 
@@ -98,7 +86,7 @@ class Bitmap
             if (!png_ptr) 
             {
                 fclose(fp);
-                log_error("Failed to create PNG write struct");
+                // log_error("Failed to create PNG write struct");
                 return;
             }
 
@@ -107,7 +95,7 @@ class Bitmap
             {
                 fclose(fp);
                 png_destroy_write_struct(&png_ptr, nullptr);
-                log_error("Failed to create PNG info struct");
+                // log_error("Failed to create PNG info struct");
                 return;
             }
 
@@ -115,7 +103,7 @@ class Bitmap
             {
                 fclose(fp);
                 png_destroy_write_struct(&png_ptr, &info_ptr);
-                log_error("Error during PNG creation");
+                // log_error("Error during PNG creation");
                 return;
             }
 
@@ -155,133 +143,6 @@ class _scale
         {
             return (n << 8) | n;
         }
-    ;
-};
-
-class rgb_code
-{
-    public:
-        rgb_code(COLOR rgb_code)
-        {
-            uint8_t r;
-            uint8_t g;
-            uint8_t b;
-            
-            switch (rgb_code) 
-            {
-                case COLOR::WHITE:
-                    r = 255; g = 255; b = 255;
-                    break;
-                ;
-                case COLOR::BLACK:
-                    r = 0; g = 0; b = 0;
-                    break;
-                ;
-                case COLOR::RED:
-                    r = 255; g = 0; b = 0;
-                    break;
-                ;
-                case COLOR::GREEN:
-                    r = 0; g = 255; b = 0;
-                    break;
-                ;
-                case COLOR::BLUE:
-                    r = 0; g = 0; b = 255;
-                    break;
-                ;
-                case COLOR::YELLOW:
-                    r = 255; g = 255; b = 0;
-                    break;
-                ;
-                case COLOR::CYAN:
-                    r = 0; g = 255; b = 255;
-                    break;
-                ;
-                case COLOR::MAGENTA:
-                    r = 255; g = 0; b = 255;
-                    break;
-                ;
-                case COLOR::GREY:
-                    r = 128; g = 128; b = 128;
-                    break;
-                ;
-                case COLOR::LIGHT_GREY:
-                    r = 192; g = 192; b = 192;
-                    break;
-                ;
-                case COLOR::DARK_GREY:
-                    r = 64; g = 64; b = 64;
-                    break;
-                ;
-                case COLOR::ORANGE:
-                    r = 255; g = 165; b = 0;
-                    break;
-                ;
-                case COLOR::PURPLE:
-                    r = 128; g = 0; b = 128;
-                    break;
-                ;
-                case COLOR::BROWN:
-                    r = 165; g = 42; b = 42;
-                    break;
-                ;
-                case COLOR::PINK:
-                    r = 255; g = 192; b = 203;
-                    break;
-                ;
-                default:
-                    r = 0; g = 0; b = 0; 
-                    break;
-                ;
-            }
-
-            color.r = r;
-            color.g = g;
-            color.b = b;
-        }
-
-        operator rgb_color_code()
-        {
-            return color;
-        }
-    ;
-
-    private:
-        rgb_color_code color;
-    ;
-};
-
-class _color
-{
-    public:
-        _color(COLOR color)
-        {
-            xcb_colormap_t colormap = screen->default_colormap;
-            rgb_color_code color_code = rgb_code(color);
-            xcb_alloc_color_reply_t * reply = xcb_alloc_color_reply
-            (
-                conn, 
-                xcb_alloc_color
-                (
-                    conn,
-                    colormap,
-                    _scale::from_8_to_16_bit(color_code.r), 
-                    _scale::from_8_to_16_bit(color_code.g),
-                    _scale::from_8_to_16_bit(color_code.b)
-                ), 
-                NULL
-            );
-            color_pixel = reply->pixel;
-        }
-
-        operator uint32_t()
-        {
-            return color_pixel;
-        }
-    ;
-
-    private:
-        uint32_t color_pixel;
     ;
 };
 
@@ -1156,6 +1017,13 @@ class window
         xcb_gcontext_t font_gc;
         xcb_font_t     font;
         xcb_pixmap_t   pixmap;
+
+        Logger log;
+        static xcb_connection_t * conn;
+        static xcb_ewmh_connection_t * ewmh; 
+        static const xcb_setup_t * setup;
+        static xcb_screen_iterator_t iter;
+        static xcb_screen_t * screen;
     ;
 
     private: // functions 
@@ -1681,6 +1549,88 @@ class window
                 pixel = reply->pixel;
                 free(reply);
                 return pixel;
+            }
+
+            rgb_color_code
+            rgb_code(COLOR COLOR)
+            {
+                rgb_color_code color;
+                uint8_t r;
+                uint8_t g;
+                uint8_t b;
+                
+                switch (COLOR) 
+                {
+                    case COLOR::WHITE:
+                        r = 255; g = 255; b = 255;
+                        break;
+                    ;
+                    case COLOR::BLACK:
+                        r = 0; g = 0; b = 0;
+                        break;
+                    ;
+                    case COLOR::RED:
+                        r = 255; g = 0; b = 0;
+                        break;
+                    ;
+                    case COLOR::GREEN:
+                        r = 0; g = 255; b = 0;
+                        break;
+                    ;
+                    case COLOR::BLUE:
+                        r = 0; g = 0; b = 255;
+                        break;
+                    ;
+                    case COLOR::YELLOW:
+                        r = 255; g = 255; b = 0;
+                        break;
+                    ;
+                    case COLOR::CYAN:
+                        r = 0; g = 255; b = 255;
+                        break;
+                    ;
+                    case COLOR::MAGENTA:
+                        r = 255; g = 0; b = 255;
+                        break;
+                    ;
+                    case COLOR::GREY:
+                        r = 128; g = 128; b = 128;
+                        break;
+                    ;
+                    case COLOR::LIGHT_GREY:
+                        r = 192; g = 192; b = 192;
+                        break;
+                    ;
+                    case COLOR::DARK_GREY:
+                        r = 64; g = 64; b = 64;
+                        break;
+                    ;
+                    case COLOR::ORANGE:
+                        r = 255; g = 165; b = 0;
+                        break;
+                    ;
+                    case COLOR::PURPLE:
+                        r = 128; g = 0; b = 128;
+                        break;
+                    ;
+                    case COLOR::BROWN:
+                        r = 165; g = 42; b = 42;
+                        break;
+                    ;
+                    case COLOR::PINK:
+                        r = 255; g = 192; b = 203;
+                        break;
+                    ;
+                    default:
+                        r = 0; g = 0; b = 0; 
+                        break;
+                    ;
+                }
+
+                color.r = r;
+                color.g = g;
+                color.b = b;
+                return color;
             }
         ;
     ;
