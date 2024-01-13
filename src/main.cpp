@@ -833,7 +833,7 @@ class window
                 void
                 width(const uint32_t & width)
                 {
-                    config_window(MWM_CONFIG_x, width);
+                    config_window(MWM_CONFIG_width, width);
                     update(_x, _y, width, _height);
                 }
 
