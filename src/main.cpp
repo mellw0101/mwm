@@ -3039,7 +3039,7 @@ class mxb
                         void
                         init()
                         {
-                            create_dock();
+                            main_window.create_default(screen->root, 0, 0, width, height);
                             setup_dock();
                             configure_context_menu();
                             make_apps();
@@ -3078,12 +3078,6 @@ class mxb
 
                             main_window.x_y_width_height(x, y, calc_width, height);
                             xcb_flush(conn);
-                        }
-
-                        void
-                        create_dock()
-                        {
-                            main_window.create_default(screen->root, 0, 0, width, height);   
                         }
 
                         void
