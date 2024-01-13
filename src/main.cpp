@@ -3455,6 +3455,12 @@ class Window_Manager
                 setSubstructureRedirectMask();
                 configure_root();
                 _ewmh();
+
+                create_new_desktop(1);
+                create_new_desktop(2);
+                create_new_desktop(3);
+                create_new_desktop(4);
+                create_new_desktop(5);
             }
 
             void
@@ -7629,12 +7635,6 @@ setup_wm()
 {
     wm = new Window_Manager;
     wm->init();
-
-    wm->create_new_desktop(1);
-    wm->create_new_desktop(2);
-    wm->create_new_desktop(3);
-    wm->create_new_desktop(4);
-    wm->create_new_desktop(5);
     
     change_desktop::teleport_to(1);
     dock = new mxb::Dialog_win::Dock;
@@ -7644,7 +7644,6 @@ setup_wm()
     dock->init();
 
     pointer = new class pointer;
-
     launcher = new Launcher;
 }
 
