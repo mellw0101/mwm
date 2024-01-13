@@ -331,7 +331,6 @@ class pointer
 };
 static pointer * pointer;
 
-
 namespace bitmap
 {
     const bool CHAR_BITMAP_A[20][20] = 
@@ -833,7 +832,7 @@ class client
         make_borders()
         {
             border.left.create_default(frame, 0, BORDER_SIZE, BORDER_SIZE, (height + TITLE_BAR_HEIGHT));
-            border.left.set_backround_color(BLACK);
+            border.left.set_backround_color(RED);
             border.left.set_pointer(CURSOR::left_side);
             border.left.grab_button({ { L_MOUSE_BUTTON, NULL } });
             border.left.map();
