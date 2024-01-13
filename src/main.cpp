@@ -4603,6 +4603,11 @@ class Window_Manager
             _setup();
             _iter();
             _screen();
+
+            setSubstructureRedirectMask();
+            configureRootWindow();
+
+            _ewmh();
         }
     ;
 
@@ -4663,6 +4668,57 @@ class Window_Manager
         _screen() 
         {
             screen = iter.data;
+        }
+
+        bool
+        setSubstructureRedirectMask() 
+        {
+            // ATTEMPT TO SET THE SUBSTRUCTURE REDIRECT MASK
+            xcb_void_cookie_t cookie = xcb_change_window_attributes_checked
+            (
+                conn,
+                screen->root,
+                XCB_CW_EVENT_MASK,
+                (const uint32_t[1])
+                {
+                    XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY
+                }
+            );
+
+            // CHECK IF ANOTHER WINDOW MANAGER IS RUNNING
+            xcb_generic_error_t * error = xcb_request_check(conn, cookie);
+            if (error) 
+            {
+                log_error("Error: Another window manager is already running or failed to set SubstructureRedirect mask."); 
+                free(error);
+                return false;
+            }
+            return true;
+        }
+
+        void 
+        configureRootWindow()
+        {
+            // SET THE ROOT WINDOW BACKROUND COLOR TO 'DARK_GREY'(0x222222, THE DEFAULT COLOR) SO THAT IF SETTING THE PNG AS BACKROUND FAILS THE ROOT WINDOW WILL BE THE DEFAULT COLOR
+            mxb::set::win::backround::as_color(screen->root, DARK_GREY);
+
+            uint32_t mask = XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT |
+                            XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY   |
+                            XCB_EVENT_MASK_ENTER_WINDOW          |
+                            XCB_EVENT_MASK_LEAVE_WINDOW          |
+                            XCB_EVENT_MASK_STRUCTURE_NOTIFY      |
+                            XCB_EVENT_MASK_BUTTON_PRESS          |
+                            XCB_EVENT_MASK_BUTTON_RELEASE        |
+                            XCB_EVENT_MASK_KEY_PRESS             |
+                            XCB_EVENT_MASK_FOCUS_CHANGE          |
+                            XCB_EVENT_MASK_KEY_RELEASE           |
+                            XCB_EVENT_MASK_POINTER_MOTION
+            ;
+            mxb::set::event_mask(& mask, screen->root);
+            mxb::win::clear(screen->root);
+
+            // FLUSH TO MAKE X SERVER HANDEL REQUEST NOW
+            xcb_flush(conn);
         }
     ;
 };
@@ -9298,14 +9354,14 @@ start_screen_window()
 void
 setup_wm()
 {
-    // wm = new Window_Manager;
+    wm = new Window_Manager;
     wm->init();
 
-    setSubstructureRedirectMask();
-    configureRootWindow();
+    // setSubstructureRedirectMask();
+    // configureRootWindow();
     pointer->set(screen->root, CURSOR::arrow);
 
-    mxb::set::_ewmh();
+    // mxb::set::_ewmh();
 
     /* 
         MAKE ('5') DESKTOPS 
