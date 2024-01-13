@@ -3503,11 +3503,6 @@ class Window_Manager
                         return;
                     }
 
-                    if (c == focused_client)
-                    {
-                        return;
-                    }
-
                     focused_client = c;
                     c->focus();
                 }
