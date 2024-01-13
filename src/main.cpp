@@ -2828,7 +2828,7 @@ class mxb
                                         }
                                     }    
                                 );
-                                buttons.list[buttons.size()].create(main_window, ((buttons.size() - 1) * width) + 2, 2, width - 4, height - 4, BLACK);
+                                buttons.list[buttons.size() - 1].create(main_window, ((buttons.size() - 1) * width) + 2, 2, width - 4, height - 4, BLACK);
                             }
                             calc_size_pos();
                         }
