@@ -3989,8 +3989,6 @@ class Window_Manager
 };
 static Window_Manager * wm;
 
-
-
 class mv_client 
 {
     public: // constructor 
@@ -7382,7 +7380,7 @@ class Event
                 }    
             }
 
-            if (e->event == screen->root)
+            if (e->event == wm->root)
             {
                 if (e->detail == R_MOUSE_BUTTON)
                 {
