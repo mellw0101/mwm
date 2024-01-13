@@ -2528,11 +2528,16 @@ class mxb
                     private: // private subclasses 
                         class DialogEntry 
                         {
-                            public:
+                            public: // constructor 
                                 DialogEntry() {}
+                            ;
+
+                            public: // variabels 
                                 window window;
                                 int16_t border_size = 1;
+                            ;
 
+                            public: // public methods 
                                 void
                                 add_name(const char * name)
                                 {
@@ -2563,10 +2568,9 @@ class mxb
                                 {
                                     window.create_default(parent_window, x, y, width, height);
                                     window.set_backround_color(BLACK);
-                                    window.apply_event_mask({XCB_EVENT_MASK_POINTER_MOTION});
+                                    window.apply_event_mask({XCB_EVENT_MASK_POINTER_MOTION, XCB_EVENT_MASK_ENTER_WINDOW, XCB_EVENT_MASK_LEAVE_WINDOW});
                                     window.grab_button({ { L_MOUSE_BUTTON, NULL } });
-                                    xcb_map_window(conn, window);
-                                    xcb_flush(conn);
+                                    window.map();
                                 }
                             ;
 
