@@ -489,15 +489,15 @@ class window
             }
 
             void
-            reparent(const uint32_t & new_parent)
+            reparent(const uint32_t & new_parent, const int16_t & x, const int16_t & y)
             {
                 xcb_reparent_window
                 (
                     conn, 
                     _window, 
                     new_parent, 
-                    BORDER_SIZE, 
-                    TITLE_BAR_HEIGHT + BORDER_SIZE
+                    x, 
+                    y
                 );
                 xcb_flush(conn);
             }
@@ -1205,29 +1205,9 @@ class client
         void 
         make_frame()
         {
-            frame.create
-            (
-                XCB_COPY_FROM_PARENT,
-                screen->root,
-                x - BORDER_SIZE,
-                y - TITLE_BAR_HEIGHT - BORDER_SIZE,
-                width + (BORDER_SIZE * 2),
-                height + TITLE_BAR_HEIGHT + (BORDER_SIZE * 2),
-                0,
-                XCB_WINDOW_CLASS_INPUT_OUTPUT,
-                screen->root_visual,
-                0,
-                nullptr
-            );
+            frame.create_default(screen->root, (x - BORDER_SIZE), (y - TITLE_BAR_HEIGHT - BORDER_SIZE), (width + (BORDER_SIZE * 2)), (height + TITLE_BAR_HEIGHT + (BORDER_SIZE * 2)));
             frame.set_backround_color(DARK_GREY);
-            xcb_reparent_window
-            (
-                conn, 
-                win, 
-                frame, 
-                BORDER_SIZE, 
-                TITLE_BAR_HEIGHT + BORDER_SIZE
-            );
+            win.reparent(frame, BORDER_SIZE, (TITLE_BAR_HEIGHT + BORDER_SIZE));
             frame.apply_event_mask({XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY});
             frame.map();
         }
