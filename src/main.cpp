@@ -9370,7 +9370,6 @@ class Event
 
                 if (e->event == c->close_button)
                 {
-                    // log_info("L_MOUSE_BUTTON + close_button");
                     win_tools::close_button_kill(c);
                     return;
                 }
@@ -9465,7 +9464,7 @@ class Event
             if (c)
             {
                 mxb::win::ungrab::button(c->win, L_MOUSE_BUTTON, 0);
-                mxb::Client::raise(c);
+                c->raise();
                 c->win.set_active_EWMH_window();
                 focused_client = c;
             }
@@ -9487,18 +9486,14 @@ class Event
                 return;
             }
             
-            mxb::win::grab::button(c->win, L_MOUSE_BUTTON, 0);
+            c->win.grab_button({ { L_MOUSE_BUTTON, NULL } });
         }
 
         void
         destroy_notify_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_destroy_notify_event_t *>(ev);
-
-            log_win("e->window: ", e->window);
-            log_win("e->event: ", e->event);
             client * c = get::client_from_all_win(& e->window);
-        
             int result = win_tools::send_sigterm_to_client(c);
             if (result == -1)
             {
