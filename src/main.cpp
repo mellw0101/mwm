@@ -832,17 +832,19 @@ class window
                 void
                 set_backround_color(COLOR color)
                 {
-                    xcb_change_window_attributes
-                    (
-                        conn,
-                        _window,
-                        XCB_CW_BACK_PIXEL,
-                        (const uint32_t[1])
-                        {
-                            _color(color)
-                        }
-                    );
-                    xcb_flush(conn);
+                    change_back_pixel(get_color(color));
+                }
+
+                void
+                set_backround_color_16_bit(const uint16_t & red_value, const uint16_t & green_value, const uint16_t & blue_value)
+                {
+                    change_back_pixel(get_color(red_value, green_value, blue_value));
+                }
+
+                void
+                set_backround_color_8_bit(const uint8_t & red_value, const uint8_t & green_value, const uint8_t & blue_value)
+                {
+                    change_back_pixel(get_color(red_value, green_value, blue_value));
                 }
             ;
         ;
@@ -1018,7 +1020,7 @@ class window
             }
         }
 
-        private: // get functions
+        private: // get functions 
             xcb_atom_t
             atom(const char * atom_name) 
             {
@@ -1041,6 +1043,94 @@ class window
                 xcb_atom_t atom = reply->atom;
                 free(reply);
                 return atom;
+            }
+        ;
+
+        private: // backround functions
+            void
+            change_back_pixel(const uint32_t & pixel)
+            {
+                xcb_change_window_attributes
+                (
+                    conn,
+                    _window,
+                    XCB_CW_BACK_PIXEL,
+                    (const uint32_t[1])
+                    {
+                        pixel
+                    }
+                );
+                xcb_flush(conn);
+            }
+
+            uint32_t
+            get_color(COLOR color)
+            {
+                uint32_t pixel = 0;
+                xcb_colormap_t colormap = screen->default_colormap;
+                rgb_color_code color_code = rgb_code(color);
+                xcb_alloc_color_reply_t * reply = xcb_alloc_color_reply
+                (
+                    conn, 
+                    xcb_alloc_color
+                    (
+                        conn,
+                        colormap,
+                        _scale::from_8_to_16_bit(color_code.r), 
+                        _scale::from_8_to_16_bit(color_code.g),
+                        _scale::from_8_to_16_bit(color_code.b)
+                    ), 
+                    NULL
+                );
+                pixel = reply->pixel;
+                free(reply);
+                return pixel;
+            }
+
+            uint32_t
+            get_color(const uint16_t & red_value, const uint16_t & green_value, const uint16_t & blue_value)
+            {
+                uint32_t pixel = 0;
+                xcb_colormap_t colormap = screen->default_colormap;
+                xcb_alloc_color_reply_t * reply = xcb_alloc_color_reply
+                (
+                    conn, 
+                    xcb_alloc_color
+                    (
+                        conn,
+                        colormap,
+                        red_value, 
+                        green_value,
+                        blue_value
+                    ), 
+                    NULL
+                );
+                pixel = reply->pixel;
+                free(reply);
+                return pixel;
+            }
+
+            uint32_t
+            get_color(const uint8_t & red_value, const uint8_t & green_value, const uint8_t & blue_value)
+            {
+                uint32_t pixel = 0;
+                xcb_colormap_t colormap = screen->default_colormap;
+                xcb_alloc_color_reply_t * reply = xcb_alloc_color_reply
+                (
+                    conn, 
+                    xcb_alloc_color
+                    (
+                        conn,
+                        colormap,
+                        _scale::from_8_to_16_bit(red_value), 
+                        _scale::from_8_to_16_bit(green_value),
+                        _scale::from_8_to_16_bit(blue_value)
+                    ), 
+                    NULL
+                );
+                pixel = reply->pixel;
+                free(reply);
+                return pixel;
             }
         ;
     ;
@@ -7047,7 +7137,7 @@ class resize_client
                         }
                     }
                     
-                    mxb::pointer::grab(c->frame);
+                    pointer->grab(c->frame);
                     teleport_mouse(_edge);
                     run(_edge);
                     xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
@@ -7341,7 +7431,6 @@ class resize_client
                     xcb_generic_event_t * ev;
                     bool shouldContinue = true;
 
-                    // Wait for motion events and handle window resizing
                     while (shouldContinue) 
                     {
                         ev = xcb_wait_for_event(conn);
@@ -7371,7 +7460,6 @@ class resize_client
                                 break;
                             }
                         }
-                        // Free the event memory after processing
                         free(ev); 
                     }
                 }
@@ -7379,23 +7467,15 @@ class resize_client
                 bool 
                 isTimeToRender() 
                 {
-                    // CALCULATE ELAPSED TIME SINCE THE LAST UPDATE
                     const auto & currentTime = std::chrono::high_resolution_clock::now();
                     const std::chrono::duration<double, std::milli> & elapsedTime = currentTime - lastUpdateTime;
 
-                    /*
-                        CHECK IF THE ELAPSED TIME EXCEEDS THE FRAME DURATION
-                    */ 
                     if (elapsedTime.count() >= frameDuration) 
                     {
-                        // UPDATE THE LAST_UPDATE_TIME TO THE 
-                        // CURRENT TIME FOR THE NEXT CHECK
                         lastUpdateTime = currentTime; 
                         
-                        // RETURN TRUE IF IT'S TIME TO RENDER
                         return true; 
                     }
-                    // RETURN FALSE IF NOT ENOUGH TIME HAS PASSED
                     return false; 
                 }
             ;
@@ -8311,7 +8391,7 @@ class tile
     public:
         tile(client * & c, TILE tile)
         {
-            if (mxb::EWMH::check::is_window_fullscreen(c->win))
+            if (c->win.check_if_EWMH_fullscreen())
             {
                 return;
             }
