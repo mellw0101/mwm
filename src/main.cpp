@@ -4667,7 +4667,7 @@ class Window_Manager
     ;
 };
 
-static Window_Manager * wm;
+Window_Manager wm;
 
 namespace get
 {
@@ -9298,13 +9298,8 @@ start_screen_window()
 void
 setup_wm()
 {
-    wm = new Window_Manager;
-    wm->init();
+    wm.init();
 
-    // mxb::set::_conn(nullptr, nullptr);
-    // mxb::set::_setup();
-    // mxb::set::_iter();
-    // mxb::set::_screen();
     setSubstructureRedirectMask();
     configureRootWindow();
     pointer->set(screen->root, CURSOR::arrow);
