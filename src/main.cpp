@@ -2345,7 +2345,6 @@ class client
         }
     ;
 };
-
 std::vector<client *> client_list; // global list of clients
 client * focused_client;
 
@@ -2360,7 +2359,6 @@ class desktop
         uint16_t height;
     ;
 };
-
 std::vector<desktop *> desktop_list;
 desktop * cur_d;
 
@@ -2378,7 +2376,6 @@ class Launcher
         }
     ;
 };
-
 static Launcher * launcher;
 
 class mxb 
@@ -3435,12 +3432,12 @@ class mxb
         };
     ;
 };
+static mxb::Dialog_win::Dock * dock;
 
 class Window_Manager
 {
     public: // variabels 
         window root;
-        mxb::Dialog_win::Dock * Dock;
     ;
 
     public: // methods 
@@ -3452,18 +3449,12 @@ class Window_Manager
                 _setup();
                 _iter();
                 _screen();
-
                 root = screen->root;
                 root.width(screen->width_in_pixels);
                 root.height(screen->height_in_pixels);
-
                 setSubstructureRedirectMask();
-                configureRootWindow();
-
+                configure_root();
                 _ewmh();
-
-                root.set_backround_png("/home/mellw/mwm_png/galaxy17.png");
-                root.set_pointer(CURSOR::arrow);
             }
 
             void
@@ -3769,7 +3760,7 @@ class Window_Manager
             }
 
             void 
-            configureRootWindow()
+            configure_root()
             {
                 root.set_backround_color(DARK_GREY);
                 uint32_t mask = 
@@ -3787,6 +3778,9 @@ class Window_Manager
                 ; 
                 root.apply_event_mask(& mask);
                 root.clear();
+
+                root.set_backround_png("/home/mellw/mwm_png/galaxy17.png");
+                root.set_pointer(CURSOR::arrow);
             }
         ;
 
@@ -3987,8 +3981,6 @@ class Window_Manager
         ;
     ;
 };
-
-static mxb::Dialog_win::Dock * dock;
 static Window_Manager * wm;
 
 class mv_client 
@@ -7638,15 +7630,6 @@ setup_wm()
     wm = new Window_Manager;
     wm->init();
 
-    /* 
-        MAKE ('5') DESKTOPS 
-        
-        THIS IS JUST FOR 
-        DEBUGING AND TESTING 
-        IN THE FUTURE I WILL IMPLEMENT
-        A WAY TO ADD AND REMOVE 
-        DESKTOPS DURING RUNTIME
-     */
     wm->create_new_desktop(1);
     wm->create_new_desktop(2);
     wm->create_new_desktop(3);
