@@ -5,6 +5,9 @@
 
 class buttons
 {
+    public: // public constructors
+        buttons() {}
+    ;
     public: // public variables
         std::vector<button> list;
     ;
