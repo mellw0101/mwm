@@ -2647,10 +2647,10 @@ class mxb
                                         }
                                         break;
                                     }
-                                    case XCB_LEAVE_NOTIFY: 
+                                    case XCB_ENTER_NOTIFY: 
                                     {
-                                        const auto * e = reinterpret_cast<const xcb_leave_notify_event_t *>(ev);
-                                        if (e->event == window)
+                                        const auto * e = reinterpret_cast<const xcb_enter_notify_event_t *>(ev);
+                                        if (e->event == screen->root)
                                         {
                                             shouldContinue = false;
                                             hide();
