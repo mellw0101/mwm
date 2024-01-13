@@ -2548,119 +2548,6 @@ class mxb
                 };
             ;
         };
-
-        class str 
-        {
-            public:
-                str(const char* str = "") 
-                {
-                    length = manualStrlen(str);
-                    data = new char[length + 1];
-                    manualStrcpy(data, str);
-                }
-
-                // Move Constructor
-                str(str&& other) noexcept
-                : data(other.data), length(other.length) 
-                {
-                    other.data = nullptr;
-                    other.length = 0;
-                }
-
-                // Move Assignment Operator
-                str& operator=(str&& other) noexcept 
-                {
-                    if (this != &other) 
-                    {
-                        delete[] data;
-                        data = other.data;
-                        length = other.length;
-
-                        other.data = nullptr;
-                        other.length = 0;
-                    }
-                    return *this;
-                }
-
-                ~str() 
-                {
-                    delete[] data;
-                }
-
-                str(const str& other) 
-                {
-                    length = other.length;
-                    data = new char[length + 1];
-                    manualStrcpy(data, other.data);
-                }
-
-                str& operator=(const str& other) 
-                {
-                    if (this != &other) 
-                    {
-                        delete[] data;
-                        length = other.length;
-                        data = new char[length + 1];
-                        manualStrcpy(data, other.data);
-                    }
-                    return *this;
-                }
-
-                operator const char*()
-                {
-                    return data;
-                }
-            ;
-
-            public: // public methods 
-                const char* c_str() const 
-                {
-                    return data;
-                }
-
-                void 
-                append(const char* str) 
-                {
-                    size_t newLength = length + manualStrlen(str);
-                    char* newData = new char[newLength + 1];
-
-                    manualStrcpy(newData, data);
-                    manualStrcpy(newData + length, str);
-
-                    delete[] data;
-                    data = newData;
-                    length = newLength;
-                }
-            ;
-
-            private: // private variables
-                char* data;
-                size_t length;
-            ;
-
-            private: // private methods
-                static 
-                size_t manualStrlen(const char* str) 
-                {
-                    size_t len = 0;
-                    while (str && str[len] != '\0') 
-                    {
-                        ++len;
-                    }
-                    return len;
-                }
-
-                static void 
-                manualStrcpy(char* dest, const char* src) 
-                {
-                    while (*src) 
-                    {
-                        *dest++ = *src++;
-                    }
-                    *dest = '\0';
-                }
-            ;
-        };
         
         class Dialog_win
         {
@@ -3103,24 +2990,12 @@ class mxb
             ;   
         };
 
-        class Root
-        {
-            public:
-                xcb_window_t window = screen->root;
-                int16_t x = 0;
-                int16_t y = 0;
-                uint16_t width = screen->width_in_pixels;
-                uint16_t height = screen->height_in_pixels;
-            ;
-        };
-
         class get 
         {
             public: 
                 class win 
                 {
                     public:
-
                         static void
                         size_pos(xcb_window_t window, uint16_t & x, uint16_t & y, uint16_t & width, uint16_t & height) 
                         {
@@ -4631,6 +4506,15 @@ class mxb
 };
 
 static mxb::Dialog_win::Dock * dock;
+
+class Window_Manager
+{
+    public:
+        window window;
+    ;
+};
+
+static Window_Manager * wm;
 
 namespace get
 {
@@ -9297,6 +9181,8 @@ setup_wm()
     dock->init();
 
     pointer = new class pointer;
+    wm = new Window_Manager;
+    wm->window = screen->root;
 }
 
 int
