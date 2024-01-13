@@ -4636,6 +4636,8 @@ class Window_Manager
             configureRootWindow();
 
             _ewmh();
+
+            window.set_backround_png("/home/mellw/mwm_png/galaxy17.png");
         }
     ;
 
@@ -4742,34 +4744,7 @@ class Window_Manager
                 XCB_EVENT_MASK_POINTER_MOTION
             ; 
             window.apply_event_mask(& mask);
-            // window.clear();
-            // window.grab_keys
-            // ({
-            //     {   T,          ALT | CTRL              },
-            //     {   Q,          ALT | SHIFT             },
-            //     {   F11,        NULL                    },
-            //     {   N_1,        ALT                     },
-            //     {   N_2,        ALT                     },
-            //     {   N_3,        ALT                     },
-            //     {   N_4,        ALT                     },
-            //     {   N_5,        ALT                     },
-            //     {   R_ARROW,    CTRL | SUPER            },
-            //     {   L_ARROW,    CTRL | SUPER            },
-            //     {   R_ARROW,    CTRL | SUPER | SHIFT    },
-            //     {   L_ARROW,    CTRL | SUPER | SHIFT    },
-            //     {   R_ARROW,    SUPER                   },
-            //     {   L_ARROW,    SUPER                   },
-            //     {   U_ARROW,    SUPER                   },
-            //     {   D_ARROW,    SUPER                   },
-            //     {   TAB,        ALT                     },
-            //     {   K,          SUPER                   }
-            // });
-
-            // window.grab_button
-            // ({
-            //     { L_MOUSE_BUTTON, NULL},
-            //     { R_MOUSE_BUTTON, NULL},
-            // });
+            window.clear();
         }
     ;
 };
@@ -9431,7 +9406,7 @@ setup_wm()
     
     change_desktop::teleport_to(1);
 
-    mxb::set::win::backround::as_png("/home/mellw/mwm_png/galaxy17.png", screen->root);
+    // mxb::set::win::backround::as_png("/home/mellw/mwm_png/galaxy17.png", screen->root);
     
     dock = new mxb::Dialog_win::Dock;
     dock->add_app("konsole");
