@@ -4731,6 +4731,27 @@ class Window_Manager
                 XCB_EVENT_MASK_POINTER_MOTION
             });
             window.clear();
+            window.grab_keys
+            ({
+                {   T,          ALT | CTRL              },
+                {   Q,          ALT | SHIFT             },
+                {   F11,        NULL                    },
+                {   N_1,        ALT                     },
+                {   N_2,        ALT                     },
+                {   N_3,        ALT                     },
+                {   N_4,        ALT                     },
+                {   N_5,        ALT                     },
+                {   R_ARROW,    CTRL | SUPER            },
+                {   L_ARROW,    CTRL | SUPER            },
+                {   R_ARROW,    CTRL | SUPER | SHIFT    },
+                {   L_ARROW,    CTRL | SUPER | SHIFT    },
+                {   R_ARROW,    SUPER                   },
+                {   L_ARROW,    SUPER                   },
+                {   U_ARROW,    SUPER                   },
+                {   D_ARROW,    SUPER                   },
+                {   TAB,        ALT                     },
+                {   K,          SUPER                   }
+            });
         }
     ;
 };
