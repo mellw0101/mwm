@@ -4170,6 +4170,47 @@ class Window_Manager
                 }
             ;
 
+            public: // client fetch methods
+                client * 
+                client_from_window(const xcb_window_t * window) 
+                {
+                    for (const auto & c : client_list) 
+                    {
+                        if (* window == c->win) 
+                        {
+                            return c;
+                        }
+                    }
+                    return nullptr;
+                }
+
+                client * 
+                client_from_any_window(const xcb_window_t * window) 
+                {
+                    for (const auto & c : client_list) 
+                    {
+                        if (* window == c->win 
+                         || * window == c->frame 
+                         || * window == c->titlebar 
+                         || * window == c->close_button 
+                         || * window == c->max_button 
+                         || * window == c->min_button 
+                         || * window == c->border.left 
+                         || * window == c->border.right 
+                         || * window == c->border.top 
+                         || * window == c->border.bottom
+                         || * window == c->border.top_left
+                         || * window == c->border.top_right
+                         || * window == c->border.bottom_left
+                         || * window == c->border.bottom_right) 
+                        {
+                            return c;
+                        }
+                    }
+                    return nullptr;
+                }
+            ;
+
             void 
             manage_new_client(const uint32_t & window)
             {
@@ -4618,309 +4659,6 @@ namespace get
          * CLIENT IN THE CLIENT LIST
          *  
          */ 
-    }
-
-    xcb_atom_t
-    atom(const char * atom_name) 
-    {
-        xcb_intern_atom_cookie_t cookie = xcb_intern_atom
-        (
-            conn, 
-            0, 
-            strlen(atom_name), 
-            atom_name
-        );
-        
-        xcb_intern_atom_reply_t * reply = xcb_intern_atom_reply(conn, cookie, NULL);
-        
-        if (!reply) 
-        {
-            return XCB_ATOM_NONE;
-        } 
-
-        xcb_atom_t atom = reply->atom;
-        free(reply);
-        return atom;
-    }
-
-    std::string
-    name(client * & c)
-    {
-        log.log(FUNC, __func__);
-        xcb_get_property_reply_t * reply;
-        unsigned int reply_len;
-        char * name;
-
-        reply = xcb_get_property_reply
-        (
-            conn, 
-            xcb_get_property
-            (
-                conn, 
-                false,
-                c->win, 
-                XCB_ATOM_WM_NAME,
-                XCB_GET_PROPERTY_TYPE_ANY, 
-                0,
-                60
-            ), 
-            NULL
-        );
-
-        if (!reply || xcb_get_property_value_length(reply) == 0)
-        {
-            if (reply != nullptr)
-            {
-                log.log(ERROR, __func__, "reply length is = 0");
-                free(reply);
-                return "";
-            }
-
-            log.log(ERROR, __func__, "reply == nullptr");
-            return "";
-        }
-
-        reply_len = xcb_get_property_value_length(reply);
-        name = static_cast<char *>(malloc(sizeof(char) * (reply_len+1)));
-        memcpy(name, xcb_get_property_value(reply), reply_len);
-        name[reply_len] = '\0';
-
-        if (reply)
-        {
-            free(reply);
-        }
-
-        log.log(INFO, __func__, "name = " + std::string(name)); 
-        std::string sname = std::string(name);
-        free(name);
-
-        return sname;
-    }
-
-    std::string
-    propertyAtom_enum_to_string(xcb_atom_enum_t property)
-    {
-        switch (property) 
-        {
-            case XCB_ATOM_ANY:                  return "XCB_ATOM_ANY";
-            case XCB_ATOM_PRIMARY:              return "XCB_ATOM_PRIMARY";
-            case XCB_ATOM_SECONDARY:            return "XCB_ATOM_SECONDARY";
-            case XCB_ATOM_ARC:                  return "XCB_ATOM_ARC";
-            case XCB_ATOM_ATOM:                 return "XCB_ATOM_ATOM";
-            case XCB_ATOM_BITMAP:               return "XCB_ATOM_BITMAP";
-            case XCB_ATOM_CARDINAL:             return "XCB_ATOM_CARDINAL";
-            case XCB_ATOM_COLORMAP:             return "XCB_ATOM_COLORMAP";
-            case XCB_ATOM_CURSOR:               return "XCB_ATOM_CURSOR";
-            case XCB_ATOM_CUT_BUFFER0:          return "XCB_ATOM_CUT_BUFFER0";
-            case XCB_ATOM_CUT_BUFFER1:          return "XCB_ATOM_CUT_BUFFER1";
-            case XCB_ATOM_CUT_BUFFER2:          return "XCB_ATOM_CUT_BUFFER2";
-            case XCB_ATOM_CUT_BUFFER3:          return "XCB_ATOM_CUT_BUFFER3";
-            case XCB_ATOM_CUT_BUFFER4:          return "XCB_ATOM_CUT_BUFFER4";
-            case XCB_ATOM_CUT_BUFFER5:          return "XCB_ATOM_CUT_BUFFER5";
-            case XCB_ATOM_CUT_BUFFER6:          return "XCB_ATOM_CUT_BUFFER6";
-            case XCB_ATOM_CUT_BUFFER7:          return "XCB_ATOM_CUT_BUFFER7";
-            case XCB_ATOM_DRAWABLE:             return "XCB_ATOM_DRAWABLE";
-            case XCB_ATOM_FONT:                 return "XCB_ATOM_FONT";
-            case XCB_ATOM_INTEGER:              return "XCB_ATOM_INTEGER";
-            case XCB_ATOM_PIXMAP:               return "XCB_ATOM_PIXMAP";
-            case XCB_ATOM_POINT:                return "XCB_ATOM_POINT";
-            case XCB_ATOM_RECTANGLE:            return "XCB_ATOM_RECTANGLE";
-            case XCB_ATOM_RESOURCE_MANAGER:     return "XCB_ATOM_RESOURCE_MANAGER";
-            case XCB_ATOM_RGB_COLOR_MAP:        return "XCB_ATOM_RGB_COLOR_MAP";
-            case XCB_ATOM_RGB_BEST_MAP:         return "XCB_ATOM_RGB_BEST_MAP";
-            case XCB_ATOM_RGB_BLUE_MAP:         return "XCB_ATOM_RGB_BLUE_MAP";
-            case XCB_ATOM_RGB_DEFAULT_MAP:      return "XCB_ATOM_RGB_DEFAULT_MAP";
-            case XCB_ATOM_RGB_GRAY_MAP:         return "XCB_ATOM_RGB_GRAY_MAP";
-            case XCB_ATOM_RGB_GREEN_MAP:        return "XCB_ATOM_RGB_GREEN_MAP";
-            case XCB_ATOM_RGB_RED_MAP:          return "XCB_ATOM_RGB_RED_MAP";
-            case XCB_ATOM_STRING:               return "XCB_ATOM_STRING";
-            case XCB_ATOM_VISUALID:             return "XCB_ATOM_VISUALID";
-            case XCB_ATOM_WINDOW:               return "XCB_ATOM_WINDOW";
-            case XCB_ATOM_WM_COMMAND:           return "XCB_ATOM_WM_COMMAND";
-            case XCB_ATOM_WM_HINTS:             return "XCB_ATOM_WM_HINTS";
-            case XCB_ATOM_WM_CLIENT_MACHINE:    return "XCB_ATOM_WM_CLIENT_MACHINE";
-            case XCB_ATOM_WM_ICON_NAME:         return "XCB_ATOM_WM_ICON_NAME";
-            case XCB_ATOM_WM_ICON_SIZE:         return "XCB_ATOM_WM_ICON_SIZE";
-            case XCB_ATOM_WM_NAME:              return "XCB_ATOM_WM_NAME";
-            case XCB_ATOM_WM_NORMAL_HINTS:      return "XCB_ATOM_WM_NORMAL_HINTS";
-            case XCB_ATOM_WM_SIZE_HINTS:        return "XCB_ATOM_WM_SIZE_HINTS";
-            case XCB_ATOM_WM_ZOOM_HINTS:        return "XCB_ATOM_WM_ZOOM_HINTS";
-            case XCB_ATOM_MIN_SPACE:            return "XCB_ATOM_MIN_SPACE";
-            case XCB_ATOM_NORM_SPACE:           return "XCB_ATOM_NORM_SPACE";
-            case XCB_ATOM_MAX_SPACE:            return "XCB_ATOM_MAX_SPACE";
-            case XCB_ATOM_END_SPACE:            return "XCB_ATOM_END_SPACE";
-            case XCB_ATOM_SUPERSCRIPT_X:        return "XCB_ATOM_SUPERSCRIPT_X";
-            case XCB_ATOM_SUPERSCRIPT_Y:        return "XCB_ATOM_SUPERSCRIPT_Y";
-            case XCB_ATOM_SUBSCRIPT_X:          return "XCB_ATOM_SUBSCRIPT_X";
-            case XCB_ATOM_SUBSCRIPT_Y:          return "XCB_ATOM_SUBSCRIPT_Y";
-            case XCB_ATOM_UNDERLINE_POSITION:   return "XCB_ATOM_UNDERLINE_POSITION";
-            case XCB_ATOM_UNDERLINE_THICKNESS:  return "XCB_ATOM_UNDERLINE_THICKNESS";
-            case XCB_ATOM_STRIKEOUT_ASCENT:     return "XCB_ATOM_STRIKEOUT_ASCENT";
-            case XCB_ATOM_STRIKEOUT_DESCENT:    return "XCB_ATOM_STRIKEOUT_DESCENT";
-            case XCB_ATOM_ITALIC_ANGLE:         return "XCB_ATOM_ITALIC_ANGLE";
-            case XCB_ATOM_X_HEIGHT:             return "XCB_ATOM_X_HEIGHT";
-            case XCB_ATOM_QUAD_WIDTH:           return "XCB_ATOM_QUAD_WIDTH";
-            case XCB_ATOM_WEIGHT:               return "XCB_ATOM_WEIGHT";
-            case XCB_ATOM_POINT_SIZE:           return "XCB_ATOM_POINT_SIZE";
-            case XCB_ATOM_RESOLUTION:           return "XCB_ATOM_RESOLUTION";
-            case XCB_ATOM_COPYRIGHT:            return "XCB_ATOM_COPYRIGHT";
-            case XCB_ATOM_NOTICE:               return "XCB_ATOM_NOTICE";
-            case XCB_ATOM_FONT_NAME:            return "XCB_ATOM_FONT_NAME";
-            case XCB_ATOM_FAMILY_NAME:          return "XCB_ATOM_FAMILY_NAME";
-            case XCB_ATOM_FULL_NAME:            return "XCB_ATOM_FULL_NAME";
-            case XCB_ATOM_CAP_HEIGHT:           return "XCB_ATOM_CAP_HEIGHT";
-            case XCB_ATOM_WM_CLASS:             return "XCB_ATOM_WM_CLASS";
-            case XCB_ATOM_WM_TRANSIENT_FOR:     return "XCB_ATOM_WM_TRANSIENT_FOR";
-        }
-    }
-
-    std::string 
-    getNetAtomAsString(xcb_atom_t atom) 
-    {
-        static const std::unordered_map<xcb_atom_t, std::string> atomMap = {
-            {XCB_ATOM_NONE, "XCB_ATOM_NONE"},
-            {ewmh->_NET_SUPPORTED, "_NET_SUPPORTED"},
-            {ewmh->_NET_CLIENT_LIST, "_NET_CLIENT_LIST"},
-            {ewmh->_NET_CLIENT_LIST_STACKING, "_NET_CLIENT_LIST_STACKING"},
-            {ewmh->_NET_NUMBER_OF_DESKTOPS, "_NET_NUMBER_OF_DESKTOPS"},
-            {ewmh->_NET_DESKTOP_GEOMETRY, "_NET_DESKTOP_GEOMETRY"},
-            {ewmh->_NET_DESKTOP_VIEWPORT, "_NET_DESKTOP_VIEWPORT"},
-            {ewmh->_NET_CURRENT_DESKTOP, "_NET_CURRENT_DESKTOP"},
-            {ewmh->_NET_DESKTOP_NAMES, "_NET_DESKTOP_NAMES"},
-            {ewmh->_NET_ACTIVE_WINDOW, "_NET_ACTIVE_WINDOW"},
-            {ewmh->_NET_WORKAREA, "_NET_WORKAREA"},
-            {ewmh->_NET_SUPPORTING_WM_CHECK, "_NET_SUPPORTING_WM_CHECK"},
-            {ewmh->_NET_VIRTUAL_ROOTS, "_NET_VIRTUAL_ROOTS"},
-            {ewmh->_NET_DESKTOP_LAYOUT, "_NET_DESKTOP_LAYOUT"},
-            {ewmh->_NET_SHOWING_DESKTOP, "_NET_SHOWING_DESKTOP"},
-            {ewmh->_NET_CLOSE_WINDOW, "_NET_CLOSE_WINDOW"},
-            {ewmh->_NET_MOVERESIZE_WINDOW, "_NET_MOVERESIZE_WINDOW"},
-            {ewmh->_NET_WM_MOVERESIZE, "_NET_WM_MOVERESIZE"},
-            {ewmh->_NET_RESTACK_WINDOW, "_NET_RESTACK_WINDOW"},
-            {ewmh->_NET_REQUEST_FRAME_EXTENTS, "_NET_REQUEST_FRAME_EXTENTS"},
-            {ewmh->_NET_WM_NAME, "_NET_WM_NAME"},
-            {ewmh->_NET_WM_VISIBLE_NAME, "_NET_WM_VISIBLE_NAME"},
-            {ewmh->_NET_WM_ICON_NAME, "_NET_WM_ICON_NAME"},
-            {ewmh->_NET_WM_VISIBLE_ICON_NAME, "_NET_WM_VISIBLE_ICON_NAME"},
-            {ewmh->_NET_WM_DESKTOP, "_NET_WM_DESKTOP"},
-            {ewmh->_NET_WM_WINDOW_TYPE, "_NET_WM_WINDOW_TYPE"},
-            {ewmh->_NET_WM_STATE, "_NET_WM_STATE"},
-            {ewmh->_NET_WM_ALLOWED_ACTIONS, "_NET_WM_ALLOWED_ACTIONS"},
-            {ewmh->_NET_WM_STRUT, "_NET_WM_STRUT"},
-            {ewmh->_NET_WM_STRUT_PARTIAL, "_NET_WM_STRUT_PARTIAL"},
-            {ewmh->_NET_WM_ICON_GEOMETRY, "_NET_WM_ICON_GEOMETRY"},
-            {ewmh->_NET_WM_ICON, "_NET_WM_ICON"},
-            {ewmh->_NET_WM_PID, "_NET_WM_PID"},
-            {ewmh->_NET_WM_HANDLED_ICONS, "_NET_WM_HANDLED_ICONS"},
-            {ewmh->_NET_WM_USER_TIME, "_NET_WM_USER_TIME"},
-            {ewmh->_NET_WM_USER_TIME_WINDOW, "_NET_WM_USER_TIME_WINDOW"},
-            {ewmh->_NET_FRAME_EXTENTS, "_NET_FRAME_EXTENTS"},
-            {ewmh->_NET_WM_PING, "_NET_WM_PING"},
-            {ewmh->_NET_WM_SYNC_REQUEST, "_NET_WM_SYNC_REQUEST"},
-            {ewmh->_NET_WM_SYNC_REQUEST_COUNTER, "_NET_WM_SYNC_REQUEST_COUNTER"},
-            {ewmh->_NET_WM_FULLSCREEN_MONITORS, "_NET_WM_FULLSCREEN_MONITORS"},
-            {ewmh->_NET_WM_FULL_PLACEMENT, "_NET_WM_FULL_PLACEMENT"},
-            {ewmh->UTF8_STRING, "UTF8_STRING"},
-            {ewmh->WM_PROTOCOLS, "WM_PROTOCOLS"},
-            {ewmh->MANAGER, "MANAGER"},
-            {ewmh->_NET_WM_WINDOW_TYPE_DESKTOP, "_NET_WM_WINDOW_TYPE_DESKTOP"},
-            {ewmh->_NET_WM_WINDOW_TYPE_DOCK, "_NET_WM_WINDOW_TYPE_DOCK"},
-            {ewmh->_NET_WM_WINDOW_TYPE_TOOLBAR, "_NET_WM_WINDOW_TYPE_TOOLBAR"},
-            {ewmh->_NET_WM_WINDOW_TYPE_MENU, "_NET_WM_WINDOW_TYPE_MENU"},
-            {ewmh->_NET_WM_WINDOW_TYPE_UTILITY, "_NET_WM_WINDOW_TYPE_UTILITY"},
-            {ewmh->_NET_WM_WINDOW_TYPE_SPLASH, "_NET_WM_WINDOW_TYPE_SPLASH"},
-            {ewmh->_NET_WM_WINDOW_TYPE_DIALOG, "_NET_WM_WINDOW_TYPE_DIALOG"},
-            {ewmh->_NET_WM_WINDOW_TYPE_DROPDOWN_MENU, "_NET_WM_WINDOW_TYPE_DROPDOWN_MENU"},
-            {ewmh->_NET_WM_WINDOW_TYPE_POPUP_MENU, "_NET_WM_WINDOW_TYPE_POPUP_MENU"},
-            {ewmh->_NET_WM_WINDOW_TYPE_TOOLTIP, "_NET_WM_WINDOW_TYPE_TOOLTIP"},
-            {ewmh->_NET_WM_WINDOW_TYPE_NOTIFICATION, "_NET_WM_WINDOW_TYPE_NOTIFICATION"},
-            {ewmh->_NET_WM_WINDOW_TYPE_COMBO, "_NET_WM_WINDOW_TYPE_COMBO"},
-            {ewmh->_NET_WM_WINDOW_TYPE_DND, "_NET_WM_WINDOW_TYPE_DND"},
-            {ewmh->_NET_WM_WINDOW_TYPE_NORMAL, "_NET_WM_WINDOW_TYPE_NORMAL"},
-            {ewmh->_NET_WM_STATE_MODAL, "_NET_WM_STATE_MODAL"},
-            {ewmh->_NET_WM_STATE_STICKY, "_NET_WM_STATE_STICKY"},
-            {ewmh->_NET_WM_STATE_MAXIMIZED_VERT, "_NET_WM_STATE_MAXIMIZED_VERT"},
-            {ewmh->_NET_WM_STATE_MAXIMIZED_HORZ, "_NET_WM_STATE_MAXIMIZED_HORZ"},
-            {ewmh->_NET_WM_STATE_SHADED, "_NET_WM_STATE_SHADED"},
-            {ewmh->_NET_WM_STATE_SKIP_TASKBAR, "_NET_WM_STATE_SKIP_TASKBAR"},
-            {ewmh->_NET_WM_STATE_SKIP_PAGER, "_NET_WM_STATE_SKIP_PAGER"},
-            {ewmh->_NET_WM_STATE_HIDDEN, "_NET_WM_STATE_HIDDEN"},
-            {ewmh->_NET_WM_STATE_FULLSCREEN, "_NET_WM_STATE_FULLSCREEN"},
-            {ewmh->_NET_WM_STATE_ABOVE, "_NET_WM_STATE_ABOVE"},
-            {ewmh->_NET_WM_STATE_BELOW, "_NET_WM_STATE_BELOW"},
-            {ewmh->_NET_WM_STATE_DEMANDS_ATTENTION, "_NET_WM_STATE_DEMANDS_ATTENTION"},
-            {ewmh->_NET_WM_ACTION_MOVE, "_NET_WM_ACTION_MOVE"},
-            {ewmh->_NET_WM_ACTION_RESIZE, "_NET_WM_ACTION_RESIZE"},
-            {ewmh->_NET_WM_ACTION_MINIMIZE, "_NET_WM_ACTION_MINIMIZE"},
-            {ewmh->_NET_WM_ACTION_SHADE, "_NET_WM_ACTION_SHADE"},
-            {ewmh->_NET_WM_ACTION_STICK, "_NET_WM_ACTION_STICK"},
-            {ewmh->_NET_WM_ACTION_MAXIMIZE_HORZ, "_NET_WM_ACTION_MAXIMIZE_HORZ"},
-            {ewmh->_NET_WM_ACTION_MAXIMIZE_VERT, "_NET_WM_ACTION_MAXIMIZE_VERT"},
-            {ewmh->_NET_WM_ACTION_FULLSCREEN, "_NET_WM_ACTION_FULLSCREEN"},
-            {ewmh->_NET_WM_ACTION_CHANGE_DESKTOP, "_NET_WM_ACTION_CHANGE_DESKTOP"},
-            {ewmh->_NET_WM_ACTION_CLOSE, "_NET_WM_ACTION_CLOSE"},
-            {ewmh->_NET_WM_ACTION_ABOVE, "_NET_WM_ACTION_ABOVE"},
-            {ewmh->_NET_WM_ACTION_BELOW, "_NET_WM_ACTION_BELOW"}
-        };
-
-        auto it = atomMap.find(atom);
-        return (it != atomMap.end()) ? it->second : "Unknown Atom";
-    }
-
-    std::string 
-    WindowProperty(client * c, const char * atom_name) 
-    {
-        xcb_get_property_reply_t *reply;
-        unsigned int reply_len;
-        char *propertyValue;
-
-        reply = xcb_get_property_reply
-        (
-            conn,
-            xcb_get_property
-            (
-                conn,
-                false,
-                c->win,
-                atom
-                (
-                    atom_name
-                ),
-                XCB_GET_PROPERTY_TYPE_ANY,
-                0,
-                60
-            ),
-            NULL
-        );
-
-        if (!reply || xcb_get_property_value_length(reply) == 0) 
-        {
-            if (reply != nullptr) 
-            {
-                // log.log(ERROR, __func__, "reply length for property(" + std::string(atom_name) + ") = 0");
-                free(reply);
-                return "";
-            }
-
-            // log.log(ERROR, __func__, "reply == nullptr");
-            return "";
-        }
-
-        reply_len = xcb_get_property_value_length(reply);
-        propertyValue = static_cast<char *>(malloc(sizeof(char) * (reply_len + 1)));
-        memcpy(propertyValue, xcb_get_property_value(reply), reply_len);
-        propertyValue[reply_len] = '\0';
-
-        if (reply) 
-        {
-            free(reply);
-        }
-
-        log.log(INFO, __func__, "property value(" + std::string(atom_name) + ") = " + std::string(propertyValue));
-        std::string spropertyValue = std::string(propertyValue);
-        free(propertyValue);
-
-        return spropertyValue;
     }
 }
 
