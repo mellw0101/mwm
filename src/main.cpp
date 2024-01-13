@@ -2726,8 +2726,6 @@ class mxb
                 };
             ;
         };
-        
-        
 
         class Client 
         {
@@ -2993,6 +2991,7 @@ class mxb
         };
     ;
 };
+
 class Dialog_win
 {
     public:
@@ -3432,6 +3431,7 @@ static Dialog_win::Dock * dock;
 class Window_Manager
 {
     public: // variabels 
+        Dialog_win::context_menu context_menu;
         window root;
     ;
 
