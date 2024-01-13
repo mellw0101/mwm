@@ -965,7 +965,7 @@ class window
                     xcb_image_destroy(xcb_image);
                     imlib_free_image(); // Free scaled image
 
-                    clear();
+                    clear_window();
                 }
 
                 void 
@@ -1023,7 +1023,7 @@ class window
             }
 
             void
-            clear()
+            clear_window()
             {
                 xcb_clear_area
                 (
@@ -2647,24 +2647,11 @@ class mxb
 
                     public: // public methods 
                         void
-                        create(const xcb_window_t & parent_window, const int16_t & x, const int16_t & y, const uint16_t & width, const uint16_t & height, COLOR color)
+                        create(const uint32_t & parent_window, const int16_t & x, const int16_t & y, const uint16_t & width, const uint16_t & height, COLOR color)
                         {
-                            window.create
-                            (
-                                XCB_COPY_FROM_PARENT,
-                                parent_window,
-                                x,
-                                y,
-                                width,
-                                height,
-                                0,
-                                XCB_WINDOW_CLASS_INPUT_OUTPUT,
-                                XCB_COPY_FROM_PARENT,
-                                0,
-                                NULL
-                            );
+                            window.create_default(parent_window, x, y, width, height);
                             window.set_backround_color(color);
-                            window.grab_button({{L_MOUSE_BUTTON, NULL}});
+                            window.grab_button({ { L_MOUSE_BUTTON, NULL } });
                             window.map();
                             xcb_flush(conn);
                         }
@@ -2678,7 +2665,6 @@ class mxb
                         void 
                         activate() const 
                         {
-                            LOG_func
                             button_action();
                         }
                     ;
@@ -2723,10 +2709,6 @@ class mxb
                             }
                         }
                     ;
-
-                    private: // private variables
-                        int button_index = 0;
-                    ;
                 };
 
                 class Dock
@@ -2759,11 +2741,7 @@ class mxb
                             {
                                 return;
                             }
-
-                            app_data app;
-                            app.name = app_name;
-                            app.index = apps.size();
-                            apps.push_back(app);
+                            apps.push_back(app_name);
                         }
                     ;
 
@@ -2773,7 +2751,7 @@ class mxb
                             const char * name;
                             int index;
                         };
-                        std::vector<app_data> apps;
+                        std::vector<const char *> apps;
                     ;
 
                     private: // private methods
@@ -2842,15 +2820,15 @@ class mxb
                             {
                                 buttons.add
                                 (
-                                    app.name,
+                                    app,
                                     [app] () 
                                     {
                                         {
-                                            mxb::launch::program((char *) app.name);
+                                            mxb::launch::program((char *) app);
                                         }
                                     }    
                                 );
-                                buttons.list[app.index].create(main_window, ((buttons.size() - 1) * width) + 2, 2, width - 4, height - 4, BLACK);
+                                buttons.list[buttons.size()].create(main_window, ((buttons.size() - 1) * width) + 2, 2, width - 4, height - 4, BLACK);
                             }
                             calc_size_pos();
                         }
