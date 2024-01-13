@@ -5045,7 +5045,7 @@ void
 make_close_button_png(window window)
 {
     mxb::create::png("/home/mellw/close.png", bitmap::CHAR_BITMAP_CLOSE_BUTTON);
-    mxb::set::win::backround::as_png("/home/mellw/close.png", window);
+    window.set_backround_png("/home/mellw/close.png");
 }
 
 void
