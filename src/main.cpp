@@ -3028,7 +3028,7 @@ class mxb
                 class Dock
                 {
                     public: // constructor
-                        Dock() {}
+                        
                     ;
 
                     public: // public variables 
