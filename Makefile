@@ -38,8 +38,6 @@ cc = clang
 CXX = clang++
 
 SRC = 	src/main.cpp 	\
-		src/tools.cpp	\
-		src/mxb.cpp		\
 		src/declarations.cpp
 
 OBJ = $(SRC:../src/%.cpp=%.o)
