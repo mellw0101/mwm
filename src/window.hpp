@@ -1091,35 +1091,35 @@ class window
 
         Logger log;
 
-        // private: // animation variables 
-        //     std::thread XAnimationThread;
-        //     std::thread YAnimationThread;
-        //     std::thread WAnimationThread;
-        //     std::thread HAnimationThread;
-        //     int currentX;
-        //     int currentY;
-        //     int currentWidth;
-        //     int currentHeight;
-        //     int stepX;
-        //     int stepY;
-        //     int stepWidth;
-        //     int stepHeight;
-        //     double GAnimDuration;
-        //     double XAnimDuration;
-        //     double YAnimDuration;
-        //     double WAnimDuration;
-        //     double HAnimDuration;
-        //     std::atomic<bool> stopXFlag{false};
-        //     std::atomic<bool> stopYFlag{false};
-        //     std::atomic<bool> stopWFlag{false};
-        //     std::atomic<bool> stopHFlag{false};
-        //     std::chrono::high_resolution_clock::time_point XlastUpdateTime;
-        //     std::chrono::high_resolution_clock::time_point YlastUpdateTime;
-        //     std::chrono::high_resolution_clock::time_point WlastUpdateTime;
-        //     std::chrono::high_resolution_clock::time_point HlastUpdateTime;
-        //     const double frameRate = 120;
-        //     const double frameDuration = 1000.0 / frameRate;
-        // ;
+        private: // animation variables 
+            std::thread XAnimationThread{};
+            std::thread YAnimationThread{};
+            std::thread WAnimationThread{};
+            std::thread HAnimationThread{};
+            int currentX;
+            int currentY;
+            int currentWidth;
+            int currentHeight;
+            int stepX;
+            int stepY;
+            int stepWidth;
+            int stepHeight;
+            double GAnimDuration;
+            double XAnimDuration;
+            double YAnimDuration;
+            double WAnimDuration;
+            double HAnimDuration;
+            std::atomic<bool> stopXFlag{false};
+            std::atomic<bool> stopYFlag{false};
+            std::atomic<bool> stopWFlag{false};
+            std::atomic<bool> stopHFlag{false};
+            std::chrono::high_resolution_clock::time_point XlastUpdateTime;
+            std::chrono::high_resolution_clock::time_point YlastUpdateTime;
+            std::chrono::high_resolution_clock::time_point WlastUpdateTime;
+            std::chrono::high_resolution_clock::time_point HlastUpdateTime;
+            const double frameRate = 120;
+            const double frameDuration = 1000.0 / frameRate;
+        ;
     ;
 
     private: // functions 
