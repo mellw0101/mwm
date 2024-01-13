@@ -970,6 +970,24 @@ class window
                 xcb_free_cursor(conn, cursor);
             }
 
+            void 
+            draw_text(const char * str , const COLOR & text_color, const COLOR & backround_color, const char * font_name, const int16_t & x, const int16_t & y)
+            {
+                get_font(font_name);
+                create_font_gc(text_color, backround_color, font);
+                xcb_image_text_8
+                (
+                    conn, 
+                    strlen(str), 
+                    _window, 
+                    font_gc,
+                    x, 
+                    y, 
+                    str
+                );
+                xcb_flush(conn);
+            }
+
             public: // size_pos configuration methods 
                 public: // fetch methods
                     uint32_t
@@ -1244,6 +1262,8 @@ class window
         const void     * _value_list;
 
         xcb_gcontext_t gc;
+        xcb_gcontext_t font_gc;
+        xcb_font_t     font;
         xcb_pixmap_t   pixmap;
     ;
 
@@ -1445,6 +1465,26 @@ class window
                         values
                     );
                     xcb_flush(conn);
+                }
+
+                void
+                create_font_gc(const COLOR & text_color, const COLOR & backround_color, xcb_font_t font)
+                {
+                    font_gc = xcb_generate_id(conn);
+
+                    xcb_create_gc
+                    (
+                        conn, 
+                        font_gc, 
+                        _window, 
+                        XCB_GC_FOREGROUND | XCB_GC_BACKGROUND | XCB_GC_FONT, 
+                        (const uint32_t[3])
+                        {
+                            get_color(text_color),
+                            get_color(backround_color),
+                            font
+                        }
+                    );
                 }
             ;
 
@@ -1649,6 +1689,20 @@ class window
                     height = 200;
                 }
                 return height;
+            }
+
+            void
+            get_font(const char * font_name)
+            {
+                font = xcb_generate_id(conn);
+                xcb_open_font
+                (
+                    conn, 
+                    font, 
+                    strlen(font_name),
+                    font_name
+                );
+                xcb_flush(conn);
             }
         ;
 
@@ -2888,7 +2942,7 @@ class mxb
                             for (auto & entry : entries)
                             {
                                 entry.make_window(window, 0, y, size_pos.width, size_pos.height);
-                                mxb::draw::text(entry.window, entry.getName(), WHITE, BLACK, "7x14", 2, 14);
+                                entry.window.draw_text(entry.getName(), WHITE, BLACK, "7x14", 2, 14);
                                 y += size_pos.height;
                             }
                         }
@@ -3116,37 +3170,6 @@ class mxb
                     ;
                 };
             ;   
-        };
-
-        class get 
-        {
-            public: 
-                class font
-                {
-                    public:
-                        font(const char * font_name)
-                        {
-                            _font = xcb_generate_id(conn);
-                            xcb_open_font
-                            (
-                                conn, 
-                                _font, 
-                                strlen(font_name),
-                                font_name
-                            );
-                        }
-
-                        operator xcb_font_t() const 
-                        {
-                            return _font;
-                        }
-                    ;
-
-                    private:
-                        xcb_font_t _font;
-                    ;
-                };
-            ;
         };
 
         class Client 
@@ -3424,80 +3447,6 @@ class mxb
         class create
         {
             public:
-                class gc
-                {
-                    public:
-                        class graphics_exposure
-                        {
-                            public:
-                                graphics_exposure(const xcb_window_t & window)
-                                {
-                                    gc = xcb_generate_id(conn);
-                                    mask = XCB_GC_FOREGROUND | XCB_GC_BACKGROUND | XCB_GC_GRAPHICS_EXPOSURES;
-                                    uint32_t values[3] =
-                                    {
-                                        screen->black_pixel,
-                                        screen->white_pixel,
-                                        0
-                                    };
-
-                                    xcb_create_gc
-                                    (
-                                        conn,
-                                        gc,
-                                        window,
-                                        mask,
-                                        values
-                                    );
-                                }
-
-                                operator xcb_gcontext_t() const 
-                                {
-                                    return gc;
-                                }
-                            ;
-
-                            private:
-                                xcb_gcontext_t gc;
-                                uint32_t mask;
-                            ;
-                        };
-
-                        class font
-                        {
-                            public:
-                                font(xcb_window_t window, const COLOR & text_color, const COLOR & backround_color, xcb_font_t font)
-                                {
-                                    gc = xcb_generate_id(conn);
-
-                                    xcb_create_gc
-                                    (
-                                        conn, 
-                                        gc, 
-                                        window, 
-                                        XCB_GC_FOREGROUND | XCB_GC_BACKGROUND | XCB_GC_FONT, 
-                                        (const uint32_t[3])
-                                        {
-                                            _color(text_color),
-                                            _color(backround_color),
-                                            font
-                                        }
-                                    );
-                                }
-
-                                operator xcb_gcontext_t() const 
-                                {
-                                    return gc;
-                                }
-                            ;
-
-                            private:
-                                xcb_gcontext_t gc;
-                            ;
-                        };
-                    ;
-                };
-
                 class new_desktop
                 {
                     public:
@@ -3795,8 +3744,6 @@ class mxb
                         }
                     ;
                 };
-
-                
             ;
         };
 
@@ -4015,34 +3962,6 @@ class mxb
                         } 
                     ;
                 };
-            ;
-        };
-
-        class draw
-        {
-            public:
-                static void 
-                text(const xcb_window_t & window, const char * str , const COLOR & text_color, const COLOR & backround_color, const char * font_name, const int16_t & x, const int16_t & y)
-                {
-                    /*
-                     *  font names
-                     *
-                     *  '7x14'
-                     *
-                     */
-                    xcb_image_text_8
-                    (
-                        conn, 
-                        strlen(str), 
-                        window, 
-                        mxb::create::gc::font(window, text_color, backround_color, mxb::get::font(font_name)),
-                        x, 
-                        y, 
-                        str
-                    );
-
-                    xcb_flush(conn);
-                }
             ;
         };
     ;
@@ -4305,7 +4224,7 @@ class Window_Manager
                 if (!(xcb_ewmh_init_atoms_replies(ewmh, cookie, 0)))
                 {
                     log_error("xcb_ewmh_init_atoms_replies:faild");
-                    exit(1);
+                    quit(1);
                 }
 
                 const char * str = "mwm";
