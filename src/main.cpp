@@ -27,6 +27,92 @@ static xcb_screen_t * screen;
 static xcb_gcontext_t gc;
 static xcb_window_t start_win;
 
+class Bitmap
+{
+    public: // constructor 
+        Bitmap(int width, int height) 
+        : width(width), height(height), bitmap(height, std::vector<bool>(width, false)) {}
+    ;
+
+    public: // methods 
+        void 
+        modify(int row, int startCol, int endCol, bool value) 
+        {
+            if (row < 0 || row >= height || startCol < 0 || endCol > width) 
+            {
+                log_error("Invalid row or column indices");
+            }
+        
+            for (int i = startCol; i < endCol; ++i) 
+            {
+                bitmap[row][i] = value;
+            }
+        }
+
+        void 
+        exportToPng(const char * file_name) const
+        {
+            FILE * fp = fopen(file_name, "wb");
+            if (!fp) 
+            {
+                log_error("Failed to create PNG file");
+                return;
+            }
+
+            png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
+            if (!png_ptr) 
+            {
+                fclose(fp);
+                log_error("Failed to create PNG write struct");
+                return;
+            }
+
+            png_infop info_ptr = png_create_info_struct(png_ptr);
+            if (!info_ptr) 
+            {
+                fclose(fp);
+                png_destroy_write_struct(&png_ptr, nullptr);
+                log_error("Failed to create PNG info struct");
+                return;
+            }
+
+            if (setjmp(png_jmpbuf(png_ptr))) 
+            {
+                fclose(fp);
+                png_destroy_write_struct(&png_ptr, &info_ptr);
+                log_error("Error during PNG creation");
+                return;
+            }
+
+            png_init_io(png_ptr, fp);
+            png_set_IHDR(png_ptr, info_ptr, width, height, 8, PNG_COLOR_TYPE_GRAY, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
+            png_write_info(png_ptr, info_ptr);
+
+            png_bytep row = new png_byte[width];
+            for (int y = 0; y < height; y++) 
+            {
+                for (int x = 0; x < width; x++) 
+                {
+                    row[x] = bitmap[y][x] ? 0xFF : 0x00;
+                }
+                png_write_row(png_ptr, row);
+            }
+            delete[] row;
+
+            png_write_end(png_ptr, nullptr);
+
+            fclose(fp);
+            png_destroy_write_struct(&png_ptr, &info_ptr);
+        }
+    ;
+    
+    private: // variables
+        int width, height;
+        std::vector<std::vector<bool>> bitmap;
+    ;
+};
+
+
 class _scale
 {
     public:
@@ -881,6 +967,13 @@ class window
 
                     clear();
                 }
+
+                void 
+                make_then_set_png(const char * file_name, const std::vector<std::vector<bool>>& bitmap) 
+                {
+                    create_png_from_vector_bitmap(file_name, bitmap);
+                    set_backround_png(file_name);
+                }
             ;
         ;
     ;
@@ -1121,6 +1214,68 @@ class window
                     xcb_flush(conn);
                 }
             ;
+
+            private: // png functions
+                void
+                create_png_from_vector_bitmap(const char * file_name, const std::vector<std::vector<bool>> & bitmap)
+                {
+                    int width = bitmap[0].size();
+                    int height = bitmap.size();
+
+                    FILE *fp = fopen(file_name, "wb");
+                    if (!fp)
+                    {
+                        log_error("Failed to open file: " + std::string(file_name));
+                        return;
+                    }
+
+                    png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+                    if (!png_ptr)
+                    {
+                        fclose(fp);
+                        log_error("Failed to create PNG write struct");
+                        return;
+                    }
+
+                    png_infop info_ptr = png_create_info_struct(png_ptr);
+                    if (!info_ptr)
+                    {
+                        fclose(fp);
+                        png_destroy_write_struct(&png_ptr, NULL);
+                        log_error("Failed to create PNG info struct");
+                        return;
+                    }
+
+                    if (setjmp(png_jmpbuf(png_ptr))) 
+                    {
+                        fclose(fp);
+                        png_destroy_write_struct(&png_ptr, &info_ptr);
+                        log_error("Error during PNG creation");
+                        return;
+                    }
+
+                    png_init_io(png_ptr, fp);
+                    png_set_IHDR(png_ptr, info_ptr, width, height, 8, PNG_COLOR_TYPE_GRAY, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
+                    png_write_info(png_ptr, info_ptr);
+
+                    // Write bitmap to PNG
+                    png_bytep row = new png_byte[width];
+                    for (int y = 0; y < height; y++) 
+                    {
+                        for (int x = 0; x < width; x++) 
+                        {
+                            row[x] = bitmap[y][x] ? 0xFF : 0x00;
+                        }
+                        png_write_row(png_ptr, row);
+                    }
+                    delete[] row;
+
+                    png_write_end(png_ptr, NULL);
+
+                    fclose(fp);
+                    png_destroy_write_struct(&png_ptr, &info_ptr);
+                }
+            ;
         ;
 
         private: // get functions 
@@ -1239,13 +1394,185 @@ class window
     ;
 };
 
-static void make_close_button_png(window window);
-static void make_max_button_png(window window);
-static void make_min_button_png(window window);
+namespace bitmap
+{
+    const bool CHAR_BITMAP_A[20][20] = 
+    {    
+        {0,0,0,1,0,0,0},
+        {0,0,1,0,1,0,0},
+        {0,0,1,0,1,0,0},
+        {0,1,0,0,0,1,0},
+        {0,1,0,0,0,1,0},
+        {1,0,0,0,0,0,1},
+        {1,1,1,1,1,1,1},
+        {1,0,0,0,0,0,1},
+        {1,0,0,0,0,0,1},
+        {1,0,0,0,0,0,1},
+        {1,0,0,0,0,0,1},
+        {1,0,0,0,0,0,1},
+        {1,0,0,0,0,0,1},
+        {1,0,0,0,0,0,1},
+    };
+
+    const bool CHAR_BITMAP_B[20][20] = 
+    {
+        {1, 1, 1, 1, 1, 0, 0},
+        {1, 0, 0, 0, 0, 1, 0},
+        {1, 0, 0, 0, 0, 1, 0},
+        {1, 0, 0, 0, 0, 1, 0},
+        {1, 1, 1, 1, 1, 0, 0},
+        {1, 0, 0, 0, 0, 1, 0},
+        {1, 0, 0, 0, 0, 1, 0},
+        {1, 0, 0, 0, 0, 1, 0},
+        {1, 0, 0, 0, 0, 1, 0},
+        {1, 0, 0, 0, 0, 1, 0},
+        {1, 0, 0, 0, 0, 1, 0},
+        {1, 0, 0, 0, 0, 1, 0},
+        {1, 1, 1, 1, 1, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0},
+    };
+
+    const bool CHAR_BITMAP_C[20][20] = 
+    {
+        {0, 1, 1, 1, 1, 1, 0},
+        {1, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 0, 0, 0, 0},
+        {1, 0, 0, 0, 0, 0, 0},
+        {1, 0, 0, 0, 0, 0, 0},
+        {1, 0, 0, 0, 0, 0, 0},
+        {1, 0, 0, 0, 0, 0, 0},
+        {1, 0, 0, 0, 0, 0, 0},
+        {1, 0, 0, 0, 0, 0, 0},
+        {1, 0, 0, 0, 0, 0, 0},
+        {1, 0, 0, 0, 0, 0, 0},
+        {1, 0, 0, 0, 0, 0, 1},
+        {0, 1, 1, 1, 1, 1, 0},
+        {0, 0, 0, 0, 0, 0, 0},
+    };
+
+    const bool CHAR_BITMAP_CLOSE_BUTTON[20][20] = 
+    {
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0},
+        {0,0,0,0,1,1,1,0,0,0,0,0,0,1,1,1,0,0,0,0},
+        {0,0,0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0,0,0},
+        {0,0,0,0,0,0,1,1,1,0,0,1,1,1,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,1,1,1,0,0,1,1,1,0,0,0,0,0,0},
+        {0,0,0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0,0,0},
+        {0,0,0,0,1,1,1,0,0,0,0,0,0,1,1,1,0,0,0,0},
+        {0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
+    };
+
+    std::vector<std::vector<bool>> CLOSE_BUTTON_BITMAP =
+    {
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0},
+        {0,0,0,0,1,1,1,0,0,0,0,0,0,1,1,1,0,0,0,0},
+        {0,0,0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0,0,0},
+        {0,0,0,0,0,0,1,1,1,0,0,1,1,1,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,1,1,1,0,0,1,1,1,0,0,0,0,0,0},
+        {0,0,0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0,0,0},
+        {0,0,0,0,1,1,1,0,0,0,0,0,0,1,1,1,0,0,0,0},
+        {0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
+    };
+
+    const bool CHAR_BITMAP_MIN_BUTTON[20][20] = 
+    {
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0},
+        {0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+    };
+
+    namespace letter
+    {
+        const bool h[11][7] =
+        {
+            {1,0,0,0,0,0,0},
+            {1,0,0,0,0,0,0},
+            {1,0,0,0,0,0,0},
+            {1,0,0,0,0,0,0},
+            {1,1,1,1,1,1,0},
+            {1,0,0,0,0,1,0},
+            {1,0,0,0,0,1,0},
+            {1,0,0,0,0,1,0},
+            {1,0,0,0,0,1,0},
+            {1,0,0,0,0,1,0},
+            {1,0,0,0,0,1,0}
+        };
+    }
+
+    std::vector<std::vector<bool>> 
+    create_bool_bitmap(int width, int height) 
+    {
+        std::vector<std::vector<bool>> bitmap(height, std::vector<bool>(width, false));
+        return bitmap;
+    }
+
+    void 
+    modify_bitmap(std::vector<std::vector<bool>>& bitmap, int row, int startCol, int endCol, bool value) 
+    {
+        // Check if the row and column indices are within the bounds of the bitmap
+        if (row < 0 || row >= bitmap.size()) 
+        {
+            log_error("Invalid row");
+            return;
+        }
+
+        if (startCol < 0 || endCol > bitmap[0].size())
+        {
+            log_error("Invalid column");
+            return;
+        }
+
+        for (int i = startCol; i < endCol; ++i) 
+        {
+            bitmap[row][i] = value;
+        }
+    }
+}
 
 class client
 {
-    public: // subclasses
+    public: // subclasses 
         class client_border_decor
         {
             public:    
@@ -1262,7 +1589,7 @@ class client
         };
     ;
 
-    public: // variabels
+    public: // variabels 
         char name[256];
 
         window win;
@@ -1286,7 +1613,7 @@ class client
         uint16_t desktop;
     ;
 
-    public: // methods
+    public: // methods 
         void
         _width(const uint32_t & width)
         {
@@ -1469,7 +1796,7 @@ class client
             close_button.set_backround_color(BLUE);
             close_button.grab_button({ { L_MOUSE_BUTTON, NULL } });
             close_button.map();
-            make_close_button_png(close_button);
+            close_button.make_then_set_png("/home/mellw/close.png", bitmap::CLOSE_BUTTON_BITMAP);
         }
 
         void
@@ -1480,7 +1807,33 @@ class client
             max_button.apply_event_mask({XCB_EVENT_MASK_ENTER_WINDOW, XCB_EVENT_MASK_LEAVE_WINDOW});
             max_button.grab_button({ { L_MOUSE_BUTTON, NULL } });
             max_button.map();
-            make_max_button_png(max_button);
+
+            Bitmap bitmap(20, 20);
+            bitmap.modify(4, 4, 16, true);
+            bitmap.modify(5, 4, 5, true);
+            bitmap.modify(5, 15, 16, true);
+            bitmap.modify(6, 4, 5, true);
+            bitmap.modify(6, 15, 16, true);
+            bitmap.modify(7, 4, 5, true);
+            bitmap.modify(7, 15, 16, true);
+            bitmap.modify(8, 4, 5, true);
+            bitmap.modify(8, 15, 16, true);
+            bitmap.modify(9, 4, 5, true);
+            bitmap.modify(9, 15, 16, true);
+            bitmap.modify(10, 4, 5, true);
+            bitmap.modify(10, 15, 16, true);
+            bitmap.modify(11, 4, 5, true);
+            bitmap.modify(11, 15, 16, true);
+            bitmap.modify(12, 4, 5, true);
+            bitmap.modify(12, 15, 16, true);
+            bitmap.modify(13, 4, 5, true);
+            bitmap.modify(13, 15, 16, true);
+            bitmap.modify(14, 4, 5, true);
+            bitmap.modify(14, 15, 16, true);
+            bitmap.modify(15, 4, 16, true);
+            bitmap.exportToPng("/home/mellw/max.png");
+
+            max_button.set_backround_png("/home/mellw/max.png");
         }
 
         void
@@ -1491,7 +1844,13 @@ class client
             min_button.apply_event_mask({XCB_EVENT_MASK_ENTER_WINDOW, XCB_EVENT_MASK_LEAVE_WINDOW});
             min_button.grab_button({ { L_MOUSE_BUTTON, NULL } });
             min_button.map();
-            make_min_button_png(min_button);
+
+            Bitmap bitmap(20, 20);            
+            bitmap.modify(9, 4, 16, true);
+            bitmap.modify(10, 4, 16, true);
+            bitmap.exportToPng("/home/mellw/min.png");
+
+            min_button.set_backround_png("/home/mellw/min.png");
         }
 
         void
@@ -4837,207 +5196,6 @@ class mxb
 };
 
 static mxb::Dialog_win::Dock * dock;
-
-namespace bitmap
-{
-    const bool CHAR_BITMAP_A[20][20] = 
-    {    
-        {0,0,0,1,0,0,0},
-        {0,0,1,0,1,0,0},
-        {0,0,1,0,1,0,0},
-        {0,1,0,0,0,1,0},
-        {0,1,0,0,0,1,0},
-        {1,0,0,0,0,0,1},
-        {1,1,1,1,1,1,1},
-        {1,0,0,0,0,0,1},
-        {1,0,0,0,0,0,1},
-        {1,0,0,0,0,0,1},
-        {1,0,0,0,0,0,1},
-        {1,0,0,0,0,0,1},
-        {1,0,0,0,0,0,1},
-        {1,0,0,0,0,0,1},
-    };
-
-    const bool CHAR_BITMAP_B[20][20] = 
-    {
-        {1, 1, 1, 1, 1, 0, 0},
-        {1, 0, 0, 0, 0, 1, 0},
-        {1, 0, 0, 0, 0, 1, 0},
-        {1, 0, 0, 0, 0, 1, 0},
-        {1, 1, 1, 1, 1, 0, 0},
-        {1, 0, 0, 0, 0, 1, 0},
-        {1, 0, 0, 0, 0, 1, 0},
-        {1, 0, 0, 0, 0, 1, 0},
-        {1, 0, 0, 0, 0, 1, 0},
-        {1, 0, 0, 0, 0, 1, 0},
-        {1, 0, 0, 0, 0, 1, 0},
-        {1, 0, 0, 0, 0, 1, 0},
-        {1, 1, 1, 1, 1, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0},
-    };
-
-    const bool CHAR_BITMAP_C[20][20] = 
-    {
-        {0, 1, 1, 1, 1, 1, 0},
-        {1, 0, 0, 0, 0, 0, 1},
-        {1, 0, 0, 0, 0, 0, 0},
-        {1, 0, 0, 0, 0, 0, 0},
-        {1, 0, 0, 0, 0, 0, 0},
-        {1, 0, 0, 0, 0, 0, 0},
-        {1, 0, 0, 0, 0, 0, 0},
-        {1, 0, 0, 0, 0, 0, 0},
-        {1, 0, 0, 0, 0, 0, 0},
-        {1, 0, 0, 0, 0, 0, 0},
-        {1, 0, 0, 0, 0, 0, 0},
-        {1, 0, 0, 0, 0, 0, 1},
-        {0, 1, 1, 1, 1, 1, 0},
-        {0, 0, 0, 0, 0, 0, 0},
-    };
-
-    const bool CHAR_BITMAP_CLOSE_BUTTON[20][20] = 
-    {
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0},
-        {0,0,0,0,1,1,1,0,0,0,0,0,0,1,1,1,0,0,0,0},
-        {0,0,0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0,0,0},
-        {0,0,0,0,0,0,1,1,1,0,0,1,1,1,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,1,1,1,0,0,1,1,1,0,0,0,0,0,0},
-        {0,0,0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0,0,0},
-        {0,0,0,0,1,1,1,0,0,0,0,0,0,1,1,1,0,0,0,0},
-        {0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
-    };
-
-    std::vector<std::vector<bool>> CLOSE_BUTTON_BITMAP =
-    {
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0},
-        {0,0,0,0,1,1,1,0,0,0,0,0,0,1,1,1,0,0,0,0},
-        {0,0,0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0,0,0},
-        {0,0,0,0,0,0,1,1,1,0,0,1,1,1,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,1,1,1,0,0,1,1,1,0,0,0,0,0,0},
-        {0,0,0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0,0,0},
-        {0,0,0,0,1,1,1,0,0,0,0,0,0,1,1,1,0,0,0,0},
-        {0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
-    };
-
-    const bool CHAR_BITMAP_MIN_BUTTON[20][20] = 
-    {
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0},
-        {0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-    };
-
-    namespace letter
-    {
-        const bool h[11][7] =
-        {
-            {1,0,0,0,0,0,0},
-            {1,0,0,0,0,0,0},
-            {1,0,0,0,0,0,0},
-            {1,0,0,0,0,0,0},
-            {1,1,1,1,1,1,0},
-            {1,0,0,0,0,1,0},
-            {1,0,0,0,0,1,0},
-            {1,0,0,0,0,1,0},
-            {1,0,0,0,0,1,0},
-            {1,0,0,0,0,1,0},
-            {1,0,0,0,0,1,0}
-        };
-    }
-
-    std::vector<std::vector<bool>> 
-    create_bool_bitmap(int width, int height) 
-    {
-        std::vector<std::vector<bool>> bitmap(height, std::vector<bool>(width, false));
-        return bitmap;
-    }
-
-    void 
-    modify_bitmap(std::vector<std::vector<bool>>& bitmap, int row, int startCol, int endCol, bool value) 
-    {
-        // Check if the row and column indices are within the bounds of the bitmap
-        if (row < 0 || row >= bitmap.size()) 
-        {
-            log_error("Invalid row");
-            return;
-        }
-
-        if (startCol < 0 || endCol > bitmap[0].size())
-        {
-            log_error("Invalid column");
-            return;
-        }
-
-        for (int i = startCol; i < endCol; ++i) 
-        {
-            bitmap[row][i] = value;
-        }
-    }
-}
-
-void
-make_close_button_png(window window)
-{
-    mxb::create::png("/home/mellw/close.png", bitmap::CLOSE_BUTTON_BITMAP);
-    window.set_backround_png("/home/mellw/close.png");
-}
-
-void
-make_max_button_png(window window)
-{
-    mxb::create::icon::max_button("/home/mellw/max.png");
-    mxb::set::win::backround::as_png("/home/mellw/max.png", window);
-}
-
-void
-make_min_button_png(window window)
-{
-    mxb::create::Bitmap bitmap(20, 20);            
-    bitmap.modify(9, 4, 16, true);
-    bitmap.modify(10, 4, 16, true);
-    bitmap.exportToPng("/home/mellw/min.png");
-
-    mxb::set::win::backround::as_png("/home/mellw/min.png", window);
-}
 
 namespace get
 {
