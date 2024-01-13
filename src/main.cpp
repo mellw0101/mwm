@@ -560,6 +560,19 @@ class window
                 );
                 xcb_flush(conn);
             }
+
+            void
+            focus_input()
+            {
+                xcb_set_input_focus
+                (
+                    conn, 
+                    XCB_INPUT_FOCUS_POINTER_ROOT, 
+                    _window, 
+                    XCB_CURRENT_TIME
+                );
+                xcb_flush(conn);
+            }
         ;
 
         public: // check methods 
@@ -2110,6 +2123,13 @@ class client
             {
                 frame.raise();
             }
+
+            void
+            focus()
+            {
+                win.focus_input();
+                frame.raise();
+            }
         ;
     ;
 
@@ -3104,63 +3124,6 @@ class mxb
                         free(err);
                     }
                 }
-
-                static void
-                error(const int & code)
-                {
-                    switch (code) 
-                    {
-                        case CONN_ERR:
-                        {
-                            log_error("Connection error.");
-                            quit(CONN_ERR);
-                            break;
-                        }
-                        case EXTENTION_NOT_SUPPORTED_ERR:
-                        {
-                            log_error("Extension not supported.");
-                            quit(EXTENTION_NOT_SUPPORTED_ERR);
-                            break;
-                        }
-                        case MEMORY_INSUFFICIENT_ERR:
-                        {
-                            log_error("Insufficient memory.");
-                            quit(MEMORY_INSUFFICIENT_ERR);
-                            break;
-                        }
-                        case REQUEST_TO_LONG_ERR:
-                        {
-                            log_error("Request to long.");
-                            quit(REQUEST_TO_LONG_ERR);
-                            break;
-                        }
-                        case PARSE_ERR:
-                        {
-                            log_error("Parse error.");
-                            quit(PARSE_ERR);
-                            break;
-                        }
-                        case SCREEN_NOT_FOUND_ERR:
-                        {
-                            log_error("Screen not found.");
-                            quit(SCREEN_NOT_FOUND_ERR);
-                            break;
-                        }
-                        case FD_ERR:
-                        {
-                            log_error("File descriptor error.");
-                            quit(FD_ERR);
-                            break;
-                        }
-                    }
-                }
-
-                static void
-                _conn()
-                {
-                    int status = xcb_connection_has_error(conn);
-                    mxb::check::error(status);
-                }
             ;
         };
 
@@ -4117,67 +4080,6 @@ class mxb
                 }
             ;
         };
-
-        class Delete
-        {
-            public:
-                static void
-                client_vec(std::vector<client *> & vec)
-                {
-                    for (client * c : vec)
-                    {
-                        if (c)
-                        {
-                            mxb::Client::send_sigterm(c);
-                            xcb_flush(conn);
-                        }
-                        mxb::Client::remove(c, vec);
-                    }
-
-                    vec.clear();
-
-                    std::vector<client *>().swap(vec);
-                }
-
-                static void
-                desktop_vec(std::vector<desktop *> & vec)
-                {
-                    for (desktop * d : vec)
-                    {
-                        mxb::Delete::client_vec(d->current_clients);
-                        delete d;
-                    }
-
-                    vec.clear();
-
-                    std::vector<desktop *>().swap(vec);
-                }
-
-                template <typename Type>
-                static void 
-                ptr_vector(std::vector<Type *>& vec) 
-                {
-                    for (Type * ptr : vec) 
-                    {
-                        delete ptr;
-                    }
-                    vec.clear();
-
-                    std::vector<Type *>().swap(vec);
-                }
-            ;
-        };
-
-        static void
-        quit(const int & status)
-        {
-            xcb_flush(conn);
-            mxb::Delete::client_vec(client_list);
-            mxb::Delete::desktop_vec(desktop_list);
-            xcb_ewmh_connection_wipe(ewmh);
-            xcb_disconnect(conn);
-            exit(status);
-        }
     ;
 };
 
@@ -4185,11 +4087,11 @@ static mxb::Dialog_win::Dock * dock;
 
 class Window_Manager
 {
-    public: // variabels
+    public: // variabels 
         window root;
     ;
 
-    public: // methods
+    public: // methods 
         void
         init()
         {
@@ -4210,6 +4112,17 @@ class Window_Manager
             root.set_backround_png("/home/mellw/mwm_png/galaxy17.png");
             root.set_pointer(CURSOR::arrow);
         }
+
+        void
+        quit(const int & status)
+        {
+            xcb_flush(conn);
+            delete_client_vec(client_list);
+            delete_desktop_vec(desktop_list);
+            xcb_ewmh_connection_wipe(ewmh);
+            xcb_disconnect(conn);
+            exit(status);
+        }
     ;
 
     private: // variables
@@ -4217,110 +4130,177 @@ class Window_Manager
     ;
 
     private: // functions
-        void 
-        _conn(const char * displayname, int * screenp) 
-        {
-            conn = xcb_connect(displayname, screenp);
-            mxb::check::_conn();
-        }
-
-        void 
-        _ewmh() 
-        {
-            if (!(ewmh = static_cast<xcb_ewmh_connection_t *>(calloc(1, sizeof(xcb_ewmh_connection_t)))))
+        private: // init functions 
+            void 
+            _conn(const char * displayname, int * screenp) 
             {
-                log_error("ewmh faild to initialize");
-                mxb::launch::program((char *) "/usr/bin/mwm-KILL");
-            }    
-            
-            xcb_intern_atom_cookie_t * cookie = xcb_ewmh_init_atoms(conn, ewmh);
-            
-            if (!(xcb_ewmh_init_atoms_replies(ewmh, cookie, 0)))
-            {
-                log_error("xcb_ewmh_init_atoms_replies:faild");
-                exit(1);
+                conn = xcb_connect(displayname, screenp);
+                check_conn();
             }
 
-            const char * str = "mwm";
-            mxb::check::err
-            (
-                conn, 
-                xcb_ewmh_set_wm_name
-                (
-                    ewmh, 
-                    screen->root, 
-                    strlen(str), 
-                    str
-                ), 
-                __func__, 
-                "xcb_ewmh_set_wm_name"
-            );
-        }
-
-        void 
-        _setup() 
-        {
-            setup = xcb_get_setup(conn);
-        }
-
-        void 
-        _iter() 
-        {
-            iter = xcb_setup_roots_iterator(setup);
-        }
-
-        void 
-        _screen() 
-        {
-            screen = iter.data;
-        }
-
-        bool
-        setSubstructureRedirectMask() 
-        {
-            // ATTEMPT TO SET THE SUBSTRUCTURE REDIRECT MASK
-            xcb_void_cookie_t cookie = xcb_change_window_attributes_checked
-            (
-                conn,
-                root,
-                XCB_CW_EVENT_MASK,
-                (const uint32_t[1])
+            void 
+            _ewmh() 
+            {
+                if (!(ewmh = static_cast<xcb_ewmh_connection_t *>(calloc(1, sizeof(xcb_ewmh_connection_t)))))
                 {
-                    XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY
+                    log_error("ewmh faild to initialize");
+                    mxb::launch::program((char *) "/usr/bin/mwm-KILL");
+                }    
+                
+                xcb_intern_atom_cookie_t * cookie = xcb_ewmh_init_atoms(conn, ewmh);
+                
+                if (!(xcb_ewmh_init_atoms_replies(ewmh, cookie, 0)))
+                {
+                    log_error("xcb_ewmh_init_atoms_replies:faild");
+                    exit(1);
                 }
-            );
 
-            // CHECK IF ANOTHER WINDOW MANAGER IS RUNNING
-            xcb_generic_error_t * error = xcb_request_check(conn, cookie);
-            if (error) 
-            {
-                log_error("Error: Another window manager is already running or failed to set SubstructureRedirect mask."); 
-                free(error);
-                return false;
+                const char * str = "mwm";
+                mxb::check::err
+                (
+                    conn, 
+                    xcb_ewmh_set_wm_name
+                    (
+                        ewmh, 
+                        screen->root, 
+                        strlen(str), 
+                        str
+                    ), 
+                    __func__, 
+                    "xcb_ewmh_set_wm_name"
+                );
             }
-            return true;
-        }
 
-        void 
-        configureRootWindow()
-        {
-            root.set_backround_color(DARK_GREY);
-            uint32_t mask = 
-                XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT |
-                XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY |
-                XCB_EVENT_MASK_ENTER_WINDOW |
-                XCB_EVENT_MASK_LEAVE_WINDOW |
-                XCB_EVENT_MASK_STRUCTURE_NOTIFY |
-                XCB_EVENT_MASK_BUTTON_PRESS |
-                XCB_EVENT_MASK_BUTTON_RELEASE |
-                XCB_EVENT_MASK_KEY_PRESS |
-                XCB_EVENT_MASK_KEY_RELEASE |
-                XCB_EVENT_MASK_FOCUS_CHANGE |
-                XCB_EVENT_MASK_POINTER_MOTION
-            ; 
-            root.apply_event_mask(& mask);
-            root.clear();
-        }
+            void 
+            _setup() 
+            {
+                setup = xcb_get_setup(conn);
+            }
+
+            void 
+            _iter() 
+            {
+                iter = xcb_setup_roots_iterator(setup);
+            }
+
+            void 
+            _screen() 
+            {
+                screen = iter.data;
+            }
+
+            bool
+            setSubstructureRedirectMask() 
+            {
+                // ATTEMPT TO SET THE SUBSTRUCTURE REDIRECT MASK
+                xcb_void_cookie_t cookie = xcb_change_window_attributes_checked
+                (
+                    conn,
+                    root,
+                    XCB_CW_EVENT_MASK,
+                    (const uint32_t[1])
+                    {
+                        XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY
+                    }
+                );
+
+                // CHECK IF ANOTHER WINDOW MANAGER IS RUNNING
+                xcb_generic_error_t * error = xcb_request_check(conn, cookie);
+                if (error) 
+                {
+                    log_error("Error: Another window manager is already running or failed to set SubstructureRedirect mask."); 
+                    free(error);
+                    return false;
+                }
+                return true;
+            }
+
+            void 
+            configureRootWindow()
+            {
+                root.set_backround_color(DARK_GREY);
+                uint32_t mask = 
+                    XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT |
+                    XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY |
+                    XCB_EVENT_MASK_ENTER_WINDOW |
+                    XCB_EVENT_MASK_LEAVE_WINDOW |
+                    XCB_EVENT_MASK_STRUCTURE_NOTIFY |
+                    XCB_EVENT_MASK_BUTTON_PRESS |
+                    XCB_EVENT_MASK_BUTTON_RELEASE |
+                    XCB_EVENT_MASK_KEY_PRESS |
+                    XCB_EVENT_MASK_KEY_RELEASE |
+                    XCB_EVENT_MASK_FOCUS_CHANGE |
+                    XCB_EVENT_MASK_POINTER_MOTION
+                ; 
+                root.apply_event_mask(& mask);
+                root.clear();
+            }
+        ;
+
+        private: // check functions 
+            void
+            check_error(const int & code)
+            {
+                switch (code) 
+                {
+                    case CONN_ERR:
+                        log_error("Connection error.");
+                        quit(CONN_ERR);
+                        break;
+                    ;
+                    case EXTENTION_NOT_SUPPORTED_ERR:
+                        log_error("Extension not supported.");
+                        quit(EXTENTION_NOT_SUPPORTED_ERR);
+                        break;
+                    ;
+                    case MEMORY_INSUFFICIENT_ERR:
+                        log_error("Insufficient memory.");
+                        quit(MEMORY_INSUFFICIENT_ERR);
+                        break;
+                    ;
+                    case REQUEST_TO_LONG_ERR:
+                        log_error("Request to long.");
+                        quit(REQUEST_TO_LONG_ERR);
+                        break;
+                    ;
+                    case PARSE_ERR:
+                        log_error("Parse error.");
+                        quit(PARSE_ERR);
+                        break;
+                    ;
+                    case SCREEN_NOT_FOUND_ERR:
+                        log_error("Screen not found.");
+                        quit(SCREEN_NOT_FOUND_ERR);
+                        break;
+                    ;
+                    case FD_ERR:
+                        log_error("File descriptor error.");
+                        quit(FD_ERR);
+                        break;
+                    ;
+                }
+            }
+
+            void
+            check_conn()
+            {
+                int status = xcb_connection_has_error(conn);
+                check_error(status);
+            }
+
+            int
+            cookie_error(xcb_void_cookie_t cookie , const char * sender_function)
+            {
+                xcb_generic_error_t * err = xcb_request_check(conn, cookie);
+                if (err)
+                {
+                    log_error(err->error_code);
+                    free(err);
+                    return err->error_code;
+                }
+                return 0;
+            }
+        ;
 
         int
         start_screen_window()
@@ -4330,6 +4310,53 @@ class Window_Manager
             start_window.map();
             return 0;
         }
+
+        private: // delete functions 
+            void
+            delete_client_vec(std::vector<client *> & vec)
+            {
+                for (client * c : vec)
+                {
+                    if (c)
+                    {
+                        mxb::Client::send_sigterm(c);
+                        xcb_flush(conn);
+                    }
+                    mxb::Client::remove(c, vec);
+                }
+
+                vec.clear();
+
+                std::vector<client *>().swap(vec);
+            }
+
+            void
+            delete_desktop_vec(std::vector<desktop *> & vec)
+            {
+                for (desktop * d : vec)
+                {
+                    delete_client_vec(d->current_clients);
+                    delete d;
+                }
+
+                vec.clear();
+
+                std::vector<desktop *>().swap(vec);
+            }
+
+            template <typename Type>
+            static void 
+            delete_ptr_vector(std::vector<Type *>& vec) 
+            {
+                for (Type * ptr : vec) 
+                {
+                    delete ptr;
+                }
+                vec.clear();
+
+                std::vector<Type *>().swap(vec);
+            }
+        ;
     ;
 };
 
@@ -6856,38 +6883,6 @@ class resize_client
     ;
 };
 
-namespace error
-{
-    int
-    conn_error(xcb_connection_t * conn, const char * sender_function)
-    {
-        if (xcb_connection_has_error(conn))
-        {
-            log_error("XCB connection is null.");
-            return CONN_ERR;
-        }
-        return 0;
-    }
-
-    int
-    cookie_error(xcb_void_cookie_t cookie , const char * sender_function)
-    {
-        if (check_conn != 0)
-        {
-            return CONN_ERR;
-        }
-
-        xcb_generic_error_t * err = xcb_request_check(conn, cookie);
-        if (err)
-        {
-            log_error(err->error_code);
-            free(err);
-            return err->error_code;
-        }
-        return 0;
-    }
-} 
-
 class max_win
 {    
     public:
@@ -7184,11 +7179,6 @@ namespace win_tools
     bool 
     getPointerPosition(xcb_window_t window, int& posX, int& posY) 
     {
-        if (check_conn == CONN_ERR) 
-        {
-            return false;
-        }
-
         // Query pointer
         xcb_query_pointer_cookie_t cookie = xcb_query_pointer(conn, window);
         xcb_query_pointer_reply_t* reply = xcb_query_pointer_reply(conn, cookie, nullptr);
@@ -8313,7 +8303,7 @@ class Event
                 {
                     case SHIFT + ALT:
                     {
-                        mxb::quit(0);
+                        wm->quit(0);
                         break;
                     }
                 }

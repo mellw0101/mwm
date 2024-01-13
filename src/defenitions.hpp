@@ -4,10 +4,7 @@
 
 /* main.cpp */
 #define conn_err()  error::conn_error(conn ,__func__)                     
-#define check_conn  error::conn_error(conn ,__func__)
 #define check_cookie(cookie)  error::cookie_error(cookie, __func__)
-
-#define check_error(cookie, err_msg) check_err(conn, cookie, __func__, err_msg)
 
 /* LOG DEFENITIONS */
 #define LOG_ev_response_type(ev)    	    Log::xcb_event_response_type(__func__, ev);
