@@ -112,7 +112,6 @@ class Bitmap
     ;
 };
 
-
 class _scale
 {
     public:
@@ -3377,195 +3376,12 @@ class mxb
                         }
                     ;
                 };
-
-                static void
-                remove(client * c, std::vector<client *> & vec)
-                {
-                    if (!c)
-                    {
-                        log_error("client is nullptr.");
-                    }
-                    vec.erase(std::remove(vec.begin(), vec.end(), c), vec.end());
-                    delete c;
-                }
-
-                static void 
-                raise(client * c) 
-                {
-                    uint32_t values[1] = {XCB_STACK_MODE_ABOVE};
-                    xcb_configure_window
-                    (
-                        conn,
-                        c->frame,
-                        XCB_CONFIG_WINDOW_STACK_MODE, 
-                        values
-                    );
-                    xcb_flush(conn);
-                }
-
-                static void
-                send_sigterm(client * c)
-                {
-                    if (!c)
-                    {
-                        return;
-                    }
-
-                    xcb_unmap_window(conn, c->win);
-                    xcb_unmap_window(conn, c->close_button);
-                    xcb_unmap_window(conn, c->max_button);
-                    xcb_unmap_window(conn, c->min_button);
-                    xcb_unmap_window(conn, c->titlebar);
-                    xcb_unmap_window(conn, c->frame);
-                    xcb_unmap_window(conn, c->border.left);
-                    xcb_unmap_window(conn, c->border.right);
-                    xcb_unmap_window(conn, c->border.top);
-                    xcb_unmap_window(conn, c->border.bottom);
-                    xcb_unmap_window(conn, c->border.top_right);
-                    xcb_unmap_window(conn, c->border.bottom_left);
-                    xcb_unmap_window(conn, c->border.bottom_right);
-                    xcb_flush(conn);
-
-                    c->win.kill();
-                    c->close_button.kill();
-                    c->max_button.kill();
-                    c->min_button.kill();
-                    c->titlebar.kill();
-                    c->frame.kill();
-                    c->border.left.kill();
-                    c->border.right.kill();
-                    c->border.top.kill();
-                    c->border.bottom.kill();
-                    c->border.top_right.kill();
-                    c->border.bottom_left.kill();
-                    c->border.bottom_right.kill();
-                    xcb_flush(conn);
-                }
             ;
         };
 
         class create
         {
             public:
-                class new_desktop
-                {
-                    public:
-                        new_desktop(const uint16_t & n)
-                        {
-                            desktop * d = new desktop;
-                            d->desktop  = n;
-                            d->width    = screen->width_in_pixels;
-                            d->height   = screen->height_in_pixels;
-                            cur_d       = d;
-                            desktop_list.push_back(d);
-                        }
-                    ;
-                };
-
-                static void
-                png(const std::string& file_name, const bool bitmap[20][20]) 
-                {
-                    FILE *fp = fopen(file_name.c_str(), "wb");
-                    if (!fp) 
-                    {
-                        throw std::runtime_error("Failed to create PNG file");
-                    }
-
-                    png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-                    if (!png_ptr) 
-                    {
-                        fclose(fp);
-                        throw std::runtime_error("Failed to create PNG write struct");
-                    }
-
-                    png_infop info_ptr = png_create_info_struct(png_ptr);
-                    if (!info_ptr) 
-                    {
-                        fclose(fp);
-                        png_destroy_write_struct(&png_ptr, NULL);
-                        throw std::runtime_error("Failed to create PNG info struct");
-                    }
-
-                    if (setjmp(png_jmpbuf(png_ptr))) {
-                        fclose(fp);
-                        png_destroy_write_struct(&png_ptr, &info_ptr);
-                        throw std::runtime_error("Error during PNG creation");
-                    }
-
-                    png_init_io(png_ptr, fp);
-                    png_set_IHDR(png_ptr, info_ptr, 20, 20, 8, PNG_COLOR_TYPE_GRAY, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
-                    png_write_info(png_ptr, info_ptr);
-
-                    // Write character bitmap to PNG
-                    png_bytep row = new png_byte[20];
-                    for (int y = 0; y < 20; y++) 
-                    {
-                        for (int x = 0; x < 20; x++) 
-                        {
-                            row[x] = bitmap[y][x] ? 0xFF : 0x00;
-                        }
-                        png_write_row(png_ptr, row);
-                    }
-                    delete[] row;
-
-                    png_write_end(png_ptr, NULL);
-
-                    fclose(fp);
-                    png_destroy_write_struct(&png_ptr, &info_ptr);
-                }
-
-                static void 
-                png(const std::string& file_name, bool** bitmap, int width, int height) 
-                {
-                    FILE *fp = fopen(file_name.c_str(), "wb");
-                    if (!fp) 
-                    {
-                        throw std::runtime_error("Failed to create PNG file");
-                    }
-
-                    png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-                    if (!png_ptr) 
-                    {
-                        fclose(fp);
-                        throw std::runtime_error("Failed to create PNG write struct");
-                    }
-
-                    png_infop info_ptr = png_create_info_struct(png_ptr);
-                    if (!info_ptr) 
-                    {
-                        fclose(fp);
-                        png_destroy_write_struct(&png_ptr, NULL);
-                        throw std::runtime_error("Failed to create PNG info struct");
-                    }
-
-                    if (setjmp(png_jmpbuf(png_ptr))) {
-                        fclose(fp);
-                        png_destroy_write_struct(&png_ptr, &info_ptr);
-                        throw std::runtime_error("Error during PNG creation");
-                    }
-
-                    png_init_io(png_ptr, fp);
-                    png_set_IHDR(png_ptr, info_ptr, width, height, 8, PNG_COLOR_TYPE_GRAY, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
-                    png_write_info(png_ptr, info_ptr);
-
-                    // Write character bitmap to PNG
-                    png_bytep row = new png_byte[width];
-                    for (int y = 0; y < height; y++) 
-                    {
-                        for (int x = 0; x < width; x++) 
-                        {
-                            row[x] = bitmap[y][x] ? 0xFF : 0x00;
-                        }
-                        png_write_row(png_ptr, row);
-                    }
-                    delete[] row;
-
-                    png_write_end(png_ptr, NULL);
-
-                    fclose(fp);
-                    png_destroy_write_struct(&png_ptr, &info_ptr);
-                }
-
                 static void 
                 png(const std::string& file_name, const std::vector<std::vector<bool>>& bitmap) 
                 {
@@ -3615,364 +3431,16 @@ class mxb
                     fclose(fp);
                     png_destroy_write_struct(&png_ptr, &info_ptr);
                 }
-
-                class Bitmap
-                {
-                    public:
-                        Bitmap(int width, int height) 
-                        : width(width), height(height), bitmap(height, std::vector<bool>(width, false)) {}
-
-                        void 
-                        modify(int row, int startCol, int endCol, bool value) 
-                        {
-                            if (row < 0 || row >= height || startCol < 0 || endCol > width) 
-                            {
-                                log_error("Invalid row or column indices");
-                            }
-                        
-                            for (int i = startCol; i < endCol; ++i) 
-                            {
-                                bitmap[row][i] = value;
-                            }
-                        }
-
-                        void 
-                        exportToPng(const char * file_name) const
-                        {
-                            FILE * fp = fopen(file_name, "wb");
-                            if (!fp) 
-                            {
-                                log_error("Failed to create PNG file");
-                                return;
-                            }
-
-                            png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
-                            if (!png_ptr) 
-                            {
-                                fclose(fp);
-                                log_error("Failed to create PNG write struct");
-                                return;
-                            }
-
-                            png_infop info_ptr = png_create_info_struct(png_ptr);
-                            if (!info_ptr) 
-                            {
-                                fclose(fp);
-                                png_destroy_write_struct(&png_ptr, nullptr);
-                                log_error("Failed to create PNG info struct");
-                                return;
-                            }
-
-                            if (setjmp(png_jmpbuf(png_ptr))) 
-                            {
-                                fclose(fp);
-                                png_destroy_write_struct(&png_ptr, &info_ptr);
-                                log_error("Error during PNG creation");
-                                return;
-                            }
-
-                            png_init_io(png_ptr, fp);
-                            png_set_IHDR(png_ptr, info_ptr, width, height, 8, PNG_COLOR_TYPE_GRAY, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
-                            png_write_info(png_ptr, info_ptr);
-
-                            png_bytep row = new png_byte[width];
-                            for (int y = 0; y < height; y++) 
-                            {
-                                for (int x = 0; x < width; x++) 
-                                {
-                                    row[x] = bitmap[y][x] ? 0xFF : 0x00;
-                                }
-                                png_write_row(png_ptr, row);
-                            }
-                            delete[] row;
-
-                            png_write_end(png_ptr, nullptr);
-
-                            fclose(fp);
-                            png_destroy_write_struct(&png_ptr, &info_ptr);
-                        }
-                    ;
-                    
-                    private:
-                        int width, height;
-                        std::vector<std::vector<bool>> bitmap;
-                    ;
-                };
-
-                class icon
-                {
-                    public:
-                        static void
-                        close_button()
-                        {
-
-                        }
-                        
-                        static void
-                        max_button(const char * file_creation_path)
-                        {
-                            mxb::create::Bitmap bitmap(20, 20);
-                            bitmap.modify(4, 4, 16, true);
-                            bitmap.modify(5, 4, 5, true);
-                            bitmap.modify(5, 15, 16, true);
-                            bitmap.modify(6, 4, 5, true);
-                            bitmap.modify(6, 15, 16, true);
-                            bitmap.modify(7, 4, 5, true);
-                            bitmap.modify(7, 15, 16, true);
-                            bitmap.modify(8, 4, 5, true);
-                            bitmap.modify(8, 15, 16, true);
-                            bitmap.modify(9, 4, 5, true);
-                            bitmap.modify(9, 15, 16, true);
-                            bitmap.modify(10, 4, 5, true);
-                            bitmap.modify(10, 15, 16, true);
-                            bitmap.modify(11, 4, 5, true);
-                            bitmap.modify(11, 15, 16, true);
-                            bitmap.modify(12, 4, 5, true);
-                            bitmap.modify(12, 15, 16, true);
-                            bitmap.modify(13, 4, 5, true);
-                            bitmap.modify(13, 15, 16, true);
-                            bitmap.modify(14, 4, 5, true);
-                            bitmap.modify(14, 15, 16, true);
-                            bitmap.modify(15, 4, 16, true);
-                            bitmap.exportToPng(file_creation_path);
-                        }
-                        
-                        static void
-                        min_button()
-                        {
-
-                        }
-                    ;
-                };
-            ;
-        };
-
-        class conf
-        {
-            public:
-                class win
-                {
-                    public:
-                        static void
-                        x(const xcb_window_t & window, const uint32_t & x)
-                        {
-                            xcb_configure_window
-                            (
-                                conn, 
-                                window, 
-                                XCB_CONFIG_WINDOW_X,
-                                (const uint32_t[1])
-                                {
-                                    x
-                                }
-                            );
-                        }
-
-                        static void
-                        y(const xcb_window_t & window, const uint32_t & y)
-                        {
-                            xcb_configure_window
-                            (
-                                conn, 
-                                window, 
-                                XCB_CONFIG_WINDOW_Y,
-                                (const uint32_t[1])
-                                {
-                                    y
-                                }
-                            );
-                        }
-
-                        static void
-                        width(const xcb_window_t & window, const uint32_t & width)
-                        {
-                            xcb_configure_window
-                            (
-                                conn, 
-                                window, 
-                                XCB_CONFIG_WINDOW_WIDTH,
-                                (const uint32_t[1])
-                                {
-                                    width
-                                }
-                            );
-                        }
-
-                        static void
-                        height(const xcb_window_t & window, const uint32_t & height)
-                        {
-                            xcb_configure_window
-                            (
-                                conn, 
-                                window, 
-                                XCB_CONFIG_WINDOW_HEIGHT,
-                                (const uint32_t[1])
-                                {
-                                    height
-                                }
-                            );
-                        }
-
-                        static void
-                        x_y(const xcb_window_t & window, const uint32_t & x, const uint32_t & y)
-                        {
-                            xcb_configure_window
-                            (
-                                conn, 
-                                window, 
-                                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y,
-                                (const uint32_t[2])
-                                {
-                                    x,
-                                    y
-                                }
-                            );
-                        }
-
-                        static void
-                        width_height(const xcb_window_t & window, const uint32_t & width, const uint32_t & height)
-                        {
-                            xcb_configure_window
-                            (
-                                conn, 
-                                window, 
-                                XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
-                                (const uint32_t[2])
-                                {
-                                    width,
-                                    height
-                                }
-                            );
-                        }
-
-                        static void
-                        x_y_width_height(const xcb_window_t & window, const uint32_t & x, const uint32_t & y, const uint32_t & width, const uint32_t & height)
-                        {
-                            xcb_configure_window
-                            (
-                                conn, 
-                                window, 
-                                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
-                                (const uint32_t[4])
-                                {
-                                    x,
-                                    y,
-                                    width,
-                                    height
-                                }
-                            );
-                        }
-
-                        static void
-                        x_width_height(const xcb_window_t & window, const uint32_t & x, const uint32_t & width, const uint32_t & height)
-                        {
-                            xcb_configure_window
-                            (
-                                conn, 
-                                window, 
-                                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
-                                (const uint32_t[3])
-                                {
-                                    x,
-                                    width,
-                                    height
-                                }
-                            );
-                        }
-
-                        static void
-                        y_width_height(const xcb_window_t & window, const uint32_t & y, const uint32_t & width, const uint32_t & height)
-                        {
-                            xcb_configure_window
-                            (
-                                conn, 
-                                window, 
-                                XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
-                                (const uint32_t[3])
-                                {
-                                    y,
-                                    width,
-                                    height
-                                }
-                            );
-                        }
-
-                        static void
-                        x_width(const xcb_window_t & window, const uint32_t & x, const uint32_t & width)
-                        {
-                            xcb_configure_window
-                            (
-                                conn, 
-                                window, 
-                                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_WIDTH,
-                                (const uint32_t[2])
-                                {
-                                    x,
-                                    width
-                                }
-                            );
-                        }
-
-                        static void
-                        x_height(const xcb_window_t & window, const uint32_t & x, const uint32_t & height)
-                        {
-                            xcb_configure_window
-                            (
-                                conn, 
-                                window, 
-                                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_HEIGHT,
-                                (const uint32_t[2])
-                                {
-                                    x,
-                                    height
-                                }
-                            );
-                        }
-                        
-                        static void
-                        y_width(const xcb_window_t & window, const uint32_t & y, const uint32_t & width)
-                        {
-                            xcb_configure_window
-                            (
-                                conn, 
-                                window, 
-                                XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH,
-                                (const uint32_t[2])
-                                {
-                                    y,
-                                    width
-                                }
-                            );
-                        }
-                        
-                        static void 
-                        y_height(const xcb_window_t & window, const uint32_t & y, const uint32_t & height)
-                        {
-                            xcb_configure_window
-                            (
-                                conn, 
-                                window, 
-                                XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT,
-                                (const uint32_t[2])
-                                {
-                                    y,
-                                    height
-                                }
-                            );
-                        } 
-                    ;
-                };
             ;
         };
     ;
 };
 
-static mxb::Dialog_win::Dock * dock;
-
 class Window_Manager
 {
     public: // variabels 
         window root;
+        mxb::Dialog_win::Dock Dock;
     ;
 
     public: // methods 
@@ -4195,6 +3663,19 @@ class Window_Manager
                 return 0;
             }
         ;
+
+        public: // desktop methods
+            void
+            create_new_desktop(const uint16_t & n)
+            {
+                desktop * d = new desktop;
+                d->desktop  = n;
+                d->width    = screen->width_in_pixels;
+                d->height   = screen->height_in_pixels;
+                cur_d       = d;
+                desktop_list.push_back(d);
+            }
+        ;
     ;
 
     private: // variables 
@@ -4400,12 +3881,8 @@ class Window_Manager
             {
                 for (client * c : vec)
                 {
-                    if (c)
-                    {
-                        mxb::Client::send_sigterm(c);
-                        xcb_flush(conn);
-                    }
-                    mxb::Client::remove(c, vec);
+                    send_sigterm_to_client(c);
+                    xcb_flush(conn);                    
                 }
 
                 vec.clear();
@@ -4511,6 +3988,7 @@ class Window_Manager
     ;
 };
 
+static mxb::Dialog_win::Dock * dock;
 static Window_Manager * wm;
 
 class mv_client 
@@ -5860,7 +5338,7 @@ move_to_previus_desktop_w_app()
     }
 
     change_desktop::teleport_to(cur_d->desktop - 1);
-    mxb::Client::raise(focused_client);
+    focused_client->raise();
 }
 
 class resize_client
@@ -7881,7 +7359,7 @@ class Event
                 {
                     if (e->detail == L_MOUSE_BUTTON)
                     {
-                        mxb::Client::raise(c);
+                        c->raise();
                         resize_client::no_border(c, 0, 0);
                         wm->focus_client(c);
                     }
@@ -7934,20 +7412,20 @@ class Event
                     switch (e->state) 
                     {
                         case ALT:
-                            mxb::Client::raise(c);
+                            c->raise();
                             mv_client(c, e->event_x, e->event_y + 20);
                             wm->focus_client(c);
                             break;
                         ;
                     }
-                    mxb::Client::raise(c);
+                    c->raise();
                     wm->focus_client(c);
                     return;
                 }
 
                 if (e->event == c->titlebar)
                 {
-                    mxb::Client::raise(c);
+                    c->raise();
                     mv_client(c, e->event_x, e->event_y);
                     wm->focus_client(c);
                     return;
@@ -8169,19 +7647,23 @@ setup_wm()
         A WAY TO ADD AND REMOVE 
         DESKTOPS DURING RUNTIME
      */
-    mxb::create::new_desktop(1);
-    mxb::create::new_desktop(2);
-    mxb::create::new_desktop(3);
-    mxb::create::new_desktop(4);
-    mxb::create::new_desktop(5);
+    wm->create_new_desktop(1);
+    wm->create_new_desktop(2);
+    wm->create_new_desktop(3);
+    wm->create_new_desktop(4);
+    wm->create_new_desktop(5);
     
     change_desktop::teleport_to(1);
     
-    dock = new mxb::Dialog_win::Dock;
-    dock->add_app("konsole");
-    dock->add_app("alacritty");
-    dock->add_app("falkon");
-    dock->init();
+    wm->Dock.add_app("konsole");
+    wm->Dock.add_app("alacritty");
+    wm->Dock.add_app("falkon");
+    wm->Dock.init();
+    // dock = new mxb::Dialog_win::Dock;
+    // dock->add_app("konsole");
+    // dock->add_app("alacritty");
+    // dock->add_app("falkon");
+    // dock->init();
 
     pointer = new class pointer;
 
