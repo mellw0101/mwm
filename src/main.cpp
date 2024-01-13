@@ -3973,57 +3973,6 @@ class mxb
                 }
 
                 static void 
-                png(const std::string& file_name, const int bitmap[20][20]) 
-                {
-                    FILE *fp = fopen(file_name.c_str(), "wb");
-                    if (!fp) {
-                        throw std::runtime_error("Failed to create PNG file");
-                    }
-
-                    png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-                    if (!png_ptr) {
-                        fclose(fp);
-                        throw std::runtime_error("Failed to create PNG write struct");
-                    }
-
-                    png_infop info_ptr = png_create_info_struct(png_ptr);
-                    if (!info_ptr) {
-                        fclose(fp);
-                        png_destroy_write_struct(&png_ptr, NULL);
-                        throw std::runtime_error("Failed to create PNG info struct");
-                    }
-
-                    if (setjmp(png_jmpbuf(png_ptr))) {
-                        fclose(fp);
-                        png_destroy_write_struct(&png_ptr, &info_ptr);
-                        throw std::runtime_error("Error during PNG creation");
-                    }
-
-                    png_init_io(png_ptr, fp);
-                    png_set_IHDR(png_ptr, info_ptr, 20, 20, 8, PNG_COLOR_TYPE_GRAY, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
-                    png_write_info(png_ptr, info_ptr);
-
-                    // Write character bitmap to PNG
-                    png_bytep row = new png_byte[20];
-                    for (int y = 0; y < 20; y++) {
-                        for (int x = 0; x < 20; x++) {
-                            if (bitmap[y][x] < 0 || bitmap[y][x] > 10) {
-                                throw std::runtime_error("Invalid bitmap value");
-                            }
-                            // Scale the value to the range 0x00 to 0xFF
-                            row[x] = static_cast<png_byte>((bitmap[y][x] * 255) / 10);
-                        }
-                        png_write_row(png_ptr, row);
-                    }
-                    delete[] row;
-
-                    png_write_end(png_ptr, NULL);
-
-                    fclose(fp);
-                    png_destroy_write_struct(&png_ptr, &info_ptr);
-                }
-
-                static void 
                 png(const std::string& file_name, const std::vector<std::vector<bool>>& bitmap) 
                 {
                     int width = bitmap[0].size();
@@ -4969,6 +4918,30 @@ namespace bitmap
         {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
     };
 
+    std::vector<std::vector<bool>> CLOSE_BUTTON_BITMAP =
+    {
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0},
+        {0,0,0,0,1,1,1,0,0,0,0,0,0,1,1,1,0,0,0,0},
+        {0,0,0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0,0,0},
+        {0,0,0,0,0,0,1,1,1,0,0,1,1,1,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,1,1,1,0,0,1,1,1,0,0,0,0,0,0},
+        {0,0,0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0,0,0},
+        {0,0,0,0,1,1,1,0,0,0,0,0,0,1,1,1,0,0,0,0},
+        {0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
+    };
+
     const bool CHAR_BITMAP_MIN_BUTTON[20][20] = 
     {
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -5044,7 +5017,7 @@ namespace bitmap
 void
 make_close_button_png(window window)
 {
-    mxb::create::png("/home/mellw/close.png", bitmap::CHAR_BITMAP_CLOSE_BUTTON);
+    mxb::create::png("/home/mellw/close.png", bitmap::CLOSE_BUTTON_BITMAP);
     window.set_backround_png("/home/mellw/close.png");
 }
 
