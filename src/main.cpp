@@ -3436,7 +3436,6 @@ class Window_Manager
 
     public: // variabels 
         Dialog_win::context_menu * context_menu = nullptr;
-        Dialog_win::Dock * dock = nullptr;
         window root;
     ;
 
@@ -3469,12 +3468,6 @@ class Window_Manager
                 {
                     launcher->program((char *) "/usr/bin/konsole");
                 });
-
-                dock = new Dialog_win::Dock();
-                dock->add_app("konsole");
-                dock->add_app("alacritty");
-                dock->add_app("falkon");
-                dock->init();
             }
 
             void
@@ -7644,11 +7637,11 @@ setup_wm()
     wm->init();
     
     change_desktop::teleport_to(1);
-    // dock = new Dialog_win::Dock;
-    // dock->add_app("konsole");
-    // dock->add_app("alacritty");
-    // dock->add_app("falkon");
-    // dock->init();
+    dock = new Dialog_win::Dock;
+    dock->add_app("konsole");
+    dock->add_app("alacritty");
+    dock->add_app("falkon");
+    dock->init();
 
     pointer = new class pointer;
     launcher = new Launcher;
