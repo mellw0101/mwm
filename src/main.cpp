@@ -1567,6 +1567,82 @@ class window
                 free(reply);
                 return atomName;
             }
+
+            uint16_t 
+            x_from_req()
+            {
+                xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, _window);
+                xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
+
+                uint16_t x;
+                if (geometry) 
+                {
+                    x = geometry->x;
+                    free(geometry);
+                } 
+                else 
+                {
+                    x = 200;
+                }
+                return x;
+            }
+            
+            uint16_t 
+            y_from_req()
+            {
+                xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, _window);
+                xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
+
+                uint16_t y;
+                if (geometry) 
+                {
+                    y = geometry->y;
+                    free(geometry);
+                } 
+                else 
+                {
+                    y = 200;
+                }
+                return y;
+            }
+
+            uint16_t 
+            width_from_req() 
+            {
+                xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, _window);
+                xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
+
+                uint16_t width;
+                if (geometry) 
+                {
+                    width = geometry->width;
+                    free(geometry);
+                } 
+                else 
+                {
+                    width = 200;
+                }
+                return width;
+            }
+            
+            uint16_t 
+            height_from_req() 
+            {
+                xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, _window);
+                xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
+
+                uint16_t height;
+                if (geometry) 
+                {
+                    height = geometry->height;
+                    free(geometry);
+                } 
+                else 
+                {
+                    height = 200;
+                }
+                return height;
+            }
         ;
 
         private: // backround functions 
@@ -4509,8 +4585,20 @@ static mxb::Dialog_win::Dock * dock;
 
 class Window_Manager
 {
-    public:
+    public: // variabels
         window window;
+        uint16_t width;
+        uint16_t height;
+    ;
+
+    public: // methods
+        void
+        init()
+        {
+            window = screen->root;
+            width = screen->width_in_pixels;
+            height = screen->height_in_pixels;
+        }
     ;
 };
 
@@ -9182,7 +9270,7 @@ setup_wm()
 
     pointer = new class pointer;
     wm = new Window_Manager;
-    wm->window = screen->root;
+    wm->init();
 }
 
 int
