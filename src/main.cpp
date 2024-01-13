@@ -409,8 +409,8 @@ class window
         }
     ;
 
-    public: // public methods 
-        public: // main public methods 
+    public: // methods 
+        public: // main methods 
             void
             create( 
                 const uint8_t  & depth,
@@ -543,7 +543,29 @@ class window
             }
         ;
 
-        public: // configuration public methods
+        public: // check methods 
+            bool 
+            check_if_EWMH_fullscreen() 
+            {
+                xcb_get_property_cookie_t cookie = xcb_ewmh_get_wm_state(ewmh, _window);
+                xcb_ewmh_get_atoms_reply_t wm_state;
+                if (xcb_ewmh_get_wm_state_reply(ewmh, cookie, &wm_state, NULL) == 1) 
+                {
+                    for (unsigned int i = 0; i < wm_state.atoms_len; i++) 
+                    {
+                        if (wm_state.atoms[i] == ewmh->_NET_WM_STATE_FULLSCREEN) 
+                        {
+                            xcb_ewmh_get_atoms_reply_wipe(&wm_state);
+                            return true;
+                        }
+                    }
+                    xcb_ewmh_get_atoms_reply_wipe(&wm_state);
+                }
+                return false;
+            }
+        ;
+
+        public: // configuration methods 
             void
             apply_event_mask(const uint32_t * mask)
             {
@@ -827,7 +849,7 @@ class window
         ;
     ;
 
-    private: // private variables 
+    private: // variables 
         uint8_t        _depth;
         uint32_t       _window;
         uint32_t       _parent;
@@ -842,7 +864,7 @@ class window
         const void     * _value_list;
     ;
 
-    private: // functions
+    private: // functions 
         void
         make_window()
         {
@@ -996,6 +1018,32 @@ class window
                 default: return "left_ptr";
             }
         }
+
+        private: // get functions
+            xcb_atom_t
+            atom(const char * atom_name) 
+            {
+                xcb_intern_atom_cookie_t cookie = xcb_intern_atom
+                (
+                    conn, 
+                    0, 
+                    strlen(atom_name), 
+                    atom_name
+                );
+                
+                xcb_intern_atom_reply_t * reply = xcb_intern_atom_reply(conn, cookie, NULL);
+                
+                if (!reply) 
+                {
+                    log_error("could not get atom");
+                    return XCB_ATOM_NONE;
+                } 
+
+                xcb_atom_t atom = reply->atom;
+                free(reply);
+                return atom;
+            }
+        ;
     ;
 };
 
@@ -6750,7 +6798,7 @@ class resize_client
                     {
                         case edge::TOP:
                         {
-                            mxb::pointer::teleport(mxb::pointer::get::x(), c->y);
+                            pointer->teleport(pointer->x(), c->y);
                             break;
                         }
                         case edge::BOTTOM_edge:
@@ -6985,7 +7033,7 @@ class resize_client
                 border(client * & c, edge _edge)
                 : c(c)
                 {
-                    if (mxb::EWMH::check::is_window_fullscreen(c->win))
+                    if (c->win.check_if_EWMH_fullscreen())
                     {
                         return;
                     }
