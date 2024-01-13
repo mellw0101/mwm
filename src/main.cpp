@@ -7955,7 +7955,7 @@ class WinManager
                 }
             );
             c->make_decorations();
-            c->win.apply_event_mask({XCB_EVENT_MASK_FOCUS_CHANGE, XCB_EVENT_MASK_ENTER_WINDOW, XCB_EVENT_MASK_LEAVE_WINDOW});
+            c->win.apply_event_mask({XCB_EVENT_MASK_ENTER_WINDOW, XCB_EVENT_MASK_FOCUS_CHANGE, XCB_EVENT_MASK_LEAVE_WINDOW});
 
             c->win.property("_NET_WM_NAME");
             mxb::Client::update(c);
