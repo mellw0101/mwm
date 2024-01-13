@@ -696,9 +696,26 @@ class window
                         button, 
                         modifier    
                     );
-
                     xcb_flush(conn); 
                 }
+            }
+
+            void
+            ungrab_button(std::initializer_list<std::pair<const uint8_t, const uint16_t>> bindings)
+            {
+                for (const auto & binding : bindings)
+                {
+                    const uint8_t & button = binding.first;
+                    const uint16_t & modifier = binding.second;
+                    xcb_ungrab_button
+                    (
+                        conn,
+                        button,
+                        _window,
+                        modifier
+                    );
+                }
+                xcb_flush(conn); // Flush the request to the X server
             }
 
             void 
@@ -2513,7 +2530,7 @@ class mxb
                         {
                             public:
                                 DialogEntry() {}
-                                xcb_window_t window;
+                                window window;
                                 int16_t border_size = 1;
 
                                 void
@@ -2544,27 +2561,10 @@ class mxb
                                 void 
                                 make_window(const xcb_window_t & parent_window, const int16_t & x, const int16_t & y, const uint16_t & width, const uint16_t & height)
                                 {
-                                    window = xcb_generate_id(conn);
-                                    xcb_create_window
-                                    (
-                                        conn,
-                                        XCB_COPY_FROM_PARENT,
-                                        window,
-                                        parent_window,
-                                        x,
-                                        y,
-                                        width,
-                                        height,
-                                        0,
-                                        XCB_WINDOW_CLASS_INPUT_OUTPUT,
-                                        XCB_COPY_FROM_PARENT,
-                                        0,
-                                        nullptr
-                                    );
-                                    mxb::set::win::backround::as_color(window, BLACK);
-                                    uint32_t mask = XCB_EVENT_MASK_POINTER_MOTION;
-                                    mxb::set::event_mask(& mask, window);
-                                    mxb::win::grab::button(window, {{L_MOUSE_BUTTON, NULL}});
+                                    window.create_default(parent_window, x, y, width, height);
+                                    window.set_backround_color(BLACK);
+                                    window.apply_event_mask({XCB_EVENT_MASK_POINTER_MOTION});
+                                    window.grab_button({ { L_MOUSE_BUTTON, NULL } });
                                     xcb_map_window(conn, window);
                                     xcb_flush(conn);
                                 }
@@ -2612,10 +2612,8 @@ class mxb
                         void
                         hide()
                         {
-                            xcb_unmap_window(conn, window);
-                            xcb_flush(conn);
-                            mxb::win::kill(window);
-                            xcb_flush(conn);
+                            window.unmap();
+                            window.kill();
                         }
                         
                         void
@@ -3942,19 +3940,19 @@ class mxb
                     xcb_unmap_window(conn, c->border.bottom_right);
                     xcb_flush(conn);
 
-                    mxb::win::kill(c->win);
-                    mxb::win::kill(c->close_button);
-                    mxb::win::kill(c->max_button);
-                    mxb::win::kill(c->min_button);
-                    mxb::win::kill(c->titlebar);
-                    mxb::win::kill(c->frame);
-                    mxb::win::kill(c->border.left);
-                    mxb::win::kill(c->border.right);
-                    mxb::win::kill(c->border.top);
-                    mxb::win::kill(c->border.bottom);
-                    mxb::win::kill(c->border.top_right);
-                    mxb::win::kill(c->border.bottom_left);
-                    mxb::win::kill(c->border.bottom_right);
+                    c->win.kill();
+                    c->close_button.kill();
+                    c->max_button.kill();
+                    c->min_button.kill();
+                    c->titlebar.kill();
+                    c->frame.kill();
+                    c->border.left.kill();
+                    c->border.right.kill();
+                    c->border.top.kill();
+                    c->border.bottom.kill();
+                    c->border.top_right.kill();
+                    c->border.bottom_left.kill();
+                    c->border.bottom_right.kill();
                     xcb_flush(conn);
                 }
             ;
@@ -4600,79 +4598,6 @@ class mxb
         class win
         {
             public:
-                class grab
-                {
-                    public:
-                        class button
-                        {
-                            public:
-                                button(const xcb_window_t & window, const uint8_t & button, const uint16_t & modifiers)
-                                {
-                                    xcb_grab_button
-                                    (
-                                        conn, 
-                                        1, // 'owner_events'. Set to 0 for no event propagation
-                                        window, 
-                                        XCB_EVENT_MASK_BUTTON_PRESS, // Event mask
-                                        XCB_GRAB_MODE_ASYNC, // Pointer mode
-                                        XCB_GRAB_MODE_ASYNC, // Keyboard mode
-                                        XCB_NONE, // Confine to window: none
-                                        XCB_NONE, // Cursor: none
-                                        button, 
-                                        modifiers
-                                    );
-                                    xcb_flush(conn); // Flush the request to the X server
-                                }
-
-                                button(const xcb_window_t & window, std::initializer_list<std::pair<const uint8_t, const uint16_t>> bindings)
-                                {
-                                    for (const auto & binding : bindings)
-                                    {
-                                        const uint8_t & button = binding.first;
-                                        const uint16_t & modifier = binding.second;
-                                        xcb_grab_button
-                                        (
-                                            conn, 
-                                            1, 
-                                            window, 
-                                            XCB_EVENT_MASK_BUTTON_PRESS, 
-                                            XCB_GRAB_MODE_ASYNC, 
-                                            XCB_GRAB_MODE_ASYNC, 
-                                            XCB_NONE, 
-                                            XCB_NONE, 
-                                            button, 
-                                            modifier    
-                                        );
-                                        xcb_flush(conn); 
-                                    }
-                                }
-                            ;
-                        };
-                    ;
-                };
-
-                class ungrab
-                {
-                    public:
-                        class button
-                        {
-                            public:
-                                button(const xcb_window_t & window, const uint8_t & button, const uint16_t & modifiers)
-                                {
-                                    xcb_ungrab_button
-                                    (
-                                        conn, 
-                                        button, 
-                                        window, 
-                                        modifiers
-                                    );
-                                    xcb_flush(conn); // Flush the request to the X server
-                                }
-                            ;
-                        };
-                    ;
-                };
-
                 static void
                 clear(const xcb_window_t & window)
                 {
@@ -4686,61 +4611,6 @@ class mxb
                         mxb::get::win::width(window),
                         mxb::get::win::height(window)
                     );
-                }
-
-                static void 
-                kill(xcb_window_t window)
-                {
-                    xcb_intern_atom_cookie_t protocols_cookie = xcb_intern_atom(conn, 1, 12, "WM_PROTOCOLS");
-                    xcb_intern_atom_reply_t * protocols_reply = xcb_intern_atom_reply(conn, protocols_cookie, NULL);
-
-                    xcb_intern_atom_cookie_t delete_cookie = xcb_intern_atom(conn, 0, 16, "WM_DELETE_WINDOW");
-                    xcb_intern_atom_reply_t * delete_reply = xcb_intern_atom_reply(conn, delete_cookie, NULL);
-
-                    if (!protocols_reply || !delete_reply) 
-                    {
-                        log_error("Could not create atoms.");
-                        free(protocols_reply);
-                        free(delete_reply);
-                        return;
-                    }
-
-                    xcb_client_message_event_t ev = {0};
-                    ev.response_type = XCB_CLIENT_MESSAGE;
-                    ev.window = window;
-                    ev.format = 32;
-                    ev.sequence = 0;
-                    ev.type = protocols_reply->atom;
-                    ev.data.data32[0] = delete_reply->atom;
-                    ev.data.data32[1] = XCB_CURRENT_TIME;
-
-                    xcb_send_event
-                    (
-                        conn,
-                        0,
-                        window,
-                        XCB_EVENT_MASK_NO_EVENT,
-                        (char *) & ev
-                    );
-
-                    free(protocols_reply);
-                    free(delete_reply);
-                }
-
-                static void  
-                raise(const xcb_window_t & window) 
-                {
-                    xcb_configure_window
-                    (
-                        conn,
-                        window,
-                        XCB_CONFIG_WINDOW_STACK_MODE, 
-                        (const uint32_t[1])
-                        {
-                            XCB_STACK_MODE_ABOVE
-                        }
-                    );
-                    xcb_flush(conn);
                 }
             ;
         };
@@ -9463,7 +9333,7 @@ class Event
             client * c = get::client_from_win( & e->event);
             if (c)
             {
-                mxb::win::ungrab::button(c->win, L_MOUSE_BUTTON, 0);
+                c->win.ungrab_button({ { L_MOUSE_BUTTON, NULL } });
                 c->raise();
                 c->win.set_active_EWMH_window();
                 focused_client = c;
