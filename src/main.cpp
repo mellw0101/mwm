@@ -4595,14 +4595,14 @@ class Window_Manager
         void
         init()
         {
-            window = screen->root;
-            width = screen->width_in_pixels;
-            height = screen->height_in_pixels;
-
             _conn(nullptr, nullptr);
             _setup();
             _iter();
             _screen();
+            
+            window = screen->root;
+            width = screen->width_in_pixels;
+            height = screen->height_in_pixels;
 
             setSubstructureRedirectMask();
             configureRootWindow();
