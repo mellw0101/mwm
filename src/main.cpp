@@ -3440,7 +3440,7 @@ class Window_Manager
 {
     public: // variabels 
         window root;
-        mxb::Dialog_win::Dock Dock;
+        mxb::Dialog_win::Dock * Dock;
     ;
 
     public: // methods 
@@ -7654,12 +7654,11 @@ setup_wm()
     wm->create_new_desktop(5);
     
     change_desktop::teleport_to(1);
-    mxb::Dialog_win::Dock d;
-    wm->Dock = d;
-    wm->Dock.add_app("konsole");
-    wm->Dock.add_app("alacritty");
-    wm->Dock.add_app("falkon");
-    wm->Dock.init();
+    wm->Dock = new mxb::Dialog_win::Dock;
+    wm->Dock->add_app("konsole");
+    wm->Dock->add_app("alacritty");
+    wm->Dock->add_app("falkon");
+    wm->Dock->init();
     // dock = new mxb::Dialog_win::Dock;
     // dock->add_app("konsole");
     // dock->add_app("alacritty");
