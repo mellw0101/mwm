@@ -388,7 +388,6 @@ class pointer
         }
     ;
 };
-
 static pointer * pointer;
 
 class window
@@ -5626,7 +5625,7 @@ class mv_client
  */
 class XCPPBAnimator
 {
-    public:
+    public: // variables
         XCPPBAnimator(xcb_connection_t* connection, const xcb_window_t & window)
         : connection(connection), window(window) {}
 
@@ -5635,7 +5634,9 @@ class XCPPBAnimator
 
         XCPPBAnimator(xcb_connection_t * connection)
         : connection(connection) {}
+    ;
 
+    public: // methods
         void /**
          * @brief Animates the position and size of an object from a starting point to an ending point.
          * 
@@ -5817,7 +5818,7 @@ class XCPPBAnimator
         }
     ;
 
-    private:
+    private: // variabels
         xcb_connection_t* connection;
         xcb_window_t window;
         client * c;
@@ -5848,13 +5849,11 @@ class XCPPBAnimator
         std::chrono::high_resolution_clock::time_point YlastUpdateTime;
         std::chrono::high_resolution_clock::time_point WlastUpdateTime;
         std::chrono::high_resolution_clock::time_point HlastUpdateTime;
-        
-        /* FRAMERATE */
         const double frameRate = 120;
-        
-        /* DURATION IN MILLISECONDS THAT EACH FRAME SHOULD LAST */
         const double frameDuration = 1000.0 / frameRate; 
-        
+    ;
+
+    private: // funcrions        
         void /**
          *
          * @brief Performs animation on window 'x' position until the specified 'endX' is reached.
@@ -6436,12 +6435,6 @@ class XCPPBAnimator
         }
 
         void 
-        conf_client_test()
-        {
-            c->x_y_width_height(currentX, currentY, currentWidth, currentHeight);
-        }
-
-        void 
         conf_client_x()
         {
             const uint32_t x = currentX;
@@ -6752,8 +6745,8 @@ class resize_client
                 return;
             }
 
-            mxb::pointer::grab(c->frame);
-            mxb::pointer::teleport(c->x + c->width, c->y + c->height);
+            pointer->grab(c->frame);
+            pointer->teleport(c->x + c->width, c->y + c->height);
             run();
             xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
             xcb_flush(conn);
@@ -7079,22 +7072,22 @@ class resize_client
                     {
                         case edge::TOP:
                         {
-                            mxb::pointer::teleport(mxb::pointer::get::x(), c->y);
+                            pointer->teleport(pointer->x(), c->y);
                             break;
                         }
                         case edge::BOTTOM_edge:
                         {
-                            mxb::pointer::teleport(mxb::pointer::get::x(), (c->y + c->height));
+                            pointer->teleport(pointer->x(), (c->y + c->height));
                             break;
                         } 
                         case edge::LEFT:
                         {
-                            mxb::pointer::teleport(c->x, mxb::pointer::get::y());
+                            pointer->teleport(c->x, pointer->y());
                             break;
                         }
                         case edge::RIGHT:
                         {
-                            mxb::pointer::teleport((c->x + c->width), mxb::pointer::get::y());
+                            pointer->teleport((c->x + c->width), pointer->y());
                             break;
                         }
                         case edge::NONE:
@@ -7103,22 +7096,22 @@ class resize_client
                         }
                         case edge::TOP_LEFT:
                         {
-                            mxb::pointer::teleport(c->x, c->y);
+                            pointer->teleport(c->x, c->y);
                             break;
                         }
                         case edge::TOP_RIGHT:
                         {
-                            mxb::pointer::teleport((c->x + c->width), c->y);
+                            pointer->teleport((c->x + c->width), c->y);
                             break;
                         }
                         case edge::BOTTOM_LEFT:
                         {
-                            mxb::pointer::teleport(c->x, (c->y + c->height));
+                            pointer->teleport(c->x, (c->y + c->height));
                             break;
                         }
                         case edge::BOTTOM_RIGHT:
                         {
-                            mxb::pointer::teleport((c->x + c->width), (c->y + c->height));
+                            pointer->teleport((c->x + c->width), (c->y + c->height));
                             break;
                         }
                     }
