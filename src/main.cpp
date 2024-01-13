@@ -3028,7 +3028,7 @@ class mxb
                 class Dock
                 {
                     public: // constructor
-                        
+                        Dock() {}
                     ;
 
                     public: // public variables 
@@ -7654,16 +7654,11 @@ setup_wm()
     wm->create_new_desktop(5);
     
     change_desktop::teleport_to(1);
-    wm->Dock = new mxb::Dialog_win::Dock;
-    wm->Dock->add_app("konsole");
-    wm->Dock->add_app("alacritty");
-    wm->Dock->add_app("falkon");
-    wm->Dock->init();
-    // dock = new mxb::Dialog_win::Dock;
-    // dock->add_app("konsole");
-    // dock->add_app("alacritty");
-    // dock->add_app("falkon");
-    // dock->init();
+    dock = new mxb::Dialog_win::Dock;
+    dock->add_app("konsole");
+    dock->add_app("alacritty");
+    dock->add_app("falkon");
+    dock->init();
 
     pointer = new class pointer;
 
