@@ -4752,6 +4752,12 @@ class Window_Manager
                 {   TAB,        ALT                     },
                 {   K,          SUPER                   }
             });
+
+            window.grab_button
+            ({
+                { L_MOUSE_BUTTON, NULL},
+                { R_MOUSE_BUTTON, NULL}
+            });
         }
     ;
 };
