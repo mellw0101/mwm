@@ -600,6 +600,59 @@ class window
                 }
                 return false;
             }
+
+            bool
+            check_if_active_EWMH_window()
+            {
+                uint32_t active_window = 0;
+                xcb_ewmh_get_active_window_reply(ewmh, xcb_ewmh_get_active_window(ewmh, 0), &active_window, NULL);
+                return _window == active_window;
+            }
+        ;
+
+        public: // set methods 
+            void
+            set_active_EWMH_window()
+            {
+                xcb_ewmh_set_active_window(ewmh, 0, _window); // 0 for the first (default) screen
+                xcb_flush(conn);
+            }
+
+            void
+            set_EWMH_fullscreen_state()
+            {
+                xcb_change_property
+                (
+                    conn,
+                    XCB_PROP_MODE_REPLACE,
+                    _window,
+                    ewmh->_NET_WM_STATE,
+                    XCB_ATOM_ATOM,
+                    32,
+                    1,
+                    &ewmh->_NET_WM_STATE_FULLSCREEN
+                );
+                xcb_flush(conn);
+            }
+        ;
+
+        public: // unset methods 
+            void
+            unset_EWMH_fullscreen_state()
+            {
+                xcb_change_property
+                (
+                    conn,
+                    XCB_PROP_MODE_REPLACE,
+                    _window,
+                    ewmh->_NET_WM_STATE, 
+                    XCB_ATOM_ATOM,
+                    32,
+                    0,
+                    0
+                );
+                xcb_flush(conn);
+            }
         ;
 
         public: // configuration methods 
@@ -1614,158 +1667,168 @@ class client
     ;
 
     public: // methods 
-        void
-        _width(const uint32_t & width)
-        {
-            win.width((width - (BORDER_SIZE * 2)));
-            xcb_flush(conn);
-            frame.width((width));
-            titlebar.width((width - (BORDER_SIZE * 2)));
-            close_button.x((width - BUTTON_SIZE - BORDER_SIZE));
-            max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
-            min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
-            border.right.x((width - BORDER_SIZE));
-            border.top.width((width - (BORDER_SIZE * 2)));
-            border.bottom.width((width - (BORDER_SIZE * 2)));
-            border.top_right.x((width - BORDER_SIZE));
-            border.bottom_right.x((width - BORDER_SIZE));
-            xcb_flush(conn);
-        }
-
-        void
-        _height(const uint32_t & height)
-        {
-            win.height((height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
-            frame.height(height);
-            border.left.height((height - (BORDER_SIZE * 2)));
-            border.right.height((height - (BORDER_SIZE * 2)));
-            border.bottom.y((height - BORDER_SIZE));
-            border.bottom_left.y((height - BORDER_SIZE));
-            border.bottom_right.y((height - BORDER_SIZE));
-        }
-
-        void
-        x_width(const uint32_t & x, const uint32_t & width)
-        {
-            win.width((width - (BORDER_SIZE * 2)));
-            xcb_flush(conn);
-            frame.x_width(x, (width));
-            titlebar.width((width - (BORDER_SIZE * 2)));
-            close_button.x((width - BUTTON_SIZE - BORDER_SIZE));
-            max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
-            min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
-            border.right.x((width - BORDER_SIZE));
-            border.top.width((width - (BORDER_SIZE * 2)));
-            border.bottom.width((width - (BORDER_SIZE * 2)));
-            border.top_right.x((width - BORDER_SIZE));
-            border.bottom_right.x((width - BORDER_SIZE));
-            xcb_flush(conn);
-        }
-
-        void
-        y_height(const uint32_t & y, const uint32_t & height)
-        {
-            win.height((height - TITLE_BAR_HEIGHT) - (BORDER_SIZE * 2));
-            xcb_flush(conn);
-            frame.y_height(y, height);
-            border.left.height((height - (BORDER_SIZE * 2)));
-            border.right.height((height - (BORDER_SIZE * 2)));
-            border.bottom.y((height - BORDER_SIZE));
-            border.bottom_left.y((height - BORDER_SIZE));
-            border.bottom_right.y((height - BORDER_SIZE));
-            xcb_flush(conn);
-        }
-
-        void
-        x_width_height(const uint32_t & x, const uint32_t & width, const uint32_t & height)
-        {
-            frame.x_width_height(x, width, height);
-            win.width_height((width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
-            titlebar.width((width - BORDER_SIZE));
-            close_button.x((width - BUTTON_SIZE - BORDER_SIZE));
-            max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
-            min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
-            border.left.height((height - (BORDER_SIZE * 2)));
-            border.right.x_height((width - BORDER_SIZE), (height - (BORDER_SIZE * 2)));
-            border.top.width((width - (BORDER_SIZE * 2)));
-            border.bottom.y_width((height - BORDER_SIZE), (width - (BORDER_SIZE * 2)));
-            border.top_right.x((width - BORDER_SIZE));
-            border.bottom_left.y((height - BORDER_SIZE));
-            border.bottom_right.x_y((width - BORDER_SIZE), (height - BORDER_SIZE));
-        }
-
-        void
-        y_width_height(const uint32_t & y, const uint32_t & width, const uint32_t & height)
-        {
-            frame.y_width_height(y, width, height);
-            win.width_height((width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
-            titlebar.width((width - BORDER_SIZE));
-            close_button.x((width - BUTTON_SIZE - BORDER_SIZE));
-            max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
-            min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
-            border.left.height((height - (BORDER_SIZE * 2)));
-            border.right.x_height((width - BORDER_SIZE), (height - (BORDER_SIZE * 2)));
-            border.top.width((width - (BORDER_SIZE * 2)));
-            border.bottom.y_width((height - BORDER_SIZE), (width - (BORDER_SIZE * 2)));
-            border.top_right.x((width - BORDER_SIZE));
-            border.bottom_left.y((height - BORDER_SIZE));
-            border.bottom_right.x_y((width - BORDER_SIZE), (height - BORDER_SIZE));
-        }
-
-        void
-        x_y_width_height(const uint32_t & x, const uint32_t & y, const uint32_t & width, const uint32_t & height)
-        {
-            win.width_height((width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
-            xcb_flush(conn);
-            frame.x_y_width_height(x, y, width, height);
-            titlebar.width((width - (BORDER_SIZE * 2)));
-            close_button.x((width - BUTTON_SIZE - BORDER_SIZE));
-            max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
-            min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
-            border.left.height((height - (BORDER_SIZE * 2)));
-            border.right.x_height((width - BORDER_SIZE), (height - (BORDER_SIZE * 2)));
-            border.top.width((width - (BORDER_SIZE * 2)));
-            border.bottom.y_width((height - BORDER_SIZE), (width - (BORDER_SIZE * 2)));
-            border.top_right.x((width - BORDER_SIZE));
-            border.bottom_right.x_y((width - BORDER_SIZE), (height - BORDER_SIZE));
-            border.bottom_left.y((height - BORDER_SIZE));
-            xcb_flush(conn);
-        }
-
-        void
-        width_height(const uint32_t & width, const uint32_t & height)
-        {
-            win.width_height((width - (BORDER_SIZE * 2)), (height - (BORDER_SIZE * 2)));
-            xcb_flush(conn);
-            frame.width_height(width, height);
-            titlebar.width((width - (BORDER_SIZE * 2)));
-            close_button.x((width - BUTTON_SIZE - BORDER_SIZE));
-            max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
-            min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
-            border.left.height((height - (BORDER_SIZE * 2)));
-            border.right.x_height((width - BORDER_SIZE), (height - (BORDER_SIZE * 2)));
-            border.top.width((width - (BORDER_SIZE * 2)));
-            border.bottom.y_width((height - BORDER_SIZE), (width - (BORDER_SIZE * 2)));
-            border.top_right.x((width - BORDER_SIZE));
-            border.bottom_right.x_y((width - BORDER_SIZE), (height - BORDER_SIZE));
-            border.bottom_left.y((height - BORDER_SIZE));
-            xcb_flush(conn);
-        }
-
-        void 
-        make_decorations()
-        {
-            make_frame();
-            make_titlebar();
-            make_close_button();
-            make_max_button();
-            make_min_button();
-            
-            if (BORDER_SIZE > 0)
+        public: // config methods 
+            void
+            _width(const uint32_t & width)
             {
-                make_borders();
+                win.width((width - (BORDER_SIZE * 2)));
+                xcb_flush(conn);
+                frame.width((width));
+                titlebar.width((width - (BORDER_SIZE * 2)));
+                close_button.x((width - BUTTON_SIZE - BORDER_SIZE));
+                max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
+                min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
+                border.right.x((width - BORDER_SIZE));
+                border.top.width((width - (BORDER_SIZE * 2)));
+                border.bottom.width((width - (BORDER_SIZE * 2)));
+                border.top_right.x((width - BORDER_SIZE));
+                border.bottom_right.x((width - BORDER_SIZE));
+                xcb_flush(conn);
             }
-        }
+
+            void
+            _height(const uint32_t & height)
+            {
+                win.height((height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
+                frame.height(height);
+                border.left.height((height - (BORDER_SIZE * 2)));
+                border.right.height((height - (BORDER_SIZE * 2)));
+                border.bottom.y((height - BORDER_SIZE));
+                border.bottom_left.y((height - BORDER_SIZE));
+                border.bottom_right.y((height - BORDER_SIZE));
+            }
+
+            void
+            x_width(const uint32_t & x, const uint32_t & width)
+            {
+                win.width((width - (BORDER_SIZE * 2)));
+                xcb_flush(conn);
+                frame.x_width(x, (width));
+                titlebar.width((width - (BORDER_SIZE * 2)));
+                close_button.x((width - BUTTON_SIZE - BORDER_SIZE));
+                max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
+                min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
+                border.right.x((width - BORDER_SIZE));
+                border.top.width((width - (BORDER_SIZE * 2)));
+                border.bottom.width((width - (BORDER_SIZE * 2)));
+                border.top_right.x((width - BORDER_SIZE));
+                border.bottom_right.x((width - BORDER_SIZE));
+                xcb_flush(conn);
+            }
+
+            void
+            y_height(const uint32_t & y, const uint32_t & height)
+            {
+                win.height((height - TITLE_BAR_HEIGHT) - (BORDER_SIZE * 2));
+                xcb_flush(conn);
+                frame.y_height(y, height);
+                border.left.height((height - (BORDER_SIZE * 2)));
+                border.right.height((height - (BORDER_SIZE * 2)));
+                border.bottom.y((height - BORDER_SIZE));
+                border.bottom_left.y((height - BORDER_SIZE));
+                border.bottom_right.y((height - BORDER_SIZE));
+                xcb_flush(conn);
+            }
+
+            void
+            x_width_height(const uint32_t & x, const uint32_t & width, const uint32_t & height)
+            {
+                frame.x_width_height(x, width, height);
+                win.width_height((width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
+                titlebar.width((width - BORDER_SIZE));
+                close_button.x((width - BUTTON_SIZE - BORDER_SIZE));
+                max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
+                min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
+                border.left.height((height - (BORDER_SIZE * 2)));
+                border.right.x_height((width - BORDER_SIZE), (height - (BORDER_SIZE * 2)));
+                border.top.width((width - (BORDER_SIZE * 2)));
+                border.bottom.y_width((height - BORDER_SIZE), (width - (BORDER_SIZE * 2)));
+                border.top_right.x((width - BORDER_SIZE));
+                border.bottom_left.y((height - BORDER_SIZE));
+                border.bottom_right.x_y((width - BORDER_SIZE), (height - BORDER_SIZE));
+            }
+
+            void
+            y_width_height(const uint32_t & y, const uint32_t & width, const uint32_t & height)
+            {
+                frame.y_width_height(y, width, height);
+                win.width_height((width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
+                titlebar.width((width - BORDER_SIZE));
+                close_button.x((width - BUTTON_SIZE - BORDER_SIZE));
+                max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
+                min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
+                border.left.height((height - (BORDER_SIZE * 2)));
+                border.right.x_height((width - BORDER_SIZE), (height - (BORDER_SIZE * 2)));
+                border.top.width((width - (BORDER_SIZE * 2)));
+                border.bottom.y_width((height - BORDER_SIZE), (width - (BORDER_SIZE * 2)));
+                border.top_right.x((width - BORDER_SIZE));
+                border.bottom_left.y((height - BORDER_SIZE));
+                border.bottom_right.x_y((width - BORDER_SIZE), (height - BORDER_SIZE));
+            }
+
+            void
+            x_y_width_height(const uint32_t & x, const uint32_t & y, const uint32_t & width, const uint32_t & height)
+            {
+                win.width_height((width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
+                xcb_flush(conn);
+                frame.x_y_width_height(x, y, width, height);
+                titlebar.width((width - (BORDER_SIZE * 2)));
+                close_button.x((width - BUTTON_SIZE - BORDER_SIZE));
+                max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
+                min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
+                border.left.height((height - (BORDER_SIZE * 2)));
+                border.right.x_height((width - BORDER_SIZE), (height - (BORDER_SIZE * 2)));
+                border.top.width((width - (BORDER_SIZE * 2)));
+                border.bottom.y_width((height - BORDER_SIZE), (width - (BORDER_SIZE * 2)));
+                border.top_right.x((width - BORDER_SIZE));
+                border.bottom_right.x_y((width - BORDER_SIZE), (height - BORDER_SIZE));
+                border.bottom_left.y((height - BORDER_SIZE));
+                xcb_flush(conn);
+            }
+
+            void
+            width_height(const uint32_t & width, const uint32_t & height)
+            {
+                win.width_height((width - (BORDER_SIZE * 2)), (height - (BORDER_SIZE * 2)));
+                xcb_flush(conn);
+                frame.width_height(width, height);
+                titlebar.width((width - (BORDER_SIZE * 2)));
+                close_button.x((width - BUTTON_SIZE - BORDER_SIZE));
+                max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
+                min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
+                border.left.height((height - (BORDER_SIZE * 2)));
+                border.right.x_height((width - BORDER_SIZE), (height - (BORDER_SIZE * 2)));
+                border.top.width((width - (BORDER_SIZE * 2)));
+                border.bottom.y_width((height - BORDER_SIZE), (width - (BORDER_SIZE * 2)));
+                border.top_right.x((width - BORDER_SIZE));
+                border.bottom_right.x_y((width - BORDER_SIZE), (height - BORDER_SIZE));
+                border.bottom_left.y((height - BORDER_SIZE));
+                xcb_flush(conn);
+            }
+        ;
+
+        public: // main methods 
+            void 
+            make_decorations()
+            {
+                make_frame();
+                make_titlebar();
+                make_close_button();
+                make_max_button();
+                make_min_button();
+                
+                if (BORDER_SIZE > 0)
+                {
+                    make_borders();
+                }
+            }
+
+            void
+            raise()
+            {
+                frame.raise();
+            }
+        ;
     ;
 
     private: // functions 
@@ -2395,8 +2458,8 @@ class mxb
                     public: // consructor 
                         context_menu()
                         {
-                            size_pos.x      = mxb::pointer::get::x();
-                            size_pos.y      = mxb::pointer::get::y();
+                            size_pos.x      = pointer->x();
+                            size_pos.y      = pointer->y();
                             size_pos.width  = 120;
                             size_pos.height = 20;
 
@@ -2413,8 +2476,8 @@ class mxb
                         void
                         show()
                         {
-                            size_pos.x = mxb::pointer::get::x();
-                            size_pos.y = mxb::pointer::get::y();
+                            size_pos.x = pointer->x();
+                            size_pos.y = pointer->y();
                             
                             uint32_t height = get_num_of_entries() * size_pos.height;
                             if (size_pos.y + height > screen->height_in_pixels)
@@ -3583,204 +3646,6 @@ class mxb
             ;
         };
 
-        class EWMH 
-        {
-            public:
-                EWMH(xcb_connection_t* connection, xcb_ewmh_connection_t* ewmh_connection)
-                : connection(connection), ewmh_conn(ewmh_connection) {}
-
-                // Function to check the type of a window
-                std::vector<std::string> 
-                WindowType(xcb_window_t window) 
-                {
-                    std::vector<std::string> types;
-                    xcb_get_property_cookie_t cookie = xcb_ewmh_get_wm_window_type(ewmh_conn, window);
-                    xcb_ewmh_get_atoms_reply_t wm_window_type;
-
-                    if (xcb_ewmh_get_wm_window_type_reply(ewmh_conn, cookie, &wm_window_type, nullptr) == 1) 
-                    {
-                        for (unsigned int i = 0; i < wm_window_type.atoms_len; i++) 
-                        {
-                            log_info(mxb::get::AtomName(wm_window_type.atoms[i]));
-                            types.push_back(mxb::get::AtomName(wm_window_type.atoms[i]));
-                        }
-                        xcb_ewmh_get_atoms_reply_wipe(&wm_window_type);
-                    }
-                    return types;
-                }
-
-                bool 
-                checkWindowDecorations(xcb_window_t window) 
-                {
-                    xcb_intern_atom_cookie_t* cookie = xcb_ewmh_init_atoms(connection, ewmh_conn);
-                    xcb_ewmh_init_atoms_replies(ewmh_conn, cookie, nullptr);
-
-                    xcb_ewmh_get_atoms_reply_t win_type_reply;
-                    if (xcb_ewmh_get_wm_window_type_reply(ewmh_conn, xcb_ewmh_get_wm_window_type(ewmh_conn, window), &win_type_reply, nullptr)) 
-                    {
-                        for (unsigned int i = 0; i < win_type_reply.atoms_len; i++) 
-                        {
-                            if (win_type_reply.atoms[i] == ewmh_conn->_NET_WM_WINDOW_TYPE_NORMAL) 
-                            {
-                                xcb_ewmh_get_atoms_reply_wipe(&win_type_reply);
-                                return true; // Window is likely to be decorated
-                            }
-                        }
-                        xcb_ewmh_get_atoms_reply_wipe(&win_type_reply);
-                    }
-
-                    return false; // Window is likely not decorated
-                }
-
-                void
-                check_extends(xcb_window_t window)
-                {
-                    xcb_ewmh_get_extents_reply_t extents;
-                    if (xcb_ewmh_get_frame_extents_reply(ewmh_conn, xcb_ewmh_get_frame_extents(ewmh_conn, window), &extents, nullptr)) 
-                    {
-                        log.log(INFO_PRIORITY, __func__, "Extents: left: %d, right: %d, top: %d, bottom: %d", extents.left, extents.right, extents.top, extents.bottom);
-                    }
-                }
-
-                bool 
-                checkWindowFrameExtents(xcb_window_t window) 
-                {
-                    xcb_ewmh_get_extents_reply_t extents;
-                    xcb_get_property_cookie_t cookie = xcb_ewmh_get_frame_extents(ewmh_conn, window);
-
-                    if (xcb_ewmh_get_frame_extents_reply(ewmh_conn, cookie, &extents, nullptr)) 
-                    {
-                        bool hasDecorations = extents.left > 0 || extents.right > 0 || extents.top > 0 || extents.bottom > 0;
-                        return hasDecorations;
-                    }
-
-                    return false; // Unable to determine or no decorations
-                }
-
-                class set
-                {
-                    public:
-                        static void
-                        active_window(xcb_window_t window)
-                        {
-                            xcb_ewmh_set_active_window(ewmh, 0, window); // 0 for the first (default) screen
-                            xcb_flush(conn);
-                        }
-
-                        static void
-                        max_win_state(const xcb_window_t & window)
-                        {
-                            xcb_change_property
-                            (
-                                conn,
-                                XCB_PROP_MODE_REPLACE,
-                                window,
-                                ewmh->_NET_WM_STATE,
-                                XCB_ATOM_ATOM,
-                                32,
-                                1,
-                                &ewmh->_NET_WM_STATE_FULLSCREEN
-                            );
-                            xcb_flush(conn);
-                        }
-                    ;
-                };
-
-                class unset
-                {
-                    public:
-                        static void
-                        max_win_state(const xcb_window_t & window)
-                        {
-                            xcb_change_property
-                            (
-                                conn,
-                                XCB_PROP_MODE_REPLACE,
-                                window,
-                                ewmh->_NET_WM_STATE, 
-                                XCB_ATOM_ATOM,
-                                32,
-                                0,
-                                0
-                            );
-                            xcb_flush(conn);
-                        }
-                    ;
-                };
-
-                class get
-                {
-                    public:
-                        static xcb_window_t
-                        active_window()
-                        {
-                            xcb_window_t window = 0;
-                            xcb_ewmh_get_active_window_reply(ewmh, xcb_ewmh_get_active_window(ewmh, 0), &window, NULL);
-                            return window;
-                        }
-                    ;
-                };
-
-                class check
-                {
-                    public:
-                        static bool
-                        active_window(xcb_window_t window)
-                        {
-                            xcb_window_t active_window = 0;
-                            xcb_ewmh_get_active_window_reply(ewmh, xcb_ewmh_get_active_window(ewmh, 0), &active_window, NULL);
-                            return window == active_window;
-                        }
-                        
-                        static bool 
-                        isWindowNormalType(xcb_window_t window) 
-                        {
-                            xcb_ewmh_get_atoms_reply_t type_reply;
-                            if (xcb_ewmh_get_wm_window_type_reply(ewmh, xcb_ewmh_get_wm_window_type(ewmh, window), &type_reply, nullptr)) 
-                            {
-                                for (unsigned int i = 0; i < type_reply.atoms_len; ++i) 
-                                {
-                                    if (type_reply.atoms[i] == ewmh->_NET_WM_WINDOW_TYPE_NORMAL) 
-                                    {
-                                        xcb_ewmh_get_atoms_reply_wipe(&type_reply);
-                                        return true;
-                                    }
-                                }
-                                xcb_ewmh_get_atoms_reply_wipe(&type_reply);
-                            }
-                            return false;
-                        }
-
-                        static bool 
-                        is_window_fullscreen(xcb_window_t window) 
-                        {
-                            xcb_get_property_cookie_t cookie = xcb_ewmh_get_wm_state(ewmh, window);
-                            xcb_ewmh_get_atoms_reply_t wm_state;
-                            if (xcb_ewmh_get_wm_state_reply(ewmh, cookie, &wm_state, NULL) == 1) 
-                            {
-                                for (unsigned int i = 0; i < wm_state.atoms_len; i++) 
-                                {
-                                    log_info(mxb::get::AtomName(wm_state.atoms[i]));
-                                    if (wm_state.atoms[i] == ewmh->_NET_WM_STATE_FULLSCREEN) 
-                                    {
-                                        xcb_ewmh_get_atoms_reply_wipe(&wm_state);
-                                        return true;
-                                    }
-                                }
-                                xcb_ewmh_get_atoms_reply_wipe(&wm_state);
-                            }
-                            return false;
-                        }
-                    ;
-                };
-            ;
-
-            private:
-                xcb_connection_t* connection;
-                xcb_ewmh_connection_t* ewmh_conn;
-            ;
-        };
-
         class Client 
         {
             public:
@@ -3790,8 +3655,8 @@ class mxb
                         static client *
                         client_edge_prox_to_pointer(const int & prox)
                         {
-                            const uint32_t & x = mxb::pointer::get::x();
-                            const uint32_t & y = mxb::pointer::get::y();
+                            const uint32_t & x = pointer->x();
+                            const uint32_t & y = pointer->y();
                             for (const auto & c : cur_d->current_clients)
                             {
                                 // LEFT EDGE OF CLIENT
@@ -3884,8 +3749,8 @@ class mxb
                         static edge
                         client_edge(client * c, const int & prox)
                         {
-                            const uint32_t & x = mxb::pointer::get::x();
-                            const uint32_t & y = mxb::pointer::get::y();
+                            const uint32_t & x = pointer->x();
+                            const uint32_t & y = pointer->y();
 
                             const uint32_t & top_border = c->y;
                             const uint32_t & bottom_border = (c->y + c->height);
@@ -4880,7 +4745,7 @@ class mxb
             ;
         };
 
-        class pointer
+        class _pointer
         {
             public:
                 class set
@@ -5660,12 +5525,12 @@ class mv_client
         mv_client(client * & c, const uint16_t & start_x, const uint16_t & start_y) 
         : c(c), start_x(start_x), start_y(start_y)
         {
-            if (mxb::EWMH::check::is_window_fullscreen(c->win))
+            if (c->win.check_if_EWMH_fullscreen())
             {
                 return;
             }
 
-            mxb::pointer::grab(c->frame);
+            pointer->grab(c->frame);
             run();
             xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
             xcb_flush(conn);
@@ -7036,12 +6901,12 @@ class resize_client
                 no_border(client * & c, const uint32_t & x, const uint32_t & y)
                 : c(c)
                 {
-                    if (mxb::EWMH::check::is_window_fullscreen(c->win))
+                    if (c->win.check_if_EWMH_fullscreen())
                     {
                         return;
                     }
                     
-                    mxb::pointer::grab(c->frame);
+                    pointer->grab(c->frame);
                     edge edge = mxb::Client::get::client_edge(c, 10);
                     teleport_mouse(edge);
                     run(edge);
@@ -7066,49 +6931,40 @@ class resize_client
                     switch (edge) 
                     {
                         case edge::TOP:
-                        {
                             pointer->teleport(pointer->x(), c->y);
                             break;
-                        }
+                        ;
                         case edge::BOTTOM_edge:
-                        {
-                            mxb::pointer::teleport(mxb::pointer::get::x(), (c->y + c->height));
+                            pointer->teleport(pointer->x(), (c->y + c->height));
                             break;
-                        } 
+                        ;
                         case edge::LEFT:
-                        {
-                            mxb::pointer::teleport(c->x, mxb::pointer::get::y());
+                            pointer->teleport(c->x, pointer->y());
                             break;
-                        }
+                        ;
                         case edge::RIGHT:
-                        {
-                            mxb::pointer::teleport((c->x + c->width), mxb::pointer::get::y());
+                            pointer->teleport((c->x + c->width), pointer->y());
                             break;
-                        }
+                        ;
                         case edge::NONE:
-                        {
                             break;
-                        }
+                        ;
                         case edge::TOP_LEFT:
-                        {
-                            mxb::pointer::teleport(c->x, c->y);
+                            pointer->teleport(c->x, c->y);
                             break;
-                        }
+                        ;
                         case edge::TOP_RIGHT:
-                        {
-                            mxb::pointer::teleport((c->x + c->width), c->y);
+                            pointer->teleport((c->x + c->width), c->y);
                             break;
-                        }
+                        ;
                         case edge::BOTTOM_LEFT:
-                        {
-                            mxb::pointer::teleport(c->x, (c->y + c->height));
+                            pointer->teleport(c->x, (c->y + c->height));
                             break;
-                        }
+                        ;
                         case edge::BOTTOM_RIGHT:
-                        {
-                            mxb::pointer::teleport((c->x + c->width), (c->y + c->height));
+                            pointer->teleport((c->x + c->width), (c->y + c->height));
                             break;
-                        }
+                        ;
                     }
                 }
 
@@ -7118,109 +6974,40 @@ class resize_client
                     switch (edge) 
                     {
                         case edge::LEFT:
-                        {
-                            const uint32_t width = (c->width + c->x - x);
-
-                            c->win.width((width - (BORDER_SIZE * 2)));
-                            c->frame.x_width(x, width);
-                            c->titlebar.width(width);
-                            c->close_button.x((width - BUTTON_SIZE - BORDER_SIZE));
-                            c->max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
-                            c->min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
-                            
+                            c->x_width(x, (c->width + c->x - x));
                             break;
-                        }
+                        ;
                         case edge::RIGHT:
-                        {
-                            const uint32_t width = (x - c->x);
-
-                            mxb::conf::win::width(c->win, (width - (BORDER_SIZE * 2)));
-                            mxb::conf::win::width(c->frame, width);
-                            mxb::conf::win::width(c->titlebar, (width - BORDER_SIZE));
-                            mxb::conf::win::x(c->close_button, (width - BUTTON_SIZE - BORDER_SIZE));
-                            mxb::conf::win::x(c->max_button, (width - (BUTTON_SIZE * 2) - BORDER_SIZE));
-                            mxb::conf::win::x(c->min_button, (width - (BUTTON_SIZE * 3) - BORDER_SIZE));
-                            
+                            c->_width((x - c->x));
                             break;
-                        }
+                        ;
                         case edge::TOP:
-                        {
-                            const uint32_t height = (c->height + c->y - y);
-
-                            mxb::conf::win::height(c->win, (height - TITLE_BAR_HEIGHT) - (BORDER_SIZE * 2));
-                            mxb::conf::win::y_height(c->frame, y, height);
-
+                            c->y_height(y, (c->height + c->y - y));   
                             break;
-                        }
+                        ;
                         case edge::BOTTOM_edge:
-                        {
-                            const uint32_t height = (y - c->y);
-
-                            mxb::conf::win::height(c->win, (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
-                            mxb::conf::win::height(c->frame, height);
-                            
+                            c->_height((y - c->y));
                             break;
-                        }
+                        ;
                         case edge::NONE:
-                        {
                             return;
-                        }
+                        ;
                         case edge::TOP_LEFT:
-                        {
-                            const uint32_t height = (c->height + c->y - y);
-                            const uint32_t width = (c->width + c->x - x);
-
-                            mxb::conf::win::x_y_width_height(c->frame, x, y, width, height);
-                            mxb::conf::win::width_height(c->win, (width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
-                            mxb::conf::win::width(c->titlebar, (width - (BORDER_SIZE * 2)));
-                            mxb::conf::win::x(c->close_button, (width - BUTTON_SIZE - BORDER_SIZE));
-                            mxb::conf::win::x(c->max_button, (width - (BUTTON_SIZE * 2) - BORDER_SIZE));
-                            mxb::conf::win::x(c->min_button, (width - (BUTTON_SIZE * 3) - BORDER_SIZE));
-
+                            c->x_y_width_height(x, y, (c->width + c->x - x), (c->height + c->y - y));
                             break;
-                        }
+                        ;
                         case edge::TOP_RIGHT:
-                        {   
-                            const uint32_t width = (x - c->x);
-                            const uint32_t height = (c->height + c->y - y);
-
-                            mxb::conf::win::y_width_height(c->frame, y, width, height);
-                            mxb::conf::win::width_height(c->win, (width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
-                            mxb::conf::win::width(c->titlebar, (width - BORDER_SIZE));
-                            mxb::conf::win::x(c->close_button, (width - BUTTON_SIZE - BORDER_SIZE));
-                            mxb::conf::win::x(c->max_button, (width - (BUTTON_SIZE * 2) - BORDER_SIZE));
-                            mxb::conf::win::x(c->min_button, (width - (BUTTON_SIZE * 3) - BORDER_SIZE));
-
+                            c->y_width_height(y, (x - c->x), (c->height + c->y - y));
                             break;
-                        }
+                        ;
                         case edge::BOTTOM_LEFT:
-                        {
-                            const uint32_t width = (c->width + c->x - x);
-                            const uint32_t height = (y - c->y);
-
-                            mxb::conf::win::x_width_height(c->frame, x, width, height);
-                            mxb::conf::win::width_height(c->win, (width - (BORDER_SIZE * 2)), (height - (BORDER_SIZE * 2)));
-                            mxb::conf::win::width(c->titlebar, (width - BORDER_SIZE));
-                            mxb::conf::win::x(c->close_button, (width - BUTTON_SIZE - BORDER_SIZE));
-                            mxb::conf::win::x(c->max_button, (width - (BUTTON_SIZE * 2) - BORDER_SIZE));
-                            mxb::conf::win::x(c->min_button, (width - (BUTTON_SIZE * 3) - BORDER_SIZE));
-
+                            c->x_width_height(x, (c->width + c->x - x), (y - c->y));   
                             break;
-                        }
+                        ;
                         case edge::BOTTOM_RIGHT:
-                        {   
-                            const uint32_t width = (x - c->x);
-                            const uint32_t height = (y - c->y);
-
-                            mxb::conf::win::width_height(c->frame, width, height);
-                            mxb::conf::win::width_height(c->win, (width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
-                            mxb::conf::win::width(c->titlebar, (width - BORDER_SIZE));
-                            mxb::conf::win::x(c->close_button, (width - BUTTON_SIZE - BORDER_SIZE));
-                            mxb::conf::win::x(c->max_button, (width - (BUTTON_SIZE * 2) - BORDER_SIZE));
-                            mxb::conf::win::x(c->min_button, (width - (BUTTON_SIZE * 3) - BORDER_SIZE));
-
+                            c->width_height((x - c->x), (y - c->y));   
                             break;
-                        }
+                        ;
                     }
                 }
 
@@ -7314,7 +7101,7 @@ class resize_client
                         {
                             c2 = pair.first;
                             c2_edge = pair.second;
-                            mxb::pointer::grab(c->frame);
+                            pointer->grab(c->frame);
                             teleport_mouse(_edge);
                             run_double(_edge);
                             xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
@@ -7399,49 +7186,40 @@ class resize_client
                     switch (edge) 
                     {
                         case edge::LEFT:
-                        {
                             c->x_width(x, (c->width + c->x - x));
                             break;
-                        }
+                        ;
                         case edge::RIGHT:
-                        {
                             c->_width((x - c->x));
                             break;
-                        }
+                        ;
                         case edge::TOP:
-                        {
                             c->y_height(y, (c->height + c->y - y));   
                             break;
-                        }
+                        ;
                         case edge::BOTTOM_edge:
-                        {
                             c->_height((y - c->y));
                             break;
-                        }
+                        ;
                         case edge::NONE:
-                        {
                             return;
-                        }
+                        ;
                         case edge::TOP_LEFT:
-                        {
                             c->x_y_width_height(x, y, (c->width + c->x - x), (c->height + c->y - y));
                             break;
-                        }
+                        ;
                         case edge::TOP_RIGHT:
-                        {
                             c->y_width_height(y, (x - c->x), (c->height + c->y - y));
                             break;
-                        }
+                        ;
                         case edge::BOTTOM_LEFT:
-                        {
                             c->x_width_height(x, (c->width + c->x - x), (y - c->y));   
                             break;
-                        }
+                        ;
                         case edge::BOTTOM_RIGHT:
-                        {
                             c->width_height((x - c->x), (y - c->y));   
                             break;
-                        }
+                        ;
                     }
                 }
 
@@ -7451,49 +7229,40 @@ class resize_client
                     switch (edge) 
                     {
                         case edge::LEFT:
-                        {
                             c->x_width(x, (c->width + c->x - x));
                             break;
-                        }
+                        ;
                         case edge::RIGHT:
-                        {
                             c->_width((x - c->x));
                             break;
-                        }
+                        ;
                         case edge::TOP:
-                        {
                             c->y_height(y, (c->height + c->y - y));   
                             break;
-                        }
+                        ;
                         case edge::BOTTOM_edge:
-                        {
                             c->_height((y - c->y));
                             break;
-                        }
+                        ;
                         case edge::NONE:
-                        {
                             return;
-                        }
+                        ;
                         case edge::TOP_LEFT:
-                        {
                             c->x_y_width_height(x, y, (c->width + c->x - x), (c->height + c->y - y));
                             break;
-                        }
+                        ;
                         case edge::TOP_RIGHT:
-                        {
                             c->y_width_height(y, (x - c->x), (c->height + c->y - y));
                             break;
-                        }
+                        ;
                         case edge::BOTTOM_LEFT:
-                        {
                             c->x_width_height(x, (c->width + c->x - x), (y - c->y));   
                             break;
-                        }
+                        ;
                         case edge::BOTTOM_RIGHT:
-                        {
                             c->width_height((x - c->x), (y - c->y));   
                             break;
-                        }
+                        ;
                     }
                 }
 
@@ -7821,7 +7590,7 @@ class max_win
             {
                 case EWMH_MAXWIN:
                 {
-                    if (mxb::EWMH::check::is_window_fullscreen(c->win))
+                    if (c->win.check_if_EWMH_fullscreen())
                     {
                         ewmh_unmax_win(c);
                     }
@@ -7885,7 +7654,7 @@ class max_win
                 screen->width_in_pixels + (BORDER_SIZE * 2), 
                 screen->height_in_pixels + TITLE_BAR_HEIGHT + (BORDER_SIZE * 2)
             );
-            mxb::EWMH::set::max_win_state(c->win);
+            c->win.set_EWMH_fullscreen_state();
             xcb_flush(conn);
         }
 
@@ -7920,7 +7689,7 @@ class max_win
                 c->max_ewmh_ogsize.width, 
                 c->max_ewmh_ogsize.height
             );
-            mxb::EWMH::unset::max_win_state(c->win);
+            c->win.unset_EWMH_fullscreen_state();
             xcb_flush(conn);
         }
 
@@ -8514,7 +8283,7 @@ class WinManager
                 c->y      = 0;
                 c->width  = screen->width_in_pixels;
                 c->height = screen->height_in_pixels;
-                mxb::EWMH::set::max_win_state(c->win);
+                c->win.set_EWMH_fullscreen_state();
             }
             
             client_list.push_back(c);
@@ -9697,7 +9466,7 @@ class Event
             {
                 mxb::win::ungrab::button(c->win, L_MOUSE_BUTTON, 0);
                 mxb::Client::raise(c);
-                mxb::EWMH::set::active_window(c->win);
+                c->win.set_active_EWMH_window();
                 focused_client = c;
             }
         }
@@ -9893,7 +9662,7 @@ setup_wm()
     mxb::set::_screen();
     setSubstructureRedirectMask();
     configureRootWindow();
-    mxb::pointer::set(screen->root, CURSOR::arrow);
+    mxb::_pointer::set(screen->root, CURSOR::arrow);
 
     mxb::set::_ewmh();
 
