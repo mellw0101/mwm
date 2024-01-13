@@ -2746,11 +2746,6 @@ class mxb
                     ;
 
                     private: // private variables
-                        struct app_data
-                        {
-                            const char * name;
-                            int index;
-                        };
                         std::vector<const char *> apps;
                     ;
 
