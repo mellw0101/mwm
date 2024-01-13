@@ -6747,7 +6747,7 @@ class resize_client
         resize_client(client * & c , int retard_int) 
         : c(c) 
         {
-            if (mxb::EWMH::check::is_window_fullscreen(c->win))
+            if (c->win.check_if_EWMH_fullscreen())
             {
                 return;
             }
