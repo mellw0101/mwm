@@ -4123,6 +4123,24 @@ class Window_Manager
             xcb_disconnect(conn);
             exit(status);
         }
+
+        void 
+        focus_client(client * c)
+        {
+            if (!c)
+            {
+                log_error("c is null");
+                return;
+            }
+
+            if (c == focused_client)
+            {
+                return;
+            }
+
+            focused_client = c;
+            c->focus();
+        }
     ;
 
     private: // variables
@@ -4785,20 +4803,6 @@ class focus
 {
     public:
         static void
-        client(client * c)
-        {
-            // LOG_func
-            if (c == nullptr)
-            {
-                LOG_warning("client was nullptr");
-                return;
-            }
-            raise_client(c);
-            focus_input(c);
-            focused_client = c;
-        }
-
-        static void
         cycle()
         {
             bool focus = false;
@@ -4814,7 +4818,7 @@ class focus
                     
                     if (focus)
                     {
-                        focus::client(c);
+                        wm->focus_client(c);
                         return;  
                     }
                 }
@@ -7522,7 +7526,7 @@ class WinManager
 
             c->win.property("_NET_WM_NAME");
             mxb::Client::update(c);
-            focus::client(c);
+            wm->focus_client(c);
         }
     ;
 
@@ -8599,7 +8603,7 @@ class Event
                     {
                         mxb::Client::raise(c);
                         resize_client::no_border(c, 0, 0);
-                        focus::client(c);
+                        wm->focus_client(c);
                     }
                     return;
                 }
@@ -8651,25 +8655,22 @@ class Event
                     {
                         case ALT:
                         {
-                            // log_info("ALT + L_MOUSE_BUTTON + win");
                             mxb::Client::raise(c);
                             mv_client(c, e->event_x, e->event_y + 20);
-                            focus::client(c);
+                            wm->focus_client(c);
                             break;
                         }
                     }
-                    // log_info("L_MOUSE_BUTTON + win");
                     mxb::Client::raise(c);
-                    focus::client(c);
+                    wm->focus_client(c);
                     return;
                 }
 
                 if (e->event == c->titlebar)
                 {
-                    // log_info("L_MOUSE_BUTTON + titlebar");
                     mxb::Client::raise(c);
                     mv_client(c, e->event_x, e->event_y);
-                    focus::client(c);
+                    wm->focus_client(c);
                     return;
                 }
 
@@ -8742,9 +8743,9 @@ class Event
                     case ALT:
                     {
                         log_error("ALT + R_MOUSE_BUTTON");
-                        mxb::Client::raise(c);
+                        c->raise();
                         resize_client(c, 0);
-                        focus::client(c);
+                        wm->focus_client(c);
                         return;
                     }
                 }
