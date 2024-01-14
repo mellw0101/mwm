@@ -189,11 +189,11 @@ class str
                 other.length = 0;
                 if (data == nullptr)
                 {
-                    is_null = true;
+                    is_null = false;
                 }
                 else
                 {
-                    is_null = false;
+                    is_null = true;
                 }
             }
             return *this;
