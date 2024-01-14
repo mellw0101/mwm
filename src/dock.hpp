@@ -178,7 +178,13 @@ class Dock
                 std::string name = app;
                 name += ".png";
 
-                std::vector<std::string> dirs = {"/usr/share/icons/gnome/256x256/apps/", "/usr/share/icons/gnome/48x48/apps/", "/usr/share/icons/gnome/32x32/apps/"};
+                std::vector<std::string> dirs = 
+                {
+                    "/usr/share/icons/gnome/256x256/apps/",
+                    "/usr/share/icons/hicolor/256x256/apps/",
+                    "/usr/share/icons/gnome/48x48/apps/",
+                    "/usr/share/icons/gnome/32x32/apps/"
+                };
 
                 for (const auto & dir : dirs)
                 {
