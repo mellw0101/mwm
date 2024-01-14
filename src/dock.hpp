@@ -58,7 +58,7 @@ class add_app_dialog_window
         void
         create()
         {
-            window.create_default(screen->root, 0, 0, 300, 200);
+            window.create_default(screen->root, pointer.x(), pointer.y(), 300, 200);
             uint32_t mask =  XCB_EVENT_MASK_STRUCTURE_NOTIFY;
             window.apply_event_mask(& mask);
             window.grab_button({ { L_MOUSE_BUTTON, NULL } });
