@@ -236,6 +236,8 @@ class string_tokenizer
         const fast_vector &
         tokenize(const char* input, const char* delimiter)
         {
+            tokens.clear();
+            
             // Copy the input string
             str = new char[strlen(input) + 1];
             strcpy(str, input);
