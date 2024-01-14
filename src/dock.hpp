@@ -43,14 +43,11 @@ class add_app_dialog_window
         void
         show()
         {
-            if (c)
+            if (!c)
             {
-                c->x_y((pointer.x() - (window.width() / 2)), (pointer.y() - (window.height() / 2)));
-                c->map();
-                return;
+                create_client();
             }
 
-            create_client();
             c->x_y((pointer.x() - (window.width() / 2)), (pointer.y() - (window.height() / 2)));
             c->map();
         }
