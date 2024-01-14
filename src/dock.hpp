@@ -28,7 +28,7 @@ class Event_Handler
         run() 
         {
             xcb_generic_event_t *ev;
-            bool shouldContinue = true;
+            shouldContinue = true;
 
             while (shouldContinue) 
             {
@@ -48,6 +48,12 @@ class Event_Handler
             }
         }
 
+        void
+        end()
+        {
+            shouldContinue = false;
+        }
+
         void 
         setEventCallback(uint8_t eventType, EventCallback callback) 
         {
@@ -56,6 +62,7 @@ class Event_Handler
     ;
     private:
         std::unordered_map<uint8_t, EventCallback> eventCallbacks;
+        bool shouldContinue = false;
     ;
 };
 
@@ -103,6 +110,7 @@ class add_app_dialog_window
                 if (e->event == screen->root)
                 {
                     hide();
+                    ev_handler.end();
                 } 
             });
 
