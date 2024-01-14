@@ -52,6 +52,7 @@
 #include <arpa/inet.h>
 #include <map>
 #include "Log.hpp"
+#include "contex_meny.hpp"
 Logger log;
 
 #include "defenitions.hpp"
@@ -61,6 +62,7 @@ Logger log;
 #include "client.hpp"
 #include "dock.hpp"
 #include "desktop.hpp"
+#include "event_handler.hpp"
 
 win_data data;
 static pointer * pointer;
@@ -430,6 +432,7 @@ class Window_Manager
     public: // variabels 
         context_menu * context_menu = nullptr;
         window root;
+        Event_Handler event_handler;
     ;
     public: // methods 
         public: // main methods 
@@ -764,7 +767,6 @@ class Window_Manager
                 uint32_t mask = XCB_EVENT_MASK_FOCUS_CHANGE | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW;
                 c->win.apply_event_mask(& mask);
 
-                c->win.property("_NET_WM_NAME");
                 c->update();
                 focus_client(c);
             }
@@ -4092,6 +4094,24 @@ class Event
                 }
             }
         }
+
+        void
+        test()
+        {
+            wm->event_handler.setEventCallback(XCB_KEY_PRESS, [&](Ev ev){ key_press_handler(ev); });
+            wm->event_handler.setEventCallback(XCB_MAP_NOTIFY, [&](Ev ev){ map_notify_handler(ev); });
+            wm->event_handler.setEventCallback(XCB_MAP_REQUEST, [&](Ev ev){ map_req_handler(ev); });
+            wm->event_handler.setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev){ button_press_handler(ev); });
+            wm->event_handler.setEventCallback(XCB_CONFIGURE_REQUEST, [&](Ev ev){ configure_request_handler(ev); });
+            wm->event_handler.setEventCallback(XCB_FOCUS_IN, [&](Ev ev){ focus_in_handler(ev); });
+            wm->event_handler.setEventCallback(XCB_FOCUS_OUT, [&](Ev ev){ focus_out_handler(ev); });
+            wm->event_handler.setEventCallback(XCB_DESTROY_NOTIFY, [&](Ev ev){ destroy_notify_handler(ev); });
+            wm->event_handler.setEventCallback(XCB_UNMAP_NOTIFY, [&](Ev ev){ unmap_notify_handler(ev); });
+            wm->event_handler.setEventCallback(XCB_REPARENT_NOTIFY, [&](Ev ev){ reparent_notify_handler(ev); });
+            wm->event_handler.setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev){ enter_notify_handler(ev); });
+            wm->event_handler.setEventCallback(XCB_LEAVE_NOTIFY, [&](Ev ev){ leave_notify_handler(ev); });
+            wm->event_handler.setEventCallback(XCB_MOTION_NOTIFY, [&](Ev ev){ motion_notify_handler(ev); });
+        }
     ;
     private: // variabels 
         xcb_key_symbols_t * keysyms;
@@ -4762,16 +4782,18 @@ void /**
 run() 
 {
     Event event;
-    while (true)
-    {
-        xcb_generic_event_t * ev = xcb_wait_for_event(conn);
-        if (!ev) 
-        {
-            continue;
-        }
-        event.handler(ev);
-        free(ev);
-    }
+    // while (true)
+    // {
+    //     xcb_generic_event_t * ev = xcb_wait_for_event(conn);
+    //     if (!ev) 
+    //     {
+    //         continue;
+    //     }
+    //     event.handler(ev);
+    //     free(ev);
+    // }
+    event.test();
+    wm->event_handler.run();
 }
 
 void
