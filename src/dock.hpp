@@ -26,7 +26,7 @@ class add_app_dialog_window
 {
     public:
         window window;
-        client * c;
+        client * c = nullptr;
         buttons buttons;
         pointer pointer;
         Event_Handler ev_handler;
