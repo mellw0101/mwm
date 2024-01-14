@@ -102,11 +102,6 @@ class add_app_dialog_window
                     search_window.focus_input();
                     return;
                 }
-
-                if (e->event  == main_window)
-                {
-                    hide();
-                }
             });
 
             wm->event_handler.setEventCallback(XCB_KEY_PRESS, [&](Ev ev) 
