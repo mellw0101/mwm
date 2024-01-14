@@ -7,6 +7,7 @@
 #include "Log.hpp"
 #include "window.hpp"
 #include "file.hpp"
+#include "window_manager.hpp"
 
 class button
 {
@@ -34,6 +35,12 @@ class button
         action(std::function<void()> action)
         {
             button_action = action;
+        }
+        
+        void
+        add_event(const uint8_t & event_type, std::function<void(Ev)> action)
+        {
+            wm->event_handler.setEventCallback(event_type, action);
         }
 
         void 
