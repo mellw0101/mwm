@@ -105,14 +105,14 @@ class File
         std::vector<const char *>
         split_$PATH_into_vector()
         {
-            const char * $PATH = get_env_var("PATH");
-            if ($PATH == nullptr)
+            str $PATH = get_env_var("PATH");
+            if ($PATH.is_nullptr())
             {
                 log_error("PATH environment variable not set");
                 return {};
             }
 
-            return string_tokenizer().tokenize($PATH, ":");
+            return st.tokenize($PATH.c_str(), ":");
         }
 
         const char *

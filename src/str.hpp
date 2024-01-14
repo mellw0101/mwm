@@ -173,6 +173,7 @@ class str
                 length = other.length;
                 data = new char[length + 1];
                 strcpy(data, other.data);
+                is_null = bool(0);
             }
             return *this;
         }
@@ -187,6 +188,7 @@ class str
                 length = other.length;
                 other.data = nullptr;
                 other.length = 0;
+                is_null = bool(data == nullptr);
             }
             return *this;
         }
@@ -208,10 +210,28 @@ class str
         {
             return data;
         }
+
+        // Get the length of the string
+        size_t size() const 
+        {
+            return length;
+        }
+
+        // Method to check if the string is empty
+        bool isEmpty() const 
+        {
+            return length == 0;
+        }
+
+        bool is_nullptr() const
+        {
+            return is_null;
+        }
     ;
     private: // variables
         char* data;
         size_t length;
+        bool is_null;
     ;
 };
 
