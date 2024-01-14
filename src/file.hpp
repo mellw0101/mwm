@@ -13,6 +13,12 @@
 
 class fast_vector 
 {
+    public: // operators
+        operator std::vector<const char*>() const
+        {
+            return data;
+        }
+    ;
     public: // Destructor
         ~fast_vector() 
         {
@@ -29,6 +35,14 @@ class fast_vector
         }
     ;
     public: // methods
+        void // Add a string to the vector
+        push_back(const char* str)
+        {
+            char* copy = new char[strlen(str) + 1];
+            strcpy(copy, str);
+            data.push_back(copy);
+        }
+
         void // Add a string to the vector
         append(const char* str)
         {
@@ -52,6 +66,12 @@ class fast_vector
             }
 
             return data.size() - 1;
+        }
+
+        void // Clear the vector
+        clear()
+        {
+            data.clear();
         }
     ;
     private: // variabels
@@ -85,7 +105,7 @@ class string_tokenizer
         }
     ;
     public: // methods
-        const std::vector<const char*> &
+        const fast_vector &
         tokenize(const char* input, const char* delimiter)
         {
             // Copy the input string
@@ -96,13 +116,13 @@ class string_tokenizer
             char* token = strtok(str, delimiter);
             while (token != nullptr) 
             {
-                tokens.push_back(token);
+                tokens.append(token);
                 token = strtok(nullptr, delimiter);
             }
             return tokens;
         }
 
-        const std::vector<const char*> & 
+        const fast_vector & 
         get_tokens() const 
         {
             return tokens;
@@ -116,7 +136,7 @@ class string_tokenizer
     ;
     private: // variables
         char* str;
-        std::vector<const char*> tokens;
+        fast_vector tokens;
     ;
 };
 
@@ -167,10 +187,15 @@ class File
         bool
         check_if_binary_exists(const char * name)
         {
-            std::vector<const char *> dirs = split_$PATH_into_vector();
+            fast_vector dirs = split_$PATH_into_vector();
             return check_if_file_exists_in_DIRS(dirs, name);
         }
-
+    ;
+    private: // variables
+        Logger log;
+        string_tokenizer st;
+    ;
+    private: // functions
         bool
         check_if_file_exists_in_DIRS(std::vector<const char *> dirs, const char * app)
         {
@@ -189,12 +214,7 @@ class File
             }
             return false;
         }
-    ;
-    private: // variables
-        Logger log;
-        string_tokenizer st;
-    ;
-    private: // functions
+
         std::vector<std::string>
         list_dir_to_vector(const char * directoryPath) 
         {
@@ -212,7 +232,7 @@ class File
             return files;
         }
 
-        std::vector<const char *>
+        fast_vector
         split_$PATH_into_vector()
         {
             const char * $PATH = get_env_var("PATH");
@@ -223,7 +243,7 @@ class File
             }
             
             st.clear();
-            std::vector<const char *> dirs = st.tokenize($PATH, ":");
+            fast_vector dirs = st.tokenize($PATH, ":");
             return dirs;
         }
 
