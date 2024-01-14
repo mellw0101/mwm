@@ -125,7 +125,7 @@ class add_app_dialog_window
             wm->event_handler.setEventCallback(XCB_CONFIGURE_NOTIFY, [&](Ev ev) 
             {
                 const auto * e = reinterpret_cast<const xcb_configure_notify_event_t *>(ev);
-                if (e->window == main_window)
+                if (e->event == main_window)
                 {
                     search_window.width((e->width - (DOCK_BORDER * 2)));
                 }
