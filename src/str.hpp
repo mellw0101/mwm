@@ -171,10 +171,6 @@ class str
             {
                 delete[] data;
                 length = other.length;
-                if (other.data == nullptr)
-                {
-                    return *this;
-                }
                 data = new char[length + 1];
                 strcpy(data, other.data);
             }
