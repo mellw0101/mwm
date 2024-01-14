@@ -65,6 +65,7 @@ install: all
 	mkdir	-p 							/bin
 	cp		-f 	test 					/bin/mwm
 	chmod	755 						/bin/mwm
+	
 uninstall:
 
 .PHONY: all depends clean dist install uninstall
