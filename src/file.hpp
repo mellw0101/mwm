@@ -200,8 +200,7 @@ class File
             for (const auto & dir : dirs)
             {
                 String _dir = dir;
-                String add = "/";
-                String full_dir = _dir + add;
+                String full_dir = _dir + "/";
                 const char * full_dir_c = full_dir.c_str();
                 log_info(full_dir.c_str());
             }
