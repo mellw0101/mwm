@@ -10,6 +10,90 @@
 
 #include "Log.hpp"
 
+
+class String 
+{
+    public: // Constructor
+        String(const char* str = "") 
+        {
+            length = strlen(str);
+            data = new char[length + 1];
+            strcpy(data, str);
+        }
+    ;
+    public: // Copy constructor
+        String(const String& other) 
+        {
+            length = other.length;
+            data = new char[length + 1];
+            strcpy(data, other.data);
+        }
+    ;
+    public: // Move constructor
+        String(String&& other) noexcept 
+        : data(other.data), length(other.length) 
+        {
+            other.data = nullptr;
+            other.length = 0;
+        }
+    ;
+    public: // Destructor
+        ~String() 
+        {
+            delete[] data;
+        }
+    ;
+    public: // Copy assignment operator
+        String& operator=(const String& other) 
+        {
+            if (this != &other) 
+            {
+                delete[] data;
+                length = other.length;
+                data = new char[length + 1];
+                strcpy(data, other.data);
+            }
+            return *this;
+        }
+    ;
+    public: // Move assignment operator
+        String& operator=(String&& other) noexcept 
+        {
+            if (this != &other) 
+            {
+                delete[] data;
+                data = other.data;
+                length = other.length;
+                other.data = nullptr;
+                other.length = 0;
+            }
+            return *this;
+        }
+    ;
+    public: // Concatenation operator
+        String operator+(const String& other) const 
+        {
+            String result;
+            result.length = length + other.length;
+            result.data = new char[result.length + 1];
+            strcpy(result.data, data);
+            strcat(result.data, other.data);
+            return result;
+        }
+    ;
+    public: // methods
+        // Access to underlying C-string
+        const char * c_str() const 
+        {
+            return data;
+        }
+    ;
+    private: // variables
+        char* data;
+        size_t length;
+    ;
+};
+
 class string_tokenizer 
 {
     public: // constructors and destructor
@@ -35,7 +119,7 @@ class string_tokenizer
     ;
     public: // methods
         const std::vector<const char*> & 
-        getTokens() const 
+        get_tokens() const 
         {
             return tokens;
         }
@@ -93,7 +177,11 @@ class File
         bool
         check_if_binary_exists(const char * file_name)
         {
-            split_$PATH_into_vector();
+            std::vector<const char *> dirs = split_$PATH_into_vector();
+            for (const auto & dir : dirs)
+            {
+                log_info(dir);
+            }
             return false;
         }
     ;
@@ -124,15 +212,19 @@ class File
             const char * $PATH = get_env_var("PATH");
             if ($PATH == nullptr)
             {
+                log_error("PATH environment variable not set");
                 return {};
             }
             
+            std::vector<const char *> dirs;
             string_tokenizer st($PATH, ":");
-            for (const auto & token : st.getTokens())
+            for (const auto & token : st.get_tokens())
             {
-                log_info(token);
+                String dir(token);
+                String correct_dir = dir + "/";
+                dirs.push_back(correct_dir.c_str());
             }
-            return {};
+            return dirs;
         }
 
         const char *
