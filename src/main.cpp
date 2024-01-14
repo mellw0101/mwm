@@ -462,11 +462,6 @@ class Window_Manager
                         launcher->program((char *) "/usr/bin/konsole");
                     }
                 );
-                
-                Menu * menu = new Menu;
-                menu->create();
-                menu->layer = 1;
-                context_menu->add_menu("menu", menu);
             }
 
             void

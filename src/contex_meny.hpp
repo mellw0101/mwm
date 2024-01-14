@@ -55,48 +55,10 @@ class Entry
             window.grab_button({ { L_MOUSE_BUTTON, NULL } });
             window.map();
         }
-
-        void
-        add_menu(std::vector<Entry> menu)
-        {
-
-        }
     ;
     private: // vatiabels
         const char * entryName;
         std::function<void()> entryAction;
-    ;
-};
-
-class Menu
-{
-    public:
-        window window;
-        std::vector<Entry> entries;
-        pointer pointer;
-        uint16_t layer = 0;
-
-    ;
-
-    public:
-        void
-        show(const int16_t & x, const int16_t & y, const uint16_t & width, const uint16_t & height)
-        {
-            window.x_y_width_height(x, y, width, height);
-            window.set_backround_color(RED);
-            window.map();
-            window.raise();
-        }
-     
-        void
-        create()
-        {
-            window.create_default(screen->root, 0, 0, 20, 20);
-            uint32_t mask = XCB_EVENT_MASK_FOCUS_CHANGE | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY | XCB_EVENT_MASK_POINTER_MOTION;
-            window.apply_event_mask(& mask);
-            window.set_backround_color(DARK_GREY);
-            window.raise();
-        }
     ;
 };
 
@@ -151,20 +113,6 @@ class context_menu
             entry.add_action(action);
             entries.push_back(entry);
         }
-
-        void
-        add_menu(const char * name, Menu * menu)
-        {
-            Entry entry;
-            entry.add_name(name);
-            entry.add_action
-            ([menu, this]()
-            {
-                menu->show((size_pos.width * menu->layer), menu->window.y(), size_pos.width, size_pos.height);
-            });
-            entries.push_back(entry);
-            menus.push_back(menu);
-        }
     ;
     private: // private variables
         window context_window;
@@ -173,7 +121,6 @@ class context_menu
         int border_size = 1;
         
         std::vector<Entry> entries;
-        std::vector<Menu *> menus;
         pointer pointer;
     ;
     private: // private methods
@@ -224,7 +171,6 @@ class context_menu
                     case XCB_ENTER_NOTIFY: 
                     {
                         const auto * e = reinterpret_cast<const xcb_enter_notify_event_t *>(ev);
-                        show_menu(& e->event);
                         if (e->event == screen->root)
                         {
                             shouldContinue = false;
@@ -250,19 +196,6 @@ class context_menu
         }
 
         void
-        show_menu(const xcb_window_t * window)
-        {
-            for (const auto & menu : menus)
-            {
-                for (const auto & entry : menu->entries)
-                if (* window == menu->window)
-                {
-                    entry.activate();
-                }
-            }
-        }
-
-        void
         make_entries()
         {
             int y = 0;
@@ -272,17 +205,6 @@ class context_menu
                 entry.window.draw_text(entry.getName(), WHITE, BLACK, "7x14", 2, 14);
                 y += size_pos.height;
             }
-        }
-
-        void
-        open_sub_menu()
-        {
-            Menu sub_menu;
-            Entry entry;
-            entry.add_name("test");
-            entry.add_action([](){  });
-            entry.make_window(screen->root, context_window.width(), 0, 100, 100);
-            sub_menu.entries.push_back(entry);
         }
     ;
 };
