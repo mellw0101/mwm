@@ -87,7 +87,8 @@ class add_app_dialog_window
             search_window.grab_button({ { L_MOUSE_BUTTON, NULL } });
             search_window.grab_keys
             ({ 
-                { Q, NULL }
+                { Q,      NULL },
+                { DELETE, NULL }
             });
             
             search_window.raise();
