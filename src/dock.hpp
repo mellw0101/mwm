@@ -47,6 +47,7 @@ class add_app_dialog_window
             {
                 c->x_y((pointer.x() - (window.width() / 2)), (pointer.y() - (window.height() / 2)));
                 c->map();
+                return;
             }
 
             create_client();
