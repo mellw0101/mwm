@@ -11,6 +11,7 @@
 
 #include "Log.hpp"
 #include "buttons.hpp"
+#include "client.hpp"
 #include "contex_meny.hpp"
 #include "defenitions.hpp"
 #include "launcher.hpp"
@@ -25,6 +26,7 @@ class add_app_dialog_window
 {
     public:
         window window;
+        client * c;
         buttons buttons;
         pointer pointer;
         Event_Handler ev_handler;
@@ -54,7 +56,7 @@ class add_app_dialog_window
             wm->event_handler.setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev)
             {
                 const auto * e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
-                if (e->event == window)
+                if (e->event == c->win)
                 {
                     hide();
                 }
@@ -65,7 +67,8 @@ class add_app_dialog_window
         show()
         {
             window.x_y((pointer.x() - (window.width() / 2)), (pointer.y() - (window.height() / 2)));
-            wm->make_internal_client(window);
+            c = wm->make_internal_client(window);
+
         }
     ;
     private:
