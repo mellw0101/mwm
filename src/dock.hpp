@@ -76,7 +76,7 @@ class add_app_dialog_window
         {
             window.unmap();
             window.kill();
-            wm->send_sigterm_to_client(c);
+            c->unmap();
         }
     ;
 };
