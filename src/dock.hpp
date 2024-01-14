@@ -41,7 +41,7 @@ class add_app_dialog_window
             uint32_t mask =  XCB_EVENT_MASK_STRUCTURE_NOTIFY;
             window.apply_event_mask(& mask);
             window.grab_button({ { L_MOUSE_BUTTON, NULL } });
-            window.set_backround_color(DARK_GREY);
+            window.set_backround_color(RED);
             window.raise();
 
             wm->event_handler.setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev) 
@@ -68,7 +68,6 @@ class add_app_dialog_window
         {
             window.x_y((pointer.x() - (window.width() / 2)), (pointer.y() - (window.height() / 2)));
             c = wm->make_internal_client(window);
-            c->win.map();
         }
     ;
     private:
