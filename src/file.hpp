@@ -220,7 +220,6 @@ class File
             string_tokenizer st($PATH, ":");
             for (const auto & token : st.get_tokens())
             {
-                log_info(token);
                 dirs.push_back(token);
             }
             return dirs;
