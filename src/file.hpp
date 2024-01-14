@@ -237,7 +237,8 @@ class File
             }
             
             std::vector<const char *> dirs;
-            for (const auto & token : st.tokenize($PATH, ";"))
+            st.tokenize($PATH, ";");
+            for (const auto & token : st.get_tokens())
             {
                 dirs.push_back(token);
             }
