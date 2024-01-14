@@ -163,7 +163,7 @@ class context_menu
                 menu->show((size_pos.width * menu->layer), menu->window.y(), size_pos.width, size_pos.height);
             });
             entries.push_back(entry);
-            menus.push_back(entry);
+            menus.push_back(menu);
         }
     ;
     private: // private variables
@@ -173,7 +173,7 @@ class context_menu
         int border_size = 1;
         
         std::vector<Entry> entries;
-        std::vector<Entry> menus;
+        std::vector<Menu *> menus;
         pointer pointer;
     ;
     private: // private methods
@@ -254,9 +254,10 @@ class context_menu
         {
             for (const auto & menu : menus)
             {
-                if (* window == menu.window)
+                for (const auto & entry : menu->entries)
+                if (* window == menu->window)
                 {
-                    menu.activate();
+                    entry.activate();
                 }
             }
         }
