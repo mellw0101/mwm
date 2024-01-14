@@ -75,9 +75,6 @@ class Window_Manager
         win_data data;
 
         xcb_key_symbols_t * keysyms;
-        /*
-            VARIABELS TO STORE KEYCODES
-         */ 
         xcb_keycode_t t{}, q{}, f{}, f11{}, n_1{}, n_2{}, n_3{}, n_4{}, n_5{}, r_arrow{}, l_arrow{}, u_arrow{}, d_arrow{}, tab{}, k{}; 
     ;
     public: // methods 
