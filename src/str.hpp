@@ -223,7 +223,12 @@ class str
 
         bool is_nullptr() const
         {
-            return bool(data == nullptr);
+            if (data == nullptr)
+            {
+                delete [] data;
+                return true;
+            }
+            return false;
         }
     ;
     private: // variables
