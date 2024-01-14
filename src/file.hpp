@@ -224,19 +224,21 @@ class File
             String _dir;
             for (auto & part : dirs_parts)
             {
-                _dir = _dir + part;
+                _dir = _dir + "/" + part;
                 log_info(_dir.c_str());
             }
             log_info(_dir.c_str());
             
             const char * directoryPath = _dir.c_str();
             DIR* dirp = opendir(directoryPath);
+            st.clear();
+            dirs_parts = st.tokenize(full_file_path, "/");
             if (dirp) 
             {
                 struct dirent* dp;
                 while ((dp = readdir(dirp)) != nullptr) 
                 {
-                    if (dp->d_name == full_file_path)
+                    if (dp->d_name == dirs_parts.back())
                     {
                         return dp->d_name;
                     }
