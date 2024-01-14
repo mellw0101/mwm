@@ -67,6 +67,7 @@ class add_app_dialog_window
             window.x_y((pointer.x() - (window.width() / 2)), (pointer.y() - (window.height() / 2)));
             window.map();
             window.raise();
+            wm->manage_new_client(window);
         }
     ;
     private:
