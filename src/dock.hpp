@@ -43,10 +43,7 @@ class add_app_dialog_window
         void
         show()
         {
-            if (!c)
-            {
-                create_client();
-            }
+            create_client();
             c->x_y((pointer.x() - (window.width() / 2)), (pointer.y() - (window.height() / 2)));
             c->map();
         }
@@ -55,8 +52,6 @@ class add_app_dialog_window
         void
         hide()
         {
-            window.unmap();
-            window.kill();
             c->unmap();
         }
 
