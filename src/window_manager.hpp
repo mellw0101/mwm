@@ -410,7 +410,7 @@ class Window_Manager
                 focus_client(c);
             }
 
-            void
+            client *
             make_internal_client(window window)
             {
                 window.map();
@@ -426,6 +426,8 @@ class Window_Manager
                 client_list.push_back(c);
                 cur_d->current_clients.push_back(c);
                 c->focus();
+
+                return c;
             }
 
             int
