@@ -1,6 +1,10 @@
 #ifndef DOCK_HPP
 #define DOCK_HPP
 
+#include <filesystem>
+#include <string>
+#include <vector>
+
 #include "buttons.hpp"
 #include "contex_meny.hpp"
 #include "launcher.hpp"
@@ -101,6 +105,7 @@ class Dock
                     }    
                 );
                 buttons.list[buttons.size() - 1].create(main_window, ((buttons.size() - 1) * width) + 2, 2, width - 4, height - 4, BLACK);
+                buttons.list[buttons.size() - 1].window.set_backround_png(findIconFilePath(std::string(app)).c_str());
             }
             calc_size_pos();
         }
@@ -141,6 +146,78 @@ class Dock
             }
 
             return false;
+        }
+
+        std::string 
+        findIconFilePath(const std::string& iconName) 
+        {
+            std::vector<std::string> iconSizes = {"256x256", "128x128", "64x64", "48x48", "32x32"};
+            std::vector<std::string> imageExtensions = {"png"};
+            std::string shortIconName = iconName.substr(iconName.find_last_of('/') + 1);
+
+            std::string scalableDir = "/usr/share/icons/hicolor/scalable/apps/";
+            std::string sizeDirBase = "/usr/share/icons/hicolor/";
+            std::string breezeDarkDirBase = "/usr/share/icons/breeze-dark/actions/24/";
+
+            auto checkExistsWildcard = [](const std::string& dir, const std::string& namePart, const std::vector<std::string>& extensions) -> std::string 
+            {
+                for (const auto& ext : extensions) 
+                {
+                    for (const auto& entry : std::filesystem::directory_iterator(dir)) 
+                    {
+                        if (!std::filesystem::is_regular_file(entry.status())) 
+                        {
+                            continue;
+                        }
+                        std::string filename = entry.path().filename().string();
+                        if (filename.find(namePart) != std::string::npos && filename.find('.' + ext) != std::string::npos) 
+                        {
+                            return entry.path().string();
+                        }
+                    }
+                }
+                return "";
+            };
+
+            std::string filePath = checkExistsWildcard(scalableDir, shortIconName, imageExtensions);
+            if (!filePath.empty()) return filePath;
+
+            for (const auto& size : iconSizes) 
+            {
+                filePath = checkExistsWildcard(sizeDirBase + size + "/apps/", shortIconName, imageExtensions);
+                if (!filePath.empty()) 
+                {
+                    return filePath;
+                }    
+            }
+
+            filePath = checkExistsWildcard(breezeDarkDirBase, shortIconName, imageExtensions);
+            if (!filePath.empty()) return filePath;
+
+            std::vector<std::string> nameParts;
+            size_t start = 0;
+            size_t end = shortIconName.find('-');
+            while (end != std::string::npos) {
+                nameParts.push_back(shortIconName.substr(start, end - start));
+                start = end + 1;
+                end = shortIconName.find('-', start);
+            }
+            nameParts.push_back(shortIconName.substr(start));
+
+            for (const auto& part : nameParts) {
+                filePath = checkExistsWildcard(scalableDir, part, imageExtensions);
+                if (!filePath.empty()) return filePath;
+
+                for (const auto& size : iconSizes) {
+                    filePath = checkExistsWildcard(sizeDirBase + size + "/apps/", part, imageExtensions);
+                    if (!filePath.empty()) return filePath;
+                }
+
+                filePath = checkExistsWildcard(breezeDarkDirBase, part, imageExtensions);
+                if (!filePath.empty()) return filePath;
+            }
+
+            return "";
         }
     ;
 };
