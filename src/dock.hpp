@@ -112,7 +112,7 @@ class Dock
                 );
                 buttons.list[buttons.size() - 1].create(main_window, ((buttons.size() - 1) * width) + 2, 2, width - 4, height - 4, BLACK);
                 // put_icon_on_button(app);
-                buttons.list[buttons.size() - 1].put_icon_on_button();
+                // buttons.list[buttons.size() - 1].put_icon_on_button();
             }
             calc_size_pos();
         }
