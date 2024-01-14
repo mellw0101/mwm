@@ -105,6 +105,8 @@ class add_app_dialog_window
                     hide();
                 } 
             });
+
+            ev_handler.run();
         }
     ;
 };
