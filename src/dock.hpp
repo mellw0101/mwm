@@ -57,7 +57,7 @@ class add_app_dialog_window
         {
             Event_Handler ev_handler;
 
-            ev_handler.setEventCallback(XCB_ENTER_NOTIFY, [&](const xcb_generic_event_t *ev) 
+            ev_handler.setEventCallback(XCB_ENTER_NOTIFY, [&](Event ev) 
             {
                 const auto * e = reinterpret_cast<const xcb_enter_notify_event_t *>(ev);
                 if (e->event == screen->root)

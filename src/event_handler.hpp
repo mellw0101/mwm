@@ -8,10 +8,13 @@
 
 #include "structs.hpp"
 
+using Event = const xcb_generic_event_t *;
+
 class Event_Handler
 {
     public:
         using EventCallback = std::function<void(const xcb_generic_event_t*)>;
+        
 
         void 
         run() 
