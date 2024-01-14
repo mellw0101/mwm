@@ -56,7 +56,7 @@ class add_app_dialog_window
             wm->event_handler.setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev)
             {
                 const auto * e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
-                if (e->event == c->win)
+                if (e->event == window)
                 {
                     hide();
                 }
@@ -68,7 +68,7 @@ class add_app_dialog_window
         {
             window.x_y((pointer.x() - (window.width() / 2)), (pointer.y() - (window.height() / 2)));
             c = wm->make_internal_client(window);
-
+            c->win.grab_button({ { L_MOUSE_BUTTON, NULL } });
         }
     ;
     private:
