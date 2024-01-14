@@ -410,6 +410,24 @@ class Window_Manager
                 focus_client(c);
             }
 
+            void
+            make_internal_client(window window)
+            {
+                window.map();
+                window.raise();
+                client * c = new client;
+                c->win = window;
+                c->x = window.x();
+                c->y = window.y();
+                c->width = window.width();
+                c->height = window.height();
+                
+                c->make_decorations();
+                client_list.push_back(c);
+                cur_d->current_clients.push_back(c);
+                c->focus();
+            }
+
             int
             send_sigterm_to_client(client * c)
             {
