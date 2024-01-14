@@ -938,7 +938,6 @@ class Window_Manager
                 root.set_pointer(CURSOR::arrow);
             }
         ;
-
         private: // check functions 
             void
             check_error(const int & code)
@@ -1085,7 +1084,6 @@ class Window_Manager
                 delete c;
             }
         ;
-
         private: // client functions
             client * 
             make_client(const uint32_t & window) 
@@ -4475,6 +4473,8 @@ class Event
         map_notify_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_map_notify_event_t *>(ev);
+            log_win("e->window: ", e->window);
+            log_win("e->window: ", e->event);
             client * c = wm->client_from_window(& e->window);
             if (c)
             {
