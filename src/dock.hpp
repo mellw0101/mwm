@@ -100,9 +100,6 @@ class add_app_dialog_window
                 if (e->event == search_window)
                 {
                     c->focus();
-                    search_window.focus_input();
-                    search_window.set_active_EWMH_window();
-                    return;
                 }
             });
 
