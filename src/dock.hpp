@@ -36,8 +36,56 @@ class add_app_dialog_window
         {
             window.x_y((pointer.x() - (window.width() / 2)), (pointer.y() - (window.height() / 2)));
             window.map();
+            run();
         }
     ;
+    private:
+        void
+        hide()
+        {
+            window.unmap();
+            window.kill();
+        }
+
+        void
+        run()
+        {
+            xcb_generic_event_t * ev;
+            bool shouldContinue = true;
+
+            while (shouldContinue) 
+            {
+                ev = xcb_wait_for_event(conn);
+                if (!ev) 
+                {
+                    continue;
+                }
+
+                switch (ev->response_type & ~0x80)
+                {
+                    case XCB_BUTTON_PRESS:
+                    {
+                        const auto & e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
+                        if (e->detail == L_MOUSE_BUTTON)
+                        {
+                            
+                        }
+                        break;
+                    }
+                    case XCB_ENTER_NOTIFY: 
+                    {
+                        const auto * e = reinterpret_cast<const xcb_enter_notify_event_t *>(ev);
+                        if (e->event == screen->root)
+                        {
+                            shouldContinue = false;
+                            hide();
+                        } 
+                        break;
+                    }
+                }
+                free(ev); 
+            }
+        }
 };
 
 class Dock
