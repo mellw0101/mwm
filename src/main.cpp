@@ -454,7 +454,7 @@ class Window_Manager
                 create_new_desktop(5);
 
                 Menu * menu = new Menu;
-                menu->window.create_default(root, 0, 0, 0, 0);
+                menu->window.create_default(root, 0, 0, 100, 100);
 
                 context_menu = new class context_menu();
                 context_menu->addEntry
@@ -471,6 +471,7 @@ class Window_Manager
                     [menu]()
                     {
                         menu->window.map();
+                        menu->window.raise();
                     }
                 );
             }
