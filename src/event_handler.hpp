@@ -14,9 +14,8 @@ class Event_Handler
 {
     public:
         using EventCallback = std::function<void(const xcb_generic_event_t*)>;
-        
-        void 
-        run() 
+
+        void run() 
         {
             xcb_generic_event_t *ev;
             shouldContinue = true;
@@ -30,29 +29,32 @@ class Event_Handler
                 }
 
                 uint8_t responseType = ev->response_type & ~0x80;
-                if (eventCallbacks.find(responseType) != eventCallbacks.end()) 
+                auto it = eventCallbacks.find(responseType);
+                if (it != eventCallbacks.end()) 
                 {
-                    eventCallbacks[responseType](ev);
+                    for (const auto& callback : it->second) 
+                    {
+                        callback(ev);
+                    }
                 }
 
                 free(ev);
             }
         }
 
-        void
-        end()
+        void end()
         {
             shouldContinue = false;
         }
 
-        void 
-        setEventCallback(uint8_t eventType, EventCallback callback) 
+        void setEventCallback(uint8_t eventType, EventCallback callback) 
         {
-            eventCallbacks[eventType] = std::move(callback);
+            eventCallbacks[eventType].push_back(std::move(callback));
         }
     ;
+
     private:
-        std::unordered_map<uint8_t, EventCallback> eventCallbacks;
+        std::unordered_map<uint8_t, std::vector<EventCallback>> eventCallbacks;
         bool shouldContinue = false;
     ;
 };
