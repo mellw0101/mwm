@@ -36,38 +36,14 @@ class add_app_dialog_window
         void
         init()
         {
-            window.create_default(screen->root, 0, 0, 300, 200);
-            log_win("add_app_win: ", window);
-            uint32_t mask =  XCB_EVENT_MASK_STRUCTURE_NOTIFY;
-            window.apply_event_mask(& mask);
-            window.grab_button({ { L_MOUSE_BUTTON, NULL } });
-            window.set_backround_color(RED);
-            window.raise();
-
-            wm->event_handler.setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev) 
-            {
-                const auto * e = reinterpret_cast<const xcb_enter_notify_event_t *>(ev);
-                if (e->event == screen->root)
-                {
-                    hide();
-                }
-            });
-
-            wm->event_handler.setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev)
-            {
-                const auto * e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
-                if (e->event == window)
-                {
-                    hide();
-                }
-            });
+            create();
+            configure_events();
         }
 
         void
         show()
         {
-            window.x_y((pointer.x() - (window.width() / 2)), (pointer.y() - (window.height() / 2)));
-            c = wm->make_internal_client(window);
+            c->map();
         }
     ;
     private:
@@ -77,6 +53,31 @@ class add_app_dialog_window
             window.unmap();
             window.kill();
             c->unmap();
+        }
+
+        void
+        create()
+        {
+            window.create_default(screen->root, 0, 0, 300, 200);
+            uint32_t mask =  XCB_EVENT_MASK_STRUCTURE_NOTIFY;
+            window.apply_event_mask(& mask);
+            window.grab_button({ { L_MOUSE_BUTTON, NULL } });
+            window.set_backround_color(RED);
+            window.x_y((pointer.x() - (window.width() / 2)), (pointer.y() - (window.height() / 2)));
+            c = wm->make_internal_client(window);
+        }
+
+        void
+        configure_events()
+        {
+            wm->event_handler.setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev)
+            {
+                const auto * e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
+                if (e->event == window)
+                {
+                    hide();
+                }
+            });
         }
     ;
 };
