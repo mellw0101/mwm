@@ -1,4 +1,5 @@
 #include <cstring>
+#include <vector>
 
 class str 
 {
@@ -80,5 +81,189 @@ class str
     private: // variables
         char* data;
         size_t length;
+    ;
+};
+
+class fast_vector
+{
+    public: // operators
+        operator std::vector<const char*>() const
+        {
+            return data;
+        }
+    ;
+    public: // Destructor
+        ~fast_vector() 
+        {
+            for (auto str : data) 
+            {
+                delete[] str;
+            }
+        }
+    ;
+    public: // [] operator Access an element in the vector
+        const char* operator[](size_t index) const 
+        {
+            return data[index];
+        }
+    ;
+    public: // methods
+        void // Add a string to the vector
+        push_back(const char* str)
+        {
+            char* copy = new char[strlen(str) + 1];
+            strcpy(copy, str);
+            data.push_back(copy);
+        }
+
+        void // Add a string to the vector
+        append(const char* str)
+        {
+            char* copy = new char[strlen(str) + 1];
+            strcpy(copy, str);
+            data.push_back(copy);
+        }
+
+        size_t // Get the size of the vector
+        size() const 
+        {
+            return data.size();
+        }
+
+        size_t // get the index of the last element in the vector
+        index_size() const
+        {
+            if (data.size() == 0)
+            {
+                return 0;
+            }
+
+            return data.size() - 1;
+        }
+
+        void // Clear the vector
+        clear()
+        {
+            data.clear();
+        }
+    ;
+    private: // variabels
+        std::vector<const char*> data; // Internal vector to store const char* strings
+    ;
+};
+
+class fast_str_vector
+{
+    public: // operators
+        operator std::vector<str>() const
+        {
+            return data;
+        }
+    ;
+    public: // [] operator Access an element in the vector
+        str operator[](size_t index) const 
+        {
+            return data[index];
+        }
+    ;
+    public: // methods
+        void // Add a string to the vector
+        push_back(str str)
+        {
+            data.push_back(str);
+        }
+
+        void // Add a string to the vector
+        append(str str)
+        {
+            data.push_back(str);
+        }
+
+        size_t // Get the size of the vector
+        size() const 
+        {
+            return data.size();
+        }
+
+        size_t // get the index of the last element in the vector
+        index_size() const
+        {
+            if (data.size() == 0)
+            {
+                return 0;
+            }
+
+            return data.size() - 1;
+        }
+
+        void // Clear the vector
+        clear()
+        {
+            data.clear();
+        }
+    ;
+    private: // variabels
+        std::vector<str> data; // Internal vector to store const char* strings
+    ;
+};
+
+class string_tokenizer 
+{
+    public: // constructors and destructor
+        string_tokenizer() {}
+
+        string_tokenizer(const char* input, const char* delimiter) 
+        {
+            // Copy the input string
+            str = new char[strlen(input) + 1];
+            strcpy(str, input);
+
+            // Tokenize the string using strtok() and push tokens to the vector
+            char* token = strtok(str, delimiter);
+            while (token != nullptr) 
+            {
+                tokens.push_back(token);
+                token = strtok(nullptr, delimiter);
+            }
+        }
+
+        ~string_tokenizer() 
+        {
+            delete[] str;
+        }
+    ;
+    public: // methods
+        const fast_vector &
+        tokenize(const char* input, const char* delimiter)
+        {
+            // Copy the input string
+            str = new char[strlen(input) + 1];
+            strcpy(str, input);
+
+            // Tokenize the string using strtok() and push tokens to the vector
+            char* token = strtok(str, delimiter);
+            while (token != nullptr) 
+            {
+                tokens.append(token);
+                token = strtok(nullptr, delimiter);
+            }
+            return tokens;
+        }
+
+        const fast_vector & 
+        get_tokens() const 
+        {
+            return tokens;
+        }
+
+        void
+        clear()
+        {
+            tokens.clear();
+        }
+    ;
+    private: // variables
+        char* str;
+        fast_vector tokens;
     ;
 };
