@@ -4782,6 +4782,7 @@ setup_wm()
     dock->add_app("konsole");
     dock->add_app("alacritty");
     dock->add_app("falkon");
+    dock->add_app("balle");
     dock->init();
 
     pointer = new class pointer;
