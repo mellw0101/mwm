@@ -470,9 +470,7 @@ class Window_Manager
                     "menu",
                     [menu]()
                     {
-                        menu->window.set_backround_color(RED);
-                        menu->window.map();
-                        menu->window.raise();
+                        menu->show();
                     }
                 );
             }

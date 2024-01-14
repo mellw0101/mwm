@@ -72,7 +72,18 @@ class Menu
     public:
         window window;
         std::vector<Entry> entries;
+        pointer pointer;
     ;
+
+    public:
+        void
+        show()
+        {
+            window.x_y_height((pointer.x() + 120), pointer.y(), 20);
+            window.set_backround_color(RED);
+            window.map();
+            window.raise();
+        }
 };
 
 class context_menu
