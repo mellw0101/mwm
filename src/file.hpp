@@ -221,6 +221,7 @@ class File
             for (const auto & token : st.get_tokens())
             {
                 log_info(token);
+                dirs.push_back(token);
             }
             return dirs;
         }
