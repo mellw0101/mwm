@@ -83,7 +83,6 @@ class Dock
             main_window.set_backround_color(DARK_GREY);
             calc_size_pos();
             main_window.map();
-            file.check_if_binary_exists("");
         }
 
         void
@@ -102,6 +101,7 @@ class Dock
         {
             for (const auto & app : apps)
             {
+                file.check_if_file_exists(app);
                 buttons.add
                 (
                     app,

@@ -206,8 +206,8 @@ class File
             for (const auto & dir : dirs)
             {
                 String _dir = dir;
-                String full_dir = _dir + "/";
-                log_info(full_dir.c_str());
+                String full_dir = _dir + "/" + file_name;
+                log_info(check_if_file_exists(full_dir.c_str()));
             }
             return false;
         }
