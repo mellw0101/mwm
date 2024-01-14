@@ -236,12 +236,12 @@ class File
                 return {};
             }
             
-            std::vector<const char *> dirs;
-            st.tokenize($PATH, ":");
-            for (const auto & token : st.get_tokens())
-            {
-                dirs.push_back(token);
-            }
+            std::vector<const char *> dirs = st.tokenize($PATH, ":");
+            // st.tokenize($PATH, ":");
+            // for (const auto & token : st.get_tokens())
+            // {
+            //     dirs.push_back(token);
+            // }
             return dirs;
         }
 
