@@ -157,8 +157,8 @@ class Dock
             std::string shortIconName = iconName.substr(iconName.find_last_of('/') + 1);
 
             std::string scalableDir = "/usr/share/icons/hicolor/scalable/apps/";
-            std::string sizeDirBase = "/usr/share/icons/gnome/256x256/apps/";
-            std::string breezeDarkDirBase = "/usr/share/icons/gnome/";
+            std::string sizeDirBase = "/usr/share/icons/hicolor/";
+            std::string breezeDarkDirBase = "/usr/share/icons/gnome/256x256/apps/";
 
             auto checkExistsWildcard = [](const std::string& dir, const std::string& namePart, const std::vector<std::string>& extensions) -> std::string 
             {
