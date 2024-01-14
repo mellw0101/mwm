@@ -99,6 +99,7 @@ class add_app_dialog_window
                 const auto * e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
                 if (e->event == search_window)
                 {
+                    c->focus();
                     search_window.focus_input();
                     search_window.set_active_EWMH_window();
                     return;
@@ -108,7 +109,7 @@ class add_app_dialog_window
             wm->event_handler.setEventCallback(XCB_KEY_PRESS, [&](Ev ev) 
             {
                 const auto * e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
-                if (search_window.check_if_active_EWMH_window())
+                if (e->event == search_window)
                 {
                     if (e->detail == wm->q)
                     {
