@@ -106,7 +106,7 @@ class File
         split_$PATH_into_vector()
         {
             str $PATH = get_env_var("bal");
-            if ($PATH.is_nullptr())
+            if ($PATH.isEmpty())
             {
                 log_error("PATH environment variable not set");
                 return {};
