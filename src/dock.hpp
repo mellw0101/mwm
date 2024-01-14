@@ -96,7 +96,13 @@ class add_app_dialog_window
             wm->event_handler.setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev)
             {
                 const auto * e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
-                if (e->event == main_window)
+                if (e->event == search_window)
+                {
+                    search_window.focus_input();
+                    return;
+                }
+
+                if (e->event  == main_window)
                 {
                     hide();
                 }
@@ -112,7 +118,7 @@ class add_app_dialog_window
                         search_string += "q";
                     }
 
-                    search_window.draw_text(search_string.c_str(), RED, WHITE, "7x14", 2, 14);
+                    search_window.draw_text(search_string.c_str(), RED, WHITE, "7x14", 2, 12);
                 }
             });
         }
