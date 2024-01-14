@@ -74,8 +74,7 @@ class add_app_dialog_window
             c->y = window.y();
             c->width = window.width();
             c->height = window.height();
-
-            c->update();
+            
             c->make_decorations();
             wm->client_list.push_back(c);
             wm->cur_d->current_clients.push_back(c);
