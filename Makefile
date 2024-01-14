@@ -63,26 +63,8 @@ dist: clean
 
 install: all
 	mkdir 		-p 							/bin
-	cp 			-f 	conf/MGaming 			/bin
-	cp 			-f 	conf/mwm-X 				/bin
-	cp 			-f 	conf/mwm-KILL 			/bin
 	cp 			-f 	test 					/bin/mwm
-
-	chmod 		755 						/bin/MGaming
-	chmod 		755 						/bin/mwm-X
-	chmod 		755 						/bin/mwm-KILL
 	chmod 		755 						/bin/mwm
-
-	mkdir 		-p 							/etc/systemd/system
-	cp 			-f 	conf/mwm.service 		/etc/systemd/system/mwm.service
-	cp 			-f 	conf/mwm-X.service 		/etc/systemd/system/mwm-X.service
-
-	mkdir 		-p 							/etc/polkit-1/rules.d
-	cp 			-f 	conf/mwm.rules 			/etc/polkit-1/rules.d/mwm.rules
-
-	systemctl 	restart 					polkit
-	systemctl 	daemon-reload
-
 uninstall:
 
 .PHONY: all depends clean dist install uninstall
