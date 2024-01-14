@@ -63,7 +63,7 @@ Logger log;
 #include "event_handler.hpp"
 #include "window_manager.hpp"
 
-win_data data;
+
 static pointer * pointer;
 
 static Dock * dock;
@@ -4674,10 +4674,10 @@ class Event
         configure_request_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_configure_request_event_t *>(ev);
-            data.width     = e->width;
-            data.height    = e->height;
-            data.x         = e->x;
-            data.y         = e->y;
+            wm->data.width     = e->width;
+            wm->data.height    = e->height;
+            wm->data.x         = e->x;
+            wm->data.y         = e->y;
         }
 
         void
