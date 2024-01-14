@@ -52,7 +52,7 @@ class add_app_dialog_window
         void
         hide()
         {
-            c->unmap();
+            c->frame.kill();
         }
 
         void
