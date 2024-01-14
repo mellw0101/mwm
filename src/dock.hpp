@@ -43,8 +43,10 @@ class add_app_dialog_window
         void
         show()
         {
+            window.x_y(pointer.x() - (window.width() / 2), pointer.y() - (window.height() / 2));
             c = wm->make_internal_client(window);
             c->x_y((pointer.x() - (c->width / 2)), (pointer.y() - (c->height / 2)));
+            window.map();
             c->map();
         }
     ;
