@@ -2,8 +2,11 @@
 #define BUTTON_HPP
 
 #include <cstdint>
-#include "window.hpp"
 #include <functional>
+
+#include "Log.hpp"
+#include "window.hpp"
+#include "file.hpp"
 
 class button
 {
@@ -38,10 +41,34 @@ class button
         {
             button_action();
         }
+
+        void
+        put_icon_on_button()
+        {
+            std::string icon_path = file.find_png_icon
+            (
+                {
+                    "/usr/share/icons/gnome/256x256/apps/",
+                    "/usr/share/icons/hicolor/256x256/apps/",
+                    "/usr/share/icons/gnome/48x48/apps/",
+                    "/usr/share/icons/gnome/32x32/apps/"
+                },
+                name
+            );
+
+            if (icon_path == "")
+            {
+                log_info("could not find icon for button: " + std::string(name));
+                return;
+            }
+            window.set_backround_png(icon_path.c_str());
+        }
     ;
 
     private: // private variables 
         std::function<void()> button_action;
+        File file;
+        Logger log;
     ;
 };
 

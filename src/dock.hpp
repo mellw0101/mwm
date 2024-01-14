@@ -111,7 +111,8 @@ class Dock
                     }    
                 );
                 buttons.list[buttons.size() - 1].create(main_window, ((buttons.size() - 1) * width) + 2, 2, width - 4, height - 4, BLACK);
-                put_icon_on_button(app);
+                // put_icon_on_button(app);
+                buttons.list[buttons.size() - 1].put_icon_on_button();
             }
             calc_size_pos();
         }
@@ -156,10 +157,10 @@ class Dock
 
         private: // icon functions 
             std::vector<std::string> 
-            listDirectory(const std::string& directoryPath) 
+            listDirectory(const char * directoryPath) 
             {
                 std::vector<std::string> files;
-                DIR* dirp = opendir(directoryPath.c_str());
+                DIR* dirp = opendir(directoryPath);
                 if (dirp) 
                 {
                     struct dirent* dp;
@@ -178,7 +179,7 @@ class Dock
                 std::string name = app;
                 name += ".png";
 
-                std::vector<std::string> dirs = 
+                std::vector<const char *> dirs = 
                 {
                     "/usr/share/icons/gnome/256x256/apps/",
                     "/usr/share/icons/hicolor/256x256/apps/",
