@@ -64,7 +64,6 @@ class client
             ;
         };
     ;
-
     public: // variabels 
         char name[256];
 
@@ -88,7 +87,6 @@ class client
 
         uint16_t desktop;
     ;
-
     public: // methods 
         public: // config methods 
             void
@@ -281,7 +279,6 @@ class client
             }
         ;
     ;
-
     private: // functions 
         void 
         make_frame()
@@ -419,7 +416,6 @@ class client
             border.bottom_right.map();
         }
     ;
-
     private: // variables 
         std::vector<std::vector<bool>> CLOSE_BUTTON_BITMAP =
         {

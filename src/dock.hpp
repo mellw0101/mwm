@@ -32,8 +32,10 @@ class add_app_dialog_window
         void
         init()
         {
-            window.create_client_window(screen->root, 0, 0, 300, 200);
+            window.create_default(screen->root, 0, 0, 300, 200);
             log_win("add_app_win: ", window);
+            uint32_t mask =  XCB_EVENT_MASK_STRUCTURE_NOTIFY;
+            window.apply_event_mask(& mask);
             window.set_backround_color(DARK_GREY);
             window.raise();
 
