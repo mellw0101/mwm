@@ -187,14 +187,6 @@ class str
                 length = other.length;
                 other.data = nullptr;
                 other.length = 0;
-                if (data == nullptr)
-                {
-                    is_null = false;
-                }
-                else
-                {
-                    is_null = true;
-                }
             }
             return *this;
         }
@@ -231,7 +223,7 @@ class str
 
         bool is_nullptr() const
         {
-            return is_null;
+            return bool(data == nullptr);
         }
     ;
     private: // variables
