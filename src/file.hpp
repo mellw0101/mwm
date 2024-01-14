@@ -233,6 +233,7 @@ class File
             DIR* dirp = opendir(directoryPath);
             st.clear();
             dirs_parts = st.tokenize(full_file_path, "/");
+            log_info(dirs_parts.back());
             if (dirp) 
             {
                 struct dirent* dp;
