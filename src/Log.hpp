@@ -350,6 +350,18 @@ class toString
 		}
 
 		std::string
+		convert(const std::vector<const char *> &in)
+		{
+			std::string str;
+			for (auto &i : in) 
+			{
+				str += std::string(i) + " ";
+			}
+			return str;
+		}
+
+
+		std::string
 		convert(const std::vector<xcb_event_mask_t> &in)
 		{
 			std::string str;
