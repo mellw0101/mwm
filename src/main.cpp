@@ -66,7 +66,6 @@ Logger log;
 win_data data;
 static pointer * pointer;
 
-static Launcher * launcher;
 static Dock * dock;
 
 class mxb 
@@ -4250,7 +4249,7 @@ class Event
                 {
                     case CTRL + ALT:
                     {
-                        launcher->program((char *) "/usr/bin/konsole");
+                        wm->launcher.program((char *) "/usr/bin/konsole");
                         break;
                     }
                 }
@@ -4806,7 +4805,6 @@ setup_wm()
     dock->init();
 
     pointer = new class pointer;
-    launcher = new Launcher;
 }
 
 int
