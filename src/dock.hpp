@@ -49,9 +49,13 @@ class add_app_dialog_window
                 }
             });
 
-            ev_handler.setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev)
+            wm->event_handler.setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev)
             {
                 const auto * e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
+                if (e->event == window)
+                {
+                    hide();
+                }
             });
         }
 
