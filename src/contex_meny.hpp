@@ -215,7 +215,7 @@ class context_menu
             int y = 0;
             for (auto & entry : entries)
             {
-                entry.make_window(window, 0, y, size_pos.width, size_pos.height);
+                entry.make_window(window, 0 + 2, y + 2, size_pos.width - 4, size_pos.height - 4);
                 entry.window.draw_text(entry.getName(), WHITE, BLACK, "7x14", 2, 14);
                 y += size_pos.height;
             }
