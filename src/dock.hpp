@@ -2,9 +2,7 @@
 #define DOCK_HPP
 
 #include <X11/X.h>
-#include <string>
 #include <vector>
-#include <string>
 #include <vector>
 #include <dirent.h>
 #include <sys/types.h>
@@ -41,7 +39,7 @@ class Dock
         void 
         add_app(const char * app_name)
         {
-            if (!check_if_app_exists(app_name))
+            if (!file.check_if_binary_exists(app_name))
             {
                 return;
             }
@@ -101,7 +99,6 @@ class Dock
         {
             for (const auto & app : apps)
             {
-                file.check_if_binary_exists(app);
                 buttons.add
                 (
                     app,
@@ -116,44 +113,6 @@ class Dock
                 buttons.list[buttons.index()].put_icon_on_button();
             }
             calc_size_pos();
-        }
-
-        bool
-        check_if_app_exists(const char * app_name)
-        {
-            std::string name = app_name;
-
-            if (File::search("/usr/bin/" + name))
-            {
-                return true;
-            }
-
-            if (File::search("/usr/local/bin/" + name))
-            {
-                return true;
-            }
-
-            if (File::search("/usr/local/sbin/" + name))
-            {
-                return true;
-            }
-
-            if (File::search("/usr/sbin/" + name))
-            {
-                return true;
-            }
-
-            if (File::search("/sbin/" + name))
-            {
-                return true;
-            }
-
-            if (File::search("/bin/" + name))
-            {
-                return true;
-            }
-
-            return false;
         }
     ;
 };

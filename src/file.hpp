@@ -1,6 +1,7 @@
 #ifndef FILE_HPP
 #define FILE_HPP
 
+#include <cstddef>
 #include <cstdlib>
 #include <string>
 #include <cstring>
@@ -10,87 +11,51 @@
 
 #include "Log.hpp"
 
-
-class String 
+class fast_vector 
 {
-    public: // Constructor
-        String(const char* str = "") 
-        {
-            length = strlen(str);
-            data = new char[length + 1];
-            strcpy(data, str);
-        }
-    ;
-    public: // Copy constructor
-        String(const String& other) 
-        {
-            length = other.length;
-            data = new char[length + 1];
-            strcpy(data, other.data);
-        }
-    ;
-    public: // Move constructor
-        String(String&& other) noexcept 
-        : data(other.data), length(other.length) 
-        {
-            other.data = nullptr;
-            other.length = 0;
-        }
-    ;
     public: // Destructor
-        ~String() 
+        ~fast_vector() 
         {
-            delete[] data;
-        }
-    ;
-    public: // Copy assignment operator
-        String& operator=(const String& other) 
-        {
-            if (this != &other) 
+            for (auto str : data) 
             {
-                delete[] data;
-                length = other.length;
-                data = new char[length + 1];
-                strcpy(data, other.data);
+                delete[] str;
             }
-            return *this;
         }
     ;
-    public: // Move assignment operator
-        String& operator=(String&& other) noexcept 
+    public: // [] operator Access an element in the vector
+        const char* operator[](size_t index) const 
         {
-            if (this != &other) 
-            {
-                delete[] data;
-                data = other.data;
-                length = other.length;
-                other.data = nullptr;
-                other.length = 0;
-            }
-            return *this;
-        }
-    ;
-    public: // Concatenation operator
-        String operator+(const String& other) const 
-        {
-            String result;
-            result.length = length + other.length;
-            result.data = new char[result.length + 1];
-            strcpy(result.data, data);
-            strcat(result.data, other.data);
-            return result;
+            return data[index];
         }
     ;
     public: // methods
-        // Access to underlying C-string
-        const char * c_str() const 
+        void // Add a string to the vector
+        append(const char* str)
         {
-            return data;
+            char* copy = new char[strlen(str) + 1];
+            strcpy(copy, str);
+            data.push_back(copy);
+        }
+
+        size_t // Get the size of the vector
+        size() const 
+        {
+            return data.size();
+        }
+
+        size_t // get the index of the last element in the vector
+        index_size() const
+        {
+            if (data.size() == 0)
+            {
+                return 0;
+            }
+
+            return data.size() - 1;
         }
     ;
-    private: // variables
-        char* data;
-        size_t length;
+    private: // variabels
+        std::vector<const char*> data; // Internal vector to store const char* strings
     ;
 };
 
@@ -203,11 +168,11 @@ class File
         check_if_binary_exists(const char * name)
         {
             std::vector<const char *> dirs = split_$PATH_into_vector();
-            return check_if_file_exists(dirs, name);
+            return check_if_file_exists_in_DIRS(dirs, name);
         }
 
         bool
-        check_if_file_exists(std::vector<const char *> dirs, const char * app)
+        check_if_file_exists_in_DIRS(std::vector<const char *> dirs, const char * app)
         {
             std::string name = app;
 
@@ -218,7 +183,6 @@ class File
                 {
                     if (file == name)
                     {
-                        log_info("file: " + name + " exists");
                         return true;
                     }
                 }
