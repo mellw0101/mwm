@@ -154,56 +154,58 @@ class Dock
             return false;
         }
 
-        std::vector<std::string> 
-        listDirectory(const std::string& directoryPath) 
-        {
-            std::vector<std::string> files;
-            DIR* dirp = opendir(directoryPath.c_str());
-            if (dirp) 
+        private: // icon functions 
+            std::vector<std::string> 
+            listDirectory(const std::string& directoryPath) 
             {
-                struct dirent* dp;
-                while ((dp = readdir(dirp)) != nullptr) 
+                std::vector<std::string> files;
+                DIR* dirp = opendir(directoryPath.c_str());
+                if (dirp) 
                 {
-                    files.push_back(dp->d_name);
-                }
-                closedir(dirp);
-            }
-            return files;
-        }
-
-        std::string
-        findIconFilePath(const char * app)
-        {
-            std::string name = app;
-            name += ".png";
-
-            std::vector<std::string> dirs = {"/usr/share/icons/gnome/256x256/apps/", "/usr/share/icons/gnome/48x48/apps/", "/usr/share/icons/gnome/32x32/apps/"};
-
-            for (const auto & dir : dirs)
-            {
-                std::vector<std::string> files = listDirectory(dir);
-                for (const auto & file : files)
-                {
-                    if (file == name)
+                    struct dirent* dp;
+                    while ((dp = readdir(dirp)) != nullptr) 
                     {
-                        return file;
+                        files.push_back(dp->d_name);
+                    }
+                    closedir(dirp);
+                }
+                return files;
+            }
+
+            std::string
+            findIconFilePath(const char * app)
+            {
+                std::string name = app;
+                name += ".png";
+
+                std::vector<std::string> dirs = {"/usr/share/icons/gnome/256x256/apps/", "/usr/share/icons/gnome/48x48/apps/", "/usr/share/icons/gnome/32x32/apps/"};
+
+                for (const auto & dir : dirs)
+                {
+                    std::vector<std::string> files = listDirectory(dir);
+                    for (const auto & file : files)
+                    {
+                        if (file == name)
+                        {
+                            return dir + file;
+                        }
                     }
                 }
+                return "";
             }
-            return "";
-        }
 
-        void
-        put_icon_on_button(const char * app)
-        {
-            std::string icon_path = findIconFilePath(app);
-            if (icon_path == "")
+            void
+            put_icon_on_button(const char * app)
             {
-                log_info("could not find icon for app: " + std::string(app));
-                return;
+                std::string icon_path = findIconFilePath(app);
+                if (icon_path == "")
+                {
+                    log_info("could not find icon for app: " + std::string(app));
+                    return;
+                }
+                buttons.list[buttons.size() - 1].window.set_backround_png(icon_path.c_str());
             }
-            buttons.list[buttons.size() - 1].window.set_backround_png(icon_path.c_str());
-        }
+        ;
     ;
 };
 
