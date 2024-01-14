@@ -112,10 +112,7 @@ class File
                 return {};
             }
             
-            st.clear();
-            // std::vector<const char *> dirs = 
             return st.tokenize($PATH, ":");
-            // return dirs;
         }
 
         const char *
