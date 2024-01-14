@@ -45,6 +45,7 @@ class add_app_dialog_window
         show()
         {
             create_client();
+            create_internal_windows();
         }
     ;
     private:
