@@ -1,10 +1,12 @@
 #ifndef FILE_HPP
 #define FILE_HPP
 
+#include <cstdlib>
 #include <string>
 #include <fstream>
 #include <vector>
 #include <dirent.h>
+#include "Log.hpp"
 
 class File
 {
@@ -51,7 +53,17 @@ class File
             }
             return "";
         }
+
+        bool
+        check_if_binary_exists(const char * file_name)
+        {
+            split_$PATH_into_vector();
+            return false;
+        }
     ;
+
+    private: // variables
+        Logger log;
 
     private: // functions
         std::vector<std::string>
@@ -69,6 +81,29 @@ class File
                 closedir(dirp);
             }
             return files;
+        }
+
+        std::vector<const char *>
+        split_$PATH_into_vector()
+        {
+            const char * $PATH = get_env_var("PATH");
+            if ($PATH == nullptr)
+            {
+                return {};
+            }
+            log_info(std::string($PATH));
+            return {};
+        }
+
+        const char *
+        get_env_var(const char * var)
+        {
+            const char * _var = getenv(var);
+            if (_var == nullptr)
+            {
+                return nullptr;
+            }
+            return _var;
         }
     ;
 };
