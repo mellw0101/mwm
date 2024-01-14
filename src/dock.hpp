@@ -1,6 +1,7 @@
 #ifndef DOCK_HPP
 #define DOCK_HPP
 
+#include <X11/X.h>
 #include <vector>
 #include <vector>
 #include <dirent.h>
@@ -80,6 +81,8 @@ class add_app_dialog_window
         {
             search_window.create_default(main_window, DOCK_BORDER, DOCK_BORDER, (main_window.width() - (DOCK_BORDER * 2)), 20);
             search_window.set_backround_color(WHITE);
+            uint32_t mask =  XCB_EVENT_MASK_STRUCTURE_NOTIFY | XCB_EVENT_MASK_FOCUS_CHANGE;
+            main_window.apply_event_mask(& mask);
             search_window.map();
             search_window.grab_button({ { L_MOUSE_BUTTON, NULL } });
             search_window.grab_keys
