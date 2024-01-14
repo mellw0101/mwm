@@ -86,6 +86,7 @@ class add_app_dialog_window
             ({ 
                 { Q, NULL }
             });
+            
             search_window.raise();
             search_window.focus_input();
         }
