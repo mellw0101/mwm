@@ -202,7 +202,8 @@ class File
                 String _dir = dir;
                 String add = "/";
                 String full_dir = _dir + add;
-                log_info(dir);
+                const char * full_dir_c = full_dir.c_str();
+                log_info(full_dir_c);
             }
             return false;
         }
