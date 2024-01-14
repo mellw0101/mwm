@@ -2,6 +2,7 @@
 #define DOCK_HPP
 
 #include <X11/X.h>
+#include <cstddef>
 #include <vector>
 #include <vector>
 #include <dirent.h>
@@ -88,7 +89,8 @@ class add_app_dialog_window
             search_window.grab_keys
             ({ 
                 { Q,      NULL },
-                { DELETE, NULL }
+                { DELETE, NULL },
+                { T,      NULL }
             });
             
             search_window.raise();
@@ -117,6 +119,11 @@ class add_app_dialog_window
                     if (e->detail == wm->q)
                     {
                         search_string += "q";
+                    }
+                    
+                    if (e->detail == wm->t)
+                    {
+                        search_string += "t";
                     }
 
                     if (e->detail == wm->_delete)
