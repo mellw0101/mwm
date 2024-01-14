@@ -43,6 +43,11 @@ class add_app_dialog_window
         void
         show()
         {
+            if (!c)
+            {
+                create_client();
+            }
+            c->x_y((pointer.x() - (window.width() / 2)), (pointer.y() - (window.height() / 2)));
             c->map();
         }
     ;
@@ -63,7 +68,12 @@ class add_app_dialog_window
             window.apply_event_mask(& mask);
             window.grab_button({ { L_MOUSE_BUTTON, NULL } });
             window.set_backround_color(RED);
-            window.x_y((pointer.x() - (window.width() / 2)), (pointer.y() - (window.height() / 2)));
+        }
+
+        void
+        create_client()
+        {
+            
             c = wm->make_internal_client(window);
         }
 

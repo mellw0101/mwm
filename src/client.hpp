@@ -88,7 +88,13 @@ class client
         uint16_t desktop;
     ;
     public: // methods 
-        public: // config methods 
+        public: // config methods
+            void
+            x_y(const int32_t & x, const uint32_t & y)
+            {
+                frame.x_y(x, y);
+            }
+
             void
             _width(const uint32_t & width)
             {
@@ -227,7 +233,6 @@ class client
                 xcb_flush(conn);
             }
         ;
-
         public: // main methods 
             void 
             make_decorations()
