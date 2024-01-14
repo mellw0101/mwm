@@ -112,7 +112,9 @@ class File
                 return {};
             }
 
-            return st.tokenize($PATH.c_str(), ":");
+            const char * _PATH = $PATH.c_str();
+
+            return st.tokenize(_PATH, ":");
         }
 
         const char *
