@@ -188,7 +188,7 @@ class str
                 length = other.length;
                 other.data = nullptr;
                 other.length = 0;
-                is_null = (data == nullptr);
+                is_null = bool(data == nullptr);
             }
             return *this;
         }
