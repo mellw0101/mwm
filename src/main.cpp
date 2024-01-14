@@ -453,9 +453,6 @@ class Window_Manager
                 create_new_desktop(4);
                 create_new_desktop(5);
 
-                Menu * menu = new Menu;
-                menu->window.create_default(root, 0, 0, 100, 100);
-
                 context_menu = new class context_menu();
                 context_menu->addEntry
                 (   
@@ -465,14 +462,10 @@ class Window_Manager
                         launcher->program((char *) "/usr/bin/konsole");
                     }
                 );
-                context_menu->addEntry
-                (
-                    "menu",
-                    [menu]()
-                    {
-                        menu->show();
-                    }
-                );
+                
+                Menu * menu = new Menu;
+                menu->layer = 1;
+                context_menu->add_menu("menu", menu);
             }
 
             void
