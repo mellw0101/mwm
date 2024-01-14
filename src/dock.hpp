@@ -1,10 +1,15 @@
 #ifndef DOCK_HPP
 #define DOCK_HPP
 
-#include <filesystem>
+#include <X11/X.h>
 #include <string>
 #include <vector>
+#include <string>
+#include <vector>
+#include <dirent.h>
+#include <sys/types.h>
 
+#include "Log.hpp"
 #include "buttons.hpp"
 #include "contex_meny.hpp"
 #include "launcher.hpp"
@@ -47,6 +52,7 @@ class Dock
     private: // private variables
         std::vector<const char *> apps;
         Launcher launcher;
+        Logger log;
     ;
 
     private: // private methods
@@ -105,8 +111,7 @@ class Dock
                     }    
                 );
                 buttons.list[buttons.size() - 1].create(main_window, ((buttons.size() - 1) * width) + 2, 2, width - 4, height - 4, BLACK);
-                std::string icon_path = findIconFilePath(app);
-                buttons.list[buttons.size() - 1].window.set_backround_png(icon_path.c_str());
+                put_icon_on_button(app);
             }
             calc_size_pos();
         }
@@ -149,76 +154,55 @@ class Dock
             return false;
         }
 
-        std::string 
-        findIconFilePath(const std::string& iconName) 
+        std::vector<std::string> 
+        listDirectory(const std::string& directoryPath) 
         {
-            std::vector<std::string> iconSizes = {"256x256", "128x128", "64x64", "48x48", "32x32"};
-            std::vector<std::string> imageExtensions = {"png"};
-            std::string shortIconName = iconName.substr(iconName.find_last_of('/') + 1);
-
-            std::string scalableDir = "/usr/share/icons/hicolor/scalable/apps/";
-            std::string sizeDirBase = "/usr/share/icons/hicolor/";
-            std::string breezeDarkDirBase = "/usr/share/icons/gnome/256x256/apps/";
-
-            auto checkExistsWildcard = [](const std::string& dir, const std::string& namePart, const std::vector<std::string>& extensions) -> std::string 
+            std::vector<std::string> files;
+            DIR* dirp = opendir(directoryPath.c_str());
+            if (dirp) 
             {
-                for (const auto& ext : extensions) 
+                struct dirent* dp;
+                while ((dp = readdir(dirp)) != nullptr) 
                 {
-                    for (const auto& entry : std::filesystem::directory_iterator(dir)) 
+                    files.push_back(dp->d_name);
+                }
+                closedir(dirp);
+            }
+            return files;
+        }
+
+        std::string
+        findIconFilePath(const char * app)
+        {
+            std::string name = app;
+            name += ".png";
+
+            std::vector<std::string> dirs = {"/usr/share/icons/gnome/256x256/apps/", "/usr/share/icons/gnome/48x48/apps/", "/usr/share/icons/gnome/32x32/apps/"};
+
+            for (const auto & dir : dirs)
+            {
+                std::vector<std::string> files = listDirectory(dir);
+                for (const auto & file : files)
+                {
+                    if (file == name)
                     {
-                        if (!std::filesystem::is_regular_file(entry.status())) 
-                        {
-                            continue;
-                        }
-                        std::string filename = entry.path().filename().string();
-                        if (filename.find(namePart) != std::string::npos && filename.find('.' + ext) != std::string::npos) 
-                        {
-                            return entry.path().string();
-                        }
+                        return file;
                     }
                 }
-                return "";
-            };
-
-            std::string filePath = checkExistsWildcard(scalableDir, shortIconName, imageExtensions);
-            if (!filePath.empty()) return filePath;
-
-            for (const auto& size : iconSizes) 
-            {
-                filePath = checkExistsWildcard(sizeDirBase + size + "/apps/", shortIconName, imageExtensions);
-                if (!filePath.empty()) 
-                {
-                    return filePath;
-                }    
             }
-
-            filePath = checkExistsWildcard(breezeDarkDirBase, shortIconName, imageExtensions);
-            if (!filePath.empty()) return filePath;
-
-            std::vector<std::string> nameParts;
-            size_t start = 0;
-            size_t end = shortIconName.find('-');
-            while (end != std::string::npos) {
-                nameParts.push_back(shortIconName.substr(start, end - start));
-                start = end + 1;
-                end = shortIconName.find('-', start);
-            }
-            nameParts.push_back(shortIconName.substr(start));
-
-            for (const auto& part : nameParts) {
-                filePath = checkExistsWildcard(scalableDir, part, imageExtensions);
-                if (!filePath.empty()) return filePath;
-
-                for (const auto& size : iconSizes) {
-                    filePath = checkExistsWildcard(sizeDirBase + size + "/apps/", part, imageExtensions);
-                    if (!filePath.empty()) return filePath;
-                }
-
-                filePath = checkExistsWildcard(breezeDarkDirBase, part, imageExtensions);
-                if (!filePath.empty()) return filePath;
-            }
-
             return "";
+        }
+
+        void
+        put_icon_on_button(const char * app)
+        {
+            std::string icon_path = findIconFilePath(app);
+            if (icon_path == "")
+            {
+                log_info("could not find icon for app: " + std::string(app));
+                return;
+            }
+            buttons.list[buttons.size() - 1].window.set_backround_png(icon_path.c_str());
         }
     ;
 };
