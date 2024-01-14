@@ -11,6 +11,7 @@
 
 #include "Log.hpp"
 #include "buttons.hpp"
+#include "client.hpp"
 #include "contex_meny.hpp"
 #include "defenitions.hpp"
 #include "launcher.hpp"
@@ -67,7 +68,18 @@ class add_app_dialog_window
             window.x_y((pointer.x() - (window.width() / 2)), (pointer.y() - (window.height() / 2)));
             window.map();
             window.raise();
-            wm->manage_new_client(window);
+            client * c = new client;
+            c->win = window;
+            c->x = window.x();
+            c->y = window.y();
+            c->width = window.width();
+            c->height = window.height();
+
+            c->update();
+            c->make_decorations();
+            wm->client_list.push_back(c);
+            wm->cur_d->current_clients.push_back(c);
+            c->focus();
         }
     ;
     private:
