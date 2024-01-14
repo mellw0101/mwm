@@ -454,7 +454,7 @@ class Window_Manager
                 create_new_desktop(5);
 
                 context_menu = new class context_menu();
-                context_menu->addEntry
+                context_menu->add_entry
                 (   
                     "konsole",
                     []() 

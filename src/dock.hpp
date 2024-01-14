@@ -1,7 +1,6 @@
 #ifndef DOCK_HPP
 #define DOCK_HPP
 
-#include <X11/X.h>
 #include <vector>
 #include <vector>
 #include <dirent.h>
@@ -12,6 +11,34 @@
 #include "contex_meny.hpp"
 #include "launcher.hpp"
 #include "file.hpp"
+#include "pointer.hpp"
+#include "structs.hpp"
+#include "window.hpp"
+
+class add_app_dialog_window
+{
+    public:
+        window window;
+        buttons buttons;
+        pointer pointer;
+    ;
+    public:
+        void
+        init()
+        {
+            window.create_default(screen->root, 0, 0, 300, 200);
+            window.set_backround_color(DARK_GREY);
+            window.raise();
+        }
+
+        void
+        show()
+        {
+            window.x_y((pointer.x() - (window.width() / 2)), (pointer.y() - (window.height() / 2)));
+            window.map();
+        }
+    ;
+};
 
 class Dock
 {
@@ -24,6 +51,8 @@ class Dock
         window main_window;
         buttons buttons;
         uint32_t x = 0, y = 0, width = 48, height = 48;
+
+        add_app_dialog_window add_app_dialog_window;
     ;
 
     public: // public methods 
@@ -34,6 +63,7 @@ class Dock
             setup_dock();
             configure_context_menu();
             make_apps();
+            add_app_dialog_window.init();
         }
 
         void 
@@ -86,12 +116,12 @@ class Dock
         void
         configure_context_menu()
         {
-            context_menu.addEntry("test with nullptr", nullptr);
-            context_menu.addEntry("test with nullptr", nullptr);
-            context_menu.addEntry("test with nullptr", nullptr);
-            context_menu.addEntry("test with nullptr", nullptr);
-            context_menu.addEntry("test with nullptr", nullptr);
-            context_menu.addEntry("test with nullptr", nullptr);
+            context_menu.add_entry("Add app", [this] () { add_app_dialog_window.show(); });
+            context_menu.add_entry("test with nullptr", nullptr);
+            context_menu.add_entry("test with nullptr", nullptr);
+            context_menu.add_entry("test with nullptr", nullptr);
+            context_menu.add_entry("test with nullptr", nullptr);
+            context_menu.add_entry("test with nullptr", nullptr);
         }
 
         void
@@ -100,20 +130,27 @@ class Dock
             for (const auto & app : apps)
             {
                 buttons.add
-                (
-                    app,
-                    [app, this] () 
+                (app,
+                [app, this] () 
+                {
                     {
-                        {
-                            launcher.program((char *) app);
-                        }
-                    }    
+                        launcher.program((char *) app);
+                    }
+                });
+                buttons.list[buttons.index()].create
+                (
+                    main_window,
+                    ((buttons.index() * width) + DOCK_BORDER),
+                    DOCK_BORDER,
+                    (width - (DOCK_BORDER * 2)),
+                    (height - (DOCK_BORDER * 2)),
+                    BLACK
                 );
-                buttons.list[buttons.index()].create(main_window, ((buttons.index() * width) + 2), 2, (width - 4), (height - 4), BLACK);
                 buttons.list[buttons.index()].put_icon_on_button();
             }
             calc_size_pos();
         }
+        ;
     ;
 };
 

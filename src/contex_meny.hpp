@@ -1,13 +1,14 @@
 #ifndef CONTEX_MENY_HPP
 #define CONTEX_MENY_HPP
 
-#include "structs.hpp"
-#include "window.hpp"
-#include <X11/X.h>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <vector>
+
+#include "launcher.hpp"
+#include "structs.hpp"
+#include "window.hpp"
 #include "pointer.hpp"
 
 class Entry 
@@ -106,7 +107,7 @@ class context_menu
         }
 
         void 
-        addEntry(const char * name, std::function<void()> action)
+        add_entry(const char * name, std::function<void()> action)
         {
             Entry entry;
             entry.add_name(name);
@@ -122,6 +123,7 @@ class context_menu
         
         std::vector<Entry> entries;
         pointer pointer;
+        Launcher launcher;
     ;
     private: // private methods
         void
