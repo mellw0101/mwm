@@ -142,6 +142,12 @@ class string_tokenizer
         {
             return tokens;
         }
+
+        void
+        clear()
+        {
+            tokens.clear();
+        }
     ;
     private: // variables
         char* str;
@@ -201,10 +207,43 @@ class File
             {
                 String _dir = dir;
                 String full_dir = _dir + "/";
-                const char * full_dir_c = full_dir.c_str();
                 log_info(full_dir.c_str());
             }
             return false;
+        }
+
+        const char *
+        check_if_file_exists(const char * full_file_path) 
+        {
+            st.clear();
+            std::vector<const char *> dirs_parts = st.tokenize(full_file_path, "/");
+            log_info(dirs_parts);
+            dirs_parts.pop_back();
+            log_info(dirs_parts);
+
+            String _dir;
+            for (auto & part : dirs_parts)
+            {
+                _dir = _dir + part;
+                log_info(_dir.c_str());
+            }
+            log_info(_dir.c_str());
+            
+            const char * directoryPath = _dir.c_str();
+            DIR* dirp = opendir(directoryPath);
+            if (dirp) 
+            {
+                struct dirent* dp;
+                while ((dp = readdir(dirp)) != nullptr) 
+                {
+                    if (dp->d_name == full_file_path)
+                    {
+                        return dp->d_name;
+                    }
+                }
+                closedir(dirp);
+            }
+            return "";
         }
     ;
     private: // variables
@@ -239,6 +278,7 @@ class File
                 return {};
             }
             
+            st.clear();
             std::vector<const char *> dirs = st.tokenize($PATH, ":");
             return dirs;
         }
