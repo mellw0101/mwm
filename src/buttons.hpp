@@ -11,7 +11,6 @@ class buttons
     public: // public variables
         std::vector<button> list;
     ;
-
     public: // public methods
         void
         add(const char * name, std::function<void()> action)
@@ -26,6 +25,12 @@ class buttons
         size()
         {
             return list.size();
+        }
+
+        int
+        index()
+        {
+            return list.size() - 1;
         }
 
         void
