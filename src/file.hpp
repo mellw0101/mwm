@@ -218,6 +218,7 @@ class File
                 {
                     if (file == name)
                     {
+                        log_info("file: " + name + " exists");
                         return true;
                     }
                 }
