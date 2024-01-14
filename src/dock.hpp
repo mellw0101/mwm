@@ -101,7 +101,7 @@ class Dock
         {
             for (const auto & app : apps)
             {
-                file.check_if_file_exists(app);
+                file.check_if_binary_exists(app);
                 buttons.add
                 (
                     app,
