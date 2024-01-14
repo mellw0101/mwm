@@ -26,12 +26,14 @@ class add_app_dialog_window
         buttons buttons;
         pointer pointer;
         Event_Handler ev_handler;
+        Logger log;
     ;
     public:
         void
         init()
         {
             window.create_client_window(screen->root, 0, 0, 300, 200);
+            log_win("add_app_win: ", window);
             window.set_backround_color(DARK_GREY);
             window.raise();
 
