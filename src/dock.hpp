@@ -42,7 +42,7 @@ class add_app_dialog_window
             window.set_backround_color(DARK_GREY);
             window.raise();
 
-            ev_handler.setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev) 
+            wm->event_handler.setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev) 
             {
                 const auto * e = reinterpret_cast<const xcb_enter_notify_event_t *>(ev);
                 if (e->event == screen->root)
