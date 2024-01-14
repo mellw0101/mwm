@@ -31,7 +31,7 @@ class add_app_dialog_window
         void
         init()
         {
-            window.create_default(screen->root, 0, 0, 300, 200);
+            window.create_client_window(screen->root, 0, 0, 300, 200);
             window.set_backround_color(DARK_GREY);
             window.raise();
 
@@ -42,7 +42,12 @@ class add_app_dialog_window
                 {
                     hide();
                     ev_handler.end();
-                } 
+                }
+            });
+
+            ev_handler.setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev)
+            {
+                const auto * e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
             });
         }
 
@@ -61,32 +66,6 @@ class add_app_dialog_window
         {
             window.unmap();
             window.kill();
-        }
-
-        void 
-        button_press(const xcb_button_press_event_t * e)
-        {
-            if (e->event == screen->root)
-            {
-                hide();
-                ev_handler.end();
-            } 
-        }
-
-        void
-        run()
-        {
-            ev_handler.setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev) 
-            {
-                const auto * e = reinterpret_cast<const xcb_enter_notify_event_t *>(ev);
-                if (e->event == screen->root)
-                {
-                    hide();
-                    ev_handler.end();
-                } 
-            });
-
-            ev_handler.run();
         }
     ;
 };

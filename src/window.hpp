@@ -214,6 +214,30 @@ class window
                 make_window();
             }
 
+            void
+            create_client_window(const uint32_t & parent, const int16_t & x, const int16_t & y, const uint16_t & width, const uint16_t & height)
+            {
+                _window = xcb_generate_id(conn);
+                uint32_t value_mask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
+                uint32_t value_list[2];
+                value_list[0] = screen->white_pixel;
+                value_list[1] = XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_STRUCTURE_NOTIFY;
+
+                _depth = 0L;
+                _parent = parent;
+                _x = x;
+                _y = y;
+                _width = width;
+                _height = height;
+                _border_width = 0;
+                __class = XCB_WINDOW_CLASS_INPUT_OUTPUT;
+                _visual = screen->root_visual;
+                _value_mask = value_mask;
+                _value_list = value_list;
+                
+                make_window();
+            }
+
             void  
             raise() 
             {
