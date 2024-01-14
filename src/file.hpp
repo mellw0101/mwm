@@ -200,50 +200,29 @@ class File
         }
 
         bool
-        check_if_binary_exists(const char * file_name)
+        check_if_binary_exists(const char * name)
         {
             std::vector<const char *> dirs = split_$PATH_into_vector();
-            for (const auto & dir : dirs)
-            {
-                String _dir = dir;
-                String full_dir = _dir + "/" + file_name;
-                log_info(check_if_file_exists(full_dir.c_str()));
-            }
-            return false;
+            return check_if_file_exists(dirs, name);
         }
 
-        const char *
-        check_if_file_exists(const char * full_file_path) 
+        bool
+        check_if_file_exists(std::vector<const char *> dirs, const char * app)
         {
-            st.clear();
-            std::vector<const char *> dirs_parts = st.tokenize(full_file_path, "/");
-            dirs_parts.pop_back();
+            std::string name = app;
 
-            String _dir;
-            for (auto & part : dirs_parts)
+            for (const auto & dir : dirs)
             {
-                _dir = _dir + "/" + part;
-            }
-            
-            const char * directoryPath = _dir.c_str();
-            log_info("directoryPath: " + std::string(directoryPath));
-            DIR* dirp = opendir(directoryPath);
-            st.clear();
-            dirs_parts = st.tokenize(full_file_path, "/");
-            log_info(dirs_parts.back());
-            if (dirp) 
-            {
-                struct dirent* dp;
-                while ((dp = readdir(dirp)) != nullptr) 
+                std::vector<std::string> files = list_dir_to_vector(dir);
+                for (const auto & file : files)
                 {
-                    if (dp->d_name == dirs_parts.back())
+                    if (file == name)
                     {
-                        return dp->d_name;
+                        return true;
                     }
                 }
-                closedir(dirp);
             }
-            return "";
+            return false;
         }
     ;
     private: // variables
