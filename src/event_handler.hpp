@@ -8,7 +8,7 @@
 
 #include "structs.hpp"
 
-using Event = const xcb_generic_event_t *;
+using Event = const xcb_generic_event_t;
 
 class Event_Handler
 {
