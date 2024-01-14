@@ -6,6 +6,7 @@
 #include <X11/X.h>
 #include <cstddef>
 #include <functional>
+#include <vector>
 #include "pointer.hpp"
 
 class Entry 
@@ -53,6 +54,12 @@ class Entry
             window.grab_button({ { L_MOUSE_BUTTON, NULL } });
             window.map();
         }
+
+        void
+        add_menu(std::vector<Entry> menu)
+        {
+
+        }
     ;
     private: // vatiabels
         const char * entryName;
@@ -60,18 +67,11 @@ class Entry
     ;
 };
 
-class Entry_list
-{
-    public: 
-        std::vector<Entry> entries;
-    ;
-};
-
 class Menu
 {
     public:
-        window menu_window;
-        Entry_list entry_list;
+        window window;
+        std::vector<Entry> entries;
     ;
 };
 
@@ -100,7 +100,7 @@ class context_menu
             size_pos.x = pointer.x();
             size_pos.y = pointer.y();
             
-            uint32_t height = main_menu.entries.size() * size_pos.height;
+            uint32_t height = entries.size() * size_pos.height;
             if (size_pos.y + height > screen->height_in_pixels)
             {
                 size_pos.y = (screen->height_in_pixels - height);
@@ -119,15 +119,12 @@ class context_menu
         }
 
         void 
-        addEntry(const char * name, std::function<void()> action, Menu * menu)
+        addEntry(const char * name, std::function<void()> action)
         {
-            if (menu == nullptr)
-            {
-                Entry entry;
-                entry.add_name(name);
-                entry.add_action(action);
-                main_menu.entries.push_back(entry);
-            }
+            Entry entry;
+            entry.add_name(name);
+            entry.add_action(action);
+            entries.push_back(entry);
         }
     ;
     private: // private variables
@@ -136,7 +133,7 @@ class context_menu
         window_borders border;
         int border_size = 1;
         
-        Entry_list main_menu;
+        std::vector<Entry> entries;
         pointer pointer;
     ;
     private: // private methods
@@ -202,7 +199,7 @@ class context_menu
         void
         run_action(const xcb_window_t * w) 
         {
-            for (const auto & entry : main_menu.entries)
+            for (const auto & entry : entries)
             {
                 if (* w == entry.window)
                 {
@@ -215,7 +212,7 @@ class context_menu
         make_entries()
         {
             int y = 0;
-            for (auto & entry : main_menu.entries)
+            for (auto & entry : entries)
             {
                 entry.make_window(context_window, (0 + (BORDER_SIZE / 2)), (y + (BORDER_SIZE / 2)), (size_pos.width - BORDER_SIZE), (size_pos.height - BORDER_SIZE));
                 entry.window.draw_text(entry.getName(), WHITE, BLACK, "7x14", 2, 14);
@@ -229,9 +226,9 @@ class context_menu
             Menu sub_menu;
             Entry entry;
             entry.add_name("test");
-            entry.add_action([](){});
-            entry.make_window(context_window, context_window.width(), 0, 0, 0);
-            sub_menu.entry_list.entries.push_back(entry);
+            entry.add_action([](){  });
+            entry.make_window(screen->root, context_window.width(), 0, 100, 100);
+            sub_menu.entries.push_back(entry);
         }
     ;
 };
