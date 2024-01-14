@@ -55,8 +55,6 @@ class add_app_dialog_window
         void
         hide()
         {
-            window.unmap();
-            window.kill();
             c->unmap();
         }
 
