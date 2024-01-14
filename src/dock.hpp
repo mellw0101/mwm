@@ -99,7 +99,8 @@ class add_app_dialog_window
                 const auto * e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
                 if (e->event == search_window)
                 {
-                    c->focus();
+                    search_window.raise();
+                    search_window.focus_input();
                 }
             });
 
