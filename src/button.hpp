@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <functional>
+#include <xcb/xproto.h>
 
 #include "Log.hpp"
 #include "window.hpp"
@@ -38,9 +39,10 @@ class button
         }
         
         void
-        add_event(const uint8_t & event_type, std::function<void(Ev)> action)
+        add_event(std::function<void(Ev ev)> action)
         {
-            wm->event_handler.setEventCallback(event_type, action);
+            ev_a = action;
+            wm->event_handler.setEventCallback(XCB_BUTTON_PRESS, ev_a);
         }
 
         void 
@@ -74,6 +76,7 @@ class button
 
     private: // private variables 
         std::function<void()> button_action;
+        std::function<void(Ev ev)> ev_a;
         File file;
         Logger log;
     ;

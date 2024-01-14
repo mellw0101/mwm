@@ -75,7 +75,6 @@ class add_app_dialog_window
         void
         create_client()
         {
-            
             c = wm->make_internal_client(window);
         }
 
@@ -204,7 +203,6 @@ class Dock
             }
             calc_size_pos();
         }
-        ;
     ;
 };
 
