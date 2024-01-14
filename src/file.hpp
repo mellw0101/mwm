@@ -111,8 +111,8 @@ class File
                 log_error("PATH environment variable not set");
                 return {};
             }
-            
-            return st.tokenize($PATH, ":");
+
+            return string_tokenizer().tokenize($PATH, ":");
         }
 
         const char *
