@@ -12,6 +12,7 @@
 #include "Log.hpp"
 #include "buttons.hpp"
 #include "contex_meny.hpp"
+#include "defenitions.hpp"
 #include "launcher.hpp"
 #include "file.hpp"
 #include "pointer.hpp"
@@ -37,6 +38,7 @@ class add_app_dialog_window
             log_win("add_app_win: ", window);
             uint32_t mask =  XCB_EVENT_MASK_STRUCTURE_NOTIFY;
             window.apply_event_mask(& mask);
+            window.grab_button({ { L_MOUSE_BUTTON, NULL } });
             window.set_backround_color(DARK_GREY);
             window.raise();
 
