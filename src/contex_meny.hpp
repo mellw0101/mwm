@@ -3,6 +3,8 @@
 
 #include "structs.hpp"
 #include "window.hpp"
+#include <X11/X.h>
+#include <cstddef>
 #include <functional>
 #include "pointer.hpp"
 
@@ -13,6 +15,7 @@ class Entry
     ;
     public: // variabels
         window window;
+        bool menu = false;
     ;
     public: // public methods
         void
@@ -64,6 +67,14 @@ class Entry_list
     ;
 };
 
+class Menu
+{
+    public:
+        window menu_window;
+        Entry_list entry_list;
+    ;
+};
+
 class context_menu
 {
     public: // consructor
@@ -100,25 +111,27 @@ class context_menu
                 size_pos.x = (screen->width_in_pixels - size_pos.width);
             }
 
-            window.x_y_height((size_pos.x - BORDER_SIZE), (size_pos.y - BORDER_SIZE), height);
-            window.map();
-            xcb_flush(conn);
-            window.raise();
+            context_window.x_y_height((size_pos.x - BORDER_SIZE), (size_pos.y - BORDER_SIZE), height);
+            context_window.map();
+            context_window.raise();
             make_entries();
             run();
         }
 
         void 
-        addEntry(const char * name, std::function<void()> action) 
+        addEntry(const char * name, std::function<void()> action, Menu * menu)
         {
-            Entry entry;
-            entry.add_name(name);
-            entry.add_action(action);
-            main_menu.entries.push_back(entry);
+            if (menu == nullptr)
+            {
+                Entry entry;
+                entry.add_name(name);
+                entry.add_action(action);
+                main_menu.entries.push_back(entry);
+            }
         }
     ;
     private: // private variables
-        window window;
+        window context_window;
         size_pos size_pos;
         window_borders border;
         int border_size = 1;
@@ -130,18 +143,18 @@ class context_menu
         void
         create_dialog_win()
         {
-            window.create_default(screen->root, 0, 0, size_pos.width, size_pos.height);
+            context_window.create_default(screen->root, 0, 0, size_pos.width, size_pos.height);
             uint32_t mask = XCB_EVENT_MASK_FOCUS_CHANGE | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY | XCB_EVENT_MASK_POINTER_MOTION;
-            window.apply_event_mask(& mask);
-            window.set_backround_color(DARK_GREY);
-            window.raise();
+            context_window.apply_event_mask(& mask);
+            context_window.set_backround_color(DARK_GREY);
+            context_window.raise();
         }
         
         void
         hide()
         {
-            window.unmap();
-            window.kill();
+            context_window.unmap();
+            context_window.kill();
         }
         
         void
@@ -204,10 +217,21 @@ class context_menu
             int y = 0;
             for (auto & entry : main_menu.entries)
             {
-                entry.make_window(window, (0 + (BORDER_SIZE / 2)), (y + (BORDER_SIZE / 2)), (size_pos.width - BORDER_SIZE), (size_pos.height - BORDER_SIZE));
+                entry.make_window(context_window, (0 + (BORDER_SIZE / 2)), (y + (BORDER_SIZE / 2)), (size_pos.width - BORDER_SIZE), (size_pos.height - BORDER_SIZE));
                 entry.window.draw_text(entry.getName(), WHITE, BLACK, "7x14", 2, 14);
                 y += size_pos.height;
             }
+        }
+
+        void
+        open_sub_menu()
+        {
+            Menu sub_menu;
+            Entry entry;
+            entry.add_name("test");
+            entry.add_action([](){});
+            entry.make_window(context_window, context_window.width(), 0, 0, 0);
+            sub_menu.entry_list.entries.push_back(entry);
         }
     ;
 };

@@ -427,12 +427,10 @@ class Window_Manager
     public: // constructor
         Window_Manager() {}
     ;
-
     public: // variabels 
         context_menu * context_menu = nullptr;
         window root;
     ;
-
     public: // methods 
         public: // main methods 
             void
@@ -457,11 +455,14 @@ class Window_Manager
 
                 context_menu = new class context_menu();
                 context_menu->addEntry
-                ("konsole",
-                []() 
-                {
-                    launcher->program((char *) "/usr/bin/konsole");
-                });
+                (   
+                    "konsole",
+                    []() 
+                    {
+                        launcher->program((char *) "/usr/bin/konsole");
+                    },
+                    nullptr
+                );
             }
 
             void
@@ -485,7 +486,6 @@ class Window_Manager
                 exit(status);
             }
         ;
-
         public: // client methods 
             public: // focus methods 
                 void 
@@ -813,7 +813,6 @@ class Window_Manager
                 return 0;
             }
         ;
-
         public: // desktop methods 
             void
             create_new_desktop(const uint16_t & n)
@@ -827,11 +826,9 @@ class Window_Manager
             }
         ;
     ;
-
     private: // variables 
         window start_window;
     ;
-
     private: // functions 
         private: // init functions 
             void 
