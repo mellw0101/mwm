@@ -220,9 +220,7 @@ class File
             string_tokenizer st($PATH, ":");
             for (const auto & token : st.get_tokens())
             {
-                String dir(token);
-                String correct_dir = dir + "/";
-                dirs.push_back(correct_dir.c_str());
+                log_info(token);
             }
             return dirs;
         }
