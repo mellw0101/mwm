@@ -64,6 +64,7 @@ class add_app_dialog_window
             uint32_t mask =  XCB_EVENT_MASK_STRUCTURE_NOTIFY;
             main_window.apply_event_mask(& mask);
             main_window.grab_button({ { L_MOUSE_BUTTON, NULL } });
+            main_window.grab_keys({ { Q, SHIFT | ALT } });
             main_window.set_backround_color(RED);
         }
 
@@ -88,9 +89,10 @@ class add_app_dialog_window
             search_window.grab_button({ { L_MOUSE_BUTTON, NULL } });
             search_window.grab_keys
             ({ 
-                { Q,      NULL },
-                { DELETE, NULL },
-                { T,      NULL }
+                { Q,      NULL        },
+                { DELETE, NULL        },
+                { T,      NULL        },
+                { Q,      SHIFT | ALT }
             });
             
             search_window.raise();
