@@ -6,9 +6,67 @@
 #include <functional>
 #include "pointer.hpp"
 
+class Entry 
+{
+    public: // constructor
+        Entry() {}
+    ;
+    public: // variabels
+        window window;
+    ;
+    public: // public methods
+        void
+        add_name(const char * name)
+        {
+            entryName = name;
+        }
+
+        void
+        add_action(std::function<void()> action)
+        {
+            entryAction = action;
+        }
+
+        void 
+        activate() const 
+        {
+            LOG_func
+            entryAction();
+        }
+
+        const char * 
+        getName() const 
+        {
+            return entryName;
+        }
+
+        void 
+        make_window(const xcb_window_t & parent_window, const int16_t & x, const int16_t & y, const uint16_t & width, const uint16_t & height)
+        {
+            window.create_default(parent_window, x, y, width, height);
+            window.set_backround_color(BLACK);
+            uint32_t mask = XCB_EVENT_MASK_POINTER_MOTION | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW;
+            window.apply_event_mask(& mask);
+            window.grab_button({ { L_MOUSE_BUTTON, NULL } });
+            window.map();
+        }
+    ;
+    private: // vatiabels
+        const char * entryName;
+        std::function<void()> entryAction;
+    ;
+};
+
+class Entry_list
+{
+    public: 
+        std::vector<Entry> entries;
+    ;
+};
+
 class context_menu
 {
-    public: // consructor 
+    public: // consructor
         context_menu()
         {
             size_pos.x      = pointer.x();
@@ -24,15 +82,14 @@ class context_menu
             create_dialog_win();
         }
     ;
-
-    public: // public methods 
+    public: // public methods
         void
         show()
         {
             size_pos.x = pointer.x();
             size_pos.y = pointer.y();
             
-            uint32_t height = entries.size() * size_pos.height;
+            uint32_t height = main_menu.entries.size() * size_pos.height;
             if (size_pos.y + height > screen->height_in_pixels)
             {
                 size_pos.y = (screen->height_in_pixels - height);
@@ -54,80 +111,22 @@ class context_menu
         void 
         addEntry(const char * name, std::function<void()> action) 
         {
-            DialogEntry entry;
+            Entry entry;
             entry.add_name(name);
             entry.add_action(action);
-            entries.push_back(entry);
+            main_menu.entries.push_back(entry);
         }
     ;
-
-    private: // private subclasses 
-        class DialogEntry 
-        {
-            public: // constructor 
-                DialogEntry() {}
-            ;
-
-            public: // variabels 
-                window window;
-                int16_t border_size = 1;
-            ;
-
-            public: // public methods 
-                void
-                add_name(const char * name)
-                {
-                    entryName = name;
-                }
-
-                void
-                add_action(std::function<void()> action)
-                {
-                    entryAction = action;
-                }
-
-                void 
-                activate() const 
-                {
-                    LOG_func
-                    entryAction();
-                }
-
-                const char * 
-                getName() const 
-                {
-                    return entryName;
-                }
-
-                void 
-                make_window(const xcb_window_t & parent_window, const int16_t & x, const int16_t & y, const uint16_t & width, const uint16_t & height)
-                {
-                    window.create_default(parent_window, x, y, width, height);
-                    window.set_backround_color(BLACK);
-                    uint32_t mask = XCB_EVENT_MASK_POINTER_MOTION | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW;
-                    window.apply_event_mask(& mask);
-                    window.grab_button({ { L_MOUSE_BUTTON, NULL } });
-                    window.map();
-                }
-            ;
-
-            private:
-                const char * entryName;
-                std::function<void()> entryAction;
-            ;
-        };
-    ;
-
-    private: // private variables 
+    private: // private variables
         window window;
         size_pos size_pos;
         window_borders border;
         int border_size = 1;
-        std::vector<DialogEntry> entries;
+        
+        Entry_list main_menu;
         pointer pointer;
     ;
-    
-    private: // private methods 
+    private: // private methods
         void
         create_dialog_win()
         {
@@ -187,21 +186,10 @@ class context_menu
             }
         }
 
-        int
-        get_num_of_entries()
-        {
-            int n = 0;
-            for (const auto & entry : entries)
-            {
-                ++n;
-            }
-            return n;
-        }
-
         void
         run_action(const xcb_window_t * w) 
         {
-            for (const auto & entry : entries) 
+            for (const auto & entry : main_menu.entries)
             {
                 if (* w == entry.window)
                 {
@@ -214,7 +202,7 @@ class context_menu
         make_entries()
         {
             int y = 0;
-            for (auto & entry : entries)
+            for (auto & entry : main_menu.entries)
             {
                 entry.make_window(window, (0 + (BORDER_SIZE / 2)), (y + (BORDER_SIZE / 2)), (size_pos.width - BORDER_SIZE), (size_pos.height - BORDER_SIZE));
                 entry.window.draw_text(entry.getName(), WHITE, BLACK, "7x14", 2, 14);
