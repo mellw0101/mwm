@@ -243,7 +243,7 @@ class File
             }
             
             st.clear();
-            fast_vector dirs = st.tokenize($PATH, ":");
+            std::vector<const char *> dirs = st.tokenize($PATH, ":");
             return dirs;
         }
 
