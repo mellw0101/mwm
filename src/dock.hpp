@@ -25,6 +25,7 @@ class add_app_dialog_window
         window window;
         buttons buttons;
         pointer pointer;
+        Event_Handler ev_handler;
     ;
     public:
         void
@@ -33,6 +34,16 @@ class add_app_dialog_window
             window.create_default(screen->root, 0, 0, 300, 200);
             window.set_backround_color(DARK_GREY);
             window.raise();
+
+            ev_handler.setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev) 
+            {
+                const auto * e = reinterpret_cast<const xcb_enter_notify_event_t *>(ev);
+                if (e->event == screen->root)
+                {
+                    hide();
+                    ev_handler.end();
+                } 
+            });
         }
 
         void
@@ -41,7 +52,7 @@ class add_app_dialog_window
             window.x_y((pointer.x() - (window.width() / 2)), (pointer.y() - (window.height() / 2)));
             window.map();
             window.raise();
-            run();
+            ev_handler.run();
         }
     ;
     private:
@@ -52,12 +63,20 @@ class add_app_dialog_window
             window.kill();
         }
 
+        void 
+        button_press(const xcb_button_press_event_t * e)
+        {
+            if (e->event == screen->root)
+            {
+                hide();
+                ev_handler.end();
+            } 
+        }
+
         void
         run()
         {
-            Event_Handler ev_handler;
-
-            ev_handler.setEventCallback(XCB_ENTER_NOTIFY, [&](Ev * ev) 
+            ev_handler.setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev) 
             {
                 const auto * e = reinterpret_cast<const xcb_enter_notify_event_t *>(ev);
                 if (e->event == screen->root)
