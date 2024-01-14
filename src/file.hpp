@@ -199,6 +199,9 @@ class File
             std::vector<const char *> dirs = split_$PATH_into_vector();
             for (const auto & dir : dirs)
             {
+                String _dir = dir;
+                String add = "/";
+                String full_dir = _dir + add;
                 log_info(dir);
             }
             return false;
