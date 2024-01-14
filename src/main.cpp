@@ -464,6 +464,7 @@ class Window_Manager
                 );
                 
                 Menu * menu = new Menu;
+                menu->create();
                 menu->layer = 1;
                 context_menu->add_menu("menu", menu);
             }

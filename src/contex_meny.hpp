@@ -160,7 +160,6 @@ class context_menu
             entry.add_action
             ([menu, this]()
             {
-                menu->create();
                 menu->show((size_pos.width * menu->layer), menu->window.y(), size_pos.width, size_pos.height);
             });
             entries.push_back(entry);
