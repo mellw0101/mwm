@@ -102,6 +102,7 @@ class add_app_dialog_window
                 const auto * e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
                 if (e->event == search_window)
                 {
+                    c->focus();
                     search_window.raise();
                     search_window.focus_input();
                 }
@@ -118,6 +119,15 @@ class add_app_dialog_window
                     }
 
                     search_window.draw_text(search_string.c_str(), RED, WHITE, "7x14", 2, 12);
+                }
+            });
+            
+            wm->event_handler.setEventCallback(XCB_CONFIGURE_NOTIFY, [&](Ev ev) 
+            {
+                const auto * e = reinterpret_cast<const xcb_configure_notify_event_t *>(ev);
+                if (e->window == main_window)
+                {
+                    search_window.width((e->width - (DOCK_BORDER * 2)));
                 }
             });
         }
