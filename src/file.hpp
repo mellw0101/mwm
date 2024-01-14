@@ -105,7 +105,7 @@ class File
         std::vector<const char *>
         split_$PATH_into_vector()
         {
-            str $PATH = get_env_var("PATH");
+            str $PATH = get_env_var("PTH");
             if ($PATH.isEmpty())
             {
                 log_error("PATH environment variable not set");
