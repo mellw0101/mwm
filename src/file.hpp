@@ -3,10 +3,48 @@
 
 #include <cstdlib>
 #include <string>
+#include <cstring>
 #include <fstream>
 #include <vector>
 #include <dirent.h>
+
 #include "Log.hpp"
+
+class string_tokenizer 
+{
+    public: // constructors and destructor
+        string_tokenizer(const char* input, const char* delimiter) 
+        {
+            // Copy the input string
+            str = new char[strlen(input) + 1];
+            strcpy(str, input);
+
+            // Tokenize the string using strtok() and push tokens to the vector
+            char* token = strtok(str, delimiter);
+            while (token != nullptr) 
+            {
+                tokens.push_back(token);
+                token = strtok(nullptr, delimiter);
+            }
+        }
+
+        ~string_tokenizer() 
+        {
+            delete[] str;
+        }
+    ;
+    public: // methods
+        const std::vector<const char*> & 
+        getTokens() const 
+        {
+            return tokens;
+        }
+    ;
+    private: // variables
+        char* str;
+        std::vector<const char*> tokens;
+    ;
+};
 
 class File
 {
@@ -28,11 +66,9 @@ class File
             ;
         };
     ;
-    
-    public: // construcers and operators
+    public: // construcers
         File() {}
     ;
-
     public: // methods
         std::string
         find_png_icon(std::vector<const char *> dirs, const char * app)
@@ -61,10 +97,9 @@ class File
             return false;
         }
     ;
-
     private: // variables
         Logger log;
-
+    ;
     private: // functions
         std::vector<std::string>
         list_dir_to_vector(const char * directoryPath) 
@@ -91,7 +126,12 @@ class File
             {
                 return {};
             }
-            log_info(std::string($PATH));
+            
+            string_tokenizer st($PATH, ":");
+            for (const auto & token : st.getTokens())
+            {
+                log_info(token);
+            }
             return {};
         }
 
