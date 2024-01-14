@@ -105,7 +105,8 @@ class File
         std::vector<const char *>
         split_$PATH_into_vector()
         {
-            return st.tokenize(str(get_env_var("PATH")).c_str(), ":");
+            str $PATH(get_env_var("PATH"));
+            return st.tokenize($PATH.c_str(), ":");
         }
 
         const char *
