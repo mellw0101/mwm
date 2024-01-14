@@ -106,11 +106,11 @@ class File
         split_$PATH_into_vector()
         {
             str $PATH = get_env_var("PATH");
-            if ($PATH.is_nullptr())
-            {
-                log_error("PATH environment variable not set");
-                return {};
-            }
+            // if ($PATH.is_nullptr())
+            // {
+            //     log_error("PATH environment variable not set");
+            //     return {};
+            // }
 
             const char * _PATH = $PATH.c_str();
 
