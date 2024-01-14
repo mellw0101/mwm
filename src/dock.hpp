@@ -38,17 +38,12 @@ class add_app_dialog_window
         {
             create();
             configure_events();
-            create_client();
-            c->unmap();
         }
 
         void
         show()
         {
-            if (!c)
-            {
-                c = wm->make_internal_client(window);
-            }
+            c = wm->make_internal_client(window);
             c->x_y((pointer.x() - (c->width / 2)), (pointer.y() - (c->height / 2)));
             c->map();
         }
@@ -57,7 +52,7 @@ class add_app_dialog_window
         void
         hide()
         {
-            c->unmap();
+            wm->send_sigterm_to_client(c);
         }
 
         void
