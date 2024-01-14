@@ -173,7 +173,6 @@ class str
                 length = other.length;
                 data = new char[length + 1];
                 strcpy(data, other.data);
-                is_null = bool(0);
             }
             return *this;
         }
@@ -188,7 +187,6 @@ class str
                 length = other.length;
                 other.data = nullptr;
                 other.length = 0;
-                is_null = (data == nullptr);
             }
             return *this;
         }
