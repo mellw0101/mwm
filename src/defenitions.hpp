@@ -29,9 +29,39 @@
 #define SUPER   XCB_MOD_MASK_4
 
 /* KEY DEFENITIONS */
-#define T       0x74
-#define Q       0x71
+#define A       0x61
+#define B       0x62
+#define C       0x63
+#define D       0x64
+#define E       0x65
 #define F       0x66
+#define G       0x67
+#define H       0x68
+#define I       0x69
+#define P       0x70
+#define Q       0x71
+#define T       0x74
+#define K       0x6b
+#define W       0x77
+#define S       0x73
+#define R       0x72
+#define _Y       0x79
+#define U       0x75
+#define O       0x6f
+#define P       0x70
+#define L       0x6c
+#define J       0x6a
+#define V       0x76
+#define L       0x6c
+#define _N       0x6e
+#define M       0x6d
+#define Z       0x7a
+#define _X       0x78
+#define S       0x73
+#define G       0x67
+#define H       0x68
+#define J       0x6a
+#define K       0x6b
 #define F11     0xffc8
 #define N_1     0x31
 #define N_2     0x32
@@ -43,7 +73,17 @@
 #define R_ARROW 0xff53
 #define D_ARROW 0xff54
 #define TAB     0xff09
-#define K       0x6b
+#define SEMI    0x3b
+#define QUOTE   0x22
+#define COMMA   0x2c
+#define DOT     0x2e
+#define SLASH   0x2f
+#define SPACE   0x20
+#define ENTER   0xff0d
+#define ESC     0xff1b
+#define BACK    0xff08
+#define DELETE  0x7f
+
 
 /* BUTTON DEFENITIONS */
 #define L_MOUSE_BUTTON XCB_BUTTON_INDEX_1

@@ -75,7 +75,7 @@ class Window_Manager
         win_data data;
 
         xcb_key_symbols_t * keysyms;
-        xcb_keycode_t t{}, q{}, f{}, f11{}, n_1{}, n_2{}, n_3{}, n_4{}, n_5{}, r_arrow{}, l_arrow{}, u_arrow{}, d_arrow{}, tab{}, k{}; 
+        xcb_keycode_t t{}, q{}, f{}, f11{}, n_1{}, n_2{}, n_3{}, n_4{}, n_5{}, r_arrow{}, l_arrow{}, u_arrow{}, d_arrow{}, tab{}, k{}, _delete{}; 
     ;
     public: // methods 
         public: // main methods 
@@ -514,96 +514,88 @@ class Window_Manager
                 xcb_keycode_t * d_arrow_keycodes    = xcb_key_symbols_get_keycode(keysyms, D_ARROW);
                 xcb_keycode_t * tab_keycodes        = xcb_key_symbols_get_keycode(keysyms, TAB);
                 xcb_keycode_t * k_keycodes			= xcb_key_symbols_get_keycode(keysyms, K);
+                xcb_keycode_t * delete_keycode		= xcb_key_symbols_get_keycode(keysyms, DELETE);
                 
                 if (t_keycodes) 
                 {
                     t = * t_keycodes;
                     free(t_keycodes);
                 }
-                
                 if (q_keycodes) 
                 {
                     q = * q_keycodes;
                     free(q_keycodes);
                 }
-                
                 if (f_keycodes)
                 {
                     f = * f_keycodes;
                     free(f_keycodes);
                 }
-
                 if (f11_keycodes)
                 {
                     f11 = * f11_keycodes;
                     free(f11_keycodes);
                 }
-
                 if (n_1_keycodes)
                 {
                     n_1 = * n_1_keycodes;
                     free(n_1_keycodes);
                 }
-
                 if (n_2_keycodes)
                 {
                     n_2 = * n_2_keycodes;
                     free(n_2_keycodes);
                 }
-
                 if (n_3_keycodes)
                 {
                     n_3 = * n_3_keycodes;
                     free(n_3_keycodes);
                 }
-
                 if (n_4_keycodes)
                 {
                     n_4 = * n_4_keycodes;
                     free(n_4_keycodes);
                 }
-
                 if (n_5_keycodes)
                 {
                     n_5 = * n_5_keycodes;
                     free(n_5_keycodes);
                 }
-
                 if (r_arrow_keycodes)
                 {
                     r_arrow = * r_arrow_keycodes;
                     free(r_arrow_keycodes);
                 }
-
                 if (l_arrow_keycodes)
                 {
                     l_arrow = * l_arrow_keycodes;
                     free(l_arrow_keycodes);
                 }
-
                 if (u_arrow_keycodes)
                 {
                     u_arrow = * u_arrow_keycodes;
                     free(u_arrow_keycodes);
                 }
-
                 if (d_arrow_keycodes)
                 {
                     d_arrow = * d_arrow_keycodes;
                     free(d_arrow_keycodes);
                 }
-
                 if (tab_keycodes)
                 {
                     tab = * tab_keycodes;
                     free(tab_keycodes);
                 }
-
                 if (k_keycodes)
 				{
 					k = * k_keycodes;
 					free(k_keycodes);
 				}
+                if (delete_keycode)
+                {
+                    _delete = * delete_keycode;
+                    free(delete_keycode);
+                }
             }
         }
     ;

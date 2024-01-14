@@ -118,20 +118,12 @@ class add_app_dialog_window
                         search_string += "q";
                     }
 
-                    search_window.draw_text(search_string.c_str(), RED, WHITE, "7x14", 2, 12);
-                }
-            });
-            
-            wm->event_handler.setEventCallback(XCB_CONFIGURE_NOTIFY, [&](Ev ev) 
-            {
-                const auto * e = reinterpret_cast<const xcb_configure_notify_event_t *>(ev);
-                c = wm->client_from_window(& e->window);
-                if (c)
-                {
-                    if (c->win == main_window)
+                    if (e->detail == wm->_delete)
                     {
-                        search_window.width((e->width - (DOCK_BORDER * 2)));
+                        search_string.erase(search_string.length() - 1);
                     }
+
+                    search_window.draw_text(search_string.c_str(), RED, WHITE, "7x14", 2, 12);
                 }
             });
         }
