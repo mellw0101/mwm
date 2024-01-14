@@ -4473,6 +4473,14 @@ class Event
         map_notify_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_map_notify_event_t *>(ev);
+            if (e->window == dock->main_window)
+            {
+                return;
+            }
+            if (e->window == wm->root)
+            {
+                return;
+            }
             if (e->window == dock->add_app_dialog_window.window)
             {
                 wm->manage_new_client(e->window);
