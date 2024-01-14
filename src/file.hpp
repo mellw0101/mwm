@@ -97,6 +97,8 @@ class String
 class string_tokenizer 
 {
     public: // constructors and destructor
+        string_tokenizer() {}
+
         string_tokenizer(const char* input, const char* delimiter) 
         {
             // Copy the input string
@@ -118,6 +120,23 @@ class string_tokenizer
         }
     ;
     public: // methods
+        const std::vector<const char*> &
+        tokenize(const char* input, const char* delimiter)
+        {
+            // Copy the input string
+            str = new char[strlen(input) + 1];
+            strcpy(str, input);
+
+            // Tokenize the string using strtok() and push tokens to the vector
+            char* token = strtok(str, delimiter);
+            while (token != nullptr) 
+            {
+                tokens.push_back(token);
+                token = strtok(nullptr, delimiter);
+            }
+            return tokens;
+        }
+
         const std::vector<const char*> & 
         get_tokens() const 
         {
@@ -187,6 +206,7 @@ class File
     ;
     private: // variables
         Logger log;
+        string_tokenizer st;
     ;
     private: // functions
         std::vector<std::string>
@@ -217,8 +237,7 @@ class File
             }
             
             std::vector<const char *> dirs;
-            string_tokenizer st($PATH, ":");
-            for (const auto & token : st.get_tokens())
+            for (const auto & token : st.tokenize($PATH, ";"))
             {
                 dirs.push_back(token);
             }
