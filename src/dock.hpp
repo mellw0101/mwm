@@ -38,20 +38,17 @@ class add_app_dialog_window
         {
             create();
             configure_events();
+            create_client();
+            c->unmap();
         }
 
         void
         show()
         {
-            if (c)
+            if (!c)
             {
-                c->x_y((pointer.x() - (window.width() / 2)), (pointer.y() - (window.height() / 2)));
-                c->map();
-                return;
+                c = wm->make_internal_client(window);
             }
-
-            create_client();
-            c->x_y((pointer.x() - (window.width() / 2)), (pointer.y() - (window.height() / 2)));
             c->map();
         }
     ;
@@ -59,7 +56,6 @@ class add_app_dialog_window
         void
         hide()
         {
-            window.unmap();
             c->unmap();
         }
 
