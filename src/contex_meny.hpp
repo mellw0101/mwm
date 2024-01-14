@@ -216,7 +216,7 @@ class context_menu
             int y = 0;
             for (auto & entry : entries)
             {
-                entry.make_window(window, (0 + BORDER_SIZE), (y + BORDER_SIZE), (size_pos.width - (BORDER_SIZE * 2)), (size_pos.height - (BORDER_SIZE * 2)));
+                entry.make_window(window, (0 + (BORDER_SIZE / 2)), (y + (BORDER_SIZE / 2)), (size_pos.width - BORDER_SIZE), (size_pos.height - BORDER_SIZE));
                 entry.window.draw_text(entry.getName(), WHITE, BLACK, "7x14", 2, 14);
                 y += size_pos.height;
             }
