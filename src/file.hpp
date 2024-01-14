@@ -232,7 +232,7 @@ class File
             return files;
         }
 
-        fast_vector
+        std::vector<const char *>
         split_$PATH_into_vector()
         {
             const char * $PATH = get_env_var("PATH");
