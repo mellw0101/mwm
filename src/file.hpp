@@ -187,7 +187,7 @@ class File
         bool
         check_if_binary_exists(const char * name)
         {
-            fast_vector dirs = split_$PATH_into_vector();
+            std::vector<const char *> dirs = split_$PATH_into_vector();
             return check_if_file_exists_in_DIRS(dirs, name);
         }
     ;
