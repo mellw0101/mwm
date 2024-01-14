@@ -413,8 +413,6 @@ class Window_Manager
             client *
             make_internal_client(window window)
             {
-                window.map();
-                window.raise();
                 client * c = new client;
                 c->win = window;
                 c->x = window.x();
