@@ -25,7 +25,8 @@
 class add_app_dialog_window
 {
     public:
-        window window;
+        window main_window;
+        window search_window;
         client * c;
         buttons buttons;
         pointer pointer;
@@ -56,21 +57,36 @@ class add_app_dialog_window
         void
         create()
         {
-            window.create_default(screen->root, pointer.x(), pointer.y(), 300, 200);
+            main_window.create_default(screen->root, pointer.x(), pointer.y(), 300, 200);
             uint32_t mask =  XCB_EVENT_MASK_STRUCTURE_NOTIFY;
-            window.apply_event_mask(& mask);
-            window.grab_button({ { L_MOUSE_BUTTON, NULL } });
-            window.set_backround_color(RED);
+            main_window.apply_event_mask(& mask);
+            main_window.grab_button({ { L_MOUSE_BUTTON, NULL } });
+            main_window.set_backround_color(RED);
         }
 
         void
         create_client()
         {
-            window.x_y(pointer.x() - (window.width() / 2), pointer.y() - (window.height() / 2));
-            c = wm->make_internal_client(window);
+            main_window.x_y(pointer.x() - (main_window.width() / 2), pointer.y() - (main_window.height() / 2));
+            c = wm->make_internal_client(main_window);
             c->x_y((pointer.x() - (c->width / 2)), (pointer.y() - (c->height / 2)));
-            window.map();
+            main_window.map();
             c->map();
+        }
+
+        void
+        create_internal_windows()
+        {
+            search_window.create_default(main_window, DOCK_BORDER, DOCK_BORDER, (main_window.width() - (DOCK_BORDER * 2)), 20);
+            search_window.set_backround_color(WHITE);
+            search_window.map();
+            search_window.grab_button({ { L_MOUSE_BUTTON, NULL } });
+            search_window.grab_keys
+            ({ 
+                { Q, NULL }
+            });
+            search_window.raise();
+            search_window.focus_input();
         }
 
         void
@@ -79,12 +95,29 @@ class add_app_dialog_window
             wm->event_handler.setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev)
             {
                 const auto * e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
-                if (e->event == window)
+                if (e->event == main_window)
                 {
                     hide();
                 }
             });
+
+            wm->event_handler.setEventCallback(XCB_KEY_PRESS, [&](Ev ev) 
+            {
+                const auto * e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
+                if (e->event == search_window)
+                {
+                    if (e->detail == wm->q)
+                    {
+                        search_string += "q";
+                    }
+
+                    search_window.draw_text(search_string.c_str(), RED, WHITE, "7x14", 2, 14);
+                }
+            });
         }
+    ;
+    private:
+        std::string search_string = "";
     ;
 };
 
