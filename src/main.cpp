@@ -3999,7 +3999,6 @@ class Event
             }
         }
     ;
-
     public: // methods 
         void /**
          *
@@ -4096,7 +4095,6 @@ class Event
             }
         }
     ;
-
     private: // variabels 
         xcb_key_symbols_t * keysyms;
         /*
@@ -4104,7 +4102,6 @@ class Event
          */ 
         xcb_keycode_t t{}, q{}, f{}, f11{}, n_1{}, n_2{}, n_3{}, n_4{}, n_5{}, r_arrow{}, l_arrow{}, u_arrow{}, d_arrow{}, tab{}, k{}; 
     ;
-
     private: // helper functions 
         void /*
             INITIALIZES KEYBOARD KEY SYMBOLS AND STORES 
@@ -4223,7 +4220,6 @@ class Event
             }
         }
     ;
-
     private: // event handling functions 
         void 
         key_press_handler(const xcb_generic_event_t * & ev)
@@ -4479,6 +4475,10 @@ class Event
         map_notify_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_map_notify_event_t *>(ev);
+            if (e->window == dock->add_app_dialog_window.window)
+            {
+                wm->manage_new_client(e->window);
+            }
             client * c = wm->client_from_window(& e->window);
             if (c)
             {

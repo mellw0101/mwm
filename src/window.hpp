@@ -164,7 +164,6 @@ class window
             return *this;
         }
     ;
-
     public: // methods 
         public: // main methods 
             void
@@ -351,7 +350,6 @@ class window
                 xcb_flush(conn);
             }
         ;
-
         public: // check methods 
             bool 
             check_if_EWMH_fullscreen() 
@@ -432,7 +430,6 @@ class window
                 return false;
             }
         ;
-
         public: // set methods 
             void
             set_active_EWMH_window()
@@ -458,7 +455,6 @@ class window
                 xcb_flush(conn);
             }
         ;
-
         public: // unset methods 
             void
             unset_EWMH_fullscreen_state()
@@ -477,7 +473,6 @@ class window
                 xcb_flush(conn);
             }
         ;
-
         public: // get methods 
             char *
             property(const char * atom_name) 
@@ -600,7 +595,6 @@ class window
                 return children;
             }
         ;
-
         public: // configuration methods 
             void 
             apply_event_mask(const std::vector<uint32_t> & values) 
@@ -1023,7 +1017,6 @@ class window
             ;
         ;
     ;
-
     private: // variables 
         private: // main variables 
             uint8_t        _depth;
@@ -1047,7 +1040,6 @@ class window
 
         Logger log;
     ;
-
     private: // functions 
         private: // main functions 
             void
@@ -1221,7 +1213,6 @@ class window
                 }
             }
         ;
-
         private: // create functions 
             private: // gc functions 
                 void
@@ -1348,7 +1339,6 @@ class window
                 }
             ;
         ;
-
         private: // get functions 
             xcb_atom_t
             atom(const char * atom_name) 
@@ -1485,7 +1475,6 @@ class window
                 xcb_flush(conn);
             }
         ;
-
         private: // backround functions 
             void
             change_back_pixel(const uint32_t & pixel)
