@@ -203,7 +203,7 @@ class File
                 String add = "/";
                 String full_dir = _dir + add;
                 const char * full_dir_c = full_dir.c_str();
-                log_info(full_dir_c);
+                log_info(full_dir.c_str());
             }
             return false;
         }
@@ -241,11 +241,6 @@ class File
             }
             
             std::vector<const char *> dirs = st.tokenize($PATH, ":");
-            // st.tokenize($PATH, ":");
-            // for (const auto & token : st.get_tokens())
-            // {
-            //     dirs.push_back(token);
-            // }
             return dirs;
         }
 
