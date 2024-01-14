@@ -217,19 +217,16 @@ class File
         {
             st.clear();
             std::vector<const char *> dirs_parts = st.tokenize(full_file_path, "/");
-            log_info(dirs_parts);
             dirs_parts.pop_back();
-            log_info(dirs_parts);
 
             String _dir;
             for (auto & part : dirs_parts)
             {
                 _dir = _dir + "/" + part;
-                log_info(_dir.c_str());
             }
-            log_info(_dir.c_str());
             
             const char * directoryPath = _dir.c_str();
+            log_info("directoryPath: " + std::string(directoryPath));
             DIR* dirp = opendir(directoryPath);
             st.clear();
             dirs_parts = st.tokenize(full_file_path, "/");
