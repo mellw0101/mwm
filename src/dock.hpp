@@ -47,7 +47,7 @@ class add_app_dialog_window
         show()
         {
             create_client();
-            create_internal_windows();
+            create_search_window();
         }
     ;
     private:
@@ -79,7 +79,7 @@ class add_app_dialog_window
         }
 
         void
-        create_internal_windows()
+        create_search_window()
         {
             search_window.create_default(main_window, DOCK_BORDER, DOCK_BORDER, (main_window.width() - (DOCK_BORDER * 2)), 20);
             search_window.set_backround_color(WHITE);
@@ -118,17 +118,17 @@ class add_app_dialog_window
                 const auto * e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
                 if (e->event == search_window)
                 {
-                    if (e->detail == wm->q)
+                    if (e->detail == wm->key_codes.q)
                     {
                         search_string += "q";
                     }
                     
-                    if (e->detail == wm->t)
+                    if (e->detail == wm->key_codes.t)
                     {
                         search_string += "t";
                     }
 
-                    if (e->detail == wm->_delete)
+                    if (e->detail == wm->key_codes._delete)
                     {
                         search_string.erase(search_string.length() - 1);
                     }
