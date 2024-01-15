@@ -112,7 +112,6 @@ class Key_Codes
         xcb_key_symbols_t * keysyms;
     ;
 };
-
 class Window_Manager
 {
     public: // constructor
