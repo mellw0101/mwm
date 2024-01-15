@@ -856,34 +856,6 @@ class window
                     update(x, _y, width, _height);
                 }
 
-                void
-                x_height(const uint32_t & x, const uint32_t & height)
-                {
-                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_HEIGHT, {x, height});
-                    update(x, _y, _width, height);
-                }
-                
-                void
-                y_width(const uint32_t & y, const uint32_t & width)
-                {
-                    config_window(XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH, {y, width});
-                    update(_x, y, width, _height);
-                }
-                
-                void 
-                y_height(const uint32_t & y, const uint32_t & height)
-                {
-                    config_window(XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT, {y, height});
-                    update(_x, y, _width, height);
-                }
-
-                void
-                x_y_width(const uint32_t & x, const uint32_t & y, const uint32_t & width)
-                {
-                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH, {x, y, width});
-                    update(x, y, width, _height);
-                }
-
                 void 
                 config_size(uint32_t mask, const std::vector<uint32_t> & values) 
                 {

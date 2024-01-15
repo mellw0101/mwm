@@ -148,7 +148,7 @@ class client
             {
                 win.height((height - TITLE_BAR_HEIGHT) - (BORDER_SIZE * 2));
                 xcb_flush(conn);
-                frame.y_height(y, height);
+                frame.config_size(MWM_CONFIG_y | MWM_CONFIG_height, {y, height});
                 border.left.height((height - (BORDER_SIZE * 2)));
                 border.right.height((height - (BORDER_SIZE * 2)));
                 border.bottom.y((height - BORDER_SIZE));
@@ -167,9 +167,9 @@ class client
                 max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
                 min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
                 border.left.height((height - (BORDER_SIZE * 2)));
-                border.right.x_height((width - BORDER_SIZE), (height - (BORDER_SIZE * 2)));
+                border.right.config_size(MWM_CONFIG_x | MWM_CONFIG_height, {(width - BORDER_SIZE), (height - (BORDER_SIZE * 2))});
                 border.top.width((width - (BORDER_SIZE * 2)));
-                border.bottom.y_width((height - BORDER_SIZE), (width - (BORDER_SIZE * 2)));
+                border.bottom.config_size(MWM_CONFIG_y | MWM_CONFIG_width, {(height - BORDER_SIZE), (width - (BORDER_SIZE * 2))});
                 border.top_right.x((width - BORDER_SIZE));
                 border.bottom_left.y((height - BORDER_SIZE));
                 border.bottom_right.x_y((width - BORDER_SIZE), (height - BORDER_SIZE));
@@ -185,9 +185,9 @@ class client
                 max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
                 min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
                 border.left.height((height - (BORDER_SIZE * 2)));
-                border.right.x_height((width - BORDER_SIZE), (height - (BORDER_SIZE * 2)));
+                border.right.config_size(MWM_CONFIG_x | MWM_CONFIG_height, {(width - BORDER_SIZE), (height - (BORDER_SIZE * 2))});
                 border.top.width((width - (BORDER_SIZE * 2)));
-                border.bottom.y_width((height - BORDER_SIZE), (width - (BORDER_SIZE * 2)));
+                border.bottom.config_size(MWM_CONFIG_y | MWM_CONFIG_width, {(height - BORDER_SIZE), (width - (BORDER_SIZE * 2))});
                 border.top_right.x((width - BORDER_SIZE));
                 border.bottom_left.y((height - BORDER_SIZE));
                 border.bottom_right.x_y((width - BORDER_SIZE), (height - BORDER_SIZE));
@@ -204,9 +204,9 @@ class client
                 max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
                 min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
                 border.left.height((height - (BORDER_SIZE * 2)));
-                border.right.x_height((width - BORDER_SIZE), (height - (BORDER_SIZE * 2)));
+                border.right.config_size(MWM_CONFIG_x | MWM_CONFIG_height, {(width - BORDER_SIZE), (height - (BORDER_SIZE * 2))});
                 border.top.width((width - (BORDER_SIZE * 2)));
-                border.bottom.y_width((height - BORDER_SIZE), (width - (BORDER_SIZE * 2)));
+                border.bottom.config_size(MWM_CONFIG_y | MWM_CONFIG_width, {(height - BORDER_SIZE), (width - (BORDER_SIZE * 2))});
                 border.top_right.x((width - BORDER_SIZE));
                 border.bottom_right.x_y((width - BORDER_SIZE), (height - BORDER_SIZE));
                 border.bottom_left.y((height - BORDER_SIZE));
@@ -224,9 +224,9 @@ class client
                 max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
                 min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
                 border.left.height((height - (BORDER_SIZE * 2)));
-                border.right.x_height((width - BORDER_SIZE), (height - (BORDER_SIZE * 2)));
+                border.right.config_size(MWM_CONFIG_x | MWM_CONFIG_height, {(width - BORDER_SIZE), (height - (BORDER_SIZE * 2))});
                 border.top.width((width - (BORDER_SIZE * 2)));
-                border.bottom.y_width((height - BORDER_SIZE), (width - (BORDER_SIZE * 2)));
+                border.bottom.config_size(MWM_CONFIG_y | MWM_CONFIG_width, {(height - BORDER_SIZE), (width - (BORDER_SIZE * 2))});
                 border.top_right.x((width - BORDER_SIZE));
                 border.bottom_right.x_y((width - BORDER_SIZE), (height - BORDER_SIZE));
                 border.bottom_left.y((height - BORDER_SIZE));
