@@ -71,7 +71,7 @@ class add_app_dialog_window
         void
         create_client()
         {
-            main_window.x_y(pointer.x() - (main_window.width() / 2), pointer.y() - (main_window.height() / 2));
+            main_window.config_size(MWM_CONFIG_x | MWM_CONFIG_y, {pointer.x() - (main_window.width() / 2), pointer.y() - (main_window.height() / 2)});
             c = wm->make_internal_client(main_window);
             c->x_y((pointer.x() - (c->width / 2)), (pointer.y() - (c->height / 2)));
             main_window.map();
@@ -203,7 +203,7 @@ class Dock
             x = ((screen->width_in_pixels / 2) - (calc_width / 2));
             y = (screen->height_in_pixels - height);
 
-            main_window.x_y_width_height(x, y, calc_width, height);
+            main_window.config_size(MWM_CONFIG_x | MWM_CONFIG_y | MWM_CONFIG_width | MWM_CONFIG_height, {x, y, calc_width, height});
             xcb_flush(conn);
         }
 
