@@ -57,9 +57,14 @@
 
 class Key_Codes
 {
-    public: // constructor
+    public: // constructor and destructor
         Key_Codes() 
         : keysyms(nullptr) {}
+
+        ~Key_Codes()
+        {
+            free(keysyms);
+        }
     ;
     public: // methods
         void /*
