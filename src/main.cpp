@@ -57,8 +57,8 @@ Logger log;
 #include "structs.hpp"
 
 #include "window.hpp"
-#include "dock.hpp"
 #include "client.hpp"
+#include "dock.hpp"
 #include "desktop.hpp"
 #include "event_handler.hpp"
 #include "window_manager.hpp"
@@ -1185,18 +1185,18 @@ class mv_client
                     // SNAP WINDOW TO 'RIGHT_TOP' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
                     if (y > cli->y - NC && y < cli->y + NC)
                     {  
-                        c->frame.config_size(MWM_CONFIG_x | MWM_CONFIG_y, {static_cast<uint32_t>(cli->x + cli->width), static_cast<uint32_t>(cli->y)});
+                        c->frame.x_y((cli->x + cli->width), cli->y);
                         return;
                     }
 
                     // SNAP WINDOW TO 'RIGHT_BOTTOM' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
                     if (y + c->height > cli->y + cli->height - NC && y + c->height < cli->y + cli->height + NC)
                     {
-                        c->frame.config_size(MWM_CONFIG_x | MWM_CONFIG_y, {static_cast<uint32_t>(cli->x + cli->width), static_cast<uint32_t>((cli->y + cli->height) - c->height)});
+                        c->frame.x_y((cli->x + cli->width), (cli->y + cli->height) - c->height);
                         return;
                     }
 
-                    c->frame.config_size(MWM_CONFIG_x | MWM_CONFIG_y, {static_cast<uint32_t>(cli->x + cli->width), static_cast<uint32_t>(y)});
+                    c->frame.x_y((cli->x + cli->width), y);
                     return;
                 }
 
@@ -1207,18 +1207,18 @@ class mv_client
                     // SNAP WINDOW TO 'LEFT_TOP' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
                     if (y > cli->y - NC && y < cli->y + NC)
                     {  
-                        c->frame.config_size(MWM_CONFIG_x | MWM_CONFIG_y, {static_cast<uint32_t>(cli->x - c->width), static_cast<uint32_t>(cli->y)});
+                        c->frame.x_y((cli->x - c->width), cli->y);
                         return;
                     }
 
                     // SNAP WINDOW TO 'LEFT_BOTTOM' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
                     if (y + c->height > cli->y + cli->height - NC && y + c->height < cli->y + cli->height + NC)
                     {
-                        c->frame.config_size(MWM_CONFIG_x | MWM_CONFIG_y, {static_cast<uint32_t>(cli->x - c->width), static_cast<uint32_t>((cli->y + cli->height) - c->height)});
+                        c->frame.x_y((cli->x - c->width), (cli->y + cli->height) - c->height);
                         return;
                     }                
 
-                    c->frame.config_size(MWM_CONFIG_x | MWM_CONFIG_y, {static_cast<uint32_t>(cli->x - c->width), static_cast<uint32_t>(y)});
+                    c->frame.x_y((cli->x - c->width), y);
                     return;
                 }
 
@@ -1229,18 +1229,18 @@ class mv_client
                     // SNAP WINDOW TO 'BOTTOM_LEFT' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
                     if (x > cli->x - NC && x < cli->x + NC)
                     {  
-                        c->frame.config_size(MWM_CONFIG_x | MWM_CONFIG_y, {static_cast<uint32_t>(cli->x), static_cast<uint32_t>(cli->y + cli->height)});
+                        c->frame.x_y(cli->x, (cli->y + cli->height));
                         return;
                     }
 
                     // SNAP WINDOW TO 'BOTTOM_RIGHT' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
                     if (x + c->width > cli->x + cli->width - NC && x + c->width < cli->x + cli->width + NC)
                     {
-                        c->frame.config_size(MWM_CONFIG_x | MWM_CONFIG_y, {static_cast<uint32_t>((cli->x + cli->width) - c->width), static_cast<uint32_t>(cli->y + cli->height)});
+                        c->frame.x_y(((cli->x + cli->width) - c->width), (cli->y + cli->height));
                         return;
                     }
 
-                    c->frame.config_size(MWM_CONFIG_x | MWM_CONFIG_y, {static_cast<uint32_t>(x), static_cast<uint32_t>(cli->y + cli->height)});
+                    c->frame.x_y(x, (cli->y + cli->height));
                     return;
                 }
 
@@ -1251,18 +1251,18 @@ class mv_client
                     // SNAP WINDOW TO 'TOP_LEFT' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
                     if (x > cli->x - NC && x < cli->x + NC)
                     {  
-                        c->frame.config_size(MWM_CONFIG_x | MWM_CONFIG_y, {static_cast<uint32_t>(cli->x), static_cast<uint32_t>(cli->y - c->height)});
+                        c->frame.x_y(cli->x, (cli->y - c->height));
                         return;
                     }
 
                     // SNAP WINDOW TO 'TOP_RIGHT' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
                     if (x + c->width > cli->x + cli->width - NC && x + c->width < cli->x + cli->width + NC)
                     {
-                        c->frame.config_size(MWM_CONFIG_x | MWM_CONFIG_y, {static_cast<uint32_t>((cli->x + cli->width) - c->width), static_cast<uint32_t>(cli->y - c->height)});
+                        c->frame.x_y(((cli->x + cli->width) - c->width), (cli->y - c->height));
                         return;
                     }
 
-                    c->frame.config_size(MWM_CONFIG_x | MWM_CONFIG_y, {static_cast<uint32_t>(x), static_cast<uint32_t>(cli->y - c->height)});
+                    c->frame.x_y(x, (cli->y - c->height));
                     return;
                 }
             }
@@ -1270,39 +1270,39 @@ class mv_client
             // WINDOW TO EDGE OF SCREEN SNAPPING
             if (((x < N) && (x > -N)) && ((y < N) && (y > -N)))
             {
-                c->frame.config_size(MWM_CONFIG_x | MWM_CONFIG_y, {0, 0});
+                c->frame.x_y(0, 0);
             }
             else if ((x < RIGHT_ + N && x > RIGHT_ - N) && (y < N && y > -N))
             {
-                c->frame.config_size(MWM_CONFIG_x | MWM_CONFIG_y, {static_cast<uint32_t>(RIGHT_), 0});
+                c->frame.x_y(RIGHT_, 0);
             }
             else if ((y < BOTTOM_ + N && y > BOTTOM_ - N) && (x < N && x > -N))
             {
-                c->frame.config_size(MWM_CONFIG_x | MWM_CONFIG_y, {0, static_cast<uint32_t>(BOTTOM_)});
+                c->frame.x_y(0, BOTTOM_);
             }
             else if ((x < N) && (x > -N))
             { 
-                c->frame.config_size(MWM_CONFIG_x | MWM_CONFIG_y, {0, static_cast<uint32_t>(y)});
+                c->frame.x_y(0, y);
             }
             else if (y < N && y > -N)
             {
-                c->frame.config_size(MWM_CONFIG_x | MWM_CONFIG_y, {static_cast<uint32_t>(x), 0});
+                c->frame.x_y(x, 0);
             }
             else if ((x < RIGHT_ + N && x > RIGHT_ - N) && (y < BOTTOM_ + N && y > BOTTOM_ - N))
             {
-                c->frame.config_size(MWM_CONFIG_x | MWM_CONFIG_y, {static_cast<uint32_t>(RIGHT_), static_cast<uint32_t>(BOTTOM_)});
+                c->frame.x_y(RIGHT_, BOTTOM_);
             }
             else if ((x < RIGHT_ + N) && (x > RIGHT_ - N))
             { 
-                c->frame.config_size(MWM_CONFIG_x | MWM_CONFIG_y, {static_cast<uint32_t>(RIGHT_), static_cast<uint32_t>(y)});
+                c->frame.x_y(RIGHT_, y);
             }
             else if (y < BOTTOM_ + N && y > BOTTOM_ - N)
             {
-                c->frame.config_size(MWM_CONFIG_x | MWM_CONFIG_y, {static_cast<uint32_t>(x), static_cast<uint32_t>(BOTTOM_)});
+                c->frame.x_y(x, BOTTOM_);
             }
             else 
             {
-                c->frame.config_size(MWM_CONFIG_x | MWM_CONFIG_y, {static_cast<uint32_t>(x), static_cast<uint32_t>(y)});
+                c->frame.x_y(x, y);
             }
         }
 
@@ -2193,7 +2193,7 @@ class XCPPBAnimator
         conf_client_x()
         {
             const uint32_t x = currentX;
-            c->frame.config_size(MWM_CONFIG_x, {static_cast<uint32_t>(x)});
+            c->frame.x(x);
             xcb_flush(connection);
         }
     ;

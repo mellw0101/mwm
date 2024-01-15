@@ -473,6 +473,7 @@ class window
                 xcb_flush(conn);
             }
         ;
+
         public: // get methods 
             char *
             property(const char * atom_name) 
@@ -595,6 +596,7 @@ class window
                 return children;
             }
         ;
+
         public: // configuration methods 
             void 
             apply_event_mask(const std::vector<uint32_t> & values) 
@@ -786,40 +788,109 @@ class window
                     }
                 ;    
                 
-                void 
-                config_size(uint32_t mask, const std::vector<uint32_t> & values) 
+                void
+                x(const uint32_t & x)
                 {
-                    if (values.empty()) 
-                    {
-                        log_error("values vector is empty");
-                        return;
-                    }
+                    config_window(MWM_CONFIG_x, x);
+                    update(x, _y, _width, _height);
+                }
 
-                    xcb_configure_window
-                    (
-                        conn,
-                        _window,
-                        mask,
-                        values.data()
-                    );
+                void
+                y(const uint32_t & y)
+                {
+                    config_window(XCB_CONFIG_WINDOW_Y, y);
+                    update(_x, y, _width, _height);
+                }                
+
+                void
+                width(const uint32_t & width)
+                {
+                    config_window(MWM_CONFIG_width, width);
+                    update(_x, _y, width, _height);
+                }
+
+                void
+                height(const uint32_t & height)
+                {
+                    config_window(XCB_CONFIG_WINDOW_HEIGHT, height);
+                    update(_x, _y, _width, height);
+                }
+
+                void
+                x_y(const uint32_t & x, const uint32_t & y)
+                {
+                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, {x, y});
+                    update(x, y, _width, _height);
+                }
+
+                void
+                width_height(const uint32_t & width, const uint32_t & height)
+                {
+                    config_window(XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, {width, height});
+                    update(_x, _y, width, height);
+                }
+
+                void
+                x_y_width_height(const uint32_t & x, const uint32_t & y, const uint32_t & width, const uint32_t & height)
+                {
+                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, {x, y, width, height});
+                    update(x, y, width, height);
+                }
+
+                void
+                x_width_height(const uint32_t & x, const uint32_t & width, const uint32_t & height)
+                {
+                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, {x, width, height});
+                    update(x, _y, width, height);
+                }
+
+                void
+                y_width_height(const uint32_t & y, const uint32_t & width, const uint32_t & height)
+                {
+                    config_window(XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, {y, width, height});
+                    update(_x, y, width, height);
+                }
+
+                void
+                x_width(const uint32_t & x, const uint32_t & width)
+                {
+                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_WIDTH, {x, width});
+                    update(x, _y, width, _height);
+                }
+
+                void
+                x_height(const uint32_t & x, const uint32_t & height)
+                {
+                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_HEIGHT, {x, height});
+                    update(x, _y, _width, height);
+                }
+                
+                void
+                y_width(const uint32_t & y, const uint32_t & width)
+                {
+                    config_window(XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH, {y, width});
+                    update(_x, y, width, _height);
                 }
                 
                 void 
-                config_window(uint32_t mask, const std::vector<uint32_t> & values) 
+                y_height(const uint32_t & y, const uint32_t & height)
                 {
-                    if (values.empty()) 
-                    {
-                        log_error("values vector is empty");
-                        return;
-                    }
+                    config_window(XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT, {y, height});
+                    update(_x, y, _width, height);
+                }
 
-                    xcb_configure_window
-                    (
-                        conn,
-                        _window,
-                        mask,
-                        values.data()
-                    );
+                void
+                x_y_width(const uint32_t & x, const uint32_t & y, const uint32_t & width)
+                {
+                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH, {x, y, width});
+                    update(x, y, width, _height);
+                }
+
+                void
+                x_y_height(const uint32_t & x, const uint32_t & y, const uint32_t & height)
+                {
+                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT, {x, y, height});
+                    update(x, y, _width, height);
                 }
             ;
 
@@ -1043,6 +1114,24 @@ class window
                     {
                         static_cast<const uint32_t &>(value)
                     }
+                );
+            }
+
+            void 
+            config_window(uint32_t mask, const std::vector<uint32_t> & values) 
+            {
+                if (values.empty()) 
+                {
+                    log_error("values vector is empty");
+                    return;
+                }
+
+                xcb_configure_window
+                (
+                    conn,
+                    _window,
+                    mask,
+                    values.data()
                 );
             }
         ;
@@ -1559,7 +1648,5 @@ class window
         ;
     ;
 };
-
-
 
 #endif

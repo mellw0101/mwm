@@ -90,146 +90,146 @@ class client
     public: // methods 
         public: // config methods
             void
-            x_y(const uint32_t & x, const uint32_t & y)
+            x_y(const int32_t & x, const uint32_t & y)
             {
-                frame.config_size(MWM_CONFIG_x | MWM_CONFIG_y, {x, y});
+                frame.x_y(x, y);
             }
 
             void
             _width(const uint32_t & width)
             {
-                win.config_size(MWM_CONFIG_width ,{(width - (BORDER_SIZE * 2))});
+                win.width((width - (BORDER_SIZE * 2)));
                 xcb_flush(conn);
-                frame.config_size(MWM_CONFIG_width ,{width});
-                titlebar.config_size(MWM_CONFIG_width, {(width - (BORDER_SIZE * 2))});
-                close_button.config_size(MWM_CONFIG_x ,{(width - BUTTON_SIZE - BORDER_SIZE)});
-                max_button.config_size(MWM_CONFIG_x, {(width - (BUTTON_SIZE * 2) - BORDER_SIZE)});
-                min_button.config_size(MWM_CONFIG_x, {(width - (BUTTON_SIZE * 3) - BORDER_SIZE)});
-                border.right.config_size(MWM_CONFIG_x, {(width - BORDER_SIZE)});
-                border.top.config_size(MWM_CONFIG_width, {(width - (BORDER_SIZE * 2))});
-                border.bottom.config_size(MWM_CONFIG_width, {(width - (BORDER_SIZE * 2))});
-                border.top_right.config_size(MWM_CONFIG_x, {(width - BORDER_SIZE)});
-                border.bottom_right.config_size(MWM_CONFIG_x, {(width - BORDER_SIZE)});
+                frame.width((width));
+                titlebar.width((width - (BORDER_SIZE * 2)));
+                close_button.x((width - BUTTON_SIZE - BORDER_SIZE));
+                max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
+                min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
+                border.right.x((width - BORDER_SIZE));
+                border.top.width((width - (BORDER_SIZE * 2)));
+                border.bottom.width((width - (BORDER_SIZE * 2)));
+                border.top_right.x((width - BORDER_SIZE));
+                border.bottom_right.x((width - BORDER_SIZE));
                 xcb_flush(conn);
             }
 
             void
             _height(const uint32_t & height)
             {
-                win.config_size(MWM_CONFIG_height, {(height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2))});
-                frame.config_size(MWM_CONFIG_height, {height});
-                border.left.config_size(MWM_CONFIG_height, {(height - (BORDER_SIZE * 2))});
-                border.right.config_size(MWM_CONFIG_height, {(height - (BORDER_SIZE * 2))});
-                border.bottom.config_size(MWM_CONFIG_y, {(height - BORDER_SIZE)});
-                border.bottom_left.config_size(MWM_CONFIG_y, {(height - BORDER_SIZE)});
-                border.bottom_right.config_size(MWM_CONFIG_y, {(height - BORDER_SIZE)});
+                win.height((height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
+                frame.height(height);
+                border.left.height((height - (BORDER_SIZE * 2)));
+                border.right.height((height - (BORDER_SIZE * 2)));
+                border.bottom.y((height - BORDER_SIZE));
+                border.bottom_left.y((height - BORDER_SIZE));
+                border.bottom_right.y((height - BORDER_SIZE));
             }
 
             void
             x_width(const uint32_t & x, const uint32_t & width)
             {
-                win.config_size(MWM_CONFIG_width, {(width - (BORDER_SIZE * 2))});
+                win.width((width - (BORDER_SIZE * 2)));
                 xcb_flush(conn);
-                frame.config_size(MWM_CONFIG_x | MWM_CONFIG_width, {x, (width)});
-                titlebar.config_size(MWM_CONFIG_width, {(width - (BORDER_SIZE * 2))});
-                close_button.config_size(MWM_CONFIG_x, {(width - BUTTON_SIZE - BORDER_SIZE)});
-                max_button.config_size(MWM_CONFIG_x, {(width - (BUTTON_SIZE * 2) - BORDER_SIZE)});
-                min_button.config_size(MWM_CONFIG_x, {(width - (BUTTON_SIZE * 3) - BORDER_SIZE)});
-                border.right.config_size(MWM_CONFIG_x, {(width - BORDER_SIZE)});
-                border.top.config_size(MWM_CONFIG_width, {(width - (BORDER_SIZE * 2))});
-                border.bottom.config_size(MWM_CONFIG_width, {(width - (BORDER_SIZE * 2))});
-                border.top_right.config_size(MWM_CONFIG_x, {(width - BORDER_SIZE)});
-                border.bottom_right.config_size(MWM_CONFIG_x, {(width - BORDER_SIZE)});
+                frame.x_width(x, (width));
+                titlebar.width((width - (BORDER_SIZE * 2)));
+                close_button.x((width - BUTTON_SIZE - BORDER_SIZE));
+                max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
+                min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
+                border.right.x((width - BORDER_SIZE));
+                border.top.width((width - (BORDER_SIZE * 2)));
+                border.bottom.width((width - (BORDER_SIZE * 2)));
+                border.top_right.x((width - BORDER_SIZE));
+                border.bottom_right.x((width - BORDER_SIZE));
                 xcb_flush(conn);
             }
 
             void
             y_height(const uint32_t & y, const uint32_t & height)
             {
-                win.config_size(MWM_CONFIG_height, {(height - TITLE_BAR_HEIGHT) - (BORDER_SIZE * 2)});
+                win.height((height - TITLE_BAR_HEIGHT) - (BORDER_SIZE * 2));
                 xcb_flush(conn);
-                frame.config_size(MWM_CONFIG_y | MWM_CONFIG_height, {y, height});
-                border.left.config_size(MWM_CONFIG_height, {(height - (BORDER_SIZE * 2))});
-                border.right.config_size(MWM_CONFIG_height, {(height - (BORDER_SIZE * 2))});
-                border.bottom.config_size(MWM_CONFIG_y, {(height - BORDER_SIZE)});
-                border.bottom_left.config_size(MWM_CONFIG_y, {(height - BORDER_SIZE)});
-                border.bottom_right.config_size(MWM_CONFIG_y, {(height - BORDER_SIZE)});
+                frame.y_height(y, height);
+                border.left.height((height - (BORDER_SIZE * 2)));
+                border.right.height((height - (BORDER_SIZE * 2)));
+                border.bottom.y((height - BORDER_SIZE));
+                border.bottom_left.y((height - BORDER_SIZE));
+                border.bottom_right.y((height - BORDER_SIZE));
                 xcb_flush(conn);
             }
 
             void
             x_width_height(const uint32_t & x, const uint32_t & width, const uint32_t & height)
             {
-                frame.config_size(MWM_CONFIG_x | MWM_CONFIG_width | MWM_CONFIG_height, {x, width, height});
-                win.config_size(MWM_CONFIG_width | MWM_CONFIG_height, {(width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2))});
-                titlebar.config_size(MWM_CONFIG_width, {(width - BORDER_SIZE)});
-                close_button.config_size(MWM_CONFIG_x, {(width - BUTTON_SIZE - BORDER_SIZE)});
-                max_button.config_size(MWM_CONFIG_x, {(width - (BUTTON_SIZE * 2) - BORDER_SIZE)});
-                min_button.config_size(MWM_CONFIG_x, {(width - (BUTTON_SIZE * 3) - BORDER_SIZE)});
-                border.left.config_size(MWM_CONFIG_height, {(height - (BORDER_SIZE * 2))});
-                border.right.config_size(MWM_CONFIG_x | MWM_CONFIG_height, {(width - BORDER_SIZE), (height - (BORDER_SIZE * 2))});
-                border.top.config_size(MWM_CONFIG_width, {(width - (BORDER_SIZE * 2))});
-                border.bottom.config_size(MWM_CONFIG_y | MWM_CONFIG_width, {(height - BORDER_SIZE), (width - (BORDER_SIZE * 2))});
-                border.top_right.config_size(MWM_CONFIG_x, {(width - BORDER_SIZE)});
-                border.bottom_left.config_size(MWM_CONFIG_y, {(height - BORDER_SIZE)});
-                border.bottom_right.config_size(MWM_CONFIG_x | MWM_CONFIG_y, {(width - BORDER_SIZE), (height - BORDER_SIZE)});
+                frame.x_width_height(x, width, height);
+                win.width_height((width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
+                titlebar.width((width - BORDER_SIZE));
+                close_button.x((width - BUTTON_SIZE - BORDER_SIZE));
+                max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
+                min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
+                border.left.height((height - (BORDER_SIZE * 2)));
+                border.right.x_height((width - BORDER_SIZE), (height - (BORDER_SIZE * 2)));
+                border.top.width((width - (BORDER_SIZE * 2)));
+                border.bottom.y_width((height - BORDER_SIZE), (width - (BORDER_SIZE * 2)));
+                border.top_right.x((width - BORDER_SIZE));
+                border.bottom_left.y((height - BORDER_SIZE));
+                border.bottom_right.x_y((width - BORDER_SIZE), (height - BORDER_SIZE));
             }
 
             void
             y_width_height(const uint32_t & y, const uint32_t & width, const uint32_t & height)
             {
-                frame.config_size(MWM_CONFIG_y | MWM_CONFIG_width | MWM_CONFIG_height, {y, width, height});
-                win.config_size(MWM_CONFIG_width | MWM_CONFIG_height, {(width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2))});
-                titlebar.config_size(MWM_CONFIG_width, {(width - BORDER_SIZE)});
-                close_button.config_size(MWM_CONFIG_x, {(width - BUTTON_SIZE - BORDER_SIZE)});
-                max_button.config_size(MWM_CONFIG_x, {(width - (BUTTON_SIZE * 2) - BORDER_SIZE)});
-                min_button.config_size(MWM_CONFIG_x, {(width - (BUTTON_SIZE * 3) - BORDER_SIZE)});
-                border.left.config_size(MWM_CONFIG_height, {(height - (BORDER_SIZE * 2))});
-                border.right.config_size(MWM_CONFIG_x | MWM_CONFIG_height, {(width - BORDER_SIZE), (height - (BORDER_SIZE * 2))});
-                border.top.config_size(MWM_CONFIG_width, {(width - (BORDER_SIZE * 2))});
-                border.bottom.config_size(MWM_CONFIG_y | MWM_CONFIG_width, {(height - BORDER_SIZE), (width - (BORDER_SIZE * 2))});
-                border.top_right.config_size(MWM_CONFIG_x, {(width - BORDER_SIZE)});
-                border.bottom_left.config_size(MWM_CONFIG_y, {(height - BORDER_SIZE)});
-                border.bottom_right.config_size(MWM_CONFIG_x | MWM_CONFIG_y, {(width - BORDER_SIZE), (height - BORDER_SIZE)});
+                frame.y_width_height(y, width, height);
+                win.width_height((width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
+                titlebar.width((width - BORDER_SIZE));
+                close_button.x((width - BUTTON_SIZE - BORDER_SIZE));
+                max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
+                min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
+                border.left.height((height - (BORDER_SIZE * 2)));
+                border.right.x_height((width - BORDER_SIZE), (height - (BORDER_SIZE * 2)));
+                border.top.width((width - (BORDER_SIZE * 2)));
+                border.bottom.y_width((height - BORDER_SIZE), (width - (BORDER_SIZE * 2)));
+                border.top_right.x((width - BORDER_SIZE));
+                border.bottom_left.y((height - BORDER_SIZE));
+                border.bottom_right.x_y((width - BORDER_SIZE), (height - BORDER_SIZE));
             }
 
             void
             x_y_width_height(const uint32_t & x, const uint32_t & y, const uint32_t & width, const uint32_t & height)
             {
-                win.config_size(MWM_CONFIG_width | MWM_CONFIG_height, {(width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2))});
+                win.width_height((width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
                 xcb_flush(conn);
-                frame.config_size(MWM_CONFIG_x | MWM_CONFIG_y | MWM_CONFIG_width | MWM_CONFIG_height, {x, y, width, height});
-                titlebar.config_size(MWM_CONFIG_width, {(width - (BORDER_SIZE * 2))});
-                close_button.config_size(MWM_CONFIG_x, {(width - BUTTON_SIZE - BORDER_SIZE)});
-                max_button.config_size(MWM_CONFIG_x, {(width - (BUTTON_SIZE * 2) - BORDER_SIZE)});
-                min_button.config_size(MWM_CONFIG_x, {(width - (BUTTON_SIZE * 3) - BORDER_SIZE)});
-                border.left.config_size(MWM_CONFIG_height, {(height - (BORDER_SIZE * 2))});
-                border.right.config_size(MWM_CONFIG_x | MWM_CONFIG_height, {(width - BORDER_SIZE), (height - (BORDER_SIZE * 2))});
-                border.top.config_size(MWM_CONFIG_width, {(width - (BORDER_SIZE * 2))});
-                border.bottom.config_size(MWM_CONFIG_y | MWM_CONFIG_width, {(height - BORDER_SIZE), (width - (BORDER_SIZE * 2))});
-                border.top_right.config_size(MWM_CONFIG_x, {(width - BORDER_SIZE)});
-                border.bottom_right.config_size(MWM_CONFIG_x | MWM_CONFIG_y, {(width - BORDER_SIZE), (height - BORDER_SIZE)});
-                border.bottom_left.config_size(MWM_CONFIG_y, {(height - BORDER_SIZE)});
+                frame.x_y_width_height(x, y, width, height);
+                titlebar.width((width - (BORDER_SIZE * 2)));
+                close_button.x((width - BUTTON_SIZE - BORDER_SIZE));
+                max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
+                min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
+                border.left.height((height - (BORDER_SIZE * 2)));
+                border.right.x_height((width - BORDER_SIZE), (height - (BORDER_SIZE * 2)));
+                border.top.width((width - (BORDER_SIZE * 2)));
+                border.bottom.y_width((height - BORDER_SIZE), (width - (BORDER_SIZE * 2)));
+                border.top_right.x((width - BORDER_SIZE));
+                border.bottom_right.x_y((width - BORDER_SIZE), (height - BORDER_SIZE));
+                border.bottom_left.y((height - BORDER_SIZE));
                 xcb_flush(conn);
             }
 
             void
             width_height(const uint32_t & width, const uint32_t & height)
             {
-                win.config_size(MWM_CONFIG_width | MWM_CONFIG_height, {(width - (BORDER_SIZE * 2)), (height - (BORDER_SIZE * 2))});
+                win.width_height((width - (BORDER_SIZE * 2)), (height - (BORDER_SIZE * 2)));
                 xcb_flush(conn);
-                frame.config_size(MWM_CONFIG_width | MWM_CONFIG_height, {width, height});
-                titlebar.config_size(MWM_CONFIG_width, {(width - (BORDER_SIZE * 2))});
-                close_button.config_size(MWM_CONFIG_x, {(width - BUTTON_SIZE - BORDER_SIZE)});
-                max_button.config_size(MWM_CONFIG_x, {(width - (BUTTON_SIZE * 2) - BORDER_SIZE)});
-                min_button.config_size(MWM_CONFIG_x, {(width - (BUTTON_SIZE * 3) - BORDER_SIZE)});
-                border.left.config_size(MWM_CONFIG_height, {(height - (BORDER_SIZE * 2))});
-                border.right.config_size(MWM_CONFIG_x | MWM_CONFIG_height, {(width - BORDER_SIZE), (height - (BORDER_SIZE * 2))});
-                border.top.config_size(MWM_CONFIG_width, {(width - (BORDER_SIZE * 2))});
-                border.bottom.config_size(MWM_CONFIG_y | MWM_CONFIG_width, {(height - BORDER_SIZE), (width - (BORDER_SIZE * 2))});
-                border.top_right.config_size(MWM_CONFIG_x, {(width - BORDER_SIZE)});
-                border.bottom_right.config_size(MWM_CONFIG_x | MWM_CONFIG_y, {(width - BORDER_SIZE), (height - BORDER_SIZE)});
-                border.bottom_left.config_size(MWM_CONFIG_y, {(height - BORDER_SIZE)});
+                frame.width_height(width, height);
+                titlebar.width((width - (BORDER_SIZE * 2)));
+                close_button.x((width - BUTTON_SIZE - BORDER_SIZE));
+                max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
+                min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
+                border.left.height((height - (BORDER_SIZE * 2)));
+                border.right.x_height((width - BORDER_SIZE), (height - (BORDER_SIZE * 2)));
+                border.top.width((width - (BORDER_SIZE * 2)));
+                border.bottom.y_width((height - BORDER_SIZE), (width - (BORDER_SIZE * 2)));
+                border.top_right.x((width - BORDER_SIZE));
+                border.bottom_right.x_y((width - BORDER_SIZE), (height - BORDER_SIZE));
+                border.bottom_left.y((height - BORDER_SIZE));
                 xcb_flush(conn);
             }
         ;

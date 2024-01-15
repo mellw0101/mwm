@@ -54,7 +54,6 @@
 #include "client.hpp"
 #include "desktop.hpp"
 #include "pointer.hpp"
-#include "structs.hpp"
 
 class Key_Codes
 {
@@ -210,8 +209,8 @@ class Window_Manager
                 _iter();
                 _screen();
                 root = screen->root;
-                root.config_size(MWM_CONFIG_width, {screen->width_in_pixels});
-                root.config_size(MWM_CONFIG_height, {screen->height_in_pixels});
+                root.width(screen->width_in_pixels);
+                root.height(screen->height_in_pixels);
                 setSubstructureRedirectMask();
                 configure_root();
                 _ewmh();
@@ -501,7 +500,7 @@ class Window_Manager
                     return;
                 }
 
-                c->win.config_size(MWM_CONFIG_x | MWM_CONFIG_y | MWM_CONFIG_width | MWM_CONFIG_height, {static_cast<uint32_t>(c->x), static_cast<uint32_t>(c->y), c->width, c->height});
+                c->win.x_y_width_height(c->x, c->y, c->width, c->height);
                 c->win.map();
                 c->win.grab_button(
                 {
