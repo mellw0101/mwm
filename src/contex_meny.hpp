@@ -84,6 +84,10 @@ class context_menu
         }
     ;
     public: // public methods
+        void init()
+        {
+            configure_events();
+        }
         void show()
         {
             size_pos.x = pointer.x();
@@ -104,7 +108,6 @@ class context_menu
             context_window.map();
             context_window.raise();
             make_entries();
-            configure_events();
         }
         void add_entry(const char * name, std::function<void()> action)
         {

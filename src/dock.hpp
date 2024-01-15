@@ -151,6 +151,7 @@ class Dock
             configure_context_menu();
             make_apps();
             add_app_dialog_window.init();
+            context_menu.init();
         }
         void add_app(const char * app_name)
         {

@@ -164,6 +164,7 @@ class Window_Manager
                         launcher.program((char *) "/usr/bin/konsole");
                     }
                 );
+                context_menu->init();
             }
             void launch_program(char * program)
             {
