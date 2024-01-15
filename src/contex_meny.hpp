@@ -141,46 +141,6 @@ class context_menu
             context_window.unmap();
             context_window.kill();
         }
-        void run()
-        {
-            xcb_generic_event_t * ev;
-            bool shouldContinue = true;
-
-            while (shouldContinue) 
-            {
-                ev = xcb_wait_for_event(conn);
-                if (!ev) 
-                {
-                    continue;
-                }
-
-                switch (ev->response_type & ~0x80)
-                {
-                    case XCB_BUTTON_PRESS:
-                    {
-                        const auto & e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
-                        if (e->detail == L_MOUSE_BUTTON)
-                        {
-                            run_action(& e->event);
-                            shouldContinue = false;
-                            hide();
-                        }
-                        break;
-                    }
-                    case XCB_ENTER_NOTIFY: 
-                    {
-                        const auto * e = reinterpret_cast<const xcb_enter_notify_event_t *>(ev);
-                        if (e->event == screen->root)
-                        {
-                            shouldContinue = false;
-                            hide();
-                        } 
-                        break;
-                    }
-                }
-                free(ev); 
-            }
-        }
         void configure_events()
         {
             event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) 
