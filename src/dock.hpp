@@ -26,7 +26,7 @@
 
 class add_app_dialog_window
 {
-    public:
+    public: // variabels
         window main_window;
         window search_window;
         client * c;
@@ -35,7 +35,7 @@ class add_app_dialog_window
         Event_Handler ev_handler;
         Logger log;
     ;
-    public:
+    public: // methods
         void
         init()
         {
@@ -50,7 +50,7 @@ class add_app_dialog_window
             create_search_window();
         }
     ;
-    private:
+    private: // functions
         void
         hide()
         {
@@ -89,10 +89,10 @@ class add_app_dialog_window
             search_window.grab_button({ { L_MOUSE_BUTTON, NULL } });
             search_window.grab_keys
             ({ 
-                { Q,      NULL        },
-                { DELETE, NULL        },
-                { T,      NULL        },
-                { Q,      SHIFT | ALT }
+                { Q,            NULL        },
+                { XK_BackSpace, NULL        },
+                { T,            NULL        },
+                { Q,            SHIFT | ALT }
             });
             
             search_window.raise();
