@@ -3379,19 +3379,19 @@ class Event
         void
         test()
         {
-            wm->event_handler.setEventCallback(XCB_KEY_PRESS, [&](Ev ev){ key_press_handler(ev); });
-            wm->event_handler.setEventCallback(XCB_MAP_NOTIFY, [&](Ev ev){ map_notify_handler(ev); });
-            wm->event_handler.setEventCallback(XCB_MAP_REQUEST, [&](Ev ev){ map_req_handler(ev); });
-            wm->event_handler.setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev){ button_press_handler(ev); });
-            wm->event_handler.setEventCallback(XCB_CONFIGURE_REQUEST, [&](Ev ev){ configure_request_handler(ev); });
-            wm->event_handler.setEventCallback(XCB_FOCUS_IN, [&](Ev ev){ focus_in_handler(ev); });
-            wm->event_handler.setEventCallback(XCB_FOCUS_OUT, [&](Ev ev){ focus_out_handler(ev); });
-            wm->event_handler.setEventCallback(XCB_DESTROY_NOTIFY, [&](Ev ev){ destroy_notify_handler(ev); });
-            wm->event_handler.setEventCallback(XCB_UNMAP_NOTIFY, [&](Ev ev){ unmap_notify_handler(ev); });
-            wm->event_handler.setEventCallback(XCB_REPARENT_NOTIFY, [&](Ev ev){ reparent_notify_handler(ev); });
-            wm->event_handler.setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev){ enter_notify_handler(ev); });
-            wm->event_handler.setEventCallback(XCB_LEAVE_NOTIFY, [&](Ev ev){ leave_notify_handler(ev); });
-            wm->event_handler.setEventCallback(XCB_MOTION_NOTIFY, [&](Ev ev){ motion_notify_handler(ev); });
+            event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev){ key_press_handler(ev); });
+            event_handler->setEventCallback(XCB_MAP_NOTIFY, [&](Ev ev){ map_notify_handler(ev); });
+            event_handler->setEventCallback(XCB_MAP_REQUEST, [&](Ev ev){ map_req_handler(ev); });
+            event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev){ button_press_handler(ev); });
+            event_handler->setEventCallback(XCB_CONFIGURE_REQUEST, [&](Ev ev){ configure_request_handler(ev); });
+            event_handler->setEventCallback(XCB_FOCUS_IN, [&](Ev ev){ focus_in_handler(ev); });
+            event_handler->setEventCallback(XCB_FOCUS_OUT, [&](Ev ev){ focus_out_handler(ev); });
+            event_handler->setEventCallback(XCB_DESTROY_NOTIFY, [&](Ev ev){ destroy_notify_handler(ev); });
+            event_handler->setEventCallback(XCB_UNMAP_NOTIFY, [&](Ev ev){ unmap_notify_handler(ev); });
+            event_handler->setEventCallback(XCB_REPARENT_NOTIFY, [&](Ev ev){ reparent_notify_handler(ev); });
+            event_handler->setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev){ enter_notify_handler(ev); });
+            event_handler->setEventCallback(XCB_LEAVE_NOTIFY, [&](Ev ev){ leave_notify_handler(ev); });
+            event_handler->setEventCallback(XCB_MOTION_NOTIFY, [&](Ev ev){ motion_notify_handler(ev); });
         }
     ;
     private: // variabels 
@@ -4062,7 +4062,7 @@ run()
     //     free(ev);
     // }
     event.test();
-    wm->event_handler.run();
+    event_handler->run();
 }
 
 void
