@@ -148,7 +148,6 @@ class Dock
     public: // constructor
         Dock() {}
     ;
-
     public: // public variables 
         context_menu context_menu;
         window main_window;
@@ -157,7 +156,6 @@ class Dock
 
         add_app_dialog_window add_app_dialog_window;
     ;
-
     public: // public methods 
         void
         init()
@@ -179,14 +177,12 @@ class Dock
             apps.push_back(app_name);
         }
     ;
-
     private: // private variables
         std::vector<const char *> apps;
         Launcher launcher;
         Logger log;
         File file;
     ;
-
     private: // private methods
         void
         calc_size_pos()

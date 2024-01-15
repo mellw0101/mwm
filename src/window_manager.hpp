@@ -171,6 +171,44 @@ class Key_Codes
             }
 
         }
+
+        void
+        init()
+        {
+            keysyms = xcb_key_symbols_alloc(conn);
+            if (keysyms)
+            {
+                std::map<uint32_t, xcb_keycode_t *> key_map = 
+                {
+                    { T      , &t       },
+                    { Q      , &q       },
+                    { F      , &f       },
+                    { F11    , &f11     },
+                    { N_1    , &n_1     },
+                    { N_2    , &n_2     },
+                    { N_3    , &n_3     },
+                    { N_4    , &n_4     },
+                    { N_5    , &n_5     },
+                    { R_ARROW, &r_arrow },
+                    { L_ARROW, &l_arrow },
+                    { U_ARROW, &u_arrow },
+                    { D_ARROW, &d_arrow },
+                    { TAB,     &tab     },
+                    { K,       &k       },
+                    { DELETE,  &_delete }
+                };
+                
+                for (auto &pair : key_map) 
+                {
+                    xcb_keycode_t *keycode = xcb_key_symbols_get_keycode(keysyms, pair.first);
+                    if (keycode) 
+                    {
+                        *(pair.second) = *keycode;
+                        free(keycode);
+                    }
+                }
+            }
+        }
     ;
     public: // variabels
         xcb_keycode_t t{}, q{}, f{}, f11{}, n_1{}, n_2{}, n_3{}, n_4{}, n_5{}, r_arrow{}, l_arrow{}, u_arrow{}, d_arrow{}, tab{}, k{}, _delete{}; 
@@ -215,7 +253,7 @@ class Window_Manager
                 configure_root();
                 _ewmh();
 
-                key_codes.initialize_keysyms();
+                key_codes.init();
 
                 create_new_desktop(1);
                 create_new_desktop(2);
