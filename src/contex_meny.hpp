@@ -82,8 +82,7 @@ class context_menu
         }
     ;
     public: // public methods
-        void
-        show()
+        void show()
         {
             size_pos.x = pointer.x();
             size_pos.y = pointer.y();
@@ -105,9 +104,7 @@ class context_menu
             make_entries();
             run();
         }
-
-        void 
-        add_entry(const char * name, std::function<void()> action)
+        void add_entry(const char * name, std::function<void()> action)
         {
             Entry entry;
             entry.add_name(name);
@@ -126,8 +123,7 @@ class context_menu
         Launcher launcher;
     ;
     private: // private methods
-        void
-        create_dialog_win()
+        void create_dialog_win()
         {
             context_window.create_default(screen->root, 0, 0, size_pos.width, size_pos.height);
             uint32_t mask = XCB_EVENT_MASK_FOCUS_CHANGE | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY | XCB_EVENT_MASK_POINTER_MOTION;
@@ -135,16 +131,12 @@ class context_menu
             context_window.set_backround_color(DARK_GREY);
             context_window.raise();
         }
-        
-        void
-        hide()
+        void hide()
         {
             context_window.unmap();
             context_window.kill();
         }
-        
-        void
-        run()
+        void run()
         {
             xcb_generic_event_t * ev;
             bool shouldContinue = true;
@@ -184,9 +176,11 @@ class context_menu
                 free(ev); 
             }
         }
-
-        void
-        run_action(const xcb_window_t * w) 
+        void configure_events()
+        {
+            
+        }
+        void run_action(const xcb_window_t * w) 
         {
             for (const auto & entry : entries)
             {
@@ -196,9 +190,7 @@ class context_menu
                 }
             }
         }
-
-        void
-        make_entries()
+        void make_entries()
         {
             int y = 0;
             for (auto & entry : entries)

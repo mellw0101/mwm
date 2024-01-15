@@ -90,7 +90,7 @@ class add_app_dialog_window
         }
         void configure_events()
         {
-            wm->event_handler.setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev)
+            event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev)
             {
                 const auto * e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
                 if (e->event == search_window)
@@ -101,7 +101,7 @@ class add_app_dialog_window
                 }
             });
 
-            wm->event_handler.setEventCallback(XCB_KEY_PRESS, [&](Ev ev) 
+            event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev) 
             {
                 const auto * e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
                 if (e->event == search_window)
@@ -130,7 +130,6 @@ class add_app_dialog_window
         std::string search_string = "";
     ;
 };
-
 class Dock
 {
     public: // constructor
@@ -145,8 +144,7 @@ class Dock
         add_app_dialog_window add_app_dialog_window;
     ;
     public: // public methods 
-        void
-        init()
+        void init()
         {
             main_window.create_default(screen->root, 0, 0, width, height);
             setup_dock();
@@ -154,9 +152,7 @@ class Dock
             make_apps();
             add_app_dialog_window.init();
         }
-
-        void 
-        add_app(const char * app_name)
+        void add_app(const char * app_name)
         {
             if (!file.check_if_binary_exists(app_name))
             {
@@ -172,8 +168,7 @@ class Dock
         File file;
     ;
     private: // private methods
-        void
-        calc_size_pos()
+        void calc_size_pos()
         {
             int num_of_buttons = buttons.size();
 
@@ -190,18 +185,14 @@ class Dock
             main_window.x_y_width_height(x, y, calc_width, height);
             xcb_flush(conn);
         }
-
-        void
-        setup_dock()
+        void setup_dock()
         {
             main_window.grab_button({{R_MOUSE_BUTTON, NULL}});
             main_window.set_backround_color(DARK_GREY);
             calc_size_pos();
             main_window.map();
         }
-
-        void
-        configure_context_menu()
+        void configure_context_menu()
         {
             context_menu.add_entry("Add app", [this] () { add_app_dialog_window.show(); });
             context_menu.add_entry("test with nullptr", nullptr);
@@ -210,9 +201,7 @@ class Dock
             context_menu.add_entry("test with nullptr", nullptr);
             context_menu.add_entry("test with nullptr", nullptr);
         }
-
-        void
-        make_apps()
+        void make_apps()
         {
             for (const auto & app : apps)
             {

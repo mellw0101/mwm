@@ -8,7 +8,7 @@
 #include "Log.hpp"
 #include "window.hpp"
 #include "file.hpp"
-#include "window_manager.hpp"
+#include "event_handler.hpp"
 
 class button
 {
@@ -42,7 +42,7 @@ class button
         add_event(std::function<void(Ev ev)> action)
         {
             ev_a = action;
-            wm->event_handler.setEventCallback(XCB_BUTTON_PRESS, ev_a);
+            event_handler->setEventCallback(XCB_BUTTON_PRESS, ev_a);
         }
 
         void 

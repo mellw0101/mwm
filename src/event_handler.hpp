@@ -114,4 +114,6 @@ class Event_Handler_test
     ;
 };
 
+static Event_Handler * event_handler;
+
 #endif // EVENT_HANDLER_HPP

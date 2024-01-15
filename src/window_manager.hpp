@@ -120,7 +120,6 @@ class Window_Manager
     public: // variabels 
         context_menu * context_menu = nullptr;
         window root;
-        Event_Handler event_handler;
         Launcher launcher;
         std::vector<client *> client_list;
         std::vector<desktop *> desktop_list;
@@ -147,6 +146,8 @@ class Window_Manager
                 _ewmh();
 
                 key_codes.init();
+
+                event_handler = new Event_Handler();
 
                 create_new_desktop(1);
                 create_new_desktop(2);
