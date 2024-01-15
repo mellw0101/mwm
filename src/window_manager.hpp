@@ -67,8 +67,7 @@ class Key_Codes
         }
     ;
     public: // methods
-        void
-        init()
+        void init()
         {
             keysyms = xcb_key_symbols_alloc(conn);
             if (keysyms)
@@ -135,8 +134,7 @@ class Window_Manager
     ;
     public: // methods 
         public: // main methods 
-            void
-            init()
+            void init()
             {
                 _conn(nullptr, nullptr);
                 _setup();
@@ -167,9 +165,7 @@ class Window_Manager
                     }
                 );
             }
-
-            void
-            launch_program(char * program)
+            void launch_program(char * program)
             {
                 if (fork() == 0) 
                 {
@@ -177,9 +173,7 @@ class Window_Manager
                     execvp(program, (char *[]) { program, NULL });
                 }
             }
-
-            void
-            quit(const int & status)
+            void quit(const int & status)
             {
                 xcb_flush(conn);
                 delete_client_vec(client_list);
@@ -191,8 +185,7 @@ class Window_Manager
         ;
         public: // client methods 
             public: // focus methods 
-                void 
-                focus_client(client * c)
+                void focus_client(client * c)
                 {
                     if (!c)
                     {
@@ -203,9 +196,7 @@ class Window_Manager
                     focused_client = c;
                     c->focus();
                 }
-
-                void
-                cycle_focus()
+                void cycle_focus()
                 {
                     bool focus = false;
                     for (auto & c : client_list)
@@ -228,8 +219,7 @@ class Window_Manager
                 }
             ;
             public: // client fetch methods
-                client * 
-                client_from_window(const xcb_window_t * window) 
+                client * client_from_window(const xcb_window_t * window) 
                 {
                     for (const auto & c : client_list) 
                     {
@@ -240,9 +230,7 @@ class Window_Manager
                     }
                     return nullptr;
                 }
-
-                client * 
-                client_from_any_window(const xcb_window_t * window) 
+                client * client_from_any_window(const xcb_window_t * window) 
                 {
                     for (const auto & c : client_list) 
                     {
@@ -266,9 +254,7 @@ class Window_Manager
                     }
                     return nullptr;
                 }
-
-                client *
-                client_from_pointer(const int & prox)
+                client * client_from_pointer(const int & prox)
                 {
                     const uint32_t & x = pointer.x();
                     const uint32_t & y = pointer.y();
@@ -300,9 +286,7 @@ class Window_Manager
                     }
                     return nullptr;
                 }
-
-                std::map<client *, edge>
-                get_client_next_to_client(client * c, edge c_edge)
+                std::map<client *, edge> get_client_next_to_client(client * c, edge c_edge)
                 {
                     std::map<client *, edge> map;
                     for (client * c2 : cur_d->current_clients)
@@ -352,9 +336,7 @@ class Window_Manager
                     map[nullptr] = edge::NONE;
                     return map;
                 }
-
-                edge
-                get_client_edge_from_pointer(client * c, const int & prox)
+                edge get_client_edge_from_pointer(client * c, const int & prox)
                 {
                     const uint32_t & x = pointer.x();
                     const uint32_t & y = pointer.y();
@@ -423,9 +405,7 @@ class Window_Manager
                     return edge::NONE;
                 }
             ;
-
-            void 
-            manage_new_client(const uint32_t & window)
+            void manage_new_client(const uint32_t & window)
             {
                 client * c = make_client(window);
                 if (!c)
@@ -470,9 +450,7 @@ class Window_Manager
                 c->update();
                 focus_client(c);
             }
-
-            client *
-            make_internal_client(window window)
+            client * make_internal_client(window window)
             {
                 client * c = new client;
                 c->win = window;
@@ -488,9 +466,7 @@ class Window_Manager
 
                 return c;
             }
-
-            int
-            send_sigterm_to_client(client * c)
+            int send_sigterm_to_client(client * c)
             {
                 if (!c)
                 {
@@ -733,19 +709,15 @@ class Window_Manager
                 }
             }
         ;
-
-        int
-        start_screen_window()
+        int start_screen_window()
         {
             start_window.create_default(root, 0, 0, 0, 0);
             start_window.set_backround_color(DARK_GREY);
             start_window.map();
             return 0;
         }
-
         private: // delete functions 
-            void
-            delete_client_vec(std::vector<client *> & vec)
+            void delete_client_vec(std::vector<client *> & vec)
             {
                 for (client * c : vec)
                 {
@@ -757,9 +729,7 @@ class Window_Manager
 
                 std::vector<client *>().swap(vec);
             }
-
-            void
-            delete_desktop_vec(std::vector<desktop *> & vec)
+            void delete_desktop_vec(std::vector<desktop *> & vec)
             {
                 for (desktop * d : vec)
                 {
@@ -771,10 +741,8 @@ class Window_Manager
 
                 std::vector<desktop *>().swap(vec);
             }
-
-            template <typename Type>
-            static void 
-            delete_ptr_vector(std::vector<Type *>& vec) 
+            template <typename Type> 
+            static void delete_ptr_vector(std::vector<Type *>& vec) 
             {
                 for (Type * ptr : vec) 
                 {
@@ -784,17 +752,13 @@ class Window_Manager
 
                 std::vector<Type *>().swap(vec);
             }
-
-            void
-            remove_client(client * c)
+            void remove_client(client * c)
             {
                 client_list.erase(std::remove(client_list.begin(), client_list.end(), c), client_list.end());
                 cur_d->current_clients.erase(std::remove(cur_d->current_clients.begin(), cur_d->current_clients.end(), c), cur_d->current_clients.end());
                 delete c;
             }
-
-            void
-            remove_client_from_vector(client * c, std::vector<client *> & vec)
+            void remove_client_from_vector(client * c, std::vector<client *> & vec)
             {
                 if (!c)
                 {
@@ -805,8 +769,7 @@ class Window_Manager
             }
         ;
         private: // client functions
-            client * 
-            make_client(const uint32_t & window) 
+            client * make_client(const uint32_t & window) 
             {
                 client * c = new client;
                 if (!c) 

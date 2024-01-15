@@ -36,29 +36,23 @@ class add_app_dialog_window
         Logger log;
     ;
     public: // methods
-        void
-        init()
+        void init()
         {
             create();
             configure_events();
         }
-
-        void
-        show()
+        void show()
         {
             create_client();
             create_search_window();
         }
     ;
     private: // functions
-        void
-        hide()
+        void hide()
         {
             wm->send_sigterm_to_client(c);
         }
-
-        void
-        create()
+        void create()
         {
             main_window.create_default(screen->root, pointer.x(), pointer.y(), 300, 200);
             uint32_t mask =  XCB_EVENT_MASK_STRUCTURE_NOTIFY;
@@ -67,9 +61,7 @@ class add_app_dialog_window
             main_window.grab_keys({ { Q, SHIFT | ALT } });
             main_window.set_backround_color(RED);
         }
-
-        void
-        create_client()
+        void create_client()
         {
             main_window.x_y(pointer.x() - (main_window.width() / 2), pointer.y() - (main_window.height() / 2));
             c = wm->make_internal_client(main_window);
@@ -77,9 +69,7 @@ class add_app_dialog_window
             main_window.map();
             c->map();
         }
-
-        void
-        create_search_window()
+        void create_search_window()
         {
             search_window.create_default(main_window, DOCK_BORDER, DOCK_BORDER, (main_window.width() - (DOCK_BORDER * 2)), 20);
             search_window.set_backround_color(WHITE);
@@ -98,9 +88,7 @@ class add_app_dialog_window
             search_window.raise();
             search_window.focus_input();
         }
-
-        void
-        configure_events()
+        void configure_events()
         {
             wm->event_handler.setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev)
             {
