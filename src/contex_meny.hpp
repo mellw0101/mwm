@@ -5,11 +5,13 @@
 #include <cstdint>
 #include <functional>
 #include <vector>
+#include <xcb/xproto.h>
 
 #include "launcher.hpp"
 #include "structs.hpp"
 #include "window.hpp"
 #include "pointer.hpp"
+#include "event_handler.hpp"
 
 class Entry 
 {
@@ -102,7 +104,7 @@ class context_menu
             context_window.map();
             context_window.raise();
             make_entries();
-            run();
+            configure_events();
         }
         void add_entry(const char * name, std::function<void()> action)
         {
@@ -178,7 +180,24 @@ class context_menu
         }
         void configure_events()
         {
-            
+            event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) 
+            {
+                const auto & e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
+                if (e->detail == L_MOUSE_BUTTON)
+                {
+                    run_action(& e->event);
+                    hide();
+                }
+            });
+
+            event_handler->setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev)
+            {
+                const auto * e = reinterpret_cast<const xcb_enter_notify_event_t *>(ev);
+                if (e->event == screen->root)
+                {
+                    hide();
+                } 
+            });
         }
         void run_action(const xcb_window_t * w) 
         {
