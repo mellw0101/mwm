@@ -884,11 +884,40 @@ class window
                     update(x, y, width, _height);
                 }
 
-                void
-                x_y_height(const uint32_t & x, const uint32_t & y, const uint32_t & height)
+                void 
+                config_size(uint32_t mask, const std::vector<uint32_t> & values) 
                 {
-                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT, {x, y, height});
-                    update(x, y, _width, height);
+                    if (values.empty()) 
+                    {
+                        log_error("values vector is empty");
+                        return;
+                    }
+
+                    xcb_configure_window
+                    (
+                        conn,
+                        _window,
+                        mask,
+                        values.data()
+                    );
+                }
+                
+                void 
+                config_window(uint32_t mask, const std::vector<uint32_t> & values) 
+                {
+                    if (values.empty()) 
+                    {
+                        log_error("values vector is empty");
+                        return;
+                    }
+
+                    xcb_configure_window
+                    (
+                        conn,
+                        _window,
+                        mask,
+                        values.data()
+                    );
                 }
             ;
 
@@ -1112,24 +1141,6 @@ class window
                     {
                         static_cast<const uint32_t &>(value)
                     }
-                );
-            }
-
-            void 
-            config_window(uint32_t mask, const std::vector<uint32_t> & values) 
-            {
-                if (values.empty()) 
-                {
-                    log_error("values vector is empty");
-                    return;
-                }
-
-                xcb_configure_window
-                (
-                    conn,
-                    _window,
-                    mask,
-                    values.data()
                 );
             }
         ;

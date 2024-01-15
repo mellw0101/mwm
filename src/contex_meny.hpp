@@ -99,7 +99,7 @@ class context_menu
                 size_pos.x = (screen->width_in_pixels - size_pos.width);
             }
 
-            context_window.x_y_height((size_pos.x - BORDER_SIZE), (size_pos.y - BORDER_SIZE), height);
+            context_window.config_size(MWM_CONFIG_x | MWM_CONFIG_y | MWM_CONFIG_height, {(size_pos.x - static_cast<uint32_t>(BORDER_SIZE)), (size_pos.y - static_cast<uint32_t>(BORDER_SIZE)), height});
             context_window.map();
             context_window.raise();
             make_entries();
@@ -114,6 +114,7 @@ class context_menu
             entry.add_action(action);
             entries.push_back(entry);
         }
+
     ;
     private: // private variables
         window context_window;

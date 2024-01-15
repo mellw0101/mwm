@@ -12,7 +12,7 @@ using Ev = const xcb_generic_event_t *;
 
 class Event_Handler
 {
-    public:
+    public: // methods
         using EventCallback = std::function<void(const xcb_generic_event_t*)>;
 
         void run() 
@@ -52,8 +52,7 @@ class Event_Handler
             eventCallbacks[eventType].push_back(std::move(callback));
         }
     ;
-
-    private:
+    private: // variables
         std::unordered_map<uint8_t, std::vector<EventCallback>> eventCallbacks;
         bool shouldContinue = false;
     ;
