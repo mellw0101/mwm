@@ -45,7 +45,7 @@
 #define W       0x77
 #define S       0x73
 #define R       0x72
-#define _Y       0x79
+#define _Y      0x79
 #define U       0x75
 #define O       0x6f
 #define P       0x70
@@ -53,10 +53,10 @@
 #define J       0x6a
 #define V       0x76
 #define L       0x6c
-#define _N       0x6e
+#define _N      0x6e
 #define M       0x6d
 #define Z       0x7a
-#define _X       0x78
+#define _X      0x78
 #define S       0x73
 #define G       0x67
 #define H       0x68

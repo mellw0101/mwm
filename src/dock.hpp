@@ -78,7 +78,8 @@ class add_app_dialog_window
             search_window.map();
             search_window.grab_button({ { L_MOUSE_BUTTON, NULL } });
             search_window.grab_keys
-            ({ 
+            ({
+                { A,            NULL        },
                 { Q,            NULL        },
                 { XK_BackSpace, NULL        },
                 { T,            NULL        },
@@ -126,7 +127,7 @@ class add_app_dialog_window
             });
         }
     ;
-    private:
+    private: // variable
         std::string search_string = "";
     ;
 };

@@ -34,8 +34,7 @@ class File
         File() {}
     ;
     public: // methods
-        std::string
-        find_png_icon(std::vector<const char *> dirs, const char * app)
+        std::string find_png_icon(std::vector<const char *> dirs, const char * app)
         {
             std::string name = app;
             name += ".png";
@@ -53,9 +52,7 @@ class File
             }
             return "";
         }
-
-        bool
-        check_if_binary_exists(const char * name)
+        bool check_if_binary_exists(const char * name)
         {
             std::vector<const char *> dirs = split_$PATH_into_vector();
             return check_if_file_exists_in_DIRS(dirs, name);
@@ -66,8 +63,7 @@ class File
         string_tokenizer st;
     ;
     private: // functions
-        bool
-        check_if_file_exists_in_DIRS(std::vector<const char *> dirs, const char * app)
+        bool check_if_file_exists_in_DIRS(std::vector<const char *> dirs, const char * app)
         {
             std::string name = app;
 
@@ -84,9 +80,7 @@ class File
             }
             return false;
         }
-
-        std::vector<std::string>
-        list_dir_to_vector(const char * directoryPath) 
+        std::vector<std::string> list_dir_to_vector(const char * directoryPath) 
         {
             std::vector<std::string> files;
             DIR* dirp = opendir(directoryPath);
@@ -101,16 +95,12 @@ class File
             }
             return files;
         }
-
-        std::vector<const char *>
-        split_$PATH_into_vector()
+        std::vector<const char *> split_$PATH_into_vector()
         {
             str $PATH(get_env_var("PATH"));
             return st.tokenize($PATH.c_str(), ":");
         }
-
-        const char *
-        get_env_var(const char * var)
+        const char * get_env_var(const char * var)
         {
             const char * _var = getenv(var);
             if (_var == nullptr)

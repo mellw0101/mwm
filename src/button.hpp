@@ -15,15 +15,12 @@ class button
     public: // constructor 
         button() {}
     ;
-
     public: // public variables 
         window window;
         const char * name;
     ;
-
     public: // public methods 
-        void
-        create(const uint32_t & parent_window, const int16_t & x, const int16_t & y, const uint16_t & width, const uint16_t & height, COLOR color)
+        void create(const uint32_t & parent_window, const int16_t & x, const int16_t & y, const uint16_t & width, const uint16_t & height, COLOR color)
         {
             window.create_default(parent_window, x, y, width, height);
             window.set_backround_color(color);
@@ -31,28 +28,20 @@ class button
             window.map();
             xcb_flush(conn);
         }
-
-        void
-        action(std::function<void()> action)
+        void action(std::function<void()> action)
         {
             button_action = action;
         }
-        
-        void
-        add_event(std::function<void(Ev ev)> action)
+        void add_event(std::function<void(Ev ev)> action)
         {
             ev_a = action;
             event_handler->setEventCallback(XCB_BUTTON_PRESS, ev_a);
         }
-
-        void 
-        activate() const 
+        void activate() const 
         {
             button_action();
         }
-
-        void
-        put_icon_on_button()
+        void put_icon_on_button()
         {
             std::string icon_path = file.find_png_icon
             (
@@ -73,7 +62,6 @@ class button
             window.set_backround_png(icon_path.c_str());
         }
     ;
-
     private: // private variables 
         std::function<void()> button_action;
         std::function<void(Ev ev)> ev_a;

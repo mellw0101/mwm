@@ -12,29 +12,22 @@ class buttons
         std::vector<button> list;
     ;
     public: // public methods
-        void
-        add(const char * name, std::function<void()> action)
+        void add(const char * name, std::function<void()> action)
         {
             button button;
             button.name = name;
             button.action(action);
             list.push_back(button);
         }
-
-        int
-        size()
+        int size()
         {
             return list.size();
         }
-
-        int
-        index()
+        int index()
         {
             return list.size() - 1;
         }
-
-        void
-        run_action(const uint32_t & window)
+        void run_action(const uint32_t & window)
         {
             for (const auto & button : list) 
             {

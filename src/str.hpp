@@ -95,8 +95,7 @@ class string_tokenizer
         }
     ;
     public: // methods
-        const fast_vector &
-        tokenize(const char* input, const char* delimiter)
+        const fast_vector & tokenize(const char* input, const char* delimiter)
         {
             tokens.clear();
 
@@ -113,15 +112,11 @@ class string_tokenizer
             }
             return tokens;
         }
-
-        const fast_vector & 
-        get_tokens() const 
+        const fast_vector & get_tokens() const 
         {
             return tokens;
         }
-
-        void
-        clear()
+        void clear()
         {
             tokens.clear();
         }

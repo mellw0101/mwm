@@ -74,15 +74,16 @@ class Key_Codes
             {
                 std::map<uint32_t, xcb_keycode_t *> key_map = 
                 {
-                    { T      ,      &t       },
-                    { Q      ,      &q       },
-                    { F      ,      &f       },
-                    { F11    ,      &f11     },
-                    { N_1    ,      &n_1     },
-                    { N_2    ,      &n_2     },
-                    { N_3    ,      &n_3     },
-                    { N_4    ,      &n_4     },
-                    { N_5    ,      &n_5     },
+                    { A,            &a       },
+                    { T,            &t       },
+                    { Q,            &q       },
+                    { F,            &f       },
+                    { F11,          &f11     },
+                    { N_1,          &n_1     },
+                    { N_2,          &n_2     },
+                    { N_3,          &n_3     },
+                    { N_4,          &n_4     },
+                    { N_5,          &n_5     },
                     { R_ARROW,      &r_arrow },
                     { L_ARROW,      &l_arrow },
                     { U_ARROW,      &u_arrow },
@@ -106,7 +107,25 @@ class Key_Codes
         }
     ;
     public: // variabels
-        xcb_keycode_t t{}, q{}, f{}, f11{}, n_1{}, n_2{}, n_3{}, n_4{}, n_5{}, r_arrow{}, l_arrow{}, u_arrow{}, d_arrow{}, tab{}, k{}, _delete{}; 
+        xcb_keycode_t 
+            t{}, 
+            q{}, 
+            f{}, 
+            f11{}, 
+            n_1{}, 
+            n_2{}, 
+            n_3{}, 
+            n_4{}, 
+            n_5{}, 
+            r_arrow{}, 
+            l_arrow{}, 
+            u_arrow{}, 
+            d_arrow{}, 
+            tab{}, 
+            k{}, 
+            _delete{},
+            a{}
+        ;
     ;
     private: // variabels
         xcb_key_symbols_t * keysyms;
