@@ -76,9 +76,7 @@
 #define DOT     0x2e
 #define SLASH   0x2f
 #define ESC     0xff1b
-#define BACK    0xff08
-#define DELETE  0x7f
-
+#define DELETE  0xff08
 
 /* BUTTON DEFENITIONS */
 #define L_MOUSE_BUTTON XCB_BUTTON_INDEX_1

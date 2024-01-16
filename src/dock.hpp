@@ -108,8 +108,8 @@ class add_app_dialog_window
 
                 { SPACE_BAR,    NULL        },
                 { ENTER,        NULL        },
+                { DELETE,       NULL        },
 
-                { XK_BackSpace, NULL        },
                 { Q,            SHIFT | ALT }
             });
             

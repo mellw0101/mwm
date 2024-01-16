@@ -104,6 +104,7 @@ class Key_Codes
 
                     { SPACE_BAR,    &space_bar },
                     { ENTER,        &enter     },
+                    { DELETE,       &_delete   },
 
                     { F11,          &f11       },
                     { N_1,          &n_1       },
@@ -118,7 +119,6 @@ class Key_Codes
                     { TAB,          &tab       },
                     { K,            &k         },
 
-                    { XK_BackSpace, &_delete   },
                 };
                 
                 for (auto &pair : key_map) 
