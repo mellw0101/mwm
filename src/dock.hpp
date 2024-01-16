@@ -145,7 +145,6 @@ class add_app_dialog_window
                         {
                             search_string += "c"; 
                         }
-                        return;
                     }
                     if (e->detail == wm->key_codes.d) 
                     {
