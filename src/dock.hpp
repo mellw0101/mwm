@@ -82,6 +82,12 @@ class add_app_dialog_window
                 { A,            NULL        },
                 { B,            NULL        },
                 { C,            NULL        },
+                { D,            NULL        },
+                { E,            NULL        },
+                { F,            NULL        },
+                { G,            NULL        },
+                { H,            NULL        },
+                { I,            NULL        },
                 { Q,            NULL        },
                 { XK_BackSpace, NULL        },
                 { T,            NULL        },
@@ -112,6 +118,11 @@ class add_app_dialog_window
                     if (e->detail == wm->key_codes.a) { search_string += "a"; }
                     if (e->detail == wm->key_codes.b) { search_string += "b"; }
                     if (e->detail == wm->key_codes.c) { search_string += "c"; }
+                    if (e->detail == wm->key_codes.d) { search_string += "d"; }
+                    if (e->detail == wm->key_codes.e) { search_string += "e"; }
+                    if (e->detail == wm->key_codes.f) { search_string += "f"; }
+                    if (e->detail == wm->key_codes.g) { search_string += "g"; }
+                    if (e->detail == wm->key_codes.h) { search_string += "h"; }
                     if (e->detail == wm->key_codes.q) { search_string += "q"; }
                     if (e->detail == wm->key_codes.t) { search_string += "t"; }
 
