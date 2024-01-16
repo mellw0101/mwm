@@ -88,6 +88,7 @@ class add_app_dialog_window
                 { SPACE_BAR,    NULL        },
                 { ENTER,        NULL        },
                 { DELETE,       NULL        },
+                { DELETE,       SHIFT       },
 
                 { Q,            SHIFT | ALT }
             });
