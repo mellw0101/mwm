@@ -648,6 +648,38 @@ class window
 
                 xcb_flush(conn); 
             }
+            void grab_keys_for_typing()
+            {
+                grab_keys(
+                {
+                    { A,            NULL        },
+                    { B,            NULL        },
+                    { C,            NULL        },
+                    { D,            NULL        },
+                    { E,            NULL        },
+                    { F,            NULL        },
+                    { G,            NULL        },
+                    { H,            NULL        },
+                    { I,            NULL        },
+                    { J,            NULL        },
+                    { K,            NULL        },
+                    { L,            NULL        },
+                    { M,            NULL        },
+                    { _N,           NULL        },
+                    { O,            NULL        },
+                    { P,            NULL        },
+                    { Q,            NULL        },
+                    { R,            NULL        },
+                    { S,            NULL        },
+                    { T,            NULL        },
+                    { U,            NULL        },
+                    { V,            NULL        },
+                    { W,            NULL        },
+                    { _X,           NULL        },
+                    { _Y,           NULL        },
+                    { Z,            NULL        },
+                });
+            }
             void set_pointer(CURSOR cursor_type) 
             {
                 xcb_cursor_context_t * ctx;
