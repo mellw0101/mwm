@@ -269,6 +269,7 @@ class Dock
                     if (e->detail == wm->key_codes.enter)
                     {
                         add_app(add_app_dialog_window.search_string.c_str());
+                        make_apps();
                         add_app_dialog_window.search_string = "";
                         add_app_dialog_window.search_window.clear();
                     }
