@@ -107,6 +107,7 @@ class add_app_dialog_window
                 { Z,            NULL        },
 
                 { SPACE_BAR,    NULL        },
+                { ENTER,        NULL        },
 
                 { XK_BackSpace, NULL        },
                 { Q,            SHIFT | ALT }
@@ -169,6 +170,12 @@ class add_app_dialog_window
                             search_string.erase(search_string.length() - 1);
                             search_window.clear();
                         }
+                    }
+
+                    if (e->detail == wm->key_codes.enter)
+                    {
+                        search_string = "";
+                        search_window.clear();
                     }
 
                     search_window.draw_text(search_string.c_str(), RED, WHITE, "7x14", 2, 12);

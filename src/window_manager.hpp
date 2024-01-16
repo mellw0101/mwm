@@ -103,6 +103,7 @@ class Key_Codes
                     { Z,            &z         },
 
                     { SPACE_BAR,    &space_bar },
+                    { ENTER,        &enter     },
 
                     { F11,          &f11       },
                     { N_1,          &n_1       },
@@ -162,6 +163,7 @@ class Key_Codes
             z{},
 
             space_bar{},
+            enter{},
 
             f11{},
             n_1{},

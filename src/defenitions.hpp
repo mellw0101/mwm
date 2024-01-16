@@ -56,6 +56,9 @@
 #define _Y      0x79
 #define Z       0x7a
 
+#define SPACE_BAR   0x20
+#define ENTER   0xff0d
+
 #define F11     0xffc8
 #define N_1     0x31
 #define N_2     0x32
@@ -72,8 +75,6 @@
 #define COMMA   0x2c
 #define DOT     0x2e
 #define SLASH   0x2f
-#define SPACE_BAR   0x20
-#define ENTER   0xff0d
 #define ESC     0xff1b
 #define BACK    0xff08
 #define DELETE  0x7f
