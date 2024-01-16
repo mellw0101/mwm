@@ -72,7 +72,7 @@
 #define COMMA   0x2c
 #define DOT     0x2e
 #define SLASH   0x2f
-#define SPACE   0x20
+#define SPACE_BAR   0x20
 #define ENTER   0xff0d
 #define ESC     0xff1b
 #define BACK    0xff08

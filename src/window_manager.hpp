@@ -49,6 +49,7 @@
 
 #include "Log.hpp"
 #include "contex_meny.hpp"
+#include "defenitions.hpp"
 #include "launcher.hpp"
 #include "event_handler.hpp"
 #include "client.hpp"
@@ -74,47 +75,49 @@ class Key_Codes
             {
                 std::map<uint32_t, xcb_keycode_t *> key_map = 
                 {
-                    { A,            &a       },
-                    { B,            &b       },
-                    { C,            &c       },
-                    { D,            &d       },
-                    { E,            &e       },
-                    { F,            &f       },
-                    { G,            &g       },
-                    { H,            &h       },
-                    { I,            &i       },
-                    { J,            &j       },
-                    { K,            &k       },
-                    { L,            &l       },
-                    { M,            &m       },
-                    { _N,            &n       },
-                    { O,            &o       },
-                    { P,            &p       },
-                    { Q,            &q       },
-                    { R,            &r       },
-                    { S,            &s       },
-                    { T,            &t       },
-                    { U,            &u       },
-                    { V,            &v       },
-                    { W,            &w       },
-                    { _X,            &x       },
-                    { _Y,            &y       },
-                    { Z,            &z       },
+                    { A,            &a         },
+                    { B,            &b         },
+                    { C,            &c         },
+                    { D,            &d         },
+                    { E,            &e         },
+                    { F,            &f         },
+                    { G,            &g         },
+                    { H,            &h         },
+                    { I,            &i         },
+                    { J,            &j         },
+                    { K,            &k         },
+                    { L,            &l         },
+                    { M,            &m         },
+                    { _N,           &n         },
+                    { O,            &o         },
+                    { P,            &p         },
+                    { Q,            &q         },
+                    { R,            &r         },
+                    { S,            &s         },
+                    { T,            &t         },
+                    { U,            &u         },
+                    { V,            &v         },
+                    { W,            &w         },
+                    { _X,           &x         },
+                    { _Y,           &y         },
+                    { Z,            &z         },
 
-                    { F11,          &f11     },
-                    { N_1,          &n_1     },
-                    { N_2,          &n_2     },
-                    { N_3,          &n_3     },
-                    { N_4,          &n_4     },
-                    { N_5,          &n_5     },
-                    { R_ARROW,      &r_arrow },
-                    { L_ARROW,      &l_arrow },
-                    { U_ARROW,      &u_arrow },
-                    { D_ARROW,      &d_arrow },
-                    { TAB,          &tab     },
-                    { K,            &k       },
-                    
-                    { XK_BackSpace, &_delete },
+                    { SPACE_BAR,    &space_bar },
+
+                    { F11,          &f11       },
+                    { N_1,          &n_1       },
+                    { N_2,          &n_2       },
+                    { N_3,          &n_3       },
+                    { N_4,          &n_4       },
+                    { N_5,          &n_5       },
+                    { R_ARROW,      &r_arrow   },
+                    { L_ARROW,      &l_arrow   },
+                    { U_ARROW,      &u_arrow   },
+                    { D_ARROW,      &d_arrow   },
+                    { TAB,          &tab       },
+                    { K,            &k         },
+
+                    { XK_BackSpace, &_delete   },
                 };
                 
                 for (auto &pair : key_map) 
@@ -157,6 +160,8 @@ class Key_Codes
             x{},
             y{},
             z{},
+
+            space_bar{},
 
             f11{},
             n_1{},

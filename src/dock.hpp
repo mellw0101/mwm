@@ -106,6 +106,8 @@ class add_app_dialog_window
                 { _Y,           NULL        },
                 { Z,            NULL        },
 
+                { SPACE_BAR,    NULL        },
+
                 { XK_BackSpace, NULL        },
                 { Q,            SHIFT | ALT }
             });
@@ -157,6 +159,8 @@ class add_app_dialog_window
                     if (e->detail == wm->key_codes.x) { search_string += "x"; }
                     if (e->detail == wm->key_codes.y) { search_string += "y"; }
                     if (e->detail == wm->key_codes.z) { search_string += "z"; }
+
+                    if (e->detail == wm->key_codes.space_bar) { search_string += " "; }
 
                     if (e->detail == wm->key_codes._delete)
                     {
