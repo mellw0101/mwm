@@ -268,8 +268,19 @@ class Dock
 
                     if (e->detail == wm->key_codes.enter)
                     {
-                        add_app(add_app_dialog_window.search_string.c_str());
-                        make_apps();
+                        buttons.add(add_app_dialog_window.search_string.c_str(), [this]() 
+                        { 
+                            launcher.program((char *) add_app_dialog_window.search_string.c_str());
+                        });
+                        buttons.list[buttons.index()].create
+                        (
+                            main_window,
+                            ((buttons.index() * width) + DOCK_BORDER),
+                            DOCK_BORDER,
+                            (width - (DOCK_BORDER * 2)),
+                            (height - (DOCK_BORDER * 2)),
+                            BLACK
+                        );
                         add_app_dialog_window.search_string = "";
                         add_app_dialog_window.search_window.clear();
                     }
