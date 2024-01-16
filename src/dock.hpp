@@ -117,8 +117,11 @@ class add_app_dialog_window
 
                     if (e->detail == wm->key_codes._delete)
                     {
-                        search_string.erase(search_string.length() - 1);
-                        search_window.clear();
+                        if (search_string.length() > 0)
+                        {
+                            search_string.erase(search_string.length() - 1);
+                            search_window.clear();
+                        }
                     }
 
                     search_window.draw_text(search_string.c_str(), RED, WHITE, "7x14", 2, 12);
