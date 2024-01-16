@@ -75,6 +75,7 @@ class Key_Codes
                 std::map<uint32_t, xcb_keycode_t *> key_map = 
                 {
                     { A,            &a       },
+                    { B,            &b       },
                     { T,            &t       },
                     { Q,            &q       },
                     { F,            &f       },
@@ -108,6 +109,8 @@ class Key_Codes
     ;
     public: // variabels
         xcb_keycode_t 
+            a{},
+            b{},
             t{}, 
             q{}, 
             f{}, 
@@ -123,8 +126,7 @@ class Key_Codes
             d_arrow{}, 
             tab{}, 
             k{}, 
-            _delete{},
-            a{}
+            _delete{}
         ;
     ;
     private: // variabels

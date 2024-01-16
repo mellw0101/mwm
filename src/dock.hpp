@@ -112,6 +112,11 @@ class add_app_dialog_window
                         search_string += "a";
                     }
 
+                    if (e->detail == wm->key_codes.b)
+                    {
+                        search_string += "b";
+                    }
+
                     if (e->detail == wm->key_codes.q)
                     {
                         search_string += "q";
