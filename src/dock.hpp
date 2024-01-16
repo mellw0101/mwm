@@ -86,7 +86,9 @@ class add_app_dialog_window
             search_window.grab_keys
             ({
                 { SPACE_BAR,    NULL        },
+                { SPACE_BAR,    SHIFT       },
                 { ENTER,        NULL        },
+                { ENTER,        SHIFT       },
                 { DELETE,       NULL        },
                 { DELETE,       SHIFT       },
 
