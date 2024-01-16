@@ -268,7 +268,6 @@ class Dock
 
                     if (e->detail == wm->key_codes.enter)
                     {
-                        add_app_from_dialog();
                         add_app_dialog_window.search_string = "";
                         add_app_dialog_window.search_window.clear();
                     }
