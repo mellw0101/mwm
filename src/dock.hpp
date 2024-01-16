@@ -152,7 +152,7 @@ class add_app_dialog_window
                         search_window.clear();
                     }
 
-                    search_window.draw_text(search_string.c_str(), WHITE, BLACK, "7x14", 2, 12);
+                    search_window.draw_text(search_string.c_str(), WHITE, BLACK, "7x14", 2, 14);
                 }
             });
         }
