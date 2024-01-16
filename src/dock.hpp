@@ -59,7 +59,7 @@ class add_app_dialog_window
             main_window.apply_event_mask(& mask);
             main_window.grab_button({ { L_MOUSE_BUTTON, NULL } });
             main_window.grab_keys({ { Q, SHIFT | ALT } });
-            main_window.set_backround_color(RED);
+            main_window.set_backround_color(DARK_GREY);
         }
         void create_client()
         {
@@ -72,7 +72,7 @@ class add_app_dialog_window
         void create_search_window()
         {
             search_window.create_default(main_window, DOCK_BORDER, DOCK_BORDER, (main_window.width() - (DOCK_BORDER * 2)), 20);
-            search_window.set_backround_color(WHITE);
+            search_window.set_backround_color(BLACK);
             uint32_t mask =  XCB_EVENT_MASK_STRUCTURE_NOTIFY | XCB_EVENT_MASK_FOCUS_CHANGE;
             main_window.apply_event_mask(& mask);
             search_window.map();
@@ -80,33 +80,6 @@ class add_app_dialog_window
             search_window.grab_keys_for_typing();
             search_window.grab_keys
             ({
-                // { A,            NULL        },
-                // { B,            NULL        },
-                // { C,            NULL        },
-                // { D,            NULL        },
-                // { E,            NULL        },
-                // { F,            NULL        },
-                // { G,            NULL        },
-                // { H,            NULL        },
-                // { I,            NULL        },
-                // { J,            NULL        },
-                // { K,            NULL        },
-                // { L,            NULL        },
-                // { M,            NULL        },
-                // { _N,           NULL        },
-                // { O,            NULL        },
-                // { P,            NULL        },
-                // { Q,            NULL        },
-                // { R,            NULL        },
-                // { S,            NULL        },
-                // { T,            NULL        },
-                // { U,            NULL        },
-                // { V,            NULL        },
-                // { W,            NULL        },
-                // { _X,           NULL        },
-                // { _Y,           NULL        },
-                // { Z,            NULL        },
-
                 { SPACE_BAR,    NULL        },
                 { ENTER,        NULL        },
                 { DELETE,       NULL        },
@@ -179,7 +152,7 @@ class add_app_dialog_window
                         search_window.clear();
                     }
 
-                    search_window.draw_text(search_string.c_str(), RED, WHITE, "7x14", 2, 12);
+                    search_window.draw_text(search_string.c_str(), WHITE, BLACK, "7x14", 2, 12);
                 }
             });
         }
