@@ -107,6 +107,11 @@ class add_app_dialog_window
                 const auto * e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
                 if (e->event == search_window)
                 {
+                    if (e->detail == wm->key_codes.a)
+                    {
+                        search_string += "a";
+                    }
+
                     if (e->detail == wm->key_codes.q)
                     {
                         search_string += "q";
