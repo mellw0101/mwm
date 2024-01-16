@@ -34,12 +34,13 @@ class add_app_dialog_window
         pointer pointer;
         Event_Handler ev_handler;
         Logger log;
+        std::string search_string = "";
     ;
     public: // methods
         void init()
         {
             create();
-            configure_events();
+            // configure_events();
         }
         void show()
         {
@@ -109,11 +110,27 @@ class add_app_dialog_window
                 if (e->event == search_window)
                 {
                     if (e->detail == wm->key_codes.a) 
-                    { 
-                        if (e->state == SHIFT) { search_string += "A"; }
-                        else { search_string += "a"; }
+                    {
+                        if (e->state == SHIFT)
+                        {
+                            search_string += "A";
+                        }
+                        else
+                        {
+                            search_string += "a";
+                        } 
                     }
-                    if (e->detail == wm->key_codes.b) { search_string += "b"; }
+                    if (e->detail == wm->key_codes.b) 
+                    {
+                        if (e->state == SHIFT)
+                        {
+                            search_string += "B";
+                        }
+                        else
+                        {
+                            search_string += "b"; 
+                        }
+                    }
                     if (e->detail == wm->key_codes.c) { search_string += "c"; }
                     if (e->detail == wm->key_codes.d) { search_string += "d"; }
                     if (e->detail == wm->key_codes.e) { search_string += "e"; }
@@ -161,9 +178,6 @@ class add_app_dialog_window
             });
         }
     ;
-    private: // variable
-        std::string search_string = "";
-    ;
 };
 class Dock
 {
@@ -187,6 +201,7 @@ class Dock
             make_apps();
             add_app_dialog_window.init();
             context_menu.init();
+            configure_events();
         }
         void add_app(const char * app_name)
         {
@@ -261,6 +276,92 @@ class Dock
                 buttons.list[buttons.index()].put_icon_on_button();
             }
             calc_size_pos();
+        }
+        void configure_events()
+        {
+            event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev)
+            {
+                const auto * e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
+                if (e->event == add_app_dialog_window.search_window)
+                {
+                    add_app_dialog_window.c->focus();
+                    add_app_dialog_window.search_window.raise();
+                    add_app_dialog_window.search_window.focus_input();
+                }
+            });
+
+            event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev) 
+            {
+                const auto * e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
+                if (e->event == add_app_dialog_window.search_window)
+                {
+                    if (e->detail == wm->key_codes.a) 
+                    {
+                        if (e->state == SHIFT)
+                        {
+                            add_app_dialog_window.search_string += "A";
+                        }
+                        else
+                        {
+                            add_app_dialog_window.search_string += "a";
+                        } 
+                    }
+                    if (e->detail == wm->key_codes.b) 
+                    {
+                        if (e->state == SHIFT)
+                        {
+                            add_app_dialog_window.search_string += "B";
+                        }
+                        else
+                        {
+                            add_app_dialog_window.search_string += "b"; 
+                        }
+                    }
+                    if (e->detail == wm->key_codes.c) { add_app_dialog_window.search_string += "c"; }
+                    if (e->detail == wm->key_codes.d) { add_app_dialog_window.search_string += "d"; }
+                    if (e->detail == wm->key_codes.e) { add_app_dialog_window.search_string += "e"; }
+                    if (e->detail == wm->key_codes.f) { add_app_dialog_window.search_string += "f"; }
+                    if (e->detail == wm->key_codes.g) { add_app_dialog_window.search_string += "g"; }
+                    if (e->detail == wm->key_codes.h) { add_app_dialog_window.search_string += "h"; }
+                    if (e->detail == wm->key_codes.i) { add_app_dialog_window.search_string += "i"; }
+                    if (e->detail == wm->key_codes.j) { add_app_dialog_window.search_string += "j"; }
+                    if (e->detail == wm->key_codes.k) { add_app_dialog_window.search_string += "k"; }
+                    if (e->detail == wm->key_codes.l) { add_app_dialog_window.search_string += "l"; }
+                    if (e->detail == wm->key_codes.m) { add_app_dialog_window.search_string += "m"; }
+                    if (e->detail == wm->key_codes.n) { add_app_dialog_window.search_string += "n"; }
+                    if (e->detail == wm->key_codes.o) { add_app_dialog_window.search_string += "o"; }
+                    if (e->detail == wm->key_codes.p) { add_app_dialog_window.search_string += "p"; }
+                    if (e->detail == wm->key_codes.q) { add_app_dialog_window.search_string += "q"; }
+                    if (e->detail == wm->key_codes.r) { add_app_dialog_window.search_string += "r"; }
+                    if (e->detail == wm->key_codes.s) { add_app_dialog_window.search_string += "s"; }
+                    if (e->detail == wm->key_codes.t) { add_app_dialog_window.search_string += "t"; }
+                    if (e->detail == wm->key_codes.u) { add_app_dialog_window.search_string += "u"; }
+                    if (e->detail == wm->key_codes.v) { add_app_dialog_window.search_string += "v"; }
+                    if (e->detail == wm->key_codes.w) { add_app_dialog_window.search_string += "w"; }
+                    if (e->detail == wm->key_codes.x) { add_app_dialog_window.search_string += "x"; }
+                    if (e->detail == wm->key_codes.y) { add_app_dialog_window.search_string += "y"; }
+                    if (e->detail == wm->key_codes.z) { add_app_dialog_window.search_string += "z"; }
+
+                    if (e->detail == wm->key_codes.space_bar) { add_app_dialog_window.search_string += " "; }
+
+                    if (e->detail == wm->key_codes._delete)
+                    {
+                        if (add_app_dialog_window.search_string.length() > 0)
+                        {
+                            add_app_dialog_window.search_string.erase(add_app_dialog_window.search_string.length() - 1);
+                            add_app_dialog_window.search_window.clear();
+                        }
+                    }
+
+                    if (e->detail == wm->key_codes.enter)
+                    {
+                        add_app_dialog_window.search_string = "";
+                        add_app_dialog_window.search_window.clear();
+                    }
+
+                    add_app_dialog_window.search_window.draw_text(add_app_dialog_window.search_string.c_str(), WHITE, BLACK, "7x14", 2, 14);
+                }
+            });
         }
     ;
 };
