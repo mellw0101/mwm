@@ -58,6 +58,7 @@
 
 #define SPACE_BAR   0x20
 #define ENTER   0xff0d
+#define DELETE  0xff08
 
 #define F11     0xffc8
 #define N_1     0x31
@@ -76,7 +77,6 @@
 #define DOT     0x2e
 #define SLASH   0x2f
 #define ESC     0xff1b
-#define DELETE  0xff08
 
 /* BUTTON DEFENITIONS */
 #define L_MOUSE_BUTTON XCB_BUTTON_INDEX_1
