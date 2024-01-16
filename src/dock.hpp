@@ -213,7 +213,8 @@ class Dock
             add_app_dialog_window.init();
             add_app_dialog_window.add_enter_action([this] () 
             {
-                add_app(add_app_dialog_window.search_string.c_str());
+                const char * app_name = add_app_dialog_window.search_string.c_str();
+                add_app(app_name);
                 make_apps();
                 calc_size_pos(); 
             });
