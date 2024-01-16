@@ -214,6 +214,7 @@ class Dock
             add_app_dialog_window.add_enter_action([this] () 
             {
                 add_app(add_app_dialog_window.search_string.c_str());
+                make_apps();
                 calc_size_pos(); 
             });
             context_menu.init();
