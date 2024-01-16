@@ -76,6 +76,7 @@ class Key_Codes
                 {
                     { A,            &a       },
                     { B,            &b       },
+                    { C,            &c       },
                     { T,            &t       },
                     { Q,            &q       },
                     { F,            &f       },
@@ -111,6 +112,7 @@ class Key_Codes
         xcb_keycode_t 
             a{},
             b{},
+            c{},
             t{}, 
             q{}, 
             f{}, 

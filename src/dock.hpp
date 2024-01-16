@@ -80,6 +80,8 @@ class add_app_dialog_window
             search_window.grab_keys
             ({
                 { A,            NULL        },
+                { B,            NULL        },
+                { C,            NULL        },
                 { Q,            NULL        },
                 { XK_BackSpace, NULL        },
                 { T,            NULL        },
@@ -107,25 +109,11 @@ class add_app_dialog_window
                 const auto * e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
                 if (e->event == search_window)
                 {
-                    if (e->detail == wm->key_codes.a)
-                    {
-                        search_string += "a";
-                    }
-
-                    if (e->detail == wm->key_codes.b)
-                    {
-                        search_string += "b";
-                    }
-
-                    if (e->detail == wm->key_codes.q)
-                    {
-                        search_string += "q";
-                    }
-                    
-                    if (e->detail == wm->key_codes.t)
-                    {
-                        search_string += "t";
-                    }
+                    if (e->detail == wm->key_codes.a) { search_string += "a"; }
+                    if (e->detail == wm->key_codes.b) { search_string += "b"; }
+                    if (e->detail == wm->key_codes.c) { search_string += "c"; }
+                    if (e->detail == wm->key_codes.q) { search_string += "q"; }
+                    if (e->detail == wm->key_codes.t) { search_string += "t"; }
 
                     if (e->detail == wm->key_codes._delete)
                     {
