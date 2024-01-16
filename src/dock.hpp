@@ -135,33 +135,276 @@ class add_app_dialog_window
                             search_string += "b"; 
                         }
                     }
-                    if (e->detail == wm->key_codes.c) { search_string += "c"; }
-                    if (e->detail == wm->key_codes.d) { search_string += "d"; }
-                    if (e->detail == wm->key_codes.e) { search_string += "e"; }
-                    if (e->detail == wm->key_codes.f) { search_string += "f"; }
-                    if (e->detail == wm->key_codes.g) { search_string += "g"; }
-                    if (e->detail == wm->key_codes.h) { search_string += "h"; }
-                    if (e->detail == wm->key_codes.i) { search_string += "i"; }
-                    if (e->detail == wm->key_codes.j) { search_string += "j"; }
-                    if (e->detail == wm->key_codes.k) { search_string += "k"; }
-                    if (e->detail == wm->key_codes.l) { search_string += "l"; }
-                    if (e->detail == wm->key_codes.m) { search_string += "m"; }
-                    if (e->detail == wm->key_codes.n) { search_string += "n"; }
-                    if (e->detail == wm->key_codes.o) { search_string += "o"; }
-                    if (e->detail == wm->key_codes.p) { search_string += "p"; }
-                    if (e->detail == wm->key_codes.q) { search_string += "q"; }
-                    if (e->detail == wm->key_codes.r) { search_string += "r"; }
-                    if (e->detail == wm->key_codes.s) { search_string += "s"; }
-                    if (e->detail == wm->key_codes.t) { search_string += "t"; }
-                    if (e->detail == wm->key_codes.u) { search_string += "u"; }
-                    if (e->detail == wm->key_codes.v) { search_string += "v"; }
-                    if (e->detail == wm->key_codes.w) { search_string += "w"; }
-                    if (e->detail == wm->key_codes.x) { search_string += "x"; }
-                    if (e->detail == wm->key_codes.y) { search_string += "y"; }
-                    if (e->detail == wm->key_codes.z) { search_string += "z"; }
+                    if (e->detail == wm->key_codes.c) 
+                    {
+                        if (e->state == SHIFT)
+                        {
+                            search_string += "C";
+                        }
+                        else 
+                        {
+                            search_string += "c"; 
+                        }
+                        return;
+                    }
+                    if (e->detail == wm->key_codes.d) 
+                    {
+                        if (e->state == SHIFT)
+                        {
+                            search_string += "D";
+                        }
+                        else 
+                        {
+                            search_string += "d";
+                        }
+                    }
+                    if (e->detail == wm->key_codes.e) 
+                    {
+                        if (e->state == SHIFT)
+                        {
+                            search_string += "E";
+                        }
+                        else 
+                        {
+                            search_string += "e";
+                        }
+                    }
+                    if (e->detail == wm->key_codes.f) 
+                    {
+                        if (e->state == SHIFT)
+                        {
+                            search_string += "F";
+                        }
+                        else 
+                        {
+                            search_string += "f";
+                        }
+                    }
+                    if (e->detail == wm->key_codes.g) 
+                    {
+                        if (e->state == SHIFT)
+                        {
+                            search_string += "G";
+                        }
+                        else 
+                        {
+                            search_string += "g";
+                        }
+                    }
+                    if (e->detail == wm->key_codes.h) 
+                    {
+                        if (e->state == SHIFT)
+                        {
+                            search_string += "H";
+                        }
+                        else 
+                        {
+                            search_string += "h";
+                        }
+                    }
+                    if (e->detail == wm->key_codes.i) 
+                    {
+                        if (e->state == SHIFT)
+                        {
+                            search_string += "I";
+                        }
+                        else 
+                        {
+                            search_string += "i";
+                        }
+                    }
+                    if (e->detail == wm->key_codes.j) 
+                    {
+                        if (e->state == SHIFT)
+                        {
+                            search_string += "J";
+                        }
+                        else 
+                        {
+                            search_string += "j";
+                        }
+                    }
+                    if (e->detail == wm->key_codes.k) 
+                    {
+                        if (e->state == SHIFT)
+                        {
+                            search_string += "K";
+                        }
+                        else 
+                        {
+                            search_string += "k";
+                        }
+                    }
+                    if (e->detail == wm->key_codes.l) 
+                    {
+                        if (e->state == SHIFT)
+                        {
+                            search_string += "L";
+                        }
+                        else 
+                        {
+                            search_string += "l";
+                        }
+                    }
+                    if (e->detail == wm->key_codes.m) 
+                    {
+                        if (e->state == SHIFT)
+                        {
+                            search_string += "M";
+                        }
+                        else 
+                        {
+                            search_string += "m";
+                        }
+                    }
+                    if (e->detail == wm->key_codes.n) 
+                    {
+                        if (e->state == SHIFT)
+                        {
+                            search_string += "N";
+                        }
+                        else 
+                        {
+                            search_string += "n";
+                        }
+                    }
+                    if (e->detail == wm->key_codes.o) 
+                    {
+                        if (e->state == SHIFT)
+                        {
+                            search_string += "O";
+                        }
+                        else 
+                        {
+                            search_string += "o";
+                        }
+                    }
+                    if (e->detail == wm->key_codes.p) 
+                    {
+                        if (e->state == SHIFT)
+                        {
+                            search_string += "P";
+                        }
+                        else 
+                        {
+                            search_string += "p";
+                        }
+                    }
+                    if (e->detail == wm->key_codes.q) 
+                    {
+                        if (e->state == SHIFT)
+                        {
+                            search_string += "Q";
+                        }
+                        else 
+                        {
+                            search_string += "q";
+                        }
+                    }
+                    if (e->detail == wm->key_codes.r) 
+                    {
+                        if (e->state == SHIFT)
+                        {
+                            search_string += "R";
+                        }
+                        else 
+                        {
+                            search_string += "r";
+                        }
+                    }
+                    if (e->detail == wm->key_codes.s) 
+                    {
+                        if (e->state == SHIFT)
+                        {
+                            search_string += "S";
+                        }
+                        else 
+                        {
+                            search_string += "s";
+                        }
+                    }
+                    if (e->detail == wm->key_codes.t) 
+                    {
+                        if (e->state == SHIFT)
+                        {
+                            search_string += "T";
+                        }
+                        else 
+                        {
+                            search_string += "t";
+                        }
+                    }
+                    if (e->detail == wm->key_codes.u) 
+                    {
+                        if (e->state == SHIFT)
+                        {
+                            search_string += "U";
+                        }
+                        else 
+                        {
+                            search_string += "u";
+                        }
+                    }
+                    if (e->detail == wm->key_codes.v) 
+                    {
+                        if (e->state == SHIFT)
+                        {
+                            search_string += "V";
+                        }
+                        else 
+                        {
+                            search_string += "v";
+                        }
+                    }
+                    if (e->detail == wm->key_codes.w) 
+                    {
+                        if (e->state == SHIFT)
+                        {
+                            search_string += "W";
+                        }
+                        else 
+                        {
+                            search_string += "w";
+                        }
+                    }
+                    if (e->detail == wm->key_codes.x) 
+                    {
+                        if (e->state == SHIFT)
+                        {
+                            search_string += "X";
+                        }
+                        else 
+                        {
+                            search_string += "x";
+                        }
+                    }
+                    if (e->detail == wm->key_codes.y) 
+                    {
+                        if (e->state == SHIFT)
+                        {
+                            search_string += "Y";
+                        }
+                        else 
+                        {
+                            search_string += "y";
+                        }
+                    }
+                    if (e->detail == wm->key_codes.z) 
+                    {
+                        if (e->state == SHIFT)
+                        {
+                            search_string += "Z";
+                        }
+                        else 
+                        {
+                            search_string += "z";
+                        }
+                    }
 
-                    if (e->detail == wm->key_codes.space_bar) { search_string += " "; }
-
+                    if (e->detail == wm->key_codes.space_bar) 
+                    {
+                        search_string += " ";
+                    }
                     if (e->detail == wm->key_codes._delete)
                     {
                         if (search_string.length() > 0)
@@ -170,7 +413,6 @@ class add_app_dialog_window
                             search_window.clear();
                         }
                     }
-
                     if (e->detail == wm->key_codes.enter)
                     {
                         if (enter_function)
@@ -211,12 +453,6 @@ class Dock
             configure_context_menu();
             make_apps();
             add_app_dialog_window.init();
-            add_app_dialog_window.add_enter_action([this] () 
-            {
-                const char * app_name = add_app_dialog_window.search_string.c_str();
-                buttons.add(app_name, [this ,app_name] () { launcher.program((char *)app_name); });
-                calc_size_pos(); 
-            });
             context_menu.init();
         }
         void add_app(const char * app_name)
