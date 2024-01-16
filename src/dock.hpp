@@ -88,9 +88,25 @@ class add_app_dialog_window
                 { G,            NULL        },
                 { H,            NULL        },
                 { I,            NULL        },
+                { J,            NULL        },
+                { K,            NULL        },
+                { L,            NULL        },
+                { M,            NULL        },
+                { _N,           NULL        },
+                { O,            NULL        },
+                { P,            NULL        },
                 { Q,            NULL        },
-                { XK_BackSpace, NULL        },
+                { R,            NULL        },
+                { S,            NULL        },
                 { T,            NULL        },
+                { U,            NULL        },
+                { V,            NULL        },
+                { W,            NULL        },
+                { _X,           NULL        },
+                { _Y,           NULL        },
+                { Z,            NULL        },
+
+                { XK_BackSpace, NULL        },
                 { Q,            SHIFT | ALT }
             });
             
@@ -123,8 +139,24 @@ class add_app_dialog_window
                     if (e->detail == wm->key_codes.f) { search_string += "f"; }
                     if (e->detail == wm->key_codes.g) { search_string += "g"; }
                     if (e->detail == wm->key_codes.h) { search_string += "h"; }
+                    if (e->detail == wm->key_codes.i) { search_string += "i"; }
+                    if (e->detail == wm->key_codes.j) { search_string += "j"; }
+                    if (e->detail == wm->key_codes.k) { search_string += "k"; }
+                    if (e->detail == wm->key_codes.l) { search_string += "l"; }
+                    if (e->detail == wm->key_codes.m) { search_string += "m"; }
+                    if (e->detail == wm->key_codes.n) { search_string += "n"; }
+                    if (e->detail == wm->key_codes.o) { search_string += "o"; }
+                    if (e->detail == wm->key_codes.p) { search_string += "p"; }
                     if (e->detail == wm->key_codes.q) { search_string += "q"; }
+                    if (e->detail == wm->key_codes.r) { search_string += "r"; }
+                    if (e->detail == wm->key_codes.s) { search_string += "s"; }
                     if (e->detail == wm->key_codes.t) { search_string += "t"; }
+                    if (e->detail == wm->key_codes.u) { search_string += "u"; }
+                    if (e->detail == wm->key_codes.v) { search_string += "v"; }
+                    if (e->detail == wm->key_codes.w) { search_string += "w"; }
+                    if (e->detail == wm->key_codes.x) { search_string += "x"; }
+                    if (e->detail == wm->key_codes.y) { search_string += "y"; }
+                    if (e->detail == wm->key_codes.z) { search_string += "z"; }
 
                     if (e->detail == wm->key_codes._delete)
                     {
