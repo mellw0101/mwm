@@ -214,8 +214,7 @@ class Dock
             add_app_dialog_window.add_enter_action([this] () 
             {
                 const char * app_name = add_app_dialog_window.search_string.c_str();
-                add_app(app_name);
-                make_apps();
+                buttons.add(app_name, [this ,app_name] () { launcher.program((char *)app_name); });
                 calc_size_pos(); 
             });
             context_menu.init();
