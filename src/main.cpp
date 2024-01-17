@@ -661,7 +661,6 @@ class XCPPBAnimator
         XCPPBAnimator(xcb_connection_t * connection)
         : connection(connection) {}
     ;
-
     public: // methods
         void /**
          * @brief Animates the position and size of an object from a starting point to an ending point.
@@ -728,9 +727,7 @@ class XCPPBAnimator
             /* STOP THE ANIMATION */
             stopAnimations();
         }
-
-        void 
-        animate_client(int startX, int startY, int startWidth, int startHeight, int endX, int endY, int endWidth, int endHeight, int duration)
+        void animate_client(int startX, int startY, int startWidth, int startHeight, int endX, int endY, int endWidth, int endHeight, int duration)
         {
             /* ENSURE ANY EXISTING ANIMATION IS STOPPED */
             stopAnimations();
@@ -784,15 +781,12 @@ class XCPPBAnimator
             /* STOP THE ANIMATION */
             stopAnimations();
         }
-
         enum DIRECTION 
         {
             NEXT,
             PREV
         };
-
-        void
-        animate_client_x(int startX, int endX, int duration)
+        void animate_client_x(int startX, int endX, int duration)
         {
             /* ENSURE ANY EXISTING ANIMATION IS STOPPED */
             stopAnimations();
@@ -834,7 +828,6 @@ class XCPPBAnimator
             /* STOP THE ANIMATION */
             stopAnimations();
         }
-        
         /**
          * @brief Destructor to ensure the animation threads are stopped when the object is destroyed.
          */
@@ -843,7 +836,6 @@ class XCPPBAnimator
             stopAnimations();
         }
     ;
-
     private: // variabels
         xcb_connection_t* connection;
         xcb_window_t window;
@@ -878,9 +870,8 @@ class XCPPBAnimator
         const double frameRate = 120;
         const double frameDuration = 1000.0 / frameRate; 
     ;
-
-    private: // funcrions        
-        void /**
+    private: // funcrions
+        void XAnimation(const int & endX) /**
          *
          * @brief Performs animation on window 'x' position until the specified 'endX' is reached.
          * 
@@ -891,7 +882,6 @@ class XCPPBAnimator
          * @param endX The desired 'x' position of the window.
          *
          */
-        XAnimation(const int & endX) 
         {
             XlastUpdateTime = std::chrono::high_resolution_clock::now();
             while (true) 
@@ -905,8 +895,7 @@ class XCPPBAnimator
                 thread_sleep(XAnimDuration);
             }
         }
-
-        void /**
+        void XStep() /**
          * @brief Performs a step in the X direction.
          * 
          * This function increments the currentX variable by the stepX value.
@@ -914,7 +903,6 @@ class XCPPBAnimator
          * 
          * @note This function assumes that the connection and window variables are properly initialized.
          */
-        XStep() 
         {
             currentX += stepX;
             
@@ -933,8 +921,7 @@ class XCPPBAnimator
                 xcb_flush(connection);
             }
         }
-
-        void /**
+        void YAnimation(const int & endY) /**
          *
          * @brief Performs animation on window 'y' position until the specified 'endY' is reached.
          * 
@@ -945,7 +932,6 @@ class XCPPBAnimator
          * @param endY The desired 'y' positon of the window.
          *
          */
-        YAnimation(const int & endY) 
         {
             YlastUpdateTime = std::chrono::high_resolution_clock::now();
             while (true) 
@@ -959,15 +945,13 @@ class XCPPBAnimator
                 thread_sleep(YAnimDuration);
             }
         }
-
-        void /**
+        void YStep() /**
          * @brief Performs a step in the Y direction.
          * 
          * This function increments the currentY variable by the stepY value.
          * If it is time to render, it configures the window's Y position using xcb_configure_window
          * and flushes the connection using xcb_flush.
          */
-        YStep() 
         {
             currentY += stepY;
             
@@ -986,8 +970,7 @@ class XCPPBAnimator
                 xcb_flush(connection);
             }
         }
-
-        void /**
+        void WAnimation(const int & endWidth) /**
          *
          * @brief Performs a 'width' animation until the specified end 'width' is reached.
          * 
@@ -998,7 +981,6 @@ class XCPPBAnimator
          * @param endWidth The desired 'width' of the window.
          *
          */
-        WAnimation(const int & endWidth) 
         {
             WlastUpdateTime = std::chrono::high_resolution_clock::now();
             while (true) 
@@ -1012,8 +994,7 @@ class XCPPBAnimator
                 thread_sleep(WAnimDuration);
             }
         }
-
-        void /**
+        void WStep() /**
          *
          * @brief Performs a step in the width calculation and updates the window width if it is time to render.
          * 
@@ -1021,7 +1002,6 @@ class XCPPBAnimator
          * using the XCB library and flushes the connection.
          *
          */
-        WStep() 
         {
             currentWidth += stepWidth;
 
@@ -1040,8 +1020,7 @@ class XCPPBAnimator
                 xcb_flush(connection);
             }
         }
-
-        void /**
+        void HAnimation(const int & endHeight) /**
          *
          * @brief Performs a 'height' animation until the specified end 'height' is reached.
          * 
@@ -1052,7 +1031,6 @@ class XCPPBAnimator
          * @param endWidth The desired 'height' of the window.
          *
          */
-        HAnimation(const int & endHeight) 
         {
             HlastUpdateTime = std::chrono::high_resolution_clock::now();
             while (true) 
@@ -1066,8 +1044,7 @@ class XCPPBAnimator
                 thread_sleep(HAnimDuration);
             }
         }
-
-        void /**
+        void HStep() /**
          *
          * @brief Increases the current height by the step height and updates the window height if it's time to render.
          * 
@@ -1076,7 +1053,6 @@ class XCPPBAnimator
          * flush the changes to the X server.
          *
          */
-        HStep() 
         {
             currentHeight += stepHeight;
             
@@ -1095,9 +1071,7 @@ class XCPPBAnimator
                 xcb_flush(connection);
             }
         }
-
-        void
-        GFrameAnimation(const int & endX, const int & endY, const int & endWidth, const int & endHeight)
+        void GFrameAnimation(const int & endX, const int & endY, const int & endWidth, const int & endHeight)
         {
             while (true)
             {
@@ -1110,9 +1084,7 @@ class XCPPBAnimator
                 thread_sleep(GAnimDuration);
             }
         }
-
-        void
-        GFrameAnimation_X(const int & endX)
+        void GFrameAnimation_X(const int & endX)
         {
             while (true)
             {
@@ -1125,8 +1097,7 @@ class XCPPBAnimator
                 thread_sleep(GAnimDuration);
             }
         }
-
-        void /**
+        void CliXAnimation(const int & endX) /**
          *
          * @brief Performs animation on window 'x' position until the specified 'endX' is reached.
          * 
@@ -1137,7 +1108,6 @@ class XCPPBAnimator
          * @param endX The desired 'x' position of the window.
          *
          */
-        CliXAnimation(const int & endX) 
         {
             XlastUpdateTime = std::chrono::high_resolution_clock::now();
             while (true) 
@@ -1150,8 +1120,7 @@ class XCPPBAnimator
                 thread_sleep(XAnimDuration);
             }
         }
-
-        void /**
+        void CliYAnimation(const int & endY) /**
          *
          * @brief Performs animation on window 'y' position until the specified 'endY' is reached.
          * 
@@ -1162,7 +1131,6 @@ class XCPPBAnimator
          * @param endY The desired 'y' positon of the window.
          *
          */
-        CliYAnimation(const int & endY) 
         {
             YlastUpdateTime = std::chrono::high_resolution_clock::now();
             while (true) 
@@ -1175,8 +1143,7 @@ class XCPPBAnimator
                 thread_sleep(YAnimDuration);
             }
         }
-
-        void /**
+        void CliWAnimation(const int & endWidth) /**
          *
          * @brief Performs a 'width' animation until the specified end 'width' is reached.
          * 
@@ -1187,7 +1154,6 @@ class XCPPBAnimator
          * @param endWidth The desired 'width' of the window.
          *
          */
-        CliWAnimation(const int & endWidth) 
         {
             WlastUpdateTime = std::chrono::high_resolution_clock::now();
             while (true) 
@@ -1200,8 +1166,7 @@ class XCPPBAnimator
                 thread_sleep(WAnimDuration);
             }
         }
-
-        void /**
+        void CliHAnimation(const int & endHeight) /**
          *
          * @brief Performs a 'height' animation until the specified end 'height' is reached.
          * 
@@ -1212,7 +1177,6 @@ class XCPPBAnimator
          * @param endWidth The desired 'height' of the window.
          *
          */
-        CliHAnimation(const int & endHeight) 
         {
             HlastUpdateTime = std::chrono::high_resolution_clock::now();
             while (true) 
@@ -1225,14 +1189,12 @@ class XCPPBAnimator
                 thread_sleep(HAnimDuration);
             }
         }
-
-        void /**
+        void stopAnimations() /**
          *
          * @brief Stops all animations by setting the corresponding flags to true and joining the animation threads.
          *        After joining the threads, the flags are set back to false.
          *
          */
-        stopAnimations() 
         {
             stopHFlag.store(true);
             stopXFlag.store(true);
@@ -1270,8 +1232,7 @@ class XCPPBAnimator
                 stopHFlag.store(false);
             }
         }
-
-        void /**
+        void thread_sleep(const double & milliseconds) /**
          *
          * @brief Sleeps the current thread for the specified number of milliseconds.
          *
@@ -1282,7 +1243,6 @@ class XCPPBAnimator
          *       as this class is designed to iterate every pixel and then only update that to the X-server at the given framerate.
          *
          */
-        thread_sleep(const double & milliseconds) 
         {
             // Creating a duration with double milliseconds
             auto duration = std::chrono::duration<double, std::milli>(milliseconds);
@@ -1290,14 +1250,12 @@ class XCPPBAnimator
             // Sleeping for the duration
             std::this_thread::sleep_for(duration);
         }
-
-        bool /**
+        bool XisTimeToRender() /**
          *
          * Checks if it is time to render based on the elapsed time since the last update.
          * @return true if it is time to render, @return false otherwise.
          *
          */
-        XisTimeToRender() 
         {
             // CALCULATE ELAPSED TIME SINCE THE LAST UPDATE
             const auto & currentTime = std::chrono::high_resolution_clock::now();
@@ -1310,14 +1268,12 @@ class XCPPBAnimator
             }
             return false; 
         }
-
-        bool /**
+        bool YisTimeToRender() /**
          *
          * Checks if it is time to render a frame based on the elapsed time since the last update.
          * @return true if it is time to render, @return false otherwise.
          *
          */
-        YisTimeToRender() 
         {
             // CALCULATE ELAPSED TIME SINCE THE LAST UPDATE
             const auto & currentTime = std::chrono::high_resolution_clock::now();
@@ -1330,14 +1286,12 @@ class XCPPBAnimator
             }
             return false; 
         }
-        
-        bool /**
+        bool WisTimeToRender() /**
          *
          * Checks if it is time to render based on the elapsed time since the last update.
          * @return true if it is time to render, @return false otherwise.
          *
          */
-        WisTimeToRender()
         {
             // CALCULATE ELAPSED TIME SINCE THE LAST UPDATE
             const auto & currentTime = std::chrono::high_resolution_clock::now();
@@ -1350,14 +1304,12 @@ class XCPPBAnimator
             }
             return false; 
         }
-
-        bool /**
+        bool HisTimeToRender() /**
          *
          * Checks if it is time to render based on the elapsed time since the last update.
          * @return true if it is time to render, @return false otherwise.
          *
          */
-        HisTimeToRender()
         {
             // CALCULATE ELAPSED TIME SINCE THE LAST UPDATE
             const auto & currentTime = std::chrono::high_resolution_clock::now();
@@ -1370,8 +1322,7 @@ class XCPPBAnimator
             }
             return false; 
         }
-
-        void /**
+        void config_window(const uint32_t & mask, const uint32_t & value) /**
          *
          * @brief Configures the window with the specified mask and value.
          * 
@@ -1382,7 +1333,6 @@ class XCPPBAnimator
          * @param value The value to set for the specified attributes.
          * 
          */
-        config_window(const uint32_t & mask, const uint32_t & value)
         {
             xcb_configure_window
             (
@@ -1396,8 +1346,7 @@ class XCPPBAnimator
             );
             xcb_flush(connection);
         }
-
-        void /**
+        void config_window(const xcb_window_t & win, const uint32_t & mask, const uint32_t & value) /**
          *
          * @brief Configures the window with the specified mask and value.
          * 
@@ -1408,7 +1357,6 @@ class XCPPBAnimator
          * @param value The value to set for the specified attributes.
          * 
          */
-        config_window(const xcb_window_t & win, const uint32_t & mask, const uint32_t & value)
         {
             xcb_configure_window
             (
@@ -1422,8 +1370,7 @@ class XCPPBAnimator
             );
             xcb_flush(connection);
         }
-
-        void /**
+        void config_client(const uint32_t & mask, const uint32_t & value) /**
          *
          * @brief Configures the window with the specified mask and value.
          * 
@@ -1434,7 +1381,6 @@ class XCPPBAnimator
          * @param value The value to set for the specified attributes.
          * 
          */
-        config_client(const uint32_t & mask, const uint32_t & value)
         {
             xcb_configure_window
             (
@@ -1459,9 +1405,7 @@ class XCPPBAnimator
             );
             xcb_flush(connection);
         }
-
-        void 
-        conf_client_x()
+        void conf_client_x()
         {
             const uint32_t x = currentX;
             c->frame.x(x);
@@ -1767,8 +1711,7 @@ class resize_client
             xcb_flush(conn);
         }
     ;
-
-    public: // subclasses 
+    public: // subclasses
         class no_border
         {
             public: // constructor
@@ -1788,7 +1731,6 @@ class resize_client
                     xcb_flush(conn);
                 }
             ;
-
             private: // variables
                 client * & c;
                 uint32_t x;
@@ -1797,10 +1739,8 @@ class resize_client
                 std::chrono::high_resolution_clock::time_point lastUpdateTime = std::chrono::high_resolution_clock::now();
                 const double frameDuration = 1000.0 / frameRate;
             ;
-
             private: // functions
-                void 
-                teleport_mouse(edge edge) 
+                void teleport_mouse(edge edge) 
                 {
                     switch (edge) 
                     {
@@ -1841,9 +1781,7 @@ class resize_client
                         ;
                     }
                 }
-
-                void
-                resize_client(const uint32_t x, const uint32_t y, edge edge)
+                void resize_client(const uint32_t x, const uint32_t y, edge edge)
                 {
                     switch (edge) 
                     {
@@ -1884,11 +1822,9 @@ class resize_client
                         ;
                     }
                 }
-
-                void /* 
-                    THIS IS THE MAIN EVENT LOOP FOR 'resize_client'
+                void run(edge edge) /**
+                 * THIS IS THE MAIN EVENT LOOP FOR 'resize_client'
                  */
-                run(edge edge)
                 {
                     if (edge == edge::NONE)
                     {
@@ -1931,9 +1867,7 @@ class resize_client
                         free(ev); 
                     }
                 }
-                
-                bool 
-                isTimeToRender() 
+                bool isTimeToRender() 
                 {
                     // CALCULATE ELAPSED TIME SINCE THE LAST UPDATE
                     const auto & currentTime = std::chrono::high_resolution_clock::now();
@@ -1956,7 +1890,6 @@ class resize_client
                 }
             ;
         };
-
         class border
         {
             public: // constructor 
@@ -1991,7 +1924,6 @@ class resize_client
                     xcb_flush(conn);
                 }
             ;
-
             private: // variables
                 client * & c;
                 client * c2;
@@ -2000,10 +1932,8 @@ class resize_client
                 std::chrono::high_resolution_clock::time_point lastUpdateTime = std::chrono::high_resolution_clock::now();
                 const double frameDuration = 1000.0 / frameRate;
             ;
-
             private: // methods
-                void 
-                teleport_mouse(edge edge) 
+                void teleport_mouse(edge edge) 
                 {
                     switch (edge) 
                     {
@@ -2053,9 +1983,7 @@ class resize_client
                         }
                     }
                 }
-
-                void
-                resize_client(const uint32_t x, const uint32_t y, edge edge)
+                void resize_client(const uint32_t x, const uint32_t y, edge edge)
                 {
                     switch (edge) 
                     {
@@ -2096,9 +2024,7 @@ class resize_client
                         ;
                     }
                 }
-
-                void
-                resize_client(client * c, const uint32_t x, const uint32_t y, edge edge)
+                void resize_client(client * c, const uint32_t x, const uint32_t y, edge edge)
                 {
                     switch (edge) 
                     {
@@ -2139,9 +2065,7 @@ class resize_client
                         ;
                     }
                 }
-
-                void
-                snap(const uint32_t x, const uint32_t y, edge edge, const uint8_t & prox)
+                void snap(const uint32_t x, const uint32_t y, edge edge, const uint8_t & prox)
                 {
                     uint16_t left_border   = 0;
                     uint16_t right_border  = 0;
@@ -2210,11 +2134,9 @@ class resize_client
                     }
                     resize_client(x, y, edge);
                 }
-
-                void /* 
-                    THIS IS THE MAIN EVENT LOOP FOR 'resize_client'
+                void run(edge edge) /**
+                 * THIS IS THE MAIN EVENT LOOP FOR 'resize_client'
                  */
-                run(edge edge)
                 {
                     xcb_generic_event_t * ev;
                     bool shouldContinue = true;
@@ -2251,11 +2173,9 @@ class resize_client
                         free(ev); 
                     }
                 }
-
-                void /* 
-                    THIS IS THE MAIN EVENT LOOP FOR 'resize_client'
+                void run_double(edge edge) /**
+                 * THIS IS THE MAIN EVENT LOOP FOR 'resize_client'
                  */
-                run_double(edge edge)
                 {
                     xcb_generic_event_t * ev;
                     bool shouldContinue = true;
@@ -2292,9 +2212,7 @@ class resize_client
                         free(ev); 
                     }
                 }
-
-                bool 
-                isTimeToRender() 
+                bool isTimeToRender() 
                 {
                     const auto & currentTime = std::chrono::high_resolution_clock::now();
                     const std::chrono::duration<double, std::milli> & elapsedTime = currentTime - lastUpdateTime;
@@ -2310,8 +2228,7 @@ class resize_client
             ;
         };
     ;
-
-    private: // variabels 
+    private: // variabels
         client * & c;
         uint32_t x;
         uint32_t y;
@@ -2319,10 +2236,8 @@ class resize_client
         std::chrono::high_resolution_clock::time_point lastUpdateTime = std::chrono::high_resolution_clock::now();
         const double frameDuration = 1000.0 / frameRate; 
     ;
-
     private: // functions
-        void
-        snap(const uint16_t & x, const uint16_t & y)
+        void snap(const uint16_t & x, const uint16_t & y)
         {
             // WINDOW TO WINDOW SNAPPING 
             for (const auto & cli : wm->cur_d->current_clients)
@@ -2350,11 +2265,9 @@ class resize_client
             }
             c->width_height((x - this->c->x), (y - this->c->y));
         }
-
-        void /* 
-            THIS IS THE MAIN EVENT LOOP FOR 'resize_client'
+        void run() /**
+         * THIS IS THE MAIN EVENT LOOP FOR 'resize_client'
          */
-        run()
         {
             xcb_generic_event_t * ev;
             bool shouldContinue = true;
@@ -2391,9 +2304,7 @@ class resize_client
                 free(ev); 
             }
         }
-
-        bool 
-        isTimeToRender() 
+        bool isTimeToRender() 
         {
             // CALCULATE ELAPSED TIME SINCE THE LAST UPDATE
             const auto & currentTime = std::chrono::high_resolution_clock::now();
@@ -2424,7 +2335,6 @@ class max_win
             BUTTON_MAXWIN,
             EWMH_MAXWIN,
         };
-
         max_win(client * c, max_win_type type)
         {
             switch (type)
@@ -2573,12 +2483,11 @@ class max_win
 };
 namespace win_tools
 {
-    /**
+    xcb_visualtype_t * find_argb_visual(xcb_connection_t *conn, xcb_screen_t *screen) /**
      *
      * @brief Function to find an ARGB visual 
      *
      */
-    xcb_visualtype_t * find_argb_visual(xcb_connection_t *conn, xcb_screen_t *screen) 
     {
         xcb_depth_iterator_t depth_iter = xcb_screen_allowed_depths_iterator(screen);
 
@@ -2834,7 +2743,7 @@ class Compositor
  */
 class tile
 {
-    public:
+    public: // constructors
         tile(client * & c, TILE tile)
         {
             if (c->win.check_if_EWMH_fullscreen())
@@ -2963,7 +2872,7 @@ class tile
             }
         }
     ;
-    private:
+    private: // functions
         void save_tile_ogsize(client * & c)
         {
             c->tile_ogsize.x      = c->x;
@@ -3952,11 +3861,10 @@ class Event
         }
     ;
 };
-/**
+void run() /**
  * THIS IS THE MAIN EVENT LOOP
  * FOR THE 'WINDOW_MANAGER' 
  */
-void run() 
 {
     Event event;
     // while (true)
