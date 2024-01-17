@@ -6,8 +6,7 @@
 class Launcher
 {
     public:
-        static void
-        program(char * program)
+        static void program(char * program)
         {
             if (fork() == 0) 
             {

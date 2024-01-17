@@ -9,8 +9,7 @@
 class pointer
 {
     public: // methods
-        uint32_t
-        x()
+        uint32_t x()
         {
             xcb_query_pointer_cookie_t cookie = xcb_query_pointer(conn, screen->root);
             xcb_query_pointer_reply_t * reply = xcb_query_pointer_reply(conn, cookie, nullptr);
@@ -25,9 +24,7 @@ class pointer
             free(reply);
             return x;
         }
-        
-        uint32_t
-        y()
+        uint32_t y()
         {
             xcb_query_pointer_cookie_t cookie = xcb_query_pointer(conn, screen->root);
             xcb_query_pointer_reply_t * reply = xcb_query_pointer_reply(conn, cookie, nullptr);
@@ -42,9 +39,7 @@ class pointer
             free(reply);
             return y;
         }
-
-        void 
-        teleport(const int16_t & x, const int16_t & y) 
+        void teleport(const int16_t & x, const int16_t & y) 
         {
             xcb_warp_pointer
             (
@@ -60,9 +55,7 @@ class pointer
             );
             xcb_flush(conn);
         }
-
-        void
-        grab(const xcb_window_t & window)
+        void grab(const xcb_window_t & window)
         {
             xcb_grab_pointer_cookie_t cookie = xcb_grab_pointer
             (
@@ -93,11 +86,9 @@ class pointer
 
             free(reply);
         }
-    ; 
-    
+    ;
     private: // functions
-        const char *
-        pointer_from_enum(CURSOR CURSOR)
+        const char * pointer_from_enum(CURSOR CURSOR)
         {
             switch (CURSOR) 
             {
@@ -146,7 +137,6 @@ class pointer
             }
         }
     ;
-
     private: // variables
         Logger log;
     ;

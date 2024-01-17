@@ -63,9 +63,7 @@ Logger log;
 #include "event_handler.hpp"
 #include "window_manager.hpp"
 
-
 static pointer * pointer;
-
 static Dock * dock;
 
 class mxb 
@@ -362,9 +360,7 @@ class mxb
                 }
             ;
         };
-
-        static XConnection * 
-        mxb_connect(const char* display) 
+        static XConnection * mxb_connect(const char* display) 
         {
             try 
             {
@@ -377,9 +373,7 @@ class mxb
                 return nullptr;
             }
         }
-
-        static int
-        mxb_connection_has_error(XConnection * conn)
+        static int mxb_connection_has_error(XConnection * conn)
         {
             try 
             {
@@ -394,7 +388,6 @@ class mxb
             }
             return 0;
         }
-
         class File
         {
             public: // subclasses
@@ -418,7 +411,6 @@ class mxb
         };
     ;
 };
-
 class mv_client 
 {
     public: // constructor 
@@ -436,7 +428,6 @@ class mv_client
             xcb_flush(conn);
         }
     ;
-
     private: // variabels 
         client * & c;
         const uint16_t & start_x;
@@ -456,10 +447,8 @@ class mv_client
             DURATION IN MILLISECONDS THAT EACH FRAME SHOULD LAST 
         */
     ;
-
     private: // functions 
-        void 
-        snap(const int16_t & x, const int16_t & y)
+        void snap(const int16_t & x, const int16_t & y)
         {
             // WINDOW TO WINDOW SNAPPING 
             for (const auto & cli : wm->cur_d->current_clients)
@@ -591,11 +580,10 @@ class mv_client
                 c->frame.x_y(x, y);
             }
         }
-
-        void /*
-            THIS IS THE MAIN EVENT LOOP FOR 'mv_client'
+        /*
+         * THIS IS THE MAIN EVENT LOOP FOR 'mv_client'
          */ 
-        run() 
+        void run() 
         {
             while (shouldContinue) 
             {
@@ -630,9 +618,7 @@ class mv_client
                 free(ev);
             }
         }
-        
-        bool 
-        isTimeToRender() 
+        bool isTimeToRender() 
         {
             auto currentTime = std::chrono::high_resolution_clock::now(); /*
                 CALCULATE ELAPSED TIME SINCE THE LAST UPDATE
@@ -657,7 +643,6 @@ class mv_client
         }
     ;
 };
-
 /**
  *
  * @class XCPPBAnimator
@@ -1484,9 +1469,7 @@ class XCPPBAnimator
         }
     ;
 };
-
-void
-animate(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight, const int & duration)
+void animate(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight, const int & duration)
 {
     XCPPBAnimator anim(conn, c->frame);
     anim.animate
@@ -1503,9 +1486,7 @@ animate(client * & c, const int & endX, const int & endY, const int & endWidth, 
     );
     c->update();
 }
-
-void
-animate_client(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight, const int & duration)
+void animate_client(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight, const int & duration)
 {
     XCPPBAnimator client_anim(conn, c);
     client_anim.animate_client
@@ -1522,9 +1503,7 @@ animate_client(client * & c, const int & endX, const int & endY, const int & end
     );
     c->update();
 }
-
 std::mutex mtx;
-
 class change_desktop
 {
     public:
@@ -1733,9 +1712,7 @@ class change_desktop
         }
     ;
 };
-
-void
-move_to_next_desktop_w_app()
+void move_to_next_desktop_w_app()
 {
     LOG_func
     if (wm->cur_d->desktop == wm->desktop_list.size())
@@ -1750,9 +1727,7 @@ move_to_next_desktop_w_app()
 
     change_desktop::teleport_to(wm->cur_d->desktop + 1);
 }
-
-void
-move_to_previus_desktop_w_app()
+void move_to_previus_desktop_w_app()
 {
     LOG_func
     if (wm->cur_d->desktop == 1)
@@ -1768,7 +1743,6 @@ move_to_previus_desktop_w_app()
     change_desktop::teleport_to(wm->cur_d->desktop - 1);
     wm->focused_client->raise();
 }
-
 class resize_client
 {
     public: // constructor
@@ -2442,9 +2416,8 @@ class resize_client
         }
     ;
 };
-
 class max_win
-{    
+{
     public:
         enum max_win_type
         {
@@ -2485,10 +2458,8 @@ class max_win
             }
         }
     ;
-
     private:
-        void
-        max_win_animate(client * c, const int & endX, const int & endY, const int & endWidth, const int & endHeight)
+        void max_win_animate(client * c, const int & endX, const int & endY, const int & endWidth, const int & endHeight)
         {
             animate_client
             (
@@ -2500,18 +2471,14 @@ class max_win
                 MAXWIN_ANIMATION_DURATION
             );
         }
-
-        void 
-        save_max_ewmh_ogsize(client * c)
+        void save_max_ewmh_ogsize(client * c)
         {
             c->max_ewmh_ogsize.x      = c->x;
             c->max_ewmh_ogsize.y      = c->y;
             c->max_ewmh_ogsize.width  = c->width;
             c->max_ewmh_ogsize.height = c->height;
         }
-
-        void
-        ewmh_max_win(client * c)
+        void ewmh_max_win(client * c)
         {
             save_max_ewmh_ogsize(c);
             max_win_animate
@@ -2525,9 +2492,7 @@ class max_win
             c->win.set_EWMH_fullscreen_state();
             xcb_flush(conn);
         }
-
-        void
-        ewmh_unmax_win(client * c)
+        void ewmh_unmax_win(client * c)
         {
             if (c->max_ewmh_ogsize.width > screen->width_in_pixels)
             {
@@ -2560,18 +2525,14 @@ class max_win
             c->win.unset_EWMH_fullscreen_state();
             xcb_flush(conn);
         }
-
-        void 
-        save_max_button_ogsize(client * c)
+        void save_max_button_ogsize(client * c)
         {
             c->max_button_ogsize.x      = c->x;
             c->max_button_ogsize.y      = c->y;
             c->max_button_ogsize.width  = c->width;
             c->max_button_ogsize.height = c->height;
         }
-
-        void
-        button_max_win(client * c)
+        void button_max_win(client * c)
         {
             save_max_button_ogsize(c);
             max_win_animate
@@ -2584,9 +2545,7 @@ class max_win
             );
             xcb_flush(conn);
         }
-
-        void
-        button_unmax_win(client * c)
+        void button_unmax_win(client * c)
         {
             max_win_animate
             (
@@ -2598,9 +2557,7 @@ class max_win
             );
             xcb_flush(conn);
         }
-
-        bool
-        is_max_win(client * c)
+        bool is_max_win(client * c)
         {
             if (c->x == 0
              && c->y == 0
@@ -2614,15 +2571,14 @@ class max_win
         }
     ;
 };
-
 namespace win_tools
 {
-    xcb_visualtype_t * /**
+    /**
      *
      * @brief Function to find an ARGB visual 
      *
      */
-    find_argb_visual(xcb_connection_t *conn, xcb_screen_t *screen) 
+    xcb_visualtype_t * find_argb_visual(xcb_connection_t *conn, xcb_screen_t *screen) 
     {
         xcb_depth_iterator_t depth_iter = xcb_screen_allowed_depths_iterator(screen);
 
@@ -2639,9 +2595,7 @@ namespace win_tools
         }
         return NULL;
     }
-
-    void
-    close_button_kill(client * c)
+    void close_button_kill(client * c)
     {
         int result = wm->send_sigterm_to_client(c);
 
@@ -2651,7 +2605,6 @@ namespace win_tools
         }
     }
 }
-
 /*
 class Compositor
 {
@@ -2871,7 +2824,6 @@ class Compositor
     ;
 };
 */
-
 /**
  * @class tile
  * @brief Represents a tile obj.
@@ -3011,19 +2963,15 @@ class tile
             }
         }
     ;
-
     private:
-        void 
-        save_tile_ogsize(client * & c)
+        void save_tile_ogsize(client * & c)
         {
             c->tile_ogsize.x      = c->x;
             c->tile_ogsize.y      = c->y;
             c->tile_ogsize.width  = c->width;
             c->tile_ogsize.height = c->height;
         }
-        
-        void
-        moveresize(client * & c)
+        void moveresize(client * & c)
         {
             xcb_configure_window
             (
@@ -3043,9 +2991,7 @@ class tile
             );
             xcb_flush(conn);
         }
-
-        bool
-        current_tile_pos(client * & c, TILEPOS mode)
+        bool current_tile_pos(client * & c, TILEPOS mode)
         {
             switch (mode) 
             {
@@ -3118,9 +3064,7 @@ class tile
             }
             return false;
         }
-
-        void
-        set_tile_sizepos(client * & c, TILEPOS sizepos)
+        void set_tile_sizepos(client * & c, TILEPOS sizepos)
         {
             switch (sizepos) 
             {
@@ -3198,9 +3142,7 @@ class tile
                 }
             }
         }
-
-        void 
-        set_tile_ogsize(client * & c)
+        void set_tile_ogsize(client * & c)
         {
             animate
             (
@@ -3211,9 +3153,7 @@ class tile
                 c->tile_ogsize.height
             );
         }
-
-        void
-        animate_old(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight)
+        void animate_old(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight)
         {
             XCPPBAnimator anim(conn, c->frame);
             anim.animate
@@ -3230,9 +3170,7 @@ class tile
             );
             c->update();
         }
-
-        void
-        animate(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight)
+        void animate(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight)
         {
             XCPPBAnimator anim(conn,  c);
             anim.animate_client
@@ -3251,7 +3189,6 @@ class tile
         }
     ;
 };
-
 class Event
 {
     public: // constructor and destructor 
@@ -3265,7 +3202,6 @@ class Event
         {
             initialize_keysyms();
         }
-
         /**
          *
          * @brief Destructor for the Event class.
@@ -3280,15 +3216,15 @@ class Event
             }
         }
     ;
-    public: // methods 
-        void /**
+    public: // methods
+        /**
          *
          * @brief Event handler function that processes the incoming XCB events.
          * 
          * @param ev The XCB event to be handled.
          *
          */
-        handler(const xcb_generic_event_t * ev)
+        void handler(const xcb_generic_event_t * ev)
         {
             switch (ev->response_type & ~0x80) 
             {
@@ -3375,9 +3311,7 @@ class Event
                 }
             }
         }
-
-        void
-        test()
+        void test()
         {
             event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev){ key_press_handler(ev); });
             event_handler->setEventCallback(XCB_MAP_NOTIFY, [&](Ev ev){ map_notify_handler(ev); });
@@ -3394,14 +3328,14 @@ class Event
             event_handler->setEventCallback(XCB_MOTION_NOTIFY, [&](Ev ev){ motion_notify_handler(ev); });
         }
     ;
-    private: // variabels 
+    private: // variabels
         xcb_key_symbols_t * keysyms;
         /*
             VARIABELS TO STORE KEYCODES
          */ 
         xcb_keycode_t t{}, q{}, f{}, f11{}, n_1{}, n_2{}, n_3{}, n_4{}, n_5{}, r_arrow{}, l_arrow{}, u_arrow{}, d_arrow{}, tab{}, k{}; 
     ;
-    private: // helper functions 
+    private: // helper functions
         void /*
             INITIALIZES KEYBOARD KEY SYMBOLS AND STORES 
             THE KEYCODES UNTIL SESSION IS KILLED 
@@ -3519,9 +3453,8 @@ class Event
             }
         }
     ;
-    private: // event handling functions 
-        void 
-        key_press_handler(const xcb_generic_event_t * & ev)
+    private: // event handling functions
+        void key_press_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
             
@@ -3769,9 +3702,7 @@ class Event
                 }
             }
         }
-
-        void 
-        map_notify_handler(const xcb_generic_event_t * & ev)
+        void map_notify_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_map_notify_event_t *>(ev);
             client * c = wm->client_from_window(& e->window);
@@ -3780,17 +3711,13 @@ class Event
                 c->update();
             }
         }
-        
-        void 
-        map_req_handler(const xcb_generic_event_t * & ev) 
+        void map_req_handler(const xcb_generic_event_t * & ev) 
         {
             const auto * e = reinterpret_cast<const xcb_map_request_event_t *>(ev);
             log_win("e->window: " ,e->window);
             wm->manage_new_client(e->window);
         }
-        
-        void 
-        button_press_handler(const xcb_generic_event_t * & ev) 
+        void button_press_handler(const xcb_generic_event_t * & ev) 
         {
             const auto * e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
             client * c;
@@ -3943,9 +3870,7 @@ class Event
                 }
             }
         }
-
-        void
-        configure_request_handler(const xcb_generic_event_t * & ev)
+        void configure_request_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_configure_request_event_t *>(ev);
             wm->data.width     = e->width;
@@ -3953,9 +3878,7 @@ class Event
             wm->data.x         = e->x;
             wm->data.y         = e->y;
         }
-
-        void
-        focus_in_handler(const xcb_generic_event_t * & ev)
+        void focus_in_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_focus_in_event_t *>(ev);
             client * c = wm->client_from_window( & e->event);
@@ -3967,9 +3890,7 @@ class Event
                 wm->focused_client = c;
             }
         }
-
-        void
-        focus_out_handler(const xcb_generic_event_t * & ev)
+        void focus_out_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_focus_out_event_t *>(ev);
             
@@ -3981,9 +3902,7 @@ class Event
             
             c->win.grab_button({ { L_MOUSE_BUTTON, NULL } });
         }
-
-        void
-        destroy_notify_handler(const xcb_generic_event_t * & ev)
+        void destroy_notify_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_destroy_notify_event_t *>(ev);
             client * c = wm->client_from_any_window(& e->window);
@@ -3993,9 +3912,7 @@ class Event
                 log_error("send_sigterm_to_client: failed");
             }
         }
-
-        void
-        unmap_notify_handler(const xcb_generic_event_t * & ev)
+        void unmap_notify_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_unmap_notify_event_t *>(ev);
             
@@ -4013,29 +3930,21 @@ class Event
             //     XCB_flush();
             // }
         }
-
-        void 
-        reparent_notify_handler(const xcb_generic_event_t * & ev)
+        void reparent_notify_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_reparent_notify_event_t *>(ev);
         }
-        
-        void
-        enter_notify_handler(const xcb_generic_event_t * & ev)
+        void enter_notify_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_enter_notify_event_t *>(ev);
             log_win("e->event: ", e->event);
         }
-
-        void
-        leave_notify_handler(const xcb_generic_event_t * & ev)
+        void leave_notify_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_leave_notify_event_t *>(ev);
             // log_win("e->event: ", e->event);
         }
-
-        void 
-        motion_notify_handler(const xcb_generic_event_t * & ev)
+        void motion_notify_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
             // log_win("e->event: ", e->event);
@@ -4043,12 +3952,11 @@ class Event
         }
     ;
 };
-
-void /**
+/**
  * THIS IS THE MAIN EVENT LOOP
  * FOR THE 'WINDOW_MANAGER' 
  */
-run() 
+void run() 
 {
     Event event;
     // while (true)
@@ -4064,9 +3972,7 @@ run()
     event.test();
     event_handler->run();
 }
-
-void
-setup_wm()
+void setup_wm()
 {
     wm = new Window_Manager;
     wm->init();
@@ -4080,9 +3986,7 @@ setup_wm()
 
     pointer = new class pointer;
 }
-
-int
-main() 
+int main() 
 {
     LOG_start()
     setup_wm();

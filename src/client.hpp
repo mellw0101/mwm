@@ -411,6 +411,4 @@ class client
     ;
 };
 
-
-
 #endif

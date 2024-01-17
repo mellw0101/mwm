@@ -14,7 +14,7 @@ class Event_Handler
 {
     public: // methods
         using EventCallback = std::function<void(const xcb_generic_event_t*)>;
-
+        
         void run() 
         {
             xcb_generic_event_t *ev;
@@ -41,12 +41,10 @@ class Event_Handler
                 free(ev);
             }
         }
-
         void end()
         {
             shouldContinue = false;
         }
-
         void setEventCallback(uint8_t eventType, EventCallback callback) 
         {
             eventCallbacks[eventType].push_back(std::move(callback));
@@ -57,7 +55,7 @@ class Event_Handler
         bool shouldContinue = false;
     ;
 };
-
+static Event_Handler * event_handler;
 class Event_Handler_test
 {
     public:
@@ -74,7 +72,6 @@ class Event_Handler_test
                 callback(reinterpret_cast<const EventType*>(ev));
             };
         }
-
         void run()
         {
             xcb_generic_event_t *ev;
@@ -97,13 +94,11 @@ class Event_Handler_test
                 free(ev);
             }
         }
-
         void end()
         {
             shouldContinue = false;
         }
     ;
-
     private:
         // Generic event callback type
         using GenericEventCallback = std::function<void(const xcb_generic_event_t*)>;
@@ -113,7 +108,5 @@ class Event_Handler_test
         bool shouldContinue = false;
     ;
 };
-
-static Event_Handler * event_handler;
 
 #endif // EVENT_HANDLER_HPP
