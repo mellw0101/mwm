@@ -858,6 +858,15 @@ class Window_Manager
                 c->depth   = 24;
                 c->desktop = cur_d->desktop;
 
+                if (c->height > screen->height_in_pixels)
+                {
+                    c->height = screen->height_in_pixels;
+                }
+                if (c->width > screen->width_in_pixels)
+                {
+                    c->width = screen->width_in_pixels;
+                }
+
                 for (int i = 0; i < 256; ++i)
                 {
                     c->name[i] = '\0';
