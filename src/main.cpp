@@ -2319,6 +2319,10 @@ class Event
          *        Initializes the key symbols and keycodes.
          *
          */
+        {}
+    ;
+    public: // methods
+        void test()
         {
             event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev){ key_press_handler(ev); });
             event_handler->setEventCallback(XCB_MAP_NOTIFY, [&](Ev ev){ map_notify_handler(ev); });
@@ -2832,6 +2836,7 @@ int main()
     LOG_start()
     setup_wm();
     Event event;
+    event.test();
     event_handler->run();
     xcb_disconnect(conn);
     return 0;
