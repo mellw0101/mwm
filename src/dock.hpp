@@ -457,7 +457,10 @@ class Dock
             add_app_dialog_window.init();
             add_app_dialog_window.add_enter_action([this]()
             {
-                launcher.program((char *) add_app_dialog_window.search_string.c_str());
+                if (file.check_if_binary_exists(add_app_dialog_window.search_string.c_str()))
+                {
+                    launcher.program((char *) add_app_dialog_window.search_string.c_str());
+                }
             });
             context_menu.init();
             configure_events();
