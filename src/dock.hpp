@@ -425,12 +425,12 @@ class Mwm_Runner
             main_window.apply_event_mask(& mask);
             main_window.set_backround_color(DARK_GREY);
             setup_events();
-            main_window.raise();
-            main_window.map();
+            
         }
         void show()
         {
-            
+            main_window.raise();
+            main_window.map();
         }
     ;
     private: // functions
