@@ -360,6 +360,16 @@ class toString
 			return str;
 		}
 
+		std::string
+		convert(const std::vector<std::string> &in)
+		{
+			std::string str;
+			for (auto &i : in) 
+			{
+				str += i + " ";
+			}
+			return str;
+		}
 
 		std::string
 		convert(const std::vector<xcb_event_mask_t> &in)
