@@ -422,8 +422,7 @@ class Mwm_Runner
             uint32_t mask = XCB_EVENT_MASK_STRUCTURE_NOTIFY;
             main_window.apply_event_mask(& mask);
             main_window.set_backround_color(DARK_GREY);
-            setup_events();
-            
+            setup_events();   
         }
         void show()
         {
@@ -447,6 +446,19 @@ class Mwm_Runner
                     {
                         show();
                     }
+                }
+            });
+
+            event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) 
+            {
+                const auto * e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
+                if (!main_window.is_mapped())
+                {
+                    return;
+                }
+                if (e->event != main_window)
+                {
+                    hide();
                 }
             });
         }

@@ -391,6 +391,20 @@ class window
                 }
                 return false;
             }
+            bool is_mapped() 
+            {
+                xcb_get_window_attributes_cookie_t cookie = xcb_get_window_attributes(conn, _window);
+                xcb_get_window_attributes_reply_t *reply = xcb_get_window_attributes_reply(conn, cookie, NULL);
+                if (!reply)
+                {
+                    log_error("Unable to get window attributes.");
+                    return false;
+                }
+
+                bool isMapped = (reply->map_state == XCB_MAP_STATE_VIEWABLE);
+                free(reply);
+                return isMapped;    
+            }
         ;
         public: // set methods
             void set_active_EWMH_window()
