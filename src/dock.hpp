@@ -416,10 +416,10 @@ class Mwm_Runner
             main_window.create_default
             (
                 screen->root,
+                (screen->width_in_pixels / 2) - (140 / 2),
                 0,
-                0,
-                100,
-                100
+                140,
+                20
             );
             uint32_t mask = XCB_EVENT_MASK_STRUCTURE_NOTIFY;
             main_window.apply_event_mask(& mask);
