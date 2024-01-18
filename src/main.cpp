@@ -2593,6 +2593,9 @@ void setup_wm()
     dock->add_app("falkon");
     dock->init();
 
+    mwm_runner = new Mwm_Runner;
+    mwm_runner->init();
+
     pointer = new class pointer;
     Events events;
     events.setup();

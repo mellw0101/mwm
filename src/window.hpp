@@ -855,7 +855,8 @@ class window
                     {   U_ARROW,    SUPER                   },
                     {   D_ARROW,    SUPER                   },
                     {   TAB,        ALT                     },
-                    {   K,          SUPER                   }
+                    {   K,          SUPER                   },
+                    {   R,          SUPER                   }, // key_binding for runner_window
                 });
             }
             void grab_keys(std::initializer_list<std::pair<const uint32_t, const uint16_t>> bindings) 
