@@ -32,7 +32,7 @@ class Mwm_Animator /**
         }
     ;
     public: // methods
-        void /**
+        void animate(int startX, int startY, int startWidth, int startHeight, int endX, int endY, int endWidth, int endHeight, int duration) /**
          * @brief Animates the position and size of an object from a starting point to an ending point.
          * 
          * @param startX The starting X coordinate.
@@ -45,7 +45,6 @@ class Mwm_Animator /**
          * @param endHeight The ending height.
          * @param duration The duration of the animation in milliseconds.
          */
-        animate(int startX, int startY, int startWidth, int startHeight, int endX, int endY, int endWidth, int endHeight, int duration) 
         {
             /* ENSURE ANY EXISTING ANIMATION IS STOPPED */
             stopAnimations();
