@@ -2133,7 +2133,7 @@ class Events
                 {
                     case CTRL + ALT:
                     {
-                        wm->launcher.program((char *) "/usr/bin/konsole");
+                        wm->launcher.program((char *) "konsole");
                         break;
                     }
                 }
@@ -2339,7 +2339,7 @@ class Events
                         {
                             return;
                         }
-                        
+
                         if (c->win.is_mask_active(XCB_EVENT_MASK_ENTER_WINDOW))
                         {
                             log_info("event_mask is active");
