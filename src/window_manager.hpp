@@ -232,7 +232,7 @@ class Window_Manager
                     "konsole",
                     [this]() 
                     {
-                        launcher.program((char *) "/usr/bin/konsole");
+                        launcher.program((char *) "konsole");
                     }
                 );
                 context_menu->init();
