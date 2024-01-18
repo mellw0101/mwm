@@ -423,6 +423,7 @@ class add_app_dialog_window
         void show()
         {
             create_client();
+            search_window.create(main_window, DOCK_BORDER, DOCK_BORDER, (main_window.width() - (DOCK_BORDER * 2)), 20);
             search_window.init();
             // create_search_window();
         }
