@@ -2331,14 +2331,15 @@ class Events
              * 
              */
             {
-                if (e->event == wm->root)
-                {
-                    return;
-                }
                 switch (e->state) 
                 {
                     case SUPER:
                         client * c = wm->client_from_window(& e->event);
+                        if (!c)
+                        {
+                            return;
+                        }
+                        
                         if (c->win.is_mask_active(XCB_EVENT_MASK_ENTER_WINDOW))
                         {
                             log_info("event_mask is active");
