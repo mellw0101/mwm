@@ -418,7 +418,7 @@ class search_window
                 for (int i = 0; i < entry_list_size; ++i)
                 {
                     window entry;
-                    entry.create_default(main_window, 0, main_window.height(), 20, 20);
+                    entry.create_default(main_window, 0, 20, 20, 20);
                     entry.set_backround_color(BLACK);
                     entry.raise();
                     entry.map();
@@ -452,7 +452,7 @@ class Mwm_Runner
                 (screen->width_in_pixels / 2) - ((140 + (BORDER * 2)) / 2),
                 0,
                 140 + (BORDER * 2),
-                20 + (BORDER * 2)
+                400 + (BORDER * 2)
             );
             uint32_t mask = XCB_EVENT_MASK_STRUCTURE_NOTIFY;
             main_window.apply_event_mask(& mask);
