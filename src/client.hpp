@@ -199,7 +199,7 @@ class client
             }
             void width_height(const uint32_t & width, const uint32_t & height)
             {
-                win.width_height((width - (BORDER_SIZE * 2)), (height - (BORDER_SIZE * 2)));
+                win.width_height((width - (BORDER_SIZE * 2)), (height - (BORDER_SIZE * 2) - TITLE_BAR_HEIGHT));
                 xcb_flush(conn);
                 frame.width_height(width, height);
                 titlebar.width((width - (BORDER_SIZE * 2)));
