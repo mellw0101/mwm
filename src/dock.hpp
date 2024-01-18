@@ -406,8 +406,6 @@ class Mwm_Runner
     public: // variabels
         window main_window;
         search_window search_window;
-        uint32_t width = 140;
-        uint32_t height = 20;
         uint32_t BORDER = 2;
     ;
     public: // methods
@@ -416,9 +414,9 @@ class Mwm_Runner
             main_window.create_default
             (
                 screen->root,
-                (screen->width_in_pixels / 2) - (width / 2),
+                (screen->width_in_pixels / 2) - ((140 + (BORDER * 2)) / 2),
                 0,
-                width,
+                140 + (BORDER * 2),
                 20
             );
             uint32_t mask = XCB_EVENT_MASK_STRUCTURE_NOTIFY;
