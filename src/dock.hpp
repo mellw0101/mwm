@@ -421,13 +421,16 @@ class Mwm_Runner
                 (width + (BORDER * 2)),
                 (height + (BORDER * 2))
             );
+            uint32_t mask = XCB_EVENT_MASK_STRUCTURE_NOTIFY;
+            main_window.apply_event_mask(& mask);
             main_window.set_backround_color(DARK_GREY);
             setup_events();
+            main_window.raise();
+            main_window.map();
         }
         void show()
         {
-            main_window.raise();
-            main_window.map();
+            
         }
     ;
     private: // functions
@@ -487,7 +490,7 @@ class add_app_dialog_window
         void create()
         {
             main_window.create_default(screen->root, pointer.x(), pointer.y(), 300, 200);
-            uint32_t mask =  XCB_EVENT_MASK_STRUCTURE_NOTIFY;
+            uint32_t mask = XCB_EVENT_MASK_STRUCTURE_NOTIFY;
             main_window.apply_event_mask(& mask);
             main_window.grab_button({ { L_MOUSE_BUTTON, NULL } });
             main_window.grab_keys({ { Q, SHIFT | ALT } });
