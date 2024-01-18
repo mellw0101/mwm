@@ -455,6 +455,10 @@ class Dock
             configure_context_menu();
             make_apps();
             add_app_dialog_window.init();
+            add_app_dialog_window.add_enter_action([this]()
+            {
+                launcher.program((char *) "konsole");
+            });
             context_menu.init();
             configure_events();
         }
@@ -493,7 +497,7 @@ class Dock
         }
         void setup_dock()
         {
-            main_window.grab_button({{R_MOUSE_BUTTON, NULL}});
+            main_window.grab_button({ { R_MOUSE_BUTTON, NULL } });
             main_window.set_backround_color(DARK_GREY);
             calc_size_pos();
             main_window.map();

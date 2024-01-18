@@ -2381,21 +2381,6 @@ class Events
                     return;
                 }
             }
-            
-            // // dock
-            // if (e->detail == L_MOUSE_BUTTON)
-            // {
-            //     dock->buttons.run_action(e->event);
-            // }
-            
-            // if (e->event == dock->main_window)
-            // {
-            //     if (e->detail == R_MOUSE_BUTTON)
-            //     {
-            //         dock->context_menu.show();
-            //         return;
-            //     }    
-            // }
 
             if (e->event == wm->root)
             {
@@ -2409,7 +2394,6 @@ class Events
             c = wm->client_from_any_window(& e->event);
             if (!c)
             {
-                // log_error("c == null");
                 return;
             }
             
