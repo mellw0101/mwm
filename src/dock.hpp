@@ -64,6 +64,14 @@ class search_window
         {
             setup_events();
         }
+        void clear_search_string()
+        {
+            search_string = "";
+        }
+        std::string string()
+        {
+            return search_string;
+        }
     ;
     private: // functions
         void setup_events()
@@ -407,6 +415,7 @@ class Mwm_Runner
         window main_window;
         search_window search_window;
         uint32_t BORDER = 2;
+        Launcher launcher;
     ;
     public: // methods
         void init()
@@ -422,6 +431,7 @@ class Mwm_Runner
             uint32_t mask = XCB_EVENT_MASK_STRUCTURE_NOTIFY;
             main_window.apply_event_mask(& mask);
             main_window.set_backround_color(DARK_GREY);
+            main_window.grab_button({ { L_MOUSE_BUTTON, NULL } });
             setup_events();
             search_window.create
             (
@@ -432,6 +442,10 @@ class Mwm_Runner
                 main_window.height() - (BORDER * 2)
             );
             search_window.init();
+            search_window.add_enter_action([this]()
+            {
+                launcher.program((char *) search_window.string().c_str());
+            });
         }
         void show()
         {
@@ -444,6 +458,7 @@ class Mwm_Runner
         void hide()
         {
             main_window.unmap();
+            search_window.clear_search_string();
         }
         void setup_events()
         {
