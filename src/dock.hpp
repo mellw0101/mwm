@@ -28,20 +28,20 @@
 class search_window
 {
     public: // variabels
-        window window;
+        window main_window;
         std::string search_string = ""
     ;
     public: // mehods
         void create(const uint32_t & parent_window, const uint32_t & x, const uint32_t & y, const uint32_t & width, const uint32_t & height)
         {
-            window.create_default(parent_window, x, y, width, height);
-            window.set_backround_color(BLACK);
+            main_window.create_default(parent_window, x, y, width, height);
+            main_window.set_backround_color(BLACK);
             uint32_t mask =  XCB_EVENT_MASK_STRUCTURE_NOTIFY | XCB_EVENT_MASK_FOCUS_CHANGE;
-            window.apply_event_mask(& mask);
-            window.map();
-            window.grab_button({ { L_MOUSE_BUTTON, NULL } });
-            window.grab_keys_for_typing();
-            window.grab_keys
+            main_window.apply_event_mask(& mask);
+            main_window.map();
+            main_window.grab_button({ { L_MOUSE_BUTTON, NULL } });
+            main_window.grab_keys_for_typing();
+            main_window.grab_keys
             ({
                 { SPACE_BAR,    NULL        },
                 { SPACE_BAR,    SHIFT       },
@@ -53,8 +53,8 @@ class search_window
                 { Q,            SHIFT | ALT }
             });
             
-            window.raise();
-            window.focus_input();
+            main_window.raise();
+            main_window.focus_input();
         }
         void add_enter_action(std::function<void()> enter_action)
         {
@@ -79,7 +79,7 @@ class search_window
             event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev) 
             {
                 const auto * e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
-                if (e->event == window)
+                if (e->event == main_window)
                 {
                     if (e->detail == wm->key_codes.a) 
                     {
@@ -377,7 +377,7 @@ class search_window
                         if (search_string.length() > 0)
                         {
                             search_string.erase(search_string.length() - 1);
-                            window.clear();
+                            main_window.clear();
                         }
                     }
                     if (e->detail == wm->key_codes.enter)
@@ -387,7 +387,7 @@ class search_window
                             enter_function();
                         }
                         search_string = "";
-                        window.clear();
+                        main_window.clear();
                     }
 
                     draw_text();
@@ -397,25 +397,42 @@ class search_window
             event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev)
             {
                 const auto * e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
-                if (e->event == window)
+                if (e->event == main_window)
                 {
-                    window.raise();
-                    window.focus_input();
+                    main_window.raise();
+                    main_window.focus_input();
                 }
             });
         }
         void draw_text()
         {
-            window.draw_text(search_string.c_str(), WHITE, BLACK, "7x14", 2, 14);
+            main_window.draw_text(search_string.c_str(), WHITE, BLACK, "7x14", 2, 14);
             if (search_string.length() > 0)
             {
-                file.search_for_binary(search_string.c_str());
+                results = file.search_for_binary(search_string.c_str());
+                int entry_list_size = results.size(); 
+                if (results.size() > 7)
+                {
+                    entry_list_size = 7;
+                }
+                for (int i = 0; i < entry_list_size; ++i)
+                {
+                    window entry;
+                    entry.create_default(main_window, 0, main_window.height(), 20, 20);
+                    entry.set_backround_color(BLACK);
+                    entry.raise();
+                    entry.map();
+                    entry_list.push_back(entry);
+                    entry.draw_text(results[i].c_str(), WHITE, BLACK, "7x14", 2, 14);
+                }
             }
         }
     ;
     private: // variables
         std::function<void()> enter_function;
         File file;
+        std::vector<std::string> results;
+        std::vector<window> entry_list;
     ;
 };
 class Mwm_Runner
@@ -461,7 +478,7 @@ class Mwm_Runner
         {
             main_window.raise();
             main_window.map();
-            search_window.window.focus_input();
+            search_window.main_window.focus_input();
         }
     ;
     private: // functions
@@ -491,7 +508,7 @@ class Mwm_Runner
                 {
                     return;
                 }
-                if (e->event != main_window && e->event != search_window.window)
+                if (e->event != main_window && e->event != search_window.main_window)
                 {
                     hide();
                 }
@@ -554,7 +571,7 @@ class add_app_dialog_window
             event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev)
             {
                 const auto * e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
-                if (e->event == search_window.window)
+                if (e->event == search_window.main_window)
                 {
                     c->focus();
                 }

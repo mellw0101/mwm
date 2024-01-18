@@ -102,10 +102,10 @@ class File
             std::vector<const char *> dirs = split_$PATH_into_vector();
             return check_if_file_exists_in_DIRS(dirs, name);
         }
-        void search_for_binary(const char * name)
+        std::vector<std::string> search_for_binary(const char * name)
         {
             ds.search(split_$PATH_into_vector(), name);
-            log_info(ds.getResults());
+            return ds.getResults();
         }
     ;
     private: // variables
