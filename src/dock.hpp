@@ -52,6 +52,16 @@ class search_window
 
                 { Q,            SHIFT | ALT }
             });
+
+            for (int i = 0; i < 7; ++i)
+            {
+                window entry;
+                entry.create_default(main_window, 0, (20 * (i + 1)) , 140, 20);
+                entry.set_backround_color(BLACK);
+                entry.raise();
+                entry.map();
+                entry_list.push_back(entry);
+            }
             
             main_window.raise();
             main_window.focus_input();
@@ -417,13 +427,7 @@ class search_window
                 }
                 for (int i = 0; i < entry_list_size; ++i)
                 {
-                    window entry;
-                    entry.create_default(main_window, 0, (20 * (i + 1)) , 140, 20);
-                    entry.set_backround_color(BLACK);
-                    entry.raise();
-                    entry.map();
-                    entry_list.push_back(entry);
-                    entry.draw_text(results[i].c_str(), WHITE, BLACK, "7x14", 2, 14);
+                    entry_list[i].draw_text(results[i].c_str(), WHITE, BLACK, "7x14", 2, 14);
                 }
             }
         }
