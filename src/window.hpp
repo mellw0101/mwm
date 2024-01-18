@@ -379,7 +379,7 @@ class window
                 }
                 return setMasks;
             }
-            bool mask_is_active(const uint32_t & event_mask)
+            bool is_mask_active(const uint32_t & event_mask)
             {
                 std::vector<xcb_event_mask_t> masks = check_event_mask_codes();
                 for (const auto & ev_mask : masks)
