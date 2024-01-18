@@ -140,7 +140,7 @@ class _scale
 };
 class window
 {
-    public: // construcers and operators 
+    public: // construcers and operators
         window() {}
 
         operator uint32_t() const 
@@ -154,8 +154,8 @@ class window
             return *this;
         }
     ;
-    public: // methods 
-        public: // main methods 
+    public: // methods
+        public: // main methods
             void create( 
                 const uint8_t  & depth,
                 const uint32_t & parent,
@@ -321,8 +321,8 @@ class window
                 xcb_flush(conn);
             }
         ;
-        public: // check methods 
-            bool check_if_EWMH_fullscreen() 
+        public: // check methods
+            bool is_EWMH_fullscreen() 
             {
                 xcb_get_property_cookie_t cookie = xcb_ewmh_get_wm_state(ewmh, _window);
                 xcb_ewmh_get_atoms_reply_t wm_state;
@@ -392,7 +392,7 @@ class window
                 return false;
             }
         ;
-        public: // set methods 
+        public: // set methods
             void set_active_EWMH_window()
             {
                 xcb_ewmh_set_active_window(ewmh, 0, _window); // 0 for the first (default) screen
@@ -414,7 +414,7 @@ class window
                 xcb_flush(conn);
             }
         ;
-        public: // unset methods 
+        public: // unset methods
             void unset_EWMH_fullscreen_state()
             {
                 xcb_change_property
@@ -431,7 +431,7 @@ class window
                 xcb_flush(conn);
             }
         ;
-        public: // get methods 
+        public: // get methods
             char * property(const char * atom_name) 
             {
                 xcb_get_property_reply_t *reply;
@@ -546,7 +546,7 @@ class window
                 return children;
             }
         ;
-        public: // configuration methods 
+        public: // configuration methods
             void apply_event_mask(const std::vector<uint32_t> & values) 
             {
                 if (values.empty()) 
@@ -574,138 +574,6 @@ class window
                     XCB_CW_EVENT_MASK,
                     mask
                 );
-            }
-            void grab_button(std::initializer_list<std::pair<const uint8_t, const uint16_t>> bindings)
-            {
-                for (const auto & binding : bindings)
-                {
-                    const uint8_t & button = binding.first;
-                    const uint16_t & modifier = binding.second;
-                    xcb_grab_button
-                    (
-                        conn, 
-                        1, 
-                        _window, 
-                        XCB_EVENT_MASK_BUTTON_PRESS, 
-                        XCB_GRAB_MODE_ASYNC, 
-                        XCB_GRAB_MODE_ASYNC, 
-                        XCB_NONE, 
-                        XCB_NONE, 
-                        button, 
-                        modifier    
-                    );
-                    xcb_flush(conn); 
-                }
-            }
-            void ungrab_button(std::initializer_list<std::pair<const uint8_t, const uint16_t>> bindings)
-            {
-                for (const auto & binding : bindings)
-                {
-                    const uint8_t & button = binding.first;
-                    const uint16_t & modifier = binding.second;
-                    xcb_ungrab_button
-                    (
-                        conn,
-                        button,
-                        _window,
-                        modifier
-                    );
-                }
-                xcb_flush(conn); // Flush the request to the X server
-            }
-            void grab_keys(std::initializer_list<std::pair<const uint32_t, const uint16_t>> bindings) 
-            {
-                xcb_key_symbols_t * keysyms = xcb_key_symbols_alloc(conn);
-            
-                if (!keysyms) 
-                {
-                    log_error("keysyms could not get initialized");
-                    return;
-                }
-
-                for (const auto & binding : bindings) 
-                {
-                    xcb_keycode_t * keycodes = xcb_key_symbols_get_keycode(keysyms, binding.first);
-                    if (keycodes)
-                    {
-                        for (auto * kc = keycodes; * kc; kc++) 
-                        {
-                            xcb_grab_key
-                            (
-                                conn,
-                                1,
-                                _window,
-                                binding.second, 
-                                *kc,        
-                                XCB_GRAB_MODE_ASYNC, 
-                                XCB_GRAB_MODE_ASYNC  
-                            );
-                        }
-                        free(keycodes);
-                    }
-                }
-                xcb_key_symbols_free(keysyms);
-
-                xcb_flush(conn); 
-            }
-            void grab_keys_for_typing()
-            {
-                grab_keys(
-                {
-                    { A,   NULL  },
-                    { B,   NULL  },
-                    { C,   NULL  },
-                    { D,   NULL  },
-                    { E,   NULL  },
-                    { F,   NULL  },
-                    { G,   NULL  },
-                    { H,   NULL  },
-                    { I,   NULL  },
-                    { J,   NULL  },
-                    { K,  NULL  },
-                    { L,  NULL  },
-                    { M,  NULL  },
-                    { _N, NULL  },
-                    { O,  NULL  },
-                    { P,  NULL  },
-                    { Q,  NULL  },
-                    { R,  NULL  },
-                    { S,  NULL  },
-                    { T,  NULL  },
-                    { U,  NULL  },
-                    { V,  NULL  },
-                    { W,  NULL  },
-                    { _X, NULL  },
-                    { _Y, NULL  },
-                    { Z,  NULL  },
-
-                    { A,  SHIFT },
-                    { B,  SHIFT },
-                    { C,  SHIFT },
-                    { D,  SHIFT },
-                    { E,  SHIFT },
-                    { F,  SHIFT },
-                    { G,  SHIFT },
-                    { H,  SHIFT },
-                    { I,  SHIFT },
-                    { J,  SHIFT },
-                    { K,  SHIFT },
-                    { L,  SHIFT },
-                    { M,  SHIFT },
-                    { _N, SHIFT },
-                    { O,  SHIFT },
-                    { P,  SHIFT },
-                    { Q,  SHIFT },
-                    { R,  SHIFT },
-                    { S,  SHIFT },
-                    { T,  SHIFT },
-                    { U,  SHIFT },
-                    { V,  SHIFT },
-                    { W,  SHIFT },
-                    { _X, SHIFT },
-                    { _Y, SHIFT },
-                    { Z,  SHIFT },
-                });
             }
             void set_pointer(CURSOR cursor_type) 
             {
@@ -755,7 +623,7 @@ class window
                 );
                 xcb_flush(conn);
             }
-            public: // size_pos configuration methods 
+            public: // size_pos configuration methods
                 public: // fetch methods
                     uint32_t x() 
                     {
@@ -850,7 +718,7 @@ class window
                     update(x, y, _width, height);
                 }
             ;
-            public: // backround methods 
+            public: // backround methods
                 void set_backround_color(COLOR color)
                 {
                     change_back_pixel(get_color(color));
@@ -990,9 +858,143 @@ class window
                     {   K,          SUPER                   }
                 });
             }
+            void grab_keys(std::initializer_list<std::pair<const uint32_t, const uint16_t>> bindings) 
+            {
+                xcb_key_symbols_t * keysyms = xcb_key_symbols_alloc(conn);
+            
+                if (!keysyms) 
+                {
+                    log_error("keysyms could not get initialized");
+                    return;
+                }
+
+                for (const auto & binding : bindings) 
+                {
+                    xcb_keycode_t * keycodes = xcb_key_symbols_get_keycode(keysyms, binding.first);
+                    if (keycodes)
+                    {
+                        for (auto * kc = keycodes; * kc; kc++) 
+                        {
+                            xcb_grab_key
+                            (
+                                conn,
+                                1,
+                                _window,
+                                binding.second, 
+                                *kc,        
+                                XCB_GRAB_MODE_ASYNC, 
+                                XCB_GRAB_MODE_ASYNC  
+                            );
+                        }
+                        free(keycodes);
+                    }
+                }
+                xcb_key_symbols_free(keysyms);
+
+                xcb_flush(conn); 
+            }
+            void grab_keys_for_typing()
+            {
+                grab_keys(
+                {
+                    { A,   NULL  },
+                    { B,   NULL  },
+                    { C,   NULL  },
+                    { D,   NULL  },
+                    { E,   NULL  },
+                    { F,   NULL  },
+                    { G,   NULL  },
+                    { H,   NULL  },
+                    { I,   NULL  },
+                    { J,   NULL  },
+                    { K,  NULL  },
+                    { L,  NULL  },
+                    { M,  NULL  },
+                    { _N, NULL  },
+                    { O,  NULL  },
+                    { P,  NULL  },
+                    { Q,  NULL  },
+                    { R,  NULL  },
+                    { S,  NULL  },
+                    { T,  NULL  },
+                    { U,  NULL  },
+                    { V,  NULL  },
+                    { W,  NULL  },
+                    { _X, NULL  },
+                    { _Y, NULL  },
+                    { Z,  NULL  },
+
+                    { A,  SHIFT },
+                    { B,  SHIFT },
+                    { C,  SHIFT },
+                    { D,  SHIFT },
+                    { E,  SHIFT },
+                    { F,  SHIFT },
+                    { G,  SHIFT },
+                    { H,  SHIFT },
+                    { I,  SHIFT },
+                    { J,  SHIFT },
+                    { K,  SHIFT },
+                    { L,  SHIFT },
+                    { M,  SHIFT },
+                    { _N, SHIFT },
+                    { O,  SHIFT },
+                    { P,  SHIFT },
+                    { Q,  SHIFT },
+                    { R,  SHIFT },
+                    { S,  SHIFT },
+                    { T,  SHIFT },
+                    { U,  SHIFT },
+                    { V,  SHIFT },
+                    { W,  SHIFT },
+                    { _X, SHIFT },
+                    { _Y, SHIFT },
+                    { Z,  SHIFT },
+                });
+            }
+        ;
+        public: // buttons
+            void grab_button(std::initializer_list<std::pair<const uint8_t, const uint16_t>> bindings)
+            {
+                for (const auto & binding : bindings)
+                {
+                    const uint8_t & button = binding.first;
+                    const uint16_t & modifier = binding.second;
+                    xcb_grab_button
+                    (
+                        conn, 
+                        1, 
+                        _window, 
+                        XCB_EVENT_MASK_BUTTON_PRESS, 
+                        XCB_GRAB_MODE_ASYNC, 
+                        XCB_GRAB_MODE_ASYNC, 
+                        XCB_NONE, 
+                        XCB_NONE, 
+                        button, 
+                        modifier    
+                    );
+                    xcb_flush(conn); 
+                }
+            }
+            void ungrab_button(std::initializer_list<std::pair<const uint8_t, const uint16_t>> bindings)
+            {
+                for (const auto & binding : bindings)
+                {
+                    const uint8_t & button = binding.first;
+                    const uint16_t & modifier = binding.second;
+                    xcb_ungrab_button
+                    (
+                        conn,
+                        button,
+                        _window,
+                        modifier
+                    );
+                }
+                xcb_flush(conn); // Flush the request to the X server
+            }
         ;
     ;
-    private: // variables 
+    private: // variables
         private: // main variables 
             uint8_t        _depth;
             uint32_t       _window;
@@ -1013,7 +1015,7 @@ class window
         xcb_pixmap_t   pixmap;
         Logger log;
     ;
-    private: // functions 
+    private: // functions
         private: // main functions 
             void
             make_window()

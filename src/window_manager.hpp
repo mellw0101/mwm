@@ -862,7 +862,7 @@ class Window_Manager
                 c->name[i] = '\0';
                 free(name);
 
-                if (c->win.check_if_EWMH_fullscreen()) 
+                if (c->win.is_EWMH_fullscreen()) 
                 {
                     c->x      = 0;
                     c->y      = 0;

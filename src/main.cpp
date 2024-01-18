@@ -417,7 +417,7 @@ class mv_client
         mv_client(client * & c, const uint16_t & start_x, const uint16_t & start_y) 
         : c(c), start_x(start_x), start_y(start_y)
         {
-            if (c->win.check_if_EWMH_fullscreen())
+            if (c->win.is_EWMH_fullscreen())
             {
                 return;
             }
@@ -1699,7 +1699,7 @@ class resize_client
         resize_client(client * & c , int retard_int) 
         : c(c) 
         {
-            if (c->win.check_if_EWMH_fullscreen())
+            if (c->win.is_EWMH_fullscreen())
             {
                 return;
             }
@@ -1718,7 +1718,7 @@ class resize_client
                 no_border(client * & c, const uint32_t & x, const uint32_t & y)
                 : c(c)
                 {
-                    if (c->win.check_if_EWMH_fullscreen())
+                    if (c->win.is_EWMH_fullscreen())
                     {
                         return;
                     }
@@ -1896,7 +1896,7 @@ class resize_client
                 border(client * & c, edge _edge)
                 : c(c)
                 {
-                    if (c->win.check_if_EWMH_fullscreen())
+                    if (c->win.is_EWMH_fullscreen())
                     {
                         return;
                     }
@@ -2341,7 +2341,7 @@ class max_win
             {
                 case EWMH_MAXWIN:
                 {
-                    if (c->win.check_if_EWMH_fullscreen())
+                    if (c->win.is_EWMH_fullscreen())
                     {
                         ewmh_unmax_win(c);
                     }
@@ -2746,7 +2746,7 @@ class tile
     public: // constructors
         tile(client * & c, TILE tile)
         {
-            if (c->win.check_if_EWMH_fullscreen())
+            if (c->win.is_EWMH_fullscreen())
             {
                 return;
             }
