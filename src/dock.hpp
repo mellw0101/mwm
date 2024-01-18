@@ -417,7 +417,7 @@ class Mwm_Runner
                 (screen->width_in_pixels / 2) - ((140 + (BORDER * 2)) / 2),
                 0,
                 140 + (BORDER * 2),
-                20
+                20 + (BORDER * 2)
             );
             uint32_t mask = XCB_EVENT_MASK_STRUCTURE_NOTIFY;
             main_window.apply_event_mask(& mask);
@@ -428,8 +428,8 @@ class Mwm_Runner
                 main_window,
                 2,
                 2,
-                40,
-                16
+                main_window.width() - (BORDER * 2),
+                main_window.height() - (BORDER * 2)
             );
             search_window.init();
         }
@@ -437,6 +437,7 @@ class Mwm_Runner
         {
             main_window.raise();
             main_window.map();
+            search_window.window.focus_input();
         }
     ;
     private: // functions
