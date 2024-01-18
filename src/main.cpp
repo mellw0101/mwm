@@ -2331,6 +2331,10 @@ class Events
              * 
              */
             {
+                if (e->event == wm->root)
+                {
+                    return;
+                }
                 switch (e->state) 
                 {
                     case SUPER:
