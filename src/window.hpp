@@ -340,7 +340,7 @@ class window
                 }
                 return false;
             }
-            bool check_if_active_EWMH_window()
+            bool is_active_EWMH_window()
             {
                 uint32_t active_window = 0;
                 xcb_ewmh_get_active_window_reply(ewmh, xcb_ewmh_get_active_window(ewmh, 0), &active_window, NULL);
@@ -379,7 +379,7 @@ class window
                 }
                 return setMasks;
             }
-            bool check_if_mask_is_active(const uint32_t & event_mask)
+            bool mask_is_active(const uint32_t & event_mask)
             {
                 std::vector<xcb_event_mask_t> masks = check_event_mask_codes();
                 for (const auto & ev_mask : masks)
