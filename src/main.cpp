@@ -2310,10 +2310,10 @@ class tile
         }
     ;
 };
-class Event
+class Events
 {
     public: // constructor and destructor  
-        Event() /**
+        Events() /**
          *
          * @brief Constructor for the Event class.
          *        Initializes the key symbols and keycodes.
@@ -2322,7 +2322,7 @@ class Event
         {}
     ;
     public: // methods
-        void test()
+        void setup()
         {
             event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev){ key_press_handler(ev); });
             event_handler->setEventCallback(XCB_MAP_NOTIFY, [&](Ev ev){ map_notify_handler(ev); });
@@ -2830,13 +2830,13 @@ void setup_wm()
     dock->init();
 
     pointer = new class pointer;
+    Events events;
+    events.setup();
 }
 int main() 
 {
     LOG_start()
     setup_wm();
-    Event event;
-    event.test();
     event_handler->run();
     xcb_disconnect(conn);
     return 0;
