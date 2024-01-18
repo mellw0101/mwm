@@ -390,7 +390,7 @@ class search_window
                         window.clear();
                     }
 
-                    window.draw_text(search_string.c_str(), WHITE, BLACK, "7x14", 2, 14);
+                    draw_text();
                 }
             });
             
@@ -404,9 +404,15 @@ class search_window
                 }
             });
         }
+        void draw_text()
+        {
+            window.draw_text(search_string.c_str(), WHITE, BLACK, "7x14", 2, 14);
+            file.search_for_binary(search_string.c_str());
+        }
     ;
     private: // variables
         std::function<void()> enter_function;
+        File file;
     ;
 };
 class Mwm_Runner
