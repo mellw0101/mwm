@@ -466,7 +466,7 @@ class Mwm_Runner
                 {
                     return;
                 }
-                if (e->event != main_window)
+                if (e->event != main_window && e->event != search_window.window)
                 {
                     hide();
                 }
