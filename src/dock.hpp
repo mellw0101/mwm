@@ -835,7 +835,7 @@ class Dock
             configure_context_menu();
             make_apps();
             add_app_dialog_window.init();
-            add_app_dialog_window.add_enter_action([this]()
+            add_app_dialog_window.search_window.add_enter_action([this]()
             {
                 if (file.check_if_binary_exists(add_app_dialog_window.search_string.c_str()))
                 {
