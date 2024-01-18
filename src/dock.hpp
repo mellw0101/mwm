@@ -445,6 +445,7 @@ class Mwm_Runner
             search_window.add_enter_action([this]()
             {
                 launcher.program((char *) search_window.string().c_str());
+                hide();
             });
         }
         void show()
