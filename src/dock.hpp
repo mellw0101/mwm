@@ -407,7 +407,10 @@ class search_window
         void draw_text()
         {
             window.draw_text(search_string.c_str(), WHITE, BLACK, "7x14", 2, 14);
-            file.search_for_binary(search_string.c_str());
+            if (search_string.length() > 0)
+            {
+                file.search_for_binary(search_string.c_str());
+            }
         }
     ;
     private: // variables
