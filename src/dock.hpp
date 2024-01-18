@@ -422,7 +422,16 @@ class Mwm_Runner
             uint32_t mask = XCB_EVENT_MASK_STRUCTURE_NOTIFY;
             main_window.apply_event_mask(& mask);
             main_window.set_backround_color(DARK_GREY);
-            setup_events();   
+            setup_events();
+            search_window.create
+            (
+                main_window,
+                (main_window.x() - BORDER),
+                (main_window.y() - BORDER),
+                (main_window.width() - (BORDER * 2)),
+                (main_window.height() - (BORDER * 2))
+            );
+            search_window.init();
         }
         void show()
         {
