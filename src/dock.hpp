@@ -426,10 +426,10 @@ class Mwm_Runner
             search_window.create
             (
                 main_window,
-                (main_window.x() - BORDER),
-                (main_window.y() - BORDER),
-                (main_window.width() - (BORDER * 2)),
-                (main_window.height() - (BORDER * 2))
+                2,
+                2,
+                40,
+                16
             );
             search_window.init();
         }
