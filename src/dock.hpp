@@ -536,6 +536,23 @@ class Dock
             event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev)
             {
                 const auto * e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
+                if (e->event == main_window)
+                {
+                    if (e->detail == R_MOUSE_BUTTON)
+                    {
+                        context_menu.show();
+                    }
+                }
+                for (int i = 0; i < buttons.size(); ++i)
+                {
+                    if (e->event == buttons.list[i].window)
+                    {
+                        if (e->detail == L_MOUSE_BUTTON) 
+                        {
+                            buttons.list[i].activate();
+                        }
+                    }
+                }
                 if (e->event == add_app_dialog_window.search_window)
                 {
                     add_app_dialog_window.c->focus();
