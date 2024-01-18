@@ -425,6 +425,8 @@ class search_window
                 {
                     entry_list_size = 7;
                 }
+                main_window.height(20 * entry_list_size);
+                xcb_flush(conn);
                 for (int i = 0; i < entry_list_size; ++i)
                 {
                     entry_list[i].draw_text(results[i].c_str(), WHITE, BLACK, "7x14", 2, 14);
