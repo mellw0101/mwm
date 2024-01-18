@@ -418,7 +418,7 @@ class search_window
                 for (int i = 0; i < entry_list_size; ++i)
                 {
                     window entry;
-                    entry.create_default(main_window, 0, 20, 20, 20);
+                    entry.create_default(main_window, 0, (20 * (i + 1)) , 140, 20);
                     entry.set_backround_color(BLACK);
                     entry.raise();
                     entry.map();
