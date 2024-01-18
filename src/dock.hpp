@@ -422,7 +422,7 @@ class Mwm_Runner
                 (height + (BORDER * 2))
             );
             main_window.set_backround_color(DARK_GREY);
-            
+            setup_events();
         }
         void show()
         {
