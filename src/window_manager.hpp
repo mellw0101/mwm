@@ -494,27 +494,7 @@ class Window_Manager
                     {   R_MOUSE_BUTTON,     ALT },
                     {   L_MOUSE_BUTTON,     0   }
                 });
-                c->win.grab_keys(
-                {
-                    {   T,          ALT | CTRL              },
-                    {   Q,          ALT | SHIFT             },
-                    {   F11,        NULL                    },
-                    {   N_1,        ALT                     },
-                    {   N_2,        ALT                     },
-                    {   N_3,        ALT                     },
-                    {   N_4,        ALT                     },
-                    {   N_5,        ALT                     },
-                    {   R_ARROW,    CTRL | SUPER            },
-                    {   L_ARROW,    CTRL | SUPER            },
-                    {   R_ARROW,    CTRL | SUPER | SHIFT    },
-                    {   L_ARROW,    CTRL | SUPER | SHIFT    },
-                    {   R_ARROW,    SUPER                   },
-                    {   L_ARROW,    SUPER                   },
-                    {   U_ARROW,    SUPER                   },
-                    {   D_ARROW,    SUPER                   },
-                    {   TAB,        ALT                     },
-                    {   K,          SUPER                   }
-                });
+                c->win.grab_default_keys();
                 c->make_decorations();
                 uint32_t mask = XCB_EVENT_MASK_FOCUS_CHANGE | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW;
                 c->win.apply_event_mask(& mask);

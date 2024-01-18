@@ -965,6 +965,32 @@ class window
                 }
             ;
         ;
+        public: // keys
+            void grab_default_keys()
+            {
+                grab_keys(
+                {
+                    {   T,          ALT | CTRL              }, // for launching terminal
+                    {   Q,          ALT | SHIFT             }, // quiting key_binding for mwm_wm
+                    {   F11,        NULL                    }, // key_binding for fullscreen
+                    {   N_1,        ALT                     },
+                    {   N_2,        ALT                     },
+                    {   N_3,        ALT                     },
+                    {   N_4,        ALT                     },
+                    {   N_5,        ALT                     },
+                    {   R_ARROW,    CTRL | SUPER            }, // key_binding for moving to the next desktop
+                    {   L_ARROW,    CTRL | SUPER            }, // key_binding for moving to the previous desktop
+                    {   R_ARROW,    CTRL | SUPER | SHIFT    },
+                    {   L_ARROW,    CTRL | SUPER | SHIFT    },
+                    {   R_ARROW,    SUPER                   },
+                    {   L_ARROW,    SUPER                   },
+                    {   U_ARROW,    SUPER                   },
+                    {   D_ARROW,    SUPER                   },
+                    {   TAB,        ALT                     },
+                    {   K,          SUPER                   }
+                });
+            }
+        ;
     ;
     private: // variables 
         private: // main variables 
