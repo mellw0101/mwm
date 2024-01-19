@@ -93,8 +93,6 @@ class client
         };
     ;
     public: // variabels 
-        client_name name;
-
         window win;
         window frame;
         window titlebar;

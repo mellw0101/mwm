@@ -851,9 +851,6 @@ class Window_Manager
                     c->width = screen->width_in_pixels;
                 }
 
-                c->name.clear();
-                c->name.set(c->win.property("_NET_WM_NAME"));
-
                 if (c->win.is_EWMH_fullscreen()) 
                 {
                     c->x      = 0;
