@@ -2486,6 +2486,7 @@ class Events
         void configure_request_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_configure_request_event_t *>(ev);
+            log_win("e->window: ", e->window);
             wm->data.width     = e->width;
             wm->data.height    = e->height;
             wm->data.x         = e->x;
@@ -2550,7 +2551,6 @@ class Events
         void enter_notify_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_enter_notify_event_t *>(ev);
-            log_win("e->event: ", e->event);
         }
         void leave_notify_handler(const xcb_generic_event_t * & ev)
         {
