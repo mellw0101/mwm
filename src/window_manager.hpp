@@ -836,7 +836,7 @@ class Window_Manager
 
                 c->win    = window;
                 c->height = (data.height < 300) ? 300 : data.height;
-                c->width  = (data.width < 400)  ? 400 : data.width;
+                c->width  = get_window_width(window);
                 c->x      = get_window_x(window);
                 c->y      = get_window_y(window);
                 c->depth   = 24;
