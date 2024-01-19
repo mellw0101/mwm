@@ -846,21 +846,21 @@ class Mwm_Runner
         void draw_text()
         {
             search_window.draw_text(search_string.c_str(), WHITE, BLACK, "7x14", 2, 14);
-            if (search_string.length() > 0)
-            {
-                results = file.search_for_binary(search_string.c_str());
-                int entry_list_size = results.size(); 
-                if (results.size() > 7)
-                {
-                    entry_list_size = 7;
-                }
-                search_window.height(20 * entry_list_size);
-                xcb_flush(conn);
-                for (int i = 0; i < entry_list_size; ++i)
-                {
-                    entry_list[i].draw_text(results[i].c_str(), WHITE, BLACK, "7x14", 2, 14);
-                }
-            }
+            // if (search_string.length() > 0)
+            // {
+            //     results = file.search_for_binary(search_string.c_str());
+            //     int entry_list_size = results.size(); 
+            //     if (results.size() > 7)
+            //     {
+            //         entry_list_size = 7;
+            //     }
+            //     search_window.height(20 * entry_list_size);
+            //     xcb_flush(conn);
+            //     for (int i = 0; i < entry_list_size; ++i)
+            //     {
+            //         entry_list[i].draw_text(results[i].c_str(), WHITE, BLACK, "7x14", 2, 14);
+            //     }
+            // }
         }
         void create_search_window(const uint32_t & parent_window, const uint32_t & x, const uint32_t & y, const uint32_t & width, const uint32_t & height)
         {
@@ -872,17 +872,6 @@ class Mwm_Runner
             search_window.grab_button({ { L_MOUSE_BUTTON, NULL } });
             search_window.grab_keys_for_typing();
             search_window.grab_default_keys();
-
-            for (int i = 0; i < 7; ++i)
-            {
-                window entry;
-                entry.create_default(search_window, 0, (20 * (i + 1)) , 140, 20);
-                entry.set_backround_color(BLACK);
-                entry.raise();
-                entry.map();
-                entry_list.push_back(entry);
-            }
-            
             search_window.raise();
             search_window.focus_input();
         }
