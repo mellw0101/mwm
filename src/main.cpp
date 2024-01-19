@@ -2364,6 +2364,11 @@ class Events
         void map_req_handler(const xcb_generic_event_t * & ev) 
         {
             const auto * e = reinterpret_cast<const xcb_map_request_event_t *>(ev);
+            client * c = wm->client_from_window(& e->window);
+            if (c)
+            {
+                return;
+            }
             wm->manage_new_client(e->window);
         }
         void button_press_handler(const xcb_generic_event_t * & ev) 
