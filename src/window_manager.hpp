@@ -835,7 +835,8 @@ class Window_Manager
                 }
 
                 c->win    = window;
-                c->height = (data.height < 300) ? 300 : data.height;
+                // c->height = (data.height < 300) ? 300 : data.height;
+                c->height = c->win.height_from_req();
                 c->width  = (data.width < 400)  ? 400 : data.width;
                 c->x      = c->win.x_from_req();
                 c->y      = c->win.y_from_req();
