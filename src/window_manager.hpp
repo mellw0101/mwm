@@ -835,10 +835,10 @@ class Window_Manager
                 }
 
                 c->win     = window;
-                c->x       = c->win.x_from_req();
-                c->y       = c->win.y_from_req();
-                c->width   = c->win.width_from_req();
-                c->height  = c->win.height_from_req();
+                c->x       = get_window_x(window);
+                c->y       = get_window_y(window);
+                c->width   = get_window_width(window);
+                c->height  = get_window_height(window);
                 c->depth   = 24;
                 c->desktop = cur_d->desktop;
 
@@ -930,6 +930,36 @@ class Window_Manager
                 int16_t y = geometry_reply->y;
                 free(geometry_reply);
                 return y;
+            }
+            int16_t get_window_width(const uint32_t & window) 
+            {
+                xcb_get_geometry_cookie_t cookie = xcb_get_geometry(conn, window);
+                xcb_get_geometry_reply_t* reply = xcb_get_geometry_reply(conn, cookie, NULL);
+
+                if (!reply) 
+                {
+                    log_error("Unable to get window geometry.");
+                    return (screen->height_in_pixels / 2);
+                } 
+            
+                int16_t width = reply->width;
+                free(reply);
+                return width;
+            }
+            int16_t get_window_height(const uint32_t & window) 
+            {
+                xcb_get_geometry_cookie_t cookie = xcb_get_geometry(conn, window);
+                xcb_get_geometry_reply_t* reply = xcb_get_geometry_reply(conn, cookie, NULL);
+
+                if (!reply) 
+                {
+                    log_error("Unable to get window geometry.");
+                    return (screen->height_in_pixels / 2);
+                } 
+            
+                int16_t height = reply->height;
+                free(reply);
+                return height;
             }
         ;
     ;
