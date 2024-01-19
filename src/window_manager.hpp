@@ -835,8 +835,7 @@ class Window_Manager
                 }
 
                 c->win    = window;
-                get_window_parameters(window, &c->x, &c->y, &c->width, &c->height);
-                c->depth   = 24;
+                get_window_parameters(window, &c->x, &c->y, &c->width, &c->height, &c->depth);
                 c->desktop = cur_d->desktop;
 
                 if (c->height > screen->height_in_pixels)
@@ -899,7 +898,7 @@ class Window_Manager
                     std::cerr << "Unable to get window geometry." << std::endl;
                 }
             }
-            void get_window_parameters(const uint32_t & window, int16_t * x, int16_t * y, uint16_t * width, uint16_t * height)
+            void get_window_parameters(const uint32_t &window, int16_t *x, int16_t *y, uint16_t *width, uint16_t *height, uint8_t *depth)
             {
                 xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
                 xcb_get_geometry_reply_t* geometry_reply = xcb_get_geometry_reply(conn, geometry_cookie, NULL);
@@ -912,6 +911,7 @@ class Window_Manager
                 *y = geometry_reply->y;
                 *width = geometry_reply->width;
                 *height = geometry_reply->height;
+                *depth = geometry_reply->depth;
 
                 free(geometry_reply);
             }
