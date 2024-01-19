@@ -499,6 +499,7 @@ class Window_Manager
                     {   L_MOUSE_BUTTON,     0   }
                 });
                 c->win.grab_default_keys();
+                c->update();
                 c->make_decorations();
                 uint32_t mask = XCB_EVENT_MASK_FOCUS_CHANGE | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW;
                 c->win.apply_event_mask(& mask);
