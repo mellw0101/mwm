@@ -2069,6 +2069,26 @@ class tile /**
         }
     ;
 };
+void getWindowParameters(const uint32_t & window) 
+{
+    xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
+    xcb_get_geometry_reply_t* geometry_reply = xcb_get_geometry_reply(conn, geometry_cookie, NULL);
+
+    if (geometry_reply != NULL) 
+    {
+        log_info("Window Parameters");
+        log_info(std::to_string(geometry_reply->x));
+        log_info(std::to_string(geometry_reply->y));
+        log_info(std::to_string(geometry_reply->width));
+        log_info(std::to_string(geometry_reply->height));
+
+        free(geometry_reply);
+    } 
+    else 
+    {
+        std::cerr << "Unable to get window geometry." << std::endl;
+    }
+}
 class Events
 {
     public: // constructor and destructor  
@@ -2346,6 +2366,7 @@ class Events
         {
             const auto * e = reinterpret_cast<const xcb_map_request_event_t *>(ev);
             log_win("e->window: ", e->window);
+            getWindowParameters(e->window);
             wm->manage_new_client(e->window);
         }
         void button_press_handler(const xcb_generic_event_t * & ev) 
