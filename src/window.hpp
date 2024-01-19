@@ -559,6 +559,74 @@ class window
                 free(reply);
                 return children;
             }
+            int16_t x_from_req()
+            {
+                xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, _window);
+                xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
+
+                int16_t x;
+                if (geometry) 
+                {
+                    x = geometry->x;
+                    free(geometry);
+                } 
+                else 
+                {
+                    x = 200;
+                }
+                return x;
+            }
+            int16_t y_from_req()
+            {
+                xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, _window);
+                xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
+
+                int16_t y;
+                if (geometry) 
+                {
+                    y = geometry->y;
+                    free(geometry);
+                } 
+                else 
+                {
+                    y = 200;
+                }
+                return y;
+            }
+            uint16_t width_from_req() 
+            {
+                xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, _window);
+                xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
+
+                uint16_t width;
+                if (geometry) 
+                {
+                    width = geometry->width;
+                    free(geometry);
+                } 
+                else 
+                {
+                    width = 200;
+                }
+                return width;
+            }
+            uint16_t height_from_req() 
+            {
+                xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, _window);
+                xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
+
+                uint16_t height;
+                if (geometry) 
+                {
+                    height = geometry->height;
+                    free(geometry);
+                } 
+                else 
+                {
+                    height = 200;
+                }
+                return height;
+            }
         ;
         public: // configuration methods
             void apply_event_mask(const std::vector<uint32_t> & values) 
@@ -1364,74 +1432,6 @@ class window
 
                 free(reply);
                 return atomName;
-            }
-            uint16_t x_from_req()
-            {
-                xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, _window);
-                xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
-
-                uint16_t x;
-                if (geometry) 
-                {
-                    x = geometry->x;
-                    free(geometry);
-                } 
-                else 
-                {
-                    x = 200;
-                }
-                return x;
-            }
-            uint16_t y_from_req()
-            {
-                xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, _window);
-                xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
-
-                uint16_t y;
-                if (geometry) 
-                {
-                    y = geometry->y;
-                    free(geometry);
-                } 
-                else 
-                {
-                    y = 200;
-                }
-                return y;
-            }
-            uint16_t width_from_req() 
-            {
-                xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, _window);
-                xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
-
-                uint16_t width;
-                if (geometry) 
-                {
-                    width = geometry->width;
-                    free(geometry);
-                } 
-                else 
-                {
-                    width = 200;
-                }
-                return width;
-            }
-            uint16_t height_from_req() 
-            {
-                xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, _window);
-                xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
-
-                uint16_t height;
-                if (geometry) 
-                {
-                    height = geometry->height;
-                    free(geometry);
-                } 
-                else 
-                {
-                    height = 200;
-                }
-                return height;
             }
             void get_font(const char * font_name)
             {
