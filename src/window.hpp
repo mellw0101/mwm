@@ -610,12 +610,12 @@ class window
                 }
                 return width;
             }
-            uint16_t height_from_req() 
+            int16_t height_from_req() 
             {
                 xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, _window);
                 xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
 
-                uint16_t height;
+                int16_t height;
                 if (geometry) 
                 {
                     height = geometry->height;
