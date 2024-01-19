@@ -518,7 +518,7 @@ class Mwm_Runner
             event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev) 
             {
                 const auto * e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
-                if (e->event == main_window)
+                if (e->event == search_window)
                 {
                     if (e->detail == wm->key_codes.a) 
                     {
@@ -836,16 +836,16 @@ class Mwm_Runner
             event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev)
             {
                 const auto * e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
-                if (e->event == main_window)
+                if (e->event == search_window)
                 {
-                    main_window.raise();
-                    main_window.focus_input();
+                    search_window.raise();
+                    search_window.focus_input();
                 }
             });
         }
         void draw_text()
         {
-            main_window.draw_text(search_string.c_str(), WHITE, BLACK, "7x14", 2, 14);
+            search_window.draw_text(search_string.c_str(), WHITE, BLACK, "7x14", 2, 14);
             if (search_string.length() > 0)
             {
                 results = file.search_for_binary(search_string.c_str());
@@ -854,7 +854,7 @@ class Mwm_Runner
                 {
                     entry_list_size = 7;
                 }
-                main_window.height(20 * entry_list_size);
+                search_window.height(20 * entry_list_size);
                 xcb_flush(conn);
                 for (int i = 0; i < entry_list_size; ++i)
                 {
