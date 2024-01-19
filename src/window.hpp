@@ -593,12 +593,12 @@ class window
                 }
                 return y;
             }
-            uint16_t width_from_req() 
+            int16_t width_from_req() 
             {
                 xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, _window);
                 xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
 
-                uint16_t width;
+                int16_t width;
                 if (geometry) 
                 {
                     width = geometry->width;
