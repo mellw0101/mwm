@@ -414,7 +414,7 @@ class mxb
 };
 class mv_client 
 {
-    public: // constructor 
+    public: // constructor
         mv_client(client * & c, const uint16_t & start_x, const uint16_t & start_y) 
         : c(c), start_x(start_x), start_y(start_y)
         {
@@ -429,7 +429,7 @@ class mv_client
             xcb_flush(conn);
         }
     ;
-    private: // variabels 
+    private: // variabels
         client * & c;
         const uint16_t & start_x;
         const uint16_t & start_y;
@@ -448,7 +448,7 @@ class mv_client
             DURATION IN MILLISECONDS THAT EACH FRAME SHOULD LAST 
         */
     ;
-    private: // functions 
+    private: // functions
         void snap(const int16_t & x, const int16_t & y)
         {
             // WINDOW TO WINDOW SNAPPING 
@@ -581,10 +581,9 @@ class mv_client
                 c->frame.x_y(x, y);
             }
         }
-        /*
+        void run() /**
          * THIS IS THE MAIN EVENT LOOP FOR 'mv_client'
          */ 
-        void run() 
         {
             while (shouldContinue) 
             {
@@ -619,7 +618,7 @@ class mv_client
                 free(ev);
             }
         }
-        bool isTimeToRender() 
+        bool isTimeToRender()
         {
             auto currentTime = std::chrono::high_resolution_clock::now(); /*
                 CALCULATE ELAPSED TIME SINCE THE LAST UPDATE
@@ -1871,26 +1870,6 @@ class tile /**
             c->tile_ogsize.y      = c->y;
             c->tile_ogsize.width  = c->width;
             c->tile_ogsize.height = c->height;
-        }
-        void moveresize(client * & c)
-        {
-            xcb_configure_window
-            (
-                conn,
-                c->win,
-                XCB_CONFIG_WINDOW_WIDTH | 
-                XCB_CONFIG_WINDOW_HEIGHT| 
-                XCB_CONFIG_WINDOW_X |
-                XCB_CONFIG_WINDOW_Y,
-                (const uint32_t[4])
-                {
-                    static_cast<const uint32_t &>(c->width),
-                    static_cast<const uint32_t &>(c->height),
-                    static_cast<const uint32_t &>(c->x),
-                    static_cast<const uint32_t &>(c->y)
-                }
-            );
-            xcb_flush(conn);
         }
         bool current_tile_pos(client * & c, TILEPOS mode)
         {
