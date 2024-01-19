@@ -842,6 +842,12 @@ class Window_Manager
                 c->depth   = 24;
                 c->desktop = cur_d->desktop;
 
+                if (c->x <= 0 && c->y <= 0 && c->width != screen->width_in_pixels && c->height != screen->height_in_pixels)
+                {
+                    c->x = (screen->width_in_pixels - c->width) / 2;
+                    c->y = (screen->height_in_pixels - c->height) / 2;
+                }
+
                 if (c->height > screen->height_in_pixels)
                 {
                     c->height = screen->height_in_pixels;
@@ -864,7 +870,6 @@ class Window_Manager
                 cur_d->current_clients.push_back(c);
                 return c;
             }
-            
         ;
         private: // window functions
             void getWindowParameters(const uint32_t & window) 
