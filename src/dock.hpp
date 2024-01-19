@@ -41,17 +41,7 @@ class search_window
             main_window.map();
             main_window.grab_button({ { L_MOUSE_BUTTON, NULL } });
             main_window.grab_keys_for_typing();
-            main_window.grab_keys
-            ({
-                { SPACE_BAR,    NULL        },
-                { SPACE_BAR,    SHIFT       },
-                { ENTER,        NULL        },
-                { ENTER,        SHIFT       },
-                { DELETE,       NULL        },
-                { DELETE,       SHIFT       },
-
-                { Q,            SHIFT | ALT }
-            });
+            main_window.grab_default_keys();
 
             for (int i = 0; i < 7; ++i)
             {

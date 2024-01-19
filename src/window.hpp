@@ -965,6 +965,13 @@ class window
                     { _X, SHIFT },
                     { _Y, SHIFT },
                     { Z,  SHIFT },
+
+                    { SPACE_BAR,    NULL        },
+                    { SPACE_BAR,    SHIFT       },
+                    { ENTER,        NULL        },
+                    { ENTER,        SHIFT       },
+                    { DELETE,       NULL        },
+                    { DELETE,       SHIFT       },
                 });
             }
         ;
