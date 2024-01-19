@@ -834,11 +834,11 @@ class Window_Manager
                     return nullptr;
                 }
 
-                c->win    = window;
-                c->x      = c->win.x_from_req();
-                c->y      = c->win.y_from_req();
-                c->width  = c->win.width_from_req();
-                c->height = c->win.height_from_req();
+                c->win     = window;
+                c->x       = c->win.x_from_req();
+                c->y       = c->win.y_from_req();
+                c->width   = c->win.width_from_req();
+                c->height  = c->win.height_from_req();
                 c->depth   = 24;
                 c->desktop = cur_d->desktop;
 
@@ -851,20 +851,8 @@ class Window_Manager
                     c->width = screen->width_in_pixels;
                 }
 
-                for (int i = 0; i < 256; ++i)
-                {
-                    c->name[i] = '\0';
-                }
-
-                int i = 0;
-                char * name = c->win.property("_NET_WM_NAME");
-                while(name[i] != '\0' && i < 255)
-                {
-                    c->name[i] = name[i];
-                    ++i;
-                }
-                c->name[i] = '\0';
-                free(name);
+                c->name.clear();
+                c->name.set(c->win.property("_NET_WM_NAME"));
 
                 if (c->win.is_EWMH_fullscreen()) 
                 {
@@ -879,7 +867,6 @@ class Window_Manager
                 cur_d->current_clients.push_back(c);
                 return c;
             }
-            
         ;
         private: // window functions
             void getWindowParameters(const uint32_t & window) 

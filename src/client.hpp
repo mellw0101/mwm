@@ -46,6 +46,34 @@
 #include "structs.hpp"
 #include "window.hpp"
 
+class client_name
+{
+    public: // variabels
+        char name[256];
+    ;
+    public: // methods
+        public: // config methods
+            void clear()
+            {
+                for (int i = 0; i < 256; i++)
+                {
+                    name[i] = '\0';
+                }
+            }
+            void set(char * _name)
+            {
+                int i = 0;
+                while(_name[i] != '\0' && i < 255)
+                {
+                    name[i] = _name[i];
+                    ++i;
+                }
+                name[i] = '\0';
+                free(_name);
+            }
+        ;
+    ;
+};
 class client
 {
     public: // subclasses 
@@ -65,7 +93,7 @@ class client
         };
     ;
     public: // variabels 
-        char name[256];
+        client_name name;
 
         window win;
         window frame;
