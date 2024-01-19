@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <string>
 #include <sys/types.h>
 #include <unistd.h>
 #include <string.h>
@@ -834,10 +835,7 @@ class Window_Manager
                 }
 
                 c->win    = window;
-                c->height = (data.height < 300) ? 300 : data.height;
-                c->width  = (data.width < 400)  ? 400 : data.width;
-                c->x      = get_window_x(window);
-                c->y      = get_window_y(window);
+                get_window_parameters(window, &c->x, &c->y, &c->width, &c->height);
                 c->depth   = 24;
                 c->desktop = cur_d->desktop;
 
@@ -900,6 +898,22 @@ class Window_Manager
                 {
                     std::cerr << "Unable to get window geometry." << std::endl;
                 }
+            }
+            void get_window_parameters(const uint32_t & window, int16_t * x, int16_t * y, uint16_t * width, uint16_t * height)
+            {
+                xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
+                xcb_get_geometry_reply_t* geometry_reply = xcb_get_geometry_reply(conn, geometry_cookie, NULL);
+                if (!geometry_reply) 
+                {
+                    log_error("unable to get window parameters for window: " + std::to_string(window));
+                }
+
+                *x = geometry_reply->x;
+                *y = geometry_reply->y;
+                *width = geometry_reply->width;
+                *height = geometry_reply->height;
+
+                free(geometry_reply);
             }
             int16_t get_window_x(const uint32_t & window) 
             {
