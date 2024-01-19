@@ -838,15 +838,6 @@ class Window_Manager
                 get_window_parameters(window, &c->x, &c->y, &c->width, &c->height, &c->depth);
                 c->desktop = cur_d->desktop;
 
-                if (c->height > screen->height_in_pixels)
-                {
-                    c->height = screen->height_in_pixels;
-                }
-                if (c->width > screen->width_in_pixels)
-                {
-                    c->width = screen->width_in_pixels;
-                }
-
                 for (int i = 0; i < 256; ++i)
                 {
                     c->name[i] = '\0';
@@ -861,15 +852,6 @@ class Window_Manager
                 }
                 c->name[i] = '\0';
                 free(name);
-
-                if (c->win.is_EWMH_fullscreen()) 
-                {
-                    c->x      = 0;
-                    c->y      = 0;
-                    c->width  = screen->width_in_pixels;
-                    c->height = screen->height_in_pixels;
-                    c->win.set_EWMH_fullscreen_state();
-                }
                 
                 client_list.push_back(c);
                 cur_d->current_clients.push_back(c);
