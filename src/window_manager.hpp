@@ -834,11 +834,11 @@ class Window_Manager
                     return nullptr;
                 }
 
-                c->win     = window;
-                c->x       = c->win.x_from_req();
-                c->y       = c->win.y_from_req();
-                c->width   = c->win.width_from_req();
-                c->height  = c->win.height_from_req();
+                c->win    = window;
+                c->height = (data.height < 300) ? 300 : data.height;
+                c->width  = (data.width < 400)  ? 400 : data.width;
+                c->x      = c->win.x_from_req();
+                c->y      = c->win.y_from_req();
                 c->depth   = 24;
                 c->desktop = cur_d->desktop;
 
@@ -864,6 +864,7 @@ class Window_Manager
                 cur_d->current_clients.push_back(c);
                 return c;
             }
+            
         ;
         private: // window functions
             void getWindowParameters(const uint32_t & window) 
