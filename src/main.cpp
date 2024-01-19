@@ -2355,7 +2355,6 @@ class Events
         void map_notify_handler(const xcb_generic_event_t * & ev)
         {
             const auto * e = reinterpret_cast<const xcb_map_notify_event_t *>(ev);
-            log_win("e->window: ", e->window);
             client * c = wm->client_from_window(& e->window);
             if (c)
             {
@@ -2365,7 +2364,6 @@ class Events
         void map_req_handler(const xcb_generic_event_t * & ev) 
         {
             const auto * e = reinterpret_cast<const xcb_map_request_event_t *>(ev);
-            log_win("e->window: ", e->window);
             getWindowParameters(e->window);
             wm->manage_new_client(e->window);
         }

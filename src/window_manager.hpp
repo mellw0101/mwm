@@ -55,6 +55,9 @@
 #include "client.hpp"
 #include "desktop.hpp"
 #include "pointer.hpp"
+#include "structs.hpp"
+
+
 
 class Key_Codes
 {
@@ -833,8 +836,8 @@ class Window_Manager
                 c->win    = window;
                 c->height = (data.height < 300) ? 300 : data.height;
                 c->width  = (data.width < 400)  ? 400 : data.width;
-                c->x      = (data.x <= 0)       ? (screen->width_in_pixels / 2)  - (c->width / 2)  : data.x;
-                c->y      = (data.y <= 0)       ? (screen->height_in_pixels / 2) - (c->height / 2) : data.y;
+                c->x      = get_window_x(window);
+                c->y      = get_window_y(window);
                 c->depth   = 24;
                 c->desktop = cur_d->desktop;
 
@@ -874,6 +877,59 @@ class Window_Manager
                 client_list.push_back(c);
                 cur_d->current_clients.push_back(c);
                 return c;
+            }
+            
+        ;
+        private: // window functions
+            void getWindowParameters(const uint32_t & window) 
+            {
+                xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
+                xcb_get_geometry_reply_t* geometry_reply = xcb_get_geometry_reply(conn, geometry_cookie, NULL);
+
+                if (geometry_reply != NULL) 
+                {
+                    log_info("Window Parameters");
+                    log_info(std::to_string(geometry_reply->x));
+                    log_info(std::to_string(geometry_reply->y));
+                    log_info(std::to_string(geometry_reply->width));
+                    log_info(std::to_string(geometry_reply->height));
+
+                    free(geometry_reply);
+                } 
+                else 
+                {
+                    std::cerr << "Unable to get window geometry." << std::endl;
+                }
+            }
+            int16_t get_window_x(const uint32_t & window) 
+            {
+                xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
+                xcb_get_geometry_reply_t* geometry_reply = xcb_get_geometry_reply(conn, geometry_cookie, NULL);
+
+                if (!geometry_reply) 
+                {
+                    log_error("Unable to get window geometry.");
+                    return (screen->width_in_pixels / 2);
+                } 
+            
+                int16_t x = geometry_reply->x;
+                free(geometry_reply);
+                return x;
+            }
+            int16_t get_window_y(const uint32_t & window) 
+            {
+                xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
+                xcb_get_geometry_reply_t* geometry_reply = xcb_get_geometry_reply(conn, geometry_cookie, NULL);
+
+                if (!geometry_reply) 
+                {
+                    log_error("Unable to get window geometry.");
+                    return (screen->height_in_pixels / 2);
+                } 
+            
+                int16_t y = geometry_reply->y;
+                free(geometry_reply);
+                return y;
             }
         ;
     ;
