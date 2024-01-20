@@ -551,6 +551,10 @@ class mv_client {
                         const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
                         int new_x = e->root_x - start_x;
                         int new_y = e->root_y - start_y;
+
+                        log_info("new_x: " + std::to_string(new_x));
+                        log_info("new_y: " + std::to_string(new_y));
+                        
                         
                         if (isTimeToRender()) {
                             snap(new_x, new_y);
@@ -2224,6 +2228,10 @@ class Events {
                 }
                 if (e->event == c->titlebar) {
                     c->raise();
+                    
+                    log_info("start_x: " + std::to_string(e->event_x));
+                    log_info("start_y: " + std::to_string(e->event_y));
+                    
                     mv_client mv(c, e->event_x, e->event_y);
                     wm->focus_client(c);
                     return;
