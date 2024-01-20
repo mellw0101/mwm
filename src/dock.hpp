@@ -489,14 +489,6 @@ class File_App {
             uint32_t mask = XCB_EVENT_MASK_STRUCTURE_NOTIFY;
             main_window.apply_event_mask(& mask);
             wm->client_list.push_back(c);
-            event_handler->setEventCallback(XCB_CONFIGURE_NOTIFY, [&](Ev ev) {
-                const auto * e = reinterpret_cast<const xcb_configure_notify_event_t *>(ev);
-                client * client = wm->client_from_any_window(&e->window);
-                if (client->win == main_window)
-                {
-                    log_info("success");
-                }
-            });
         }
         void launch() {
             main_window.raise();
@@ -511,6 +503,16 @@ class File_App {
                 if (e->detail == wm->key_codes.f) {
                     if (e->state == SUPER) {
                         launch();
+                    }
+                }
+            });
+            event_handler->setEventCallback(XCB_CONFIGURE_NOTIFY, [&](Ev ev) {
+                const auto * e = reinterpret_cast<const xcb_configure_notify_event_t *>(ev);
+                client * client = wm->client_from_any_window(&e->window);
+                if (c) {
+                    if (client->win == main_window)
+                    {
+                        log_info("success");
                     }
                 }
             });
