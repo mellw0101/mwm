@@ -50,19 +50,10 @@ class client {
         public: // main methods
             void make_decorations() {
                 make_frame();
-                Threads t;
-                t.addThread([this](){
-                    make_titlebar();
-                });
-                t.addThread([this](){
-                    make_close_button();
-                });
-                t.addThread([this](){
-                    make_max_button();
-                });
-                t.addThread([this](){
-                    make_min_button();
-                });
+                make_titlebar();
+                make_close_button();
+                make_max_button();
+                make_min_button();
                 
                 if (BORDER_SIZE > 0)
                 {
@@ -89,7 +80,6 @@ class client {
                 frame.unmap();
             }
             void kill() {
-                frame.unmap();
                 win.unmap();
                 close_button.unmap();
                 max_button.unmap();
@@ -103,6 +93,7 @@ class client {
                 border.top_right.unmap();
                 border.bottom_left.unmap();
                 border.bottom_right.unmap();
+                frame.unmap();
 
                 win.kill();
                 close_button.kill();
