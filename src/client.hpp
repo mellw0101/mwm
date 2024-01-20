@@ -83,11 +83,7 @@ class client
             void make_decorations()
             {
                 make_frame();
-                Threads threads;
-                threads.addThread([&]()
-                {
-                    make_titlebar();
-                });
+                make_titlebar();
                 make_close_button();
                 make_max_button();
                 make_min_button();
