@@ -444,7 +444,7 @@ class add_app_dialog_window {
 class File_App {
     public: // variabels
         window main_window;
-        static client * c;
+        client * c;
     ;
     public: // methods
         void init() {
