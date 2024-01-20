@@ -30,7 +30,15 @@ class Directory_Searcher
                 while ((entry = readdir(d)) != nullptr) {
                     std::string fileName = entry->d_name;
                     if (fileName.find(searchString) != std::string::npos) {
-                        results.push_back(fileName);
+                        bool already_found = false;
+                        for (const auto & result : results) {
+                            if (result == fileName) {
+                                already_found = true;
+                            }
+                        }
+                        if (!already_found) {
+                            results.push_back(fileName);
+                        }
                     }
                 }
 
