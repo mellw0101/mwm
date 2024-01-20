@@ -7,7 +7,6 @@
 #include "defenitions.hpp"
 #include "structs.hpp"
 #include "window.hpp"
-#include "threads.hpp"
 
 class client {
     public: // subclasses
