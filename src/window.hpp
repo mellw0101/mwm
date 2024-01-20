@@ -218,8 +218,7 @@ class window {
                 
                 make_window();
             }
-            void raise() 
-            {
+            void raise() {
                 xcb_configure_window
                 (
                     conn,
@@ -232,18 +231,15 @@ class window {
                 );
                 xcb_flush(conn);
             }
-            void map()
-            {
+            void map() {
                 xcb_map_window(conn, _window);
                 xcb_flush(conn);
             }
-            void unmap()
-            {
+            void unmap() {
                 xcb_unmap_window(conn, _window);
                 xcb_flush(conn);
             }
-            void reparent(const uint32_t & new_parent, const int16_t & x, const int16_t & y)
-            {
+            void reparent(const uint32_t & new_parent, const int16_t & x, const int16_t & y) {
                 xcb_reparent_window
                 (
                     conn, 
@@ -254,8 +250,7 @@ class window {
                 );
                 xcb_flush(conn);
             }
-            void kill() 
-            {
+            void kill() {
                 xcb_intern_atom_cookie_t protocols_cookie = xcb_intern_atom(conn, 1, 12, "WM_PROTOCOLS");
                 xcb_intern_atom_reply_t *protocols_reply = xcb_intern_atom_reply(conn, protocols_cookie, NULL);
 
@@ -292,8 +287,7 @@ class window {
 
                 xcb_flush(conn);
             }
-            void clear()
-            {
+            void clear() {
                 xcb_clear_area
                 (
                     conn, 
@@ -306,8 +300,7 @@ class window {
                 );
                 xcb_flush(conn);
             }
-            void focus_input()
-            {
+            void focus_input() {
                 xcb_set_input_focus
                 (
                     conn, 
@@ -319,8 +312,7 @@ class window {
             }
         ;
         public: // check methods
-            bool is_EWMH_fullscreen() 
-            {
+            bool is_EWMH_fullscreen() {
                 xcb_get_property_cookie_t cookie = xcb_ewmh_get_wm_state(ewmh, _window);
                 xcb_ewmh_get_atoms_reply_t wm_state;
                 if (xcb_ewmh_get_wm_state_reply(ewmh, cookie, &wm_state, NULL) == 1) 
@@ -337,14 +329,12 @@ class window {
                 }
                 return false;
             }
-            bool is_active_EWMH_window()
-            {
+            bool is_active_EWMH_window() {
                 uint32_t active_window = 0;
                 xcb_ewmh_get_active_window_reply(ewmh, xcb_ewmh_get_active_window(ewmh, 0), &active_window, NULL);
                 return _window == active_window;
             }
-            uint32_t check_event_mask_sum() 
-            {
+            uint32_t check_event_mask_sum() {
                 uint32_t mask = 0;
 
                 // Get the window attributes
@@ -363,8 +353,7 @@ class window {
                 }
                 return mask;
             }
-            std::vector<xcb_event_mask_t> check_event_mask_codes()
-            {
+            std::vector<xcb_event_mask_t> check_event_mask_codes() {
                 uint32_t maskSum = check_event_mask_sum();
                 std::vector<xcb_event_mask_t> setMasks;
                 for (int mask = XCB_EVENT_MASK_KEY_PRESS; mask <= XCB_EVENT_MASK_OWNER_GRAB_BUTTON; mask <<= 1) 
@@ -376,8 +365,7 @@ class window {
                 }
                 return setMasks;
             }
-            bool is_mask_active(const uint32_t & event_mask)
-            {
+            bool is_mask_active(const uint32_t & event_mask) {
                 std::vector<xcb_event_mask_t> masks = check_event_mask_codes();
                 for (const auto & ev_mask : masks)
                 {
@@ -388,8 +376,7 @@ class window {
                 }
                 return false;
             }
-            bool is_mapped() 
-            {
+            bool is_mapped() {
                 xcb_get_window_attributes_cookie_t cookie = xcb_get_window_attributes(conn, _window);
                 xcb_get_window_attributes_reply_t *reply = xcb_get_window_attributes_reply(conn, cookie, NULL);
                 if (!reply)

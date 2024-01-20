@@ -9,13 +9,13 @@
 #include "client.hpp"
 #include "structs.hpp"
 
-class Mwm_Animator /**
+/**
  *
  * @class XCPPBAnimator
  * @brief Class for animating the position and size of an XCB window.
  *
  */
-{
+class Mwm_Animator {
     public: // variables
         Mwm_Animator(const uint32_t & window)
         : window(window) {}
@@ -24,10 +24,10 @@ class Mwm_Animator /**
         : c(c) {}
     ;
     public: // destructor
-        ~Mwm_Animator() /**
+        /**
          * @brief Destructor to ensure the animation threads are stopped when the object is destroyed.
          */
-        {
+        ~Mwm_Animator() {
             stopAnimations();
         }
     ;
