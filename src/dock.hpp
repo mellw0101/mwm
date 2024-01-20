@@ -465,6 +465,8 @@ class Dock
         window main_window;
         buttons buttons;
         uint32_t x = 0, y = 0, width = 48, height = 48;
+
+        add_app_dialog_window add_app_dialog_window;
     ;
     public: // public methods 
         void init() {
@@ -472,6 +474,11 @@ class Dock
             setup_dock();
             configure_context_menu();
             make_apps();
+            add_app_dialog_window.init();
+            add_app_dialog_window.search_window.add_enter_action([this]()
+            {
+                launcher.program((char *) add_app_dialog_window.search_window.search_string.c_str());
+            });
             context_menu.init();
             configure_events();
         }
@@ -512,11 +519,17 @@ class Dock
             main_window.map();
         }
         void configure_context_menu() {
+            context_menu.add_entry("Add app", [this] () { add_app_dialog_window.show(); });
+            context_menu.add_entry("test with nullptr", nullptr);
+            context_menu.add_entry("test with nullptr", nullptr);
+            context_menu.add_entry("test with nullptr", nullptr);
+            context_menu.add_entry("test with nullptr", nullptr);
             context_menu.add_entry("test with nullptr", nullptr);
         }
         void make_apps() {
             for (const auto & app : apps) {
-                buttons.add(app,
+                buttons.add
+                (app,
                 [app, this] () 
                 {
                     {
