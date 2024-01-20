@@ -504,6 +504,7 @@ class Window_Manager
 
                 c->update();
                 focus_client(c);
+                log_win("c->win: " ,c->win);
             }
             client * make_internal_client(window window) {
                 client * c = new client;
