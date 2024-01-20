@@ -1544,12 +1544,7 @@ namespace win_tools {
     }
     void close_button_kill(client * c)
     {
-        int result = wm->send_sigterm_to_client(c);
-
-        if (result == -1)
-        {
-            log_error("client is nullptr");
-        }
+        wm->send_sigterm_to_client(c);
     }
 }
 /**
@@ -2273,7 +2268,6 @@ class Events {
         }
         void configure_request_handler(const xcb_generic_event_t * & ev) {
             const auto * e = reinterpret_cast<const xcb_configure_request_event_t *>(ev);
-            log_win("e->window: ", e->window);
             wm->data.width     = e->width;
             wm->data.height    = e->height;
             wm->data.x         = e->x;
@@ -2304,11 +2298,7 @@ class Events {
         void destroy_notify_handler(const xcb_generic_event_t * & ev) {
             const auto * e = reinterpret_cast<const xcb_destroy_notify_event_t *>(ev);
             client * c = wm->client_from_any_window(& e->window);
-            int result = wm->send_sigterm_to_client(c);
-            if (result == -1)
-            {
-                log_error("send_sigterm_to_client: failed");
-            }
+            wm->send_sigterm_to_client(c);
         }
         void unmap_notify_handler(const xcb_generic_event_t * & ev) {
             const auto * e = reinterpret_cast<const xcb_unmap_notify_event_t *>(ev);

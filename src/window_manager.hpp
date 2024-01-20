@@ -520,16 +520,14 @@ class Window_Manager
 
                 return c;
             }
-            int send_sigterm_to_client(client * c) {
+            void send_sigterm_to_client(client * c) {
                 if (!c)
                 {
-                    return - 1;
+                    return;
                 }
 
                 c->kill();
                 remove_client(c);
-
-                return 0;
             }
         ;
         public: // desktop methods 
