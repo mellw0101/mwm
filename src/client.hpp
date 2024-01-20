@@ -2,37 +2,13 @@
 #define CLIENT_HPP
 #include <vector>
 #include <xcb/randr.h>
-#include <thread>
 
 #include "Log.hpp"
 #include "defenitions.hpp"
 #include "structs.hpp"
 #include "window.hpp"
+#include "threads.hpp"
 
-class Threads {
-    public:
-        template <typename Callable>
-        void addThread(Callable&& func) {
-            threads.emplace_back(std::thread(std::forward<Callable>(func)));
-        }
-        void joinAll() {
-            for (auto& thread : threads) 
-            {
-                if (thread.joinable()) 
-                {
-                    thread.join();
-                }
-            }
-        }
-        // Destructor to ensure all threads are joined
-        ~Threads() {
-            joinAll();
-        }
-    ;
-    private:
-        std::vector<std::thread> threads;
-    ;
-};
 class client {
     public: // subclasses
         class client_border_decor {
