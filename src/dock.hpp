@@ -454,22 +454,38 @@ class add_app_dialog_window {
     ;
 };
 class File_App {
-    public:
+    public: // variabels
         window main_window;
     ;
-    public:
+    public: // methods
         void init() {
             int width = 300, height = 400;
             int x = ((screen->width_in_pixels / 2) - (width / 2)), y = ((screen->height_in_pixels / 2) - (height / 2));
             main_window.create_default(screen->root, x, y, width, height);
             main_window.set_backround_color(DARK_GREY);
             main_window.grab_button({ { L_MOUSE_BUTTON, NULL } });
+
+            setup_events();
         }
+    ;
+    private: // functions
         void launch() {
             main_window.map();
             main_window.raise();
         }
+        void setup_events() {
+            event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev) {
+                const auto * e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
+                if (e->detail == wm->key_codes.f) {
+                    if (e->state == SUPER)
+                    {
+                        launch();
+                    }
+                }
+            });
+        }
     ;
+
 };
 class Dock {
     public: // constructor
@@ -482,7 +498,6 @@ class Dock {
         uint32_t x = 0, y = 0, width = 48, height = 48;
 
         add_app_dialog_window add_app_dialog_window;
-        File_App file_app;
     ;
     public: // public methods 
         void init() {
@@ -497,8 +512,6 @@ class Dock {
             });
             context_menu.init();
             configure_events();
-
-            file_app.init();
         }
         void add_app(const char * app_name) {
             if (!file.check_if_binary_exists(app_name)) {
@@ -564,15 +577,6 @@ class Dock {
                 );
                 buttons.list[buttons.index()].put_icon_on_button();
             }
-            buttons.add("File", [this] () { file_app.launch(); });
-            buttons.list[buttons.index()].create(
-                main_window,
-                ((buttons.index() * width) + DOCK_BORDER),
-                DOCK_BORDER,
-                (width - (DOCK_BORDER * 2)),
-                (height - (DOCK_BORDER * 2)),
-                BLACK
-            );
             calc_size_pos();
         }
         void configure_events() {
