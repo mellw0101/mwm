@@ -485,6 +485,8 @@ class File_App {
             c->width = main_window.width();
             c->height = main_window.height();
             c->make_decorations();
+            uint32_t mask = XCB_EVENT_MASK_STRUCTURE_NOTIFY;
+            main_window.apply_event_mask(& mask);
             wm->client_list.push_back(c);
         }
         void launch() {
