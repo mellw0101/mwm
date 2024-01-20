@@ -578,8 +578,7 @@ class mv_client {
 };
 void animate(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight, const int & duration) {
     Mwm_Animator anim(c->frame);
-    anim.animate
-    (
+    anim.animate(
         c->x,
         c->y, 
         c->width, 
@@ -594,8 +593,7 @@ void animate(client * & c, const int & endX, const int & endY, const int & endWi
 }
 void animate_client(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight, const int & duration) {
     Mwm_Animator client_anim(c);
-    client_anim.animate_client
-    (
+    client_anim.animate_client(
         c->x,
         c->y,
         c->width,
@@ -793,21 +791,17 @@ class change_desktop {
     ;
 };
 void move_to_next_desktop_w_app() {
-    LOG_func
-    if (wm->cur_d->desktop == wm->desktop_list.size())
-    {
+    if (wm->cur_d->desktop == wm->desktop_list.size()) {
         return;
     }
 
-    if (wm->focused_client)
-    {
+    if (wm->focused_client) {
         wm->focused_client->desktop = wm->cur_d->desktop + 1;
     }
 
     change_desktop::teleport_to(wm->cur_d->desktop + 1);
 }
 void move_to_previus_desktop_w_app() {
-    LOG_func
     if (wm->cur_d->desktop == 1)
     {
         return;

@@ -15,37 +15,29 @@ class Directory_Searcher
     public:
         Directory_Searcher() {}
 
-        void search(const std::vector<const char *>& directories, const std::string& searchString) 
-        {
+        void search(const std::vector<const char *>& directories, const std::string& searchString) {
             results.clear();
             searchDirectories = directories;
 
-            for (const auto& dir : searchDirectories) 
-            {
+            for (const auto& dir : searchDirectories) {
                 DIR *d = opendir(dir);
-                if (d == nullptr) 
-                {
+                if (d == nullptr) {
                     log_error("opendir() failed for directory: " + std::string(dir));
                     continue;
                 }
 
                 struct dirent *entry;
-                while ((entry = readdir(d)) != nullptr) 
-                {
+                while ((entry = readdir(d)) != nullptr) {
                     std::string fileName = entry->d_name;
-                    if (fileName.find(searchString) != std::string::npos) 
-                    {
-                        std::string dir_name = dir;
-                        results.push_back(dir_name + "/" + fileName);
+                    if (fileName.find(searchString) != std::string::npos) {
+                        results.push_back(fileName);
                     }
                 }
 
                 closedir(d);
             }
         }
-
-        const std::vector<std::string>& getResults() const 
-        {
+        const std::vector<std::string>& getResults() const {
             return results;
         }
     ;
