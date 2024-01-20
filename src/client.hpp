@@ -1,6 +1,8 @@
 #ifndef CLIENT_HPP
 #define CLIENT_HPP
+#include <vector>
 #include <xcb/randr.h>
+#include <thread>
 
 #include "Log.hpp"
 #include "defenitions.hpp"
@@ -9,7 +11,7 @@
 
 class client
 {
-    public: // subclasses 
+    public: // subclasses
         class client_border_decor
         {
             public:    
@@ -25,7 +27,7 @@ class client
             ;
         };
     ;
-    public: // variabels 
+    public: // variabels
         window win;
         window frame;
         window titlebar;
@@ -46,7 +48,84 @@ class client
 
         uint16_t desktop;
     ;
-    public: // methods 
+    public: // methods
+        public: // main methods
+            void make_decorations()
+            {
+                make_frame();
+                
+                std::thread t1(&client::make_titlebar, this);
+                std::thread t2(&client::make_close_button, this);
+                std::thread t3(&client::make_max_button, this);
+                std::thread t4(&client::make_min_button, this);
+                
+                t1.join();
+                t2.join();
+                t3.join();
+                t4.join();
+
+                if (BORDER_SIZE > 0)
+                {
+                    make_borders();
+                }
+            }
+            void raise()
+            {
+                frame.raise();
+            }
+            void focus()
+            {
+                win.focus_input();
+                frame.raise();
+            }
+            void update()
+            {
+                x = frame.x();
+                y = frame.y();
+                width = frame.width();
+                height = frame.height();
+            }
+            void map()
+            {
+                frame.map();
+            }
+            void unmap()
+            {
+                frame.unmap();
+            }
+            void kill()
+            {
+                win.unmap();
+                close_button.unmap();
+                max_button.unmap();
+                min_button.unmap();
+                titlebar.unmap();
+                border.left.unmap();
+                border.right.unmap();
+                border.top.unmap();
+                border.bottom.unmap();
+                border.top_left.unmap();
+                border.top_right.unmap();
+                border.bottom_left.unmap();
+                border.bottom_right.unmap();
+                frame.unmap();
+
+                win.kill();
+                close_button.kill();
+                max_button.kill();
+                min_button.kill();
+                titlebar.kill();
+                border.left.kill();
+                border.right.kill();
+                border.top.kill();
+                border.bottom.kill();
+                border.top_left.kill();
+                border.top_right.kill();
+                border.bottom_left.kill();
+                border.bottom_right.kill();
+                frame.kill();
+            }
+        ;
         public: // config methods
             void x_y(const int32_t & x, const uint32_t & y)
             {
@@ -175,79 +254,8 @@ class client
                 xcb_flush(conn);
             }
         ;
-        public: // main methods 
-            void make_decorations()
-            {
-                make_frame();
-                make_titlebar();
-                make_close_button();
-                make_max_button();
-                make_min_button();
-                
-                if (BORDER_SIZE > 0)
-                {
-                    make_borders();
-                }
-            }
-            void raise()
-            {
-                frame.raise();
-            }
-            void focus()
-            {
-                win.focus_input();
-                frame.raise();
-            }
-            void update()
-            {
-                x = frame.x();
-                y = frame.y();
-                width = frame.width();
-                height = frame.height();
-            }
-            void map()
-            {
-                frame.map();
-            }
-            void unmap()
-            {
-                frame.unmap();
-            }
-            void kill()
-            {
-                win.unmap();
-                close_button.unmap();
-                max_button.unmap();
-                min_button.unmap();
-                titlebar.unmap();
-                border.left.unmap();
-                border.right.unmap();
-                border.top.unmap();
-                border.bottom.unmap();
-                border.top_left.unmap();
-                border.top_right.unmap();
-                border.bottom_left.unmap();
-                border.bottom_right.unmap();
-                frame.unmap();
-
-                win.kill();
-                close_button.kill();
-                max_button.kill();
-                min_button.kill();
-                titlebar.kill();
-                border.left.kill();
-                border.right.kill();
-                border.top.kill();
-                border.bottom.kill();
-                border.top_left.kill();
-                border.top_right.kill();
-                border.bottom_left.kill();
-                border.bottom_right.kill();
-                frame.kill();
-            }
-        ;
     ;
-    private: // functions 
+    private: // functions
         void make_frame()
         {
             frame.create_default(screen->root, (x - BORDER_SIZE), (y - TITLE_BAR_HEIGHT - BORDER_SIZE), (width + (BORDER_SIZE * 2)), (height + TITLE_BAR_HEIGHT + (BORDER_SIZE * 2)));
@@ -373,7 +381,7 @@ class client
             border.bottom_right.map();
         }
     ;
-    private: // variables 
+    private: // variables
         std::vector<std::vector<bool>> CLOSE_BUTTON_BITMAP =
         {
             {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
