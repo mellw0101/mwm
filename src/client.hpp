@@ -90,9 +90,7 @@ class client {
                 
                 if (BORDER_SIZE > 0)
                 {
-                    t.addThread([this](){
-                        make_borders();
-                    });
+                    make_borders();
                 }
             }
             void raise() {
