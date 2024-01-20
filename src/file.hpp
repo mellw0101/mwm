@@ -34,6 +34,7 @@ class Directory_Searcher
                         for (const auto & result : results) {
                             if (result == fileName) {
                                 already_found = true;
+                                break;
                             }
                         }
                         if (!already_found) {
@@ -104,7 +105,7 @@ class File
         }
         std::vector<std::string> search_for_binary(const char * name)
         {
-            ds.search(split_$PATH_into_vector(), name);
+            ds.search({ "/usr/bin" }, name);
             return ds.getResults();
         }
     ;
