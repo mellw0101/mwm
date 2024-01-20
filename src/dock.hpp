@@ -310,8 +310,7 @@ class search_window {
         std::vector<window> entry_list;
     ;
 };
-class Mwm_Runner
-{
+class Mwm_Runner {
     public: // variabels
         window main_window;
         search_window search_window;
@@ -390,8 +389,7 @@ class Mwm_Runner
     ;
 };
 static Mwm_Runner * mwm_runner;
-class add_app_dialog_window
-{
+class add_app_dialog_window {
     public: // variabels
         window main_window;
         search_window search_window;
@@ -455,8 +453,25 @@ class add_app_dialog_window
         std::function<void()> enter_function;
     ;
 };
-class Dock
-{
+class File_App {
+    public:
+        window main_window;
+    ;
+    public:
+        void init() {
+            int width = 300, height = 400;
+            int x = ((screen->width_in_pixels / 2) - (width / 2)), y = ((screen->height_in_pixels / 2) - (height / 2));
+            main_window.create_default(screen->root, x, y, width, height);
+            main_window.set_backround_color(DARK_GREY);
+            main_window.grab_button({ { L_MOUSE_BUTTON, NULL } });
+        }
+        void launch() {
+            main_window.map();
+            main_window.raise();
+        }
+    ;
+};
+class Dock {
     public: // constructor
         Dock() {}
     ;
@@ -467,6 +482,7 @@ class Dock
         uint32_t x = 0, y = 0, width = 48, height = 48;
 
         add_app_dialog_window add_app_dialog_window;
+        File_App file_app;
     ;
     public: // public methods 
         void init() {
@@ -481,6 +497,8 @@ class Dock
             });
             context_menu.init();
             configure_events();
+
+            file_app.init();
         }
         void add_app(const char * app_name) {
             if (!file.check_if_binary_exists(app_name)) {

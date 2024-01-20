@@ -148,19 +148,17 @@ class window {
     ;
     public: // methods
         public: // main methods
-            void create( 
-                const uint8_t  & depth,
-                const uint32_t & parent,
-                const int16_t  & x,
-                const int16_t  & y,
-                const uint16_t & width,
-                const uint16_t & height,
-                const uint16_t & border_width,
-                const uint16_t & _class,
-                const uint32_t & visual,
-                const uint32_t & value_mask,
-                const void     * value_list)
-            { 
+            void create(const uint8_t  & depth,
+                        const uint32_t & parent,
+                        const int16_t  & x,
+                        const int16_t  & y,
+                        const uint16_t & width,
+                        const uint16_t & height,
+                        const uint16_t & border_width,
+                        const uint16_t & _class,
+                        const uint32_t & visual,
+                        const uint32_t & value_mask,
+                        const void     * value_list) { 
                 _depth = depth;
                 _parent = parent;
                 _x = x;
