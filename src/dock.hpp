@@ -451,7 +451,6 @@ class File_App {
             create_window();
             setup_window();
             setup_events();
-            make_internal_client();
         }
     ;
     private: // functions
@@ -479,6 +478,7 @@ class File_App {
         void launch() {
             main_window.raise();
             main_window.map();
+            make_internal_client();
         }
         void setup_events() {
             event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev) {
