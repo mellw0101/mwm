@@ -1922,11 +1922,7 @@ class Events {
         void key_press_handler(const xcb_generic_event_t * & ev) {
             const auto * e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
                 
-            if (e->detail == wm->key_codes.t) /**
-             * CHECK IF 'ALT+CTRL+T' WAS PRESSED
-             * AND IF SO LAUNCH TERMINAL   
-             */  
-            {
+            if (e->detail == wm->key_codes.t) {
                 switch (e->state) 
                 {
                     case CTRL + ALT:
@@ -1936,11 +1932,7 @@ class Events {
                     }
                 }
             }
-            if (e->detail == wm->key_codes.q) /**
-             * CHECK IF 'ALT+SHIFT+Q' WAS PRESSED
-             * AND IF SO LAUNCH KILL_SESSION
-             */
-            {
+            if (e->detail == wm->key_codes.q) {
                 switch (e->state) 
                 {
                     case SHIFT + ALT:
@@ -1950,19 +1942,11 @@ class Events {
                     }
                 }
             }
-            if (e->detail == wm->key_codes.f11) /**
-             * CHECK IF 'F11' WAS PRESSED
-             * AND IF SO TOGGLE FULLSCREEN
-             */ 
-            {
+            if (e->detail == wm->key_codes.f11) {
                 client * c = wm->client_from_window(& e->event);
                 max_win(c, max_win::EWMH_MAXWIN);
             }
-            if (e->detail == wm->key_codes.n_1) /**
-             * CHECK IF 'ALT+1' WAS PRESSED
-             * AND IF SO MOVE TO DESKTOP 1
-             */
-            {
+            if (e->detail == wm->key_codes.n_1) {
                 switch (e->state) 
                 {
                     case ALT:
@@ -1972,11 +1956,7 @@ class Events {
                     }
                 }
             }
-            if (e->detail == wm->key_codes.n_2) /**
-             * CHECK IF 'ALT+2' WAS PRESSED
-             * AND IF SO MOVE TO DESKTOP 2
-             */ 
-            {
+            if (e->detail == wm->key_codes.n_2) {
                 switch (e->state) 
                 {
                     case ALT:
@@ -1986,11 +1966,7 @@ class Events {
                     }
                 }
             }
-            if (e->detail == wm->key_codes.n_3) /**
-             * CHECK IF 'ALT+3' WAS PRESSED
-             * AND IF SO MOVE TO DESKTOP 3
-             */ 
-            {
+            if (e->detail == wm->key_codes.n_3) {
                 switch (e->state) 
                 {
                     case ALT:
@@ -2000,11 +1976,7 @@ class Events {
                     }
                 }
             }
-            if (e->detail == wm->key_codes.n_4) /**
-             * CHECK IF 'ALT+4' WAS PRESSED
-             * AND IF SO MOVE TO DESKTOP 4
-             */
-            {
+            if (e->detail == wm->key_codes.n_4) {
                 switch (e->state) 
                 {
                     case ALT:
@@ -2014,11 +1986,7 @@ class Events {
                     }
                 }
             }
-            if (e->detail == wm->key_codes.n_5) /**
-             * CHECK IF 'ALT+5' WAS PRESSED
-             * IF SO MOVE TO DESKTOP 5
-             */
-            {
+            if (e->detail == wm->key_codes.n_5) {
                 switch (e->state) 
                 {
                     case ALT:
@@ -2028,13 +1996,7 @@ class Events {
                     }
                 }
             }
-            if (e->detail == wm->key_codes.r_arrow) /**
-             * IF R_ARROW IS PRESSED THEN CHECK WHAT MOD MASK IS APPLIED
-             * IF 'SHIFT+CTRL+SUPER' THEN MOVE TO NEXT DESKTOP WITH CURRENTLY FOCUSED APP
-             * IF 'CTRL+SUPER' THEN MOVE TO THE NEXT DESKTOP
-             * IF 'SUPER' THEN TILE WINDOW TO THE RIGHT
-             */
-            {
+            if (e->detail == wm->key_codes.r_arrow) {
                 switch (e->state) 
                 {
                     case SHIFT + CTRL + SUPER:
@@ -2057,13 +2019,7 @@ class Events {
                     return;
                 }
             }
-            if (e->detail == wm->key_codes.l_arrow) /**
-             * IF L_ARROW IS PRESSED THEN CHECK WHAT MOD MASK IS APPLIED
-             * IF 'SHIFT+CTRL+SUPER' THEN MOVE TO PREV DESKTOP WITH CURRENTLY FOCUSED APP
-             * IF 'CTRL+SUPER' THEN MOVE TO THE PREV DESKTOP
-             * IF 'SUPER' THEN TILE WINDOW TO THE LEFT
-             */
-            {
+            if (e->detail == wm->key_codes.l_arrow) {
                 switch (e->state) 
                 {
                     case SHIFT + CTRL + SUPER:
@@ -2085,10 +2041,7 @@ class Events {
                     }
                 }
             }
-            if (e->detail == wm->key_codes.d_arrow) /**
-             * IF 'D_ARROW' IS PRESSED SEND TO TILE
-             */
-            {
+            if (e->detail == wm->key_codes.d_arrow) {
                 switch (e->state) 
                 {
                     case SUPER:
@@ -2099,8 +2052,7 @@ class Events {
                     ;
                 }
             }
-            if (e->detail == wm->key_codes.u_arrow)
-            {
+            if (e->detail == wm->key_codes.u_arrow) {
                 switch (e->state) 
                 {
                     case SUPER:
@@ -2110,11 +2062,7 @@ class Events {
                     ;
                 }
             }
-            if (e->detail == wm->key_codes.tab) /**
-             * CHECK IF 'ALT+TAB' WAS PRESSED
-             * IF SO CYCLE FOCUS
-             */
-            {
+            if (e->detail == wm->key_codes.tab) {
                 switch (e->state) 
                 {
                     case ALT:
@@ -2123,12 +2071,7 @@ class Events {
                     ;
                 }
             }
-            if (e->detail == wm->key_codes.k) /**
-             *
-             * @brief This is a debug kebinding to test featurtes before they are implemented.  
-             * 
-             */
-            {
+            if (e->detail == wm->key_codes.k) {
                 switch (e->state) 
                 {
                     case SUPER:
