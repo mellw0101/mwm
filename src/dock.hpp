@@ -447,18 +447,12 @@ class File_App {
         window left_side_window;
 
         client * c;
-        
-        std::string current_directory;
-        File file;
-        std::vector<std::string> list_of_current_directory;
     ;
     public: // methods
         void init() {
             create_main_window();
             create_left_side_window();
             setup_events();
-            current_directory = file.get_current_directory();
-            list_of_current_directory = file.directory_lister.list(current_directory);
         }
     ;
     private: // functions
