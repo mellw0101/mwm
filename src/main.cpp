@@ -2300,6 +2300,9 @@ class Events {
             log_win("e->event: ", e->event);
             log_win("e->window: ", e->window);
             client * c = wm->client_from_window(& e->event);
+            if (!c) {
+                log_error("client not found");
+            }
             wm->send_sigterm_to_client(c);
         }
         void unmap_notify_handler(const xcb_generic_event_t * & ev) {
