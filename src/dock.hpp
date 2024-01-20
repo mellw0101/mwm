@@ -319,8 +319,7 @@ class Mwm_Runner {
     ;
     public: // methods
         void init() {
-            main_window.create_default
-            (
+            main_window.create_default(
                 screen->root,
                 (screen->width_in_pixels / 2) - ((140 + (BORDER * 2)) / 2),
                 0,
@@ -399,29 +398,24 @@ class add_app_dialog_window {
         Logger log;
     ;
     public: // methods
-        void init()
-        {
+        void init() {
             create();
             configure_events();
         }
-        void show()
-        {
+        void show() {
             create_client();
             search_window.create(main_window, DOCK_BORDER, DOCK_BORDER, (main_window.width() - (DOCK_BORDER * 2)), 20);
             search_window.init();
         }
-        void add_enter_action(std::function<void()> enter_action)
-        {
+        void add_enter_action(std::function<void()> enter_action) {
             enter_function = enter_action;
         }
     ;
     private: // functions
-        void hide()
-        {
+        void hide() {
             wm->send_sigterm_to_client(c);
         }
-        void create()
-        {
+        void create() {
             main_window.create_default(screen->root, pointer.x(), pointer.y(), 300, 200);
             uint32_t mask = XCB_EVENT_MASK_STRUCTURE_NOTIFY;
             main_window.apply_event_mask(& mask);
@@ -429,16 +423,14 @@ class add_app_dialog_window {
             main_window.grab_keys({ { Q, SHIFT | ALT } });
             main_window.set_backround_color(DARK_GREY);
         }
-        void create_client()
-        {
+        void create_client() {
             main_window.x_y(pointer.x() - (main_window.width() / 2), pointer.y() - (main_window.height() / 2));
             c = wm->make_internal_client(main_window);
             c->x_y((pointer.x() - (c->width / 2)), (pointer.y() - (c->height / 2)));
             main_window.map();
             c->map();
         }
-        void configure_events()
-        {
+        void configure_events() {
             event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev)
             {
                 const auto * e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
@@ -461,7 +453,9 @@ class File_App {
         void init() {
             int width = 300, height = 400;
             int x = ((screen->width_in_pixels / 2) - (width / 2)), y = ((screen->height_in_pixels / 2) - (height / 2));
-            main_window.create_default(screen->root, x, y, width, height);
+            main_window.create_default(screen->root, 0, 0, 200, 200);
+            uint32_t mask = XCB_EVENT_MASK_STRUCTURE_NOTIFY;
+            main_window.apply_event_mask(& mask);
             main_window.set_backround_color(DARK_GREY);
             main_window.grab_button({ { L_MOUSE_BUTTON, NULL } });
 
@@ -470,8 +464,8 @@ class File_App {
     ;
     private: // functions
         void launch() {
-            main_window.map();
             main_window.raise();
+            main_window.map();
         }
         void setup_events() {
             event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev) {
@@ -485,7 +479,6 @@ class File_App {
             });
         }
     ;
-
 };
 class Dock {
     public: // constructor

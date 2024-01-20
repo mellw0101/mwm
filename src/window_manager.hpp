@@ -606,43 +606,35 @@ class Window_Manager
         ;
         private: // check functions 
             void check_error(const int & code) {
-                switch (code) 
-                {
+                switch (code) {
                     case CONN_ERR:
                         log_error("Connection error.");
                         quit(CONN_ERR);
                         break;
-                    ;
                     case EXTENTION_NOT_SUPPORTED_ERR:
                         log_error("Extension not supported.");
                         quit(EXTENTION_NOT_SUPPORTED_ERR);
                         break;
-                    ;
                     case MEMORY_INSUFFICIENT_ERR:
                         log_error("Insufficient memory.");
                         quit(MEMORY_INSUFFICIENT_ERR);
                         break;
-                    ;
                     case REQUEST_TO_LONG_ERR:
                         log_error("Request to long.");
                         quit(REQUEST_TO_LONG_ERR);
                         break;
-                    ;
                     case PARSE_ERR:
                         log_error("Parse error.");
                         quit(PARSE_ERR);
                         break;
-                    ;
                     case SCREEN_NOT_FOUND_ERR:
                         log_error("Screen not found.");
                         quit(SCREEN_NOT_FOUND_ERR);
                         break;
-                    ;
                     case FD_ERR:
                         log_error("File descriptor error.");
                         quit(FD_ERR);
                         break;
-                    ;
                 }
             }
             void check_conn() {
@@ -651,8 +643,7 @@ class Window_Manager
             }
             int cookie_error(xcb_void_cookie_t cookie , const char * sender_function) {
                 xcb_generic_error_t * err = xcb_request_check(conn, cookie);
-                if (err)
-                {
+                if (err) {
                     log_error(err->error_code);
                     free(err);
                     return err->error_code;
@@ -764,8 +755,7 @@ class Window_Manager
             }
         ;
         private: // window functions
-            void getWindowParameters(const uint32_t & window) 
-            {
+            void getWindowParameters(const uint32_t & window) {
                 xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
                 xcb_get_geometry_reply_t* geometry_reply = xcb_get_geometry_reply(conn, geometry_cookie, NULL);
 
@@ -784,8 +774,7 @@ class Window_Manager
                     std::cerr << "Unable to get window geometry." << std::endl;
                 }
             }
-            void get_window_parameters(const uint32_t & window, int16_t * x, int16_t * y, uint16_t * width, uint16_t * height)
-            {
+            void get_window_parameters(const uint32_t & window, int16_t * x, int16_t * y, uint16_t * width, uint16_t * height) {
                 xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
                 xcb_get_geometry_reply_t* geometry_reply = xcb_get_geometry_reply(conn, geometry_cookie, NULL);
                 if (!geometry_reply) 
@@ -799,8 +788,7 @@ class Window_Manager
 
                 free(geometry_reply);
             }
-            int16_t get_window_x(const uint32_t & window) 
-            {
+            int16_t get_window_x(const uint32_t & window) {
                 xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
                 xcb_get_geometry_reply_t* geometry_reply = xcb_get_geometry_reply(conn, geometry_cookie, NULL);
 
@@ -814,8 +802,7 @@ class Window_Manager
                 free(geometry_reply);
                 return x;
             }
-            int16_t get_window_y(const uint32_t & window) 
-            {
+            int16_t get_window_y(const uint32_t & window) {
                 xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
                 xcb_get_geometry_reply_t* geometry_reply = xcb_get_geometry_reply(conn, geometry_cookie, NULL);
 
