@@ -451,6 +451,7 @@ class File_App {
             create_window();
             setup_window();
             setup_events();
+            make_internal_client();
         }
     ;
     private: // functions
@@ -473,6 +474,7 @@ class File_App {
             c->width = main_window.width();
             c->height = main_window.height();
             c->make_decorations();
+            wm->client_list.push_back(c);
         }
         void launch() {
             main_window.raise();
