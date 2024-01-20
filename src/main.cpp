@@ -2221,10 +2221,6 @@ class Events {
                 }
                 if (e->event == c->titlebar) {
                     c->raise();
-                    
-                    log_info("start_x: " + std::to_string(e->event_x));
-                    log_info("start_y: " + std::to_string(e->event_y));
-                    
                     mv_client mv(c, e->event_x, e->event_y);
                     wm->focus_client(c);
                     return;
