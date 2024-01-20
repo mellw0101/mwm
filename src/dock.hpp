@@ -444,26 +444,40 @@ class add_app_dialog_window {
 class File_App {
     public: // variabels
         window main_window;
+        window left_side_window;
+
         client * c;
+        
+        std::string current_directory;
+        File file;
+        std::vector<std::string> list_of_current_directory;
     ;
     public: // methods
         void init() {
-            create_window();
-            setup_window();
+            create_main_window();
             setup_events();
+            current_directory = file.get_current_directory();
+            list_of_current_directory = file.directory_lister.list(current_directory);
         }
     ;
     private: // functions
-        void create_window() {
+        void create_main_window() {
             int width = (screen->width_in_pixels / 2), height = (screen->height_in_pixels / 2);
             int x = ((screen->width_in_pixels / 2) - (width / 2)), y = ((screen->height_in_pixels / 2) - (height / 2));
             main_window.create_default(screen->root, x, y, width, height);
-        }
-        void setup_window() {
+
             uint32_t mask = XCB_EVENT_MASK_STRUCTURE_NOTIFY;
             main_window.apply_event_mask(& mask);
             main_window.set_backround_color(BLUE);
             main_window.grab_button({ { L_MOUSE_BUTTON, NULL } });
+        }
+        void create_left_side_window() {
+            left_side_window.create_default(main_window, 0, 0, 80, main_window.height());
+
+            uint32_t mask = XCB_EVENT_MASK_STRUCTURE_NOTIFY;
+            left_side_window.apply_event_mask(& mask);
+            left_side_window.set_backround_color(DARK_GREY);
+            left_side_window.grab_button({ { L_MOUSE_BUTTON, NULL } });
         }
         void make_internal_client() {
             c = new client;
@@ -479,6 +493,8 @@ class File_App {
             main_window.raise();
             main_window.map();
             make_internal_client();
+            left_side_window.raise();
+            left_side_window.map();
         }
         void setup_events() {
             event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev) {

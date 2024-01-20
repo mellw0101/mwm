@@ -10,8 +10,7 @@
 #include "str.hpp"
 #include "Log.hpp"
 
-class Directory_Searcher 
-{
+class Directory_Searcher {
     public:
         Directory_Searcher() {}
 
@@ -56,6 +55,31 @@ class Directory_Searcher
         Logger log;
     ;
 };
+class Directory_Lister {
+    public:
+        Directory_Lister() {}
+        std::vector<std::string> list(const std::string& Directory) {
+            std::vector<std::string> results;
+
+            DIR *d = opendir(Directory.c_str());
+            if (d == nullptr) {
+                log_error("Failed to open Directory: " + Directory);
+                return results;
+            }
+
+            struct dirent *entry;
+            while ((entry = readdir(d)) != nullptr) {
+                std::string fileName = entry->d_name;
+                results.push_back(fileName);
+            }
+            closedir(d);
+            return results;   
+        }
+    ;
+    private:
+        Logger log;
+    ;
+};
 class File
 {
     public: // subclasses
@@ -78,6 +102,9 @@ class File
     ;
     public: // construcers
         File() {}
+    ;
+    public: // variabels
+        Directory_Lister directory_lister;
     ;
     public: // methods
         std::string find_png_icon(std::vector<const char *> dirs, const char * app) {
@@ -103,6 +130,9 @@ class File
         std::vector<std::string> search_for_binary(const char * name) {
             ds.search({ "/usr/bin" }, name);
             return ds.getResults();
+        }
+        std::string get_current_directory() {
+            return get_env_var("PWD");
         }
     ;
     private: // variables
