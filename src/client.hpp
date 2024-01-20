@@ -343,48 +343,55 @@ class client {
                 border.left.grab_button({ { L_MOUSE_BUTTON, NULL } });
                 border.left.map();
             });
-
-            border.right.create_default(frame, (width + BORDER_SIZE), BORDER_SIZE, BORDER_SIZE, (height + TITLE_BAR_HEIGHT));
-            border.right.set_backround_color(BLACK);
-            border.right.set_pointer(CURSOR::right_side);
-            border.right.grab_button({ { L_MOUSE_BUTTON, NULL } });
-            border.right.map();
-
-            border.top.create_default(frame, BORDER_SIZE, 0, width, BORDER_SIZE);
-            border.top.set_backround_color(BLACK);
-            border.top.set_pointer(CURSOR::top_side);
-            border.top.grab_button({ { L_MOUSE_BUTTON, NULL } });
-            border.top.map();
-
-            border.bottom.create_default(frame, BORDER_SIZE, (height + TITLE_BAR_HEIGHT + BORDER_SIZE), width, BORDER_SIZE);
-            border.bottom.set_backround_color(BLACK);
-            border.bottom.set_pointer(CURSOR::bottom_side);
-            border.bottom.grab_button({ { L_MOUSE_BUTTON, NULL } });
-            border.bottom.map();
-
-            border.top_left.create_default(frame, 0, 0, BORDER_SIZE, BORDER_SIZE);
-            border.top_left.set_backround_color(BLACK);
-            border.top_left.set_pointer(CURSOR::top_left_corner);
-            border.top_left.grab_button({ { L_MOUSE_BUTTON, NULL } });
-            border.top_left.map();
-
-            border.top_right.create_default(frame, (width + BORDER_SIZE), 0, BORDER_SIZE, BORDER_SIZE);
-            border.top_right.set_backround_color(BLACK);
-            border.top_right.set_pointer(CURSOR::top_right_corner);
-            border.top_right.grab_button({ { L_MOUSE_BUTTON, NULL } });
-            border.top_right.map();
-            
-            border.bottom_left.create_default(frame, 0, (height + TITLE_BAR_HEIGHT + BORDER_SIZE), BORDER_SIZE, BORDER_SIZE);
-            border.bottom_left.set_backround_color(BLACK);
-            border.bottom_left.set_pointer(CURSOR::bottom_left_corner);
-            border.bottom_left.grab_button({ { L_MOUSE_BUTTON, NULL } });
-            border.bottom_left.map();
-
-            border.bottom_right.create_default(frame, (width + BORDER_SIZE), (height + TITLE_BAR_HEIGHT + BORDER_SIZE), BORDER_SIZE, BORDER_SIZE);
-            border.bottom_right.set_backround_color(BLACK);
-            border.bottom_right.set_pointer(CURSOR::bottom_right_corner);
-            border.bottom_right.grab_button({ { L_MOUSE_BUTTON, NULL } });
-            border.bottom_right.map();
+            t.addThread([this](){
+                border.right.create_default(frame, (width + BORDER_SIZE), BORDER_SIZE, BORDER_SIZE, (height + TITLE_BAR_HEIGHT));
+                border.right.set_backround_color(BLACK);
+                border.right.set_pointer(CURSOR::right_side);
+                border.right.grab_button({ { L_MOUSE_BUTTON, NULL } });
+                border.right.map();
+            });
+            t.addThread([this](){
+                border.top.create_default(frame, BORDER_SIZE, 0, width, BORDER_SIZE);
+                border.top.set_backround_color(BLACK);
+                border.top.set_pointer(CURSOR::top_side);
+                border.top.grab_button({ { L_MOUSE_BUTTON, NULL } });
+                border.top.map();
+            });
+            t.addThread([this](){
+                border.bottom.create_default(frame, BORDER_SIZE, (height + TITLE_BAR_HEIGHT + BORDER_SIZE), width, BORDER_SIZE);
+                border.bottom.set_backround_color(BLACK);
+                border.bottom.set_pointer(CURSOR::bottom_side);
+                border.bottom.grab_button({ { L_MOUSE_BUTTON, NULL } });
+                border.bottom.map();
+            });
+            t.addThread([this](){
+                border.top_left.create_default(frame, 0, 0, BORDER_SIZE, BORDER_SIZE);
+                border.top_left.set_backround_color(BLACK);
+                border.top_left.set_pointer(CURSOR::top_left_corner);
+                border.top_left.grab_button({ { L_MOUSE_BUTTON, NULL } });
+                border.top_left.map();
+            });
+            t.addThread([this](){
+                border.top_right.create_default(frame, (width + BORDER_SIZE), 0, BORDER_SIZE, BORDER_SIZE);
+                border.top_right.set_backround_color(BLACK);
+                border.top_right.set_pointer(CURSOR::top_right_corner);
+                border.top_right.grab_button({ { L_MOUSE_BUTTON, NULL } });
+                border.top_right.map();
+            });
+            t.addThread([this](){
+                border.bottom_left.create_default(frame, 0, (height + TITLE_BAR_HEIGHT + BORDER_SIZE), BORDER_SIZE, BORDER_SIZE);
+                border.bottom_left.set_backround_color(BLACK);
+                border.bottom_left.set_pointer(CURSOR::bottom_left_corner);
+                border.bottom_left.grab_button({ { L_MOUSE_BUTTON, NULL } });
+                border.bottom_left.map();
+            });
+            t.addThread([this](){
+                border.bottom_right.create_default(frame, (width + BORDER_SIZE), (height + TITLE_BAR_HEIGHT + BORDER_SIZE), BORDER_SIZE, BORDER_SIZE);
+                border.bottom_right.set_backround_color(BLACK);
+                border.bottom_right.set_pointer(CURSOR::bottom_right_corner);
+                border.bottom_right.grab_button({ { L_MOUSE_BUTTON, NULL } });
+                border.bottom_right.map();
+            });            
         }
     ;
     private: // variables
