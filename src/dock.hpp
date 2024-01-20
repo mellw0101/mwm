@@ -468,6 +468,7 @@ class File_App {
             }
             main_window.set_backround_color(BLUE);
             main_window.grab_button({ { L_MOUSE_BUTTON, NULL } });
+            log_win("main_window: ", main_window);
         }
         void create_left_side_window() {
             left_side_window.create_default(main_window, 0, 0, 80, main_window.height());
@@ -507,10 +508,9 @@ class File_App {
             });
             event_handler->setEventCallback(XCB_CONFIGURE_NOTIFY, [&](Ev ev) {
                 const auto * e = reinterpret_cast<const xcb_configure_notify_event_t *>(ev);
-                if (e->window == main_window) {
-                    log_info("success");
-                    log_win("e->window: ", e->window);
-                }
+                log_info("success");
+                log_win("e->window: ", e->window);
+                log_win("e->event: ", e->event);
             });
         }
     ;
