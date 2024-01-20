@@ -508,14 +508,8 @@ class File_App {
             });
             event_handler->setEventCallback(XCB_CONFIGURE_NOTIFY, [&](Ev ev) {
                 const auto * e = reinterpret_cast<const xcb_configure_notify_event_t *>(ev);
-                if (e->window == c->border.left 
-                 || e->window == c->border.right
-                 || e->window == c->border.top
-                 || e->window == c->border.bottom
-                 || e->window == c->border.top_left 
-                 || e->window == c->border.top_right 
-                 || e->window == c->border.bottom_left 
-                 || e->window == c->border.bottom_right)
+                client * c = wm->client_from_any_window(&e->window);
+                if (c->win == main_window)
                 {
                     log_info("success");
                 }
