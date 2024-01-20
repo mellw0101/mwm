@@ -462,7 +462,7 @@ class File_App {
         void setup_window() {
             uint32_t mask = XCB_EVENT_MASK_STRUCTURE_NOTIFY;
             main_window.apply_event_mask(& mask);
-            main_window.set_backround_color(DARK_GREY);
+            main_window.set_backround_color(BLUE);
             main_window.grab_button({ { L_MOUSE_BUTTON, NULL } });
         }
         void make_internal_client() {
