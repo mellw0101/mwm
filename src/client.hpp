@@ -1,46 +1,7 @@
 #ifndef CLIENT_HPP
 #define CLIENT_HPP
-#include <cstdlib>
-#include <stdio.h>
-#include <stdbool.h>
-#include <stdint.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <string.h>
-#include <vector>
 #include <xcb/randr.h>
-#include <xcb/xcb_keysyms.h>
-#include <xcb/xcb_icccm.h>
-#include <xcb/xcb_ewmh.h>
-#include <xcb/xcb_xrm.h>
-#include <xcb/render.h>
-#include <X11/keysym.h>
-#include <X11/X.h>
-#include <cstddef>
-#include <cstdint>
-#include <cstring>
-#include <xcb/xcb.h>
-#include <unistd.h>     // For fork() and exec()
-#include <sys/wait.h>   // For waitpid()
-#include <xcb/xcb_ewmh.h>
-#include <xcb/xcb_keysyms.h>
-#include <xcb/xproto.h>
-#include <xcb/xcb_cursor.h> /* For cursor */
-#include <xcb/xcb_icccm.h>
-#include <spawn.h>
-#include <sys/wait.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <png.h>
-#include <xcb/xcb_image.h>
-#include <Imlib2.h>
-#include <sys/socket.h>
-#include <sys/un.h>
-#include <unistd.h>
-#include <X11/Xauth.h>
-#include <cstring>
-#include <netinet/in.h>
-#include <arpa/inet.h>
+
 #include "Log.hpp"
 #include "defenitions.hpp"
 #include "structs.hpp"
