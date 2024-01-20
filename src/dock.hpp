@@ -319,8 +319,7 @@ class Mwm_Runner
         Launcher launcher;
     ;
     public: // methods
-        void init()
-        {
+        void init() {
             main_window.create_default
             (
                 screen->root,
@@ -349,8 +348,7 @@ class Mwm_Runner
                 hide();
             });
         }
-        void show()
-        {
+        void show() {
             main_window.raise();
             main_window.map();
             search_window.main_window.focus_input();

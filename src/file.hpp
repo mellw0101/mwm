@@ -80,13 +80,11 @@ class File
         File() {}
     ;
     public: // methods
-        std::string find_png_icon(std::vector<const char *> dirs, const char * app)
-        {
+        std::string find_png_icon(std::vector<const char *> dirs, const char * app) {
             std::string name = app;
             name += ".png";
 
-            for (const auto & dir : dirs)
-            {
+            for (const auto & dir : dirs) {
                 std::vector<std::string> files = list_dir_to_vector(dir);
                 for (const auto & file : files)
                 {
@@ -98,13 +96,11 @@ class File
             }
             return "";
         }
-        bool check_if_binary_exists(const char * name)
-        {
+        bool check_if_binary_exists(const char * name){
             std::vector<const char *> dirs = split_$PATH_into_vector();
             return check_if_file_exists_in_DIRS(dirs, name);
         }
-        std::vector<std::string> search_for_binary(const char * name)
-        {
+        std::vector<std::string> search_for_binary(const char * name) {
             ds.search({ "/usr/bin" }, name);
             return ds.getResults();
         }

@@ -481,8 +481,7 @@ class Window_Manager
                     return edge::NONE;
                 }
             ;
-            void manage_new_client(const uint32_t & window)
-            {
+            void manage_new_client(const uint32_t & window) {
                 client * c = make_client(window);
                 if (!c)
                 {
@@ -500,14 +499,13 @@ class Window_Manager
                 });
                 c->win.grab_default_keys();
                 c->make_decorations();
-                uint32_t mask = XCB_EVENT_MASK_FOCUS_CHANGE | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW;
+                uint32_t mask = XCB_EVENT_MASK_FOCUS_CHANGE | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW | XCB_EVENT_MASK_STRUCTURE_NOTIFY;
                 c->win.apply_event_mask(& mask);
 
                 c->update();
                 focus_client(c);
             }
-            client * make_internal_client(window window)
-            {
+            client * make_internal_client(window window) {
                 client * c = new client;
                 c->win = window;
                 c->x = window.x();
@@ -522,8 +520,7 @@ class Window_Manager
 
                 return c;
             }
-            int send_sigterm_to_client(client * c)
-            {
+            int send_sigterm_to_client(client * c) {
                 if (!c)
                 {
                     return - 1;
@@ -662,9 +659,7 @@ class Window_Manager
             }
         ;
         private: // check functions 
-            void
-            check_error(const int & code)
-            {
+            void check_error(const int & code) {
                 switch (code) 
                 {
                     case CONN_ERR:
@@ -704,17 +699,11 @@ class Window_Manager
                     ;
                 }
             }
-
-            void
-            check_conn()
-            {
+            void check_conn() {
                 int status = xcb_connection_has_error(conn);
                 check_error(status);
             }
-
-            int
-            cookie_error(xcb_void_cookie_t cookie , const char * sender_function)
-            {
+            int cookie_error(xcb_void_cookie_t cookie , const char * sender_function) {
                 xcb_generic_error_t * err = xcb_request_check(conn, cookie);
                 if (err)
                 {
@@ -724,10 +713,7 @@ class Window_Manager
                 }
                 return 0;
             }
-
-            void
-            check_error(xcb_connection_t * connection, xcb_void_cookie_t cookie , const char * sender_function, const char * err_msg)
-            {
+            void check_error(xcb_connection_t * connection, xcb_void_cookie_t cookie , const char * sender_function, const char * err_msg) {
                 xcb_generic_error_t * err = xcb_request_check(connection, cookie);
                 if (err)
                 {
@@ -744,8 +730,7 @@ class Window_Manager
             return 0;
         }
         private: // delete functions 
-            void delete_client_vec(std::vector<client *> & vec)
-            {
+            void delete_client_vec(std::vector<client *> & vec) {
                 for (client * c : vec)
                 {
                     send_sigterm_to_client(c);
@@ -756,8 +741,7 @@ class Window_Manager
 
                 std::vector<client *>().swap(vec);
             }
-            void delete_desktop_vec(std::vector<desktop *> & vec)
-            {
+            void delete_desktop_vec(std::vector<desktop *> & vec) {
                 for (desktop * d : vec)
                 {
                     delete_client_vec(d->current_clients);
@@ -769,8 +753,7 @@ class Window_Manager
                 std::vector<desktop *>().swap(vec);
             }
             template <typename Type> 
-            static void delete_ptr_vector(std::vector<Type *>& vec) 
-            {
+            static void delete_ptr_vector(std::vector<Type *>& vec) {
                 for (Type * ptr : vec) 
                 {
                     delete ptr;
@@ -779,14 +762,12 @@ class Window_Manager
 
                 std::vector<Type *>().swap(vec);
             }
-            void remove_client(client * c)
-            {
+            void remove_client(client * c) {
                 client_list.erase(std::remove(client_list.begin(), client_list.end(), c), client_list.end());
                 cur_d->current_clients.erase(std::remove(cur_d->current_clients.begin(), cur_d->current_clients.end(), c), cur_d->current_clients.end());
                 delete c;
             }
-            void remove_client_from_vector(client * c, std::vector<client *> & vec)
-            {
+            void remove_client_from_vector(client * c, std::vector<client *> & vec) {
                 if (!c)
                 {
                     log_error("client is nullptr.");
@@ -796,11 +777,9 @@ class Window_Manager
             }
         ;
         private: // client functions
-            client * make_client(const uint32_t & window) 
-            {
+            client * make_client(const uint32_t & window) {
                 client * c = new client;
-                if (!c) 
-                {
+                if (!c) {
                     log_error("Could not allocate memory for client");
                     return nullptr;
                 }
@@ -813,23 +792,19 @@ class Window_Manager
                 c->depth   = 24;
                 c->desktop = cur_d->desktop;
 
-                if (c->x <= 0 && c->y <= 0 && c->width != screen->width_in_pixels && c->height != screen->height_in_pixels)
-                {
+                if (c->x <= 0 && c->y <= 0 && c->width != screen->width_in_pixels && c->height != screen->height_in_pixels) {
                     c->x = (screen->width_in_pixels - c->width) / 2;
                     c->y = (screen->height_in_pixels - c->height) / 2;
                 }
 
-                if (c->height > screen->height_in_pixels)
-                {
+                if (c->height > screen->height_in_pixels) {
                     c->height = screen->height_in_pixels;
                 }
-                if (c->width > screen->width_in_pixels)
-                {
+                if (c->width > screen->width_in_pixels) {
                     c->width = screen->width_in_pixels;
                 }
 
-                if (c->win.is_EWMH_fullscreen()) 
-                {
+                if (c->win.is_EWMH_fullscreen()) {
                     c->x      = 0;
                     c->y      = 0;
                     c->width  = screen->width_in_pixels;
