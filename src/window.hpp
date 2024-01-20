@@ -853,8 +853,7 @@ class window {
         ;
         public: // keys
             void grab_default_keys() {
-                grab_keys(
-                {
+                grab_keys({
                     {   T,          ALT | CTRL              }, // for launching terminal
                     {   Q,          ALT | SHIFT             }, // quiting key_binding for mwm_wm
                     {   F11,        NULL                    }, // key_binding for fullscreen
@@ -874,6 +873,7 @@ class window {
                     {   TAB,        ALT                     },
                     {   K,          SUPER                   },
                     {   R,          SUPER                   }, // key_binding for runner_window
+                    {   F,          SUPER                   }, // key_binding for file_app
                 });
             }
             void grab_keys(std::initializer_list<std::pair<const uint32_t, const uint16_t>> bindings) {

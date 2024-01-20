@@ -207,8 +207,7 @@ class Window_Manager
     ;
     public: // methods 
         public: // main methods 
-            void init()
-            {
+            void init() {
                 _conn(nullptr, nullptr);
                 _setup();
                 _iter();
@@ -241,16 +240,14 @@ class Window_Manager
                 );
                 context_menu->init();
             }
-            void launch_program(char * program)
-            {
+            void launch_program(char * program) {
                 if (fork() == 0) 
                 {
                     setsid();
                     execvp(program, (char *[]) { program, NULL });
                 }
             }
-            void quit(const int & status)
-            {
+            void quit(const int & status) {
                 xcb_flush(conn);
                 delete_client_vec(client_list);
                 delete_desktop_vec(desktop_list);
@@ -261,8 +258,7 @@ class Window_Manager
         ;
         public: // client methods 
             public: // focus methods 
-                void focus_client(client * c)
-                {
+                void focus_client(client * c) {
                     if (!c)
                     {
                         log_error("c is null");
@@ -272,21 +268,16 @@ class Window_Manager
                     focused_client = c;
                     c->focus();
                 }
-                void cycle_focus()
-                {
+                void cycle_focus() {
                     bool focus = false;
-                    for (auto & c : client_list)
-                    {
-                        if (c)
-                        {
-                            if (c == focused_client)
-                            {
+                    for (auto & c : client_list) {
+                        if (c) {
+                            if (c == focused_client) {
                                 focus = true;
                                 continue;
                             }
                             
-                            if (focus)
-                            {
+                            if (focus) {
                                 focus_client(c);
                                 return;  
                             }
@@ -295,8 +286,7 @@ class Window_Manager
                 }
             ;
             public: // client fetch methods
-                client * client_from_window(const xcb_window_t * window) 
-                {
+                client * client_from_window(const xcb_window_t * window) {
                     for (const auto & c : client_list) 
                     {
                         if (* window == c->win) 
@@ -306,8 +296,7 @@ class Window_Manager
                     }
                     return nullptr;
                 }
-                client * client_from_any_window(const xcb_window_t * window) 
-                {
+                client * client_from_any_window(const xcb_window_t * window) {
                     for (const auto & c : client_list) 
                     {
                         if (* window == c->win 
@@ -330,8 +319,7 @@ class Window_Manager
                     }
                     return nullptr;
                 }
-                client * client_from_pointer(const int & prox)
-                {
+                client * client_from_pointer(const int & prox) {
                     const uint32_t & x = pointer.x();
                     const uint32_t & y = pointer.y();
                     for (const auto & c : cur_d->current_clients)
@@ -362,8 +350,7 @@ class Window_Manager
                     }
                     return nullptr;
                 }
-                std::map<client *, edge> get_client_next_to_client(client * c, edge c_edge)
-                {
+                std::map<client *, edge> get_client_next_to_client(client * c, edge c_edge) {
                     std::map<client *, edge> map;
                     for (client * c2 : cur_d->current_clients)
                     {
@@ -412,8 +399,7 @@ class Window_Manager
                     map[nullptr] = edge::NONE;
                     return map;
                 }
-                edge get_client_edge_from_pointer(client * c, const int & prox)
-                {
+                edge get_client_edge_from_pointer(client * c, const int & prox) {
                     const uint32_t & x = pointer.x();
                     const uint32_t & y = pointer.y();
 
@@ -519,15 +505,12 @@ class Window_Manager
                 return c;
             }
             void send_sigterm_to_client(client * c) {
-                log_win("c->win: " ,c->win);
                 c->kill();
                 remove_client(c);
             }
         ;
         public: // desktop methods 
-            void
-            create_new_desktop(const uint16_t & n)
-            {
+            void create_new_desktop(const uint16_t & n) {
                 desktop * d = new desktop;
                 d->desktop  = n;
                 d->width    = screen->width_in_pixels;
@@ -542,36 +525,26 @@ class Window_Manager
     ;
     private: // functions 
         private: // init functions 
-            void 
-            _conn(const char * displayname, int * screenp) 
-            {
+            void _conn(const char * displayname, int * screenp) {
                 conn = xcb_connect(displayname, screenp);
                 check_conn();
             }
-
-            void 
-            _ewmh() 
-            {
-                if (!(ewmh = static_cast<xcb_ewmh_connection_t *>(calloc(1, sizeof(xcb_ewmh_connection_t)))))
-                {
+            void _ewmh() {
+                if (!(ewmh = static_cast<xcb_ewmh_connection_t *>(calloc(1, sizeof(xcb_ewmh_connection_t))))) {
                     log_error("ewmh faild to initialize");
                     quit(1);
                 }    
                 
                 xcb_intern_atom_cookie_t * cookie = xcb_ewmh_init_atoms(conn, ewmh);
-                
-                if (!(xcb_ewmh_init_atoms_replies(ewmh, cookie, 0)))
-                {
+                if (!(xcb_ewmh_init_atoms_replies(ewmh, cookie, 0))) {
                     log_error("xcb_ewmh_init_atoms_replies:faild");
                     quit(1);
                 }
 
                 const char * str = "mwm";
-                check_error
-                (
+                check_error(
                     conn, 
-                    xcb_ewmh_set_wm_name
-                    (
+                    xcb_ewmh_set_wm_name(
                         ewmh, 
                         screen->root, 
                         strlen(str), 
@@ -581,31 +554,17 @@ class Window_Manager
                     "xcb_ewmh_set_wm_name"
                 );
             }
-
-            void 
-            _setup() 
-            {
+            void _setup() {
                 setup = xcb_get_setup(conn);
             }
-
-            void 
-            _iter() 
-            {
+            void _iter() {
                 iter = xcb_setup_roots_iterator(setup);
             }
-
-            void 
-            _screen() 
-            {
+            void _screen() {
                 screen = iter.data;
             }
-
-            bool
-            setSubstructureRedirectMask() 
-            {
-                // ATTEMPT TO SET THE SUBSTRUCTURE REDIRECT MASK
-                xcb_void_cookie_t cookie = xcb_change_window_attributes_checked
-                (
+            bool setSubstructureRedirectMask() {
+                xcb_void_cookie_t cookie = xcb_change_window_attributes_checked(
                     conn,
                     root,
                     XCB_CW_EVENT_MASK,
@@ -615,20 +574,15 @@ class Window_Manager
                     }
                 );
 
-                // CHECK IF ANOTHER WINDOW MANAGER IS RUNNING
                 xcb_generic_error_t * error = xcb_request_check(conn, cookie);
-                if (error) 
-                {
+                if (error) {
                     log_error("Error: Another window manager is already running or failed to set SubstructureRedirect mask."); 
                     free(error);
                     return false;
                 }
                 return true;
             }
-
-            void 
-            configure_root()
-            {
+            void configure_root() {
                 root.set_backround_color(DARK_GREY);
                 uint32_t mask = 
                     XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT |
