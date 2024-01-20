@@ -550,13 +550,8 @@ class mv_client {
                     case XCB_MOTION_NOTIFY: {
                         const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
 
-                        log_info("start_x: " + std::to_string(e->event_x));
-                        log_info("start_y: " + std::to_string(e->event_y));
-                        log_info("root_x: " + std::to_string(e->root_x));
-                        log_info("root_y: " + std::to_string(e->root_y));
-                        
                         if (isTimeToRender()) {
-                            snap(e->root_x, e->root_y);
+                            snap((e->root_x - (e->root_x - c->x)), (e->root_y - (e->root_y - c->y)));
                             xcb_flush(conn);
                         }
                         break;
