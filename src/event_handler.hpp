@@ -15,25 +15,20 @@ class Event_Handler
     public: // methods
         using EventCallback = std::function<void(const xcb_generic_event_t*)>;
         
-        void run() 
-        {
+        void run() {
             xcb_generic_event_t *ev;
             shouldContinue = true;
 
-            while (shouldContinue) 
-            {
+            while (shouldContinue) {
                 ev = xcb_wait_for_event(conn);
-                if (!ev) 
-                {
+                if (!ev) {
                     continue;
                 }
 
                 uint8_t responseType = ev->response_type & ~0x80;
                 auto it = eventCallbacks.find(responseType);
-                if (it != eventCallbacks.end()) 
-                {
-                    for (const auto& callback : it->second) 
-                    {
+                if (it != eventCallbacks.end()) {
+                    for (const auto& callback : it->second) {
                         callback(ev);
                     }
                 }
@@ -41,12 +36,10 @@ class Event_Handler
                 free(ev);
             }
         }
-        void end()
-        {
+        void end() {
             shouldContinue = false;
         }
-        void setEventCallback(uint8_t eventType, EventCallback callback) 
-        {
+        void setEventCallback(uint8_t eventType, EventCallback callback) {
             eventCallbacks[eventType].push_back(std::move(callback));
         }
     ;
