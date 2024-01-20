@@ -20,6 +20,7 @@
 #define log_error_long(message, message_2)                  log.log(ERROR, __FUNCTION__, message, message_2)
 #define log_error_code(message, err_code)   log.log(ERROR, __FUNCTION__, message, err_code)
 #define log_win(win_name ,window)           log.log(INFO, __func__, win_name + std::to_string(window))
+#define log_window(window)                  log.log(INFO, __func__, std::to_string(window))
 #define log_func                            log.log(FUNC, __func__)
 
 /* MOD_MASK DEFENITIONS */

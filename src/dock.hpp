@@ -506,6 +506,7 @@ class File_App {
             event_handler->setEventCallback(XCB_CONFIGURE_NOTIFY, [&](Ev ev) {
                 const auto * e = reinterpret_cast<const xcb_configure_notify_event_t *>(ev);
                 log_info("success");
+                log_win("e->window: ", e->window);
             });
         }
     ;
