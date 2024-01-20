@@ -51,6 +51,7 @@
 #include <map>
 #include "Log.hpp"
 #include "contex_meny.hpp"
+#include "pointer.hpp"
 Logger log;
 
 #include "defenitions.hpp"
@@ -64,7 +65,6 @@ Logger log;
 #include "window_manager.hpp"
 #include "mwm_animator.hpp"
 
-static pointer * pointer;
 static Dock * dock;
 
 class mxb 
@@ -415,7 +415,7 @@ class mxb
 class mv_client 
 {
     public: // constructor
-        mv_client(client * & c, const uint16_t & start_x, const uint16_t & start_y) 
+        mv_client(client * c, int start_x, const int start_y) 
         : c(c), start_x(start_x), start_y(start_y)
         {
             if (c->win.is_EWMH_fullscreen())
@@ -423,16 +423,17 @@ class mv_client
                 return;
             }
 
-            pointer->grab(c->frame);
+            pointer.grab(c->frame);
             run();
             xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
             xcb_flush(conn);
         }
     ;
     private: // variabels
-        client * & c;
-        const uint16_t & start_x;
-        const uint16_t & start_y;
+        client * c;
+        pointer pointer;
+        int start_x;
+        int start_y;
         bool shouldContinue = true;
         xcb_generic_event_t * ev;
         /* DEFENITIONS TO REDUCE REDUNDENT CODE IN 'snap' FUNCTION */
@@ -910,8 +911,8 @@ class resize_client
                 return;
             }
 
-            pointer->grab(c->frame);
-            pointer->teleport(c->x + c->width, c->y + c->height);
+            pointer.grab(c->frame);
+            pointer.teleport(c->x + c->width, c->y + c->height);
             run();
             xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
             xcb_flush(conn);
@@ -929,7 +930,7 @@ class resize_client
                         return;
                     }
                     
-                    pointer->grab(c->frame);
+                    pointer.grab(c->frame);
                     edge edge = wm->get_client_edge_from_pointer(c, 10);
                     teleport_mouse(edge);
                     run(edge);
@@ -940,6 +941,7 @@ class resize_client
             private: // variables
                 client * & c;
                 uint32_t x;
+                pointer pointer;
                 uint32_t y;
                 const double frameRate = 120.0;
                 std::chrono::high_resolution_clock::time_point lastUpdateTime = std::chrono::high_resolution_clock::now();
@@ -951,40 +953,31 @@ class resize_client
                     switch (edge) 
                     {
                         case edge::TOP:
-                            pointer->teleport(pointer->x(), c->y);
+                            pointer.teleport(pointer.x(), c->y);
                             break;
-                        ;
                         case edge::BOTTOM_edge:
-                            pointer->teleport(pointer->x(), (c->y + c->height));
+                            pointer.teleport(pointer.x(), (c->y + c->height));
                             break;
-                        ;
                         case edge::LEFT:
-                            pointer->teleport(c->x, pointer->y());
+                            pointer.teleport(c->x, pointer.y());
                             break;
-                        ;
                         case edge::RIGHT:
-                            pointer->teleport((c->x + c->width), pointer->y());
+                            pointer.teleport((c->x + c->width), pointer.y());
                             break;
-                        ;
                         case edge::NONE:
                             break;
-                        ;
                         case edge::TOP_LEFT:
-                            pointer->teleport(c->x, c->y);
+                            pointer.teleport(c->x, c->y);
                             break;
-                        ;
                         case edge::TOP_RIGHT:
-                            pointer->teleport((c->x + c->width), c->y);
+                            pointer.teleport((c->x + c->width), c->y);
                             break;
-                        ;
                         case edge::BOTTOM_LEFT:
-                            pointer->teleport(c->x, (c->y + c->height));
+                            pointer.teleport(c->x, (c->y + c->height));
                             break;
-                        ;
                         case edge::BOTTOM_RIGHT:
-                            pointer->teleport((c->x + c->width), (c->y + c->height));
+                            pointer.teleport((c->x + c->width), (c->y + c->height));
                             break;
-                        ;
                     }
                 }
                 void resize_client(const uint32_t x, const uint32_t y, edge edge)
@@ -1114,7 +1107,7 @@ class resize_client
                         {
                             c2 = pair.first;
                             c2_edge = pair.second;
-                            pointer->grab(c->frame);
+                            pointer.grab(c->frame);
                             teleport_mouse(_edge);
                             run_double(_edge);
                             xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
@@ -1123,7 +1116,7 @@ class resize_client
                         }
                     }
                     
-                    pointer->grab(c->frame);
+                    pointer.grab(c->frame);
                     teleport_mouse(_edge);
                     run(_edge);
                     xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
@@ -1133,7 +1126,8 @@ class resize_client
             private: // variables
                 client * & c;
                 client * c2;
-                edge c2_edge; 
+                edge c2_edge;
+                pointer pointer; 
                 const double frameRate = 120.0;
                 std::chrono::high_resolution_clock::time_point lastUpdateTime = std::chrono::high_resolution_clock::now();
                 const double frameDuration = 1000.0 / frameRate;
@@ -1145,22 +1139,22 @@ class resize_client
                     {
                         case edge::TOP:
                         {
-                            pointer->teleport(pointer->x(), c->y);
+                            pointer.teleport(pointer.x(), c->y);
                             break;
                         }
                         case edge::BOTTOM_edge:
                         {
-                            pointer->teleport(pointer->x(), (c->y + c->height));
+                            pointer.teleport(pointer.x(), (c->y + c->height));
                             break;
                         } 
                         case edge::LEFT:
                         {
-                            pointer->teleport(c->x, pointer->y());
+                            pointer.teleport(c->x, pointer.y());
                             break;
                         }
                         case edge::RIGHT:
                         {
-                            pointer->teleport((c->x + c->width), pointer->y());
+                            pointer.teleport((c->x + c->width), pointer.y());
                             break;
                         }
                         case edge::NONE:
@@ -1169,22 +1163,22 @@ class resize_client
                         }
                         case edge::TOP_LEFT:
                         {
-                            pointer->teleport(c->x, c->y);
+                            pointer.teleport(c->x, c->y);
                             break;
                         }
                         case edge::TOP_RIGHT:
                         {
-                            pointer->teleport((c->x + c->width), c->y);
+                            pointer.teleport((c->x + c->width), c->y);
                             break;
                         }
                         case edge::BOTTOM_LEFT:
                         {
-                            pointer->teleport(c->x, (c->y + c->height));
+                            pointer.teleport(c->x, (c->y + c->height));
                             break;
                         }
                         case edge::BOTTOM_RIGHT:
                         {
-                            pointer->teleport((c->x + c->width), (c->y + c->height));
+                            pointer.teleport((c->x + c->width), (c->y + c->height));
                             break;
                         }
                     }
@@ -1437,6 +1431,7 @@ class resize_client
     private: // variabels
         client * & c;
         uint32_t x;
+        pointer pointer;
         uint32_t y;
         const double frameRate = 120.0;
         std::chrono::high_resolution_clock::time_point lastUpdateTime = std::chrono::high_resolution_clock::now();
@@ -2359,7 +2354,7 @@ class Events
                     if (e->detail == L_MOUSE_BUTTON)
                     {
                         c->raise();
-                        resize_client::no_border(c, 0, 0);
+                        resize_client::no_border border(c, 0, 0);
                         wm->focus_client(c);
                     }
                     return;
@@ -2389,7 +2384,7 @@ class Events
                     {
                         case ALT:
                             c->raise();
-                            mv_client(c, e->event_x, e->event_y + 20);
+                            mv_client mv(c, e->event_x, e->event_y + 20);
                             wm->focus_client(c);
                             break;
                         ;
@@ -2398,72 +2393,61 @@ class Events
                     wm->focus_client(c);
                     return;
                 }
-
                 if (e->event == c->titlebar)
                 {
                     c->raise();
-                    mv_client(c, e->event_x, e->event_y);
+                    mv_client mv(c, e->event_x, e->event_y);
                     wm->focus_client(c);
                     return;
                 }
-
                 if (e->event == c->close_button)
                 {
                     win_tools::close_button_kill(c);
                     return;
                 }
-
                 if (e->event == c->max_button)
                 {
                     client * c = wm->client_from_any_window(& e->event);
                     max_win(c, max_win::BUTTON_MAXWIN);
                     return;
                 }
-
                 if (e->event == c->border.left)
                 {
-                    resize_client::border(c, edge::LEFT);
+                    resize_client::border border(c, edge::LEFT);
                     return;
                 }
-
                 if (e->event == c->border.right)
                 {
-                    resize_client::border(c, edge::RIGHT);
+                    resize_client::border border(c, edge::RIGHT);
                     return;
                 }
-
                 if (e->event == c->border.top)
                 {
-                    resize_client::border(c, edge::TOP);
+                    resize_client::border border(c, edge::TOP);
                     return;
                 }
-
                 if (e->event == c->border.bottom)
                 {
                     resize_client::border(c, edge::BOTTOM_edge);
                 }
-
                 if (e->event == c->border.top_left)
                 {
-                    resize_client::border(c, edge::TOP_LEFT);
+                    resize_client::border border(c, edge::TOP_LEFT);
                     return;
                 }
-
                 if (e->event == c->border.top_right)
                 {
-                    resize_client::border(c, edge::TOP_RIGHT);
+                    resize_client::border border(c, edge::TOP_RIGHT);
                     return;
                 }
-
                 if (e->event == c->border.bottom_left)
                 {
-                    resize_client::border(c, edge::BOTTOM_LEFT);
+                    resize_client::border border(c, edge::BOTTOM_LEFT);
                     return;
                 }
-
                 if (e->event == c->border.bottom_right)
                 {
-                    resize_client::border(c, edge::BOTTOM_RIGHT);
+                    resize_client::border border(c, edge::BOTTOM_RIGHT);
                     return;
                 }
             }
@@ -2476,7 +2460,7 @@ class Events
                     {
                         log_error("ALT + R_MOUSE_BUTTON");
                         c->raise();
-                        resize_client(c, 0);
+                        resize_client resize(c, 0);
                         wm->focus_client(c);
                         return;
                     }
@@ -2580,7 +2564,6 @@ void setup_wm()
     mwm_runner = new Mwm_Runner;
     mwm_runner->init();
 
-    pointer = new class pointer;
     Events events;
     events.setup();
 }
