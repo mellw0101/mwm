@@ -549,9 +549,11 @@ class mv_client {
                 switch (ev->response_type & ~0x80) {
                     case XCB_MOTION_NOTIFY: {
                         const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
-
+                        int new_x = e->root_x - start_x + BORDER_SIZE;
+                        int new_y = e->root_y - start_y + BORDER_SIZE;
+                        
                         if (isTimeToRender()) {
-                            snap((e->root_x - (e->root_x - c->x)), (e->root_y - (e->root_y - c->y)));
+                            snap(new_x, new_y);
                             xcb_flush(conn);
                         }
                         break;
@@ -2225,10 +2227,8 @@ class Events {
                     
                     log_info("start_x: " + std::to_string(e->event_x));
                     log_info("start_y: " + std::to_string(e->event_y));
-                    log_info("root_x: " + std::to_string(e->root_x));
-                    log_info("root_y: " + std::to_string(e->root_y));
                     
-                    mv_client mv(c, e->root_x, e->root_y);
+                    mv_client mv(c, e->event_x, e->event_y);
                     wm->focus_client(c);
                     return;
                 }
