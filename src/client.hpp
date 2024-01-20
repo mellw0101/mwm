@@ -335,11 +335,14 @@ class client {
             min_button.set_backround_png("/home/mellw/min.png");
         }
         void make_borders() {
-            border.left.create_default(frame, 0, BORDER_SIZE, BORDER_SIZE, (height + TITLE_BAR_HEIGHT));
-            border.left.set_backround_color(BLACK);
-            border.left.set_pointer(CURSOR::left_side);
-            border.left.grab_button({ { L_MOUSE_BUTTON, NULL } });
-            border.left.map();
+            Threads t;
+            t.addThread([this](){
+                border.left.create_default(frame, 0, BORDER_SIZE, BORDER_SIZE, (height + TITLE_BAR_HEIGHT));
+                border.left.set_backround_color(BLACK);
+                border.left.set_pointer(CURSOR::left_side);
+                border.left.grab_button({ { L_MOUSE_BUTTON, NULL } });
+                border.left.map();
+            });
 
             border.right.create_default(frame, (width + BORDER_SIZE), BORDER_SIZE, BORDER_SIZE, (height + TITLE_BAR_HEIGHT));
             border.right.set_backround_color(BLACK);
