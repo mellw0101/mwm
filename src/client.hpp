@@ -89,6 +89,7 @@ class client {
                 frame.unmap();
             }
             void kill() {
+                frame.unmap();
                 win.unmap();
                 close_button.unmap();
                 max_button.unmap();
@@ -102,7 +103,6 @@ class client {
                 border.top_right.unmap();
                 border.bottom_left.unmap();
                 border.bottom_right.unmap();
-                frame.unmap();
 
                 win.kill();
                 close_button.kill();
