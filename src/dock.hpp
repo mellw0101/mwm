@@ -554,8 +554,7 @@ class Dock {
                         launcher.program((char *) app);
                     }
                 });
-                buttons.list[buttons.index()].create
-                (
+                buttons.list[buttons.index()].create(
                     main_window,
                     ((buttons.index() * width) + DOCK_BORDER),
                     DOCK_BORDER,
@@ -565,6 +564,15 @@ class Dock {
                 );
                 buttons.list[buttons.index()].put_icon_on_button();
             }
+            buttons.add("File", [this] () { file_app.launch(); });
+            buttons.list[buttons.index()].create(
+                main_window,
+                ((buttons.index() * width) + DOCK_BORDER),
+                DOCK_BORDER,
+                (width - (DOCK_BORDER * 2)),
+                (height - (DOCK_BORDER * 2)),
+                BLACK
+            );
             calc_size_pos();
         }
         void configure_events() {
