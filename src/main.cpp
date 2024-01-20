@@ -548,7 +548,12 @@ class mv_client {
 
                 switch (ev->response_type & ~0x80) {
                     case XCB_MOTION_NOTIFY: {
-                        const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);                        
+                        const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
+
+                        log_info("start_x: " + std::to_string(e->event_x));
+                        log_info("start_y: " + std::to_string(e->event_y));
+                        log_info("root_x: " + std::to_string(e->root_x));
+                        log_info("root_y: " + std::to_string(e->root_y));
                         
                         if (isTimeToRender()) {
                             snap(e->root_x, e->root_y);
@@ -2225,6 +2230,8 @@ class Events {
                     
                     log_info("start_x: " + std::to_string(e->event_x));
                     log_info("start_y: " + std::to_string(e->event_y));
+                    log_info("root_x: " + std::to_string(e->root_x));
+                    log_info("root_y: " + std::to_string(e->root_y));
                     
                     mv_client mv(c, e->root_x, e->root_y);
                     wm->focus_client(c);
