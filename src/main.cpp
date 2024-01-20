@@ -549,8 +549,8 @@ class mv_client {
                 switch (ev->response_type & ~0x80) {
                     case XCB_MOTION_NOTIFY: {
                         const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
-                        int new_x = e->root_x - start_x + BORDER_SIZE;
-                        int new_y = e->root_y - start_y + BORDER_SIZE;
+                        int new_x = e->root_x - start_x - BORDER_SIZE;
+                        int new_y = e->root_y - start_y - BORDER_SIZE;
                         
                         if (isTimeToRender()) {
                             snap(new_x, new_y);
