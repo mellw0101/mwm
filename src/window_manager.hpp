@@ -529,36 +529,7 @@ class Window_Manager
                     return - 1;
                 }
 
-                c->win.unmap();
-                c->close_button.unmap();
-                c->max_button.unmap();
-                c->min_button.unmap();
-                c->titlebar.unmap();
-                c->border.left.unmap();
-                c->border.right.unmap();
-                c->border.top.unmap();
-                c->border.bottom.unmap();
-                c->border.top_left.unmap();
-                c->border.top_right.unmap();
-                c->border.bottom_left.unmap();
-                c->border.bottom_right.unmap();
-                c->frame.unmap();
-
-                c->win.kill();
-                c->close_button.kill();
-                c->max_button.kill();
-                c->min_button.kill();
-                c->titlebar.kill();
-                c->border.left.kill();
-                c->border.right.kill();
-                c->border.top.kill();
-                c->border.bottom.kill();
-                c->border.top_left.kill();
-                c->border.top_right.kill();
-                c->border.bottom_left.kill();
-                c->border.bottom_right.kill();
-                c->frame.kill();
-                
+                c->kill();
                 remove_client(c);
 
                 return 0;

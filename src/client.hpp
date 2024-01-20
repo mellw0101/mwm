@@ -46,34 +46,6 @@
 #include "structs.hpp"
 #include "window.hpp"
 
-class client_name
-{
-    public: // variabels
-        char name[256];
-    ;
-    public: // methods
-        public: // config methods
-            void clear()
-            {
-                for (int i = 0; i < 256; i++)
-                {
-                    name[i] = '\0';
-                }
-            }
-            void set(char * _name)
-            {
-                int i = 0;
-                while(_name[i] != '\0' && i < 255)
-                {
-                    name[i] = _name[i];
-                    ++i;
-                }
-                name[i] = '\0';
-                free(_name);
-            }
-        ;
-    ;
-};
 class client
 {
     public: // subclasses 
@@ -279,6 +251,38 @@ class client
             void unmap()
             {
                 frame.unmap();
+            }
+            void kill()
+            {
+                win.unmap();
+                close_button.unmap();
+                max_button.unmap();
+                min_button.unmap();
+                titlebar.unmap();
+                border.left.unmap();
+                border.right.unmap();
+                border.top.unmap();
+                border.bottom.unmap();
+                border.top_left.unmap();
+                border.top_right.unmap();
+                border.bottom_left.unmap();
+                border.bottom_right.unmap();
+                frame.unmap();
+
+                win.kill();
+                close_button.kill();
+                max_button.kill();
+                min_button.kill();
+                titlebar.kill();
+                border.left.kill();
+                border.right.kill();
+                border.top.kill();
+                border.bottom.kill();
+                border.top_left.kill();
+                border.top_right.kill();
+                border.bottom_left.kill();
+                border.bottom_right.kill();
+                frame.kill();
             }
         ;
     ;
