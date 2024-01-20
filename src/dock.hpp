@@ -363,10 +363,8 @@ class Mwm_Runner {
             event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev)
             {
                 const auto * e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
-                if (e->detail == wm->key_codes.r)
-                {
-                    if (e->state == SUPER)
-                    {
+                if (e->detail == wm->key_codes.r) {
+                    if (e->state == SUPER) {
                         show();
                     }
                 }
@@ -461,18 +459,17 @@ class File_App {
 
             setup_events();
         }
-    ;
-    private: // functions
         void launch() {
             main_window.raise();
             main_window.map();
         }
+    ;
+    private: // functions
         void setup_events() {
             event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev) {
                 const auto * e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
                 if (e->detail == wm->key_codes.f) {
-                    if (e->state == SUPER)
-                    {
+                    if (e->state == SUPER) {
                         launch();
                     }
                 }
