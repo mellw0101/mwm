@@ -465,8 +465,6 @@ class Dock
         window main_window;
         buttons buttons;
         uint32_t x = 0, y = 0, width = 48, height = 48;
-
-        add_app_dialog_window add_app_dialog_window;
     ;
     public: // public methods 
         void init() {
@@ -474,17 +472,11 @@ class Dock
             setup_dock();
             configure_context_menu();
             make_apps();
-            add_app_dialog_window.init();
-            add_app_dialog_window.search_window.add_enter_action([this]()
-            {
-                launcher.program((char *) add_app_dialog_window.search_window.search_string.c_str());
-            });
             context_menu.init();
             configure_events();
         }
         void add_app(const char * app_name) {
-            if (!file.check_if_binary_exists(app_name))
-            {
+            if (!file.check_if_binary_exists(app_name)) {
                 return;
             }
             apps.push_back(app_name);
@@ -497,8 +489,7 @@ class Dock
         File file;
     ;
     private: // private methods
-        void calc_size_pos()
-        {
+        void calc_size_pos() {
             int num_of_buttons = buttons.size();
 
             if (num_of_buttons == 0)
@@ -514,28 +505,18 @@ class Dock
             main_window.x_y_width_height(x, y, calc_width, height);
             xcb_flush(conn);
         }
-        void setup_dock()
-        {
+        void setup_dock() {
             main_window.grab_button({ { R_MOUSE_BUTTON, NULL } });
             main_window.set_backround_color(DARK_GREY);
             calc_size_pos();
             main_window.map();
         }
-        void configure_context_menu()
-        {
-            context_menu.add_entry("Add app", [this] () { add_app_dialog_window.show(); });
-            context_menu.add_entry("test with nullptr", nullptr);
-            context_menu.add_entry("test with nullptr", nullptr);
-            context_menu.add_entry("test with nullptr", nullptr);
-            context_menu.add_entry("test with nullptr", nullptr);
+        void configure_context_menu() {
             context_menu.add_entry("test with nullptr", nullptr);
         }
-        void make_apps()
-        {
-            for (const auto & app : apps)
-            {
-                buttons.add
-                (app,
+        void make_apps() {
+            for (const auto & app : apps) {
+                buttons.add(app,
                 [app, this] () 
                 {
                     {
@@ -555,8 +536,7 @@ class Dock
             }
             calc_size_pos();
         }
-        void configure_events()
-        {
+        void configure_events() {
             event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev)
             {
                 const auto * e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
