@@ -49,8 +49,7 @@
 #include "defenitions.hpp"
 #include "structs.hpp"
 
-class Bitmap
-{
+class Bitmap {
     public: // constructor 
         Bitmap(int width, int height) 
         : width(width), height(height), bitmap(height, std::vector<bool>(width, false)) {}
@@ -129,8 +128,7 @@ class Bitmap
         Logger log;
     ;
 };
-class _scale
-{
+class _scale {
     public:
         static uint16_t from_8_to_16_bit(const uint8_t & n)
         {
@@ -138,8 +136,7 @@ class _scale
         }
     ;
 };
-class window
-{
+class window {
     public: // construcers and operators
         window() {}
 
@@ -1107,9 +1104,7 @@ class window
     ;
     private: // functions
         private: // main functions 
-            void
-            make_window()
-            {
+            void make_window() {
                 _window = xcb_generate_id(conn);
                 xcb_create_window
                 (
@@ -1129,10 +1124,7 @@ class window
                 );
                 xcb_flush(conn);
             }
-
-            void
-            clear_window()
-            {
+            void clear_window() {
                 xcb_clear_area
                 (
                     conn, 
@@ -1145,17 +1137,13 @@ class window
                 );
                 xcb_flush(conn);
             }
-
-            void
-            update(const uint32_t & x, const uint32_t & y, const uint32_t & width, const uint32_t & height)
-            {
+            void update(const uint32_t & x, const uint32_t & y, const uint32_t & width, const uint32_t & height) {
                 _x = x;
                 _y = y;
                 _width = width;
                 _height = height;
             }
-
-            void /**
+            /**
              *
              * @brief Configures the window with the specified mask and value.
              * 
@@ -1166,8 +1154,7 @@ class window
              * @param value The value to set for the specified attributes.
              * 
              */
-            config_window(const uint16_t & mask, const uint16_t & value)
-            {
+            void config_window(const uint16_t & mask, const uint16_t & value) {
                 xcb_configure_window
                 (
                     conn,
@@ -1179,10 +1166,7 @@ class window
                     }
                 );
             }
-
-            void 
-            config_window(uint32_t mask, const std::vector<uint32_t> & values) 
-            {
+            void config_window(uint32_t mask, const std::vector<uint32_t> & values) {
                 if (values.empty()) 
                 {
                     log_error("values vector is empty");
@@ -1198,8 +1182,7 @@ class window
                 );
             }
         ;
-        void send_event(xcb_client_message_event_t ev)
-        {
+        void send_event(xcb_client_message_event_t ev) {
             xcb_send_event
             (
                 conn,
@@ -1209,8 +1192,7 @@ class window
                 (char *) & ev
             );
         }
-        xcb_client_message_event_t make_client_message_event(const uint32_t & format, const uint32_t & type, const uint32_t & data)
-        {
+        xcb_client_message_event_t make_client_message_event(const uint32_t & format, const uint32_t & type, const uint32_t & data) {
             xcb_client_message_event_t ev = {0};
             ev.response_type = XCB_CLIENT_MESSAGE;
             ev.window = _window;

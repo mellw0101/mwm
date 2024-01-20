@@ -67,8 +67,7 @@ Logger log;
 
 static Dock * dock;
 
-class mxb 
-{
+class mxb {
     public: 
         class XConnection 
         {
@@ -412,12 +411,10 @@ class mxb
         };
     ;
 };
-class mv_client 
-{
+class mv_client {
     public: // constructor
         mv_client(client * c, int start_x, const int start_y) 
-        : c(c), start_x(start_x), start_y(start_y)
-        {
+        : c(c), start_x(start_x), start_y(start_y) {
             if (c->win.is_EWMH_fullscreen())
             {
                 return;
@@ -450,8 +447,7 @@ class mv_client
         */
     ;
     private: // functions
-        void snap(const int16_t & x, const int16_t & y)
-        {
+        void snap(const int16_t & x, const int16_t & y) {
             // WINDOW TO WINDOW SNAPPING 
             for (const auto & cli : wm->cur_d->current_clients)
             {
@@ -582,10 +578,10 @@ class mv_client
                 c->frame.x_y(x, y);
             }
         }
-        void run() /**
+        /**
          * THIS IS THE MAIN EVENT LOOP FOR 'mv_client'
          */ 
-        {
+        void run() { 
             while (shouldContinue) 
             {
                 ev = xcb_wait_for_event(conn);
@@ -619,8 +615,7 @@ class mv_client
                 free(ev);
             }
         }
-        bool isTimeToRender()
-        {
+        bool isTimeToRender() {
             auto currentTime = std::chrono::high_resolution_clock::now(); /*
                 CALCULATE ELAPSED TIME SINCE THE LAST UPDATE
              */ 
@@ -644,8 +639,7 @@ class mv_client
         }
     ;
 };
-void animate(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight, const int & duration)
-{
+void animate(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight, const int & duration) {
     Mwm_Animator anim(c->frame);
     anim.animate
     (
@@ -661,8 +655,7 @@ void animate(client * & c, const int & endX, const int & endY, const int & endWi
     );
     c->update();
 }
-void animate_client(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight, const int & duration)
-{
+void animate_client(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight, const int & duration) {
     Mwm_Animator client_anim(c);
     client_anim.animate_client
     (
@@ -679,8 +672,7 @@ void animate_client(client * & c, const int & endX, const int & endY, const int 
     c->update();
 }
 std::mutex mtx;
-class change_desktop
-{
+class change_desktop {
     public: // constructor
         change_desktop(xcb_connection_t * connection) 
         : connection(connection) {}
@@ -863,8 +855,7 @@ class change_desktop
         }
     ;
 };
-void move_to_next_desktop_w_app()
-{
+void move_to_next_desktop_w_app() {
     LOG_func
     if (wm->cur_d->desktop == wm->desktop_list.size())
     {
@@ -878,8 +869,7 @@ void move_to_next_desktop_w_app()
 
     change_desktop::teleport_to(wm->cur_d->desktop + 1);
 }
-void move_to_previus_desktop_w_app()
-{
+void move_to_previus_desktop_w_app() {
     LOG_func
     if (wm->cur_d->desktop == 1)
     {
@@ -894,10 +884,9 @@ void move_to_previus_desktop_w_app()
     change_desktop::teleport_to(wm->cur_d->desktop - 1);
     wm->focused_client->raise();
 }
-class resize_client
-{
+class resize_client {
     public: // constructor
-        /* 
+        /**
             THE REASON FOR THE 'retard_int' IS BECUSE WITHOUT IT 
             I CANNOT CALL THIS CLASS LIKE THIS 'resize_client(c)' 
             INSTEAD I WOULD HAVE TO CALL IT LIKE THIS 'resize_client rc(c)'
@@ -919,14 +908,11 @@ class resize_client
         }
     ;
     public: // subclasses
-        class no_border
-        {
+        class no_border {
             public: // constructor
                 no_border(client * & c, const uint32_t & x, const uint32_t & y)
-                : c(c)
-                {
-                    if (c->win.is_EWMH_fullscreen())
-                    {
+                : c(c) {
+                    if (c->win.is_EWMH_fullscreen()) {
                         return;
                     }
                     
@@ -948,10 +934,8 @@ class resize_client
                 const double frameDuration = 1000.0 / frameRate;
             ;
             private: // functions
-                void teleport_mouse(edge edge) 
-                {
-                    switch (edge) 
-                    {
+                void teleport_mouse(edge edge) {
+                    switch (edge) {
                         case edge::TOP:
                             pointer.teleport(pointer.x(), c->y);
                             break;
@@ -980,117 +964,76 @@ class resize_client
                             break;
                     }
                 }
-                void resize_client(const uint32_t x, const uint32_t y, edge edge)
-                {
-                    switch (edge) 
-                    {
+                void resize_client(const uint32_t x, const uint32_t y, edge edge) {
+                    switch (edge) {
                         case edge::LEFT:
                             c->x_width(x, (c->width + c->x - x));
                             break;
-                        ;
                         case edge::RIGHT:
                             c->_width((x - c->x));
                             break;
-                        ;
                         case edge::TOP:
                             c->y_height(y, (c->height + c->y - y));   
                             break;
-                        ;
                         case edge::BOTTOM_edge:
                             c->_height((y - c->y));
                             break;
-                        ;
                         case edge::NONE:
                             return;
-                        ;
                         case edge::TOP_LEFT:
                             c->x_y_width_height(x, y, (c->width + c->x - x), (c->height + c->y - y));
                             break;
-                        ;
                         case edge::TOP_RIGHT:
                             c->y_width_height(y, (x - c->x), (c->height + c->y - y));
                             break;
-                        ;
                         case edge::BOTTOM_LEFT:
                             c->x_width_height(x, (c->width + c->x - x), (y - c->y));   
                             break;
-                        ;
                         case edge::BOTTOM_RIGHT:
                             c->width_height((x - c->x), (y - c->y));   
                             break;
-                        ;
                     }
                 }
-                void run(edge edge) /**
-                 * THIS IS THE MAIN EVENT LOOP FOR 'resize_client'
-                 */
-                {
-                    if (edge == edge::NONE)
-                    {
-                        log_info("edge == edge::NONE");
-                        return;
-                    }
-
+                void run(edge edge) {
                     xcb_generic_event_t * ev;
                     bool shouldContinue = true;
-
-                    // Wait for motion events and handle window resizing
-                    while (shouldContinue) 
-                    {
+                    while (shouldContinue) {
                         ev = xcb_wait_for_event(conn);
-                        if (!ev) 
-                        {
+                        if (!ev) {
                             continue;
                         }
 
-                        switch (ev->response_type & ~0x80) 
-                        {
-                            case XCB_MOTION_NOTIFY: 
-                            {
+                        switch (ev->response_type & ~0x80) {
+                            case XCB_MOTION_NOTIFY: {
                                 const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
-                                if (isTimeToRender())
-                                {
+                                if (isTimeToRender()) {
                                     resize_client(e->root_x, e->root_y, edge);
                                     xcb_flush(conn); 
                                 }
                                 break;
                             }
-                            case XCB_BUTTON_RELEASE: 
-                            {
+                            case XCB_BUTTON_RELEASE: {
                                 shouldContinue = false;                        
                                 c->update();
                                 break;
                             }
                         }
-                        // Free the event memory after processing
                         free(ev); 
                     }
                 }
-                bool isTimeToRender() 
-                {
-                    // CALCULATE ELAPSED TIME SINCE THE LAST UPDATE
+                bool isTimeToRender() {
                     const auto & currentTime = std::chrono::high_resolution_clock::now();
                     const std::chrono::duration<double, std::milli> & elapsedTime = currentTime - lastUpdateTime;
 
-                    /*
-                        CHECK IF THE ELAPSED TIME EXCEEDS THE FRAME DURATION
-                    */ 
-                    if (elapsedTime.count() >= frameDuration) 
-                    {
-                        // UPDATE THE LAST_UPDATE_TIME TO THE 
-                        // CURRENT TIME FOR THE NEXT CHECK
-                        lastUpdateTime = currentTime; 
-                        
-                        // RETURN TRUE IF IT'S TIME TO RENDER
+                    if (elapsedTime.count() >= frameDuration) {
+                        lastUpdateTime = currentTime;                         
                         return true; 
                     }
-                    // RETURN FALSE IF NOT ENOUGH TIME HAS PASSED
                     return false; 
                 }
             ;
         };
-        class border
-        {
+        class border {
             public: // constructor 
                 border(client * & c, edge _edge)
                 : c(c)
@@ -1528,52 +1471,34 @@ class resize_client
         }
     ;
 };
-class max_win
-{
+class max_win {
     public: // constructor
-        enum max_win_type
-        {
+        enum max_win_type {
             BUTTON_MAXWIN,
-            EWMH_MAXWIN,
+            EWMH_MAXWIN
         };
-        max_win(client * c, max_win_type type)
-        {
-            switch (type)
-            {
+        max_win(client * c, max_win_type type) {
+            switch (type) {
                 case EWMH_MAXWIN:
-                {
-                    if (c->win.is_EWMH_fullscreen())
-                    {
+                    if (c->win.is_EWMH_fullscreen()) {
                         ewmh_unmax_win(c);
-                    }
-                    else
-                    {
+                    } else {
                         ewmh_max_win(c);
                     }
-
                     break;
-                }
                 case BUTTON_MAXWIN:
-                {
-                    if (is_max_win(c))
-                    {
+                    if (is_max_win(c)) {
                         button_unmax_win(c);
-                    }
-                    else
-                    {
+                    } else {
                         button_max_win(c);
                     }
-
                     break;
-                }
             }
         }
     ;
     private: // functions
-        void max_win_animate(client * c, const int & endX, const int & endY, const int & endWidth, const int & endHeight)
-        {
-            animate_client
-            (
+        void max_win_animate(client * c, const int & endX, const int & endY, const int & endWidth, const int & endHeight) {
+            animate_client(
                 c, 
                 endX, 
                 endY, 
@@ -1582,18 +1507,15 @@ class max_win
                 MAXWIN_ANIMATION_DURATION
             );
         }
-        void save_max_ewmh_ogsize(client * c)
-        {
+        void save_max_ewmh_ogsize(client * c) {
             c->max_ewmh_ogsize.x      = c->x;
             c->max_ewmh_ogsize.y      = c->y;
             c->max_ewmh_ogsize.width  = c->width;
             c->max_ewmh_ogsize.height = c->height;
         }
-        void ewmh_max_win(client * c)
-        {
+        void ewmh_max_win(client * c) {
             save_max_ewmh_ogsize(c);
-            max_win_animate
-            (
+            max_win_animate(
                 c, 
                 - BORDER_SIZE, 
                 - TITLE_BAR_HEIGHT - BORDER_SIZE, 
@@ -1603,30 +1525,21 @@ class max_win
             c->win.set_EWMH_fullscreen_state();
             xcb_flush(conn);
         }
-        void ewmh_unmax_win(client * c)
-        {
-            if (c->max_ewmh_ogsize.width > screen->width_in_pixels)
-            {
-                c->max_ewmh_ogsize.width = screen->width_in_pixels / 2;
+        void ewmh_unmax_win(client * c) {
+            if (c->max_ewmh_ogsize.width > screen->width_in_pixels) {
+                (c->max_ewmh_ogsize.width = screen->width_in_pixels / 2);
+            }
+            if (c->max_ewmh_ogsize.height > screen->height_in_pixels) {
+                (c->max_ewmh_ogsize.height = screen->height_in_pixels / 2);
+            }
+            if (c->max_ewmh_ogsize.x >= screen->width_in_pixels - 1) {
+                c->max_ewmh_ogsize.x = ((screen->width_in_pixels / 2) - (c->max_ewmh_ogsize.width / 2) - BORDER_SIZE);
+            }
+            if (c->max_ewmh_ogsize.y >= screen->height_in_pixels - 1) {
+                c->max_ewmh_ogsize.y = ((screen->height_in_pixels / 2) - (c->max_ewmh_ogsize.height / 2) - TITLE_BAR_HEIGHT - BORDER_SIZE);
             }
 
-            if (c->max_ewmh_ogsize.height > screen->height_in_pixels)
-            {
-                c->max_ewmh_ogsize.height = screen->height_in_pixels / 2;
-            }
-
-            if (c->max_ewmh_ogsize.x >= screen->width_in_pixels - 1)
-            {
-                c->max_ewmh_ogsize.x = (screen->width_in_pixels / 2) - (c->max_ewmh_ogsize.width / 2) - BORDER_SIZE;
-            }
-
-            if (c->max_ewmh_ogsize.y >= screen->height_in_pixels - 1)
-            {
-                c->max_ewmh_ogsize.y = (screen->height_in_pixels / 2) - (c->max_ewmh_ogsize.height / 2) - TITLE_BAR_HEIGHT - BORDER_SIZE;
-            }
-
-            max_win_animate
-            (
+            max_win_animate(
                 c, 
                 c->max_ewmh_ogsize.x, 
                 c->max_ewmh_ogsize.y, 
@@ -1636,18 +1549,15 @@ class max_win
             c->win.unset_EWMH_fullscreen_state();
             xcb_flush(conn);
         }
-        void save_max_button_ogsize(client * c)
-        {
+        void save_max_button_ogsize(client * c) {
             c->max_button_ogsize.x      = c->x;
             c->max_button_ogsize.y      = c->y;
             c->max_button_ogsize.width  = c->width;
             c->max_button_ogsize.height = c->height;
         }
-        void button_max_win(client * c)
-        {
+        void button_max_win(client * c) {
             save_max_button_ogsize(c);
-            max_win_animate
-            (
+            max_win_animate(
                 c,
                 0,
                 0,
@@ -1656,10 +1566,8 @@ class max_win
             );
             xcb_flush(conn);
         }
-        void button_unmax_win(client * c)
-        {
-            max_win_animate
-            (
+        void button_unmax_win(client * c) {
+            max_win_animate(
                 c, 
                 c->max_button_ogsize.x,
                 c->max_button_ogsize.y,
@@ -1668,8 +1576,7 @@ class max_win
             );
             xcb_flush(conn);
         }
-        bool is_max_win(client * c)
-        {
+        bool is_max_win(client * c) {
             if (c->x == 0
              && c->y == 0
              && c->width == screen->width_in_pixels
@@ -1682,8 +1589,7 @@ class max_win
         }
     ;
 };
-namespace win_tools
-{
+namespace win_tools {
     xcb_visualtype_t * find_argb_visual(xcb_connection_t *conn, xcb_screen_t *screen) /**
      *
      * @brief Function to find an ARGB visual 
@@ -1715,7 +1621,7 @@ namespace win_tools
         }
     }
 }
-class tile /**
+/**
  * @class tile
  * @brief Represents a tile obj.
  * 
@@ -1723,7 +1629,7 @@ class tile /**
  * It provides methods to tile windows to the left, right, *up, or *down positions on the screen.
  * The class also includes helper methods to check the current tile position of a window and set the size and position of a window.
  */
-{
+class tile {
     public: // constructors
         tile(client * & c, TILE tile)
         {
@@ -2059,8 +1965,7 @@ class tile /**
         }
     ;
 };
-class Events
-{
+class Events {
     public: // constructor and destructor  
         Events() /**
          *
@@ -2071,8 +1976,7 @@ class Events
         {}
     ;
     public: // methods
-        void setup()
-        {
+        void setup() {
             event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev){ key_press_handler(ev); });
             event_handler->setEventCallback(XCB_MAP_NOTIFY, [&](Ev ev){ map_notify_handler(ev); });
             event_handler->setEventCallback(XCB_MAP_REQUEST, [&](Ev ev){ map_req_handler(ev); });
@@ -2089,8 +1993,7 @@ class Events
         }
     ;
     private: // event handling functions
-        void key_press_handler(const xcb_generic_event_t * & ev)
-        {
+        void key_press_handler(const xcb_generic_event_t * & ev) {
             const auto * e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
                 
             if (e->detail == wm->key_codes.t) /**
@@ -2322,32 +2225,25 @@ class Events
                 }
             }
         }
-        void map_notify_handler(const xcb_generic_event_t * & ev)
-        {
+        void map_notify_handler(const xcb_generic_event_t * & ev) {
             const auto * e = reinterpret_cast<const xcb_map_notify_event_t *>(ev);
             client * c = wm->client_from_window(& e->window);
-            if (c)
-            {
+            if (c) {
                 c->update();
             }
         }
-        void map_req_handler(const xcb_generic_event_t * & ev) 
-        {
+        void map_req_handler(const xcb_generic_event_t * & ev) {
             const auto * e = reinterpret_cast<const xcb_map_request_event_t *>(ev);
             client * c = wm->client_from_window(& e->window);
-            if (c)
-            {
+            if (c) {
                 return;
             }
             wm->manage_new_client(e->window);
         }
-        void button_press_handler(const xcb_generic_event_t * & ev) 
-        {
+        void button_press_handler(const xcb_generic_event_t * & ev) {
             const auto * e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
             client * c;
-
-            if (BORDER_SIZE == 0)
-            {
+            if (BORDER_SIZE == 0) {
                 c = wm->client_from_pointer(10);
                 if (c)
                 {
@@ -2360,26 +2256,19 @@ class Events
                     return;
                 }
             }
-
-            if (e->event == wm->root)
-            {
+            if (e->event == wm->root) {
                 if (e->detail == R_MOUSE_BUTTON)
                 {
                     wm->context_menu->show();
                     return;
                 }
             }
-
             c = wm->client_from_any_window(& e->event);
-            if (!c)
-            {
+            if (!c) {
                 return;
             }
-            
-            if (e->detail == L_MOUSE_BUTTON)
-            {
-                if (e->event == c->win)
-                {
+            if (e->detail == L_MOUSE_BUTTON) {
+                if (e->event == c->win) {
                     switch (e->state) 
                     {
                         case ALT:
@@ -2393,82 +2282,65 @@ class Events
                     wm->focus_client(c);
                     return;
                 }
-                if (e->event == c->titlebar)
-                {
+                if (e->event == c->titlebar) {
                     c->raise();
                     mv_client mv(c, e->event_x, e->event_y);
                     wm->focus_client(c);
                     return;
                 }
-                if (e->event == c->close_button)
-                {
+                if (e->event == c->close_button) {
                     win_tools::close_button_kill(c);
                     return;
                 }
-                if (e->event == c->max_button)
-                {
+                if (e->event == c->max_button) {
                     client * c = wm->client_from_any_window(& e->event);
                     max_win(c, max_win::BUTTON_MAXWIN);
                     return;
                 }
-                if (e->event == c->border.left)
-                {
+                if (e->event == c->border.left) {
                     resize_client::border border(c, edge::LEFT);
                     return;
                 }
-                if (e->event == c->border.right)
-                {
+                if (e->event == c->border.right) {
                     resize_client::border border(c, edge::RIGHT);
                     return;
                 }
-                if (e->event == c->border.top)
-                {
+                if (e->event == c->border.top) {
                     resize_client::border border(c, edge::TOP);
                     return;
                 }
-                if (e->event == c->border.bottom)
-                {
+                if (e->event == c->border.bottom) {
                     resize_client::border(c, edge::BOTTOM_edge);
                 }
-                if (e->event == c->border.top_left)
-                {
+                if (e->event == c->border.top_left) {
                     resize_client::border border(c, edge::TOP_LEFT);
                     return;
                 }
-                if (e->event == c->border.top_right)
-                {
+                if (e->event == c->border.top_right) {
                     resize_client::border border(c, edge::TOP_RIGHT);
                     return;
                 }
-                if (e->event == c->border.bottom_left)
-                {
+                if (e->event == c->border.bottom_left) {
                     resize_client::border border(c, edge::BOTTOM_LEFT);
                     return;
                 }
-                if (e->event == c->border.bottom_right)
-                {
+                if (e->event == c->border.bottom_right) {
                     resize_client::border border(c, edge::BOTTOM_RIGHT);
                     return;
                 }
             }
-
-            if (e->detail == R_MOUSE_BUTTON) 
-            {
-                switch (e->state) 
-                {
+            if (e->detail == R_MOUSE_BUTTON) {
+                switch (e->state) {
                     case ALT:
-                    {
                         log_error("ALT + R_MOUSE_BUTTON");
                         c->raise();
                         resize_client resize(c, 0);
                         wm->focus_client(c);
                         return;
-                    }
                 }
             }
         }
-        void configure_request_handler(const xcb_generic_event_t * & ev)
-        {
+        void configure_request_handler(const xcb_generic_event_t * & ev) {
             const auto * e = reinterpret_cast<const xcb_configure_request_event_t *>(ev);
             log_win("e->window: ", e->window);
             wm->data.width     = e->width;
@@ -2476,8 +2348,7 @@ class Events
             wm->data.x         = e->x;
             wm->data.y         = e->y;
         }
-        void focus_in_handler(const xcb_generic_event_t * & ev)
-        {
+        void focus_in_handler(const xcb_generic_event_t * & ev) {
             const auto * e = reinterpret_cast<const xcb_focus_in_event_t *>(ev);
             client * c = wm->client_from_window( & e->event);
             if (c)
@@ -2488,8 +2359,7 @@ class Events
                 wm->focused_client = c;
             }
         }
-        void focus_out_handler(const xcb_generic_event_t * & ev)
-        {
+        void focus_out_handler(const xcb_generic_event_t * & ev) {
             const auto * e = reinterpret_cast<const xcb_focus_out_event_t *>(ev);
             
             client * c = wm->client_from_window(& e->event);
@@ -2500,8 +2370,7 @@ class Events
             
             c->win.grab_button({ { L_MOUSE_BUTTON, NULL } });
         }
-        void destroy_notify_handler(const xcb_generic_event_t * & ev)
-        {
+        void destroy_notify_handler(const xcb_generic_event_t * & ev) {
             const auto * e = reinterpret_cast<const xcb_destroy_notify_event_t *>(ev);
             client * c = wm->client_from_any_window(& e->window);
             int result = wm->send_sigterm_to_client(c);
@@ -2510,8 +2379,7 @@ class Events
                 log_error("send_sigterm_to_client: failed");
             }
         }
-        void unmap_notify_handler(const xcb_generic_event_t * & ev)
-        {
+        void unmap_notify_handler(const xcb_generic_event_t * & ev) {
             const auto * e = reinterpret_cast<const xcb_unmap_notify_event_t *>(ev);
             
             client * c = wm->client_from_window(& e->window);
@@ -2528,29 +2396,24 @@ class Events
             //     XCB_flush();
             // }
         }
-        void reparent_notify_handler(const xcb_generic_event_t * & ev)
-        {
+        void reparent_notify_handler(const xcb_generic_event_t * & ev) {
             const auto * e = reinterpret_cast<const xcb_reparent_notify_event_t *>(ev);
         }
-        void enter_notify_handler(const xcb_generic_event_t * & ev)
-        {
+        void enter_notify_handler(const xcb_generic_event_t * & ev) {
             const auto * e = reinterpret_cast<const xcb_enter_notify_event_t *>(ev);
         }
-        void leave_notify_handler(const xcb_generic_event_t * & ev)
-        {
+        void leave_notify_handler(const xcb_generic_event_t * & ev) {
             const auto * e = reinterpret_cast<const xcb_leave_notify_event_t *>(ev);
             // log_win("e->event: ", e->event);
         }
-        void motion_notify_handler(const xcb_generic_event_t * & ev)
-        {
+        void motion_notify_handler(const xcb_generic_event_t * & ev) {
             const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
             // log_win("e->event: ", e->event);
             // log_info(e->event_x);
         }
     ;
 };
-void setup_wm()
-{
+void setup_wm() {
     wm = new Window_Manager;
     wm->init();
     
@@ -2567,8 +2430,7 @@ void setup_wm()
     Events events;
     events.setup();
 }
-int main() 
-{
+int main() {
     LOG_start()
     setup_wm();
     event_handler->run();

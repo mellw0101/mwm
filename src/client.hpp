@@ -9,8 +9,7 @@
 #include "structs.hpp"
 #include "window.hpp"
 
-class Threads 
-{
+class Threads {
     public:
         template <typename Callable>
         void addThread(Callable&& func) 
@@ -39,11 +38,9 @@ class Threads
         std::vector<std::thread> threads;
     ;
 };
-class client
-{
+class client {
     public: // subclasses
-        class client_border_decor
-        {
+        class client_border_decor {
             public:    
                 window left;
                 window right;
@@ -80,8 +77,7 @@ class client
     ;
     public: // methods
         public: // main methods
-            void make_decorations()
-            {
+            void make_decorations() {
                 make_frame();
                 make_titlebar();
                 make_close_button();
@@ -93,32 +89,26 @@ class client
                     make_borders();
                 }
             }
-            void raise()
-            {
+            void raise() {
                 frame.raise();
             }
-            void focus()
-            {
+            void focus() {
                 win.focus_input();
                 frame.raise();
             }
-            void update()
-            {
+            void update() {
                 x = frame.x();
                 y = frame.y();
                 width = frame.width();
                 height = frame.height();
             }
-            void map()
-            {
+            void map() {
                 frame.map();
             }
-            void unmap()
-            {
+            void unmap() {
                 frame.unmap();
             }
-            void kill()
-            {
+            void kill() {
                 win.unmap();
                 close_button.unmap();
                 max_button.unmap();
@@ -151,12 +141,10 @@ class client
             }
         ;
         public: // config methods
-            void x_y(const int32_t & x, const uint32_t & y)
-            {
+            void x_y(const int32_t & x, const uint32_t & y) {
                 frame.x_y(x, y);
             }
-            void _width(const uint32_t & width)
-            {
+            void _width(const uint32_t & width) {
                 win.width((width - (BORDER_SIZE * 2)));
                 xcb_flush(conn);
                 frame.width((width));
@@ -171,8 +159,7 @@ class client
                 border.bottom_right.x((width - BORDER_SIZE));
                 xcb_flush(conn);
             }
-            void _height(const uint32_t & height)
-            {
+            void _height(const uint32_t & height) {
                 win.height((height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
                 frame.height(height);
                 border.left.height((height - (BORDER_SIZE * 2)));
@@ -181,8 +168,7 @@ class client
                 border.bottom_left.y((height - BORDER_SIZE));
                 border.bottom_right.y((height - BORDER_SIZE));
             }
-            void x_width(const uint32_t & x, const uint32_t & width)
-            {
+            void x_width(const uint32_t & x, const uint32_t & width) {
                 win.width((width - (BORDER_SIZE * 2)));
                 xcb_flush(conn);
                 frame.x_width(x, (width));
@@ -197,8 +183,7 @@ class client
                 border.bottom_right.x((width - BORDER_SIZE));
                 xcb_flush(conn);
             }
-            void y_height(const uint32_t & y, const uint32_t & height)
-            {
+            void y_height(const uint32_t & y, const uint32_t & height) {
                 win.height((height - TITLE_BAR_HEIGHT) - (BORDER_SIZE * 2));
                 xcb_flush(conn);
                 frame.y_height(y, height);
@@ -209,8 +194,7 @@ class client
                 border.bottom_right.y((height - BORDER_SIZE));
                 xcb_flush(conn);
             }
-            void x_width_height(const uint32_t & x, const uint32_t & width, const uint32_t & height)
-            {
+            void x_width_height(const uint32_t & x, const uint32_t & width, const uint32_t & height) {
                 frame.x_width_height(x, width, height);
                 win.width_height((width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
                 titlebar.width((width - BORDER_SIZE));
@@ -225,8 +209,7 @@ class client
                 border.bottom_left.y((height - BORDER_SIZE));
                 border.bottom_right.x_y((width - BORDER_SIZE), (height - BORDER_SIZE));
             }
-            void y_width_height(const uint32_t & y, const uint32_t & width, const uint32_t & height)
-            {
+            void y_width_height(const uint32_t & y, const uint32_t & width, const uint32_t & height) {
                 frame.y_width_height(y, width, height);
                 win.width_height((width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
                 titlebar.width((width - BORDER_SIZE));
@@ -241,8 +224,7 @@ class client
                 border.bottom_left.y((height - BORDER_SIZE));
                 border.bottom_right.x_y((width - BORDER_SIZE), (height - BORDER_SIZE));
             }
-            void x_y_width_height(const uint32_t & x, const uint32_t & y, const uint32_t & width, const uint32_t & height)
-            {
+            void x_y_width_height(const uint32_t & x, const uint32_t & y, const uint32_t & width, const uint32_t & height) {
                 win.width_height((width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
                 xcb_flush(conn);
                 frame.x_y_width_height(x, y, width, height);
@@ -259,8 +241,7 @@ class client
                 border.bottom_left.y((height - BORDER_SIZE));
                 xcb_flush(conn);
             }
-            void width_height(const uint32_t & width, const uint32_t & height)
-            {
+            void width_height(const uint32_t & width, const uint32_t & height) {
                 win.width_height((width - (BORDER_SIZE * 2)), (height - (BORDER_SIZE * 2) - TITLE_BAR_HEIGHT));
                 xcb_flush(conn);
                 frame.width_height(width, height);
@@ -280,23 +261,20 @@ class client
         ;
     ;
     private: // functions
-        void make_frame()
-        {
+        void make_frame() {
             frame.create_default(screen->root, (x - BORDER_SIZE), (y - TITLE_BAR_HEIGHT - BORDER_SIZE), (width + (BORDER_SIZE * 2)), (height + TITLE_BAR_HEIGHT + (BORDER_SIZE * 2)));
             frame.set_backround_color(DARK_GREY);
             win.reparent(frame, BORDER_SIZE, (TITLE_BAR_HEIGHT + BORDER_SIZE));
             frame.apply_event_mask({XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY});
             frame.map();
         }
-        void make_titlebar()
-        {
+        void make_titlebar() {
             titlebar.create_default(frame, BORDER_SIZE, BORDER_SIZE, width, TITLE_BAR_HEIGHT);
             titlebar.set_backround_color(BLACK);
             titlebar.grab_button({ { L_MOUSE_BUTTON, NULL } });
             titlebar.map();
         }
-        void make_close_button()
-        {
+        void make_close_button() {
             close_button.create_default(frame, (width - BUTTON_SIZE + BORDER_SIZE), BORDER_SIZE, BUTTON_SIZE, BUTTON_SIZE);
             close_button.apply_event_mask({XCB_EVENT_MASK_ENTER_WINDOW, XCB_EVENT_MASK_LEAVE_WINDOW});
             close_button.set_backround_color(BLUE);
@@ -304,8 +282,7 @@ class client
             close_button.map();
             close_button.make_then_set_png("/home/mellw/close.png", CLOSE_BUTTON_BITMAP);
         }
-        void make_max_button()
-        {
+        void make_max_button() {
             max_button.create_default(frame, (width - (BUTTON_SIZE * 2) + BORDER_SIZE), BORDER_SIZE, BUTTON_SIZE, BUTTON_SIZE);
             max_button.set_backround_color(RED);
             max_button.apply_event_mask({XCB_EVENT_MASK_ENTER_WINDOW, XCB_EVENT_MASK_LEAVE_WINDOW});
@@ -339,8 +316,7 @@ class client
 
             max_button.set_backround_png("/home/mellw/max.png");
         }
-        void make_min_button()
-        {
+        void make_min_button() {
             min_button.create_default(frame, (width - (BUTTON_SIZE * 3) + BORDER_SIZE), BORDER_SIZE, BUTTON_SIZE, BUTTON_SIZE);
             min_button.set_backround_color(GREEN);
             min_button.apply_event_mask({XCB_EVENT_MASK_ENTER_WINDOW, XCB_EVENT_MASK_LEAVE_WINDOW});
@@ -354,8 +330,7 @@ class client
 
             min_button.set_backround_png("/home/mellw/min.png");
         }
-        void make_borders()
-        {
+        void make_borders() {
             border.left.create_default(frame, 0, BORDER_SIZE, BORDER_SIZE, (height + TITLE_BAR_HEIGHT));
             border.left.set_backround_color(BLACK);
             border.left.set_pointer(CURSOR::left_side);
