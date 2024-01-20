@@ -2298,8 +2298,7 @@ class Events {
         void destroy_notify_handler(const xcb_generic_event_t * & ev) {
             const auto * e = reinterpret_cast<const xcb_destroy_notify_event_t *>(ev);
             client * c = wm->client_from_window(& e->event);
-            if (c) {
-                c->unmap();
+            if (!c) {
                 return;
             }
             wm->send_sigterm_to_client(c);
