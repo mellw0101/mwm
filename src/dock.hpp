@@ -353,13 +353,11 @@ class Mwm_Runner {
         }
     ;
     private: // functions
-        void hide()
-        {
+        void hide() {
             main_window.unmap();
             search_window.clear_search_string();
         }
-        void setup_events()
-        {
+        void setup_events() {
             event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev)
             {
                 const auto * e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
@@ -477,6 +475,7 @@ class File_App {
         }
     ;
 };
+static File_App * file_app;
 class Dock {
     public: // constructor
         Dock() {}

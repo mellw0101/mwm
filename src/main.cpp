@@ -2291,8 +2291,8 @@ void setup_wm() {
     Events events;
     events.setup();
 
-    File_App file_app;
-    file_app.init();
+    file_app = new File_App;
+    file_app->init();
 }
 int main() {
     LOG_start()
