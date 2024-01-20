@@ -463,6 +463,9 @@ class File_App {
 
             uint32_t mask = XCB_EVENT_MASK_STRUCTURE_NOTIFY;
             main_window.apply_event_mask(& mask);
+            if (main_window.is_mask_active(XCB_EVENT_MASK_STRUCTURE_NOTIFY)) {
+                log_error("could not apply XCB_EVENT_MASK_STRUCTURE_NOTIFY");
+            }
             main_window.set_backround_color(BLUE);
             main_window.grab_button({ { L_MOUSE_BUTTON, NULL } });
         }
