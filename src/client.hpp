@@ -12,13 +12,10 @@
 class Threads {
     public:
         template <typename Callable>
-        void addThread(Callable&& func) 
-        {
+        void addThread(Callable&& func) {
             threads.emplace_back(std::thread(std::forward<Callable>(func)));
         }
-
-        void joinAll() 
-        {
+        void joinAll() {
             for (auto& thread : threads) 
             {
                 if (thread.joinable()) 
@@ -27,10 +24,8 @@ class Threads {
                 }
             }
         }
-
         // Destructor to ensure all threads are joined
-        ~Threads() 
-        {
+        ~Threads() {
             joinAll();
         }
     ;
@@ -79,10 +74,19 @@ class client {
         public: // main methods
             void make_decorations() {
                 make_frame();
-                make_titlebar();
-                make_close_button();
-                make_max_button();
-                make_min_button();
+                Threads t;
+                t.addThread([this](){
+                    make_titlebar();
+                });
+                t.addThread([this](){
+                    make_close_button();
+                });
+                t.addThread([this](){
+                    make_max_button();
+                });
+                t.addThread([this](){
+                    make_min_button();
+                });
                 
                 if (BORDER_SIZE > 0)
                 {
