@@ -536,9 +536,6 @@ class mv_client {
                 c->frame.x_y(x, y);
             }
         }
-        /**
-         * THIS IS THE MAIN EVENT LOOP FOR 'mv_client'
-         */ 
         void run() { 
             while (shouldContinue) {
                 ev = xcb_wait_for_event(conn);
