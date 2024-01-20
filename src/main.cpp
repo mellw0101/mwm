@@ -413,10 +413,9 @@ class mxb {
 };
 class mv_client {
     public: // constructor
-        mv_client(client * c, int start_x, const int start_y) 
+        mv_client(client * c, int start_x, int start_y) 
         : c(c), start_x(start_x), start_y(start_y) {
-            if (c->win.is_EWMH_fullscreen())
-            {
+            if (c->win.is_EWMH_fullscreen()) {
                 return;
             }
 
@@ -447,134 +446,93 @@ class mv_client {
         */
     ;
     private: // functions
-        void snap(const int16_t & x, const int16_t & y) {
+        void snap(int x, int y) {
             // WINDOW TO WINDOW SNAPPING 
-            for (const auto & cli : wm->cur_d->current_clients)
-            {
+            for (const auto & cli : wm->cur_d->current_clients) {
                 // SNAP WINDOW TO 'RIGHT' BORDER OF 'NON_CONTROLLED' WINDOW
                 if ((x > cli->x + cli->width - N && x < cli->x + cli->width + N) 
-                 && (y + c->height > cli->y && y < cli->y + cli->height))
-                {
+                 && (y + c->height > cli->y && y < cli->y + cli->height)) {
                     // SNAP WINDOW TO 'RIGHT_TOP' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
-                    if (y > cli->y - NC && y < cli->y + NC)
-                    {  
+                    if (y > cli->y - NC && y < cli->y + NC) {  
                         c->frame.x_y((cli->x + cli->width), cli->y);
                         return;
                     }
-
                     // SNAP WINDOW TO 'RIGHT_BOTTOM' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
-                    if (y + c->height > cli->y + cli->height - NC && y + c->height < cli->y + cli->height + NC)
-                    {
+                    if (y + c->height > cli->y + cli->height - NC && y + c->height < cli->y + cli->height + NC) {
                         c->frame.x_y((cli->x + cli->width), (cli->y + cli->height) - c->height);
                         return;
                     }
-
                     c->frame.x_y((cli->x + cli->width), y);
                     return;
                 }
-
                 // SNAP WINSOW TO 'LEFT' BORDER OF 'NON_CONTROLLED' WINDOW
                 if ((x + c->width > cli->x - N && x + c->width < cli->x + N) 
-                 && (y + c->height > cli->y && y < cli->y + cli->height))
-                {
+                 && (y + c->height > cli->y && y < cli->y + cli->height)) {
                     // SNAP WINDOW TO 'LEFT_TOP' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
-                    if (y > cli->y - NC && y < cli->y + NC)
-                    {  
+                    if (y > cli->y - NC && y < cli->y + NC) {  
                         c->frame.x_y((cli->x - c->width), cli->y);
                         return;
                     }
-
                     // SNAP WINDOW TO 'LEFT_BOTTOM' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
-                    if (y + c->height > cli->y + cli->height - NC && y + c->height < cli->y + cli->height + NC)
-                    {
+                    if (y + c->height > cli->y + cli->height - NC && y + c->height < cli->y + cli->height + NC) {
                         c->frame.x_y((cli->x - c->width), (cli->y + cli->height) - c->height);
                         return;
                     }                
-
                     c->frame.x_y((cli->x - c->width), y);
                     return;
                 }
-
                 // SNAP WINDOW TO 'BOTTOM' BORDER OF 'NON_CONTROLLED' WINDOW
                 if ((y > cli->y + cli->height - N && y < cli->y + cli->height + N) 
-                 && (x + c->width > cli->x && x < cli->x + cli->width))
-                {
+                 && (x + c->width > cli->x && x < cli->x + cli->width)) {
                     // SNAP WINDOW TO 'BOTTOM_LEFT' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
-                    if (x > cli->x - NC && x < cli->x + NC)
-                    {  
+                    if (x > cli->x - NC && x < cli->x + NC) {  
                         c->frame.x_y(cli->x, (cli->y + cli->height));
                         return;
                     }
-
                     // SNAP WINDOW TO 'BOTTOM_RIGHT' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
-                    if (x + c->width > cli->x + cli->width - NC && x + c->width < cli->x + cli->width + NC)
-                    {
+                    if (x + c->width > cli->x + cli->width - NC && x + c->width < cli->x + cli->width + NC) {
                         c->frame.x_y(((cli->x + cli->width) - c->width), (cli->y + cli->height));
                         return;
                     }
-
                     c->frame.x_y(x, (cli->y + cli->height));
                     return;
                 }
-
                 // SNAP WINDOW TO 'TOP' BORDER OF 'NON_CONTROLLED' WINDOW
                 if ((y + c->height > cli->y - N && y + c->height < cli->y + N) 
-                 && (x + c->width > cli->x && x < cli->x + cli->width))
-                {
+                 && (x + c->width > cli->x && x < cli->x + cli->width)) {
                     // SNAP WINDOW TO 'TOP_LEFT' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
-                    if (x > cli->x - NC && x < cli->x + NC)
-                    {  
+                    if (x > cli->x - NC && x < cli->x + NC) {  
                         c->frame.x_y(cli->x, (cli->y - c->height));
                         return;
                     }
-
                     // SNAP WINDOW TO 'TOP_RIGHT' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
-                    if (x + c->width > cli->x + cli->width - NC && x + c->width < cli->x + cli->width + NC)
-                    {
+                    if (x + c->width > cli->x + cli->width - NC && x + c->width < cli->x + cli->width + NC) {
                         c->frame.x_y(((cli->x + cli->width) - c->width), (cli->y - c->height));
                         return;
                     }
-
                     c->frame.x_y(x, (cli->y - c->height));
                     return;
                 }
             }
 
             // WINDOW TO EDGE OF SCREEN SNAPPING
-            if (((x < N) && (x > -N)) && ((y < N) && (y > -N)))
-            {
+            if (((x < N) && (x > -N)) && ((y < N) && (y > -N))) {
                 c->frame.x_y(0, 0);
-            }
-            else if ((x < RIGHT_ + N && x > RIGHT_ - N) && (y < N && y > -N))
-            {
+            } else if ((x < RIGHT_ + N && x > RIGHT_ - N) && (y < N && y > -N)) {
                 c->frame.x_y(RIGHT_, 0);
-            }
-            else if ((y < BOTTOM_ + N && y > BOTTOM_ - N) && (x < N && x > -N))
-            {
+            } else if ((y < BOTTOM_ + N && y > BOTTOM_ - N) && (x < N && x > -N)) {
                 c->frame.x_y(0, BOTTOM_);
-            }
-            else if ((x < N) && (x > -N))
-            { 
+            } else if ((x < N) && (x > -N)) { 
                 c->frame.x_y(0, y);
-            }
-            else if (y < N && y > -N)
-            {
+            } else if (y < N && y > -N) {
                 c->frame.x_y(x, 0);
-            }
-            else if ((x < RIGHT_ + N && x > RIGHT_ - N) && (y < BOTTOM_ + N && y > BOTTOM_ - N))
-            {
+            } else if ((x < RIGHT_ + N && x > RIGHT_ - N) && (y < BOTTOM_ + N && y > BOTTOM_ - N)) {
                 c->frame.x_y(RIGHT_, BOTTOM_);
-            }
-            else if ((x < RIGHT_ + N) && (x > RIGHT_ - N))
-            { 
+            } else if ((x < RIGHT_ + N) && (x > RIGHT_ - N)) { 
                 c->frame.x_y(RIGHT_, y);
-            }
-            else if (y < BOTTOM_ + N && y > BOTTOM_ - N)
-            {
+            } else if (y < BOTTOM_ + N && y > BOTTOM_ - N) {
                 c->frame.x_y(x, BOTTOM_);
-            }
-            else 
-            {
+            } else {
                 c->frame.x_y(x, y);
             }
         }
@@ -582,31 +540,25 @@ class mv_client {
          * THIS IS THE MAIN EVENT LOOP FOR 'mv_client'
          */ 
         void run() { 
-            while (shouldContinue) 
-            {
+            while (shouldContinue) {
                 ev = xcb_wait_for_event(conn);
-                if (!ev) 
-                {
+                if (!ev) {
                     continue;
                 }
 
-                switch (ev->response_type & ~0x80) 
-                {
-                    case XCB_MOTION_NOTIFY: 
-                    {
+                switch (ev->response_type & ~0x80) {
+                    case XCB_MOTION_NOTIFY: {
                         const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
                         int new_x = e->root_x - start_x;
                         int new_y = e->root_y - start_y;
                         
-                        if (isTimeToRender())
-                        {
+                        if (isTimeToRender()) {
                             snap(new_x, new_y);
                             xcb_flush(conn);
                         }
                         break;
                     }
-                    case XCB_BUTTON_RELEASE:
-                    {
+                    case XCB_BUTTON_RELEASE: {
                         shouldContinue = false;
                         c->update();
                         break;
@@ -616,26 +568,14 @@ class mv_client {
             }
         }
         bool isTimeToRender() {
-            auto currentTime = std::chrono::high_resolution_clock::now(); /*
-                CALCULATE ELAPSED TIME SINCE THE LAST UPDATE
-             */ 
+            auto currentTime = std::chrono::high_resolution_clock::now();
             const std::chrono::duration<double, std::milli> elapsedTime = currentTime - lastUpdateTime;
 
-            if (elapsedTime.count() >= frameDuration) /*
-                CHECK IF THE ELAPSED TIME EXCEEDS THE FRAME DURATION
-             */ 
-            {
-                lastUpdateTime = currentTime; /*
-                    UPDATE THE LAST_UPDATE_TIME TO THE 
-                    CURRENT TIME FOR THE NEXT CHECK
-                 */ 
-                return true; /*
-                    RETURN TRUE IF IT'S TIME TO RENDER
-                 */ 
+            if (elapsedTime.count() >= frameDuration) {
+                lastUpdateTime = currentTime;
+                return true;
             }
-            return false; /*
-                RETURN FALSE IF NOT ENOUGH TIME HAS PASSED
-             */ 
+            return false;
         }
     ;
 };

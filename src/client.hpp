@@ -371,8 +371,7 @@ class client {
         }
     ;
     private: // variables
-        std::vector<std::vector<bool>> CLOSE_BUTTON_BITMAP =
-        {
+        std::vector<std::vector<bool>> CLOSE_BUTTON_BITMAP = {
             {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
             {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
             {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},

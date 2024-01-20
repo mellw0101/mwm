@@ -9,12 +9,10 @@
 class pointer
 {
     public: // methods
-        uint32_t x()
-        {
+        uint32_t x() {
             xcb_query_pointer_cookie_t cookie = xcb_query_pointer(conn, screen->root);
             xcb_query_pointer_reply_t * reply = xcb_query_pointer_reply(conn, cookie, nullptr);
-            if (!reply) 
-            {
+            if (!reply) {
                 log_error("reply is nullptr.");
                 return 0;                            
             } 
@@ -24,12 +22,10 @@ class pointer
             free(reply);
             return x;
         }
-        uint32_t y()
-        {
+        uint32_t y() {
             xcb_query_pointer_cookie_t cookie = xcb_query_pointer(conn, screen->root);
             xcb_query_pointer_reply_t * reply = xcb_query_pointer_reply(conn, cookie, nullptr);
-            if (!reply) 
-            {
+            if (!reply) {
                 log_error("reply is nullptr.");
                 return 0;                            
             } 
@@ -39,10 +35,8 @@ class pointer
             free(reply);
             return y;
         }
-        void teleport(const int16_t & x, const int16_t & y) 
-        {
-            xcb_warp_pointer
-            (
+        void teleport(const int16_t & x, const int16_t & y) {
+            xcb_warp_pointer(
                 conn, 
                 XCB_NONE, 
                 screen->root, 
@@ -55,10 +49,8 @@ class pointer
             );
             xcb_flush(conn);
         }
-        void grab(const xcb_window_t & window)
-        {
-            xcb_grab_pointer_cookie_t cookie = xcb_grab_pointer
-            (
+        void grab(const xcb_window_t & window) {
+            xcb_grab_pointer_cookie_t cookie = xcb_grab_pointer(
                 conn,
                 false,
                 window,
@@ -71,27 +63,22 @@ class pointer
             );
 
             xcb_grab_pointer_reply_t * reply = xcb_grab_pointer_reply(conn, cookie, nullptr);
-            if (!reply)
-            {
+            if (!reply) {
                 log_error("reply is nullptr.");
                 free(reply);
                 return;
             }
-            if (reply->status != XCB_GRAB_STATUS_SUCCESS) 
-            {
+            if (reply->status != XCB_GRAB_STATUS_SUCCESS) {
                 log_error("Could not grab pointer");
                 free(reply);
                 return;
             }
-
             free(reply);
         }
     ;
     private: // functions
-        const char * pointer_from_enum(CURSOR CURSOR)
-        {
-            switch (CURSOR) 
-            {
+        const char * pointer_from_enum(CURSOR CURSOR) {
+            switch (CURSOR) {
                 case CURSOR::arrow: return "arrow";
                 case CURSOR::hand1: return "hand1";
                 case CURSOR::hand2: return "hand2";
