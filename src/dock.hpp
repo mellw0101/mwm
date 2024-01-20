@@ -444,6 +444,7 @@ class add_app_dialog_window {
 class File_App {
     public: // variabels
         window main_window;
+        static client * c;
     ;
     public: // methods
         void init() {
@@ -454,7 +455,7 @@ class File_App {
     ;
     private: // functions
         void create_window() {
-            int width = 300, height = 400;
+            int width = (screen->width_in_pixels / 2), height = (screen->height_in_pixels / 2);
             int x = ((screen->width_in_pixels / 2) - (width / 2)), y = ((screen->height_in_pixels / 2) - (height / 2));
             main_window.create_default(screen->root, x, y, width, height);
         }
@@ -463,6 +464,15 @@ class File_App {
             main_window.apply_event_mask(& mask);
             main_window.set_backround_color(DARK_GREY);
             main_window.grab_button({ { L_MOUSE_BUTTON, NULL } });
+        }
+        void make_internal_client() {
+            c = new client;
+            c->win = main_window;
+            c->x = main_window.x();
+            c->y = main_window.y();
+            c->width = main_window.width();
+            c->height = main_window.height();
+            c->make_decorations();
         }
         void launch() {
             main_window.raise();
