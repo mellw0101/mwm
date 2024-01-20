@@ -483,16 +483,14 @@ class Window_Manager
             ;
             void manage_new_client(const uint32_t & window) {
                 client * c = make_client(window);
-                if (!c)
-                {
+                if (!c) {
                     log_error("could not make client");
                     return;
                 }
 
                 c->win.x_y_width_height(c->x, c->y, c->width, c->height);
                 c->win.map();
-                c->win.grab_button(
-                {
+                c->win.grab_button({
                     {   L_MOUSE_BUTTON,     ALT },
                     {   R_MOUSE_BUTTON,     ALT },
                     {   L_MOUSE_BUTTON,     0   }
@@ -504,7 +502,6 @@ class Window_Manager
 
                 c->update();
                 focus_client(c);
-                log_win("c->win: " ,c->win);
             }
             client * make_internal_client(window window) {
                 client * c = new client;
