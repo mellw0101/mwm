@@ -447,22 +447,27 @@ class File_App {
     ;
     public: // methods
         void init() {
+            create_window();
+            setup_window();
+            setup_events();
+        }
+    ;
+    private: // functions
+        void create_window() {
             int width = 300, height = 400;
             int x = ((screen->width_in_pixels / 2) - (width / 2)), y = ((screen->height_in_pixels / 2) - (height / 2));
-            main_window.create_default(screen->root, 0, 0, 200, 200);
+            main_window.create_default(screen->root, x, y, width, height);
+        }
+        void setup_window() {
             uint32_t mask = XCB_EVENT_MASK_STRUCTURE_NOTIFY;
             main_window.apply_event_mask(& mask);
             main_window.set_backround_color(DARK_GREY);
             main_window.grab_button({ { L_MOUSE_BUTTON, NULL } });
-
-            setup_events();
         }
         void launch() {
             main_window.raise();
             main_window.map();
         }
-    ;
-    private: // functions
         void setup_events() {
             event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev) {
                 const auto * e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
