@@ -794,9 +794,6 @@ class change_desktop
                     {
                         if (c)
                         {
-                            // std::thread t(&change_desktop::anim_cli, this, c, c->x - screen->width_in_pixels);
-                            // t.detach();
-                            // animation_threads.emplace_back(&change_desktop::anim_cli, this, c, calculateEndX(c, direction));
                             animation_threads.emplace_back(&change_desktop::anim_cli, this, c, c->x - screen->width_in_pixels);
                         }
                     }
@@ -808,8 +805,6 @@ class change_desktop
                     {
                         if (c)
                         {
-                            // std::thread t(&change_desktop::anim_cli, this, c, c->x + screen->width_in_pixels);
-                            // t.detach();
                             animation_threads.emplace_back(&change_desktop::anim_cli, this, c, c->x + screen->width_in_pixels);
                         }
                     }
@@ -2069,26 +2064,6 @@ class tile /**
         }
     ;
 };
-void getWindowParameters(const uint32_t & window) 
-{
-    xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
-    xcb_get_geometry_reply_t* geometry_reply = xcb_get_geometry_reply(conn, geometry_cookie, NULL);
-
-    if (geometry_reply != NULL) 
-    {
-        log_info("Window Parameters");
-        log_info(std::to_string(geometry_reply->x));
-        log_info(std::to_string(geometry_reply->y));
-        log_info(std::to_string(geometry_reply->width));
-        log_info(std::to_string(geometry_reply->height));
-
-        free(geometry_reply);
-    } 
-    else 
-    {
-        std::cerr << "Unable to get window geometry." << std::endl;
-    }
-}
 class Events
 {
     public: // constructor and destructor  

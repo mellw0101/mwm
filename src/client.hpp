@@ -53,17 +53,12 @@ class client
             void make_decorations()
             {
                 make_frame();
+                std::thread(&client::make_titlebar, this).detach();
+                // make_titlebar();
+                make_close_button();
+                make_max_button();
+                make_min_button();
                 
-                std::thread t1(&client::make_titlebar, this);
-                std::thread t2(&client::make_close_button, this);
-                std::thread t3(&client::make_max_button, this);
-                std::thread t4(&client::make_min_button, this);
-                
-                t1.join();
-                t2.join();
-                t3.join();
-                t4.join();
-
                 if (BORDER_SIZE > 0)
                 {
                     make_borders();
