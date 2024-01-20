@@ -54,10 +54,9 @@ class client
             {
                 make_frame();
                 std::thread(&client::make_titlebar, this).detach();
-                // make_titlebar();
-                make_close_button();
-                make_max_button();
-                make_min_button();
+                std::thread(&client::make_close_button, this).detach();
+                std::thread(&client::make_max_button, this).detach();
+                std::thread(&client::make_min_button, this).detach();
                 
                 if (BORDER_SIZE > 0)
                 {
