@@ -522,8 +522,7 @@ class Window_Manager
                 return c;
             }
             void send_sigterm_to_client(client * c) {
-                if (!c)
-                {
+                if (!c) {
                     return;
                 }
 
