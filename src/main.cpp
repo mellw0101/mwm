@@ -423,7 +423,7 @@ class mv_client
                 return;
             }
 
-            pointer->grab(screen->root);
+            pointer->grab(c->frame);
             run();
             xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
             xcb_flush(conn);
@@ -598,8 +598,8 @@ class mv_client
                     case XCB_MOTION_NOTIFY: 
                     {
                         const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
-                        const int16_t & new_x = e->root_x - start_x;
-                        const int16_t & new_y = e->root_y - start_y;
+                        int new_x = e->root_x - start_x;
+                        int new_y = e->root_y - start_y;
                         
                         if (isTimeToRender())
                         {
