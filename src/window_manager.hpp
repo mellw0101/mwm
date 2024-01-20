@@ -522,10 +522,7 @@ class Window_Manager
                 return c;
             }
             void send_sigterm_to_client(client * c) {
-                if (!c) {
-                    return;
-                }
-
+                log_win("c->win: " ,c->win);
                 c->kill();
                 remove_client(c);
             }
