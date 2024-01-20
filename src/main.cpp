@@ -548,16 +548,10 @@ class mv_client {
 
                 switch (ev->response_type & ~0x80) {
                     case XCB_MOTION_NOTIFY: {
-                        const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
-                        int new_x = e->root_x - start_x;
-                        int new_y = e->root_y - start_y;
-
-                        log_info("new_x: " + std::to_string(new_x));
-                        log_info("new_y: " + std::to_string(new_y));
-                        
+                        const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);                        
                         
                         if (isTimeToRender()) {
-                            snap(new_x, new_y);
+                            snap(e->root_x, e->root_y);
                             xcb_flush(conn);
                         }
                         break;
