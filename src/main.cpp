@@ -2276,8 +2276,7 @@ class Events {
         void focus_in_handler(const xcb_generic_event_t * & ev) {
             const auto * e = reinterpret_cast<const xcb_focus_in_event_t *>(ev);
             client * c = wm->client_from_window( & e->event);
-            if (c)
-            {
+            if (c) {
                 c->win.ungrab_button({ { L_MOUSE_BUTTON, NULL } });
                 c->raise();
                 c->win.set_active_EWMH_window();
@@ -2286,14 +2285,10 @@ class Events {
         }
         void focus_out_handler(const xcb_generic_event_t * & ev) {
             const auto * e = reinterpret_cast<const xcb_focus_out_event_t *>(ev);
-            
             client * c = wm->client_from_window(& e->event);
-            if (!c)
-            {
-                return;
+            if (c) {
+                c->win.grab_button({ { L_MOUSE_BUTTON, NULL } });
             }
-            
-            c->win.grab_button({ { L_MOUSE_BUTTON, NULL } });
         }
         void destroy_notify_handler(const xcb_generic_event_t * & ev) {
             const auto * e = reinterpret_cast<const xcb_destroy_notify_event_t *>(ev);
@@ -2328,7 +2323,6 @@ class Events {
         }
         void leave_notify_handler(const xcb_generic_event_t * & ev) {
             const auto * e = reinterpret_cast<const xcb_leave_notify_event_t *>(ev);
-            // log_win("e->event: ", e->event);
         }
         void motion_notify_handler(const xcb_generic_event_t * & ev) {
             const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
