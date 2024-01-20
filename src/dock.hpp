@@ -500,7 +500,17 @@ class File_App {
                     }
                 }
             });
+            event_handler->setEventCallback(XCB_CONFIGURE_NOTIFY, [&](Ev ev) {
+                const auto * e = reinterpret_cast<const xcb_configure_notify_event_t *>(ev);
+                if (e->window == main_window)
+                {
+                    log_info("success");
+                }
+            });
         }
+    ;
+    private:
+        Logger log;
     ;
 };
 static File_App * file_app;
