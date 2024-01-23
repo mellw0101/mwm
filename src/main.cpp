@@ -540,63 +540,44 @@ class pointer {
 };
 class fast_vector {
     public: // operators
-        operator std::vector<const char*>() const
-        {
+        operator std::vector<const char*>() const {
             return data;
         }
     ;
     public: // Destructor
-        ~fast_vector() 
-        {
-            for (auto str : data) 
-            {
+        ~fast_vector() {
+            for (auto str : data)  {
                 delete[] str;
             }
         }
     ;
     public: // [] operator Access an element in the vector
-        const char* operator[](size_t index) const 
-        {
+        const char* operator[](size_t index) const {
             return data[index];
         }
     ;
     public: // methods
-        void // Add a string to the vector
-        push_back(const char* str)
-        {
+        void push_back(const char* str) {
             char* copy = new char[strlen(str) + 1];
             strcpy(copy, str);
             data.push_back(copy);
         }
-
-        void // Add a string to the vector
-        append(const char* str)
-        {
+        void append(const char* str) {
             char* copy = new char[strlen(str) + 1];
             strcpy(copy, str);
             data.push_back(copy);
         }
-
-        size_t // Get the size of the vector
-        size() const 
-        {
+        size_t size() const {
             return data.size();
         }
-
-        size_t // get the index of the last element in the vector
-        index_size() const
-        {
-            if (data.size() == 0)
-            {
+        size_t index_size() const {
+            if (data.size() == 0) {
                 return 0;
             }
 
             return data.size() - 1;
         }
-
-        void // Clear the vector
-        clear()
-        {
+        void clear() {
             data.clear();
         }
     ;
@@ -607,30 +588,24 @@ class fast_vector {
 class string_tokenizer {
     public: // constructors and destructor
         string_tokenizer() {}
-
-        string_tokenizer(const char* input, const char* delimiter) 
-        {
+        string_tokenizer(const char* input, const char* delimiter) {
             // Copy the input string
             str = new char[strlen(input) + 1];
             strcpy(str, input);
 
             // Tokenize the string using strtok() and push tokens to the vector
             char* token = strtok(str, delimiter);
-            while (token != nullptr) 
-            {
+            while (token != nullptr) {
                 tokens.push_back(token);
                 token = strtok(nullptr, delimiter);
             }
         }
-
-        ~string_tokenizer() 
-        {
+        ~string_tokenizer() {
             delete[] str;
         }
     ;
     public: // methods
-        const fast_vector & tokenize(const char* input, const char* delimiter)
-        {
+        const fast_vector & tokenize(const char* input, const char* delimiter) {
             tokens.clear();
 
             // Copy the input string
@@ -639,19 +614,16 @@ class string_tokenizer {
 
             // Tokenize the string using strtok() and push tokens to the vector
             char* token = strtok(str, delimiter);
-            while (token != nullptr) 
-            {
+            while (token != nullptr) {
                 tokens.append(token);
                 token = strtok(nullptr, delimiter);
             }
             return tokens;
         }
-        const fast_vector & get_tokens() const 
-        {
+        const fast_vector & get_tokens() const {
             return tokens;
         }
-        void clear()
-        {
+        void clear() {
             tokens.clear();
         }
     ;
@@ -662,16 +634,14 @@ class string_tokenizer {
 };
 class str {
     public: // Constructor
-        str(const char* str = "") 
-        {
+        str(const char* str = "") {
             length = strlen(str);
             data = new char[length + 1];
             strcpy(data, str);
         }
     ;
     public: // Copy constructor
-        str(const str& other) 
-        {
+        str(const str& other) {
             length = other.length;
             data = new char[length + 1];
             strcpy(data, other.data);
@@ -679,23 +649,19 @@ class str {
     ;
     public: // Move constructor
         str(str&& other) noexcept 
-        : data(other.data), length(other.length) 
-        {
+        : data(other.data), length(other.length) {
             other.data = nullptr;
             other.length = 0;
         }
     ;
     public: // Destructor
-        ~str() 
-        {
+        ~str() {
             delete[] data;
         }
     ;
     public: // Copy assignment operator
-        str& operator=(const str& other) 
-        {
-            if (this != &other) 
-            {
+        str& operator=(const str& other) {
+            if (this != &other) {
                 delete[] data;
                 length = other.length;
                 data = new char[length + 1];
@@ -705,10 +671,8 @@ class str {
         }
     ;
     public: // Move assignment operator
-        str& operator=(str&& other) noexcept 
-        {
-            if (this != &other) 
-            {
+        str& operator=(str&& other) noexcept {
+            if (this != &other) {
                 delete[] data;
                 data = other.data;
                 length = other.length;
@@ -719,8 +683,7 @@ class str {
         }
     ;
     public: // Concatenation operator
-        str operator+(const str& other) const 
-        {
+        str operator+(const str& other) const {
             str result;
             result.length = length + other.length;
             result.data = new char[result.length + 1];
@@ -730,28 +693,17 @@ class str {
         }
     ;
     public: // methods
-        // Access to underlying C-string
-        const char * c_str() const 
-        {
+        const char * c_str() const { // Access to underlying C-string
             return data;
-        }
-
-        // Get the length of the string
-        size_t size() const 
-        {
+        }        
+        size_t size() const { // Get the length of the string
             return length;
         }
-
-        // Method to check if the string is empty
-        bool isEmpty() const 
-        {
+        bool isEmpty() const { // Method to check if the string is empty
             return length == 0;
         }
-
-        bool is_nullptr() const
-        {
-            if (data == nullptr)
-            {
+        bool is_nullptr() const {
+            if (data == nullptr) {
                 delete [] data;
                 return true;
             }
@@ -889,18 +841,15 @@ class Directory_Lister {
 };
 class File {
     public: // subclasses
-        class search
-        {
+        class search {
             public: // construcers and operators
                 search(const std::string& filename)
                 : file(filename) {}
 
-                operator bool() const
-                {
+                operator bool() const {
                     return file.good();
                 }
             ;
-
             private: // private variables
                 std::ifstream file;
             ;
@@ -919,17 +868,15 @@ class File {
 
             for (const auto & dir : dirs) {
                 std::vector<std::string> files = list_dir_to_vector(dir);
-                for (const auto & file : files)
-                {
-                    if (file == name)
-                    {
+                for (const auto & file : files) {
+                    if (file == name) {
                         return dir + file;
                     }
                 }
             }
             return "";
         }
-        bool check_if_binary_exists(const char * name){
+        bool check_if_binary_exists(const char * name) {
             std::vector<const char *> dirs = split_$PATH_into_vector();
             return check_if_file_exists_in_DIRS(dirs, name);
         }
@@ -947,48 +894,38 @@ class File {
         Directory_Searcher ds;
     ;
     private: // functions
-        bool check_if_file_exists_in_DIRS(std::vector<const char *> dirs, const char * app)
-        {
+        bool check_if_file_exists_in_DIRS(std::vector<const char *> dirs, const char * app) {
             std::string name = app;
 
-            for (const auto & dir : dirs)
-            {
+            for (const auto & dir : dirs) {
                 std::vector<std::string> files = list_dir_to_vector(dir);
-                for (const auto & file : files)
-                {
-                    if (file == name)
-                    {
+                for (const auto & file : files) {
+                    if (file == name) {
                         return true;
                     }
                 }
             }
             return false;
         }
-        std::vector<std::string> list_dir_to_vector(const char * directoryPath) 
-        {
+        std::vector<std::string> list_dir_to_vector(const char * directoryPath) {
             std::vector<std::string> files;
             DIR* dirp = opendir(directoryPath);
-            if (dirp) 
-            {
+            if (dirp) {
                 struct dirent* dp;
-                while ((dp = readdir(dirp)) != nullptr) 
-                {
+                while ((dp = readdir(dirp)) != nullptr) {
                     files.push_back(dp->d_name);
                 }
                 closedir(dirp);
             }
             return files;
         }
-        std::vector<const char *> split_$PATH_into_vector()
-        {
+        std::vector<const char *> split_$PATH_into_vector() {
             str $PATH(get_env_var("PATH"));
             return st.tokenize($PATH.c_str(), ":");
         }
-        const char * get_env_var(const char * var)
-        {
+        const char * get_env_var(const char * var) {
             const char * _var = getenv(var);
-            if (_var == nullptr)
-            {
+            if (_var == nullptr) {
                 return nullptr;
             }
             return _var;
@@ -997,14 +934,11 @@ class File {
 };
 class Launcher {
     public:
-        void program(char * program)
-        {
-            if (!file.check_if_binary_exists(program))
-            {
+        void program(char * program) {
+            if (!file.check_if_binary_exists(program)) {
                 return;
             }
-            if (fork() == 0) 
-            {
+            if (fork() == 0) {
                 setsid();
                 execvp(program, (char *[]) { program, NULL });
             }
@@ -1050,7 +984,6 @@ class Event_Handler {
             eventCallbacks[eventType].emplace_back(id, std::move(callback));
             return id;
         }
-
         void removeEventCallback(uint8_t eventType, CallbackId id) {
             auto& callbacks = eventCallbacks[eventType];
             callbacks.erase(std::remove_if(callbacks.begin(), callbacks.end(),
@@ -1071,43 +1004,37 @@ class Bitmap {
     ;
     public: // methods
         void modify(int row, int startCol, int endCol, bool value) {
-            if (row < 0 || row >= height || startCol < 0 || endCol > width) 
-            {
+            if (row < 0 || row >= height || startCol < 0 || endCol > width) {
                 log_error("Invalid row or column indices");
             }
         
-            for (int i = startCol; i < endCol; ++i) 
-            {
+            for (int i = startCol; i < endCol; ++i) {
                 bitmap[row][i] = value;
             }
         }
         void exportToPng(const char * file_name) const {
             FILE * fp = fopen(file_name, "wb");
-            if (!fp) 
-            {
+            if (!fp) {
                 // log_error("Failed to create PNG file");
                 return;
             }
 
             png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
-            if (!png_ptr) 
-            {
+            if (!png_ptr) {
                 fclose(fp);
                 // log_error("Failed to create PNG write struct");
                 return;
             }
 
             png_infop info_ptr = png_create_info_struct(png_ptr);
-            if (!info_ptr) 
-            {
+            if (!info_ptr) {
                 fclose(fp);
                 png_destroy_write_struct(&png_ptr, nullptr);
                 // log_error("Failed to create PNG info struct");
                 return;
             }
 
-            if (setjmp(png_jmpbuf(png_ptr))) 
-            {
+            if (setjmp(png_jmpbuf(png_ptr))) {
                 fclose(fp);
                 png_destroy_write_struct(&png_ptr, &info_ptr);
                 // log_error("Error during PNG creation");
@@ -1119,10 +1046,8 @@ class Bitmap {
             png_write_info(png_ptr, info_ptr);
 
             png_bytep row = new png_byte[width];
-            for (int y = 0; y < height; y++) 
-            {
-                for (int x = 0; x < width; x++) 
-                {
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
                     row[x] = bitmap[y][x] ? 0xFF : 0x00;
                 }
                 png_write_row(png_ptr, row);
@@ -1155,8 +1080,7 @@ class window {
         operator uint32_t() const {
             return _window;
         }
-        // Overload the assignment operator for uint32_t
-        window& operator=(uint32_t new_window) {
+        window& operator=(uint32_t new_window) { // Overload the assignment operator for uint32_t
             _window = new_window;
             return *this;
         }
@@ -1225,8 +1149,7 @@ class window {
                 make_window();
             }
             void raise() {
-                xcb_configure_window
-                (
+                xcb_configure_window(
                     conn,
                     _window,
                     XCB_CONFIG_WINDOW_STACK_MODE, 
@@ -1246,8 +1169,7 @@ class window {
                 xcb_flush(conn);
             }
             void reparent(const uint32_t & new_parent, const int16_t & x, const int16_t & y) {
-                xcb_reparent_window
-                (
+                xcb_reparent_window(
                     conn, 
                     _window, 
                     new_parent, 
@@ -1263,25 +1185,21 @@ class window {
                 xcb_intern_atom_cookie_t delete_cookie = xcb_intern_atom(conn, 0, 16, "WM_DELETE_WINDOW");
                 xcb_intern_atom_reply_t *delete_reply = xcb_intern_atom_reply(conn, delete_cookie, NULL);
 
-                if (!protocols_reply)
-                {
+                if (!protocols_reply) {
                     log_error("protocols reply is null");
                     free(protocols_reply);
                     free(delete_reply);
                     return;
                 }
-                if (!delete_reply)
-                {
+                if (!delete_reply) {
                     log_error("delete reply is null");
                     free(protocols_reply);
                     free(delete_reply);
                     return;
                 }
 
-                send_event
-                (
-                    make_client_message_event
-                    (
+                send_event(
+                    make_client_message_event(
                         32,
                         protocols_reply->atom,
                         delete_reply->atom
@@ -1294,8 +1212,7 @@ class window {
                 xcb_flush(conn);
             }
             void clear() {
-                xcb_clear_area
-                (
+                xcb_clear_area(
                     conn, 
                     0,
                     _window,
@@ -1307,8 +1224,7 @@ class window {
                 xcb_flush(conn);
             }
             void focus_input() {
-                xcb_set_input_focus
-                (
+                xcb_set_input_focus(
                     conn, 
                     XCB_INPUT_FOCUS_POINTER_ROOT, 
                     _window, 
@@ -1321,12 +1237,9 @@ class window {
             bool is_EWMH_fullscreen() {
                 xcb_get_property_cookie_t cookie = xcb_ewmh_get_wm_state(ewmh, _window);
                 xcb_ewmh_get_atoms_reply_t wm_state;
-                if (xcb_ewmh_get_wm_state_reply(ewmh, cookie, &wm_state, NULL) == 1) 
-                {
-                    for (unsigned int i = 0; i < wm_state.atoms_len; i++) 
-                    {
-                        if (wm_state.atoms[i] == ewmh->_NET_WM_STATE_FULLSCREEN) 
-                        {
+                if (xcb_ewmh_get_wm_state_reply(ewmh, cookie, &wm_state, NULL) == 1) {
+                    for (unsigned int i = 0; i < wm_state.atoms_len; i++) {
+                        if (wm_state.atoms[i] == ewmh->_NET_WM_STATE_FULLSCREEN) {
                             xcb_ewmh_get_atoms_reply_wipe(&wm_state);
                             return true;
                         }
@@ -1342,19 +1255,13 @@ class window {
             }
             uint32_t check_event_mask_sum() {
                 uint32_t mask = 0;
-
-                // Get the window attributes
                 xcb_get_window_attributes_cookie_t attr_cookie = xcb_get_window_attributes(conn, _window);
                 xcb_get_window_attributes_reply_t * attr_reply = xcb_get_window_attributes_reply(conn, attr_cookie, NULL);
 
-                // Check if the reply is valid
-                if (attr_reply) 
-                {
+                if (attr_reply) { // Check if the reply is valid
                     mask = attr_reply->all_event_masks;
                     free(attr_reply);
-                }
-                else 
-                {
+                } else {
                     log_error("Unable to get window attributes.");
                 }
                 return mask;
@@ -1362,10 +1269,8 @@ class window {
             std::vector<xcb_event_mask_t> check_event_mask_codes() {
                 uint32_t maskSum = check_event_mask_sum();
                 std::vector<xcb_event_mask_t> setMasks;
-                for (int mask = XCB_EVENT_MASK_KEY_PRESS; mask <= XCB_EVENT_MASK_OWNER_GRAB_BUTTON; mask <<= 1) 
-                {
-                    if (maskSum & mask) 
-                    {
+                for (int mask = XCB_EVENT_MASK_KEY_PRESS; mask <= XCB_EVENT_MASK_OWNER_GRAB_BUTTON; mask <<= 1) {
+                    if (maskSum & mask) {
                         setMasks.push_back(static_cast<xcb_event_mask_t>(mask));
                     }
                 }
@@ -1373,10 +1278,8 @@ class window {
             }
             bool is_mask_active(const uint32_t & event_mask) {
                 std::vector<xcb_event_mask_t> masks = check_event_mask_codes();
-                for (const auto & ev_mask : masks)
-                {
-                    if (ev_mask == event_mask)
-                    {
+                for (const auto & ev_mask : masks) {
+                    if (ev_mask == event_mask) {
                         return true;
                     }
                 }
@@ -1385,8 +1288,7 @@ class window {
             bool is_mapped() {
                 xcb_get_window_attributes_cookie_t cookie = xcb_get_window_attributes(conn, _window);
                 xcb_get_window_attributes_reply_t *reply = xcb_get_window_attributes_reply(conn, cookie, NULL);
-                if (!reply)
-                {
+                if (!reply) {
                     log_error("Unable to get window attributes.");
                     return false;
                 }
@@ -1402,8 +1304,7 @@ class window {
                 xcb_flush(conn);
             }
             void set_EWMH_fullscreen_state() {
-                xcb_change_property
-                (
+                xcb_change_property(
                     conn,
                     XCB_PROP_MODE_REPLACE,
                     _window,
@@ -1418,8 +1319,7 @@ class window {
         ;
         public: // unset methods
             void unset_EWMH_fullscreen_state() {
-                xcb_change_property
-                (
+                xcb_change_property(
                     conn,
                     XCB_PROP_MODE_REPLACE,
                     _window,
@@ -1438,11 +1338,9 @@ class window {
                 unsigned int reply_len;
                 char * propertyValue;
 
-                reply = xcb_get_property_reply
-                (
+                reply = xcb_get_property_reply(
                     conn,
-                    xcb_get_property
-                    (
+                    xcb_get_property(
                         conn,
                         false,
                         _window,
@@ -1457,10 +1355,8 @@ class window {
                     NULL
                 );
 
-                if (!reply || xcb_get_property_value_length(reply) == 0) 
-                {
-                    if (reply != nullptr) 
-                    {
+                if (!reply || xcb_get_property_value_length(reply) == 0) {
+                    if (reply != nullptr) {
                         log_error("reply length for property(" + std::string(atom_name) + ") = 0");
                         free(reply);
                         return (char *) "";
@@ -1490,8 +1386,7 @@ class window {
                 cookie = xcb_query_tree(conn, _window);
                 reply = xcb_query_tree_reply(conn, cookie, NULL);
 
-                if (!reply) 
-                {
+                if (!reply) {
                     log_error("Unable to query the window tree.");
                     return (uint32_t) 0; // Invalid window ID
                 }
@@ -1507,8 +1402,7 @@ class window {
                 cookie = xcb_query_tree(conn, _window);
                 reply = xcb_query_tree_reply(conn, cookie, NULL);
 
-                if (!reply) 
-                {
+                if (!reply) {
                     log_error("Unable to query the window tree.");
                     return (uint32_t) 0; // Invalid window ID
                 }
@@ -1522,8 +1416,7 @@ class window {
                 xcb_query_tree_cookie_t cookie = xcb_query_tree(conn, _window);
                 xcb_query_tree_reply_t *reply = xcb_query_tree_reply(conn, cookie, NULL);
 
-                if (!reply) 
-                {
+                if (!reply) {
                     log_error("Unable to query the window tree.");
                     return nullptr;
                 }
@@ -1531,8 +1424,7 @@ class window {
                 * child_count = xcb_query_tree_children_length(reply);
                 uint32_t * children = static_cast<uint32_t *>(malloc(* child_count * sizeof(xcb_window_t)));
 
-                if (!children) 
-                {
+                if (!children) {
                     log_error("Unable to allocate memory for children.");
                     free(reply);
                     return nullptr;
@@ -1547,13 +1439,10 @@ class window {
                 xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
 
                 int16_t x;
-                if (geometry) 
-                {
+                if (geometry) {
                     x = geometry->x;
                     free(geometry);
-                } 
-                else 
-                {
+                } else {
                     x = 200;
                 }
                 return x;
@@ -1563,13 +1452,10 @@ class window {
                 xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
 
                 int16_t y;
-                if (geometry) 
-                {
+                if (geometry) {
                     y = geometry->y;
                     free(geometry);
-                } 
-                else 
-                {
+                } else {
                     y = 200;
                 }
                 return y;
@@ -1579,13 +1465,10 @@ class window {
                 xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
 
                 int16_t width;
-                if (geometry) 
-                {
+                if (geometry) {
                     width = geometry->width;
                     free(geometry);
-                } 
-                else 
-                {
+                } else {
                     width = 200;
                 }
                 return width;
@@ -1595,13 +1478,10 @@ class window {
                 xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
 
                 int16_t height;
-                if (geometry) 
-                {
+                if (geometry) {
                     height = geometry->height;
                     free(geometry);
-                } 
-                else 
-                {
+                } else {
                     height = 200;
                 }
                 return height;
@@ -1609,14 +1489,12 @@ class window {
         ;
         public: // configuration methods
             void apply_event_mask(const std::vector<uint32_t> & values) {
-                if (values.empty()) 
-                {
+                if (values.empty()) {
                     log_error("values vector is empty");
                     return;
                 }
 
-                xcb_change_window_attributes
-                (
+                xcb_change_window_attributes(
                     conn,
                     _window,
                     XCB_CW_EVENT_MASK,
@@ -1626,8 +1504,7 @@ class window {
                 xcb_flush(conn);
             }
             void apply_event_mask(const uint32_t * mask) {
-                xcb_change_window_attributes
-                (
+                xcb_change_window_attributes(
                     conn,
                     _window,
                     XCB_CW_EVENT_MASK,
@@ -1637,21 +1514,18 @@ class window {
             void set_pointer(CURSOR cursor_type) {
                 xcb_cursor_context_t * ctx;
 
-                if (xcb_cursor_context_new(conn, screen, &ctx) < 0) 
-                {
+                if (xcb_cursor_context_new(conn, screen, &ctx) < 0) {
                     log_error("Unable to create cursor context.");
                     return;
                 }
 
                 xcb_cursor_t cursor = xcb_cursor_load_cursor(ctx, pointer_from_enum(cursor_type));
-                if (!cursor) 
-                {
+                if (!cursor) {
                     log_error("Unable to load cursor.");
                     return;
                 }
 
-                xcb_change_window_attributes
-                (
+                xcb_change_window_attributes(
                     conn, 
                     _window, 
                     XCB_CW_CURSOR, 
@@ -1668,8 +1542,7 @@ class window {
             void draw_text(const char * str , const COLOR & text_color, const COLOR & backround_color, const char * font_name, const int16_t & x, const int16_t & y) {
                 get_font(font_name);
                 create_font_gc(text_color, backround_color, font);
-                xcb_image_text_8
-                (
+                xcb_image_text_8(
                     conn, 
                     strlen(str), 
                     _window, 
@@ -1768,8 +1641,7 @@ class window {
                 }
                 void set_backround_png(const char * imagePath) {
                     Imlib_Image image = imlib_load_image(imagePath);
-                    if (!image) 
-                    {
+                    if (!image) {
                         log_error("Failed to load image: " + std::string(imagePath));
                         return;
                     }
@@ -1783,14 +1655,12 @@ class window {
                     int newHeight = _height;
                     int newWidth = (int)(newHeight * aspectRatio);
 
-                    if (newWidth > _width) 
-                    {
+                    if (newWidth > _width) {
                         newWidth = _width;
                         newHeight = (int)(newWidth / aspectRatio);
                     }
 
-                    Imlib_Image scaledImage = imlib_create_cropped_scaled_image
-                    (
+                    Imlib_Image scaledImage = imlib_create_cropped_scaled_image(
                         0, 
                         0, 
                         originalWidth, 
@@ -1805,8 +1675,7 @@ class window {
                     DATA32 * data = imlib_image_get_data();
 
                     // Create an XCB image from the scaled data
-                    xcb_image_t * xcb_image = xcb_image_create_native
-                    (
+                    xcb_image_t * xcb_image = xcb_image_create_native(
                         conn, 
                         newWidth, 
                         newHeight,
@@ -1819,8 +1688,7 @@ class window {
                     create_pixmap();
                     create_graphics_exposure_gc();
                     xcb_rectangle_t rect = {0, 0, _width, _height};
-                    xcb_poly_fill_rectangle
-                    (
+                    xcb_poly_fill_rectangle(
                         conn, 
                         pixmap, 
                         gc, 
@@ -1832,9 +1700,7 @@ class window {
                     int x = (_width - newWidth) / 2;
                     int y = (_height - newHeight) / 2;
 
-                    // Put the scaled image onto the pixmap at the calculated position
-                    xcb_image_put
-                    (
+                    xcb_image_put( // Put the scaled image onto the pixmap at the calculated position
                         conn, 
                         pixmap, 
                         gc, 
@@ -1844,9 +1710,7 @@ class window {
                         0
                     );
 
-                    // Set the pixmap as the background of the window
-                    xcb_change_window_attributes
-                    (
+                    xcb_change_window_attributes( // Set the pixmap as the background of the window
                         conn,
                         _window,
                         XCB_CW_BACK_PIXMAP,
@@ -1894,21 +1758,16 @@ class window {
             void grab_keys(std::initializer_list<std::pair<const uint32_t, const uint16_t>> bindings) {
                 xcb_key_symbols_t * keysyms = xcb_key_symbols_alloc(conn);
             
-                if (!keysyms) 
-                {
+                if (!keysyms) {
                     log_error("keysyms could not get initialized");
                     return;
                 }
 
-                for (const auto & binding : bindings) 
-                {
+                for (const auto & binding : bindings) {
                     xcb_keycode_t * keycodes = xcb_key_symbols_get_keycode(keysyms, binding.first);
-                    if (keycodes)
-                    {
-                        for (auto * kc = keycodes; * kc; kc++) 
-                        {
-                            xcb_grab_key
-                            (
+                    if (keycodes) {
+                        for (auto * kc = keycodes; * kc; kc++) {
+                            xcb_grab_key(
                                 conn,
                                 1,
                                 _window,
@@ -1926,8 +1785,7 @@ class window {
                 xcb_flush(conn); 
             }
             void grab_keys_for_typing() {
-                grab_keys(
-                {
+                grab_keys({
                     { A,   NULL  },
                     { B,   NULL  },
                     { C,   NULL  },
@@ -1993,12 +1851,10 @@ class window {
         ;
         public: // buttons
             void grab_button(std::initializer_list<std::pair<const uint8_t, const uint16_t>> bindings) {
-                for (const auto & binding : bindings)
-                {
+                for (const auto & binding : bindings) {
                     const uint8_t & button = binding.first;
                     const uint16_t & modifier = binding.second;
-                    xcb_grab_button
-                    (
+                    xcb_grab_button(
                         conn, 
                         1, 
                         _window, 
@@ -2014,12 +1870,10 @@ class window {
                 }
             }
             void ungrab_button(std::initializer_list<std::pair<const uint8_t, const uint16_t>> bindings) {
-                for (const auto & binding : bindings)
-                {
+                for (const auto & binding : bindings) {
                     const uint8_t & button = binding.first;
                     const uint16_t & modifier = binding.second;
-                    xcb_ungrab_button
-                    (
+                    xcb_ungrab_button(
                         conn,
                         button,
                         _window,
@@ -2055,8 +1909,7 @@ class window {
         private: // main functions 
             void make_window() {
                 _window = xcb_generate_id(conn);
-                xcb_create_window
-                (
+                xcb_create_window(
                     conn,
                     _depth,
                     _window,
@@ -2074,8 +1927,7 @@ class window {
                 xcb_flush(conn);
             }
             void clear_window() {
-                xcb_clear_area
-                (
+                xcb_clear_area(
                     conn, 
                     0,
                     _window,
@@ -2104,8 +1956,7 @@ class window {
              * 
              */
             void config_window(const uint16_t & mask, const uint16_t & value) {
-                xcb_configure_window
-                (
+                xcb_configure_window(
                     conn,
                     _window,
                     mask,
@@ -2116,14 +1967,12 @@ class window {
                 );
             }
             void config_window(uint32_t mask, const std::vector<uint32_t> & values) {
-                if (values.empty()) 
-                {
+                if (values.empty()) {
                     log_error("values vector is empty");
                     return;
                 }
 
-                xcb_configure_window
-                (
+                xcb_configure_window(
                     conn,
                     _window,
                     mask,
@@ -2132,8 +1981,7 @@ class window {
             }
         ;
         void send_event(xcb_client_message_event_t ev) {
-            xcb_send_event
-            (
+            xcb_send_event(
                 conn,
                 0,
                 _window,
@@ -2142,7 +1990,7 @@ class window {
             );
         }
         xcb_client_message_event_t make_client_message_event(const uint32_t & format, const uint32_t & type, const uint32_t & data) {
-            xcb_client_message_event_t ev = {0};
+            xcb_client_message_event_t ev = { 0 };
             ev.response_type = XCB_CLIENT_MESSAGE;
             ev.window = _window;
             ev.format = format;
@@ -2155,8 +2003,7 @@ class window {
         }
         private: // pointer functions 
             const char * pointer_from_enum(CURSOR CURSOR) {
-                switch (CURSOR) 
-                {
+                switch (CURSOR) {
                     case CURSOR::arrow: return "arrow";
                     case CURSOR::hand1: return "hand1";
                     case CURSOR::hand2: return "hand2";
@@ -2207,15 +2054,13 @@ class window {
                 void create_graphics_exposure_gc() {
                     gc = xcb_generate_id(conn);
                     uint32_t mask = XCB_GC_FOREGROUND | XCB_GC_BACKGROUND | XCB_GC_GRAPHICS_EXPOSURES;
-                    uint32_t values[3] =
-                    {
+                    uint32_t values[3] = {
                         screen->black_pixel,
                         screen->white_pixel,
                         0
                     };
 
-                    xcb_create_gc
-                    (
+                    xcb_create_gc(
                         conn,
                         gc,
                         _window,
@@ -2227,14 +2072,12 @@ class window {
                 void create_font_gc(const COLOR & text_color, const COLOR & backround_color, xcb_font_t font) {
                     font_gc = xcb_generate_id(conn);
 
-                    xcb_create_gc
-                    (
+                    xcb_create_gc(
                         conn, 
                         font_gc, 
                         _window, 
                         XCB_GC_FOREGROUND | XCB_GC_BACKGROUND | XCB_GC_FONT, 
-                        (const uint32_t[3])
-                        {
+                        (const uint32_t[3]) {
                             get_color(text_color),
                             get_color(backround_color),
                             font
@@ -2245,8 +2088,7 @@ class window {
             private: // pixmap functions 
                 void create_pixmap() {
                     pixmap = xcb_generate_id(conn);
-                    xcb_create_pixmap
-                    (
+                    xcb_create_pixmap(
                         conn, 
                         screen->root_depth, 
                         pixmap, 
@@ -2263,31 +2105,27 @@ class window {
                     int height = bitmap.size();
 
                     FILE *fp = fopen(file_name, "wb");
-                    if (!fp)
-                    {
+                    if (!fp) {
                         log_error("Failed to open file: " + std::string(file_name));
                         return;
                     }
 
                     png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-                    if (!png_ptr)
-                    {
+                    if (!png_ptr) {
                         fclose(fp);
                         log_error("Failed to create PNG write struct");
                         return;
                     }
 
                     png_infop info_ptr = png_create_info_struct(png_ptr);
-                    if (!info_ptr)
-                    {
+                    if (!info_ptr) {
                         fclose(fp);
                         png_destroy_write_struct(&png_ptr, NULL);
                         log_error("Failed to create PNG info struct");
                         return;
                     }
 
-                    if (setjmp(png_jmpbuf(png_ptr))) 
-                    {
+                    if (setjmp(png_jmpbuf(png_ptr))) {
                         fclose(fp);
                         png_destroy_write_struct(&png_ptr, &info_ptr);
                         log_error("Error during PNG creation");
@@ -2300,10 +2138,8 @@ class window {
 
                     // Write bitmap to PNG
                     png_bytep row = new png_byte[width];
-                    for (int y = 0; y < height; y++) 
-                    {
-                        for (int x = 0; x < width; x++) 
-                        {
+                    for (int y = 0; y < height; y++) {
+                        for (int x = 0; x < width; x++) {
                             row[x] = bitmap[y][x] ? 0xFF : 0x00;
                         }
                         png_write_row(png_ptr, row);
@@ -2319,8 +2155,7 @@ class window {
         ;
         private: // get functions 
             xcb_atom_t atom(const char * atom_name) {
-                xcb_intern_atom_cookie_t cookie = xcb_intern_atom
-                (
+                xcb_intern_atom_cookie_t cookie = xcb_intern_atom(
                     conn, 
                     0, 
                     strlen(atom_name), 
@@ -2328,9 +2163,7 @@ class window {
                 );
                 
                 xcb_intern_atom_reply_t * reply = xcb_intern_atom_reply(conn, cookie, NULL);
-                
-                if (!reply) 
-                {
+                if (!reply) {
                     log_error("could not get atom");
                     return XCB_ATOM_NONE;
                 } 
@@ -2343,8 +2176,7 @@ class window {
                 xcb_get_atom_name_cookie_t cookie = xcb_get_atom_name(conn, atom);
                 xcb_get_atom_name_reply_t* reply = xcb_get_atom_name_reply(conn, cookie, nullptr);
 
-                if (!reply) 
-                {
+                if (!reply) {
                     log_error("reply is nullptr.");
                     return "";
                 }
@@ -2359,8 +2191,7 @@ class window {
             }
             void get_font(const char * font_name) {
                 font = xcb_generate_id(conn);
-                xcb_open_font
-                (
+                xcb_open_font(
                     conn, 
                     font, 
                     strlen(font_name),
@@ -2371,13 +2202,11 @@ class window {
         ;
         private: // backround functions 
             void change_back_pixel(const uint32_t & pixel) {
-                xcb_change_window_attributes
-                (
+                xcb_change_window_attributes(
                     conn,
                     _window,
                     XCB_CW_BACK_PIXEL,
-                    (const uint32_t[1])
-                    {
+                    (const uint32_t[1]) {
                         pixel
                     }
                 );
@@ -2387,11 +2216,9 @@ class window {
                 uint32_t pixel = 0;
                 xcb_colormap_t colormap = screen->default_colormap;
                 rgb_color_code color_code = rgb_code(color);
-                xcb_alloc_color_reply_t * reply = xcb_alloc_color_reply
-                (
+                xcb_alloc_color_reply_t * reply = xcb_alloc_color_reply(
                     conn, 
-                    xcb_alloc_color
-                    (
+                    xcb_alloc_color(
                         conn,
                         colormap,
                         _scale::from_8_to_16_bit(color_code.r), 
@@ -2407,11 +2234,9 @@ class window {
             uint32_t get_color(const uint16_t & red_value, const uint16_t & green_value, const uint16_t & blue_value) {
                 uint32_t pixel = 0;
                 xcb_colormap_t colormap = screen->default_colormap;
-                xcb_alloc_color_reply_t * reply = xcb_alloc_color_reply
-                (
+                xcb_alloc_color_reply_t * reply = xcb_alloc_color_reply(
                     conn, 
-                    xcb_alloc_color
-                    (
+                    xcb_alloc_color(
                         conn,
                         colormap,
                         red_value, 
@@ -2427,11 +2252,9 @@ class window {
             uint32_t get_color(const uint8_t & red_value, const uint8_t & green_value, const uint8_t & blue_value) {
                 uint32_t pixel = 0;
                 xcb_colormap_t colormap = screen->default_colormap;
-                xcb_alloc_color_reply_t * reply = xcb_alloc_color_reply
-                (
+                xcb_alloc_color_reply_t * reply = xcb_alloc_color_reply(
                     conn, 
-                    xcb_alloc_color
-                    (
+                    xcb_alloc_color(
                         conn,
                         colormap,
                         _scale::from_8_to_16_bit(red_value), 
@@ -2450,72 +2273,55 @@ class window {
                 uint8_t g;
                 uint8_t b;
                 
-                switch (COLOR) 
-                {
+                switch (COLOR) {
                     case COLOR::WHITE:
                         r = 255; g = 255; b = 255;
                         break;
-                    ;
                     case COLOR::BLACK:
                         r = 0; g = 0; b = 0;
                         break;
-                    ;
                     case COLOR::RED:
                         r = 255; g = 0; b = 0;
                         break;
-                    ;
                     case COLOR::GREEN:
                         r = 0; g = 255; b = 0;
                         break;
-                    ;
                     case COLOR::BLUE:
                         r = 0; g = 0; b = 255;
                         break;
-                    ;
                     case COLOR::YELLOW:
                         r = 255; g = 255; b = 0;
                         break;
-                    ;
                     case COLOR::CYAN:
                         r = 0; g = 255; b = 255;
                         break;
-                    ;
                     case COLOR::MAGENTA:
                         r = 255; g = 0; b = 255;
                         break;
-                    ;
                     case COLOR::GREY:
                         r = 128; g = 128; b = 128;
                         break;
-                    ;
                     case COLOR::LIGHT_GREY:
                         r = 192; g = 192; b = 192;
                         break;
-                    ;
                     case COLOR::DARK_GREY:
                         r = 64; g = 64; b = 64;
                         break;
-                    ;
                     case COLOR::ORANGE:
                         r = 255; g = 165; b = 0;
                         break;
-                    ;
                     case COLOR::PURPLE:
                         r = 128; g = 0; b = 128;
                         break;
-                    ;
                     case COLOR::BROWN:
                         r = 165; g = 42; b = 42;
                         break;
-                    ;
                     case COLOR::PINK:
                         r = 255; g = 192; b = 203;
                         break;
-                    ;
                     default:
                         r = 0; g = 0; b = 0; 
                         break;
-                    ;
                 }
 
                 color.r = r;
@@ -2529,7 +2335,7 @@ class window {
 class client {
     public: // subclasses
         class client_border_decor {
-            public:    
+            public:
                 window left;
                 window right;
                 window top;
@@ -2572,8 +2378,7 @@ class client {
                 make_max_button();
                 make_min_button();
                 
-                if (BORDER_SIZE > 0)
-                {
+                if (BORDER_SIZE > 0) {
                     make_borders();
                 }
             }
@@ -2910,19 +2715,15 @@ class Key_Codes {
         Key_Codes() 
         : keysyms(nullptr) {}
 
-        ~Key_Codes()
-        {
+        ~Key_Codes() {
             free(keysyms);
         }
     ;
     public: // methods
-        void init()
-        {
+        void init() {
             keysyms = xcb_key_symbols_alloc(conn);
-            if (keysyms)
-            {
-                std::map<uint32_t, xcb_keycode_t *> key_map = 
-                {
+            if (keysyms) {
+                std::map<uint32_t, xcb_keycode_t *> key_map = {
                     { A,            &a         },
                     { B,            &b         },
                     { C,            &c         },
@@ -2965,15 +2766,12 @@ class Key_Codes {
                     { U_ARROW,      &u_arrow   },
                     { D_ARROW,      &d_arrow   },
                     { TAB,          &tab       },
-                    { K,            &k         },
-
+                    { K,            &k         }
                 };
                 
-                for (auto &pair : key_map) 
-                {
+                for (auto &pair : key_map) {
                     xcb_keycode_t * keycode = xcb_key_symbols_get_keycode(keysyms, pair.first);
-                    if (keycode) 
-                    {
+                    if (keycode) {
                         * (pair.second) = * keycode;
                         free(keycode);
                     }
@@ -2982,7 +2780,7 @@ class Key_Codes {
         }
     ;
     public: // variabels
-        xcb_keycode_t 
+        xcb_keycode_t
             a{},
             b{},
             c{},
@@ -3040,34 +2838,19 @@ class Entry {
         bool menu = false;
     ;
     public: // public methods
-        void
-        add_name(const char * name)
-        {
+        void add_name(const char * name) {
             entryName = name;
         }
-
-        void
-        add_action(std::function<void()> action)
-        {
+        void add_action(std::function<void()> action) {
             entryAction = action;
         }
-
-        void 
-        activate() const 
-        {
-            LOG_func
+        void activate() const {
             entryAction();
         }
-
-        const char * 
-        getName() const 
-        {
+        const char * getName() const {
             return entryName;
         }
-
-        void 
-        make_window(const xcb_window_t & parent_window, const int16_t & x, const int16_t & y, const uint16_t & width, const uint16_t & height)
-        {
+        void make_window(const xcb_window_t & parent_window, const int16_t & x, const int16_t & y, const uint16_t & width, const uint16_t & height) {
             window.create_default(parent_window, x, y, width, height);
             window.set_backround_color(BLACK);
             uint32_t mask = XCB_EVENT_MASK_POINTER_MOTION | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW;
@@ -3083,8 +2866,7 @@ class Entry {
 };
 class context_menu {
     public: // consructor
-        context_menu()
-        {
+        context_menu() {
             size_pos.x      = pointer.x();
             size_pos.y      = pointer.y();
             size_pos.width  = 120;
@@ -3099,23 +2881,19 @@ class context_menu {
         }
     ;
     public: // public methods
-        void init()
-        {
+        void init() {
             configure_events();
         }
-        void show()
-        {
+        void show() {
             size_pos.x = pointer.x();
             size_pos.y = pointer.y();
             
             uint32_t height = entries.size() * size_pos.height;
-            if (size_pos.y + height > screen->height_in_pixels)
-            {
+            if (size_pos.y + height > screen->height_in_pixels) {
                 size_pos.y = (screen->height_in_pixels - height);
             }
 
-            if (size_pos.x + size_pos.width > screen->width_in_pixels)
-            {
+            if (size_pos.x + size_pos.width > screen->width_in_pixels) {
                 size_pos.x = (screen->width_in_pixels - size_pos.width);
             }
 
@@ -3124,8 +2902,7 @@ class context_menu {
             context_window.raise();
             make_entries();
         }
-        void add_entry(const char * name, std::function<void()> action)
-        {
+        void add_entry(const char * name, std::function<void()> action) {
             Entry entry;
             entry.add_name(name);
             entry.add_action(action);
@@ -3143,55 +2920,42 @@ class context_menu {
         Launcher launcher;
     ;
     private: // private methods
-        void create_dialog_win()
-        {
+        void create_dialog_win() {
             context_window.create_default(screen->root, 0, 0, size_pos.width, size_pos.height);
             uint32_t mask = XCB_EVENT_MASK_FOCUS_CHANGE | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY | XCB_EVENT_MASK_POINTER_MOTION;
             context_window.apply_event_mask(& mask);
             context_window.set_backround_color(DARK_GREY);
             context_window.raise();
         }
-        void hide()
-        {
+        void hide() {
             context_window.unmap();
             context_window.kill();
         }
-        void configure_events()
-        {
-            event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) 
-            {
+        void configure_events() {
+            event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) {
                 const auto & e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
-                if (e->detail == L_MOUSE_BUTTON)
-                {
+                if (e->detail == L_MOUSE_BUTTON) {
                     run_action(& e->event);
                     hide();
                 }
             });
-
-            event_handler->setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev)
-            {
+            event_handler->setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev) {
                 const auto * e = reinterpret_cast<const xcb_enter_notify_event_t *>(ev);
-                if (e->event == screen->root)
-                {
+                if (e->event == screen->root) {
                     hide();
                 } 
             });
         }
-        void run_action(const xcb_window_t * w) 
-        {
-            for (const auto & entry : entries)
-            {
-                if (* w == entry.window)
-                {
+        void run_action(const xcb_window_t * w) {
+            for (const auto & entry : entries) {
+                if (* w == entry.window) {
                     entry.activate();
                 }
             }
         }
-        void make_entries()
-        {
+        void make_entries() {
             int y = 0;
-            for (auto & entry : entries)
-            {
+            for (auto & entry : entries) {
                 entry.make_window(context_window, (0 + (BORDER_SIZE / 2)), (y + (BORDER_SIZE / 2)), (size_pos.width - BORDER_SIZE), (size_pos.height - BORDER_SIZE));
                 entry.window.draw_text(entry.getName(), WHITE, BLACK, "7x14", 2, 14);
                 y += size_pos.height;
@@ -3241,8 +3005,7 @@ class Window_Manager {
                 create_new_desktop(5);
 
                 context_menu = new class context_menu();
-                context_menu->add_entry
-                (   
+                context_menu->add_entry(   
                     "konsole",
                     [this]() 
                     {
@@ -3252,8 +3015,7 @@ class Window_Manager {
                 context_menu->init();
             }
             void launch_program(char * program) {
-                if (fork() == 0) 
-                {
+                if (fork() == 0) {
                     setsid();
                     execvp(program, (char *[]) { program, NULL });
                 }
@@ -3270,8 +3032,7 @@ class Window_Manager {
         public: // client methods 
             public: // focus methods 
                 void focus_client(client * c) {
-                    if (!c)
-                    {
+                    if (!c) {
                         log_error("c is null");
                         return;
                     }
@@ -3298,18 +3059,15 @@ class Window_Manager {
             ;
             public: // client fetch methods
                 client * client_from_window(const xcb_window_t * window) {
-                    for (const auto & c : client_list) 
-                    {
-                        if (* window == c->win) 
-                        {
+                    for (const auto & c : client_list) {
+                        if (* window == c->win) {
                             return c;
                         }
                     }
                     return nullptr;
                 }
                 client * client_from_any_window(const xcb_window_t * window) {
-                    for (const auto & c : client_list) 
-                    {
+                    for (const auto & c : client_list) {
                         if (* window == c->win 
                          || * window == c->frame 
                          || * window == c->titlebar 
@@ -3333,29 +3091,17 @@ class Window_Manager {
                 client * client_from_pointer(const int & prox) {
                     const uint32_t & x = pointer.x();
                     const uint32_t & y = pointer.y();
-                    for (const auto & c : cur_d->current_clients)
-                    {
-                        // LEFT EDGE OF CLIENT
-                        if (x > c->x - prox && x <= c->x)
-                        {
+                    for (const auto & c : cur_d->current_clients) {
+                        if (x > c->x - prox && x <= c->x) { // LEFT EDGE OF CLIENT
                             return c;
                         }
-
-                        // RIGHT EDGE OF CLIENT
-                        if (x >= c->x + c->width && x < c->x + c->width + prox)
-                        {
+                        if (x >= c->x + c->width && x < c->x + c->width + prox) { // RIGHT EDGE OF CLIENT
                             return c;
                         }
-
-                        // TOP EDGE OF CLIENT
-                        if (y > c->y - prox && y <= c->y)
-                        {
+                        if (y > c->y - prox && y <= c->y) { // TOP EDGE OF CLIENT
                             return c;
                         }
-
-                        // BOTTOM EDGE OF CLIENT
-                        if (y >= c->y + c->height && y < c->y + c->height + prox)
-                        {
+                        if (y >= c->y + c->height && y < c->y + c->height + prox) { // BOTTOM EDGE OF CLIENT
                             return c;
                         }
                     }
@@ -3363,44 +3109,31 @@ class Window_Manager {
                 }
                 std::map<client *, edge> get_client_next_to_client(client * c, edge c_edge) {
                     std::map<client *, edge> map;
-                    for (client * c2 : cur_d->current_clients)
-                    {
-                        if (c == c2)
-                        {
+                    for (client * c2 : cur_d->current_clients) {
+                        if (c == c2) {
                             continue;
                         }
 
-                        if (c_edge == edge::LEFT)
-                        {
-                            if (c->x == c2->x + c2->width)
-                            {
+                        if (c_edge == edge::LEFT) {
+                            if (c->x == c2->x + c2->width) {
                                 map[c2] = edge::RIGHT;
                                 return map;
                             }
                         }
-                        
-                        if (c_edge == edge::RIGHT)
-                        {
-                            if (c->x + c->width == c2->x)
-                            {
+                        if (c_edge == edge::RIGHT) {
+                            if (c->x + c->width == c2->x) {
                                 map[c2] = edge::LEFT;
                                 return map;
                             }
                         }
-                        
-                        if (c_edge == edge::TOP)
-                        {
-                            if (c->y == c2->y + c2->height)
-                            {
+                        if (c_edge == edge::TOP) {
+                            if (c->y == c2->y + c2->height) {
                                 map[c2] = edge::BOTTOM_edge;
                                 return map;
                             }
                         }
-
-                        if (c_edge == edge::BOTTOM_edge)
-                        {
-                            if (c->y + c->height == c2->y)
-                            {
+                        if (c_edge == edge::BOTTOM_edge) {
+                            if (c->y + c->height == c2->y) {
                                 map[c2] = edge::TOP;
                                 return map;
                             }
@@ -3419,59 +3152,36 @@ class Window_Manager {
                     const uint32_t & left_border = c->x;
                     const uint32_t & right_border = (c->x + c->width);
 
-                    // TOP EDGE OF CLIENT
-                    if (((y > top_border - prox) && (y <= top_border))
-                     && ((x > left_border + prox) && (x < right_border - prox)))
-                    {
+                    if (((y > top_border - prox) && (y <= top_border)) // TOP EDGE OF CLIENT
+                     && ((x > left_border + prox) && (x < right_border - prox))) {
                         return edge::TOP;
                     }
-
-                    // BOTTOM EDGE OF CLIENT
-                    if (((y >= bottom_border) && (y < bottom_border + prox))
-                     && ((x > left_border + prox) && (x < right_border - prox)))
-                    {
+                    if (((y >= bottom_border) && (y < bottom_border + prox)) // BOTTOM EDGE OF CLIENT
+                     && ((x > left_border + prox) && (x < right_border - prox))) {
                         return edge::BOTTOM_edge;
                     }
-
-                    // LEFT EDGE OF CLIENT
-                    if (((x > left_border) - prox && (x <= left_border))
-                     && ((y > top_border + prox) && (y < bottom_border - prox)))
-                    {
+                    if (((x > left_border) - prox && (x <= left_border)) // LEFT EDGE OF CLIENT
+                     && ((y > top_border + prox) && (y < bottom_border - prox))) {
                         return edge::LEFT;
                     }
-
-                    // RIGHT EDGE OF CLIENT
-                    if (((x >= right_border) && (x < right_border + prox))
-                     && ((y > top_border + prox) && (y < bottom_border - prox)))
-                    {
+                    if (((x >= right_border) && (x < right_border + prox)) // RIGHT EDGE OF CLIENT
+                     && ((y > top_border + prox) && (y < bottom_border - prox))) {
                         return edge::RIGHT;
                     }
-
-                    // TOP LEFT CORNER OF CLIENT
-                    if (((x > left_border - prox) && x < left_border + prox)
-                     && ((y > top_border - prox) && y < top_border + prox))
-                    {
+                    if (((x > left_border - prox) && x < left_border + prox) // TOP LEFT CORNER OF CLIENT
+                     && ((y > top_border - prox) && y < top_border + prox)) {
                         return edge::TOP_LEFT;
                     }
-
-                    // TOP RIGHT CORNER OF CLIENT
-                    if (((x > right_border - prox) && x < right_border + prox)
-                     && ((y > top_border - prox) && y < top_border + prox))
-                    {
+                    if (((x > right_border - prox) && x < right_border + prox) // TOP RIGHT CORNER OF CLIENT
+                     && ((y > top_border - prox) && y < top_border + prox)) {
                         return edge::TOP_RIGHT;
                     }
-
-                    // BOTTOM LEFT CORNER OF CLIENT
-                    if (((x > left_border - prox) && x < left_border + prox)
-                     && ((y > bottom_border - prox) && y < bottom_border + prox))
-                    {
+                    if (((x > left_border - prox) && x < left_border + prox) // BOTTOM LEFT CORNER OF CLIENT
+                     && ((y > bottom_border - prox) && y < bottom_border + prox)) {
                         return edge::BOTTOM_LEFT;
                     }
-
-                    // BOTTOM RIGHT CORNER OF CLIENT
-                    if (((x > right_border - prox) && x < right_border + prox)
-                     && ((y > bottom_border - prox) && y < bottom_border + prox))
-                    {
+                    if (((x > right_border - prox) && x < right_border + prox) // BOTTOM RIGHT CORNER OF CLIENT
+                     && ((y > bottom_border - prox) && y < bottom_border + prox)) {
                         return edge::BOTTOM_RIGHT;
                     }
 
@@ -3670,8 +3380,7 @@ class Window_Manager {
                 }
             }
         ;
-        int start_screen_window()
-        {
+        int start_screen_window() {
             start_window.create_default(root, 0, 0, 0, 0);
             start_window.set_backround_color(DARK_GREY);
             start_window.map();
@@ -3679,8 +3388,7 @@ class Window_Manager {
         }
         private: // delete functions 
             void delete_client_vec(std::vector<client *> & vec) {
-                for (client * c : vec)
-                {
+                for (client * c : vec) {
                     send_sigterm_to_client(c);
                     xcb_flush(conn);                    
                 }
@@ -3690,8 +3398,7 @@ class Window_Manager {
                 std::vector<client *>().swap(vec);
             }
             void delete_desktop_vec(std::vector<desktop *> & vec) {
-                for (desktop * d : vec)
-                {
+                for (desktop * d : vec) {
                     delete_client_vec(d->current_clients);
                     delete d;
                 }
@@ -3702,8 +3409,7 @@ class Window_Manager {
             }
             template <typename Type> 
             static void delete_ptr_vector(std::vector<Type *>& vec) {
-                for (Type * ptr : vec) 
-                {
+                for (Type * ptr : vec) {
                     delete ptr;
                 }
                 vec.clear();
@@ -3716,8 +3422,7 @@ class Window_Manager {
                 delete c;
             }
             void remove_client_from_vector(client * c, std::vector<client *> & vec) {
-                if (!c)
-                {
+                if (!c) {
                     log_error("client is nullptr.");
                 }
                 vec.erase(std::remove(vec.begin(), vec.end(), c), vec.end());
@@ -3770,8 +3475,7 @@ class Window_Manager {
                 xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
                 xcb_get_geometry_reply_t* geometry_reply = xcb_get_geometry_reply(conn, geometry_cookie, NULL);
 
-                if (geometry_reply != NULL) 
-                {
+                if (geometry_reply != NULL) {
                     log_info("Window Parameters");
                     log_info(std::to_string(geometry_reply->x));
                     log_info(std::to_string(geometry_reply->y));
@@ -3779,19 +3483,17 @@ class Window_Manager {
                     log_info(std::to_string(geometry_reply->height));
 
                     free(geometry_reply);
-                } 
-                else 
-                {
+                } else {
                     std::cerr << "Unable to get window geometry." << std::endl;
                 }
             }
             void get_window_parameters(const uint32_t & window, int16_t * x, int16_t * y, uint16_t * width, uint16_t * height) {
                 xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
                 xcb_get_geometry_reply_t* geometry_reply = xcb_get_geometry_reply(conn, geometry_cookie, NULL);
-                if (!geometry_reply) 
-                {
+                if (!geometry_reply) {
                     log_error("unable to get window parameters for window: " + std::to_string(window));
                 }
+
                 x = &geometry_reply->x;
                 y = &geometry_reply->y;
                 width = &geometry_reply->width;
@@ -3802,9 +3504,7 @@ class Window_Manager {
             int16_t get_window_x(const uint32_t & window) {
                 xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
                 xcb_get_geometry_reply_t* geometry_reply = xcb_get_geometry_reply(conn, geometry_cookie, NULL);
-
-                if (!geometry_reply) 
-                {
+                if (!geometry_reply) {
                     log_error("Unable to get window geometry.");
                     return (screen->width_in_pixels / 2);
                 } 
@@ -3816,9 +3516,7 @@ class Window_Manager {
             int16_t get_window_y(const uint32_t & window) {
                 xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
                 xcb_get_geometry_reply_t* geometry_reply = xcb_get_geometry_reply(conn, geometry_cookie, NULL);
-
-                if (!geometry_reply) 
-                {
+                if (!geometry_reply) {
                     log_error("Unable to get window geometry.");
                     return (screen->height_in_pixels / 2);
                 } 
@@ -3852,8 +3550,8 @@ class Mwm_Animator {
             stopAnimations();
         }
     ;
-    public: // methods
-        void animate(int startX, int startY, int startWidth, int startHeight, int endX, int endY, int endWidth, int endHeight, int duration) /**
+    public: // methods 
+        /**
          * @brief Animates the position and size of an object from a starting point to an ending point.
          * 
          * @param startX The starting X coordinate.
@@ -3866,9 +3564,8 @@ class Mwm_Animator {
          * @param endHeight The ending height.
          * @param duration The duration of the animation in milliseconds.
          */
-        {
-            /* ENSURE ANY EXISTING ANIMATION IS STOPPED */
-            stopAnimations();
+        void animate(int startX, int startY, int startWidth, int startHeight, int endX, int endY, int endWidth, int endHeight, int duration) {
+            stopAnimations(); // ENSURE ANY EXISTING ANIMATION IS STOPPED
             
             /* INITILIZE CLASS VARIABELS WITH INPUT VALUES */
             currentX      = startX;
@@ -3911,14 +3608,10 @@ class Mwm_Animator {
             WAnimationThread = std::thread(&Mwm_Animator::WAnimation, this, endWidth);
             HAnimationThread = std::thread(&Mwm_Animator::HAnimation, this, endHeight);
 
-            /* WAIT FOR ANIMATION TO COMPLETE */
-            std::this_thread::sleep_for(std::chrono::milliseconds(duration));
-
-            /* STOP THE ANIMATION */
-            stopAnimations();
+            std::this_thread::sleep_for(std::chrono::milliseconds(duration)); // WAIT FOR ANIMATION TO COMPLETE
+            stopAnimations(); // STOP THE ANIMATION
         }
-        void animate_client(int startX, int startY, int startWidth, int startHeight, int endX, int endY, int endWidth, int endHeight, int duration)
-        {
+        void animate_client(int startX, int startY, int startWidth, int startHeight, int endX, int endY, int endWidth, int endHeight, int duration) {
             /* ENSURE ANY EXISTING ANIMATION IS STOPPED */
             stopAnimations();
             
@@ -3971,13 +3664,11 @@ class Mwm_Animator {
             /* STOP THE ANIMATION */
             stopAnimations();
         }
-        enum DIRECTION 
-        {
+        enum DIRECTION {
             NEXT,
             PREV
         };
-        void animate_client_x(int startX, int endX, int duration)
-        {
+        void animate_client_x(int startX, int endX, int duration) {
             /* ENSURE ANY EXISTING ANIMATION IS STOPPED */
             stopAnimations();
             
@@ -4053,7 +3744,7 @@ class Mwm_Animator {
         const double frameDuration = 1000.0 / frameRate; 
     ;
     private: // funcrions
-        void XAnimation(const int & endX) /**
+        /**
          *
          * @brief Performs animation on window 'x' position until the specified 'endX' is reached.
          * 
@@ -4064,12 +3755,10 @@ class Mwm_Animator {
          * @param endX The desired 'x' position of the window.
          *
          */
-        {
+        void XAnimation(const int & endX) {
             XlastUpdateTime = std::chrono::high_resolution_clock::now();
-            while (true) 
-            {
-                if (currentX == endX) 
-                {
+            while (true) {
+                if (currentX == endX) {
                     config_window(XCB_CONFIG_WINDOW_X, endX);
                     break;
                 }
@@ -4077,7 +3766,7 @@ class Mwm_Animator {
                 thread_sleep(XAnimDuration);
             }
         }
-        void XStep() /**
+        /**
          * @brief Performs a step in the X direction.
          * 
          * This function increments the currentX variable by the stepX value.
@@ -4085,25 +3774,22 @@ class Mwm_Animator {
          * 
          * @note This function assumes that the connection and window variables are properly initialized.
          */
-        {
+        void XStep() {
             currentX += stepX;
             
-            if (XisTimeToRender())
-            {
-                xcb_configure_window
-                (
+            if (XisTimeToRender()) {
+                xcb_configure_window(
                     conn,
                     window,
                     XCB_CONFIG_WINDOW_X,
-                    (const uint32_t[1])
-                    {
+                    (const uint32_t[1]) {
                         static_cast<const uint32_t &>(currentX)
                     }
                 );
                 xcb_flush(conn);
             }
         }
-        void YAnimation(const int & endY) /**
+        /**
          *
          * @brief Performs animation on window 'y' position until the specified 'endY' is reached.
          * 
@@ -4114,12 +3800,10 @@ class Mwm_Animator {
          * @param endY The desired 'y' positon of the window.
          *
          */
-        {
+        void YAnimation(const int & endY) {
             YlastUpdateTime = std::chrono::high_resolution_clock::now();
-            while (true) 
-            {
-                if (currentY == endY) 
-                {
+            while (true) {
+                if (currentY == endY) {
                     config_window(XCB_CONFIG_WINDOW_Y, endY);
                     break;
                 }
@@ -4127,32 +3811,29 @@ class Mwm_Animator {
                 thread_sleep(YAnimDuration);
             }
         }
-        void YStep() /**
+        /**
          * @brief Performs a step in the Y direction.
          * 
          * This function increments the currentY variable by the stepY value.
          * If it is time to render, it configures the window's Y position using xcb_configure_window
          * and flushes the connection using xcb_flush.
          */
-        {
+        void YStep() {
             currentY += stepY;
             
-            if (YisTimeToRender())
-            {
-                xcb_configure_window
-                (
+            if (YisTimeToRender()) {
+                xcb_configure_window(
                     conn,
                     window,
                     XCB_CONFIG_WINDOW_Y,
-                    (const uint32_t[1])
-                    {
+                    (const uint32_t[1]) {
                         static_cast<const uint32_t &>(currentY)
                     }
                 );
                 xcb_flush(conn);
             }
         }
-        void WAnimation(const int & endWidth) /**
+        /**
          *
          * @brief Performs a 'width' animation until the specified end 'width' is reached.
          * 
@@ -4163,12 +3844,10 @@ class Mwm_Animator {
          * @param endWidth The desired 'width' of the window.
          *
          */
-        {
+        void WAnimation(const int & endWidth) {
             WlastUpdateTime = std::chrono::high_resolution_clock::now();
-            while (true) 
-            {
-                if (currentWidth == endWidth) 
-                {
+            while (true) {
+                if (currentWidth == endWidth) {
                     config_window(XCB_CONFIG_WINDOW_WIDTH, endWidth);
                     break;
                 }
@@ -4176,7 +3855,7 @@ class Mwm_Animator {
                 thread_sleep(WAnimDuration);
             }
         }
-        void WStep() /**
+        /**
          *
          * @brief Performs a step in the width calculation and updates the window width if it is time to render.
          * 
@@ -4184,25 +3863,22 @@ class Mwm_Animator {
          * using the XCB library and flushes the connection.
          *
          */
-        {
+        void WStep() {
             currentWidth += stepWidth;
 
-            if (WisTimeToRender())
-            {
-                xcb_configure_window
-                (
+            if (WisTimeToRender()) {
+                xcb_configure_window(
                     conn,
                     window,
                     XCB_CONFIG_WINDOW_WIDTH,
-                    (const uint32_t[1])
-                    {
+                    (const uint32_t[1]) {
                         static_cast<const uint32_t &>(currentWidth) 
                     }
                 );
                 xcb_flush(conn);
             }
         }
-        void HAnimation(const int & endHeight) /**
+        /**
          *
          * @brief Performs a 'height' animation until the specified end 'height' is reached.
          * 
@@ -4213,12 +3889,10 @@ class Mwm_Animator {
          * @param endWidth The desired 'height' of the window.
          *
          */
-        {
+        void HAnimation(const int & endHeight) {
             HlastUpdateTime = std::chrono::high_resolution_clock::now();
-            while (true) 
-            {
-                if (currentHeight == endHeight) 
-                {
+            while (true) {
+                if (currentHeight == endHeight) {
                     config_window(XCB_CONFIG_WINDOW_HEIGHT, endHeight);
                     break;
                 }
@@ -4226,7 +3900,7 @@ class Mwm_Animator {
                 thread_sleep(HAnimDuration);
             }
         }
-        void HStep() /**
+        /**
          *
          * @brief Increases the current height by the step height and updates the window height if it's time to render.
          * 
@@ -4235,30 +3909,24 @@ class Mwm_Animator {
          * flush the changes to the X server.
          *
          */
-        {
+        void HStep() {
             currentHeight += stepHeight;
             
-            if (HisTimeToRender())
-            {
-                xcb_configure_window
-                (
+            if (HisTimeToRender()) {
+                xcb_configure_window(
                     conn,
                     window,
                     XCB_CONFIG_WINDOW_HEIGHT,
-                    (const uint32_t[1])
-                    {
+                    (const uint32_t[1]) {
                         static_cast<const uint32_t &>(currentHeight)
                     }
                 );
                 xcb_flush(conn);
             }
         }
-        void GFrameAnimation(const int & endX, const int & endY, const int & endWidth, const int & endHeight)
-        {
-            while (true)
-            {
-                if (currentX == endX && currentY == endY && currentWidth == endWidth && currentHeight == endHeight)
-                {
+        void GFrameAnimation(const int & endX, const int & endY, const int & endWidth, const int & endHeight) {
+            while (true) {
+                if (currentX == endX && currentY == endY && currentWidth == endWidth && currentHeight == endHeight) {
                     c->x_y_width_height(currentX, currentY, currentWidth, currentHeight);
                     break;
                 }
@@ -4266,12 +3934,9 @@ class Mwm_Animator {
                 thread_sleep(GAnimDuration);
             }
         }
-        void GFrameAnimation_X(const int & endX)
-        {
-            while (true)
-            {
-                if (currentX == endX)
-                {
+        void GFrameAnimation_X(const int & endX) {
+            while (true) {
+                if (currentX == endX) {
                     conf_client_x();
                     break;
                 }
@@ -4279,7 +3944,7 @@ class Mwm_Animator {
                 thread_sleep(GAnimDuration);
             }
         }
-        void CliXAnimation(const int & endX) /**
+        /**
          *
          * @brief Performs animation on window 'x' position until the specified 'endX' is reached.
          * 
@@ -4290,19 +3955,17 @@ class Mwm_Animator {
          * @param endX The desired 'x' position of the window.
          *
          */
-        {
+        void CliXAnimation(const int & endX) {
             XlastUpdateTime = std::chrono::high_resolution_clock::now();
-            while (true) 
-            {
-                if (currentX == endX) 
-                {
+            while (true) {
+                if (currentX == endX) {
                     break;
                 }
                 currentX += stepX;
                 thread_sleep(XAnimDuration);
             }
         }
-        void CliYAnimation(const int & endY) /**
+        /**
          *
          * @brief Performs animation on window 'y' position until the specified 'endY' is reached.
          * 
@@ -4313,19 +3976,17 @@ class Mwm_Animator {
          * @param endY The desired 'y' positon of the window.
          *
          */
-        {
+        void CliYAnimation(const int & endY) {
             YlastUpdateTime = std::chrono::high_resolution_clock::now();
-            while (true) 
-            {
-                if (currentY == endY) 
-                {
+            while (true) {
+                if (currentY == endY) {
                     break;
                 }
                 currentY += stepY;
                 thread_sleep(YAnimDuration);
             }
         }
-        void CliWAnimation(const int & endWidth) /**
+        /**
          *
          * @brief Performs a 'width' animation until the specified end 'width' is reached.
          * 
@@ -4336,19 +3997,17 @@ class Mwm_Animator {
          * @param endWidth The desired 'width' of the window.
          *
          */
-        {
+        void CliWAnimation(const int & endWidth) {
             WlastUpdateTime = std::chrono::high_resolution_clock::now();
-            while (true) 
-            {
-                if (currentWidth == endWidth) 
-                {
+            while (true) {
+                if (currentWidth == endWidth) {
                     break;
                 }
                 currentWidth += stepWidth;
                 thread_sleep(WAnimDuration);
             }
         }
-        void CliHAnimation(const int & endHeight) /**
+        /**
          *
          * @brief Performs a 'height' animation until the specified end 'height' is reached.
          * 
@@ -4359,62 +4018,51 @@ class Mwm_Animator {
          * @param endWidth The desired 'height' of the window.
          *
          */
-        {
+        void CliHAnimation(const int & endHeight) {
             HlastUpdateTime = std::chrono::high_resolution_clock::now();
-            while (true) 
-            {
-                if (currentHeight == endHeight) 
-                {
+            while (true) {
+                if (currentHeight == endHeight) {
                     break;
                 }
                 currentHeight += stepHeight;
                 thread_sleep(HAnimDuration);
             }
         }
-        void stopAnimations() /**
+        /**
          *
          * @brief Stops all animations by setting the corresponding flags to true and joining the animation threads.
          *        After joining the threads, the flags are set back to false.
          *
          */
-        {
+        void stopAnimations() {
             stopHFlag.store(true);
             stopXFlag.store(true);
             stopYFlag.store(true);
             stopWFlag.store(true);
             stopHFlag.store(true);
 
-            if (GAnimationThread.joinable()) 
-            {
+            if (GAnimationThread.joinable()) {
                 GAnimationThread.join();
                 stopGFlag.store(false);
             }
-
-            if (XAnimationThread.joinable()) 
-            {
+            if (XAnimationThread.joinable()) {
                 XAnimationThread.join();
                 stopXFlag.store(false);
             }
-
-            if (YAnimationThread.joinable()) 
-            {
+            if (YAnimationThread.joinable()) {
                 YAnimationThread.join();
                 stopYFlag.store(false);
             }
-
-            if (WAnimationThread.joinable()) 
-            {
+            if (WAnimationThread.joinable()) {
                 WAnimationThread.join();
                 stopWFlag.store(false);
             }
-
-            if (HAnimationThread.joinable()) 
-            {
+            if (HAnimationThread.joinable()) {
                 HAnimationThread.join();
                 stopHFlag.store(false);
             }
         }
-        void thread_sleep(const double & milliseconds) /**
+        /**
          *
          * @brief Sleeps the current thread for the specified number of milliseconds.
          *
@@ -4425,60 +4073,49 @@ class Mwm_Animator {
          *       as this class is designed to iterate every pixel and then only update that to the X-server at the given framerate.
          *
          */
-        {
-            // Creating a duration with double milliseconds
-            auto duration = std::chrono::duration<double, std::milli>(milliseconds);
-
-            // Sleeping for the duration
-            std::this_thread::sleep_for(duration);
+        void thread_sleep(const double & milliseconds) {
+            auto duration = std::chrono::duration<double, std::milli>(milliseconds); // Creating a duration with a 'double' in milliseconds
+            std::this_thread::sleep_for(duration); // Sleeping for the duration
         }
-        bool XisTimeToRender() /**
+        /**
          *
          * Checks if it is time to render based on the elapsed time since the last update.
          * @return true if it is time to render, @return false otherwise.
          *
          */
-        {
-            // CALCULATE ELAPSED TIME SINCE THE LAST UPDATE
+        bool XisTimeToRender() {
             const auto & currentTime = std::chrono::high_resolution_clock::now();
-            const std::chrono::duration<double, std::milli> & elapsedTime = currentTime - XlastUpdateTime;
-
-            if (elapsedTime.count() >= frameDuration) 
-            {
+            const std::chrono::duration<double, std::milli> & elapsedTime = currentTime - XlastUpdateTime; // CALCULATE ELAPSED TIME SINCE THE LAST UPDATE
+            if (elapsedTime.count() >= frameDuration) {
                 XlastUpdateTime = currentTime; 
                 return true; 
             }
             return false; 
         }
-        bool YisTimeToRender() /**
+        /**
          *
          * Checks if it is time to render a frame based on the elapsed time since the last update.
          * @return true if it is time to render, @return false otherwise.
          *
          */
-        {
-            // CALCULATE ELAPSED TIME SINCE THE LAST UPDATE
+        bool YisTimeToRender() {
             const auto & currentTime = std::chrono::high_resolution_clock::now();
-            const std::chrono::duration<double, std::milli> & elapsedTime = currentTime - YlastUpdateTime;
-
-            if (elapsedTime.count() >= frameDuration) 
-            {
+            const std::chrono::duration<double, std::milli> & elapsedTime = currentTime - YlastUpdateTime; // CALCULATE ELAPSED TIME SINCE THE LAST UPDATE
+            if (elapsedTime.count() >= frameDuration) {
                 YlastUpdateTime = currentTime; 
                 return true; 
             }
             return false; 
         }
-        bool WisTimeToRender() /**
+        /**
          *
          * Checks if it is time to render based on the elapsed time since the last update.
          * @return true if it is time to render, @return false otherwise.
          *
          */
-        {
-            // CALCULATE ELAPSED TIME SINCE THE LAST UPDATE
+        bool WisTimeToRender() {
             const auto & currentTime = std::chrono::high_resolution_clock::now();
-            const std::chrono::duration<double, std::milli> & elapsedTime = currentTime - WlastUpdateTime;
-
+            const std::chrono::duration<double, std::milli> & elapsedTime = currentTime - WlastUpdateTime; // CALCULATE ELAPSED TIME SINCE THE LAST UPDATE
             if (elapsedTime.count() >= frameDuration) 
             {
                 WlastUpdateTime = currentTime; 
@@ -4486,25 +4123,22 @@ class Mwm_Animator {
             }
             return false; 
         }
-        bool HisTimeToRender() /**
+        /**
          *
          * Checks if it is time to render based on the elapsed time since the last update.
          * @return true if it is time to render, @return false otherwise.
          *
          */
-        {
-            // CALCULATE ELAPSED TIME SINCE THE LAST UPDATE
+        bool HisTimeToRender() {
             const auto & currentTime = std::chrono::high_resolution_clock::now();
-            const std::chrono::duration<double, std::milli> & elapsedTime = currentTime - HlastUpdateTime;
-
-            if (elapsedTime.count() >= frameDuration) 
-            {
+            const std::chrono::duration<double, std::milli> & elapsedTime = currentTime - HlastUpdateTime; // CALCULATE ELAPSED TIME SINCE THE LAST UPDATE
+            if (elapsedTime.count() >= frameDuration) {
                 HlastUpdateTime = currentTime; 
                 return true; 
             }
             return false; 
         }
-        void config_window(const uint32_t & mask, const uint32_t & value) /**
+        /**
          *
          * @brief Configures the window with the specified mask and value.
          * 
@@ -4515,20 +4149,18 @@ class Mwm_Animator {
          * @param value The value to set for the specified attributes.
          * 
          */
-        {
-            xcb_configure_window
-            (
+        void config_window(const uint32_t & mask, const uint32_t & value) {
+            xcb_configure_window(
                 conn,
                 window,
                 mask,
-                (const uint32_t[1])
-                {
+                (const uint32_t[1]) {
                     static_cast<const uint32_t &>(value)
                 }
             );
             xcb_flush(conn);
         }
-        void config_window(const xcb_window_t & win, const uint32_t & mask, const uint32_t & value) /**
+        /**
          *
          * @brief Configures the window with the specified mask and value.
          * 
@@ -4539,20 +4171,18 @@ class Mwm_Animator {
          * @param value The value to set for the specified attributes.
          * 
          */
-        {
-            xcb_configure_window
-            (
+        void config_window(const xcb_window_t & win, const uint32_t & mask, const uint32_t & value) {
+            xcb_configure_window(
                 conn,
                 win,
                 mask,
-                (const uint32_t[1])
-                {
+                (const uint32_t[1]) {
                     static_cast<const uint32_t &>(value)
                 }
             );
             xcb_flush(conn);
         }
-        void config_client(const uint32_t & mask, const uint32_t & value) /**
+        /**
          *
          * @brief Configures the window with the specified mask and value.
          * 
@@ -4563,32 +4193,27 @@ class Mwm_Animator {
          * @param value The value to set for the specified attributes.
          * 
          */
-        {
-            xcb_configure_window
-            (
+        void config_client(const uint32_t & mask, const uint32_t & value) {
+            xcb_configure_window(
                 conn,
                 c->win,
                 mask,
-                (const uint32_t[1])
-                {
+                (const uint32_t[1]) {
                     static_cast<const uint32_t &>(value)
                 }
             );
 
-            xcb_configure_window
-            (
+            xcb_configure_window(
                 conn,
                 c->frame,
                 mask,
-                (const uint32_t[1])
-                {
+                (const uint32_t[1]) {
                     static_cast<const uint32_t &>(value)
                 }
             );
             xcb_flush(conn);
         }
-        void conf_client_x()
-        {
+        void conf_client_x() {
             const uint32_t x = currentX;
             c->frame.x(x);
             xcb_flush(conn);
@@ -4634,31 +4259,25 @@ class button {
         const char * name;
     ;
     public: // public methods 
-        void create(const uint32_t & parent_window, const int16_t & x, const int16_t & y, const uint16_t & width, const uint16_t & height, COLOR color)
-        {
+        void create(const uint32_t & parent_window, const int16_t & x, const int16_t & y, const uint16_t & width, const uint16_t & height, COLOR color) {
             window.create_default(parent_window, x, y, width, height);
             window.set_backround_color(color);
             window.grab_button({ { L_MOUSE_BUTTON, NULL } });
             window.map();
             xcb_flush(conn);
         }
-        void action(std::function<void()> action)
-        {
+        void action(std::function<void()> action) {
             button_action = action;
         }
-        void add_event(std::function<void(Ev ev)> action)
-        {
+        void add_event(std::function<void(Ev ev)> action) {
             ev_a = action;
             event_handler->setEventCallback(XCB_BUTTON_PRESS, ev_a);
         }
-        void activate() const 
-        {
+        void activate() const {
             button_action();
         }
-        void put_icon_on_button()
-        {
-            std::string icon_path = file.find_png_icon
-            (
+        void put_icon_on_button() {
+            std::string icon_path = file.find_png_icon(
                 {
                     "/usr/share/icons/gnome/256x256/apps/",
                     "/usr/share/icons/hicolor/256x256/apps/",
@@ -4668,8 +4287,7 @@ class button {
                 name
             );
 
-            if (icon_path == "")
-            {
+            if (icon_path == "") {
                 log_info("could not find icon for button: " + std::string(name));
                 return;
             }
@@ -4684,34 +4302,28 @@ class button {
     ;
 };
 class buttons {
-    public: // public constructors
+    public: // constructors
         buttons() {}
     ;
-    public: // public variables
+    public: // variables
         std::vector<button> list;
     ;
-    public: // public methods
-        void add(const char * name, std::function<void()> action)
-        {
+    public: // methods
+        void add(const char * name, std::function<void()> action) {
             button button;
             button.name = name;
             button.action(action);
             list.push_back(button);
         }
-        int size()
-        {
+        int size() {
             return list.size();
         }
-        int index()
-        {
+        int index() {
             return list.size() - 1;
         }
-        void run_action(const uint32_t & window)
-        {
-            for (const auto & button : list) 
-            {
-                if (window == button.window)
-                {
+        void run_action(const uint32_t & window) {
+            for (const auto & button : list) {
+                if (window == button.window) {
                     button.activate();
                     return;
                 }
@@ -4968,11 +4580,9 @@ class search_window {
                     draw_text();
                 }
             });
-            
             event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) {
                 const auto * e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
-                if (e->event == main_window)
-                {
+                if (e->event == main_window) {
                     main_window.raise();
                     main_window.focus_input();
                 }
@@ -4980,18 +4590,15 @@ class search_window {
         }
         void draw_text() {
             main_window.draw_text(search_string.c_str(), WHITE, BLACK, "7x14", 2, 14);
-            if (search_string.length() > 0)
-            {
+            if (search_string.length() > 0) {
                 results = file.search_for_binary(search_string.c_str());
                 int entry_list_size = results.size(); 
-                if (results.size() > 7)
-                {
+                if (results.size() > 7) {
                     entry_list_size = 7;
                 }
                 main_window.height(20 * entry_list_size);
                 xcb_flush(conn);
-                for (int i = 0; i < entry_list_size; ++i)
-                {
+                for (int i = 0; i < entry_list_size; ++i) {
                     entry_list[i].draw_text(results[i].c_str(), WHITE, BLACK, "7x14", 2, 14);
                 }
             }
@@ -5025,8 +4632,7 @@ class Mwm_Runner {
             main_window.set_backround_color(DARK_GREY);
             main_window.grab_button({ { L_MOUSE_BUTTON, NULL } });
             setup_events();
-            search_window.create
-            (
+            search_window.create(
                 main_window,
                 2,
                 2,
@@ -5034,8 +4640,7 @@ class Mwm_Runner {
                 main_window.height() - (BORDER * 2)
             );
             search_window.init();
-            search_window.add_enter_action([this]()
-            {
+            search_window.add_enter_action([this]() {
                 launcher.program((char *) search_window.string().c_str());
                 hide();
             });
@@ -5052,8 +4657,7 @@ class Mwm_Runner {
             search_window.clear_search_string();
         }
         void setup_events() {
-            event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev)
-            {
+            event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev) {
                 const auto * e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
                 if (e->detail == wm->key_codes.r) {
                     if (e->state == SUPER) {
@@ -5061,16 +4665,12 @@ class Mwm_Runner {
                     }
                 }
             });
-
-            event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) 
-            {
+            event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) {
                 const auto * e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
-                if (!main_window.is_mapped())
-                {
+                if (!main_window.is_mapped()) {
                     return;
                 }
-                if (e->event != main_window && e->event != search_window.main_window)
-                {
+                if (e->event != main_window && e->event != search_window.main_window) {
                     hide();
                 }
             });
@@ -5120,11 +4720,9 @@ class add_app_dialog_window {
             c->map();
         }
         void configure_events() {
-            event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev)
-            {
+            event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) {
                 const auto * e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
-                if (e->event == search_window.main_window)
-                {
+                if (e->event == search_window.main_window) {
                     c->focus();
                 }
             });
@@ -5204,7 +4802,7 @@ class File_App {
             });
         }
     ;
-    private:
+    private: // variables
         Logger log;
     ;
 }; static File_App * file_app;
@@ -5227,8 +4825,7 @@ class Dock {
             configure_context_menu();
             make_apps();
             add_app_dialog_window.init();
-            add_app_dialog_window.search_window.add_enter_action([this]()
-            {
+            add_app_dialog_window.search_window.add_enter_action([this]() {
                 launcher.program((char *) add_app_dialog_window.search_window.search_string.c_str());
             });
             context_menu.init();
@@ -5250,9 +4847,7 @@ class Dock {
     private: // private methods
         void calc_size_pos() {
             int num_of_buttons = buttons.size();
-
-            if (num_of_buttons == 0)
-            {
+            if (num_of_buttons == 0) {
                 num_of_buttons = 1;
             }
 
@@ -5280,14 +4875,14 @@ class Dock {
         }
         void make_apps() {
             for (const auto & app : apps) {
-                buttons.add
-                (app,
-                [app, this] () 
-                {
-                    {
-                        launcher.program((char *) app);
+                buttons.add(
+                    app,
+                    [app, this] () {
+                        {
+                            launcher.program((char *) app);
+                        }
                     }
-                });
+                );
                 buttons.list[buttons.index()].create(
                     main_window,
                     ((buttons.index() * width) + DOCK_BORDER),
@@ -5301,22 +4896,16 @@ class Dock {
             calc_size_pos();
         }
         void configure_events() {
-            event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev)
-            {
+            event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) {
                 const auto * e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
-                if (e->event == main_window)
-                {
-                    if (e->detail == R_MOUSE_BUTTON)
-                    {
+                if (e->event == main_window) {
+                    if (e->detail == R_MOUSE_BUTTON) {
                         context_menu.show();
                     }
                 }
-                for (int i = 0; i < buttons.size(); ++i)
-                {
-                    if (e->event == buttons.list[i].window)
-                    {
-                        if (e->detail == L_MOUSE_BUTTON) 
-                        {
+                for (int i = 0; i < buttons.size(); ++i) {
+                    if (e->event == buttons.list[i].window) {
+                        if (e->detail == L_MOUSE_BUTTON) {
                             buttons.list[i].activate();
                         }
                     }
@@ -5363,8 +4952,7 @@ class mv_client {
         void snap(int x, int y) {
             // WINDOW TO WINDOW SNAPPING 
             for (const auto & cli : wm->cur_d->current_clients) {
-                // SNAP WINDOW TO 'RIGHT' BORDER OF 'NON_CONTROLLED' WINDOW
-                if ((x > cli->x + cli->width - N && x < cli->x + cli->width + N) 
+                if ((x > cli->x + cli->width - N && x < cli->x + cli->width + N)   // SNAP WINDOW TO 'RIGHT' BORDER OF 'NON_CONTROLLED' WINDOW
                  && (y + c->height > cli->y && y < cli->y + cli->height)) {
                     // SNAP WINDOW TO 'RIGHT_TOP' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
                     if (y > cli->y - NC && y < cli->y + NC) {  
@@ -5379,8 +4967,7 @@ class mv_client {
                     c->frame.x_y((cli->x + cli->width), y);
                     return;
                 }
-                // SNAP WINSOW TO 'LEFT' BORDER OF 'NON_CONTROLLED' WINDOW
-                if ((x + c->width > cli->x - N && x + c->width < cli->x + N) 
+                if ((x + c->width > cli->x - N && x + c->width < cli->x + N)       // SNAP WINDOW TO 'LEFT' BORDER OF 'NON_CONTROLLED' WINDOW
                  && (y + c->height > cli->y && y < cli->y + cli->height)) {
                     // SNAP WINDOW TO 'LEFT_TOP' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
                     if (y > cli->y - NC && y < cli->y + NC) {  
@@ -5395,8 +4982,7 @@ class mv_client {
                     c->frame.x_y((cli->x - c->width), y);
                     return;
                 }
-                // SNAP WINDOW TO 'BOTTOM' BORDER OF 'NON_CONTROLLED' WINDOW
-                if ((y > cli->y + cli->height - N && y < cli->y + cli->height + N) 
+                if ((y > cli->y + cli->height - N && y < cli->y + cli->height + N) // SNAP WINDOW TO 'BOTTOM' BORDER OF 'NON_CONTROLLED' WINDOW
                  && (x + c->width > cli->x && x < cli->x + cli->width)) {
                     // SNAP WINDOW TO 'BOTTOM_LEFT' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
                     if (x > cli->x - NC && x < cli->x + NC) {  
@@ -5411,8 +4997,7 @@ class mv_client {
                     c->frame.x_y(x, (cli->y + cli->height));
                     return;
                 }
-                // SNAP WINDOW TO 'TOP' BORDER OF 'NON_CONTROLLED' WINDOW
-                if ((y + c->height > cli->y - N && y + c->height < cli->y + N) 
+                if ((y + c->height > cli->y - N && y + c->height < cli->y + N)     // SNAP WINDOW TO 'TOP' BORDER OF 'NON_CONTROLLED' WINDOW
                  && (x + c->width > cli->x && x < cli->x + cli->width)) {
                     // SNAP WINDOW TO 'TOP_LEFT' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
                     if (x > cli->x - NC && x < cli->x + NC) {  
