@@ -1,4 +1,4 @@
- #include <cstdlib>
+#include <cstdlib>
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -75,8 +75,7 @@ static xcb_screen_t * screen;
 
 class mxb {
     public: 
-        class XConnection 
-        {
+        class XConnection {
             public:
                 struct mxb_auth_info_t 
                 {
@@ -366,8 +365,7 @@ class mxb {
                 }
             ;
         };
-        static XConnection * mxb_connect(const char* display) 
-        {
+        static XConnection * mxb_connect(const char* display) {
             try 
             {
                 return new XConnection(display);
@@ -379,37 +377,29 @@ class mxb {
                 return nullptr;
             }
         }
-        static int mxb_connection_has_error(XConnection * conn)
-        {
-            try 
-            {
+        static int mxb_connection_has_error(XConnection * conn) {
+            try {
                 // conn->confirmConnection();
                 std::string response = conn->sendMessage("BIG-REQUESTS");
                 log_info(response);
-            }
-            catch (const std::exception & e)
-            {
+            } catch (const std::exception & e) {
                 log_error(e.what());
                 return 1;
             }
             return 0;
         }
-        class File
-        {
+        class File {
             public: // subclasses
-                class search
-                {
+                class search {
                     public: // construcers and operators
                         search(const std::string& filename)
                         : file(filename) {}
 
-                        operator bool() const
-                        {
+                        operator bool() const {
                             return file.good();
                         }
                     ;
-
-                    private: // private variables
+                    private: // variables
                         std::ifstream file;
                     ;
                 };
@@ -588,6 +578,7 @@ class fast_vector {
 class string_tokenizer {
     public: // constructors and destructor
         string_tokenizer() {}
+        
         string_tokenizer(const char* input, const char* delimiter) {
             // Copy the input string
             str = new char[strlen(input) + 1];
