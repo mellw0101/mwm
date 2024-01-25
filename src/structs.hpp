@@ -5,8 +5,7 @@
 #include <xcb/xcb_ewmh.h>
 #include <xcb/xproto.h>
 
-enum 
-{
+enum {
     N = 12, /* 
         THIS IS HOW FAR AWAY SNAPING WILL HAPPEN 
      */ 
@@ -14,40 +13,44 @@ enum
         THIS IS HOW FAR AWAY WINDOW TO WINDOW CORNER SNAPPING WILL HAPPEN 
      */
 };
-
-enum SET_COLOR 
-{
+enum SET_COLOR {
     RAW
 };
-
-struct rgb_color_code 
-{
+struct rgb_color_code {
     uint8_t r;
     uint8_t g;
     uint8_t b;
 };
-
-enum COLOR 
-{
+enum COLOR {
     BLACK,
     WHITE,
     RED,
     GREEN,
     BLUE,
+    BLUE_2,
+    BLUE_3,
+    BLUE_4,
+    BLUE_5,
+    BLUE_6,
+    BLUE_7,
+    BLUE_8,
+    BLUE_9,
+    BLUE_10,
     YELLOW,
     MAGENTA,
     CYAN,
     GREY,
     DARK_GREY,
+    DARK_GREY_2,
+    DARK_GREY_3,
+    DARK_GREY_4,
     LIGHT_GREY,
     ORANGE,
     BROWN,
     PINK,
     PURPLE
 };
-
-typedef enum Error_codes 
-{
+typedef enum Error_codes {
     OK                          = 0,
     CONN_ERR                    = 1,
     EXTENTION_NOT_SUPPORTED_ERR = 2,
@@ -56,11 +59,8 @@ typedef enum Error_codes
     PARSE_ERR                   = 5,
     SCREEN_NOT_FOUND_ERR        = 6,
     FD_ERR                      = 7
-} 
-Error_codes;
-
-enum class TILEPOS 
-{
+} Error_codes;
+enum class TILEPOS {
     LEFT        = 1,
     RIGHT       = 2,
     LEFT_DOWN   = 3,
@@ -68,42 +68,29 @@ enum class TILEPOS
     LEFT_UP     = 5,
     RIGHT_UP    = 6
 };
-
-enum class TILE 
-{
+enum class TILE {
     LEFT    = 1 ,
     RIGHT   = 2 ,
     DOWN    = 3 ,
     UP      = 4
 };
-
-enum TILE_ANIMATION 
-{
+enum TILE_ANIMATION {
     TILE_ANIMATION_DURATION = 80
 };
-
-typedef enum Decor_data 
-{
+typedef enum Decor_data {
     BORDER_SIZE      = 4,
     DOCK_BORDER      = 2,
     TITLE_BAR_HEIGHT = 20,
     BUTTON_SIZE      = TITLE_BAR_HEIGHT
-} 
-Decor_data;
-
-enum MAXWIN_ANIMATION 
-{
+} Decor_data;
+enum MAXWIN_ANIMATION {
     MAXWIN_ANIMATION_DURATION = 80
 };
-
-enum show_hide 
-{
+enum show_hide {
     SHOW,
     HIDE
 };
-
-enum class edge
-{
+enum class edge {
     NONE,
     LEFT,
     RIGHT,
@@ -114,40 +101,28 @@ enum class edge
     BOTTOM_LEFT,
     BOTTOM_RIGHT
 };
-
-enum Direction 
-{
+enum Direction {
     NEXT,
     PREV
 };
-
-enum class MAX 
-{
+enum class MAX {
     X       = 1 ,
     Y       = 2 ,
     WIDTH   = 3 ,
     HEIGHT  = 4
 };
-
-struct window_borders
-{
+struct window_borders {
     int16_t left, right, top, bottom;
 };
-
-struct size_pos 
-{
+struct size_pos {
     int16_t x, y;
     uint16_t width, height;
 };
-
-struct win_data 
-{
+struct win_data {
     xcb_window_t win;
     uint16_t x, y, width, height;
 };
-
-enum class CURSOR
-{
+enum class CURSOR {
     arrow,
     hand1,
     hand2,
@@ -190,17 +165,13 @@ enum class CURSOR
     bottom_left_arrow,
     bottom_right_arrow
 };
-
-enum class config : uint32_t
-{
+enum class config : uint32_t {
     x = 1,
     y = 2,
     width = 4,
     height = 8
 };
-
-typedef enum mwm_config_t
-{
+typedef enum mwm_config_t {
     MWM_CONFIG_x      = 1,
     MWM_CONFIG_y      = 2,
     MWM_CONFIG_width  = 4,

@@ -77,16 +77,13 @@ class mxb {
     public: 
         class XConnection {
             public:
-                struct mxb_auth_info_t 
-                {
+                struct mxb_auth_info_t {
                     int namelen;
                     char* name;
                     int datalen;
                     char* data;
                 };
-
-                XConnection(const char * display) 
-                {
+                XConnection(const char * display) {
                     std::string socketPath = getSocketPath(display);
 
                     // Initialize address
@@ -116,9 +113,7 @@ class mxb {
                         throw std::runtime_error("Failed to authenticate with X server");
                     }
                 }
-
-                ~XConnection() 
-                {
+                ~XConnection() {
                     if (fd != -1) 
                     {
                         ::close(fd);
@@ -126,16 +121,10 @@ class mxb {
                     delete[] auth_info.name;
                     delete[] auth_info.data;
                 }
-
-                int 
-                getFd() const 
-                {
+                int getFd() const {
                     return fd;
                 }
-
-                void 
-                confirmConnection() 
-                {
+                void confirmConnection() {
                     const std::string extensionName = "BIG-REQUESTS";  // Example extension
                     uint16_t nameLength = static_cast<uint16_t>(extensionName.length());
 
@@ -193,10 +182,7 @@ class mxb {
                         log_info("BIG-REQUESTS extension is not supported by the X server.");
                     }
                 }
-
-                std::string 
-                sendMessage(const std::string & extensionName) 
-                {
+                std::string sendMessage(const std::string & extensionName) {
                     uint16_t nameLength = static_cast<uint16_t>(extensionName.length());
 
                     // Calculate the total length of the request in 4-byte units, including padding
@@ -254,37 +240,28 @@ class mxb {
                     }
                 }
             ;
-
             private:
                 int fd;
                 struct sockaddr_un addr;
                 mxb_auth_info_t auth_info;
                 Logger log;
-
-                // Function to authenticate an X11 connection
-                bool 
-                authenticate_x11_connection(int display_number, mxb_auth_info_t & auth_info) 
-                {
-                    // Try to get the XAUTHORITY environment variable; fall back to default
-                    const char* xauthority_env = std::getenv("XAUTHORITY");
+                
+                bool authenticate_x11_connection(int display_number, mxb_auth_info_t & auth_info) { // Function to authenticate an X11 connection
+                    const char* xauthority_env = std::getenv("XAUTHORITY"); // Try to get the XAUTHORITY environment variable; fall back to default
                     std::string xauthority_file = xauthority_env ? xauthority_env : "~/.Xauthority";
 
-                    // Open the Xauthority file
-                    FILE* auth_file = fopen(xauthority_file.c_str(), "rb");
-                    if (!auth_file) 
-                    {
-                        // Handle error: Failed to open .Xauthority file
+                    FILE* auth_file = fopen(xauthority_file.c_str(), "rb"); // Open the Xauthority file
+                    if (!auth_file) { // Handle error: Failed to open .Xauthority file
+                        
                         return false;
                     }
 
                     Xauth* xauth_entry;
                     bool found = false;
-                    while ((xauth_entry = XauReadAuth(auth_file)) != nullptr) 
-                    {
+                    while ((xauth_entry = XauReadAuth(auth_file)) != nullptr) {
                         // Check if the entry matches your display number
                         // Assuming display_number is the display you're interested in
-                        if (std::to_string(display_number) == std::string(xauth_entry->number, xauth_entry->number_length)) 
-                        {
+                        if (std::to_string(display_number) == std::string(xauth_entry->number, xauth_entry->number_length)) {
                             // Fill the auth_info structure
                             auth_info.namelen = xauth_entry->name_length;
                             auth_info.name = new char[xauth_entry->name_length];
@@ -305,59 +282,41 @@ class mxb {
 
                     return found;
                 }
-
-                std::string 
-                getSocketPath(const char * display) 
-                {
+                std::string getSocketPath(const char * display) {
                     std::string displayStr;
 
-                    if (display == nullptr) 
-                    {
+                    if (display == nullptr) {
                         char* envDisplay = std::getenv("DISPLAY");
                         
-                        if (envDisplay != nullptr) 
-                        {
+                        if (envDisplay != nullptr) {
                             displayStr = envDisplay;
-                        } 
-                        else 
-                        {
+                        } else {
                             displayStr = ":0";
                         }
-                    } 
-                    else 
-                    {
+                    } else {
                         displayStr = display;
                     }
 
                     int displayNumber = 0;
-
-                    // Extract the display number from the display string
-                    size_t colonPos = displayStr.find(':');
-                    if (colonPos != std::string::npos) 
-                    {
+                    size_t colonPos = displayStr.find(':'); // Extract the display number from the display string
+                    if (colonPos != std::string::npos) {
                         displayNumber = std::stoi(displayStr.substr(colonPos + 1));
                     }
 
                     return "/tmp/.X11-unix/X" + std::to_string(displayNumber);
                 }
-
-                int 
-                parseDisplayNumber(const char * display) 
-                {
-                    if (!display) 
-                    {
+                int parseDisplayNumber(const char * display) {
+                    if (!display) {
                         display = std::getenv("DISPLAY");
                     }
 
-                    if (!display) 
-                    {
+                    if (!display) {
                         return 0;  // default to display 0
                     }
 
                     const std::string displayStr = display;
                     size_t colonPos = displayStr.find(':');
-                    if (colonPos != std::string::npos) 
-                    {
+                    if (colonPos != std::string::npos) {
                         return std::stoi(displayStr.substr(colonPos + 1));
                     }
 
@@ -366,12 +325,9 @@ class mxb {
             ;
         };
         static XConnection * mxb_connect(const char* display) {
-            try 
-            {
+            try {
                 return new XConnection(display);
-            } 
-            catch (const std::exception & e) 
-            {
+            } catch (const std::exception & e) {
                 // Handle exceptions or errors here
                 std::cerr << "Connection error: " << e.what() << std::endl;
                 return nullptr;
@@ -599,12 +555,10 @@ class string_tokenizer {
         const fast_vector & tokenize(const char* input, const char* delimiter) {
             tokens.clear();
 
-            // Copy the input string
             str = new char[strlen(input) + 1];
-            strcpy(str, input);
+            strcpy(str, input); // Copy the input string
 
-            // Tokenize the string using strtok() and push tokens to the vector
-            char* token = strtok(str, delimiter);
+            char* token = strtok(str, delimiter); // Tokenize the string using strtok() and push tokens to the vector
             while (token != nullptr) {
                 tokens.append(token);
                 token = strtok(nullptr, delimiter);
@@ -1232,15 +1186,16 @@ class window {
             }
             uint32_t check_event_mask_sum() {
                 uint32_t mask = 0;
-                xcb_get_window_attributes_cookie_t attr_cookie = xcb_get_window_attributes(conn, _window);
-                xcb_get_window_attributes_reply_t * attr_reply = xcb_get_window_attributes_reply(conn, attr_cookie, NULL);
+                xcb_get_window_attributes_cookie_t cookie = xcb_get_window_attributes(conn, _window);
+                xcb_get_window_attributes_reply_t * reply = xcb_get_window_attributes_reply(conn, cookie, NULL);
 
-                if (attr_reply) { // Check if the reply is valid
-                    mask = attr_reply->all_event_masks;
-                    free(attr_reply);
-                } else {
+                if (!reply) { // Check if the reply is valid
                     log_error("Unable to get window attributes.");
+                    return 0;
                 }
+
+                mask = reply->all_event_masks;
+                free(reply);
                 return mask;
             }
             std::vector<xcb_event_mask_t> check_event_mask_codes() {
@@ -1329,7 +1284,7 @@ class window {
                         0,
                         60
                     ),
-                    NULL
+                    nullptr
                 );
 
                 if (!reply || xcb_get_property_value_length(reply) == 0) {
@@ -1477,7 +1432,6 @@ class window {
                     XCB_CW_EVENT_MASK,
                     values.data()
                 );
-
                 xcb_flush(conn);
             }
             void apply_event_mask(const uint32_t * mask) {
@@ -1487,10 +1441,10 @@ class window {
                     XCB_CW_EVENT_MASK,
                     mask
                 );
+                xcb_flush(conn);
             }
             void set_pointer(CURSOR cursor_type) {
                 xcb_cursor_context_t * ctx;
-
                 if (xcb_cursor_context_new(conn, screen, &ctx) < 0) {
                     log_error("Unable to create cursor context.");
                     return;
@@ -1647,12 +1601,10 @@ class window {
                     );
                     imlib_free_image(); // Free original image
                     imlib_context_set_image(scaledImage);
+                    
+                    DATA32 * data = imlib_image_get_data(); // Get the scaled image data
 
-                    // Get the scaled image data
-                    DATA32 * data = imlib_image_get_data();
-
-                    // Create an XCB image from the scaled data
-                    xcb_image_t * xcb_image = xcb_image_create_native(
+                    xcb_image_t * xcb_image = xcb_image_create_native( // Create an XCB image from the scaled data
                         conn, 
                         newWidth, 
                         newHeight,
@@ -1937,8 +1889,7 @@ class window {
                     conn,
                     _window,
                     mask,
-                    (const uint32_t[1])
-                    {
+                    (const uint32_t[1]) {
                         static_cast<const uint32_t &>(value)
                     }
                 );
@@ -2048,7 +1999,6 @@ class window {
                 }
                 void create_font_gc(const COLOR & text_color, const COLOR & backround_color, xcb_font_t font) {
                     font_gc = xcb_generate_id(conn);
-
                     xcb_create_gc(
                         conn, 
                         font_gc, 
@@ -2266,6 +2216,33 @@ class window {
                     case COLOR::BLUE:
                         r = 0; g = 0; b = 255;
                         break;
+                    case COLOR::BLUE_2:
+                        r = 0; g = 0; b = 230;
+                        break;
+                    case COLOR::BLUE_3:
+                        r = 0; g = 0; b = 204;
+                        break;
+                    case COLOR::BLUE_4:
+                        r = 0; g = 0; b = 178;
+                        break;
+                    case COLOR::BLUE_5:
+                        r = 0; g = 0; b = 153;
+                        break;
+                    case COLOR::BLUE_6:
+                        r = 0; g = 0; b = 128;
+                        break;
+                    case COLOR::BLUE_7:
+                        r = 0; g = 0; b = 102;
+                        break;
+                    case COLOR::BLUE_8:
+                        r = 0; g = 0; b = 76;
+                        break;
+                    case COLOR::BLUE_9:
+                        r = 0; g = 0; b = 51;
+                        break;
+                    case COLOR::BLUE_10:
+                        r = 0; g = 0; b = 26;
+                        break;
                     case COLOR::YELLOW:
                         r = 255; g = 255; b = 0;
                         break;
@@ -2283,6 +2260,15 @@ class window {
                         break;
                     case COLOR::DARK_GREY:
                         r = 64; g = 64; b = 64;
+                        break;
+                    case COLOR::DARK_GREY_2:
+                        r = 70; g = 70; b = 70;
+                        break;
+                    case COLOR::DARK_GREY_3:
+                        r = 76; g = 76; b = 76;
+                        break;
+                    case COLOR::DARK_GREY_4:
+                        r = 82; g = 82; b = 82;
                         break;
                     case COLOR::ORANGE:
                         r = 255; g = 165; b = 0;
@@ -5861,15 +5847,13 @@ class tile {
             }
 
             switch (tile) {
-                case TILE::LEFT: {
-                    // IF 'CURRENTLT_TILED' TO 'LEFT'
-                    if (current_tile_pos(c, TILEPOS::LEFT)) {
+                case TILE::LEFT:
+                    if (current_tile_pos(c, TILEPOS::LEFT)) { // IF 'CURRENTLT_TILED' TO 'LEFT'
                         set_tile_ogsize(c);
                         return;
                     }
                     
-                    // IF 'CURRENTLY_TILED' TO 'RIGHT', 'LEFT_DOWN' OR 'LEFT_UP'
-                    if (current_tile_pos(c, TILEPOS::RIGHT)
+                    if (current_tile_pos(c, TILEPOS::RIGHT) // IF 'CURRENTLY_TILED' TO 'RIGHT', 'LEFT_DOWN' OR 'LEFT_UP'
                      || current_tile_pos(c, TILEPOS::LEFT_DOWN)
                      || current_tile_pos(c, TILEPOS::LEFT_UP))
                     {
@@ -5877,8 +5861,8 @@ class tile {
                         return;
                     }
 
-                    // IF 'CURRENTLY_TILED' TO 'RIGHT_DOWN'
-                    if (current_tile_pos(c, TILEPOS::RIGHT_DOWN)) {
+                    
+                    if (current_tile_pos(c, TILEPOS::RIGHT_DOWN)) { // IF 'CURRENTLY_TILED' TO 'RIGHT_DOWN'
                         set_tile_sizepos(c, TILEPOS::LEFT_DOWN);
                         return;
                     }
@@ -5893,33 +5877,28 @@ class tile {
                     save_tile_ogsize(c);
                     set_tile_sizepos(c, TILEPOS::LEFT);
                     break;
-                }
-                case TILE::RIGHT: {
-                    // IF 'CURRENTLY_TILED' TO 'RIGHT'
-                    if (current_tile_pos(c, TILEPOS::RIGHT))
+                case TILE::RIGHT:
+                    if (current_tile_pos(c, TILEPOS::RIGHT)) // IF 'CURRENTLY_TILED' TO 'RIGHT'
                     {
                         set_tile_ogsize(c);
                         return;
                     }
 
-                    // IF 'CURRENTLT_TILED' TO 'LEFT', 'RIGHT_DOWN' OR 'RIGHT_UP' 
-                    if (current_tile_pos(c, TILEPOS::LEFT)
+                    if (current_tile_pos(c, TILEPOS::LEFT) // IF 'CURRENTLT_TILED' TO 'LEFT', 'RIGHT_DOWN' OR 'RIGHT_UP' 
                      || current_tile_pos(c, TILEPOS::RIGHT_UP)
                      || current_tile_pos(c, TILEPOS::RIGHT_DOWN))
                     {
                         set_tile_sizepos(c, TILEPOS::RIGHT);
                         return;
                     }
-
-                    // IF 'CURRENTLT_TILED' 'LEFT_DOWN'
-                    if (current_tile_pos(c, TILEPOS::LEFT_DOWN))
+                    
+                    if (current_tile_pos(c, TILEPOS::LEFT_DOWN)) // IF 'CURRENTLT_TILED' 'LEFT_DOWN'
                     {
                         set_tile_sizepos(c, TILEPOS::RIGHT_DOWN);
                         return;
                     }
-
-                    // IF 'CURRENTLY_TILED' 'LEFT_UP'
-                    if (current_tile_pos(c, TILEPOS::LEFT_UP))
+                    
+                    if (current_tile_pos(c, TILEPOS::LEFT_UP)) // IF 'CURRENTLY_TILED' 'LEFT_UP'
                     {
                         set_tile_sizepos(c, TILEPOS::RIGHT_UP);
                         return;
@@ -5928,49 +5907,41 @@ class tile {
                     save_tile_ogsize(c);
                     set_tile_sizepos(c, TILEPOS::RIGHT);
                     break;
-                }
-                case TILE::DOWN: {
-                    // IF 'CURRENTLY_TILED' 'LEFT' OR 'LEFT_UP'
-                    if (current_tile_pos(c, TILEPOS::LEFT)
+                case TILE::DOWN:
+                    if (current_tile_pos(c, TILEPOS::LEFT) // IF 'CURRENTLY_TILED' 'LEFT' OR 'LEFT_UP'
                      || current_tile_pos(c, TILEPOS::LEFT_UP))
                     {
                         set_tile_sizepos(c, TILEPOS::LEFT_DOWN);
                         return;
                     }
 
-                    // IF 'CURRENTLY_TILED' 'RIGHT' OR 'RIGHT_UP'
-                    if (current_tile_pos(c, TILEPOS::RIGHT)
+                    if (current_tile_pos(c, TILEPOS::RIGHT) // IF 'CURRENTLY_TILED' 'RIGHT' OR 'RIGHT_UP'
                      || current_tile_pos(c, TILEPOS::RIGHT_UP))
                     {
                         set_tile_sizepos(c, TILEPOS::RIGHT_DOWN);
                         return;
                     }
-
-                    // IF 'CURRENTLY_TILED' 'LEFT_DOWN' OR 'RIGHT_DOWN'
-                    if (current_tile_pos(c, TILEPOS::LEFT_DOWN)
+  
+                    if (current_tile_pos(c, TILEPOS::LEFT_DOWN) // IF 'CURRENTLY_TILED' 'LEFT_DOWN' OR 'RIGHT_DOWN'
                      || current_tile_pos(c, TILEPOS::RIGHT_DOWN))
                     {
                         set_tile_ogsize(c);
                         return;
                     }
-                }
-                case TILE::UP: {
-                    // IF 'CURRENTLY_TILED' 'LEFT'
-                    if (current_tile_pos(c, TILEPOS::LEFT)
+                case TILE::UP:
+                    if (current_tile_pos(c, TILEPOS::LEFT) // IF 'CURRENTLY_TILED' 'LEFT'
                      || current_tile_pos(c, TILEPOS::LEFT_DOWN))
                     {
                         set_tile_sizepos(c, TILEPOS::LEFT_UP);
                         return;
                     }
 
-                    // IF 'CURRENTLY_TILED' 'RIGHT' OR RIGHT_DOWN
-                    if (current_tile_pos(c, TILEPOS::RIGHT)
+                    if (current_tile_pos(c, TILEPOS::RIGHT) // IF 'CURRENTLY_TILED' 'RIGHT' OR RIGHT_DOWN
                      || current_tile_pos(c, TILEPOS::RIGHT_DOWN))
                     {
                         set_tile_sizepos(c, TILEPOS::RIGHT_UP);
                         return;
                     }
-                }
             }
         }
     ;
@@ -5983,7 +5954,7 @@ class tile {
         }
         bool current_tile_pos(client * & c, TILEPOS mode) {
             switch (mode) {
-                case TILEPOS::LEFT: {
+                case TILEPOS::LEFT:
                     if (c->x        == 0 
                      && c->y        == 0 
                      && c->width    == screen->width_in_pixels / 2 
@@ -5992,8 +5963,7 @@ class tile {
                         return true;
                     }
                     break;
-                }
-                case TILEPOS::RIGHT: {
+                case TILEPOS::RIGHT:
                     if (c->x        == screen->width_in_pixels / 2 
                      && c->y        == 0 
                      && c->width    == screen->width_in_pixels / 2
@@ -6002,8 +5972,7 @@ class tile {
                         return true;
                     }
                     break;
-                }
-                case TILEPOS::LEFT_DOWN: {
+                case TILEPOS::LEFT_DOWN:
                     if (c->x        == 0
                      && c->y        == screen->height_in_pixels / 2
                      && c->width    == screen->width_in_pixels / 2
@@ -6012,8 +5981,7 @@ class tile {
                         return true;
                     }
                     break;
-                }
-                case TILEPOS::RIGHT_DOWN: {
+                case TILEPOS::RIGHT_DOWN:
                     if (c->x        == screen->width_in_pixels / 2
                      && c->y        == screen->height_in_pixels / 2
                      && c->width    == screen->width_in_pixels / 2
@@ -6022,8 +5990,7 @@ class tile {
                         return true;
                     }
                     break;
-                }
-                case TILEPOS::LEFT_UP: {
+                case TILEPOS::LEFT_UP:
                     if (c->x        == 0
                      && c->y        == 0
                      && c->width    == screen->width_in_pixels / 2
@@ -6032,8 +5999,7 @@ class tile {
                         return true;
                     }
                     break;
-                }
-                case TILEPOS::RIGHT_UP: {
+                case TILEPOS::RIGHT_UP:
                     if (c->x        == screen->width_in_pixels / 2
                      && c->y        == 0
                      && c->width    == screen->width_in_pixels / 2
@@ -6042,16 +6008,13 @@ class tile {
                         return true;
                     }
                     break;
-                }
             }
             return false;
         }
-        void set_tile_sizepos(client * & c, TILEPOS sizepos)
-        {
+        void set_tile_sizepos(client * & c, TILEPOS sizepos) {
             switch (sizepos) {
-                case TILEPOS::LEFT: {
-                    animate
-                    (
+                case TILEPOS::LEFT:
+                    animate(
                         c, 
                         0, 
                         0, 
@@ -6059,10 +6022,8 @@ class tile {
                         screen->height_in_pixels
                     );
                     return;
-                }
-                case TILEPOS::RIGHT: {
-                    animate
-                    (
+                case TILEPOS::RIGHT:
+                    animate(
                         c, 
                         screen->width_in_pixels / 2, 
                         0, 
@@ -6070,10 +6031,8 @@ class tile {
                         screen->height_in_pixels
                     );
                     return;
-                }
-                case TILEPOS::LEFT_DOWN: {
-                    animate
-                    (
+                case TILEPOS::LEFT_DOWN:
+                    animate(
                         c, 
                         0, 
                         screen->height_in_pixels / 2, 
@@ -6081,10 +6040,8 @@ class tile {
                         screen->height_in_pixels / 2
                     );
                     return;
-                }
-                case TILEPOS::RIGHT_DOWN: {
-                    animate
-                    (
+                case TILEPOS::RIGHT_DOWN:
+                    animate(
                         c, 
                         screen->width_in_pixels / 2, 
                         screen->height_in_pixels / 2, 
@@ -6092,10 +6049,8 @@ class tile {
                         screen->height_in_pixels / 2
                     );
                     return;
-                }
-                case TILEPOS::LEFT_UP: {
-                    animate
-                    (
+                case TILEPOS::LEFT_UP:
+                    animate(
                         c, 
                         0, 
                         0, 
@@ -6103,10 +6058,8 @@ class tile {
                         screen->height_in_pixels / 2
                     );
                     return;
-                } 
-                case TILEPOS::RIGHT_UP: {
-                    animate
-                    (
+                case TILEPOS::RIGHT_UP:
+                    animate(
                         c, 
                         screen->width_in_pixels / 2, 
                         0, 
@@ -6114,33 +6067,16 @@ class tile {
                         screen->height_in_pixels / 2
                     );
                     return;
-                }
             }
         }
         void set_tile_ogsize(client * & c) {
-            animate
-            (
+            animate(
                 c, 
                 c->tile_ogsize.x, 
                 c->tile_ogsize.y, 
                 c->tile_ogsize.width, 
                 c->tile_ogsize.height
             );
-        }
-        void animate_old(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight) {
-            Mwm_Animator anim(c->frame);
-            anim.animate(
-                c->x,
-                c->y, 
-                c->width, 
-                c->height, 
-                endX,
-                endY, 
-                endWidth, 
-                endHeight, 
-                TILE_ANIMATION_DURATION
-            );
-            c->update();
         }
         void animate(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight) {
             Mwm_Animator anim(c);
