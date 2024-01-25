@@ -709,39 +709,26 @@ class str {
 };
 class fast_str_vector {
     public: // operators
-        operator std::vector<str>() const
-        {
+        operator std::vector<str>() const {
             return data;
         }
     ;
     public: // [] operator Access an element in the vector
-        str operator[](size_t index) const 
-        {
+        str operator[](size_t index) const {
             return data[index];
         }
     ;
     public: // methods
-        void // Add a string to the vector
-        push_back(str str)
-        {
+        void push_back(str str) { // Add a string to the vector
             data.push_back(str);
         }
-
-        void // Add a string to the vector
-        append(str str)
-        {
+        void append(str str) { // Add a string to the vector
             data.push_back(str);
         }
-
-        size_t // Get the size of the vector
-        size() const 
-        {
+        size_t size() const { // Get the size of the vector
             return data.size();
         }
-
-        size_t // get the index of the last element in the vector
-        index_size() const
-        {
+        size_t index_size() const { // get the index of the last element in the vector
             if (data.size() == 0)
             {
                 return 0;
@@ -749,10 +736,7 @@ class fast_str_vector {
 
             return data.size() - 1;
         }
-
-        void // Clear the vector
-        clear()
-        {
+        void clear() { // Clear the vector
             data.clear();
         }
     ;
@@ -808,6 +792,8 @@ class Directory_Searcher {
 class Directory_Lister {
     public:
         Directory_Lister() {}
+    ;
+    public: // methods
         std::vector<std::string> list(const std::string& Directory) {
             std::vector<std::string> results;
 
@@ -5073,23 +5059,17 @@ class change_desktop {
         : connection(connection) {}
     ;
     public: // methods
-        enum DIRECTION
-        {
+        enum DIRECTION {
             NEXT,
             PREV
         };
-        enum DURATION
-        {
+        enum DURATION {
             DURATION = 100
         };
-        void change_to(const DIRECTION & direction)
-        {
-            switch (direction)
-            {
-                case NEXT:
-                {
-                    if (wm->cur_d->desktop == wm->desktop_list.size())
-                    {
+        void change_to(const DIRECTION & direction) {
+            switch (direction) {
+                case NEXT: {
+                    if (wm->cur_d->desktop == wm->desktop_list.size()) {
                         return;
                     }
 
@@ -5100,10 +5080,8 @@ class change_desktop {
                     wm->cur_d = wm->desktop_list[wm->cur_d->desktop];
                     break;
                 }
-                case PREV:
-                {
-                    if (wm->cur_d->desktop == 1)
-                    {
+                case PREV: {
+                    if (wm->cur_d->desktop == 1) {
                         return;
                     }
 
@@ -5120,29 +5098,22 @@ class change_desktop {
             joinAndClearThreads();
             mtx.unlock();
         }
-        static void teleport_to(const uint8_t & n)
-        {
-            if (wm->cur_d == wm->desktop_list[n - 1] || n == 0 || n == wm->desktop_list.size())
-            {
+        static void teleport_to(const uint8_t & n) {
+            if (wm->cur_d == wm->desktop_list[n - 1] || n == 0 || n == wm->desktop_list.size()) {
                 return;
             }
             
-            for (const auto & c : wm->cur_d->current_clients)
-            {
-                if (c)
-                {
-                    if (c->desktop == wm->cur_d->desktop)
-                    {
+            for (const auto & c : wm->cur_d->current_clients) {
+                if (c) {
+                    if (c->desktop == wm->cur_d->desktop) {
                         c->unmap();
                     }
                 }
             }
 
             wm->cur_d = wm->desktop_list[n - 1];
-            for (const auto & c : wm->cur_d->current_clients)
-            {
-                if (c)
-                {
+            for (const auto & c : wm->cur_d->current_clients) {
+                if (c) {
                     c->map();
                 }
             }
@@ -5160,39 +5131,28 @@ class change_desktop {
         std::vector<std::thread> animation_threads;
     ;
     private: // functions
-        std::vector<client *> get_clients_on_desktop(const uint8_t & desktop)
-        {
+        std::vector<client *> get_clients_on_desktop(const uint8_t & desktop) {
             std::vector<client *> clients;
-            for (const auto & c : wm->client_list)
-            {
-                if (c->desktop == desktop)
-                {
+            for (const auto & c : wm->client_list) {
+                if (c->desktop == desktop) {
                     clients.push_back(c);
                 }
             }
             return clients;
         }
-        void animate(std::vector<client *> clients, const DIRECTION & direction)
-        {
-            switch (direction) 
-            {
-                case NEXT:
-                {
-                    for (const auto c : clients)
-                    {
-                        if (c)
-                        {
+        void animate(std::vector<client *> clients, const DIRECTION & direction) {
+            switch (direction) {
+                case NEXT: {
+                    for (const auto c : clients) {
+                        if (c) {
                             animation_threads.emplace_back(&change_desktop::anim_cli, this, c, c->x - screen->width_in_pixels);
                         }
                     }
                     break;
                 }
-                case PREV:
-                {
-                    for (const auto & c : clients)
-                    {
-                        if (c)
-                        {
+                case PREV: {
+                    for (const auto & c : clients) {
+                        if (c) {
                             animation_threads.emplace_back(&change_desktop::anim_cli, this, c, c->x + screen->width_in_pixels);
                         }
                     }
@@ -5200,43 +5160,34 @@ class change_desktop {
                 }
             }
         }
-        void anim_cli(client * c, const int & endx)
-        {
+        void anim_cli(client * c, const int & endx) {
             Mwm_Animator anim(c);
             anim.animate_client_x(c->x, endx, DURATION);
             c->update();
         }
-        void thread_sleep(const double & milliseconds) 
-        {
+        void thread_sleep(const double & milliseconds) {
             // Creating a duration with double milliseconds
             auto duration = std::chrono::duration<double, std::milli>(milliseconds);
 
             // Sleeping for the duration
             std::this_thread::sleep_for(duration);
         }
-        void stopAnimations() 
-        {
+        void stopAnimations() {
             stop_show_flag.store(true);
             stop_hide_flag.store(true);
             
-            if (show_thread.joinable()) 
-            {
+            if (show_thread.joinable()) {
                 show_thread.join();
                 stop_show_flag.store(false);
             }
-
-            if (hide_thread.joinable()) 
-            {
+            if (hide_thread.joinable()) {
                 hide_thread.join();
                 stop_hide_flag.store(false);
             }
         }
-        void joinAndClearThreads()
-        {
-            for (std::thread & t : animation_threads)
-            {
-                if (t.joinable()) 
-                {
+        void joinAndClearThreads() {
+            for (std::thread & t : animation_threads) {
+                if (t.joinable()) {
                     t.join();
                 }
             }
@@ -5262,13 +5213,11 @@ void move_to_next_desktop_w_app() {
     change_desktop::teleport_to(wm->cur_d->desktop + 1);
 }
 void move_to_previus_desktop_w_app() {
-    if (wm->cur_d->desktop == 1)
-    {
+    if (wm->cur_d->desktop == 1) {
         return;
     }
 
-    if (wm->focused_client)
-    {
+    if (wm->focused_client) {
         wm->focused_client->desktop = wm->cur_d->desktop - 1;
     }
 
@@ -5284,10 +5233,8 @@ class resize_client {
             AND NOW WITH THE 'retard_int' I CAN CALL IT LIKE THIS 'resize_client(c, 0)'
          */
         resize_client(client * & c , int retard_int) 
-        : c(c) 
-        {
-            if (c->win.is_EWMH_fullscreen())
-            {
+        : c(c) {
+            if (c->win.is_EWMH_fullscreen()) {
                 return;
             }
 
@@ -5427,18 +5374,14 @@ class resize_client {
         class border {
             public: // constructor 
                 border(client * & c, edge _edge)
-                : c(c)
-                {
-                    if (c->win.is_EWMH_fullscreen())
-                    {
+                : c(c) {
+                    if (c->win.is_EWMH_fullscreen()) {
                         return;
                     }
 
                     std::map<client *, edge> map = wm->get_client_next_to_client(c, _edge);
-                    for (const auto & pair : map)
-                    {
-                        if (pair.first != nullptr)
-                        {
+                    for (const auto & pair : map) {
+                        if (pair.first != nullptr) {
                             c2 = pair.first;
                             c2_edge = pair.second;
                             pointer.grab(c->frame);
@@ -5468,132 +5411,93 @@ class resize_client {
             ;
             private: // methods
                 void teleport_mouse(edge edge) {
-                    switch (edge) 
-                    {
+                    switch (edge) {
                         case edge::TOP:
-                        {
                             pointer.teleport(pointer.x(), c->y);
                             break;
-                        }
                         case edge::BOTTOM_edge:
-                        {
                             pointer.teleport(pointer.x(), (c->y + c->height));
                             break;
-                        } 
                         case edge::LEFT:
-                        {
                             pointer.teleport(c->x, pointer.y());
                             break;
-                        }
                         case edge::RIGHT:
-                        {
                             pointer.teleport((c->x + c->width), pointer.y());
                             break;
-                        }
                         case edge::NONE:
-                        {
                             break;
-                        }
                         case edge::TOP_LEFT:
-                        {
                             pointer.teleport(c->x, c->y);
                             break;
-                        }
                         case edge::TOP_RIGHT:
-                        {
                             pointer.teleport((c->x + c->width), c->y);
                             break;
-                        }
                         case edge::BOTTOM_LEFT:
-                        {
                             pointer.teleport(c->x, (c->y + c->height));
                             break;
-                        }
                         case edge::BOTTOM_RIGHT:
-                        {
                             pointer.teleport((c->x + c->width), (c->y + c->height));
                             break;
-                        }
                     }
                 }
                 void resize_client(const uint32_t x, const uint32_t y, edge edge) {
-                    switch (edge) 
-                    {
+                    switch (edge) {
                         case edge::LEFT:
                             c->x_width(x, (c->width + c->x - x));
                             break;
-                        ;
                         case edge::RIGHT:
                             c->_width((x - c->x));
                             break;
-                        ;
                         case edge::TOP:
                             c->y_height(y, (c->height + c->y - y));   
                             break;
-                        ;
                         case edge::BOTTOM_edge:
                             c->_height((y - c->y));
                             break;
-                        ;
                         case edge::NONE:
                             return;
-                        ;
                         case edge::TOP_LEFT:
                             c->x_y_width_height(x, y, (c->width + c->x - x), (c->height + c->y - y));
                             break;
-                        ;
                         case edge::TOP_RIGHT:
                             c->y_width_height(y, (x - c->x), (c->height + c->y - y));
                             break;
-                        ;
                         case edge::BOTTOM_LEFT:
                             c->x_width_height(x, (c->width + c->x - x), (y - c->y));   
                             break;
-                        ;
                         case edge::BOTTOM_RIGHT:
                             c->width_height((x - c->x), (y - c->y));   
                             break;
-                        ;
                     }
                 }
                 void resize_client(client * c, const uint32_t x, const uint32_t y, edge edge) {
-                    switch (edge) 
-                    {
+                    switch (edge) {
                         case edge::LEFT:
                             c->x_width(x, (c->width + c->x - x));
                             break;
-                        ;
                         case edge::RIGHT:
                             c->_width((x - c->x));
                             break;
-                        ;
                         case edge::TOP:
                             c->y_height(y, (c->height + c->y - y));   
                             break;
-                        ;
                         case edge::BOTTOM_edge:
                             c->_height((y - c->y));
                             break;
-                        ;
                         case edge::NONE:
                             return;
-                        ;
                         case edge::TOP_LEFT:
                             c->x_y_width_height(x, y, (c->width + c->x - x), (c->height + c->y - y));
                             break;
-                        ;
                         case edge::TOP_RIGHT:
                             c->y_width_height(y, (x - c->x), (c->height + c->y - y));
                             break;
-                        ;
                         case edge::BOTTOM_LEFT:
                             c->x_width_height(x, (c->width + c->x - x), (y - c->y));   
                             break;
-                        ;
                         case edge::BOTTOM_RIGHT:
                             c->width_height((x - c->x), (y - c->y));   
                             break;
-                        ;
                     }
                 }
                 void snap(const uint32_t x, const uint32_t y, edge edge, const uint8_t & prox) {
@@ -5602,10 +5506,8 @@ class resize_client {
                     uint16_t top_border    = 0;
                     uint16_t bottom_border = 0;
 
-                    for (const auto & c : wm->cur_d->current_clients)
-                    {
-                        if (c == this->c)
-                        {
+                    for (const auto & c : wm->cur_d->current_clients) {
+                        if (c == this->c) {
                             continue;
                         }
 
@@ -5616,11 +5518,9 @@ class resize_client {
 
                         if (edge != edge::RIGHT
                          && edge != edge::BOTTOM_RIGHT
-                         && edge != edge::TOP_RIGHT)
-                        {
+                         && edge != edge::TOP_RIGHT) {
                             if ((x > right_border - prox && x < right_border + prox)
-                            && (y > top_border && y < bottom_border))
-                            {
+                             && (y > top_border && y < bottom_border)) {
                                 resize_client(right_border, y, edge);
                                 return;
                             }
@@ -5628,11 +5528,9 @@ class resize_client {
 
                         if (edge != edge::LEFT
                          && edge != edge::TOP_LEFT
-                         && edge != edge::BOTTOM_LEFT)
-                        {
+                         && edge != edge::BOTTOM_LEFT) {
                             if ((x > left_border - prox && x < left_border + prox)
-                            && (y > top_border && y < bottom_border))
-                            {
+                             && (y > top_border && y < bottom_border)) {
                                 resize_client(left_border, y, edge);
                                 return;
                             }
@@ -5640,11 +5538,9 @@ class resize_client {
 
                         if (edge != edge::BOTTOM_edge 
                          && edge != edge::BOTTOM_LEFT 
-                         && edge != edge::BOTTOM_RIGHT)
-                        {
+                         && edge != edge::BOTTOM_RIGHT) {
                             if ((y > bottom_border - prox && y < bottom_border + prox)
-                            && (x > left_border && x < right_border))
-                            {
+                             && (x > left_border && x < right_border)) {
                                 resize_client(x, bottom_border, edge);
                                 return;
                             }
@@ -5652,11 +5548,9 @@ class resize_client {
 
                         if (edge != edge::TOP
                          && edge != edge::TOP_LEFT
-                         && edge != edge::TOP_RIGHT)
-                        {
+                         && edge != edge::TOP_RIGHT) {
                             if ((y > top_border - prox && y < top_border + prox)
-                            && (x > left_border && x < right_border))
-                            {
+                             && (x > left_border && x < right_border)) {
                                 resize_client(x, top_border, edge);
                                 return;
                             }
@@ -5664,14 +5558,10 @@ class resize_client {
                     }
                     resize_client(x, y, edge);
                 }
-                void run(edge edge) /**
-                 * THIS IS THE MAIN EVENT LOOP FOR 'resize_client'
-                 */
-                {
+                void run(edge edge) {
                     xcb_generic_event_t * ev;
                     bool shouldContinue = true;
 
-                    // Wait for motion events and handle window resizing
                     while (shouldContinue) {
                         ev = xcb_wait_for_event(conn);
                         if (!ev) {
@@ -5696,36 +5586,27 @@ class resize_client {
                         free(ev); 
                     }
                 }
-                void run_double(edge edge) /**
-                 * THIS IS THE MAIN EVENT LOOP FOR 'resize_client'
-                 */
-                {
+                void run_double(edge edge) {
                     xcb_generic_event_t * ev;
                     bool shouldContinue = true;
 
-                    while (shouldContinue) 
-                    {
+                    while (shouldContinue) {
                         ev = xcb_wait_for_event(conn);
-                        if (!ev) 
-                        {
+                        if (!ev) {
                             continue;
                         }
 
-                        switch (ev->response_type & ~0x80)
-                        {
-                            case XCB_MOTION_NOTIFY: 
-                            {
+                        switch (ev->response_type & ~0x80) {
+                            case XCB_MOTION_NOTIFY: {
                                 const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
-                                if (isTimeToRender())
-                                {
+                                if (isTimeToRender()) {
                                     resize_client(c, e->root_x, e->root_y, edge);
                                     resize_client(c2, e->root_x, e->root_y, c2_edge);
                                     xcb_flush(conn); 
                                 }
                                 break;
                             }
-                            case XCB_BUTTON_RELEASE: 
-                            {
+                            case XCB_BUTTON_RELEASE: {
                                 shouldContinue = false;                        
                                 c->update();
                                 c2->update();
@@ -5739,8 +5620,7 @@ class resize_client {
                     const auto & currentTime = std::chrono::high_resolution_clock::now();
                     const std::chrono::duration<double, std::milli> & elapsedTime = currentTime - lastUpdateTime;
 
-                    if (elapsedTime.count() >= frameDuration) 
-                    {
+                    if (elapsedTime.count() >= frameDuration) {
                         lastUpdateTime = currentTime; 
                         
                         return true; 
@@ -5760,19 +5640,16 @@ class resize_client {
         const double frameDuration = 1000.0 / frameRate; 
     ;
     private: // functions
-        void snap(const uint16_t & x, const uint16_t & y)
-        {
+        void snap(const uint16_t & x, const uint16_t & y) {
             // WINDOW TO WINDOW SNAPPING 
-            for (const auto & cli : wm->cur_d->current_clients)
-            {
-                if (cli == this->c)
-                {
+            for (const auto & cli : wm->cur_d->current_clients) {
+                if (cli == this->c) {
                     continue;
                 }
 
                 // SNAP WINSOW TO 'LEFT' BORDER OF 'NON_CONTROLLED' WINDOW
                 if ((x > cli->x - N && x < cli->x + N) 
-                 && (y + this->c->height > cli->y && y < cli->y + cli->height))
+                 && (y + this->c->height > cli->y && y < cli->y + cli->height)) 
                 {
                     c->width_height((cli->x - this->c->x), (y - this->c->y));
                     return;
@@ -5788,36 +5665,27 @@ class resize_client {
             }
             c->width_height((x - this->c->x), (y - this->c->y));
         }
-        void run() /**
-         * THIS IS THE MAIN EVENT LOOP FOR 'resize_client'
-         */
-        {
+        void run() {
             xcb_generic_event_t * ev;
             bool shouldContinue = true;
 
             // Wait for motion events and handle window resizing
-            while (shouldContinue) 
-            {
+            while (shouldContinue) {
                 ev = xcb_wait_for_event(conn);
-                if (!ev) 
-                {
+                if (!ev) {
                     continue;
                 }
 
-                switch (ev->response_type & ~0x80) 
-                {
-                    case XCB_MOTION_NOTIFY: 
-                    {
+                switch (ev->response_type & ~0x80) {
+                    case XCB_MOTION_NOTIFY: {
                         const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
-                        if (isTimeToRender())
-                        {
+                        if (isTimeToRender()) {
                             snap(e->root_x, e->root_y);
                             xcb_flush(conn); 
                         }
                         break;
                     }
-                    case XCB_BUTTON_RELEASE: 
-                    {
+                    case XCB_BUTTON_RELEASE: {
                         shouldContinue = false;                        
                         c->update();
                         break;
@@ -5829,23 +5697,14 @@ class resize_client {
         }
         bool isTimeToRender() 
         {
-            // CALCULATE ELAPSED TIME SINCE THE LAST UPDATE
             const auto & currentTime = std::chrono::high_resolution_clock::now();
             const std::chrono::duration<double, std::milli> & elapsedTime = currentTime - lastUpdateTime;
 
-            /*
-                CHECK IF THE ELAPSED TIME EXCEEDS THE FRAME DURATION
-             */ 
-            if (elapsedTime.count() >= frameDuration) 
-            {
-                // UPDATE THE LAST_UPDATE_TIME TO THE 
-                // CURRENT TIME FOR THE NEXT CHECK
+            if (elapsedTime.count() >= frameDuration) {
                 lastUpdateTime = currentTime; 
                 
-                // RETURN TRUE IF IT'S TIME TO RENDER
                 return true; 
             }
-            // RETURN FALSE IF NOT ENOUGH TIME HAS PASSED
             return false; 
         }
     ;
@@ -5969,29 +5828,20 @@ class max_win {
     ;
 };
 namespace win_tools {
-    xcb_visualtype_t * find_argb_visual(xcb_connection_t *conn, xcb_screen_t *screen) /**
-     *
-     * @brief Function to find an ARGB visual 
-     *
-     */
-    {
+    xcb_visualtype_t * find_argb_visual(xcb_connection_t *conn, xcb_screen_t *screen) {
         xcb_depth_iterator_t depth_iter = xcb_screen_allowed_depths_iterator(screen);
 
-        for (; depth_iter.rem; xcb_depth_next(&depth_iter)) 
-        {
+        for (; depth_iter.rem; xcb_depth_next(&depth_iter)) {
             xcb_visualtype_iterator_t visual_iter = xcb_depth_visuals_iterator(depth_iter.data);
-            for (; visual_iter.rem; xcb_visualtype_next(&visual_iter)) 
-            {
-                if (depth_iter.data->depth == 32) 
-                {
+            for (; visual_iter.rem; xcb_visualtype_next(&visual_iter)) {
+                if (depth_iter.data->depth == 32) {
                     return visual_iter.data;
                 }
             }
         }
         return NULL;
     }
-    void close_button_kill(client * c)
-    {
+    void close_button_kill(client * c) {
         wm->send_sigterm_to_client(c);
     }
 }
@@ -6005,20 +5855,15 @@ namespace win_tools {
  */
 class tile {
     public: // constructors
-        tile(client * & c, TILE tile)
-        {
-            if (c->win.is_EWMH_fullscreen())
-            {
+        tile(client * & c, TILE tile) {
+            if (c->win.is_EWMH_fullscreen()) {
                 return;
             }
 
-            switch (tile) 
-            {
-                case TILE::LEFT:
-                {
+            switch (tile) {
+                case TILE::LEFT: {
                     // IF 'CURRENTLT_TILED' TO 'LEFT'
-                    if (current_tile_pos(c, TILEPOS::LEFT))
-                    {
+                    if (current_tile_pos(c, TILEPOS::LEFT)) {
                         set_tile_ogsize(c);
                         return;
                     }
@@ -6033,8 +5878,7 @@ class tile {
                     }
 
                     // IF 'CURRENTLY_TILED' TO 'RIGHT_DOWN'
-                    if (current_tile_pos(c, TILEPOS::RIGHT_DOWN))
-                    {
+                    if (current_tile_pos(c, TILEPOS::RIGHT_DOWN)) {
                         set_tile_sizepos(c, TILEPOS::LEFT_DOWN);
                         return;
                     }
@@ -6050,8 +5894,7 @@ class tile {
                     set_tile_sizepos(c, TILEPOS::LEFT);
                     break;
                 }
-                case TILE::RIGHT:
-                {
+                case TILE::RIGHT: {
                     // IF 'CURRENTLY_TILED' TO 'RIGHT'
                     if (current_tile_pos(c, TILEPOS::RIGHT))
                     {
@@ -6086,8 +5929,7 @@ class tile {
                     set_tile_sizepos(c, TILEPOS::RIGHT);
                     break;
                 }
-                case TILE::DOWN:
-                {
+                case TILE::DOWN: {
                     // IF 'CURRENTLY_TILED' 'LEFT' OR 'LEFT_UP'
                     if (current_tile_pos(c, TILEPOS::LEFT)
                      || current_tile_pos(c, TILEPOS::LEFT_UP))
@@ -6112,8 +5954,7 @@ class tile {
                         return;
                     }
                 }
-                case TILE::UP:
-                {
+                case TILE::UP: {
                     // IF 'CURRENTLY_TILED' 'LEFT'
                     if (current_tile_pos(c, TILEPOS::LEFT)
                      || current_tile_pos(c, TILEPOS::LEFT_DOWN))
@@ -6134,19 +5975,15 @@ class tile {
         }
     ;
     private: // functions
-        void save_tile_ogsize(client * & c)
-        {
+        void save_tile_ogsize(client * & c) {
             c->tile_ogsize.x      = c->x;
             c->tile_ogsize.y      = c->y;
             c->tile_ogsize.width  = c->width;
             c->tile_ogsize.height = c->height;
         }
-        bool current_tile_pos(client * & c, TILEPOS mode)
-        {
-            switch (mode) 
-            {
-                case TILEPOS::LEFT:
-                {
+        bool current_tile_pos(client * & c, TILEPOS mode) {
+            switch (mode) {
+                case TILEPOS::LEFT: {
                     if (c->x        == 0 
                      && c->y        == 0 
                      && c->width    == screen->width_in_pixels / 2 
@@ -6156,8 +5993,7 @@ class tile {
                     }
                     break;
                 }
-                case TILEPOS::RIGHT:
-                {
+                case TILEPOS::RIGHT: {
                     if (c->x        == screen->width_in_pixels / 2 
                      && c->y        == 0 
                      && c->width    == screen->width_in_pixels / 2
@@ -6167,8 +6003,7 @@ class tile {
                     }
                     break;
                 }
-                case TILEPOS::LEFT_DOWN:
-                {
+                case TILEPOS::LEFT_DOWN: {
                     if (c->x        == 0
                      && c->y        == screen->height_in_pixels / 2
                      && c->width    == screen->width_in_pixels / 2
@@ -6178,8 +6013,7 @@ class tile {
                     }
                     break;
                 }
-                case TILEPOS::RIGHT_DOWN:
-                {
+                case TILEPOS::RIGHT_DOWN: {
                     if (c->x        == screen->width_in_pixels / 2
                      && c->y        == screen->height_in_pixels / 2
                      && c->width    == screen->width_in_pixels / 2
@@ -6189,8 +6023,7 @@ class tile {
                     }
                     break;
                 }
-                case TILEPOS::LEFT_UP:
-                {
+                case TILEPOS::LEFT_UP: {
                     if (c->x        == 0
                      && c->y        == 0
                      && c->width    == screen->width_in_pixels / 2
@@ -6200,8 +6033,7 @@ class tile {
                     }
                     break;
                 }
-                case TILEPOS::RIGHT_UP:
-                {
+                case TILEPOS::RIGHT_UP: {
                     if (c->x        == screen->width_in_pixels / 2
                      && c->y        == 0
                      && c->width    == screen->width_in_pixels / 2
@@ -6216,10 +6048,8 @@ class tile {
         }
         void set_tile_sizepos(client * & c, TILEPOS sizepos)
         {
-            switch (sizepos) 
-            {
-                case TILEPOS::LEFT:
-                {
+            switch (sizepos) {
+                case TILEPOS::LEFT: {
                     animate
                     (
                         c, 
@@ -6230,8 +6060,7 @@ class tile {
                     );
                     return;
                 }
-                case TILEPOS::RIGHT:
-                {
+                case TILEPOS::RIGHT: {
                     animate
                     (
                         c, 
@@ -6242,8 +6071,7 @@ class tile {
                     );
                     return;
                 }
-                case TILEPOS::LEFT_DOWN:
-                {
+                case TILEPOS::LEFT_DOWN: {
                     animate
                     (
                         c, 
@@ -6254,8 +6082,7 @@ class tile {
                     );
                     return;
                 }
-                case TILEPOS::RIGHT_DOWN:
-                {
+                case TILEPOS::RIGHT_DOWN: {
                     animate
                     (
                         c, 
@@ -6266,8 +6093,7 @@ class tile {
                     );
                     return;
                 }
-                case TILEPOS::LEFT_UP:
-                {
+                case TILEPOS::LEFT_UP: {
                     animate
                     (
                         c, 
@@ -6278,8 +6104,7 @@ class tile {
                     );
                     return;
                 } 
-                case TILEPOS::RIGHT_UP:
-                {
+                case TILEPOS::RIGHT_UP: {
                     animate
                     (
                         c, 
@@ -6292,8 +6117,7 @@ class tile {
                 }
             }
         }
-        void set_tile_ogsize(client * & c)
-        {
+        void set_tile_ogsize(client * & c) {
             animate
             (
                 c, 
@@ -6303,11 +6127,9 @@ class tile {
                 c->tile_ogsize.height
             );
         }
-        void animate_old(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight)
-        {
+        void animate_old(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight) {
             Mwm_Animator anim(c->frame);
-            anim.animate
-            (
+            anim.animate(
                 c->x,
                 c->y, 
                 c->width, 
@@ -6320,11 +6142,9 @@ class tile {
             );
             c->update();
         }
-        void animate(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight)
-        {
+        void animate(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight) {
             Mwm_Animator anim(c);
-            anim.animate_client
-            (
+            anim.animate_client(
                 c->x,
                 c->y, 
                 c->width, 
@@ -6371,23 +6191,17 @@ class Events {
             const auto * e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
                 
             if (e->detail == wm->key_codes.t) {
-                switch (e->state) 
-                {
+                switch (e->state) {
                     case CTRL + ALT:
-                    {
                         wm->launcher.program((char *) "konsole");
                         break;
-                    }
                 }
             }
             if (e->detail == wm->key_codes.q) {
-                switch (e->state) 
-                {
+                switch (e->state) {
                     case SHIFT + ALT:
-                    {
                         wm->quit(0);
                         break;
-                    }
                 }
             }
             if (e->detail == wm->key_codes.f11) {
@@ -6395,71 +6209,52 @@ class Events {
                 max_win(c, max_win::EWMH_MAXWIN);
             }
             if (e->detail == wm->key_codes.n_1) {
-                switch (e->state) 
-                {
+                switch (e->state) {
                     case ALT:
-                    {
                         change_desktop::teleport_to(1);
                         break;
-                    }
                 }
             }
             if (e->detail == wm->key_codes.n_2) {
-                switch (e->state) 
-                {
+                switch (e->state) {
                     case ALT:
-                    {
                         change_desktop::teleport_to(2);
                         break;
-                    }
                 }
             }
             if (e->detail == wm->key_codes.n_3) {
-                switch (e->state) 
-                {
+                switch (e->state) {
                     case ALT:
-                    {
                         change_desktop::teleport_to(3);
                         break;
-                    }
                 }
             }
             if (e->detail == wm->key_codes.n_4) {
-                switch (e->state) 
-                {
+                switch (e->state) {
                     case ALT:
-                    {
                         change_desktop::teleport_to(4);
                         break;
-                    }
                 }
             }
             if (e->detail == wm->key_codes.n_5) {
-                switch (e->state) 
-                {
+                switch (e->state) {
                     case ALT:
-                    {
                         change_desktop::teleport_to(5);
                         break;
-                    }
                 }
             }
             if (e->detail == wm->key_codes.r_arrow) {
-                switch (e->state) 
-                {
-                    case SHIFT + CTRL + SUPER:
-                    {
+                switch (e->state) {
+                    case SHIFT + CTRL + SUPER: {
                         move_to_next_desktop_w_app();
                         break;
                     }
-                    case CTRL + SUPER:
-                    {
+                    case CTRL + SUPER: {
 				        change_desktop change_desktop(conn);
                         change_desktop.change_to(change_desktop::NEXT);
                         break;
                     }
-                    case SUPER:
-                    {
+                    case SUPER: {
                         client * c = wm->client_from_window(& e->event);
                         tile(c, TILE::RIGHT);
                         break;
@@ -6468,21 +6263,17 @@ class Events {
                 }
             }
             if (e->detail == wm->key_codes.l_arrow) {
-                switch (e->state) 
-                {
-                    case SHIFT + CTRL + SUPER:
-                    {
+                switch (e->state) {
+                    case SHIFT + CTRL + SUPER: {
                         move_to_previus_desktop_w_app();
                         break;
                     }
-                    case CTRL + SUPER:
-                    {
+                    case CTRL + SUPER: {
 				        change_desktop change_desktop(conn);
                         change_desktop.change_to(change_desktop::PREV);
                         break;
                     }
-                    case SUPER:
-                    {
+                    case SUPER: {
                         client * c = wm->client_from_window(& e->event);
                         tile(c, TILE::LEFT);
                         break;
@@ -6490,55 +6281,43 @@ class Events {
                 }
             }
             if (e->detail == wm->key_codes.d_arrow) {
-                switch (e->state) 
-                {
+                switch (e->state) {
                     case SUPER:
                         client * c = wm->client_from_window(& e->event);
                         tile(c, TILE::DOWN);
                         return;
                         break;
-                    ;
                 }
             }
             if (e->detail == wm->key_codes.u_arrow) {
-                switch (e->state) 
-                {
+                switch (e->state) {
                     case SUPER:
                         client * c = wm->client_from_window(& e->event);
                         tile(c, TILE::UP);
                         break;
-                    ;
                 }
             }
             if (e->detail == wm->key_codes.tab) {
-                switch (e->state) 
-                {
+                switch (e->state) {
                     case ALT:
                         wm->cycle_focus();
                         break;
-                    ;
                 }
             }
             if (e->detail == wm->key_codes.k) {
-                switch (e->state) 
-                {
+                switch (e->state) {
                     case SUPER:
                         client * c = wm->client_from_window(& e->event);
-                        if (!c)
-                        {
+                        if (!c) {
                             return;
                         }
 
-                        if (c->win.is_mask_active(XCB_EVENT_MASK_ENTER_WINDOW))
-                        {
+                        if (c->win.is_mask_active(XCB_EVENT_MASK_ENTER_WINDOW)) {
                             log_info("event_mask is active");
-                        }
-                        else 
-                        {
+                        } else {
                             log_info("event_mask is NOT active");
                         }
                         break;
-                    ;
                 }
             }
         }
@@ -6562,10 +6341,8 @@ class Events {
             client * c;
             if (BORDER_SIZE == 0) {
                 c = wm->client_from_pointer(10);
-                if (c)
-                {
-                    if (e->detail == L_MOUSE_BUTTON)
-                    {
+                if (c) {
+                    if (e->detail == L_MOUSE_BUTTON) {
                         c->raise();
                         resize_client::no_border border(c, 0, 0);
                         wm->focus_client(c);
@@ -6574,8 +6351,7 @@ class Events {
                 }
             }
             if (e->event == wm->root) {
-                if (e->detail == R_MOUSE_BUTTON)
-                {
+                if (e->detail == R_MOUSE_BUTTON) {
                     wm->context_menu->show();
                     return;
                 }
@@ -6586,14 +6362,12 @@ class Events {
             }
             if (e->detail == L_MOUSE_BUTTON) {
                 if (e->event == c->win) {
-                    switch (e->state) 
-                    {
+                    switch (e->state) {
                         case ALT:
                             c->raise();
                             mv_client mv(c, e->event_x, e->event_y + 20);
                             wm->focus_client(c);
                             break;
-                        ;
                     }
                     c->raise();
                     wm->focus_client(c);
