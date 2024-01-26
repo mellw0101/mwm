@@ -810,11 +810,13 @@ class File {
         }
         std::string findPngFile(const std::vector<const char *>& dirs, const char * name) {
             for (const auto& dir : dirs) {
-                for (const auto& entry : std::filesystem::directory_iterator(dir)) {
-                    if (entry.is_regular_file()) {
-                        std::string filename = entry.path().filename().string();
-                        if (filename.find(name) != std::string::npos && filename.find(".png") != std::string::npos) {
-                            return entry.path().string();
+                if (std::filesystem::is_directory(dir)) {
+                    for (const auto& entry : std::filesystem::directory_iterator(dir)) {
+                        if (entry.is_regular_file()) {
+                            std::string filename = entry.path().filename().string();
+                            if (filename.find(name) != std::string::npos && filename.find(".png") != std::string::npos) {
+                                return entry.path().string();
+                            }
                         }
                     }
                 }
@@ -4270,7 +4272,7 @@ class button {
                     "/usr/share/icons/hicolor/256x256/apps/",
                     "/usr/share/icons/gnome/48x48/apps/",
                     "/usr/share/icons/gnome/32x32/apps/",
-                    "/usr/share/pixmaps"
+                    "/usr/share/pixmap"
                 },
                 name
             );
