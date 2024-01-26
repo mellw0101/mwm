@@ -5665,7 +5665,6 @@ class resize_client {
             xcb_generic_event_t * ev;
             bool shouldContinue = true;
 
-            // Wait for motion events and handle window resizing
             while (shouldContinue) {
                 ev = xcb_wait_for_event(conn);
                 if (!ev) {
@@ -5687,7 +5686,6 @@ class resize_client {
                         break;
                     }
                 }
-                // Free the event memory after processing
                 free(ev); 
             }
         }
@@ -5711,27 +5709,31 @@ class max_win {
             BUTTON_MAXWIN,
             EWMH_MAXWIN
         };
-        max_win(client * c, max_win_type type) {
+        max_win(client * c, max_win_type type) 
+        : c(c) {
             switch (type) {
                 case EWMH_MAXWIN:
                     if (c->win.is_EWMH_fullscreen()) {
-                        ewmh_unmax_win(c);
+                        ewmh_unmax_win();
                     } else {
-                        ewmh_max_win(c);
+                        ewmh_max_win();
                     }
                     break;
                 case BUTTON_MAXWIN:
-                    if (is_max_win(c)) {
-                        button_unmax_win(c);
+                    if (is_max_win()) {
+                        button_unmax_win();
                     } else {
-                        button_max_win(c);
+                        button_max_win();
                     }
                     break;
             }
         }
     ;
+    private:
+        client * c;
+    ;
     private: // functions
-        void max_win_animate(client * c, const int & endX, const int & endY, const int & endWidth, const int & endHeight) {
+        void max_win_animate(const int & endX, const int & endY, const int & endWidth, const int & endHeight) {
             animate_client(
                 c, 
                 endX, 
@@ -5741,25 +5743,24 @@ class max_win {
                 MAXWIN_ANIMATION_DURATION
             );
         }
-        void save_max_ewmh_ogsize(client * c) {
+        void save_max_ewmh_ogsize() {
             c->max_ewmh_ogsize.x      = c->x;
             c->max_ewmh_ogsize.y      = c->y;
             c->max_ewmh_ogsize.width  = c->width;
             c->max_ewmh_ogsize.height = c->height;
         }
-        void ewmh_max_win(client * c) {
-            save_max_ewmh_ogsize(c);
+        void ewmh_max_win() {
+            save_max_ewmh_ogsize();
             max_win_animate(
-                c, 
-                - BORDER_SIZE, 
-                - TITLE_BAR_HEIGHT - BORDER_SIZE, 
-                screen->width_in_pixels + (BORDER_SIZE * 2), 
+                - BORDER_SIZE,
+                - TITLE_BAR_HEIGHT - BORDER_SIZE,
+                screen->width_in_pixels + (BORDER_SIZE * 2),
                 screen->height_in_pixels + TITLE_BAR_HEIGHT + (BORDER_SIZE * 2)
             );
             c->win.set_EWMH_fullscreen_state();
             xcb_flush(conn);
         }
-        void ewmh_unmax_win(client * c) {
+        void ewmh_unmax_win() {
             if (c->max_ewmh_ogsize.width > screen->width_in_pixels) {
                 (c->max_ewmh_ogsize.width = screen->width_in_pixels / 2);
             }
@@ -5774,7 +5775,6 @@ class max_win {
             }
 
             max_win_animate(
-                c, 
                 c->max_ewmh_ogsize.x, 
                 c->max_ewmh_ogsize.y, 
                 c->max_ewmh_ogsize.width, 
@@ -5783,16 +5783,15 @@ class max_win {
             c->win.unset_EWMH_fullscreen_state();
             xcb_flush(conn);
         }
-        void save_max_button_ogsize(client * c) {
+        void save_max_button_ogsize() {
             c->max_button_ogsize.x      = c->x;
             c->max_button_ogsize.y      = c->y;
             c->max_button_ogsize.width  = c->width;
             c->max_button_ogsize.height = c->height;
         }
-        void button_max_win(client * c) {
-            save_max_button_ogsize(c);
+        void button_max_win() {
+            save_max_button_ogsize();
             max_win_animate(
-                c,
                 0,
                 0,
                 screen->width_in_pixels,
@@ -5800,9 +5799,8 @@ class max_win {
             );
             xcb_flush(conn);
         }
-        void button_unmax_win(client * c) {
+        void button_unmax_win() {
             max_win_animate(
-                c, 
                 c->max_button_ogsize.x,
                 c->max_button_ogsize.y,
                 c->max_button_ogsize.width,
@@ -5810,7 +5808,7 @@ class max_win {
             );
             xcb_flush(conn);
         }
-        bool is_max_win(client * c) {
+        bool is_max_win() {
             if (c->x == 0
              && c->y == 0
              && c->width == screen->width_in_pixels
