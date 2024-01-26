@@ -1109,6 +1109,16 @@ class window {
                 );
                 xcb_flush(conn);
             }
+            void make_child(const uint32_t & window_to_make_child, const uint32_t & child_x, const uint32_t & child_y) {
+                xcb_reparent_window(
+                    conn,
+                    window_to_make_child,
+                    _window,
+                    child_x,
+                    child_y
+                );
+                xcb_flush(conn);
+            }
             void kill() {
                 xcb_intern_atom_cookie_t protocols_cookie = xcb_intern_atom(conn, 1, 12, "WM_PROTOCOLS");
                 xcb_intern_atom_reply_t *protocols_reply = xcb_intern_atom_reply(conn, protocols_cookie, NULL);
@@ -5841,118 +5851,122 @@ namespace win_tools {
  */
 class tile {
     public: // constructors
-        tile(client * & c, TILE tile) {
+        tile(client * & c, TILE tile)
+        : c(c) {
             if (c->win.is_EWMH_fullscreen()) {
                 return;
             }
 
             switch (tile) {
                 case TILE::LEFT:
-                    if (current_tile_pos(c, TILEPOS::LEFT)) { // IF 'CURRENTLT_TILED' TO 'LEFT'
-                        set_tile_ogsize(c);
+                    if (current_tile_pos(TILEPOS::LEFT)) { // IF 'CURRENTLT_TILED' TO 'LEFT'
+                        set_tile_ogsize();
                         return;
                     }
                     
-                    if (current_tile_pos(c, TILEPOS::RIGHT) // IF 'CURRENTLY_TILED' TO 'RIGHT', 'LEFT_DOWN' OR 'LEFT_UP'
-                     || current_tile_pos(c, TILEPOS::LEFT_DOWN)
-                     || current_tile_pos(c, TILEPOS::LEFT_UP))
+                    if (current_tile_pos(TILEPOS::RIGHT) // IF 'CURRENTLY_TILED' TO 'RIGHT', 'LEFT_DOWN' OR 'LEFT_UP'
+                     || current_tile_pos(TILEPOS::LEFT_DOWN)
+                     || current_tile_pos(TILEPOS::LEFT_UP))
                     {
-                        set_tile_sizepos(c, TILEPOS::LEFT);
+                        set_tile_sizepos(TILEPOS::LEFT);
                         return;
                     }
 
                     
-                    if (current_tile_pos(c, TILEPOS::RIGHT_DOWN)) { // IF 'CURRENTLY_TILED' TO 'RIGHT_DOWN'
-                        set_tile_sizepos(c, TILEPOS::LEFT_DOWN);
+                    if (current_tile_pos(TILEPOS::RIGHT_DOWN)) { // IF 'CURRENTLY_TILED' TO 'RIGHT_DOWN'
+                        set_tile_sizepos(TILEPOS::LEFT_DOWN);
                         return;
                     }
 
                     // IF 'CURRENTLY_TILED' TO 'RIGHT_UP'
-                    if (current_tile_pos(c, TILEPOS::RIGHT_UP))
+                    if (current_tile_pos(TILEPOS::RIGHT_UP))
                     {
-                        set_tile_sizepos(c, TILEPOS::LEFT_UP);
+                        set_tile_sizepos(TILEPOS::LEFT_UP);
                         return;
                     }
 
-                    save_tile_ogsize(c);
-                    set_tile_sizepos(c, TILEPOS::LEFT);
+                    save_tile_ogsize();
+                    set_tile_sizepos(TILEPOS::LEFT);
                     break;
                 case TILE::RIGHT:
-                    if (current_tile_pos(c, TILEPOS::RIGHT)) // IF 'CURRENTLY_TILED' TO 'RIGHT'
+                    if (current_tile_pos(TILEPOS::RIGHT)) // IF 'CURRENTLY_TILED' TO 'RIGHT'
                     {
-                        set_tile_ogsize(c);
+                        set_tile_ogsize();
                         return;
                     }
 
-                    if (current_tile_pos(c, TILEPOS::LEFT) // IF 'CURRENTLT_TILED' TO 'LEFT', 'RIGHT_DOWN' OR 'RIGHT_UP' 
-                     || current_tile_pos(c, TILEPOS::RIGHT_UP)
-                     || current_tile_pos(c, TILEPOS::RIGHT_DOWN))
+                    if (current_tile_pos(TILEPOS::LEFT) // IF 'CURRENTLT_TILED' TO 'LEFT', 'RIGHT_DOWN' OR 'RIGHT_UP' 
+                     || current_tile_pos(TILEPOS::RIGHT_UP)
+                     || current_tile_pos(TILEPOS::RIGHT_DOWN))
                     {
-                        set_tile_sizepos(c, TILEPOS::RIGHT);
+                        set_tile_sizepos(TILEPOS::RIGHT);
                         return;
                     }
                     
-                    if (current_tile_pos(c, TILEPOS::LEFT_DOWN)) // IF 'CURRENTLT_TILED' 'LEFT_DOWN'
+                    if (current_tile_pos(TILEPOS::LEFT_DOWN)) // IF 'CURRENTLT_TILED' 'LEFT_DOWN'
                     {
-                        set_tile_sizepos(c, TILEPOS::RIGHT_DOWN);
+                        set_tile_sizepos(TILEPOS::RIGHT_DOWN);
                         return;
                     }
                     
-                    if (current_tile_pos(c, TILEPOS::LEFT_UP)) // IF 'CURRENTLY_TILED' 'LEFT_UP'
+                    if (current_tile_pos(TILEPOS::LEFT_UP)) // IF 'CURRENTLY_TILED' 'LEFT_UP'
                     {
-                        set_tile_sizepos(c, TILEPOS::RIGHT_UP);
+                        set_tile_sizepos(TILEPOS::RIGHT_UP);
                         return;
                     }
 
-                    save_tile_ogsize(c);
-                    set_tile_sizepos(c, TILEPOS::RIGHT);
+                    save_tile_ogsize();
+                    set_tile_sizepos(TILEPOS::RIGHT);
                     break;
                 case TILE::DOWN:
-                    if (current_tile_pos(c, TILEPOS::LEFT) // IF 'CURRENTLY_TILED' 'LEFT' OR 'LEFT_UP'
-                     || current_tile_pos(c, TILEPOS::LEFT_UP))
+                    if (current_tile_pos(TILEPOS::LEFT) // IF 'CURRENTLY_TILED' 'LEFT' OR 'LEFT_UP'
+                     || current_tile_pos(TILEPOS::LEFT_UP))
                     {
-                        set_tile_sizepos(c, TILEPOS::LEFT_DOWN);
+                        set_tile_sizepos(TILEPOS::LEFT_DOWN);
                         return;
                     }
 
-                    if (current_tile_pos(c, TILEPOS::RIGHT) // IF 'CURRENTLY_TILED' 'RIGHT' OR 'RIGHT_UP'
-                     || current_tile_pos(c, TILEPOS::RIGHT_UP))
+                    if (current_tile_pos(TILEPOS::RIGHT) // IF 'CURRENTLY_TILED' 'RIGHT' OR 'RIGHT_UP'
+                     || current_tile_pos(TILEPOS::RIGHT_UP))
                     {
-                        set_tile_sizepos(c, TILEPOS::RIGHT_DOWN);
+                        set_tile_sizepos(TILEPOS::RIGHT_DOWN);
                         return;
                     }
   
-                    if (current_tile_pos(c, TILEPOS::LEFT_DOWN) // IF 'CURRENTLY_TILED' 'LEFT_DOWN' OR 'RIGHT_DOWN'
-                     || current_tile_pos(c, TILEPOS::RIGHT_DOWN))
+                    if (current_tile_pos(TILEPOS::LEFT_DOWN) // IF 'CURRENTLY_TILED' 'LEFT_DOWN' OR 'RIGHT_DOWN'
+                     || current_tile_pos(TILEPOS::RIGHT_DOWN))
                     {
-                        set_tile_ogsize(c);
+                        set_tile_ogsize();
                         return;
                     }
                 case TILE::UP:
-                    if (current_tile_pos(c, TILEPOS::LEFT) // IF 'CURRENTLY_TILED' 'LEFT'
-                     || current_tile_pos(c, TILEPOS::LEFT_DOWN))
+                    if (current_tile_pos(TILEPOS::LEFT) // IF 'CURRENTLY_TILED' 'LEFT'
+                     || current_tile_pos(TILEPOS::LEFT_DOWN))
                     {
-                        set_tile_sizepos(c, TILEPOS::LEFT_UP);
+                        set_tile_sizepos(TILEPOS::LEFT_UP);
                         return;
                     }
 
-                    if (current_tile_pos(c, TILEPOS::RIGHT) // IF 'CURRENTLY_TILED' 'RIGHT' OR RIGHT_DOWN
-                     || current_tile_pos(c, TILEPOS::RIGHT_DOWN))
+                    if (current_tile_pos(TILEPOS::RIGHT) // IF 'CURRENTLY_TILED' 'RIGHT' OR RIGHT_DOWN
+                     || current_tile_pos(TILEPOS::RIGHT_DOWN))
                     {
-                        set_tile_sizepos(c, TILEPOS::RIGHT_UP);
+                        set_tile_sizepos(TILEPOS::RIGHT_UP);
                         return;
                     }
             }
         }
     ;
+    private: // variabels
+        client * c;
+    ;
     private: // functions
-        void save_tile_ogsize(client * & c) {
+        void save_tile_ogsize() {
             c->tile_ogsize.x      = c->x;
             c->tile_ogsize.y      = c->y;
             c->tile_ogsize.width  = c->width;
             c->tile_ogsize.height = c->height;
         }
-        bool current_tile_pos(client * & c, TILEPOS mode) {
+        bool current_tile_pos(TILEPOS mode) {
             switch (mode) {
                 case TILEPOS::LEFT:
                     if (c->x        == 0 
@@ -6011,84 +6025,77 @@ class tile {
             }
             return false;
         }
-        void set_tile_sizepos(client * & c, TILEPOS sizepos) {
+        void set_tile_sizepos(TILEPOS sizepos) {
             switch (sizepos) {
                 case TILEPOS::LEFT:
                     animate(
-                        c, 
-                        0, 
-                        0, 
-                        screen->width_in_pixels / 2, 
+                        0,
+                        0,
+                        screen->width_in_pixels / 2,
                         screen->height_in_pixels
                     );
                     return;
                 case TILEPOS::RIGHT:
                     animate(
-                        c, 
-                        screen->width_in_pixels / 2, 
-                        0, 
-                        screen->width_in_pixels / 2, 
+                        screen->width_in_pixels / 2,
+                        0,
+                        screen->width_in_pixels / 2,
                         screen->height_in_pixels
                     );
                     return;
                 case TILEPOS::LEFT_DOWN:
                     animate(
-                        c, 
-                        0, 
-                        screen->height_in_pixels / 2, 
-                        screen->width_in_pixels / 2, 
+                        0,
+                        screen->height_in_pixels / 2,
+                        screen->width_in_pixels / 2,
                         screen->height_in_pixels / 2
                     );
                     return;
                 case TILEPOS::RIGHT_DOWN:
                     animate(
-                        c, 
-                        screen->width_in_pixels / 2, 
-                        screen->height_in_pixels / 2, 
-                        screen->width_in_pixels / 2, 
+                        screen->width_in_pixels / 2,
+                        screen->height_in_pixels / 2,
+                        screen->width_in_pixels / 2,
                         screen->height_in_pixels / 2
                     );
                     return;
                 case TILEPOS::LEFT_UP:
                     animate(
-                        c, 
-                        0, 
-                        0, 
-                        screen->width_in_pixels / 2, 
+                        0,
+                        0,
+                        screen->width_in_pixels / 2,
                         screen->height_in_pixels / 2
                     );
                     return;
                 case TILEPOS::RIGHT_UP:
                     animate(
-                        c, 
-                        screen->width_in_pixels / 2, 
-                        0, 
-                        screen->width_in_pixels / 2, 
+                        screen->width_in_pixels / 2,
+                        0,
+                        screen->width_in_pixels / 2,
                         screen->height_in_pixels / 2
                     );
                     return;
             }
         }
-        void set_tile_ogsize(client * & c) {
+        void set_tile_ogsize() {
             animate(
-                c, 
-                c->tile_ogsize.x, 
-                c->tile_ogsize.y, 
-                c->tile_ogsize.width, 
+                c->tile_ogsize.x,
+                c->tile_ogsize.y,
+                c->tile_ogsize.width,
                 c->tile_ogsize.height
             );
         }
-        void animate(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight) {
+        void animate(const int & end_x, const int & end_y, const int & end_width, const int & end_height) {
             Mwm_Animator anim(c);
             anim.animate_client(
                 c->x,
                 c->y, 
                 c->width, 
                 c->height, 
-                endX,
-                endY, 
-                endWidth, 
-                endHeight, 
+                end_x,
+                end_y, 
+                end_width, 
+                end_height, 
                 TILE_ANIMATION_DURATION
             );
             c->update();
