@@ -4912,7 +4912,7 @@ class mv_client {
                 return;
             }
 
-            pointer.grab(0);
+            pointer.grab(wm->root);
             run();
             xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
             xcb_flush(conn);
@@ -4944,8 +4944,8 @@ class mv_client {
             for (const auto & cli : wm->cur_d->current_clients) {
                 if ((x > cli->x + cli->width - N && x < cli->x + cli->width + N)   // SNAP WINDOW TO 'RIGHT' BORDER OF 'NON_CONTROLLED' WINDOW
                  && (y + c->height > cli->y && y < cli->y + cli->height)) {
-                    // SNAP WINDOW TO 'RIGHT_TOP' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
-                    if (y > cli->y - NC && y < cli->y + NC) {  
+                    
+                    if (y > cli->y - NC && y < cli->y + NC) { // SNAP WINDOW TO 'RIGHT_TOP' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
                         c->frame.x_y((cli->x + cli->width), cli->y);
                         return;
                     }
