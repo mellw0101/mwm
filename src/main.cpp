@@ -4272,7 +4272,7 @@ class button {
                     "/usr/share/icons/hicolor/256x256/apps/",
                     "/usr/share/icons/gnome/48x48/apps/",
                     "/usr/share/icons/gnome/32x32/apps/",
-                    "/usr/share/pixmap"
+                    "/usr/share/pixmaps"
                 },
                 name
             );
