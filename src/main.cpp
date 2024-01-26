@@ -4264,12 +4264,13 @@ class button {
             button_action();
         }
         void put_icon_on_button() {
-            std::string icon_path = file.find_png_icon(
+            std::string icon_path = file.findPngFile(
                 {
                     "/usr/share/icons/gnome/256x256/apps/",
                     "/usr/share/icons/hicolor/256x256/apps/",
                     "/usr/share/icons/gnome/48x48/apps/",
-                    "/usr/share/icons/gnome/32x32/apps/"
+                    "/usr/share/icons/gnome/32x32/apps/",
+                    "/usr/share/pixmap"
                 },
                 name
             );
