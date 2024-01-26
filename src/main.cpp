@@ -4912,7 +4912,7 @@ class mv_client {
                 return;
             }
 
-            pointer.grab(c->frame);
+            pointer.grab(0);
             run();
             xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
             xcb_flush(conn);
