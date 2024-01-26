@@ -6447,6 +6447,7 @@ void setup_wm() {
     dock = new Dock;
     dock->add_app("konsole");
     dock->add_app("alacritty");
+    dock->add_app("google-chrome-stable");
     dock->add_app("falkon");
     dock->init();
 
