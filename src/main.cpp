@@ -60,6 +60,7 @@
 #include <functional>
 #include <unordered_map>
 #include <xcb/xproto.h>
+#include <filesystem>
 
 #include "Log.hpp"
 Logger log;
@@ -802,6 +803,19 @@ class File {
                 for (const auto & file : files) {
                     if (file == name) {
                         return dir + file;
+                    }
+                }
+            }
+            return "";
+        }
+        std::string findPngFile(const std::vector<const char *>& dirs, const char * name) {
+            for (const auto& dir : dirs) {
+                for (const auto& entry : std::filesystem::directory_iterator(dir)) {
+                    if (entry.is_regular_file()) {
+                        std::string filename = entry.path().filename().string();
+                        if (filename.find(name) != std::string::npos && filename.find(".png") != std::string::npos) {
+                            return entry.path().string();
+                        }
                     }
                 }
             }
