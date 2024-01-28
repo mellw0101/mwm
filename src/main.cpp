@@ -4925,39 +4925,34 @@ class mv_client {
         int start_y;
         bool shouldContinue = true;
         xcb_generic_event_t * ev;
-        /* DEFENITIONS TO REDUCE REDUNDENT CODE IN 'snap' FUNCTION */
         #define RIGHT_  screen->width_in_pixels  - c->width
         #define BOTTOM_ screen->height_in_pixels - c->height
-        const double frameRate = 120.0; /* 
-            FRAMERATE 
-         */
-        std::chrono::high_resolution_clock::time_point lastUpdateTime = std::chrono::high_resolution_clock::now(); /*
-            HIGH_PRECISION_CLOCK AND TIME_POINT 
-         */
-        const double frameDuration = 1000.0 / frameRate; /* 
-            DURATION IN MILLISECONDS THAT EACH FRAME SHOULD LAST 
-        */
+        const double frameRate = 120.0;
+        std::chrono::high_resolution_clock::time_point lastUpdateTime = std::chrono::high_resolution_clock::now();
+        const double frameDuration = 1000.0 / frameRate;
     ;
     private: // functions
         void snap(int x, int y) {
             // WINDOW TO WINDOW SNAPPING 
             for (const auto & cli : wm->cur_d->current_clients) {
-                if ((x > cli->x + cli->width - N && x < cli->x + cli->width + N)   // SNAP WINDOW TO 'RIGHT' BORDER OF 'NON_CONTROLLED' WINDOW
+                // SNAP WINDOW TO 'RIGHT' BORDER OF 'NON_CONTROLLED' WINDOW
+                if ((x > cli->x + cli->width - N && x < cli->x + cli->width + N)
                  && (y + c->height > cli->y && y < cli->y + cli->height)) {
-                    
-                    if (y > cli->y - NC && y < cli->y + NC) { // SNAP WINDOW TO 'RIGHT_TOP' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
+                    // SNAP WINDOW TO 'RIGHT_TOP' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
+                    if (y > cli->y - NC && y < cli->y + NC) { 
                         c->frame.x_y((cli->x + cli->width), cli->y);
                         return;
                     }
                     // SNAP WINDOW TO 'RIGHT_BOTTOM' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
-                    if (y + c->height > cli->y + cli->height - NC && y + c->height < cli->y + cli->height + NC) {
+                    if (y + c->height > cli->y + cli->height - NC && y + c->height < cli->y + cli->height + NC) { 
                         c->frame.x_y((cli->x + cli->width), (cli->y + cli->height) - c->height);
                         return;
                     }
                     c->frame.x_y((cli->x + cli->width), y);
                     return;
                 }
-                if ((x + c->width > cli->x - N && x + c->width < cli->x + N)       // SNAP WINDOW TO 'LEFT' BORDER OF 'NON_CONTROLLED' WINDOW
+                // SNAP WINDOW TO 'LEFT' BORDER OF 'NON_CONTROLLED' WINDOW
+                if ((x + c->width > cli->x - N && x + c->width < cli->x + N)       
                  && (y + c->height > cli->y && y < cli->y + cli->height)) {
                     // SNAP WINDOW TO 'LEFT_TOP' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
                     if (y > cli->y - NC && y < cli->y + NC) {  
@@ -4972,7 +4967,8 @@ class mv_client {
                     c->frame.x_y((cli->x - c->width), y);
                     return;
                 }
-                if ((y > cli->y + cli->height - N && y < cli->y + cli->height + N) // SNAP WINDOW TO 'BOTTOM' BORDER OF 'NON_CONTROLLED' WINDOW
+                // SNAP WINDOW TO 'BOTTOM' BORDER OF 'NON_CONTROLLED' WINDOW
+                if ((y > cli->y + cli->height - N && y < cli->y + cli->height + N) 
                  && (x + c->width > cli->x && x < cli->x + cli->width)) {
                     // SNAP WINDOW TO 'BOTTOM_LEFT' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
                     if (x > cli->x - NC && x < cli->x + NC) {  
@@ -4987,7 +4983,8 @@ class mv_client {
                     c->frame.x_y(x, (cli->y + cli->height));
                     return;
                 }
-                if ((y + c->height > cli->y - N && y + c->height < cli->y + N)     // SNAP WINDOW TO 'TOP' BORDER OF 'NON_CONTROLLED' WINDOW
+                // SNAP WINDOW TO 'TOP' BORDER OF 'NON_CONTROLLED' WINDOW
+                if ((y + c->height > cli->y - N && y + c->height < cli->y + N)     
                  && (x + c->width > cli->x && x < cli->x + cli->width)) {
                     // SNAP WINDOW TO 'TOP_LEFT' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
                     if (x > cli->x - NC && x < cli->x + NC) {  
@@ -5871,31 +5868,27 @@ class tile {
             if (c->win.is_EWMH_fullscreen()) {
                 return;
             }
-
             switch (tile) {
                 case TILE::LEFT:
-                    if (current_tile_pos(TILEPOS::LEFT)) { // IF 'CURRENTLT_TILED' TO 'LEFT'
+                    // IF 'CURRENTLT_TILED' TO 'LEFT'
+                    if (current_tile_pos(TILEPOS::LEFT)) { 
                         set_tile_ogsize();
                         return;
                     }
-                    
-                    if (current_tile_pos(TILEPOS::RIGHT) // IF 'CURRENTLY_TILED' TO 'RIGHT', 'LEFT_DOWN' OR 'LEFT_UP'
+                    // IF 'CURRENTLY_TILED' TO 'RIGHT', 'LEFT_DOWN' OR 'LEFT_UP'
+                    if (current_tile_pos(TILEPOS::RIGHT)
                      || current_tile_pos(TILEPOS::LEFT_DOWN)
-                     || current_tile_pos(TILEPOS::LEFT_UP))
-                    {
+                     || current_tile_pos(TILEPOS::LEFT_UP)) {
                         set_tile_sizepos(TILEPOS::LEFT);
                         return;
                     }
-
-                    
-                    if (current_tile_pos(TILEPOS::RIGHT_DOWN)) { // IF 'CURRENTLY_TILED' TO 'RIGHT_DOWN'
+                    // IF 'CURRENTLY_TILED' TO 'RIGHT_DOWN'
+                    if (current_tile_pos(TILEPOS::RIGHT_DOWN)) { 
                         set_tile_sizepos(TILEPOS::LEFT_DOWN);
                         return;
                     }
-
                     // IF 'CURRENTLY_TILED' TO 'RIGHT_UP'
-                    if (current_tile_pos(TILEPOS::RIGHT_UP))
-                    {
+                    if (current_tile_pos(TILEPOS::RIGHT_UP)) {
                         set_tile_sizepos(TILEPOS::LEFT_UP);
                         return;
                     }
@@ -5904,28 +5897,25 @@ class tile {
                     set_tile_sizepos(TILEPOS::LEFT);
                     break;
                 case TILE::RIGHT:
-                    if (current_tile_pos(TILEPOS::RIGHT)) // IF 'CURRENTLY_TILED' TO 'RIGHT'
-                    {
+                    // IF 'CURRENTLY_TILED' TO 'RIGHT'
+                    if (current_tile_pos(TILEPOS::RIGHT)) {
                         set_tile_ogsize();
                         return;
                     }
-
-                    if (current_tile_pos(TILEPOS::LEFT) // IF 'CURRENTLT_TILED' TO 'LEFT', 'RIGHT_DOWN' OR 'RIGHT_UP' 
+                    // IF 'CURRENTLT_TILED' TO 'LEFT', 'RIGHT_DOWN' OR 'RIGHT_UP' 
+                    if (current_tile_pos(TILEPOS::LEFT)
                      || current_tile_pos(TILEPOS::RIGHT_UP)
-                     || current_tile_pos(TILEPOS::RIGHT_DOWN))
-                    {
+                     || current_tile_pos(TILEPOS::RIGHT_DOWN)) {
                         set_tile_sizepos(TILEPOS::RIGHT);
                         return;
                     }
-                    
-                    if (current_tile_pos(TILEPOS::LEFT_DOWN)) // IF 'CURRENTLT_TILED' 'LEFT_DOWN'
-                    {
+                    // IF 'CURRENTLT_TILED' 'LEFT_DOWN'
+                    if (current_tile_pos(TILEPOS::LEFT_DOWN)) {
                         set_tile_sizepos(TILEPOS::RIGHT_DOWN);
                         return;
                     }
-                    
-                    if (current_tile_pos(TILEPOS::LEFT_UP)) // IF 'CURRENTLY_TILED' 'LEFT_UP'
-                    {
+                    // IF 'CURRENTLY_TILED' 'LEFT_UP'
+                    if (current_tile_pos(TILEPOS::LEFT_UP)) {
                         set_tile_sizepos(TILEPOS::RIGHT_UP);
                         return;
                     }
@@ -5934,40 +5924,39 @@ class tile {
                     set_tile_sizepos(TILEPOS::RIGHT);
                     break;
                 case TILE::DOWN:
-                    if (current_tile_pos(TILEPOS::LEFT) // IF 'CURRENTLY_TILED' 'LEFT' OR 'LEFT_UP'
-                     || current_tile_pos(TILEPOS::LEFT_UP))
-                    {
+                    // IF 'CURRENTLY_TILED' 'LEFT' OR 'LEFT_UP'
+                    if (current_tile_pos(TILEPOS::LEFT)
+                     || current_tile_pos(TILEPOS::LEFT_UP)) {
                         set_tile_sizepos(TILEPOS::LEFT_DOWN);
                         return;
                     }
-
-                    if (current_tile_pos(TILEPOS::RIGHT) // IF 'CURRENTLY_TILED' 'RIGHT' OR 'RIGHT_UP'
-                     || current_tile_pos(TILEPOS::RIGHT_UP))
-                    {
+                    // IF 'CURRENTLY_TILED' 'RIGHT' OR 'RIGHT_UP'
+                    if (current_tile_pos(TILEPOS::RIGHT) 
+                     || current_tile_pos(TILEPOS::RIGHT_UP)) {
                         set_tile_sizepos(TILEPOS::RIGHT_DOWN);
                         return;
                     }
-  
-                    if (current_tile_pos(TILEPOS::LEFT_DOWN) // IF 'CURRENTLY_TILED' 'LEFT_DOWN' OR 'RIGHT_DOWN'
-                     || current_tile_pos(TILEPOS::RIGHT_DOWN))
-                    {
+                    // IF 'CURRENTLY_TILED' 'LEFT_DOWN' OR 'RIGHT_DOWN'
+                    if (current_tile_pos(TILEPOS::LEFT_DOWN)
+                     || current_tile_pos(TILEPOS::RIGHT_DOWN)) {
                         set_tile_ogsize();
                         return;
                     }
+                    break;
                 case TILE::UP:
-                    if (current_tile_pos(TILEPOS::LEFT) // IF 'CURRENTLY_TILED' 'LEFT'
-                     || current_tile_pos(TILEPOS::LEFT_DOWN))
-                    {
+                    // IF 'CURRENTLY_TILED' 'LEFT'
+                    if (current_tile_pos(TILEPOS::LEFT)
+                     || current_tile_pos(TILEPOS::LEFT_DOWN)) {
                         set_tile_sizepos(TILEPOS::LEFT_UP);
                         return;
                     }
-
-                    if (current_tile_pos(TILEPOS::RIGHT) // IF 'CURRENTLY_TILED' 'RIGHT' OR RIGHT_DOWN
-                     || current_tile_pos(TILEPOS::RIGHT_DOWN))
-                    {
+                    // IF 'CURRENTLY_TILED' 'RIGHT' OR RIGHT_DOWN
+                    if (current_tile_pos(TILEPOS::RIGHT)
+                     || current_tile_pos(TILEPOS::RIGHT_DOWN)) {
                         set_tile_sizepos(TILEPOS::RIGHT_UP);
                         return;
                     }
+                    break;
             }
         }
     ;
@@ -5987,8 +5976,7 @@ class tile {
                     if (c->x        == 0 
                      && c->y        == 0 
                      && c->width    == screen->width_in_pixels / 2 
-                     && c->height   == screen->height_in_pixels)
-                    {
+                     && c->height   == screen->height_in_pixels) {
                         return true;
                     }
                     break;
@@ -5996,8 +5984,7 @@ class tile {
                     if (c->x        == screen->width_in_pixels / 2 
                      && c->y        == 0 
                      && c->width    == screen->width_in_pixels / 2
-                     && c->height   == screen->height_in_pixels)
-                    {
+                     && c->height   == screen->height_in_pixels) {
                         return true;
                     }
                     break;
@@ -6005,8 +5992,7 @@ class tile {
                     if (c->x        == 0
                      && c->y        == screen->height_in_pixels / 2
                      && c->width    == screen->width_in_pixels / 2
-                     && c->height   == screen->height_in_pixels / 2)
-                    {
+                     && c->height   == screen->height_in_pixels / 2) {
                         return true;
                     }
                     break;
@@ -6014,8 +6000,7 @@ class tile {
                     if (c->x        == screen->width_in_pixels / 2
                      && c->y        == screen->height_in_pixels / 2
                      && c->width    == screen->width_in_pixels / 2
-                     && c->height   == screen->height_in_pixels / 2)
-                    {
+                     && c->height   == screen->height_in_pixels / 2) {
                         return true;
                     }
                     break;
@@ -6023,8 +6008,7 @@ class tile {
                     if (c->x        == 0
                      && c->y        == 0
                      && c->width    == screen->width_in_pixels / 2
-                     && c->height   == screen->height_in_pixels / 2)
-                    {
+                     && c->height   == screen->height_in_pixels / 2) {
                         return true;
                     }
                     break;
@@ -6032,8 +6016,7 @@ class tile {
                     if (c->x        == screen->width_in_pixels / 2
                      && c->y        == 0
                      && c->width    == screen->width_in_pixels / 2
-                     && c->height   == screen->height_in_pixels / 2)
-                    {
+                     && c->height   == screen->height_in_pixels / 2) {
                         return true;
                     }
                     break;
@@ -6118,14 +6101,8 @@ class tile {
     ;
 };
 class Events {
-    public: // constructor and destructor  
-        Events() /**
-         *
-         * @brief Constructor for the Event class.
-         *        Initializes the key symbols and keycodes.
-         *
-         */
-        {}
+    public: // constructor and destructor
+        Events() {}
     ;
     public: // methods
         void setup() {
