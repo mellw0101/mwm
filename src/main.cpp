@@ -3430,13 +3430,7 @@ class Window_Manager {
                 c->height = (data.height < 300) ? 300 : data.height;
                 c->width  = (data.width < 400)  ? 400 : data.width;
                 c->x      = c->win.x_from_req();
-                if (c->x < (BORDER_SIZE * 2)) {
-                    c->x = (BORDER_SIZE * 2);
-                }
                 c->y      = c->win.y_from_req();
-                if (c->y < (BORDER_SIZE * 2)) {
-                    c->y = (BORDER_SIZE * 2);
-                }
                 c->depth   = 24;
                 c->desktop = cur_d->desktop;
 
