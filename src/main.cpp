@@ -87,7 +87,7 @@ struct size_pos {
 class mxb {
     public: 
         class XConnection {
-            public:
+            public: // constructor and destructor
                 struct mxb_auth_info_t {
                     int namelen;
                     char* name;
@@ -132,6 +132,8 @@ class mxb {
                     delete[] auth_info.name;
                     delete[] auth_info.data;
                 }
+            ;
+            public: // methods
                 int getFd() const {
                     return fd;
                 }
@@ -251,12 +253,13 @@ class mxb {
                     }
                 }
             ;
-            private:
+            private: // variabels
                 int fd;
                 struct sockaddr_un addr;
                 mxb_auth_info_t auth_info;
                 Logger log;
-                
+            ;
+            private: // functions
                 bool authenticate_x11_connection(int display_number, mxb_auth_info_t & auth_info) { // Function to authenticate an X11 connection
                     const char* xauthority_env = std::getenv("XAUTHORITY"); // Try to get the XAUTHORITY environment variable; fall back to default
                     std::string xauthority_file = xauthority_env ? xauthority_env : "~/.Xauthority";
@@ -355,23 +358,6 @@ class mxb {
             }
             return 0;
         }
-        class File {
-            public: // subclasses
-                class search {
-                    public: // construcers and operators
-                        search(const std::string& filename)
-                        : file(filename) {}
-
-                        operator bool() const {
-                            return file.good();
-                        }
-                    ;
-                    private: // variables
-                        std::ifstream file;
-                    ;
-                };
-            ;
-        };
     ;
 };
 class pointer {
@@ -759,7 +745,7 @@ class Directory_Searcher {
     ;
 };
 class Directory_Lister {
-    public:
+    public: // constructor
         Directory_Lister() {}
     ;
     public: // methods
@@ -781,7 +767,7 @@ class Directory_Lister {
             return results;   
         }
     ;
-    private:
+    private: // variabels
         Logger log;
     ;
 };
@@ -3014,7 +3000,7 @@ class Window_Manager {
     public: // constructor
         Window_Manager() {}
     ;
-    public: // variabels 
+    public: // variabels
         window root;
         Launcher launcher;
         Logger log;
@@ -3029,8 +3015,8 @@ class Window_Manager {
         client * focused_client = nullptr;
         desktop * cur_d = nullptr;
     ;
-    public: // methods 
-        public: // main methods 
+    public: // methods
+        public: // main methods
             void init() {
                 _conn(nullptr, nullptr);
                 _setup();
@@ -3078,7 +3064,7 @@ class Window_Manager {
                 exit(status);
             }
         ;
-        public: // client methods 
+        public: // client methods
             public: // focus methods
                 void focus_client(client * c) {
                     if (!c) {
@@ -3279,7 +3265,7 @@ class Window_Manager {
                 remove_client(c);
             }
         ;
-        public: // desktop methods 
+        public: // desktop methods
             void create_new_desktop(const uint16_t & n) {
                 desktop * d = new desktop;
                 d->desktop  = n;
@@ -3305,11 +3291,11 @@ class Window_Manager {
             }
         ;
     ;
-    private: // variables 
+    private: // variables
         window start_window;
     ;
-    private: // functions 
-        private: // init functions 
+    private: // functions
+        private: // init functions
             void _conn(const char * displayname, int * screenp) {
                 conn = xcb_connect(displayname, screenp);
                 check_conn();
@@ -3388,7 +3374,7 @@ class Window_Manager {
                 root.set_pointer(CURSOR::arrow);
             }
         ;
-        private: // check functions 
+        private: // check functions
             void check_error(const int & code) {
                 switch (code) {
                     case CONN_ERR:
@@ -3449,7 +3435,7 @@ class Window_Manager {
             start_window.map();
             return 0;
         }
-        private: // delete functions 
+        private: // delete functions
             void delete_client_vec(std::vector<client *> & vec) {
                 for (client * c : vec) {
                     send_sigterm_to_client(c);
