@@ -3433,6 +3433,9 @@ class Window_Manager {
                 log_info(std::to_string(c->x));
                 c->y      = c->win.y_from_req();
                 log_info(std::to_string(c->y));
+                if (c->y == 0) {
+                    c->y = (BORDER_SIZE * 2);
+                }
                 c->depth   = 24;
                 c->desktop = cur_d->desktop;
 
