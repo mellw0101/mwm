@@ -3527,12 +3527,21 @@ class Window_Manager {
                 return c;
             }
             void check_client(client * c) {
-                if (c->x == 0
+                if (c->x == 0 // if client if full_screen but 'y' is offset for some reason, make 'y' (0)
                  && c->y != 0
                  && c->width == screen->width_in_pixels
                  && c->height == screen->height_in_pixels) {
                     c->_y(0);
                     xcb_flush(conn);
+                    return;
+                }
+                if (c->x != 0 // if client is full_screen 'width' and 'height' but position is offset from (0, 0) then make pos (0, 0)
+                 && c->y != 0
+                 && c->width == screen->width_in_pixels
+                 && c->height == screen->height_in_pixels) {
+                    c->x_y(0,0);
+                    xcb_flush(conn);
+                    return;
                 }
                 if (c->x < 0) {
                     c->_x(0);
