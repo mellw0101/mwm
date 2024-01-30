@@ -68,7 +68,7 @@ Logger log;
 #include "structs.hpp"
 
 static xcb_connection_t * conn;
-static xcb_ewmh_connection_t * ewmh;
+static xcb_ewmh_connection_t * ewmh; 
 static const xcb_setup_t * setup;
 static xcb_screen_iterator_t iter;
 static xcb_screen_t * screen;
@@ -3584,8 +3584,8 @@ class Window_Manager {
  *
  */
 class Mwm_Animator {
-    public: // constructor
-        Mwm_Animator(window window)
+    public: // variables
+        Mwm_Animator(const uint32_t & window)
         : window(window) {}
         Mwm_Animator(client * c)
         : c(c) {}
@@ -3742,7 +3742,7 @@ class Mwm_Animator {
         }
     ;
     private: // variabels
-        window window;
+        xcb_window_t window;
         client * c;
         std::thread GAnimationThread;
         std::thread XAnimationThread;
@@ -3790,7 +3790,7 @@ class Mwm_Animator {
             XlastUpdateTime = std::chrono::high_resolution_clock::now();
             while (true) {
                 if (currentX == endX) {
-                    window.x(endX);
+                    config_window(XCB_CONFIG_WINDOW_X, endX);
                     break;
                 }
                 XStep();
@@ -3834,7 +3834,7 @@ class Mwm_Animator {
             YlastUpdateTime = std::chrono::high_resolution_clock::now();
             while (true) {
                 if (currentY == endY) {
-                    window.y(endY);
+                    config_window(XCB_CONFIG_WINDOW_Y, endY);
                     break;
                 }
                 YStep();
@@ -3877,7 +3877,7 @@ class Mwm_Animator {
             WlastUpdateTime = std::chrono::high_resolution_clock::now();
             while (true) {
                 if (currentWidth == endWidth) {
-                    window.width(endWidth);
+                    config_window(XCB_CONFIG_WINDOW_WIDTH, endWidth);
                     break;
                 }
                 WStep();
@@ -3921,7 +3921,7 @@ class Mwm_Animator {
             HlastUpdateTime = std::chrono::high_resolution_clock::now();
             while (true) {
                 if (currentHeight == endHeight) {
-                    window.height(endHeight);
+                    config_window(XCB_CONFIG_WINDOW_HEIGHT, endHeight);
                     break;
                 }
                 HStep();
@@ -4164,6 +4164,28 @@ class Mwm_Animator {
                 return true; 
             }
             return false; 
+        }
+        /**
+         *
+         * @brief Configures the window with the specified mask and value.
+         * 
+         * This function configures the window using the XCB library. It takes in a mask and a value
+         * as parameters and applies the configuration to the window.
+         * 
+         * @param mask The mask specifying which attributes to configure.
+         * @param value The value to set for the specified attributes.
+         * 
+         */
+        void config_window(const uint32_t & mask, const uint32_t & value) {
+            xcb_configure_window(
+                conn,
+                window,
+                mask,
+                (const uint32_t[1]) {
+                    static_cast<const uint32_t &>(value)
+                }
+            );
+            xcb_flush(conn);
         }
     ;
 };
