@@ -73,7 +73,17 @@ static const xcb_setup_t * setup;
 static xcb_screen_iterator_t iter;
 static xcb_screen_t * screen;
 
+struct size_pos {
+    int16_t x, y;
+    uint16_t width, height;
 
+    void save(int x, int y, int width, int height) {
+        this->x = x;
+        this->y = y;
+        this->width = width;
+        this->height = height;
+    }
+};
 class mxb {
     public: 
         class XConnection {
@@ -3253,14 +3263,13 @@ class Window_Manager {
 
                 const char * str = "mwm";
                 check_error(
-                    conn, 
                     xcb_ewmh_set_wm_name(
-                        ewmh, 
-                        screen->root, 
-                        strlen(str), 
+                        ewmh,
+                        screen->root,
+                        strlen(str),
                         str
                     ), 
-                    __func__, 
+                    __func__,
                     "xcb_ewmh_set_wm_name"
                 );
             }
@@ -3360,8 +3369,8 @@ class Window_Manager {
                 }
                 return 0;
             }
-            void check_error(xcb_connection_t * connection, xcb_void_cookie_t cookie , const char * sender_function, const char * err_msg) {
-                xcb_generic_error_t * err = xcb_request_check(connection, cookie);
+            void check_error(xcb_void_cookie_t cookie , const char * sender_function, const char * err_msg) {
+                xcb_generic_error_t * err = xcb_request_check(conn, cookie);
                 if (err)
                 {
                     log_error_code(err_msg, err->error_code);
@@ -3430,9 +3439,7 @@ class Window_Manager {
                 c->height = (data.height < 300) ? 300 : data.height;
                 c->width  = (data.width < 400)  ? 400 : data.width;
                 c->x      = c->win.x_from_req();
-                log_info(std::to_string(c->x));
                 c->y      = c->win.y_from_req();
-                log_info(std::to_string(c->y));
                 c->depth   = 24;
                 c->desktop = cur_d->desktop;
 
@@ -5895,7 +5902,8 @@ class tile {
                         return;
                     }
 
-                    save_tile_ogsize();
+                    // save_tile_ogsize();
+                    c->tile_ogsize.save(c->x, c->y, c->width, c->height);
                     set_tile_sizepos(TILEPOS::LEFT);
                     break;
                 case TILE::RIGHT:
@@ -5922,7 +5930,8 @@ class tile {
                         return;
                     }
 
-                    save_tile_ogsize();
+                    // save_tile_ogsize();
+                    c->tile_ogsize.save(c->x, c->y, c->width, c->height);
                     set_tile_sizepos(TILEPOS::RIGHT);
                     break;
                 case TILE::DOWN:

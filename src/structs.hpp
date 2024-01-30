@@ -114,10 +114,6 @@ enum class MAX {
 struct window_borders {
     int16_t left, right, top, bottom;
 };
-struct size_pos {
-    int16_t x, y;
-    uint16_t width, height;
-};
 struct win_data {
     xcb_window_t win;
     uint16_t x, y, width, height;
