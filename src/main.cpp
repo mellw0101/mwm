@@ -77,7 +77,7 @@ struct size_pos {
     int16_t x, y;
     uint16_t width, height;
 
-    void save(int x, int y, int width, int height) {
+    void save(const int & x, const int & y, const int & width, const int & height) {
         this->x = x;
         this->y = y;
         this->width = width;
