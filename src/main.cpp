@@ -3433,15 +3433,12 @@ class Window_Manager {
                 log_info(std::to_string(c->x));
                 c->y      = c->win.y_from_req();
                 log_info(std::to_string(c->y));
-                if (c->y == 0) {
-                    c->y = (BORDER_SIZE * 2);
-                }
                 c->depth   = 24;
                 c->desktop = cur_d->desktop;
 
                 if (c->x <= 0 && c->y <= 0 && c->width != screen->width_in_pixels && c->height != screen->height_in_pixels) {
                     c->x = (screen->width_in_pixels - c->width) / 2;
-                    c->y = (screen->height_in_pixels - c->height) / 2;
+                    c->y = (((screen->height_in_pixels - c->height) / 2) + (BORDER_SIZE * 2));
                 }
 
                 if (c->height > screen->height_in_pixels) {
