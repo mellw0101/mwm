@@ -700,9 +700,10 @@ class fast_str_vector {
     ;
 };
 class Directory_Searcher {
-    public:
+    public: // construtor
         Directory_Searcher() {}
-
+    ;
+    public: // methods
         void search(const std::vector<const char *>& directories, const std::string& searchString) {
             results.clear();
             searchDirectories = directories;
@@ -738,7 +739,7 @@ class Directory_Searcher {
             return results;
         }
     ;
-    private:
+    private: // variabels
         std::vector<const char *> searchDirectories;
         std::vector<std::string> results;
         Logger log;
@@ -880,7 +881,7 @@ class File {
     ;
 };
 class Launcher {
-    public:
+    public: // methods
         void program(char * program) {
             if (!file.check_if_binary_exists(program)) {
                 return;
@@ -891,7 +892,7 @@ class Launcher {
             }
         }
     ;
-    private:
+    private: // variabels
         File file;
     ;
 };
@@ -2798,8 +2799,7 @@ class Key_Codes {
                     { L_ARROW,      &l_arrow   },
                     { U_ARROW,      &u_arrow   },
                     { D_ARROW,      &d_arrow   },
-                    { TAB,          &tab       },
-                    { K,            &k         }
+                    { TAB,          &tab       }
                 };
                 
                 for (auto &pair : key_map) {
@@ -3584,10 +3584,9 @@ class Window_Manager {
  *
  */
 class Mwm_Animator {
-    public: // variables
-        Mwm_Animator(const uint32_t & window)
+    public: // constructor
+        Mwm_Animator(window window)
         : window(window) {}
-
         Mwm_Animator(client * c)
         : c(c) {}
     ;
@@ -3614,15 +3613,12 @@ class Mwm_Animator {
          * @param duration The duration of the animation in milliseconds.
          */
         void animate(int startX, int startY, int startWidth, int startHeight, int endX, int endY, int endWidth, int endHeight, int duration) {
-            stopAnimations(); // ENSURE ANY EXISTING ANIMATION IS STOPPED
-            
-            /* INITILIZE CLASS VARIABELS WITH INPUT VALUES */
+            stopAnimations();
             currentX      = startX;
             currentY      = startY;
             currentWidth  = startWidth;
             currentHeight = startHeight;
-
-            int steps = duration; 
+            int steps = duration;
 
             /**
              * @brief Calculate if the step is positive or negative for each property.
@@ -3647,9 +3643,9 @@ class Mwm_Animator {
              * ensuring that all threads will complete at the same time.
              */
             XAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(std::abs(endX - startX));
-            YAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(std::abs(endY - startY)); 
+            YAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(std::abs(endY - startY));
             WAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(std::abs(endWidth - startWidth));
-            HAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(std::abs(endHeight - startHeight)); 
+            HAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(std::abs(endHeight - startHeight));
 
             /* START ANIMATION THREADS */
             XAnimationThread = std::thread(&Mwm_Animator::XAnimation, this, endX);
@@ -3658,19 +3654,15 @@ class Mwm_Animator {
             HAnimationThread = std::thread(&Mwm_Animator::HAnimation, this, endHeight);
 
             std::this_thread::sleep_for(std::chrono::milliseconds(duration)); // WAIT FOR ANIMATION TO COMPLETE
-            stopAnimations(); // STOP THE ANIMATION
+            stopAnimations();
         }
         void animate_client(int startX, int startY, int startWidth, int startHeight, int endX, int endY, int endWidth, int endHeight, int duration) {
-            /* ENSURE ANY EXISTING ANIMATION IS STOPPED */
             stopAnimations();
-            
-            /* INITILIZE CLASS VARIABELS WITH INPUT VALUES */
             currentX      = startX;
             currentY      = startY;
             currentWidth  = startWidth;
             currentHeight = startHeight;
-
-            int steps = duration; 
+            int steps = duration;
 
             /**
              * @brief Calculate if the step is positive or negative for each property.
@@ -3695,9 +3687,9 @@ class Mwm_Animator {
              * ensuring that all threads will complete at the same time.
              */
             XAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(std::abs(endX - startX));
-            YAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(std::abs(endY - startY)); 
+            YAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(std::abs(endY - startY));
             WAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(std::abs(endWidth - startWidth));
-            HAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(std::abs(endHeight - startHeight)); 
+            HAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(std::abs(endHeight - startHeight));
             GAnimDuration = frameDuration;
 
             /* START ANIMATION THREADS */
@@ -3707,10 +3699,7 @@ class Mwm_Animator {
             WAnimationThread = std::thread(&Mwm_Animator::CliWAnimation, this, endWidth);
             HAnimationThread = std::thread(&Mwm_Animator::CliHAnimation, this, endHeight);
 
-            /* WAIT FOR ANIMATION TO COMPLETE */
-            std::this_thread::sleep_for(std::chrono::milliseconds(duration));
-
-            /* STOP THE ANIMATION */
+            std::this_thread::sleep_for(std::chrono::milliseconds(duration)); // WAIT FOR ANIMATION TO COMPLETE
             stopAnimations();
         }
         enum DIRECTION {
@@ -3718,13 +3707,9 @@ class Mwm_Animator {
             PREV
         };
         void animate_client_x(int startX, int endX, int duration) {
-            /* ENSURE ANY EXISTING ANIMATION IS STOPPED */
             stopAnimations();
-            
-            /* INITILIZE CLASS VARIABELS WITH INPUT VALUES */
             currentX = startX;
-
-            int steps = duration; 
+            int steps = duration;
 
             /**
              * @brief Calculate if the step is positive or negative for each property.
@@ -3752,15 +3737,12 @@ class Mwm_Animator {
             GAnimationThread = std::thread(&Mwm_Animator::GFrameAnimation_X, this, endX);
             XAnimationThread = std::thread(&Mwm_Animator::CliXAnimation, this, endX);
 
-            /* WAIT FOR ANIMATION TO COMPLETE */
-            std::this_thread::sleep_for(std::chrono::milliseconds(duration));
-
-            /* STOP THE ANIMATION */
+            std::this_thread::sleep_for(std::chrono::milliseconds(duration)); // WAIT FOR ANIMATION TO COMPLETE
             stopAnimations();
         }
     ;
     private: // variabels
-        xcb_window_t window;
+        window window;
         client * c;
         std::thread GAnimationThread;
         std::thread XAnimationThread;
@@ -3808,7 +3790,7 @@ class Mwm_Animator {
             XlastUpdateTime = std::chrono::high_resolution_clock::now();
             while (true) {
                 if (currentX == endX) {
-                    config_window(XCB_CONFIG_WINDOW_X, endX);
+                    window.x(endX);
                     break;
                 }
                 XStep();
@@ -3825,7 +3807,6 @@ class Mwm_Animator {
          */
         void XStep() {
             currentX += stepX;
-            
             if (XisTimeToRender()) {
                 xcb_configure_window(
                     conn,
@@ -3853,7 +3834,7 @@ class Mwm_Animator {
             YlastUpdateTime = std::chrono::high_resolution_clock::now();
             while (true) {
                 if (currentY == endY) {
-                    config_window(XCB_CONFIG_WINDOW_Y, endY);
+                    window.y(endY);
                     break;
                 }
                 YStep();
@@ -3869,7 +3850,6 @@ class Mwm_Animator {
          */
         void YStep() {
             currentY += stepY;
-            
             if (YisTimeToRender()) {
                 xcb_configure_window(
                     conn,
@@ -3897,7 +3877,7 @@ class Mwm_Animator {
             WlastUpdateTime = std::chrono::high_resolution_clock::now();
             while (true) {
                 if (currentWidth == endWidth) {
-                    config_window(XCB_CONFIG_WINDOW_WIDTH, endWidth);
+                    window.width(endWidth);
                     break;
                 }
                 WStep();
@@ -3914,7 +3894,6 @@ class Mwm_Animator {
          */
         void WStep() {
             currentWidth += stepWidth;
-
             if (WisTimeToRender()) {
                 xcb_configure_window(
                     conn,
@@ -3942,7 +3921,7 @@ class Mwm_Animator {
             HlastUpdateTime = std::chrono::high_resolution_clock::now();
             while (true) {
                 if (currentHeight == endHeight) {
-                    config_window(XCB_CONFIG_WINDOW_HEIGHT, endHeight);
+                    window.height(endHeight);
                     break;
                 }
                 HStep();
@@ -3960,7 +3939,6 @@ class Mwm_Animator {
          */
         void HStep() {
             currentHeight += stepHeight;
-            
             if (HisTimeToRender()) {
                 xcb_configure_window(
                     conn,
@@ -3986,10 +3964,10 @@ class Mwm_Animator {
         void GFrameAnimation_X(const int & endX) {
             while (true) {
                 if (currentX == endX) {
-                    conf_client_x();
+                    c->frame.x(endX);
                     break;
                 }
-                conf_client_x();
+                c->frame.x(currentX);
                 thread_sleep(GAnimDuration);
             }
         }
@@ -4198,75 +4176,17 @@ class Mwm_Animator {
          * @param value The value to set for the specified attributes.
          * 
          */
-        void config_window(const uint32_t & mask, const uint32_t & value) {
-            xcb_configure_window(
-                conn,
-                window,
-                mask,
-                (const uint32_t[1]) {
-                    static_cast<const uint32_t &>(value)
-                }
-            );
-            xcb_flush(conn);
-        }
-        /**
-         *
-         * @brief Configures the window with the specified mask and value.
-         * 
-         * This function configures the window using the XCB library. It takes in a mask and a value
-         * as parameters and applies the configuration to the window.
-         * 
-         * @param mask The mask specifying which attributes to configure.
-         * @param value The value to set for the specified attributes.
-         * 
-         */
-        void config_window(const xcb_window_t & win, const uint32_t & mask, const uint32_t & value) {
-            xcb_configure_window(
-                conn,
-                win,
-                mask,
-                (const uint32_t[1]) {
-                    static_cast<const uint32_t &>(value)
-                }
-            );
-            xcb_flush(conn);
-        }
-        /**
-         *
-         * @brief Configures the window with the specified mask and value.
-         * 
-         * This function configures the window using the XCB library. It takes in a mask and a value
-         * as parameters and applies the configuration to the window.
-         * 
-         * @param mask The mask specifying which attributes to configure.
-         * @param value The value to set for the specified attributes.
-         * 
-         */
-        void config_client(const uint32_t & mask, const uint32_t & value) {
-            xcb_configure_window(
-                conn,
-                c->win,
-                mask,
-                (const uint32_t[1]) {
-                    static_cast<const uint32_t &>(value)
-                }
-            );
-
-            xcb_configure_window(
-                conn,
-                c->frame,
-                mask,
-                (const uint32_t[1]) {
-                    static_cast<const uint32_t &>(value)
-                }
-            );
-            xcb_flush(conn);
-        }
-        void conf_client_x() {
-            const uint32_t x = currentX;
-            c->frame.x(x);
-            xcb_flush(conn);
-        }
+        // void config_window(const uint32_t & mask, const uint32_t & value) {
+        //     xcb_configure_window(
+        //         conn,
+        //         window,
+        //         mask,
+        //         (const uint32_t[1]) {
+        //             static_cast<const uint32_t &>(value)
+        //         }
+        //     );
+        //     xcb_flush(conn);
+        // }
     ;
 };
 void animate(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight, const int & duration) {
