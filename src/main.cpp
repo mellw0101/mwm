@@ -2551,6 +2551,20 @@ class client {
                 xcb_flush(conn);
             }
         ;
+        public: // size_pos methods
+            void save_ogsize() {
+                ogsize.save(x, y, width, height);
+            }
+            void save_tile_ogsize() {
+                tile_ogsize.save(x, y, width, height);
+            }
+            void save_max_ewmh_ogsize() {
+                max_ewmh_ogsize.save(x, y, width, height);
+            }
+            void save_max_button_ogsize() {
+                max_button_ogsize.save(x, y, width, height);
+            }
+        ;
     ;
     private: // functions
         void make_frame() {
@@ -5902,8 +5916,7 @@ class tile {
                         return;
                     }
 
-                    // save_tile_ogsize();
-                    c->tile_ogsize.save(c->x, c->y, c->width, c->height);
+                    c->save_tile_ogsize();
                     set_tile_sizepos(TILEPOS::LEFT);
                     break;
                 case TILE::RIGHT:
@@ -5930,8 +5943,7 @@ class tile {
                         return;
                     }
 
-                    // save_tile_ogsize();
-                    c->tile_ogsize.save(c->x, c->y, c->width, c->height);
+                    c->save_tile_ogsize();
                     set_tile_sizepos(TILEPOS::RIGHT);
                     break;
                 case TILE::DOWN:
