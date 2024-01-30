@@ -3244,6 +3244,8 @@ class Window_Manager {
 
                 c->update();
                 focus_client(c);
+
+                check_client(c);
             }
             client * make_internal_client(window window) {
                 client * c = new client;
@@ -3517,6 +3519,14 @@ class Window_Manager {
                 client_list.push_back(c);
                 cur_d->current_clients.push_back(c);
                 return c;
+            }
+            void check_client(client * c) {
+                if (c->x == 0
+                 && c->y != 0
+                 && c->width == screen->width_in_pixels
+                 && c->height == screen->height_in_pixels) {
+                    c->y = 0;
+                }
             }
         ;
         private: // window functions
