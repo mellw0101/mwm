@@ -4313,14 +4313,13 @@ class button {
             window.set_backround_color(color);
             window.grab_button({ { L_MOUSE_BUTTON, NULL } });
             window.map();
-            xcb_flush(conn);
         }
         void action(std::function<void()> action) {
             button_action = action;
         }
         void add_event(std::function<void(Ev ev)> action) {
             ev_a = action;
-            event_handler->setEventCallback(XCB_BUTTON_PRESS, ev_a);
+            event_id = event_handler->setEventCallback(XCB_BUTTON_PRESS, ev_a);
         }
         void activate() const {
             button_action();
@@ -4349,6 +4348,7 @@ class button {
         std::function<void(Ev ev)> ev_a;
         File file;
         Logger log;
+        int event_id = 0;
     ;
 };
 class buttons {
