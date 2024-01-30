@@ -3533,6 +3533,18 @@ class Window_Manager {
                  && c->height == screen->height_in_pixels) {
                     c->_y(0);
                 }
+                if (c->x < 0) {
+                    c->_x(0);
+                }
+                if (c->y < 0) {
+                    c->_y(0);
+                }
+                if (c->width > screen->width_in_pixels) {
+                    c->_width(screen->width_in_pixels);
+                }
+                if (c->height > screen->height_in_pixels) {
+                    c->_height(screen->height_in_pixels);
+                }
             }
         ;
         private: // window functions
