@@ -2576,6 +2576,28 @@ class client {
             bool is_EWMH_fullscreen() {
                 return win.is_EWMH_fullscreen();
             }
+            bool is_button_max_win() {
+                if (x      == 0
+                 && y      == 0
+                 && width  == screen->width_in_pixels
+                 && height == screen->height_in_pixels) {
+                    return true;
+                }
+                return false;
+            }
+        ;
+        public: // set methods
+            void set_active_EWMH_window() {
+                win.set_active_EWMH_window();
+            }
+            void set_EWMH_fullscreen_state() {
+                win.set_EWMH_fullscreen_state();
+            }
+        ;
+        public: // unset methods
+            void unset_EWMH_fullscreen_state() {
+                win.unset_EWMH_fullscreen_state();
+            }
         ;
     ;
     private: // functions
@@ -3055,7 +3077,7 @@ class Window_Manager {
             }
         ;
         public: // client methods 
-            public: // focus methods 
+            public: // focus methods
                 void focus_client(client * c) {
                     if (!c) {
                         log_error("c is null");
@@ -3263,6 +3285,21 @@ class Window_Manager {
                 d->height   = screen->height_in_pixels;
                 cur_d       = d;
                 desktop_list.push_back(d);
+            }
+        ;
+        public: // experimental methods
+            xcb_visualtype_t * find_argb_visual(xcb_connection_t *conn, xcb_screen_t *screen) {
+                xcb_depth_iterator_t depth_iter = xcb_screen_allowed_depths_iterator(screen);
+
+                for (; depth_iter.rem; xcb_depth_next(&depth_iter)) {
+                    xcb_visualtype_iterator_t visual_iter = xcb_depth_visuals_iterator(depth_iter.data);
+                    for (; visual_iter.rem; xcb_visualtype_next(&visual_iter)) {
+                        if (depth_iter.data->depth == 32) {
+                            return visual_iter.data;
+                        }
+                    }
+                }
+                return NULL;
             }
         ;
     ;
@@ -5759,14 +5796,14 @@ class max_win {
         : c(c) {
             switch (type) {
                 case EWMH_MAXWIN:
-                    if (c->win.is_EWMH_fullscreen()) {
+                    if (c->is_EWMH_fullscreen()) {
                         ewmh_unmax_win();
                     } else {
                         ewmh_max_win();
                     }
                     break;
                 case BUTTON_MAXWIN:
-                    if (is_max_win()) {
+                    if (c->is_button_max_win()) {
                         button_unmax_win();
                     } else {
                         button_max_win();
@@ -5788,23 +5825,17 @@ class max_win {
                 endHeight, 
                 MAXWIN_ANIMATION_DURATION
             );
-        }
-        void save_max_ewmh_ogsize() {
-            c->max_ewmh_ogsize.x      = c->x;
-            c->max_ewmh_ogsize.y      = c->y;
-            c->max_ewmh_ogsize.width  = c->width;
-            c->max_ewmh_ogsize.height = c->height;
+            xcb_flush(conn);
         }
         void ewmh_max_win() {
-            save_max_ewmh_ogsize();
+            c->save_max_ewmh_ogsize();
             max_win_animate(
                 - BORDER_SIZE,
                 - TITLE_BAR_HEIGHT - BORDER_SIZE,
                 screen->width_in_pixels + (BORDER_SIZE * 2),
                 screen->height_in_pixels + TITLE_BAR_HEIGHT + (BORDER_SIZE * 2)
             );
-            c->win.set_EWMH_fullscreen_state();
-            xcb_flush(conn);
+            c->set_EWMH_fullscreen_state();
         }
         void ewmh_unmax_win() {
             if (c->max_ewmh_ogsize.width > screen->width_in_pixels) {
@@ -5826,24 +5857,16 @@ class max_win {
                 c->max_ewmh_ogsize.width, 
                 c->max_ewmh_ogsize.height
             );
-            c->win.unset_EWMH_fullscreen_state();
-            xcb_flush(conn);
-        }
-        void save_max_button_ogsize() {
-            c->max_button_ogsize.x      = c->x;
-            c->max_button_ogsize.y      = c->y;
-            c->max_button_ogsize.width  = c->width;
-            c->max_button_ogsize.height = c->height;
+            c->unset_EWMH_fullscreen_state();
         }
         void button_max_win() {
-            save_max_button_ogsize();
+            c->save_max_button_ogsize();
             max_win_animate(
                 0,
                 0,
                 screen->width_in_pixels,
                 screen->height_in_pixels
             );
-            xcb_flush(conn);
         }
         void button_unmax_win() {
             max_win_animate(
@@ -5852,39 +5875,9 @@ class max_win {
                 c->max_button_ogsize.width,
                 c->max_button_ogsize.height
             );
-            xcb_flush(conn);
-        }
-        bool is_max_win() {
-            if (c->x == 0
-             && c->y == 0
-             && c->width == screen->width_in_pixels
-             && c->height == screen->height_in_pixels)
-            {
-                return true;
-            }
-
-            return false;
         }
     ;
 };
-namespace win_tools {
-    xcb_visualtype_t * find_argb_visual(xcb_connection_t *conn, xcb_screen_t *screen) {
-        xcb_depth_iterator_t depth_iter = xcb_screen_allowed_depths_iterator(screen);
-
-        for (; depth_iter.rem; xcb_depth_next(&depth_iter)) {
-            xcb_visualtype_iterator_t visual_iter = xcb_depth_visuals_iterator(depth_iter.data);
-            for (; visual_iter.rem; xcb_visualtype_next(&visual_iter)) {
-                if (depth_iter.data->depth == 32) {
-                    return visual_iter.data;
-                }
-            }
-        }
-        return NULL;
-    }
-    void close_button_kill(client * c) {
-        wm->send_sigterm_to_client(c);
-    }
-}
 /**
  * @class tile
  * @brief Represents a tile obj.
@@ -6341,7 +6334,7 @@ class Events {
                     return;
                 }
                 if (e->event == c->close_button) {
-                    win_tools::close_button_kill(c);
+                    wm->send_sigterm_to_client(c);
                     return;
                 }
                 if (e->event == c->max_button) {
