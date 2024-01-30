@@ -5026,7 +5026,8 @@ class mv_client {
 std::mutex mtx;
 class change_desktop {
     public: // constructor
-        change_desktop() {}
+        change_desktop(xcb_connection_t * connection) 
+        : connection(connection) {}
     ;
     public: // methods
         enum DIRECTION {
@@ -5090,6 +5091,7 @@ class change_desktop {
         }
     ;
     private: // variables
+        xcb_connection_t * connection;
         std::vector<client *> show;
         std::vector<client *> hide;
         std::thread show_thread;
@@ -5135,7 +5137,10 @@ class change_desktop {
             c->update();
         }
         void thread_sleep(const double & milliseconds) {
+            // Creating a duration with double milliseconds
             auto duration = std::chrono::duration<double, std::milli>(milliseconds);
+
+            // Sleeping for the duration
             std::this_thread::sleep_for(duration);
         }
         void stopAnimations() {
@@ -6085,7 +6090,7 @@ class Events {
                         break;
                     }
                     case CTRL + SUPER: {
-				        change_desktop change_desktop;
+				        change_desktop change_desktop(conn);
                         change_desktop.change_to(change_desktop::NEXT);
                         break;
                     }
@@ -6104,7 +6109,7 @@ class Events {
                         break;
                     }
                     case CTRL + SUPER: {
-				        change_desktop change_desktop;
+				        change_desktop change_desktop(conn);
                         change_desktop.change_to(change_desktop::PREV);
                         break;
                     }
