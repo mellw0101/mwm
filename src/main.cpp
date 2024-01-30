@@ -3532,21 +3532,31 @@ class Window_Manager {
                  && c->width == screen->width_in_pixels
                  && c->height == screen->height_in_pixels) {
                     c->_y(0);
+                    xcb_flush(conn);
                 }
                 if (c->x < 0) {
                     c->_x(0);
+                    xcb_flush(conn);
                 }
                 if (c->y < 0) {
                     c->_y(0);
+                    xcb_flush(conn);
                 }
                 if (c->width > screen->width_in_pixels) {
                     c->_width(screen->width_in_pixels);
+                    xcb_flush(conn);
                 }
                 if (c->height > screen->height_in_pixels) {
                     c->_height(screen->height_in_pixels);
+                    xcb_flush(conn);
+                }
+                if ((c->x + c->width) > screen->width_in_pixels) {
+                    c->_width(screen->width_in_pixels - c->x);
+                    xcb_flush(conn);
                 }
                 if ((c->y + c->height) > screen->height_in_pixels) {
                     c->_height(screen->height_in_pixels - c->y);
+                    xcb_flush(conn);
                 }
             }
         ;
