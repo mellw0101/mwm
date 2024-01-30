@@ -416,11 +416,11 @@ class pointer {
             );
             xcb_flush(conn);
         }
-        void grab(const xcb_window_t & window) {
+        void grab() {
             xcb_grab_pointer_cookie_t cookie = xcb_grab_pointer(
                 conn,
                 false,
-                window,
+                screen->root,
                 XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_POINTER_MOTION,
                 XCB_GRAB_MODE_ASYNC,
                 XCB_GRAB_MODE_ASYNC,
@@ -2563,6 +2563,14 @@ class client {
             }
             void save_max_button_ogsize() {
                 max_button_ogsize.save(x, y, width, height);
+            }
+        ;
+        public: // check methods
+            bool is_active_EWMH_window() {
+                return win.is_active_EWMH_window();
+            }
+            bool is_EWMH_fullscreen() {
+                return win.is_EWMH_fullscreen();
             }
         ;
     ;
@@ -4935,7 +4943,7 @@ class mv_client {
                 return;
             }
 
-            pointer.grab(wm->root);
+            pointer.grab();
             run();
             xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
             xcb_flush(conn);
@@ -5271,7 +5279,7 @@ class resize_client {
                 return;
             }
 
-            pointer.grab(c->frame);
+            pointer.grab();
             pointer.teleport(c->x + c->width, c->y + c->height);
             run();
             xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
@@ -5287,7 +5295,7 @@ class resize_client {
                         return;
                     }
                     
-                    pointer.grab(c->frame);
+                    pointer.grab();
                     edge edge = wm->get_client_edge_from_pointer(c, 10);
                     teleport_mouse(edge);
                     run(edge);
@@ -5417,7 +5425,7 @@ class resize_client {
                         if (pair.first != nullptr) {
                             c2 = pair.first;
                             c2_edge = pair.second;
-                            pointer.grab(c->frame);
+                            pointer.grab();
                             teleport_mouse(_edge);
                             run_double(_edge);
                             xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
@@ -5426,7 +5434,7 @@ class resize_client {
                         }
                     }
                     
-                    pointer.grab(c->frame);
+                    pointer.grab();
                     teleport_mouse(_edge);
                     run(_edge);
                     xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
@@ -5888,7 +5896,7 @@ class tile {
     public: // constructors
         tile(client * & c, TILE tile)
         : c(c) {
-            if (c->win.is_EWMH_fullscreen()) {
+            if (c->is_EWMH_fullscreen()) {
                 return;
             }
             switch (tile) {
@@ -5987,12 +5995,6 @@ class tile {
         client * c;
     ;
     private: // functions
-        void save_tile_ogsize() {
-            c->tile_ogsize.x      = c->x;
-            c->tile_ogsize.y      = c->y;
-            c->tile_ogsize.width  = c->width;
-            c->tile_ogsize.height = c->height;
-        }
         bool current_tile_pos(TILEPOS mode) {
             switch (mode) {
                 case TILEPOS::LEFT:
