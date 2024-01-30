@@ -2427,6 +2427,12 @@ class client {
             void x_y(const int32_t & x, const uint32_t & y) {
                 frame.x_y(x, y);
             }
+            void _x(const int & x) {
+                frame.x(x);
+            }
+            void _y(const int & y) {
+                frame.y(y);
+            }
             void _width(const uint32_t & width) {
                 win.width((width - (BORDER_SIZE * 2)));
                 xcb_flush(conn);
@@ -3525,7 +3531,7 @@ class Window_Manager {
                  && c->y != 0
                  && c->width == screen->width_in_pixels
                  && c->height == screen->height_in_pixels) {
-                    c->y = 0;
+                    c->_y(0);
                 }
             }
         ;
