@@ -442,6 +442,10 @@ class pointer {
             }
             free(reply);
         }
+        void ungrab() {
+            xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
+            xcb_flush(conn);
+        }
     ;
     private: // functions
         const char * pointer_from_enum(CURSOR CURSOR) {
@@ -4945,8 +4949,7 @@ class mv_client {
 
             pointer.grab();
             run();
-            xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
-            xcb_flush(conn);
+            pointer.ungrab();
         }
     ;
     private: // variabels
@@ -4966,6 +4969,10 @@ class mv_client {
         void snap(int x, int y) {
             // WINDOW TO WINDOW SNAPPING 
             for (const auto & cli : wm->cur_d->current_clients) {
+                if (cli == c) {
+                    continue;
+                }
+
                 // SNAP WINDOW TO 'RIGHT' BORDER OF 'NON_CONTROLLED' WINDOW
                 if ((x > cli->x + cli->width - N && x < cli->x + cli->width + N)
                  && (y + c->height > cli->y && y < cli->y + cli->height)) {
@@ -5039,13 +5046,13 @@ class mv_client {
                 c->frame.x_y(RIGHT_, 0);
             } else if ((y < BOTTOM_ + N && y > BOTTOM_ - N) && (x < N && x > -N)) {
                 c->frame.x_y(0, BOTTOM_);
-            } else if ((x < N) && (x > -N)) { 
+            } else if ((x < N) && (x > -N)) {
                 c->frame.x_y(0, y);
             } else if (y < N && y > -N) {
                 c->frame.x_y(x, 0);
             } else if ((x < RIGHT_ + N && x > RIGHT_ - N) && (y < BOTTOM_ + N && y > BOTTOM_ - N)) {
                 c->frame.x_y(RIGHT_, BOTTOM_);
-            } else if ((x < RIGHT_ + N) && (x > RIGHT_ - N)) { 
+            } else if ((x < RIGHT_ + N) && (x > RIGHT_ - N)) {
                 c->frame.x_y(RIGHT_, y);
             } else if (y < BOTTOM_ + N && y > BOTTOM_ - N) {
                 c->frame.x_y(x, BOTTOM_);
@@ -5282,8 +5289,7 @@ class resize_client {
             pointer.grab();
             pointer.teleport(c->x + c->width, c->y + c->height);
             run();
-            xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
-            xcb_flush(conn);
+            pointer.ungrab();
         }
     ;
     public: // subclasses
@@ -5299,8 +5305,7 @@ class resize_client {
                     edge edge = wm->get_client_edge_from_pointer(c, 10);
                     teleport_mouse(edge);
                     run(edge);
-                    xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
-                    xcb_flush(conn);
+                    pointer.ungrab();
                 }
             ;
             private: // variables
@@ -5428,8 +5433,7 @@ class resize_client {
                             pointer.grab();
                             teleport_mouse(_edge);
                             run_double(_edge);
-                            xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
-                            xcb_flush(conn);
+                            pointer.ungrab();
                             return;
                         }
                     }
@@ -5437,8 +5441,7 @@ class resize_client {
                     pointer.grab();
                     teleport_mouse(_edge);
                     run(_edge);
-                    xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
-                    xcb_flush(conn);
+                    pointer.ungrab();
                 }
             ;
             private: // variables
@@ -5690,16 +5693,14 @@ class resize_client {
 
                 // SNAP WINSOW TO 'LEFT' BORDER OF 'NON_CONTROLLED' WINDOW
                 if ((x > cli->x - N && x < cli->x + N) 
-                 && (y + this->c->height > cli->y && y < cli->y + cli->height)) 
-                {
+                 && (y + this->c->height > cli->y && y < cli->y + cli->height)) {
                     c->width_height((cli->x - this->c->x), (y - this->c->y));
                     return;
                 }
 
                 // SNAP WINDOW TO 'TOP' BORDER OF 'NON_CONTROLLED' WINDOW
                 if ((y > cli->y - N && y < cli->y + N) 
-                 && (x + this->c->width > cli->x && x < cli->x + cli->width))
-                {
+                 && (x + this->c->width > cli->x && x < cli->x + cli->width)) {
                     c->width_height((x - this->c->x), (cli->y - this->c->y));
                     return;
                 }
