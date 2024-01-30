@@ -3430,7 +3430,9 @@ class Window_Manager {
                 c->height = (data.height < 300) ? 300 : data.height;
                 c->width  = (data.width < 400)  ? 400 : data.width;
                 c->x      = c->win.x_from_req();
+                log_info(std::to_string(c->x));
                 c->y      = c->win.y_from_req();
+                log_info(std::to_string(c->y));
                 c->depth   = 24;
                 c->desktop = cur_d->desktop;
 
