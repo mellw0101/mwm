@@ -68,7 +68,7 @@ Logger log;
 #include "structs.hpp"
 
 static xcb_connection_t * conn;
-static xcb_ewmh_connection_t * ewmh; 
+static xcb_ewmh_connection_t * ewmh;
 static const xcb_setup_t * setup;
 static xcb_screen_iterator_t iter;
 static xcb_screen_t * screen;
@@ -4165,28 +4165,6 @@ class Mwm_Animator {
             }
             return false; 
         }
-        /**
-         *
-         * @brief Configures the window with the specified mask and value.
-         * 
-         * This function configures the window using the XCB library. It takes in a mask and a value
-         * as parameters and applies the configuration to the window.
-         * 
-         * @param mask The mask specifying which attributes to configure.
-         * @param value The value to set for the specified attributes.
-         * 
-         */
-        // void config_window(const uint32_t & mask, const uint32_t & value) {
-        //     xcb_configure_window(
-        //         conn,
-        //         window,
-        //         mask,
-        //         (const uint32_t[1]) {
-        //             static_cast<const uint32_t &>(value)
-        //         }
-        //     );
-        //     xcb_flush(conn);
-        // }
     ;
 };
 void animate(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight, const int & duration) {
