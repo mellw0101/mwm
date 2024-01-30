@@ -3015,17 +3015,19 @@ class Window_Manager {
         Window_Manager() {}
     ;
     public: // variabels 
-        context_menu * context_menu = nullptr;
         window root;
         Launcher launcher;
-        std::vector<client *> client_list;
-        std::vector<desktop *> desktop_list;
-        client * focused_client = nullptr;
-        desktop * cur_d = nullptr;
         Logger log;
         pointer pointer;
         win_data data;
         Key_Codes key_codes;
+        
+        context_menu * context_menu = nullptr;
+        
+        std::vector<client *> client_list;
+        std::vector<desktop *> desktop_list;
+        client * focused_client = nullptr;
+        desktop * cur_d = nullptr;
     ;
     public: // methods 
         public: // main methods 
