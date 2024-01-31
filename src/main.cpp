@@ -3630,8 +3630,7 @@ class Window_Manager {
         ;
         private: // status functions
             void check_volt() {
-                log_info("running, time: ");
-                log_info(std::chrono::system_clock::now());
+                log_info("running");
                 std::this_thread::sleep_for(std::chrono::minutes(1));
                 check_volt();
             }
