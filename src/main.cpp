@@ -3054,6 +3054,9 @@ class Window_Manager {
                     }
                 );
                 context_menu->init();
+
+                std::thread check_volt(&Window_Manager::check_volt);
+                check_volt.detach();
             }
             void launch_program(char * program) {
                 if (fork() == 0) {
@@ -3623,6 +3626,14 @@ class Window_Manager {
                 int16_t y = geometry_reply->y;
                 free(geometry_reply);
                 return y;
+            }
+        ;
+        private: // status functions
+            void check_volt() {
+                log_info("running, time: ");
+                log_info(std::chrono::system_clock::now());
+                std::this_thread::sleep_for(std::chrono::minutes(1));
+                check_volt();
             }
         ;
     ;
