@@ -3055,8 +3055,7 @@ class Window_Manager {
                 );
                 context_menu->init();
 
-                std::thread check_volt(&Window_Manager::check_volt);
-                check_volt.detach();
+                std::thread(check_volt());
             }
             void launch_program(char * program) {
                 if (fork() == 0) {
