@@ -6500,13 +6500,23 @@ class Events {
 class test {
     public: // constructor
         test() {}
+    ;
+    public: // vatiabels]
+        int running = 1;
+    ;
     public: // methods
         void setup_events() {
             event_handler->setEventCallback(XCB_KEY_PRESS, [this](Ev ev) {
                 const auto * e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
                 if (e->detail == wm->key_codes.k) {
                     if (e->state == SUPER) {
+                        running = 1;
                         run_full();
+                    }
+                }
+                if (e->detail == wm->key_codes.q) {
+                    if (e->state == ALT) {
+                        running = 0;
                     }
                 }
             });
@@ -6545,6 +6555,9 @@ class test {
                 win_1_animator.animate((screen->width_in_pixels - 300), 0, 300, 300, (screen->width_in_pixels - 300), (screen->height_in_pixels - 300), 300, 300, (400 - i));
                 win_1_animator.animate((screen->width_in_pixels - 300), (screen->height_in_pixels - 300), 300, 300, 0, (screen->height_in_pixels - 300), 300, 300, (400 - i));
                 win_1_animator.animate(0, (screen->height_in_pixels - 300), 300, 300, 0, 0, 300, 300, (400 - i));
+                if (running == 0) { 
+                    break;
+                }
             }
             
             win_1.unmap();
