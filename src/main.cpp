@@ -5297,7 +5297,7 @@ class change_desktop {
         }
         void anim_cli(client * c, const int & endx) {
             Mwm_Animator anim(c);
-            anim.animate_client_x(c->x, endx, duration);
+            anim.animate_client_x(c->x, endx, DURATION);
             c->update();
         }
         void thread_sleep(const double & milliseconds) {
