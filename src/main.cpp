@@ -6540,6 +6540,9 @@ class test {
                 cd.change_to(change_desktop::PREV);
                 cd.duration = (cd.duration - 1);
                 ++i;
+                if (running == 0) { 
+                    break;
+                }
             }
         }
         void mv_test() {
