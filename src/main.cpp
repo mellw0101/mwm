@@ -6561,7 +6561,7 @@ int main() {
     setup_wm();
 
     test tester;
-    tester.run_full();
+    tester.setup_events();
     
     event_handler->run();
     xcb_disconnect(conn);
