@@ -6530,6 +6530,7 @@ class test {
                 cd.change_to(change_desktop::NEXT);
                 cd.change_to(change_desktop::PREV);
                 cd.duration = (cd.duration - (dropof - 1));
+                ++i;
             }
         }
     ;
