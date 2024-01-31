@@ -6538,16 +6538,13 @@ class test {
             win_1.raise();
             win_1.set_backround_color(RED);
             win_1.map();
+            Mwm_Animator win_1_animator(win_1);
             
             for (int i = 0; i < 400; ++i) {
-                win_1.x_y((screen->width_in_pixels - 300), 0);
-                std::this_thread::sleep_for(std::chrono::milliseconds(400 - i));
-                win_1.x_y((screen->width_in_pixels - 300), (screen->height_in_pixels - 300));
-                std::this_thread::sleep_for(std::chrono::milliseconds(400 - i));
-                win_1.x_y(0, (screen->height_in_pixels - 300));
-                std::this_thread::sleep_for(std::chrono::milliseconds(400 - i));
-                win_1.x_y(0, 0);
-                std::this_thread::sleep_for(std::chrono::milliseconds(400 - i));
+                win_1_animator.animate(0, 0, 300, 300, (screen->width_in_pixels - 300), 0, 300, 300, (400 - i));
+                win_1_animator.animate((screen->width_in_pixels - 300), 0, 300, 300, (screen->width_in_pixels - 300), (screen->height_in_pixels - 300), 300, 300, (400 - i));
+                win_1_animator.animate((screen->width_in_pixels - 300), (screen->height_in_pixels - 300), 300, 300, 0, (screen->height_in_pixels - 300), 300, 300, (400 - i));
+                win_1_animator.animate(0, (screen->height_in_pixels - 300), 300, 300, 0, 0, 300, 300, (400 - i));
             }
             
             win_1.unmap();
