@@ -6529,7 +6529,7 @@ class test {
             while(i < (end + 1)) {
                 cd.change_to(change_desktop::NEXT);
                 cd.change_to(change_desktop::PREV);
-                cd.duration = (cd.duration - (dropof - 1));
+                cd.duration = (cd.duration - 1);
                 ++i;
             }
         }
