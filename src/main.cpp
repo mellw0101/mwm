@@ -5198,9 +5198,6 @@ class change_desktop {
             NEXT,
             PREV
         };
-        enum DURATION {
-            DURATION = 100
-        };
         void change_to(const DIRECTION & direction) {
             switch (direction) {
                 case NEXT: {
@@ -5229,7 +5226,7 @@ class change_desktop {
                 }
             }
             mtx.lock();
-            thread_sleep(DURATION + 20);
+            thread_sleep(duration + 20);
             joinAndClearThreads();
             mtx.unlock();
         }
@@ -6501,22 +6498,30 @@ class Events {
     ;
 };
 class test {
+    public: // constructor
+        test() {
+            
+        }
     public: // methods
         void run_full() {
-
+            cd_test();
         }
-    ;
-    private: // variabels; 
-        change_desktop cd;
     ;
     private: // functions
         void cd_test() {
+            change_desktop cd(conn);
             // first test
             int i = 0;
-            while(i < 6) {
+            int end = 5;
+            const int og_duration = cd.duration;
+            
+            int dropof = 0;
+            dropof = (cd.duration / (end + 1));
+
+            while(i < (end + 1)) {
                 cd.change_to(change_desktop::NEXT);
                 cd.change_to(change_desktop::PREV);
-                
+                cd.duration = (cd.duration - (dropof - 1));
             }
         }
     ;
@@ -6546,6 +6551,7 @@ void setup_wm() {
 int main() {
     LOG_start()
     setup_wm();
+    test tester;
     event_handler->run();
     xcb_disconnect(conn);
     return 0;
