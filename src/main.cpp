@@ -6513,18 +6513,17 @@ class test {
         }
         void run_full() {
             cd_test();
+            mv_test();
         }
     ;
     private: // functions
         void cd_test() {
-            change_desktop cd(conn);
+            
             // first test
             int i = 0;
             int end = 100;
+            change_desktop cd(conn);
             const int og_duration = cd.duration;
-            
-            int dropof = 0;
-            dropof = (cd.duration / (end + 1));
 
             while(i < (end + 1)) {
                 cd.change_to(change_desktop::NEXT);
@@ -6532,6 +6531,27 @@ class test {
                 cd.duration = (cd.duration - 1);
                 ++i;
             }
+        }
+        void mv_test() {
+            window win_1;
+            win_1.create_default(wm->root, 0, 0, 300, 300);
+            win_1.raise();
+            win_1.set_backround_color(RED);
+            win_1.map();
+            
+            for (int i = 0; i < 400; ++i) {
+                win_1.x_y((screen->width_in_pixels - 300), 0);
+                std::this_thread::sleep_for(std::chrono::milliseconds(400 - i));
+                win_1.x_y((screen->width_in_pixels - 300), (screen->height_in_pixels - 300));
+                std::this_thread::sleep_for(std::chrono::milliseconds(400 - i));
+                win_1.x_y(0, (screen->height_in_pixels - 300));
+                std::this_thread::sleep_for(std::chrono::milliseconds(400 - i));
+                win_1.x_y(0, 0);
+                std::this_thread::sleep_for(std::chrono::milliseconds(400 - i));
+            }
+            
+            win_1.unmap();
+            win_1.kill();
         }
     ;
 };
