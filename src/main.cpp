@@ -5191,7 +5191,7 @@ class change_desktop {
         : connection(connection) {}
     ;
     public: // variabels
-        int duration;
+        int duration = 100;
     ;
     public: // methods
         enum DIRECTION {
@@ -5297,7 +5297,7 @@ class change_desktop {
         }
         void anim_cli(client * c, const int & endx) {
             Mwm_Animator anim(c);
-            anim.animate_client_x(c->x, endx, DURATION);
+            anim.animate_client_x(c->x, endx, duration);
             c->update();
         }
         void thread_sleep(const double & milliseconds) {
