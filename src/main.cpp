@@ -6499,10 +6499,18 @@ class Events {
 };
 class test {
     public: // constructor
-        test() {
-            
-        }
+        test() {}
     public: // methods
+        void setup_events() {
+            event_handler->setEventCallback(XCB_KEY_PRESS, [this](Ev ev) {
+                const auto * e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
+                if (e->detail == wm->key_codes.k) {
+                    if (e->state == SUPER) {
+                        run_full();
+                    }
+                }
+            });
+        }
         void run_full() {
             cd_test();
         }
@@ -6551,7 +6559,10 @@ void setup_wm() {
 int main() {
     LOG_start()
     setup_wm();
+
     test tester;
+    tester.run_full();
+    
     event_handler->run();
     xcb_disconnect(conn);
     return 0;
