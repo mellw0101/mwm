@@ -5190,6 +5190,9 @@ class change_desktop {
         change_desktop(xcb_connection_t * connection) 
         : connection(connection) {}
     ;
+    public: // variabels
+        int duration;
+    ;
     public: // methods
         enum DIRECTION {
             NEXT,
@@ -5294,7 +5297,7 @@ class change_desktop {
         }
         void anim_cli(client * c, const int & endx) {
             Mwm_Animator anim(c);
-            anim.animate_client_x(c->x, endx, DURATION);
+            anim.animate_client_x(c->x, endx, duration);
             c->update();
         }
         void thread_sleep(const double & milliseconds) {
@@ -6494,6 +6497,27 @@ class Events {
             const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
             // log_win("e->event: ", e->event);
             // log_info(e->event_x);
+        }
+    ;
+};
+class test {
+    public: // methods
+        void run_full() {
+
+        }
+    ;
+    private: // variabels; 
+        change_desktop cd;
+    ;
+    private: // functions
+        void cd_test() {
+            // first test
+            int i = 0;
+            while(i < 6) {
+                cd.change_to(change_desktop::NEXT);
+                cd.change_to(change_desktop::PREV);
+                
+            }
         }
     ;
 };
