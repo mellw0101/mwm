@@ -6520,7 +6520,7 @@ class test {
             change_desktop cd(conn);
             // first test
             int i = 0;
-            int end = 5;
+            int end = 100;
             const int og_duration = cd.duration;
             
             int dropof = 0;
