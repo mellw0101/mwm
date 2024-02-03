@@ -73,510 +73,341 @@ static const xcb_setup_t * setup;
 static xcb_screen_iterator_t iter;
 static xcb_screen_t * screen;
 
+#define Public(type) public:type
+#define Private(type) private:type
+using namespace std;
+using Uint = unsigned int;
+using SUint = unsigned short int;
+
 struct size_pos {
-    int16_t x, y;
-    uint16_t width, height;
+  int16_t x, y;
+  uint16_t width, height;
 
-    void save(const int & x, const int & y, const int & width, const int & height) {
-        this->x = x;
-        this->y = y;
-        this->width = width;
-        this->height = height;
-    }
-};
+  void save(const int & x, const int & y, const int & width, const int & height) {
+    this->x = x;
+    this->y = y;
+    this->width = width;
+    this->height = height; }};
 class mxb {
-    public: 
-        class XConnection {
-            public: // constructor and destructor
-                struct mxb_auth_info_t {
-                    int namelen;
-                    char* name;
-                    int datalen;
-                    char* data;
-                };
-                XConnection(const char * display) {
-                    std::string socketPath = getSocketPath(display);
+  Public(class) XConnection {
+    // constructor and destructor
+      Public(struct mxb_auth_info_t) {
+          int namelen;
+          char* name;
+          int datalen;
+          char* data; };
+      Public(XConnection)(const char * display) {
+        std::string socketPath = getSocketPath(display);
+        memset(&addr, 0, sizeof(addr)); // Initialize address
+        addr.sun_family = AF_UNIX;
+        strncpy(addr.sun_path, socketPath.c_str(), sizeof(addr.sun_path) - 1);
+        fd = socket(AF_UNIX, SOCK_STREAM, 0); // Create socket 
+        if(fd == -1)
+          throw 
+            std::runtime_error("Failed to create socket");
+        if(connect(fd, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr)) == -1) { // Connect to the X server's socket
+          ::close(fd);
+            throw
+              std::runtime_error("Failed to connect to X server"); }
+        int displayNumber = parseDisplayNumber(display); // Perform authentication 
+        if(!authenticate_x11_connection(displayNumber, auth_info)) {
+          ::close(fd);
+            throw 
+              std::runtime_error("Failed to authenticate with X server"); }}
+      Public(~XConnection()) {
+        if(fd != -1)
+          ::close(fd);
+        delete[] auth_info.name;
+        delete[] auth_info.data; }
+    // Methods
+      Public (int) getFd() const { return fd; }
+      Public (void) confirmConnection() {
+        const string extensionName = "BIG-REQUESTS";  // Example extension
+        uint16_t nameLength = static_cast<uint16_t>(extensionName.length());
 
-                    // Initialize address
-                    memset(&addr, 0, sizeof(addr));
-                    addr.sun_family = AF_UNIX;
-                    strncpy(addr.sun_path, socketPath.c_str(), sizeof(addr.sun_path) - 1);
+        // Calculate the total length of the request in 4-byte units, including padding
+        uint16_t requestLength = htons((8 + nameLength + 3) / 4); // Length in 4-byte units
+        char request[32] = {0};  // 32 bytes is enough for most requests
+        request[0] = 98;         // Opcode for QueryExtension
+        request[1] = 0;          // Unused
+        request[2] = (requestLength >> 8) & 0xFF;  // Length (high byte)
+        request[3] = requestLength & 0xFF;         // Length (low byte)
+        request[4] = nameLength & 0xFF;            // Length of the extension name (low byte)
+        request[5] = (nameLength >> 8) & 0xFF;     // Length of the extension name (high byte)
+        memcpy(&request[8], extensionName.c_str(), nameLength); // Copy the extension name
 
-                    // Create socket
-                    fd = socket(AF_UNIX, SOCK_STREAM, 0);
-                    if (fd == -1) 
-                    {
-                        throw std::runtime_error("Failed to create socket");
-                    }
+        /* Send the request */
+        if(send(fd, request, 8 + nameLength, 0) == -1)
+          throw std::runtime_error("Failed to send QueryExtension request");
+        /* Prepare to receive the response */ 
+        char reply[32] = {0}; int received = 0;
 
-                    // Connect to the X server's socket
-                    if (connect(fd, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr)) == -1) 
-                    {
-                        ::close(fd);
-                        throw std::runtime_error("Failed to connect to X server");
-                    }
+        while(received < sizeof(reply)) { // Read the response from the server
+          int n = recv(fd, reply + received, sizeof(reply) - received, 0);
+          if(n == -1)
+            throw runtime_error("Failed to receive QueryExtension reply"); 
+          else if(n == 0)
+            throw runtime_error("Connection closed by X server");
+          received += n; }
+        if(reply[0] != 1)
+          throw std::runtime_error("Invalid response received from X server");
+        bool extensionPresent = reply[1];
+        if(extensionPresent) 
+          log_info("BIG-REQUESTS extension is supported by the X server."); 
+        else
+          log_info("BIG-REQUESTS extension is not supported by the X server.");}
+      Public (string) sendMessage(const string &extensionName) {
+        uint16_t nameLength = static_cast<uint16_t>(extensionName.length());
 
-                    // Perform authentication
-                    int displayNumber = parseDisplayNumber(display);
-                    if (!authenticate_x11_connection(displayNumber, auth_info)) 
-                    {
-                        ::close(fd);
-                        throw std::runtime_error("Failed to authenticate with X server");
-                    }
-                }
-                ~XConnection() {
-                    if (fd != -1) 
-                    {
-                        ::close(fd);
-                    }
-                    delete[] auth_info.name;
-                    delete[] auth_info.data;
-                }
-            ;
-            public: // methods
-                int getFd() const {
-                    return fd;
-                }
-                void confirmConnection() {
-                    const std::string extensionName = "BIG-REQUESTS";  // Example extension
-                    uint16_t nameLength = static_cast<uint16_t>(extensionName.length());
+        // Calculate the total length of the request in 4-byte units, including padding
+        uint16_t requestLength = htons((8 + nameLength + 3) / 4); // Length in 4-byte units
+        char request[32] = {0};  // 32 bytes is enough for most requests
+        request[0] = 98;         // Opcode for QueryExtension
+        request[1] = 0;          // Unused
+        request[2] = (requestLength >> 8) & 0xFF;  // Length (high byte)
+        request[3] = requestLength & 0xFF;         // Length (low byte)
+        request[4] = nameLength & 0xFF;            // Length of the extension name (low byte)
+        request[5] = (nameLength >> 8) & 0xFF;     // Length of the extension name (high byte)
+        std::memcpy(&request[8], extensionName.c_str(), nameLength); // Copy the extension name
 
-                    // Calculate the total length of the request in 4-byte units, including padding
-                    uint16_t requestLength = htons((8 + nameLength + 3) / 4); // Length in 4-byte units
-                    char request[32] = {0};  // 32 bytes is enough for most requests
-                    request[0] = 98;         // Opcode for QueryExtension
-                    request[1] = 0;          // Unused
-                    request[2] = (requestLength >> 8) & 0xFF;  // Length (high byte)
-                    request[3] = requestLength & 0xFF;         // Length (low byte)
-                    request[4] = nameLength & 0xFF;            // Length of the extension name (low byte)
-                    request[5] = (nameLength >> 8) & 0xFF;     // Length of the extension name (high byte)
-                    std::memcpy(&request[8], extensionName.c_str(), nameLength); // Copy the extension name
-
-                    // Send the request
-                    if (send(fd, request, 8 + nameLength, 0) == -1) 
-                    {
-                        throw std::runtime_error("Failed to send QueryExtension request");
-                    }
-
-                    // Prepare to receive the response
-                    char reply[32] = {0}; // Buffer to hold the response
-                    int received = 0;     // Number of bytes received so far
-
-                    // Read the response from the server
-                    while (received < sizeof(reply)) 
-                    {
-                        int n = recv(fd, reply + received, sizeof(reply) - received, 0);
-                        if (n == -1) 
-                        {
-                            throw std::runtime_error("Failed to receive QueryExtension reply");
-                        }
-                        else if (n == 0) 
-                        {
-                            throw std::runtime_error("Connection closed by X server");
-                        }
-                        received += n;
-                    }
-
-                    // Process the reply
-                    // Check if the first byte is 1 (indicating a reply)
-                    if (reply[0] != 1) 
-                    {
-                        throw std::runtime_error("Invalid response received from X server");
-                    }
-
-                    // Check if the extension is present
-                    bool extensionPresent = reply[1];
-                    if (extensionPresent) 
-                    {
-                        log_info("BIG-REQUESTS extension is supported by the X server.");
-                    } 
-                    else 
-                    {
-                        log_info("BIG-REQUESTS extension is not supported by the X server.");
-                    }
-                }
-                std::string sendMessage(const std::string & extensionName) {
-                    uint16_t nameLength = static_cast<uint16_t>(extensionName.length());
-
-                    // Calculate the total length of the request in 4-byte units, including padding
-                    uint16_t requestLength = htons((8 + nameLength + 3) / 4); // Length in 4-byte units
-                    char request[32] = {0};  // 32 bytes is enough for most requests
-                    request[0] = 98;         // Opcode for QueryExtension
-                    request[1] = 0;          // Unused
-                    request[2] = (requestLength >> 8) & 0xFF;  // Length (high byte)
-                    request[3] = requestLength & 0xFF;         // Length (low byte)
-                    request[4] = nameLength & 0xFF;            // Length of the extension name (low byte)
-                    request[5] = (nameLength >> 8) & 0xFF;     // Length of the extension name (high byte)
-                    std::memcpy(&request[8], extensionName.c_str(), nameLength); // Copy the extension name
-
-                    // Send the request
-                    if (send(fd, request, 8 + nameLength, 0) == -1) 
-                    {
-                        throw std::runtime_error("Failed to send QueryExtension request");
-                    }
-
-                    // Prepare to receive the response
-                    char reply[32] = {0}; // Buffer to hold the response
-                    int received = 0;     // Number of bytes received so far
-
-                    // Read the response from the server
-                    while (received < sizeof(reply)) 
-                    {
-                        int n = recv(fd, reply + received, sizeof(reply) - received, 0);
-                        if (n == -1) 
-                        {
-                            throw std::runtime_error("Failed to receive QueryExtension reply");
-                        }
-                        else if (n == 0) 
-                        {
-                            throw std::runtime_error("Connection closed by X server");
-                        }
-                        received += n;
-                    }
-
-                    // Process the reply
-                    // Check if the first byte is 1 (indicating a reply)
-                    if (reply[0] != 1) 
-                    {
-                        throw std::runtime_error("Invalid response received from X server");
-                    }
-
-                    // Check if the extension is present
-                    bool extensionPresent = reply[1];
-                    if (extensionPresent) 
-                    {
-                        return "Extension is supported by the X server.";
-                    } 
-                    else 
-                    {
-                        return "Extension is not supported by the X server.";
-                    }
-                }
-            ;
-            private: // variabels
-                int fd;
-                struct sockaddr_un addr;
-                mxb_auth_info_t auth_info;
-                Logger log;
-            ;
-            private: // functions
-                bool authenticate_x11_connection(int display_number, mxb_auth_info_t & auth_info) { // Function to authenticate an X11 connection
-                    const char* xauthority_env = std::getenv("XAUTHORITY"); // Try to get the XAUTHORITY environment variable; fall back to default
-                    std::string xauthority_file = xauthority_env ? xauthority_env : "~/.Xauthority";
-
-                    FILE* auth_file = fopen(xauthority_file.c_str(), "rb"); // Open the Xauthority file
-                    if (!auth_file) { // Handle error: Failed to open .Xauthority file
-                        
-                        return false;
-                    }
-
-                    Xauth* xauth_entry;
-                    bool found = false;
-                    while ((xauth_entry = XauReadAuth(auth_file)) != nullptr) {
-                        // Check if the entry matches your display number
-                        // Assuming display_number is the display you're interested in
-                        if (std::to_string(display_number) == std::string(xauth_entry->number, xauth_entry->number_length)) {
-                            // Fill the auth_info structure
-                            auth_info.namelen = xauth_entry->name_length;
-                            auth_info.name = new char[xauth_entry->name_length];
-                            std::memcpy(auth_info.name, xauth_entry->name, xauth_entry->name_length);
-
-                            auth_info.datalen = xauth_entry->data_length;
-                            auth_info.data = new char[xauth_entry->data_length];
-                            std::memcpy(auth_info.data, xauth_entry->data, xauth_entry->data_length);
-
-                            found = true;
-                            XauDisposeAuth(xauth_entry);
-                            break;
-                        }
-                        XauDisposeAuth(xauth_entry);
-                    }
-
-                    fclose(auth_file);
-
-                    return found;
-                }
-                std::string getSocketPath(const char * display) {
-                    std::string displayStr;
-
-                    if (display == nullptr) {
-                        char* envDisplay = std::getenv("DISPLAY");
-                        
-                        if (envDisplay != nullptr) {
-                            displayStr = envDisplay;
-                        } else {
-                            displayStr = ":0";
-                        }
-                    } else {
-                        displayStr = display;
-                    }
-
-                    int displayNumber = 0;
-                    size_t colonPos = displayStr.find(':'); // Extract the display number from the display string
-                    if (colonPos != std::string::npos) {
-                        displayNumber = std::stoi(displayStr.substr(colonPos + 1));
-                    }
-
-                    return "/tmp/.X11-unix/X" + std::to_string(displayNumber);
-                }
-                int parseDisplayNumber(const char * display) {
-                    if (!display) {
-                        display = std::getenv("DISPLAY");
-                    }
-
-                    if (!display) {
-                        return 0;  // default to display 0
-                    }
-
-                    const std::string displayStr = display;
-                    size_t colonPos = displayStr.find(':');
-                    if (colonPos != std::string::npos) {
-                        return std::stoi(displayStr.substr(colonPos + 1));
-                    }
-
-                    return 0;  // default to display 0
-                }
-            ;
-        };
-        static XConnection * mxb_connect(const char* display) {
-            try {
-                return new XConnection(display);
-            } catch (const std::exception & e) {
-                // Handle exceptions or errors here
-                std::cerr << "Connection error: " << e.what() << std::endl;
-                return nullptr;
-            }
-        }
-        static int mxb_connection_has_error(XConnection * conn) {
-            try {
-                // conn->confirmConnection();
-                std::string response = conn->sendMessage("BIG-REQUESTS");
-                log_info(response);
-            } catch (const std::exception & e) {
-                log_error(e.what());
-                return 1;
-            }
-            return 0;
-        }
-    ;
-};
-class pointer {
-    public: // methods
-        uint32_t x() {
-            xcb_query_pointer_cookie_t cookie = xcb_query_pointer(conn, screen->root);
-            xcb_query_pointer_reply_t * reply = xcb_query_pointer_reply(conn, cookie, nullptr);
-            if (!reply) {
-                log_error("reply is nullptr.");
-                return 0;                            
-            } 
-
-            uint32_t x;
-            x = reply->root_x;
-            free(reply);
-            return x;
-        }
-        uint32_t y() {
-            xcb_query_pointer_cookie_t cookie = xcb_query_pointer(conn, screen->root);
-            xcb_query_pointer_reply_t * reply = xcb_query_pointer_reply(conn, cookie, nullptr);
-            if (!reply) {
-                log_error("reply is nullptr.");
-                return 0;                            
-            } 
-
-            uint32_t y;
-            y = reply->root_y;
-            free(reply);
-            return y;
-        }
-        void teleport(const int16_t & x, const int16_t & y) {
-            xcb_warp_pointer(
-                conn, 
-                XCB_NONE, 
-                screen->root, 
-                0, 
-                0, 
-                0, 
-                0, 
-                x, 
-                y
-            );
-            xcb_flush(conn);
-        }
-        void grab() {
-            xcb_grab_pointer_cookie_t cookie = xcb_grab_pointer(
-                conn,
-                false,
-                screen->root,
-                XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_POINTER_MOTION,
-                XCB_GRAB_MODE_ASYNC,
-                XCB_GRAB_MODE_ASYNC,
-                XCB_NONE,
-                XCB_NONE,
-                XCB_CURRENT_TIME
-            );
-
-            xcb_grab_pointer_reply_t * reply = xcb_grab_pointer_reply(conn, cookie, nullptr);
-            if (!reply) {
-                log_error("reply is nullptr.");
-                free(reply);
-                return;
-            }
-            if (reply->status != XCB_GRAB_STATUS_SUCCESS) {
-                log_error("Could not grab pointer");
-                free(reply);
-                return;
-            }
-            free(reply);
-        }
-        void ungrab() {
-            xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
-            xcb_flush(conn);
-        }
-    ;
+        /* Send the request */ if (send(fd, request, 8 + nameLength, 0) == -1)
+          throw runtime_error("Failed to send QueryExtension request");
+        /* Prepare to receive the response */ char reply[32] = {0}; int received = 0;
+        /* Read the response from the server */ while(received < sizeof(reply)) {
+          int n = recv(fd, reply + received, sizeof(reply) - received, 0);
+          if(n == -1)
+            throw runtime_error("Failed to receive QueryExtension reply");
+          else if(n == 0)
+            throw runtime_error("Connection closed by X server");
+          received += n; }
+        if (reply[0] != 1)
+          throw runtime_error("Invalid response received from X server");
+        bool extensionPresent = reply[1]; 
+        if(extensionPresent) // Check if the extension is present
+          return("Extension is supported by the X server."); 
+        else
+          return("Extension is not supported by the X server.");}
+    // Variabels
+      Private(int)fd;
+      Private(struct sockaddr_un)addr;
+      Private(mxb_auth_info_t)auth_info;
+      Private(Logger)log;
     private: // functions
-        const char * pointer_from_enum(CURSOR CURSOR) {
-            switch (CURSOR) {
-                case CURSOR::arrow: return "arrow";
-                case CURSOR::hand1: return "hand1";
-                case CURSOR::hand2: return "hand2";
-                case CURSOR::watch: return "watch";
-                case CURSOR::xterm: return "xterm";
-                case CURSOR::cross: return "cross";
-                case CURSOR::left_ptr: return "left_ptr";
-                case CURSOR::right_ptr: return "right_ptr";
-                case CURSOR::center_ptr: return "center_ptr";
-                case CURSOR::sb_v_double_arrow: return "sb_v_double_arrow";
-                case CURSOR::sb_h_double_arrow: return "sb_h_double_arrow";
-                case CURSOR::fleur: return "fleur";
-                case CURSOR::question_arrow: return "question_arrow";
-                case CURSOR::pirate: return "pirate";
-                case CURSOR::coffee_mug: return "coffee_mug";
-                case CURSOR::umbrella: return "umbrella";
-                case CURSOR::circle: return "circle";
-                case CURSOR::xsb_left_arrow: return "xsb_left_arrow";
-                case CURSOR::xsb_right_arrow: return "xsb_right_arrow";
-                case CURSOR::xsb_up_arrow: return "xsb_up_arrow";
-                case CURSOR::xsb_down_arrow: return "xsb_down_arrow";
-                case CURSOR::top_left_corner: return "top_left_corner";
-                case CURSOR::top_right_corner: return "top_right_corner";
-                case CURSOR::bottom_left_corner: return "bottom_left_corner";
-                case CURSOR::bottom_right_corner: return "bottom_right_corner";
-                case CURSOR::sb_left_arrow: return "sb_left_arrow";
-                case CURSOR::sb_right_arrow: return "sb_right_arrow";
-                case CURSOR::sb_up_arrow: return "sb_up_arrow";
-                case CURSOR::sb_down_arrow: return "sb_down_arrow";
-                case CURSOR::top_side: return "top_side";
-                case CURSOR::bottom_side: return "bottom_side";
-                case CURSOR::left_side: return "left_side";
-                case CURSOR::right_side: return "right_side";
-                case CURSOR::top_tee: return "top_tee";
-                case CURSOR::bottom_tee: return "bottom_tee";
-                case CURSOR::left_tee: return "left_tee";
-                case CURSOR::right_tee: return "right_tee";
-                case CURSOR::top_left_arrow: return "top_left_arrow";
-                case CURSOR::top_right_arrow: return "top_right_arrow";
-                case CURSOR::bottom_left_arrow: return "bottom_left_arrow";
-                case CURSOR::bottom_right_arrow: return "bottom_right_arrow";
-                default: return "left_ptr";
-            }
-        }
-    ;
-    private: // variables
-        Logger log;
-    ;
-};
+      bool authenticate_x11_connection(int display_number, mxb_auth_info_t & auth_info) {
+        const char* xauthority_env = std::getenv("XAUTHORITY"); 
+        string xauthority_file = xauthority_env ? xauthority_env : "~/.Xauthority";
+
+        FILE* auth_file = fopen(xauthority_file.c_str(), "rb");
+        if(!auth_file)
+          return(false);
+        Xauth* xauth_entry;
+        bool found = false;
+        while((xauth_entry = XauReadAuth(auth_file)) != nullptr) {
+          // Check if the entry matches your display number
+          // Assuming display_number is the display you're interested in
+          if(to_string(display_number) == string(xauth_entry->number, xauth_entry->number_length)) {
+            auth_info.namelen = xauth_entry->name_length;
+            auth_info.name = new char[xauth_entry->name_length];
+            memcpy(auth_info.name, xauth_entry->name, xauth_entry->name_length);
+
+            auth_info.datalen = xauth_entry->data_length;
+            auth_info.data = new char[xauth_entry->data_length];
+            memcpy(auth_info.data, xauth_entry->data, xauth_entry->data_length);
+
+            found = true;
+            XauDisposeAuth(xauth_entry);
+            break; }
+          XauDisposeAuth(xauth_entry); }
+        fclose(auth_file);
+        return(found); }
+      string getSocketPath(const char * display) {
+        string displayStr;
+        if(display == nullptr) {
+          char* envDisplay = getenv("DISPLAY");
+          if(envDisplay != nullptr)
+            displayStr = envDisplay;
+          else
+            displayStr = ":0"; }
+        else
+          displayStr = display;
+        int displayNumber = 0;
+        size_t colonPos = displayStr.find(':'); // Extract the display number from the display string
+        if(colonPos != string::npos)
+          displayNumber = std::stoi(displayStr.substr(colonPos + 1));
+        return "/tmp/.X11-unix/X" + std::to_string(displayNumber); }
+      int parseDisplayNumber(const char * display) {
+        if(!display)
+          display = getenv("DISPLAY");
+        if(!display)
+          return 0;  // default to display 0
+        const string displayStr = display;
+        size_t colonPos = displayStr.find(':');
+        if(colonPos != string::npos)
+          return std::stoi(displayStr.substr(colonPos + 1));
+        return 0; }};
+  static XConnection * mxb_connect(const char* display) {
+    try { return(new XConnection(display)); }
+      catch (const exception & e) { cerr << "Connection error: " << e.what() << endl; return(nullptr); }}
+  static int mxb_connection_has_error(XConnection * conn) {
+    try {string response = conn->sendMessage("BIG-REQUESTS"); log_info(response);} 
+      catch (const exception &e) { log_error(e.what()); return(1); }
+        return(0); };};
+class pointer {
+  // methods
+    Public(uint32_t) x() {
+      xcb_query_pointer_cookie_t cookie = xcb_query_pointer(conn, screen->root);
+      xcb_query_pointer_reply_t * reply = xcb_query_pointer_reply(conn, cookie, nullptr);
+      if(!reply) {
+        log_error("reply is nullptr."); return(0); } 
+      uint32_t x = reply->root_x;
+      free(reply);
+      return x; }
+    Public(uint32_t) y() {
+      xcb_query_pointer_cookie_t cookie = xcb_query_pointer(conn, screen->root);
+      xcb_query_pointer_reply_t * reply = xcb_query_pointer_reply(conn, cookie, nullptr);
+      if(!reply) {
+        log_error("reply is nullptr."); return(0); }
+      uint32_t y = reply->root_y;
+      free(reply);
+      return y; }
+    Public(void) teleport(const int16_t &x, const int16_t &y) {
+      xcb_warp_pointer(conn, XCB_NONE, screen->root, 0, 0, 0, 0, x, y); xcb_flush(conn);}
+    Public(void) grab() {
+      xcb_grab_pointer_cookie_t cookie = xcb_grab_pointer(
+        conn,
+        false,
+        screen->root,
+        XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_POINTER_MOTION,
+        XCB_GRAB_MODE_ASYNC,
+        XCB_GRAB_MODE_ASYNC,
+        XCB_NONE,
+        XCB_NONE,
+        XCB_CURRENT_TIME);
+
+      xcb_grab_pointer_reply_t * reply = xcb_grab_pointer_reply(conn, cookie, nullptr);
+      if(!reply) {
+        log_error("reply is nullptr.");
+        free(reply); return; }
+      if(reply->status != XCB_GRAB_STATUS_SUCCESS) {
+        log_error("Could not grab pointer"); 
+        free(reply); return; }
+      free(reply); }
+    Public(void) ungrab() {
+      xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
+      xcb_flush(conn); }
+    Private(const char *) pointer_from_enum(CURSOR CURSOR) { switch(CURSOR) {
+      case(CURSOR::arrow)               : return("arrow");
+      case(CURSOR::hand1)               : return("hand1");
+      case(CURSOR::hand2)               : return("hand2");
+      case(CURSOR::watch)               : return("watch");
+      case(CURSOR::xterm)               : return("xterm");
+      case(CURSOR::cross)               : return("cross");
+      case(CURSOR::left_ptr)            : return("left_ptr");
+      case(CURSOR::right_ptr)           : return("right_ptr");
+      case(CURSOR::center_ptr)          : return("center_ptr");
+      case(CURSOR::sb_v_double_arrow)   : return("sb_v_double_arrow");
+      case(CURSOR::sb_h_double_arrow)   : return("sb_h_double_arrow");
+      case(CURSOR::fleur)               : return("fleur");
+      case(CURSOR::question_arrow)      : return("question_arrow");
+      case(CURSOR::pirate)              : return("pirate");
+      case(CURSOR::coffee_mug)          : return("coffee_mug");
+      case(CURSOR::umbrella)            : return("umbrella");
+      case(CURSOR::circle)              : return("circle");
+      case(CURSOR::xsb_left_arrow)      : return("xsb_left_arrow");
+      case(CURSOR::xsb_right_arrow)     : return("xsb_right_arrow");
+      case(CURSOR::xsb_up_arrow)        : return("xsb_up_arrow");
+      case(CURSOR::xsb_down_arrow)      : return("xsb_down_arrow");
+      case(CURSOR::top_left_corner)     : return("top_left_corner");
+      case(CURSOR::top_right_corner)    : return("top_right_corner");
+      case(CURSOR::bottom_left_corner)  : return("bottom_left_corner");
+      case(CURSOR::bottom_right_corner) : return("bottom_right_corner");
+      case(CURSOR::sb_left_arrow)       : return("sb_left_arrow");
+      case(CURSOR::sb_right_arrow)      : return("sb_right_arrow");
+      case(CURSOR::sb_up_arrow)         : return("sb_up_arrow");
+      case(CURSOR::sb_down_arrow)       : return("sb_down_arrow");
+      case(CURSOR::top_side)            : return("top_side");
+      case(CURSOR::bottom_side)         : return("bottom_side");
+      case(CURSOR::left_side)           : return("left_side");
+      case(CURSOR::right_side)          : return("right_side");
+      case(CURSOR::top_tee)             : return("top_tee");
+      case(CURSOR::bottom_tee)          : return("bottom_tee");
+      case(CURSOR::left_tee)            : return("left_tee");
+      case(CURSOR::right_tee)           : return("right_tee");
+      case(CURSOR::top_left_arrow)      : return("top_left_arrow");
+      case(CURSOR::top_right_arrow)     : return("top_right_arrow");
+      case(CURSOR::bottom_left_arrow)   : return("bottom_left_arrow");
+      case(CURSOR::bottom_right_arrow)  : return("bottom_right_arrow");
+      default                           : return("left_ptr"); }}
+  // Private Variabels
+    Private(Logger) log; };
 class fast_vector {
-    public: // operators
-        operator std::vector<const char*>() const {
-            return data;
-        }
-    ;
-    public: // Destructor
-        ~fast_vector() {
-            for (auto str : data)  {
-                delete[] str;
-            }
-        }
-    ;
-    public: // [] operator Access an element in the vector
-        const char* operator[](size_t index) const {
-            return data[index];
-        }
-    ;
-    public: // methods
-        void push_back(const char* str) {
-            char* copy = new char[strlen(str) + 1];
-            strcpy(copy, str);
-            data.push_back(copy);
-        }
-        void append(const char* str) {
-            char* copy = new char[strlen(str) + 1];
-            strcpy(copy, str);
-            data.push_back(copy);
-        }
-        size_t size() const {
-            return data.size();
-        }
-        size_t index_size() const {
-            if (data.size() == 0) {
-                return 0;
-            }
-
-            return data.size() - 1;
-        }
-        void clear() {
-            data.clear();
-        }
-    ;
-    private: // variabels
-        std::vector<const char*> data; // Internal vector to store const char* strings
-    ;
-};
+  Public(operator vector<const char*>() const) {
+    return data; }
+  Public(~fast_vector()) {
+    for(auto str:data) 
+      delete[] str; }
+  Public(const char* operator[])(size_t index) const {
+    return data[index]; }
+  // methods
+    void push_back(const char* str) {
+      char* copy = new char[strlen(str) + 1];
+      strcpy(copy, str);
+      data.push_back(copy); }
+    void append(const char* str) {
+      char* copy = new char[strlen(str) + 1];
+      strcpy(copy, str);
+      data.push_back(copy); }
+    size_t size() const {
+      return data.size(); }
+    size_t index_size() const {
+      if(data.size() == 0)
+        return(0);
+      return(data.size() - 1); }
+    void clear() {
+      data.clear(); }
+  Private(vector<const char*> data); };
 class string_tokenizer {
-    public: // constructors and destructor
-        string_tokenizer() {}
-        
-        string_tokenizer(const char* input, const char* delimiter) {
-            // Copy the input string
-            str = new char[strlen(input) + 1];
-            strcpy(str, input);
+  public: // constructors and destructor
+    string_tokenizer() {}
+    
+    string_tokenizer(const char* input, const char* delimiter) {
+        // Copy the input string
+        str = new char[strlen(input) + 1];
+        strcpy(str, input);
 
-            // Tokenize the string using strtok() and push tokens to the vector
-            char* token = strtok(str, delimiter);
-            while (token != nullptr) {
-                tokens.push_back(token);
-                token = strtok(nullptr, delimiter);
-            }
+        // Tokenize the string using strtok() and push tokens to the vector
+        char* token = strtok(str, delimiter);
+        while (token != nullptr) {
+            tokens.push_back(token);
+            token = strtok(nullptr, delimiter);
         }
-        ~string_tokenizer() {
-            delete[] str;
-        }
-    ;
-    public: // methods
-        const fast_vector & tokenize(const char* input, const char* delimiter) {
-            tokens.clear();
+    }
+    ~string_tokenizer() {
+        delete[] str;
+    }
+  public: // methods
+    const fast_vector & tokenize(const char* input, const char* delimiter) {
+        tokens.clear();
 
-            str = new char[strlen(input) + 1];
-            strcpy(str, input); // Copy the input string
+        str = new char[strlen(input) + 1];
+        strcpy(str, input); // Copy the input string
 
-            char* token = strtok(str, delimiter); // Tokenize the string using strtok() and push tokens to the vector
-            while (token != nullptr) {
-                tokens.append(token);
-                token = strtok(nullptr, delimiter);
-            }
-            return tokens;
+        char* token = strtok(str, delimiter); // Tokenize the string using strtok() and push tokens to the vector
+        while (token != nullptr) {
+            tokens.append(token);
+            token = strtok(nullptr, delimiter);
         }
-        const fast_vector & get_tokens() const {
-            return tokens;
-        }
-        void clear() {
-            tokens.clear();
-        }
-    ;
-    private: // variables
-        char* str;
-        fast_vector tokens;
-    ;
+        return tokens;
+    }
+    const fast_vector & get_tokens() const {
+        return tokens;
+    }
+    void clear() {
+        tokens.clear();
+    }
+  private: // variables
+      char* str;
+      fast_vector tokens;
 };
 class str {
     public: // Constructor
@@ -3003,638 +2834,541 @@ class context_menu {
     ;
 };
 class Window_Manager {
-    public: // constructor
-        Window_Manager() {}
+  public: // constructor
+      Window_Manager() {}
+  ;
+  public: // variabels
+      window root;
+      Launcher launcher;
+      Logger log;
+      pointer pointer;
+      win_data data;
+      Key_Codes key_codes;
+      
+      context_menu * context_menu = nullptr;
+      
+      std::vector<client *> client_list;
+      std::vector<desktop *> desktop_list;
+      client * focused_client = nullptr;
+      desktop * cur_d = nullptr;
+  ;
+  public: // methods
+    // Main Methods
+      Public(void) init() {
+        _conn(nullptr, nullptr);
+        _setup();
+        _iter();
+        _screen();
+        root = screen->root;
+        root.width(screen->width_in_pixels);
+        root.height(screen->height_in_pixels);
+        setSubstructureRedirectMask();
+        configure_root();
+        _ewmh();
+
+        key_codes.init();
+
+        event_handler = new Event_Handler();
+
+        create_new_desktop(1);
+        create_new_desktop(2);
+        create_new_desktop(3);
+        create_new_desktop(4);
+        create_new_desktop(5);
+
+        context_menu = new class context_menu();
+        context_menu->add_entry("konsole",
+        [this]() {
+          launcher.program((char *) "konsole");
+        });
+        context_menu->init();
+
+        // std::thread(check_volt()); // dosent work 
+        }
+      Public(void) launch_program(char * program) {
+        if(fork() == 0) {
+          setsid();
+          execvp(program, (char *[]) { program, NULL }); }}
+      Public(void) quit(const int & status) {
+        xcb_flush(conn);
+        delete_client_vec(client_list);
+        delete_desktop_vec(desktop_list);
+        xcb_ewmh_connection_wipe(ewmh);
+        xcb_disconnect(conn);
+        exit(status); }
+    public: // client methods
+      // focus methods
+        Public(void) focus_client(client * c) {
+          if(!c) {
+            log_error("c is null"); return; }
+          focused_client = c;
+          c->focus(); }
+        Public(void) cycle_focus() {
+          bool focus = false;
+          for(auto &c:client_list) {
+            if(c) {
+              if(c == focused_client) { 
+                  focus = true; continue; }    
+              if (focus) { focus_client(c); 
+                return; }}}}
+      // client fetch methods
+        Public(client) *client_from_window(const xcb_window_t * window) {
+          for (const auto &c:client_list)
+            if(*window == c->win)
+              return c;
+          return nullptr; }
+        Public(client) *client_from_any_window(const xcb_window_t * window) {
+          for(const auto &c:client_list)
+            if(*window == c->win 
+            || *window == c->frame 
+            || *window == c->titlebar 
+            || *window == c->close_button 
+            || *window == c->max_button 
+            || *window == c->min_button 
+            || *window == c->border.left 
+            || *window == c->border.right 
+            || *window == c->border.top 
+            || *window == c->border.bottom
+            || *window == c->border.top_left
+            || *window == c->border.top_right
+            || *window == c->border.bottom_left
+            || *window == c->border.bottom_right)
+              return(c);
+          return(nullptr); }
+        Public(client) *client_from_pointer(const int & prox) {
+          const uint32_t & x = pointer.x();
+          const uint32_t & y = pointer.y();
+          for (const auto & c : cur_d->current_clients) {
+            if (x > c->x - prox && x <= c->x) // LEFT EDGE OF CLIENT
+              return(c);
+            if (x >= c->x + c->width && x < c->x + c->width + prox) // RIGHT EDGE OF CLIENT
+              return(c);
+            if (y > c->y - prox && y <= c->y) // TOP EDGE OF CLIENT
+              return(c);
+            if (y >= c->y + c->height && y < c->y + c->height + prox) // BOTTOM EDGE OF CLIENT
+              return(c);
+          } return(nullptr); }
+        Public(map)<client *, edge> get_client_next_to_client(client * c, edge c_edge) {
+          map<client *, edge> map;
+          for(client *c2:cur_d->current_clients) {
+            if(c == c2)
+                continue;
+            if(c_edge == edge::LEFT) {
+              if (c->x == c2->x + c2->width) {
+                map[c2] = edge::RIGHT; return map; }}
+            if(c_edge == edge::RIGHT) {
+              if(c->x + c->width == c2->x) {
+                map[c2] = edge::LEFT; return map; }}
+            if(c_edge == edge::TOP) {
+              if(c->y == c2->y + c2->height) {
+                map[c2] = edge::BOTTOM_edge; return map; }}
+            if(c_edge == edge::BOTTOM_edge) {
+              if(c->y + c->height == c2->y) {
+                map[c2] = edge::TOP; return map; }}}
+          map[nullptr] = edge::NONE;
+          return(map); }
+        Public(edge) get_client_edge_from_pointer(client * c, const int & prox) {
+          const uint32_t &x = pointer.x();
+          const uint32_t &y = pointer.y();
+
+          const uint32_t &top_border = c->y;
+          const uint32_t &bottom_border = (c->y + c->height);
+          const uint32_t &left_border = c->x;
+          const uint32_t &right_border = (c->x + c->width);
+
+          // TOP EDGE OF CLIENT
+          if(((y > top_border - prox) && (y <= top_border))
+           &&((x > left_border + prox) && (x < right_border - prox)))
+            return edge::TOP;
+          // BOTTOM EDGE OF CLIENT
+          if(((y >= bottom_border) && (y < bottom_border + prox))
+           &&((x > left_border + prox) && (x < right_border - prox)))
+            return edge::BOTTOM_edge;
+          // LEFT EDGE OF CLIENT
+          if(((x > left_border) - prox && (x <= left_border))
+           &&((y > top_border + prox) && (y < bottom_border - prox)))
+            return edge::LEFT;
+          // RIGHT EDGE OF CLIENT
+          if(((x >= right_border) && (x < right_border + prox))
+           &&((y > top_border + prox) && (y < bottom_border - prox)))
+            return edge::RIGHT;
+          // TOP LEFT CORNER OF CLIENT
+          if(((x > left_border - prox) && x < left_border + prox)
+           &&((y > top_border - prox) && y < top_border + prox))
+            return edge::TOP_LEFT;
+          // TOP RIGHT CORNER OF CLIENT
+          if(((x > right_border - prox) && x < right_border + prox)
+           &&((y > top_border - prox) && y < top_border + prox))
+            return edge::TOP_RIGHT;
+          // BOTTOM LEFT CORNER OF CLIENT
+          if(((x > left_border - prox) && x < left_border + prox) 
+           &&((y > bottom_border - prox) && y < bottom_border + prox))
+            return edge::BOTTOM_LEFT;
+          // BOTTOM RIGHT CORNER OF CLIENT
+          if(((x > right_border - prox) && x < right_border + prox)
+           &&((y > bottom_border - prox) && y < bottom_border + prox))
+            return edge::BOTTOM_RIGHT;
+          return edge::NONE; }
+      void manage_new_client(const uint32_t & window) {
+          client * c = make_client(window); if(!c){log_error("could not make client"); return;}
+
+          c->win.x_y_width_height(c->x, c->y, c->width, c->height); c->win.map();
+          c->win.grab_button({{L_MOUSE_BUTTON, ALT}, {R_MOUSE_BUTTON, ALT}, {L_MOUSE_BUTTON, 0}});
+          c->win.grab_default_keys();
+          c->make_decorations();
+          uint mask = XCB_EVENT_MASK_FOCUS_CHANGE | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW | XCB_EVENT_MASK_STRUCTURE_NOTIFY;
+          c->win.apply_event_mask(& mask);
+
+          c->update(); focus_client(c); check_client(c);
+      }
+      client * make_internal_client(window window) {
+          client * c = new client;
+          c->win = window;
+          c->x = window.x();
+          c->y = window.y();
+          c->width = window.width();
+          c->height = window.height();
+          
+          c->make_decorations();
+          client_list.push_back(c);
+          cur_d->current_clients.push_back(c);
+          c->focus();
+
+          return c;
+      }
+      void send_sigterm_to_client(client * c) {
+          c->kill();
+          remove_client(c);
+      }
     ;
-    public: // variabels
-        window root;
-        Launcher launcher;
-        Logger log;
-        pointer pointer;
-        win_data data;
-        Key_Codes key_codes;
-        
-        context_menu * context_menu = nullptr;
-        
-        std::vector<client *> client_list;
-        std::vector<desktop *> desktop_list;
-        client * focused_client = nullptr;
-        desktop * cur_d = nullptr;
+    public: // desktop methods
+        void create_new_desktop(const uint16_t & n) {
+            desktop * d = new desktop;
+            d->desktop  = n;
+            d->width    = screen->width_in_pixels;
+            d->height   = screen->height_in_pixels;
+            cur_d       = d;
+            desktop_list.push_back(d);
+        }
     ;
-    public: // methods
-        public: // main methods
-            void init() {
-                _conn(nullptr, nullptr);
-                _setup();
-                _iter();
-                _screen();
-                root = screen->root;
-                root.width(screen->width_in_pixels);
-                root.height(screen->height_in_pixels);
-                setSubstructureRedirectMask();
-                configure_root();
-                _ewmh();
+    public: // experimental methods
+        xcb_visualtype_t * find_argb_visual(xcb_connection_t *conn, xcb_screen_t *screen) {
+            xcb_depth_iterator_t depth_iter = xcb_screen_allowed_depths_iterator(screen);
 
-                key_codes.init();
-
-                event_handler = new Event_Handler();
-
-                create_new_desktop(1);
-                create_new_desktop(2);
-                create_new_desktop(3);
-                create_new_desktop(4);
-                create_new_desktop(5);
-
-                context_menu = new class context_menu();
-                context_menu->add_entry(
-                    "konsole",
-                    [this]()
-                    {
-                        launcher.program((char *) "konsole");
+            for (; depth_iter.rem; xcb_depth_next(&depth_iter)) {
+                xcb_visualtype_iterator_t visual_iter = xcb_depth_visuals_iterator(depth_iter.data);
+                for (; visual_iter.rem; xcb_visualtype_next(&visual_iter)) {
+                    if (depth_iter.data->depth == 32) {
+                        return visual_iter.data;
                     }
-                );
-                context_menu->init();
-
-                // std::thread(check_volt()); // dosent work
-            }
-            void launch_program(char * program) {
-                if (fork() == 0) {
-                    setsid();
-                    execvp(program, (char *[]) { program, NULL });
                 }
             }
-            void quit(const int & status) {
-                xcb_flush(conn);
-                delete_client_vec(client_list);
-                delete_desktop_vec(desktop_list);
-                xcb_ewmh_connection_wipe(ewmh);
-                xcb_disconnect(conn);
-                exit(status);
-            }
-        ;
-        public: // client methods
-            public: // focus methods
-                void focus_client(client * c) {
-                    if (!c) {
-                        log_error("c is null");
-                        return;
-                    }
-
-                    focused_client = c;
-                    c->focus();
-                }
-                void cycle_focus() {
-                    bool focus = false;
-                    for (auto & c : client_list) {
-                        if (c) {
-                            if (c == focused_client) {
-                                focus = true;
-                                continue;
-                            }
-                            
-                            if (focus) {
-                                focus_client(c);
-                                return;  
-                            }
-                        }
-                    }
-                }
-            ;
-            public: // client fetch methods
-                client * client_from_window(const xcb_window_t * window) {
-                    for (const auto & c : client_list) {
-                        if (* window == c->win) {
-                            return c;
-                        }
-                    }
-                    return nullptr;
-                }
-                client * client_from_any_window(const xcb_window_t * window) {
-                    for (const auto & c : client_list) {
-                        if (* window == c->win 
-                         || * window == c->frame 
-                         || * window == c->titlebar 
-                         || * window == c->close_button 
-                         || * window == c->max_button 
-                         || * window == c->min_button 
-                         || * window == c->border.left 
-                         || * window == c->border.right 
-                         || * window == c->border.top 
-                         || * window == c->border.bottom
-                         || * window == c->border.top_left
-                         || * window == c->border.top_right
-                         || * window == c->border.bottom_left
-                         || * window == c->border.bottom_right) 
-                        {
-                            return c;
-                        }
-                    }
-                    return nullptr;
-                }
-                client * client_from_pointer(const int & prox) {
-                    const uint32_t & x = pointer.x();
-                    const uint32_t & y = pointer.y();
-                    for (const auto & c : cur_d->current_clients) {
-                        if (x > c->x - prox && x <= c->x) { // LEFT EDGE OF CLIENT
-                            return c;
-                        }
-                        if (x >= c->x + c->width && x < c->x + c->width + prox) { // RIGHT EDGE OF CLIENT
-                            return c;
-                        }
-                        if (y > c->y - prox && y <= c->y) { // TOP EDGE OF CLIENT
-                            return c;
-                        }
-                        if (y >= c->y + c->height && y < c->y + c->height + prox) { // BOTTOM EDGE OF CLIENT
-                            return c;
-                        }
-                    }
-                    return nullptr;
-                }
-                std::map<client *, edge> get_client_next_to_client(client * c, edge c_edge) {
-                    std::map<client *, edge> map;
-                    for (client * c2 : cur_d->current_clients) {
-                        if (c == c2) {
-                            continue;
-                        }
-
-                        if (c_edge == edge::LEFT) {
-                            if (c->x == c2->x + c2->width) {
-                                map[c2] = edge::RIGHT;
-                                return map;
-                            }
-                        }
-                        if (c_edge == edge::RIGHT) {
-                            if (c->x + c->width == c2->x) {
-                                map[c2] = edge::LEFT;
-                                return map;
-                            }
-                        }
-                        if (c_edge == edge::TOP) {
-                            if (c->y == c2->y + c2->height) {
-                                map[c2] = edge::BOTTOM_edge;
-                                return map;
-                            }
-                        }
-                        if (c_edge == edge::BOTTOM_edge) {
-                            if (c->y + c->height == c2->y) {
-                                map[c2] = edge::TOP;
-                                return map;
-                            }
-                        }
-                    }
-
-                    map[nullptr] = edge::NONE;
-                    return map;
-                }
-                edge get_client_edge_from_pointer(client * c, const int & prox) {
-                    const uint32_t & x = pointer.x();
-                    const uint32_t & y = pointer.y();
-
-                    const uint32_t & top_border = c->y;
-                    const uint32_t & bottom_border = (c->y + c->height);
-                    const uint32_t & left_border = c->x;
-                    const uint32_t & right_border = (c->x + c->width);
-
-                    if (((y > top_border - prox) && (y <= top_border)) // TOP EDGE OF CLIENT
-                     && ((x > left_border + prox) && (x < right_border - prox))) {
-                        return edge::TOP;
-                    }
-                    if (((y >= bottom_border) && (y < bottom_border + prox)) // BOTTOM EDGE OF CLIENT
-                     && ((x > left_border + prox) && (x < right_border - prox))) {
-                        return edge::BOTTOM_edge;
-                    }
-                    if (((x > left_border) - prox && (x <= left_border)) // LEFT EDGE OF CLIENT
-                     && ((y > top_border + prox) && (y < bottom_border - prox))) {
-                        return edge::LEFT;
-                    }
-                    if (((x >= right_border) && (x < right_border + prox)) // RIGHT EDGE OF CLIENT
-                     && ((y > top_border + prox) && (y < bottom_border - prox))) {
-                        return edge::RIGHT;
-                    }
-                    if (((x > left_border - prox) && x < left_border + prox) // TOP LEFT CORNER OF CLIENT
-                     && ((y > top_border - prox) && y < top_border + prox)) {
-                        return edge::TOP_LEFT;
-                    }
-                    if (((x > right_border - prox) && x < right_border + prox) // TOP RIGHT CORNER OF CLIENT
-                     && ((y > top_border - prox) && y < top_border + prox)) {
-                        return edge::TOP_RIGHT;
-                    }
-                    if (((x > left_border - prox) && x < left_border + prox) // BOTTOM LEFT CORNER OF CLIENT
-                     && ((y > bottom_border - prox) && y < bottom_border + prox)) {
-                        return edge::BOTTOM_LEFT;
-                    }
-                    if (((x > right_border - prox) && x < right_border + prox) // BOTTOM RIGHT CORNER OF CLIENT
-                     && ((y > bottom_border - prox) && y < bottom_border + prox)) {
-                        return edge::BOTTOM_RIGHT;
-                    }
-
-                    return edge::NONE;
-                }
-            ;
-            void manage_new_client(const uint32_t & window) {
-                client * c = make_client(window);
-                if (!c) {
-                    log_error("could not make client");
-                    return;
-                }
-
-                c->win.x_y_width_height(c->x, c->y, c->width, c->height);
-                c->win.map();
-                c->win.grab_button({
-                    {   L_MOUSE_BUTTON,     ALT },
-                    {   R_MOUSE_BUTTON,     ALT },
-                    {   L_MOUSE_BUTTON,     0   }
-                });
-                c->win.grab_default_keys();
-                c->make_decorations();
-                uint32_t mask = XCB_EVENT_MASK_FOCUS_CHANGE | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW | XCB_EVENT_MASK_STRUCTURE_NOTIFY;
-                c->win.apply_event_mask(& mask);
-
-                c->update();
-                focus_client(c);
-
-                check_client(c);
-            }
-            client * make_internal_client(window window) {
-                client * c = new client;
-                c->win = window;
-                c->x = window.x();
-                c->y = window.y();
-                c->width = window.width();
-                c->height = window.height();
-                
-                c->make_decorations();
-                client_list.push_back(c);
-                cur_d->current_clients.push_back(c);
-                c->focus();
-
-                return c;
-            }
-            void send_sigterm_to_client(client * c) {
-                c->kill();
-                remove_client(c);
-            }
-        ;
-        public: // desktop methods
-            void create_new_desktop(const uint16_t & n) {
-                desktop * d = new desktop;
-                d->desktop  = n;
-                d->width    = screen->width_in_pixels;
-                d->height   = screen->height_in_pixels;
-                cur_d       = d;
-                desktop_list.push_back(d);
-            }
-        ;
-        public: // experimental methods
-            xcb_visualtype_t * find_argb_visual(xcb_connection_t *conn, xcb_screen_t *screen) {
-                xcb_depth_iterator_t depth_iter = xcb_screen_allowed_depths_iterator(screen);
-
-                for (; depth_iter.rem; xcb_depth_next(&depth_iter)) {
-                    xcb_visualtype_iterator_t visual_iter = xcb_depth_visuals_iterator(depth_iter.data);
-                    for (; visual_iter.rem; xcb_visualtype_next(&visual_iter)) {
-                        if (depth_iter.data->depth == 32) {
-                            return visual_iter.data;
-                        }
-                    }
-                }
-                return NULL;
-            }
-        ;
+            return NULL;
+        }
     ;
-    private: // variables
-        window start_window;
-    ;
-    private: // functions
-        private: // init functions
-            void _conn(const char * displayname, int * screenp) {
-                conn = xcb_connect(displayname, screenp);
-                check_conn();
+  private: // variables
+      window start_window;
+  ;
+  private: // functions
+      private: // init functions
+        void _conn(const char * displayname, int * screenp) {
+            conn = xcb_connect(displayname, screenp);
+            check_conn();
+        }
+        void _ewmh() {
+            if (!(ewmh = static_cast<xcb_ewmh_connection_t *>(calloc(1, sizeof(xcb_ewmh_connection_t))))) {
+                log_error("ewmh faild to initialize");
+                quit(1);
+            }    
+            
+            xcb_intern_atom_cookie_t * cookie = xcb_ewmh_init_atoms(conn, ewmh);
+            if (!(xcb_ewmh_init_atoms_replies(ewmh, cookie, 0))) {
+                log_error("xcb_ewmh_init_atoms_replies:faild");
+                quit(1);
             }
-            void _ewmh() {
-                if (!(ewmh = static_cast<xcb_ewmh_connection_t *>(calloc(1, sizeof(xcb_ewmh_connection_t))))) {
-                    log_error("ewmh faild to initialize");
-                    quit(1);
-                }    
-                
-                xcb_intern_atom_cookie_t * cookie = xcb_ewmh_init_atoms(conn, ewmh);
-                if (!(xcb_ewmh_init_atoms_replies(ewmh, cookie, 0))) {
-                    log_error("xcb_ewmh_init_atoms_replies:faild");
-                    quit(1);
-                }
 
-                const char * str = "mwm";
-                check_error(
-                    xcb_ewmh_set_wm_name(
-                        ewmh,
-                        screen->root,
-                        strlen(str),
-                        str
-                    ), 
-                    __func__,
-                    "xcb_ewmh_set_wm_name"
-                );
-            }
-            void _setup() {
-                setup = xcb_get_setup(conn);
-            }
-            void _iter() {
-                iter = xcb_setup_roots_iterator(setup);
-            }
-            void _screen() {
-                screen = iter.data;
-            }
-            bool setSubstructureRedirectMask() {
-                xcb_void_cookie_t cookie = xcb_change_window_attributes_checked(
-                    conn,
-                    root,
-                    XCB_CW_EVENT_MASK,
-                    (const uint32_t[1])
-                    {
-                        XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY
-                    }
-                );
-
-                xcb_generic_error_t * error = xcb_request_check(conn, cookie);
-                if (error) {
-                    log_error("Error: Another window manager is already running or failed to set SubstructureRedirect mask."); 
-                    free(error);
-                    return false;
-                }
-                return true;
-            }
-            void configure_root() {
-                root.set_backround_color(DARK_GREY);
-                uint32_t mask = 
-                    XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT |
-                    XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY |
-                    XCB_EVENT_MASK_ENTER_WINDOW |
-                    XCB_EVENT_MASK_LEAVE_WINDOW |
-                    XCB_EVENT_MASK_STRUCTURE_NOTIFY |
-                    XCB_EVENT_MASK_BUTTON_PRESS |
-                    XCB_EVENT_MASK_BUTTON_RELEASE |
-                    XCB_EVENT_MASK_KEY_PRESS |
-                    XCB_EVENT_MASK_KEY_RELEASE |
-                    XCB_EVENT_MASK_FOCUS_CHANGE |
-                    XCB_EVENT_MASK_POINTER_MOTION
-                ; 
-                root.apply_event_mask(& mask);
-                root.clear();
-
-                root.set_backround_png("/home/mellw/mwm_png/galaxy17.png");
-                root.set_pointer(CURSOR::arrow);
-            }
-        ;
-        private: // check functions
-            void check_error(const int & code) {
-                switch (code) {
-                    case CONN_ERR:
-                        log_error("Connection error.");
-                        quit(CONN_ERR);
-                        break;
-                    case EXTENTION_NOT_SUPPORTED_ERR:
-                        log_error("Extension not supported.");
-                        quit(EXTENTION_NOT_SUPPORTED_ERR);
-                        break;
-                    case MEMORY_INSUFFICIENT_ERR:
-                        log_error("Insufficient memory.");
-                        quit(MEMORY_INSUFFICIENT_ERR);
-                        break;
-                    case REQUEST_TO_LONG_ERR:
-                        log_error("Request to long.");
-                        quit(REQUEST_TO_LONG_ERR);
-                        break;
-                    case PARSE_ERR:
-                        log_error("Parse error.");
-                        quit(PARSE_ERR);
-                        break;
-                    case SCREEN_NOT_FOUND_ERR:
-                        log_error("Screen not found.");
-                        quit(SCREEN_NOT_FOUND_ERR);
-                        break;
-                    case FD_ERR:
-                        log_error("File descriptor error.");
-                        quit(FD_ERR);
-                        break;
-                }
-            }
-            void check_conn() {
-                int status = xcb_connection_has_error(conn);
-                check_error(status);
-            }
-            int cookie_error(xcb_void_cookie_t cookie , const char * sender_function) {
-                xcb_generic_error_t * err = xcb_request_check(conn, cookie);
-                if (err) {
-                    log_error(err->error_code);
-                    free(err);
-                    return err->error_code;
-                }
-                return 0;
-            }
-            void check_error(xcb_void_cookie_t cookie , const char * sender_function, const char * err_msg) {
-                xcb_generic_error_t * err = xcb_request_check(conn, cookie);
-                if (err)
+            const char * str = "mwm";
+            check_error(
+                xcb_ewmh_set_wm_name(
+                    ewmh,
+                    screen->root,
+                    strlen(str),
+                    str
+                ), 
+                __func__,
+                "xcb_ewmh_set_wm_name"
+            );
+        }
+        void _setup() {
+            setup = xcb_get_setup(conn);
+        }
+        void _iter() {
+            iter = xcb_setup_roots_iterator(setup);
+        }
+        void _screen() {
+            screen = iter.data;
+        }
+        bool setSubstructureRedirectMask() {
+            xcb_void_cookie_t cookie = xcb_change_window_attributes_checked(
+                conn,
+                root,
+                XCB_CW_EVENT_MASK,
+                (const uint32_t[1])
                 {
-                    log_error_code(err_msg, err->error_code);
-                    free(err);
+                    XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY
                 }
+            );
+
+            xcb_generic_error_t * error = xcb_request_check(conn, cookie);
+            if (error) {
+                log_error("Error: Another window manager is already running or failed to set SubstructureRedirect mask."); 
+                free(error);
+                return false;
             }
-        ;
-        int start_screen_window() {
-            start_window.create_default(root, 0, 0, 0, 0);
-            start_window.set_backround_color(DARK_GREY);
-            start_window.map();
+            return true;
+        }
+        void configure_root() {
+            root.set_backround_color(DARK_GREY);
+            uint32_t mask = 
+                XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT |
+                XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY |
+                XCB_EVENT_MASK_ENTER_WINDOW |
+                XCB_EVENT_MASK_LEAVE_WINDOW |
+                XCB_EVENT_MASK_STRUCTURE_NOTIFY |
+                XCB_EVENT_MASK_BUTTON_PRESS |
+                XCB_EVENT_MASK_BUTTON_RELEASE |
+                XCB_EVENT_MASK_KEY_PRESS |
+                XCB_EVENT_MASK_KEY_RELEASE |
+                XCB_EVENT_MASK_FOCUS_CHANGE |
+                XCB_EVENT_MASK_POINTER_MOTION
+            ; 
+            root.apply_event_mask(& mask);
+            root.clear();
+
+            root.set_backround_png("/home/mellw/mwm_png/galaxy17.png");
+            root.set_pointer(CURSOR::arrow);
+        }
+      ;
+      private: // check functions
+        void check_error(const int & code) {
+            switch (code) {
+                case CONN_ERR:
+                    log_error("Connection error.");
+                    quit(CONN_ERR);
+                    break;
+                case EXTENTION_NOT_SUPPORTED_ERR:
+                    log_error("Extension not supported.");
+                    quit(EXTENTION_NOT_SUPPORTED_ERR);
+                    break;
+                case MEMORY_INSUFFICIENT_ERR:
+                    log_error("Insufficient memory.");
+                    quit(MEMORY_INSUFFICIENT_ERR);
+                    break;
+                case REQUEST_TO_LONG_ERR:
+                    log_error("Request to long.");
+                    quit(REQUEST_TO_LONG_ERR);
+                    break;
+                case PARSE_ERR:
+                    log_error("Parse error.");
+                    quit(PARSE_ERR);
+                    break;
+                case SCREEN_NOT_FOUND_ERR:
+                    log_error("Screen not found.");
+                    quit(SCREEN_NOT_FOUND_ERR);
+                    break;
+                case FD_ERR:
+                    log_error("File descriptor error.");
+                    quit(FD_ERR);
+                    break;
+            }
+        }
+        void check_conn() {
+            int status = xcb_connection_has_error(conn);
+            check_error(status);
+        }
+        int cookie_error(xcb_void_cookie_t cookie , const char * sender_function) {
+            xcb_generic_error_t * err = xcb_request_check(conn, cookie);
+            if (err) {
+                log_error(err->error_code);
+                free(err);
+                return err->error_code;
+            }
             return 0;
         }
-        private: // delete functions
-            void delete_client_vec(std::vector<client *> & vec) {
-                for (client * c : vec) {
-                    send_sigterm_to_client(c);
-                    xcb_flush(conn);                    
-                }
-
-                vec.clear();
-
-                std::vector<client *>().swap(vec);
+        void check_error(xcb_void_cookie_t cookie , const char * sender_function, const char * err_msg) {
+            xcb_generic_error_t * err = xcb_request_check(conn, cookie);
+            if (err)
+            {
+                log_error_code(err_msg, err->error_code);
+                free(err);
             }
-            void delete_desktop_vec(std::vector<desktop *> & vec) {
-                for (desktop * d : vec) {
-                    delete_client_vec(d->current_clients);
-                    delete d;
-                }
-
-                vec.clear();
-
-                std::vector<desktop *>().swap(vec);
+        }
+      ;
+      int start_screen_window() {
+        start_window.create_default(root, 0, 0, 0, 0);
+        start_window.set_backround_color(DARK_GREY);
+        start_window.map();
+        return 0;
+      }
+      private: // delete functions
+        void delete_client_vec(std::vector<client *> & vec) {
+            for (client * c : vec) {
+                send_sigterm_to_client(c);
+                xcb_flush(conn);                    
             }
-            template <typename Type> 
-            static void delete_ptr_vector(std::vector<Type *>& vec) {
-                for (Type * ptr : vec) {
-                    delete ptr;
-                }
-                vec.clear();
 
-                std::vector<Type *>().swap(vec);
+            vec.clear();
+
+            std::vector<client *>().swap(vec);
+        }
+        void delete_desktop_vec(std::vector<desktop *> & vec) {
+            for (desktop * d : vec) {
+                delete_client_vec(d->current_clients);
+                delete d;
             }
-            void remove_client(client * c) {
-                client_list.erase(std::remove(client_list.begin(), client_list.end(), c), client_list.end());
-                cur_d->current_clients.erase(std::remove(cur_d->current_clients.begin(), cur_d->current_clients.end(), c), cur_d->current_clients.end());
-                delete c;
+
+            vec.clear();
+
+            std::vector<desktop *>().swap(vec);
+        }
+        template <typename Type> 
+        static void delete_ptr_vector(std::vector<Type *>& vec) {
+            for (Type * ptr : vec) {
+                delete ptr;
             }
-            void remove_client_from_vector(client * c, std::vector<client *> & vec) {
-                if (!c) {
-                    log_error("client is nullptr.");
-                }
-                vec.erase(std::remove(vec.begin(), vec.end(), c), vec.end());
-                delete c;
+            vec.clear();
+
+            std::vector<Type *>().swap(vec);
+        }
+        void remove_client(client * c) {
+            client_list.erase(std::remove(client_list.begin(), client_list.end(), c), client_list.end());
+            cur_d->current_clients.erase(std::remove(cur_d->current_clients.begin(), cur_d->current_clients.end(), c), cur_d->current_clients.end());
+            delete c;
+        }
+        void remove_client_from_vector(client * c, std::vector<client *> & vec) {
+            if (!c) {
+                log_error("client is nullptr.");
             }
-        ;
-        private: // client functions
-            client * make_client(const uint32_t & window) {
-                client * c = new client;
-                if (!c) {
-                    log_error("Could not allocate memory for client");
-                    return nullptr;
-                }
+            vec.erase(std::remove(vec.begin(), vec.end(), c), vec.end());
+            delete c;
+        }
+      ;
+      private: // client functions
+        client * make_client(const uint32_t & window) {
+            client * c = new client;
+            if(!c){log_error("Could not allocate memory for client"); return(nullptr);}
 
-                c->win    = window;
-                c->height = (data.height < 300) ? 300 : data.height;
-                c->width  = (data.width < 400)  ? 400 : data.width;
-                c->x      = c->win.x_from_req();
-                c->y      = c->win.y_from_req();
-                c->depth   = 24;
-                c->desktop = cur_d->desktop;
+            c->win     = window;
+            c->height  = (data.height < 300) ? 300 : data.height;
+            c->width   = (data.width < 400)  ? 400 : data.width;
+            c->x       = c->win.x_from_req();
+            c->y       = c->win.y_from_req();
+            c->depth   = 24;
+            c->desktop = cur_d->desktop;
 
-                if (c->x <= 0 && c->y <= 0 && c->width != screen->width_in_pixels && c->height != screen->height_in_pixels) {
-                    c->x = (screen->width_in_pixels - c->width) / 2;
-                    c->y = (((screen->height_in_pixels - c->height) / 2) + (BORDER_SIZE * 2));
-                }
-
-                if (c->height > screen->height_in_pixels) {
-                    c->height = screen->height_in_pixels;
-                }
-                if (c->width > screen->width_in_pixels) {
-                    c->width = screen->width_in_pixels;
-                }
-
-                if (c->win.is_EWMH_fullscreen()) {
-                    c->x      = 0;
-                    c->y      = 0;
-                    c->width  = screen->width_in_pixels;
-                    c->height = screen->height_in_pixels;
-                    c->win.set_EWMH_fullscreen_state();
-                }
-                
-                client_list.push_back(c);
-                cur_d->current_clients.push_back(c);
-                return c;
-            }
-            void check_client(client * c) {
-                if (c->x == 0 // if client if full_screen but 'y' is offset for some reason, make 'y' (0)
-                 && c->y != 0
-                 && c->width == screen->width_in_pixels
-                 && c->height == screen->height_in_pixels) {
-                    c->_y(0);
-                    xcb_flush(conn);
-                    return;
-                }
-                if (c->x != 0 // if client is full_screen 'width' and 'height' but position is offset from (0, 0) then make pos (0, 0)
-                 && c->y != 0
-                 && c->width == screen->width_in_pixels
-                 && c->height == screen->height_in_pixels) {
-                    c->x_y(0,0);
-                    xcb_flush(conn);
-                    return;
-                }
-                if (c->x < 0) {
-                    c->_x(0);
-                    xcb_flush(conn);
-                }
-                if (c->y < 0) {
-                    c->_y(0);
-                    xcb_flush(conn);
-                }
-                if (c->width > screen->width_in_pixels) {
-                    c->_width(screen->width_in_pixels);
-                    xcb_flush(conn);
-                }
-                if (c->height > screen->height_in_pixels) {
-                    c->_height(screen->height_in_pixels);
-                    xcb_flush(conn);
-                }
-                if ((c->x + c->width) > screen->width_in_pixels) {
-                    c->_width(screen->width_in_pixels - c->x);
-                    xcb_flush(conn);
-                }
-                if ((c->y + c->height) > screen->height_in_pixels) {
-                    c->_height(screen->height_in_pixels - c->y);
-                    xcb_flush(conn);
-                }
-            }
-        ;
-        private: // window functions
-            void getWindowParameters(const uint32_t & window) {
-                xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
-                xcb_get_geometry_reply_t* geometry_reply = xcb_get_geometry_reply(conn, geometry_cookie, NULL);
-
-                if (geometry_reply != NULL) {
-                    log_info("Window Parameters");
-                    log_info(std::to_string(geometry_reply->x));
-                    log_info(std::to_string(geometry_reply->y));
-                    log_info(std::to_string(geometry_reply->width));
-                    log_info(std::to_string(geometry_reply->height));
-
-                    free(geometry_reply);
-                } else {
-                    std::cerr << "Unable to get window geometry." << std::endl;
-                }
-            }
-            void get_window_parameters(const uint32_t & window, int16_t * x, int16_t * y, uint16_t * width, uint16_t * height) {
-                xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
-                xcb_get_geometry_reply_t* geometry_reply = xcb_get_geometry_reply(conn, geometry_cookie, NULL);
-                if (!geometry_reply) {
-                    log_error("unable to get window parameters for window: " + std::to_string(window));
-                }
-
-                x = &geometry_reply->x;
-                y = &geometry_reply->y;
-                width = &geometry_reply->width;
-                height = &geometry_reply->height;
-
-                free(geometry_reply);
-            }
-            int16_t get_window_x(const uint32_t & window) {
-                xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
-                xcb_get_geometry_reply_t* geometry_reply = xcb_get_geometry_reply(conn, geometry_cookie, NULL);
-                if (!geometry_reply) {
-                    log_error("Unable to get window geometry.");
-                    return (screen->width_in_pixels / 2);
-                } 
+            if(c->x <= 0 && c->y <= 0 && c->width != screen->width_in_pixels && c->height != screen->height_in_pixels){c->x=((screen->width_in_pixels - c->width) / 2); c->y=(((screen->height_in_pixels - c->height) / 2) + (BORDER_SIZE * 2));}
+            if(c->height > screen->height_in_pixels) c->height = screen->height_in_pixels;
+            if(c->width > screen->width_in_pixels) c->width = screen->width_in_pixels;
+            if(c->win.is_EWMH_fullscreen()){c->x=(0); c->y=(0); c->width=(screen->width_in_pixels); c->height=(screen->height_in_pixels); c->win.set_EWMH_fullscreen_state();}
             
-                int16_t x = geometry_reply->x;
+            client_list.push_back(c); cur_d->current_clients.push_back(c);
+            return(c);
+        }
+        void check_client(client * c) {
+            if (c->x == 0 // if client if full_screen but 'y' is offset for some reason, make 'y' (0)
+              && c->y != 0
+              && c->width == screen->width_in_pixels
+              && c->height == screen->height_in_pixels) {
+                c->_y(0);
+                xcb_flush(conn);
+                return;
+            }
+            if (c->x != 0 // if client is full_screen 'width' and 'height' but position is offset from (0, 0) then make pos (0, 0)
+              && c->y != 0
+              && c->width == screen->width_in_pixels
+              && c->height == screen->height_in_pixels) {
+                c->x_y(0,0);
+                xcb_flush(conn);
+                return;
+            }
+            if (c->x < 0) {
+                c->_x(0);
+                xcb_flush(conn);
+            }
+            if (c->y < 0) {
+                c->_y(0);
+                xcb_flush(conn);
+            }
+            if (c->width > screen->width_in_pixels) {
+                c->_width(screen->width_in_pixels);
+                xcb_flush(conn);
+            }
+            if (c->height > screen->height_in_pixels) {
+                c->_height(screen->height_in_pixels);
+                xcb_flush(conn);
+            }
+            if ((c->x + c->width) > screen->width_in_pixels) {
+                c->_width(screen->width_in_pixels - c->x);
+                xcb_flush(conn);
+            }
+            if ((c->y + c->height) > screen->height_in_pixels) {
+                c->_height(screen->height_in_pixels - c->y);
+                xcb_flush(conn);
+            }
+        }
+      ;
+      private: // window functions
+        void getWindowParameters(const uint32_t & window) {
+            xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
+            xcb_get_geometry_reply_t* geometry_reply = xcb_get_geometry_reply(conn, geometry_cookie, NULL);
+
+            if (geometry_reply != NULL) {
+                log_info("Window Parameters");
+                log_info(std::to_string(geometry_reply->x));
+                log_info(std::to_string(geometry_reply->y));
+                log_info(std::to_string(geometry_reply->width));
+                log_info(std::to_string(geometry_reply->height));
+
                 free(geometry_reply);
-                return x;
+            } else {
+                std::cerr << "Unable to get window geometry." << std::endl;
             }
-            int16_t get_window_y(const uint32_t & window) {
-                xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
-                xcb_get_geometry_reply_t* geometry_reply = xcb_get_geometry_reply(conn, geometry_cookie, NULL);
-                if (!geometry_reply) {
-                    log_error("Unable to get window geometry.");
-                    return (screen->height_in_pixels / 2);
-                } 
-            
-                int16_t y = geometry_reply->y;
-                free(geometry_reply);
-                return y;
-            }
-        ;
-        private: // status functions
-            void check_volt() {
-                log_info("running");
-                std::this_thread::sleep_for(std::chrono::minutes(1));
-                check_volt();
-            }
-        ;
-    ;
+        }
+        void get_window_parameters(const uint32_t(&window), int16_t(*x), int16_t(*y), uint16_t(*width), uint16_t(*height)) {
+            xcb_get_geometry_cookie_t cookie = xcb_get_geometry(conn, window);
+            xcb_get_geometry_reply_t* reply = xcb_get_geometry_reply(conn, cookie, NULL);
+            if (!reply){log_error("unable to get window parameters for window: " + std::to_string(window)); return;}
+            x=(&reply->x); y=(&reply->y); width=(&reply->width); height=(&reply->height); free(reply);
+        }
+        int16_t get_window_x(const uint32_t & window) {
+            xcb_get_geometry_cookie_t cookie = xcb_get_geometry(conn, window);
+            xcb_get_geometry_reply_t* reply = xcb_get_geometry_reply(conn, cookie, NULL);
+            if(!reply){log_error("Unable to get window geometry.");return(screen->width_in_pixels / 2);} 
+        
+            int16_t x(reply->x);
+            free(reply);
+            return x;
+        }
+        int16_t get_window_y(const uint32_t & window) {
+            xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
+            xcb_get_geometry_reply_t* geometry_reply = xcb_get_geometry_reply(conn, geometry_cookie, NULL);
+            if (!geometry_reply) {
+                log_error("Unable to get window geometry.");
+                return (screen->height_in_pixels / 2);
+            } 
+        
+            int16_t y = geometry_reply->y;
+            free(geometry_reply);
+            return y;
+        }
+      ;
+      private: // status functions
+        void check_volt() {
+            log_info("running");
+            std::this_thread::sleep_for(std::chrono::minutes(1));
+            check_volt();
+        }
+      ;
 }; static Window_Manager * wm;
 /**
  *
@@ -5184,747 +4918,637 @@ class mv_client {
         }
     ;
 };
-std::mutex mtx;
+mutex mtx;
 class change_desktop {
-    public: // constructor
-        change_desktop(xcb_connection_t * connection) 
-        : connection(connection) {}
-    ;
-    public: // variabels
-        int duration = 100;
-    ;
-    public: // methods
-        enum DIRECTION {
-            NEXT,
-            PREV
-        };
-        void change_to(const DIRECTION & direction) {
-            switch (direction) {
-                case NEXT: {
-                    if (wm->cur_d->desktop == wm->desktop_list.size()) {
-                        return;
-                    }
-
-                    hide = get_clients_on_desktop(wm->cur_d->desktop);
-                    show = get_clients_on_desktop(wm->cur_d->desktop + 1);
-                    animate(show, NEXT);
-                    animate(hide, NEXT);
-                    wm->cur_d = wm->desktop_list[wm->cur_d->desktop];
-                    break;
-                }
-                case PREV: {
-                    if (wm->cur_d->desktop == 1) {
-                        return;
-                    }
-
-                    hide = get_clients_on_desktop(wm->cur_d->desktop);
-                    show = get_clients_on_desktop(wm->cur_d->desktop - 1);
-                    animate(show, PREV);
-                    animate(hide, PREV);
-                    wm->cur_d = wm->desktop_list[wm->cur_d->desktop - 2];
-                    break;
-                }
-            }
-            mtx.lock();
-            thread_sleep(duration + 20);
-            joinAndClearThreads();
-            mtx.unlock();
-        }
-        static void teleport_to(const uint8_t & n) {
-            if (wm->cur_d == wm->desktop_list[n - 1] || n == 0 || n == wm->desktop_list.size()) {
+  Public(change_desktop)(xcb_connection_t * connection) : connection(connection) {}
+  Public(int) duration = 100;
+  // Methods
+    Public(enum) DIRECTION {
+      NEXT,
+      PREV };
+    Public(void) change_to(const DIRECTION & direction) {
+      switch (direction) {
+        case NEXT: {
+            if (wm->cur_d->desktop == wm->desktop_list.size()) {
                 return;
             }
-            
-            for (const auto & c : wm->cur_d->current_clients) {
-                if (c) {
-                    if (c->desktop == wm->cur_d->desktop) {
-                        c->unmap();
-                    }
-                }
-            }
 
-            wm->cur_d = wm->desktop_list[n - 1];
-            for (const auto & c : wm->cur_d->current_clients) {
-                if (c) {
-                    c->map();
-                }
-            }
+            hide = get_clients_on_desktop(wm->cur_d->desktop);
+            show = get_clients_on_desktop(wm->cur_d->desktop + 1);
+            animate(show, NEXT);
+            animate(hide, NEXT);
+            wm->cur_d = wm->desktop_list[wm->cur_d->desktop];
+            break;
         }
-    ;
-    private: // variables
-        xcb_connection_t * connection;
-        std::vector<client *> show;
-        std::vector<client *> hide;
-        std::thread show_thread;
-        std::thread hide_thread;
-        std::atomic<bool> stop_show_flag{false};
-        std::atomic<bool> stop_hide_flag{false};
-        std::atomic<bool> reverse_animation_flag{false};
-        std::vector<std::thread> animation_threads;
-    ;
-    private: // functions
-        std::vector<client *> get_clients_on_desktop(const uint8_t & desktop) {
-            std::vector<client *> clients;
-            for (const auto & c : wm->client_list) {
-                if (c->desktop == desktop) {
-                    clients.push_back(c);
-                }
-            }
-            return clients;
-        }
-        void animate(std::vector<client *> clients, const DIRECTION & direction) {
-            switch (direction) {
-                case NEXT: {
-                    for (const auto c : clients) {
-                        if (c) {
-                            animation_threads.emplace_back(&change_desktop::anim_cli, this, c, c->x - screen->width_in_pixels);
-                        }
-                    }
-                    break;
-                }
-                case PREV: {
-                    for (const auto & c : clients) {
-                        if (c) {
-                            animation_threads.emplace_back(&change_desktop::anim_cli, this, c, c->x + screen->width_in_pixels);
-                        }
-                    }
-                    break;
-                }
-            }
-        }
-        void anim_cli(client * c, const int & endx) {
-            Mwm_Animator anim(c);
-            anim.animate_client_x(c->x, endx, duration);
-            c->update();
-        }
-        void thread_sleep(const double & milliseconds) {
-            // Creating a duration with double milliseconds
-            auto duration = std::chrono::duration<double, std::milli>(milliseconds);
+        case PREV: {
+          if (wm->cur_d->desktop == 1) {
+              return;
+          }
 
-            // Sleeping for the duration
-            std::this_thread::sleep_for(duration);
+          hide = get_clients_on_desktop(wm->cur_d->desktop);
+          show = get_clients_on_desktop(wm->cur_d->desktop - 1);
+          animate(show, PREV);
+          animate(hide, PREV);
+          wm->cur_d = wm->desktop_list[wm->cur_d->desktop - 2];
+          break;
         }
-        void stopAnimations() {
-            stop_show_flag.store(true);
-            stop_hide_flag.store(true);
-            
-            if (show_thread.joinable()) {
-                show_thread.join();
-                stop_show_flag.store(false);
-            }
-            if (hide_thread.joinable()) {
-                hide_thread.join();
-                stop_hide_flag.store(false);
-            }
-        }
-        void joinAndClearThreads() {
-            for (std::thread & t : animation_threads) {
-                if (t.joinable()) {
-                    t.join();
-                }
-            }
-            animation_threads.clear();
-            show.clear();
-            hide.clear();
+      }
+      mtx.lock();
+      thread_sleep(duration + 20);
+      joinAndClearThreads();
+      mtx.unlock(); }
+    Public(static void) teleport_to(const uint8_t & n) {
+      if(wm->cur_d == wm->desktop_list[n - 1] || n == 0 || n == wm->desktop_list.size())
+        return;
+      for(const auto &c:wm->cur_d->current_clients)
+        if(c)
+          if(c->desktop == wm->cur_d->desktop)
+            c->unmap();
+      wm->cur_d = wm->desktop_list[n - 1];
+      for(const auto &c:wm->cur_d->current_clients)
+        if(c)
+          c->map(); }
+  // variables
+    Private(xcb_connection_t) * connection;
+    Private(vector)<client *> show;
+    Private(vector)<client *> hide;
+    Private(thread) show_thread;
+    Private(thread) hide_thread;
+    Private(atomic)<bool> stop_show_flag{false};
+    Private(atomic)<bool> stop_hide_flag{false};
+    Private(atomic)<bool> reverse_animation_flag{false};
+    Private(vector)<thread> animation_threads;
+  // functions
+    Private(vector)<client *> get_clients_on_desktop(const uint8_t & desktop) {
+        vector<client *> clients;
+        for(const auto & c : wm->client_list)
+          if(c->desktop == desktop)
+            clients.push_back(c);
+        return(clients); }
+    Private(void) animate(std::vector<client *> clients, const DIRECTION & direction) {
+        switch(direction) {
+          case(NEXT): {
+            for(const auto c : clients)
+              if(c)
+                animation_threads.emplace_back(&change_desktop::anim_cli, this, c, c->x - screen->width_in_pixels);
+            break;
+          }
+          case(PREV): {
+            for(const auto &c:clients)
+              if(c)
+                animation_threads.emplace_back(&change_desktop::anim_cli, this, c, c->x + screen->width_in_pixels);
+            break;
+          }}}
+    Private(void) anim_cli(client * c, const int & endx) {
+        Mwm_Animator anim(c);
+        anim.animate_client_x(c->x, endx, duration);
+        c->update(); }
+    Private(void) thread_sleep(const double & milliseconds) {
+        // Creating a duration with double milliseconds
+        auto duration = std::chrono::duration<double, std::milli>(milliseconds);
 
-            std::vector<std::thread>().swap(animation_threads);
-            std::vector<client *>().swap(show);
-            std::vector<client *>().swap(hide);
-        }
-    ;
-};
+        // Sleeping for the duration
+        std::this_thread::sleep_for(duration); }
+    Private(void) stopAnimations() {
+        stop_show_flag.store(true);
+        stop_hide_flag.store(true);
+        
+        if(show_thread.joinable()) {
+          show_thread.join();
+          stop_show_flag.store(false); }
+        if(hide_thread.joinable()) {
+          hide_thread.join();
+          stop_hide_flag.store(false); }}
+    Private(void) joinAndClearThreads() {
+      for(thread &t:animation_threads)
+        if(t.joinable())
+          t.join();
+      animation_threads.clear();
+      show.clear();
+      hide.clear();
+
+      vector<thread>().swap(animation_threads);
+      vector<client *>().swap(show);
+      vector<client *>().swap(hide); }};
 void move_to_next_desktop_w_app() {
-    if (wm->cur_d->desktop == wm->desktop_list.size()) {
-        return;
-    }
-
-    if (wm->focused_client) {
-        wm->focused_client->desktop = wm->cur_d->desktop + 1;
-    }
-
-    change_desktop::teleport_to(wm->cur_d->desktop + 1);
-}
+  if(wm->cur_d->desktop == wm->desktop_list.size())
+    return;
+  if(wm->focused_client)
+    wm->focused_client->desktop = wm->cur_d->desktop + 1;
+  change_desktop::teleport_to(wm->cur_d->desktop + 1); }
 void move_to_previus_desktop_w_app() {
-    if (wm->cur_d->desktop == 1) {
-        return;
-    }
-
-    if (wm->focused_client) {
-        wm->focused_client->desktop = wm->cur_d->desktop - 1;
-    }
-
-    change_desktop::teleport_to(wm->cur_d->desktop - 1);
-    wm->focused_client->raise();
-}
+  if(wm->cur_d->desktop == 1)
+    return;
+  if(wm->focused_client)
+    wm->focused_client->desktop = wm->cur_d->desktop - 1;
+  change_desktop::teleport_to(wm->cur_d->desktop - 1);
+  wm->focused_client->raise(); }
 class resize_client {
-    public: // constructor
-        /**
-            THE REASON FOR THE 'retard_int' IS BECUSE WITHOUT IT 
-            I CANNOT CALL THIS CLASS LIKE THIS 'resize_client(c)' 
-            INSTEAD I WOULD HAVE TO CALL IT LIKE THIS 'resize_client rc(c)'
-            AND NOW WITH THE 'retard_int' I CAN CALL IT LIKE THIS 'resize_client(c, 0)'
-         */
-        resize_client(client * & c , int retard_int) 
-        : c(c) {
-            if (c->win.is_EWMH_fullscreen()) {
-                return;
-            }
-
-            pointer.grab();
-            pointer.teleport(c->x + c->width, c->y + c->height);
-            run();
-            pointer.ungrab();
-        }
-    ;
-    public: // subclasses
-        class no_border {
-            public: // constructor
-                no_border(client * & c, const uint32_t & x, const uint32_t & y)
-                : c(c) {
-                    if (c->win.is_EWMH_fullscreen()) {
-                        return;
-                    }
-                    
-                    pointer.grab();
-                    edge edge = wm->get_client_edge_from_pointer(c, 10);
-                    teleport_mouse(edge);
-                    run(edge);
-                    pointer.ungrab();
-                }
-            ;
-            private: // variables
-                client * & c;
-                uint32_t x;
-                pointer pointer;
-                uint32_t y;
-                const double frameRate = 120.0;
-                std::chrono::high_resolution_clock::time_point lastUpdateTime = std::chrono::high_resolution_clock::now();
-                const double frameDuration = 1000.0 / frameRate;
-            ;
-            private: // functions
-                void teleport_mouse(edge edge) {
-                    switch (edge) {
-                        case edge::TOP:
-                            pointer.teleport(pointer.x(), c->y);
-                            break;
-                        case edge::BOTTOM_edge:
-                            pointer.teleport(pointer.x(), (c->y + c->height));
-                            break;
-                        case edge::LEFT:
-                            pointer.teleport(c->x, pointer.y());
-                            break;
-                        case edge::RIGHT:
-                            pointer.teleport((c->x + c->width), pointer.y());
-                            break;
-                        case edge::NONE:
-                            break;
-                        case edge::TOP_LEFT:
-                            pointer.teleport(c->x, c->y);
-                            break;
-                        case edge::TOP_RIGHT:
-                            pointer.teleport((c->x + c->width), c->y);
-                            break;
-                        case edge::BOTTOM_LEFT:
-                            pointer.teleport(c->x, (c->y + c->height));
-                            break;
-                        case edge::BOTTOM_RIGHT:
-                            pointer.teleport((c->x + c->width), (c->y + c->height));
-                            break;
-                    }
-                }
-                void resize_client(const uint32_t x, const uint32_t y, edge edge) {
-                    switch (edge) {
-                        case edge::LEFT:
-                            c->x_width(x, (c->width + c->x - x));
-                            break;
-                        case edge::RIGHT:
-                            c->_width((x - c->x));
-                            break;
-                        case edge::TOP:
-                            c->y_height(y, (c->height + c->y - y));   
-                            break;
-                        case edge::BOTTOM_edge:
-                            c->_height((y - c->y));
-                            break;
-                        case edge::NONE:
-                            return;
-                        case edge::TOP_LEFT:
-                            c->x_y_width_height(x, y, (c->width + c->x - x), (c->height + c->y - y));
-                            break;
-                        case edge::TOP_RIGHT:
-                            c->y_width_height(y, (x - c->x), (c->height + c->y - y));
-                            break;
-                        case edge::BOTTOM_LEFT:
-                            c->x_width_height(x, (c->width + c->x - x), (y - c->y));   
-                            break;
-                        case edge::BOTTOM_RIGHT:
-                            c->width_height((x - c->x), (y - c->y));   
-                            break;
-                    }
-                }
-                void run(edge edge) {
-                    xcb_generic_event_t * ev;
-                    bool shouldContinue = true;
-                    while (shouldContinue) {
-                        ev = xcb_wait_for_event(conn);
-                        if (!ev) {
-                            continue;
-                        }
-
-                        switch (ev->response_type & ~0x80) {
-                            case XCB_MOTION_NOTIFY: {
-                                const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
-                                if (isTimeToRender()) {
-                                    resize_client(e->root_x, e->root_y, edge);
-                                    xcb_flush(conn); 
-                                }
-                                break;
-                            }
-                            case XCB_BUTTON_RELEASE: {
-                                shouldContinue = false;                        
-                                c->update();
-                                break;
-                            }
-                        }
-                        free(ev); 
-                    }
-                }
-                bool isTimeToRender() {
-                    const auto & currentTime = std::chrono::high_resolution_clock::now();
-                    const std::chrono::duration<double, std::milli> & elapsedTime = currentTime - lastUpdateTime;
-
-                    if (elapsedTime.count() >= frameDuration) {
-                        lastUpdateTime = currentTime;                         
-                        return true; 
-                    }
-                    return false; 
-                }
-            ;
-        };
-        class border {
-            public: // constructor 
-                border(client * & c, edge _edge)
-                : c(c) {
-                    if (c->win.is_EWMH_fullscreen()) {
-                        return;
-                    }
-
-                    std::map<client *, edge> map = wm->get_client_next_to_client(c, _edge);
-                    for (const auto & pair : map) {
-                        if (pair.first != nullptr) {
-                            c2 = pair.first;
-                            c2_edge = pair.second;
-                            pointer.grab();
-                            teleport_mouse(_edge);
-                            run_double(_edge);
-                            pointer.ungrab();
-                            return;
-                        }
-                    }
-                    
-                    pointer.grab();
-                    teleport_mouse(_edge);
-                    run(_edge);
-                    pointer.ungrab();
-                }
-            ;
-            private: // variables
-                client * & c;
-                client * c2;
-                edge c2_edge;
-                pointer pointer; 
-                const double frameRate = 120.0;
-                std::chrono::high_resolution_clock::time_point lastUpdateTime = std::chrono::high_resolution_clock::now();
-                const double frameDuration = 1000.0 / frameRate;
-            ;
-            private: // methods
-                void teleport_mouse(edge edge) {
-                    switch (edge) {
-                        case edge::TOP:
-                            pointer.teleport(pointer.x(), c->y);
-                            break;
-                        case edge::BOTTOM_edge:
-                            pointer.teleport(pointer.x(), (c->y + c->height));
-                            break;
-                        case edge::LEFT:
-                            pointer.teleport(c->x, pointer.y());
-                            break;
-                        case edge::RIGHT:
-                            pointer.teleport((c->x + c->width), pointer.y());
-                            break;
-                        case edge::NONE:
-                            break;
-                        case edge::TOP_LEFT:
-                            pointer.teleport(c->x, c->y);
-                            break;
-                        case edge::TOP_RIGHT:
-                            pointer.teleport((c->x + c->width), c->y);
-                            break;
-                        case edge::BOTTOM_LEFT:
-                            pointer.teleport(c->x, (c->y + c->height));
-                            break;
-                        case edge::BOTTOM_RIGHT:
-                            pointer.teleport((c->x + c->width), (c->y + c->height));
-                            break;
-                    }
-                }
-                void resize_client(const uint32_t x, const uint32_t y, edge edge) {
-                    switch (edge) {
-                        case edge::LEFT:
-                            c->x_width(x, (c->width + c->x - x));
-                            break;
-                        case edge::RIGHT:
-                            c->_width((x - c->x));
-                            break;
-                        case edge::TOP:
-                            c->y_height(y, (c->height + c->y - y));   
-                            break;
-                        case edge::BOTTOM_edge:
-                            c->_height((y - c->y));
-                            break;
-                        case edge::NONE:
-                            return;
-                        case edge::TOP_LEFT:
-                            c->x_y_width_height(x, y, (c->width + c->x - x), (c->height + c->y - y));
-                            break;
-                        case edge::TOP_RIGHT:
-                            c->y_width_height(y, (x - c->x), (c->height + c->y - y));
-                            break;
-                        case edge::BOTTOM_LEFT:
-                            c->x_width_height(x, (c->width + c->x - x), (y - c->y));   
-                            break;
-                        case edge::BOTTOM_RIGHT:
-                            c->width_height((x - c->x), (y - c->y));   
-                            break;
-                    }
-                }
-                void resize_client(client * c, const uint32_t x, const uint32_t y, edge edge) {
-                    switch (edge) {
-                        case edge::LEFT:
-                            c->x_width(x, (c->width + c->x - x));
-                            break;
-                        case edge::RIGHT:
-                            c->_width((x - c->x));
-                            break;
-                        case edge::TOP:
-                            c->y_height(y, (c->height + c->y - y));   
-                            break;
-                        case edge::BOTTOM_edge:
-                            c->_height((y - c->y));
-                            break;
-                        case edge::NONE:
-                            return;
-                        case edge::TOP_LEFT:
-                            c->x_y_width_height(x, y, (c->width + c->x - x), (c->height + c->y - y));
-                            break;
-                        case edge::TOP_RIGHT:
-                            c->y_width_height(y, (x - c->x), (c->height + c->y - y));
-                            break;
-                        case edge::BOTTOM_LEFT:
-                            c->x_width_height(x, (c->width + c->x - x), (y - c->y));   
-                            break;
-                        case edge::BOTTOM_RIGHT:
-                            c->width_height((x - c->x), (y - c->y));   
-                            break;
-                    }
-                }
-                void snap(const uint32_t x, const uint32_t y, edge edge, const uint8_t & prox) {
-                    uint16_t left_border   = 0;
-                    uint16_t right_border  = 0;
-                    uint16_t top_border    = 0;
-                    uint16_t bottom_border = 0;
-
-                    for (const auto & c : wm->cur_d->current_clients) {
-                        if (c == this->c) {
-                            continue;
-                        }
-
-                        left_border = c->x;
-                        right_border = (c->x + c->width);
-                        top_border = c->y;
-                        bottom_border = (c->y + c->height);
-
-                        if (edge != edge::RIGHT
-                         && edge != edge::BOTTOM_RIGHT
-                         && edge != edge::TOP_RIGHT) {
-                            if ((x > right_border - prox && x < right_border + prox)
-                             && (y > top_border && y < bottom_border)) {
-                                resize_client(right_border, y, edge);
-                                return;
-                            }
-                        }
-
-                        if (edge != edge::LEFT
-                         && edge != edge::TOP_LEFT
-                         && edge != edge::BOTTOM_LEFT) {
-                            if ((x > left_border - prox && x < left_border + prox)
-                             && (y > top_border && y < bottom_border)) {
-                                resize_client(left_border, y, edge);
-                                return;
-                            }
-                        }
-
-                        if (edge != edge::BOTTOM_edge 
-                         && edge != edge::BOTTOM_LEFT 
-                         && edge != edge::BOTTOM_RIGHT) {
-                            if ((y > bottom_border - prox && y < bottom_border + prox)
-                             && (x > left_border && x < right_border)) {
-                                resize_client(x, bottom_border, edge);
-                                return;
-                            }
-                        }
-
-                        if (edge != edge::TOP
-                         && edge != edge::TOP_LEFT
-                         && edge != edge::TOP_RIGHT) {
-                            if ((y > top_border - prox && y < top_border + prox)
-                             && (x > left_border && x < right_border)) {
-                                resize_client(x, top_border, edge);
-                                return;
-                            }
-                        }
-                    }
-                    resize_client(x, y, edge);
-                }
-                void run(edge edge) {
-                    xcb_generic_event_t * ev;
-                    bool shouldContinue = true;
-
-                    while (shouldContinue) {
-                        ev = xcb_wait_for_event(conn);
-                        if (!ev) {
-                            continue;
-                        }
-
-                        switch (ev->response_type & ~0x80) {
-                            case XCB_MOTION_NOTIFY: {
-                                const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
-                                if (isTimeToRender()) {
-                                    snap(e->root_x, e->root_y, edge, 12);
-                                    xcb_flush(conn); 
-                                }
-                                break;
-                            }
-                            case XCB_BUTTON_RELEASE: {
-                                shouldContinue = false;                        
-                                c->update();
-                                break;
-                            }
-                        }
-                        free(ev); 
-                    }
-                }
-                void run_double(edge edge) {
-                    xcb_generic_event_t * ev;
-                    bool shouldContinue = true;
-
-                    while (shouldContinue) {
-                        ev = xcb_wait_for_event(conn);
-                        if (!ev) {
-                            continue;
-                        }
-
-                        switch (ev->response_type & ~0x80) {
-                            case XCB_MOTION_NOTIFY: {
-                                const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
-                                if (isTimeToRender()) {
-                                    resize_client(c, e->root_x, e->root_y, edge);
-                                    resize_client(c2, e->root_x, e->root_y, c2_edge);
-                                    xcb_flush(conn); 
-                                }
-                                break;
-                            }
-                            case XCB_BUTTON_RELEASE: {
-                                shouldContinue = false;                        
-                                c->update();
-                                c2->update();
-                                break;
-                            }
-                        }
-                        free(ev); 
-                    }
-                }
-                bool isTimeToRender() {
-                    const auto & currentTime = std::chrono::high_resolution_clock::now();
-                    const std::chrono::duration<double, std::milli> & elapsedTime = currentTime - lastUpdateTime;
-
-                    if (elapsedTime.count() >= frameDuration) {
-                        lastUpdateTime = currentTime; 
-                        
-                        return true; 
-                    }
-                    return false; 
-                }
-            ;
-        };
-    ;
-    private: // variabels
-        client * & c;
-        uint32_t x;
-        pointer pointer;
-        uint32_t y;
-        const double frameRate = 120.0;
-        std::chrono::high_resolution_clock::time_point lastUpdateTime = std::chrono::high_resolution_clock::now();
-        const double frameDuration = 1000.0 / frameRate; 
-    ;
-    private: // functions
-        void snap(const uint16_t & x, const uint16_t & y) {
-            // WINDOW TO WINDOW SNAPPING 
-            for (const auto & cli : wm->cur_d->current_clients) {
-                if (cli == this->c) {
-                    continue;
-                }
-
-                // SNAP WINSOW TO 'LEFT' BORDER OF 'NON_CONTROLLED' WINDOW
-                if ((x > cli->x - N && x < cli->x + N) 
-                 && (y + this->c->height > cli->y && y < cli->y + cli->height)) {
-                    c->width_height((cli->x - this->c->x), (y - this->c->y));
+  /**
+      THE REASON FOR THE 'retard_int' IS BECUSE WITHOUT IT 
+      I CANNOT CALL THIS CLASS LIKE THIS 'resize_client(c)' 
+      INSTEAD I WOULD HAVE TO CALL IT LIKE THIS 'resize_client rc(c)'
+      AND NOW WITH THE 'retard_int' I CAN CALL IT LIKE THIS 'resize_client(c, 0)'
+   */
+  Public(resize_client)(client * & c , int retard_int) : c(c) {
+    if(c->win.is_EWMH_fullscreen())
+      return;
+    pointer.grab();
+    pointer.teleport(c->x + c->width, c->y + c->height);
+    run();
+    pointer.ungrab(); }
+  public: // subclasses
+    class no_border {
+        public: // constructor
+            no_border(client * & c, const uint32_t & x, const uint32_t & y)
+            : c(c) {
+                if (c->win.is_EWMH_fullscreen()) {
                     return;
                 }
-
-                // SNAP WINDOW TO 'TOP' BORDER OF 'NON_CONTROLLED' WINDOW
-                if ((y > cli->y - N && y < cli->y + N) 
-                 && (x + this->c->width > cli->x && x < cli->x + cli->width)) {
-                    c->width_height((x - this->c->x), (cli->y - this->c->y));
-                    return;
-                }
-            }
-            c->width_height((x - this->c->x), (y - this->c->y));
-        }
-        void run() {
-            xcb_generic_event_t * ev;
-            bool shouldContinue = true;
-
-            while (shouldContinue) {
-                ev = xcb_wait_for_event(conn);
-                if (!ev) {
-                    continue;
-                }
-
-                switch (ev->response_type & ~0x80) {
-                    case XCB_MOTION_NOTIFY: {
-                        const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
-                        if (isTimeToRender()) {
-                            snap(e->root_x, e->root_y);
-                            xcb_flush(conn); 
-                        }
-                        break;
-                    }
-                    case XCB_BUTTON_RELEASE: {
-                        shouldContinue = false;                        
-                        c->update();
-                        break;
-                    }
-                }
-                free(ev); 
-            }
-        }
-        bool isTimeToRender() 
-        {
-            const auto & currentTime = std::chrono::high_resolution_clock::now();
-            const std::chrono::duration<double, std::milli> & elapsedTime = currentTime - lastUpdateTime;
-
-            if (elapsedTime.count() >= frameDuration) {
-                lastUpdateTime = currentTime; 
                 
-                return true; 
+                pointer.grab();
+                edge edge = wm->get_client_edge_from_pointer(c, 10);
+                teleport_mouse(edge);
+                run(edge);
+                pointer.ungrab();
             }
-            return false; 
-        }
-    ;
-};
-class max_win {
-    public: // constructor
-        enum max_win_type {
-            BUTTON_MAXWIN,
-            EWMH_MAXWIN
-        };
-        max_win(client * c, max_win_type type) 
-        : c(c) {
-            switch (type) {
-                case EWMH_MAXWIN:
-                    if (c->is_EWMH_fullscreen()) {
-                        ewmh_unmax_win();
-                    } else {
-                        ewmh_max_win();
+        ;
+        private: // variables
+            client * & c;
+            uint32_t x;
+            pointer pointer;
+            uint32_t y;
+            const double frameRate = 120.0;
+            std::chrono::high_resolution_clock::time_point lastUpdateTime = std::chrono::high_resolution_clock::now();
+            const double frameDuration = 1000.0 / frameRate;
+        ;
+        private: // functions
+            void teleport_mouse(edge edge) {
+                switch (edge) {
+                    case edge::TOP:
+                        pointer.teleport(pointer.x(), c->y);
+                        break;
+                    case edge::BOTTOM_edge:
+                        pointer.teleport(pointer.x(), (c->y + c->height));
+                        break;
+                    case edge::LEFT:
+                        pointer.teleport(c->x, pointer.y());
+                        break;
+                    case edge::RIGHT:
+                        pointer.teleport((c->x + c->width), pointer.y());
+                        break;
+                    case edge::NONE:
+                        break;
+                    case edge::TOP_LEFT:
+                        pointer.teleport(c->x, c->y);
+                        break;
+                    case edge::TOP_RIGHT:
+                        pointer.teleport((c->x + c->width), c->y);
+                        break;
+                    case edge::BOTTOM_LEFT:
+                        pointer.teleport(c->x, (c->y + c->height));
+                        break;
+                    case edge::BOTTOM_RIGHT:
+                        pointer.teleport((c->x + c->width), (c->y + c->height));
+                        break;
+                }
+            }
+            void resize_client(const uint32_t x, const uint32_t y, edge edge) {
+                switch (edge) {
+                    case edge::LEFT:
+                        c->x_width(x, (c->width + c->x - x));
+                        break;
+                    case edge::RIGHT:
+                        c->_width((x - c->x));
+                        break;
+                    case edge::TOP:
+                        c->y_height(y, (c->height + c->y - y));   
+                        break;
+                    case edge::BOTTOM_edge:
+                        c->_height((y - c->y));
+                        break;
+                    case edge::NONE:
+                        return;
+                    case edge::TOP_LEFT:
+                        c->x_y_width_height(x, y, (c->width + c->x - x), (c->height + c->y - y));
+                        break;
+                    case edge::TOP_RIGHT:
+                        c->y_width_height(y, (x - c->x), (c->height + c->y - y));
+                        break;
+                    case edge::BOTTOM_LEFT:
+                        c->x_width_height(x, (c->width + c->x - x), (y - c->y));   
+                        break;
+                    case edge::BOTTOM_RIGHT:
+                        c->width_height((x - c->x), (y - c->y));   
+                        break;
+                }
+            }
+            void run(edge edge) {
+                xcb_generic_event_t * ev;
+                bool shouldContinue = true;
+                while (shouldContinue) {
+                    ev = xcb_wait_for_event(conn);
+                    if (!ev) {
+                        continue;
                     }
-                    break;
-                case BUTTON_MAXWIN:
-                    if (c->is_button_max_win()) {
-                        button_unmax_win();
-                    } else {
-                        button_max_win();
-                    }
-                    break;
-            }
-        }
-    ;
-    private:
-        client * c;
-    ;
-    private: // functions
-        void max_win_animate(const int & endX, const int & endY, const int & endWidth, const int & endHeight) {
-            animate_client(
-                c, 
-                endX, 
-                endY, 
-                endWidth, 
-                endHeight, 
-                MAXWIN_ANIMATION_DURATION
-            );
-            xcb_flush(conn);
-        }
-        void ewmh_max_win() {
-            c->save_max_ewmh_ogsize();
-            max_win_animate(
-                - BORDER_SIZE,
-                - TITLE_BAR_HEIGHT - BORDER_SIZE,
-                screen->width_in_pixels + (BORDER_SIZE * 2),
-                screen->height_in_pixels + TITLE_BAR_HEIGHT + (BORDER_SIZE * 2)
-            );
-            c->set_EWMH_fullscreen_state();
-        }
-        void ewmh_unmax_win() {
-            if (c->max_ewmh_ogsize.width > screen->width_in_pixels) {
-                (c->max_ewmh_ogsize.width = screen->width_in_pixels / 2);
-            }
-            if (c->max_ewmh_ogsize.height > screen->height_in_pixels) {
-                (c->max_ewmh_ogsize.height = screen->height_in_pixels / 2);
-            }
-            if (c->max_ewmh_ogsize.x >= screen->width_in_pixels - 1) {
-                c->max_ewmh_ogsize.x = ((screen->width_in_pixels / 2) - (c->max_ewmh_ogsize.width / 2) - BORDER_SIZE);
-            }
-            if (c->max_ewmh_ogsize.y >= screen->height_in_pixels - 1) {
-                c->max_ewmh_ogsize.y = ((screen->height_in_pixels / 2) - (c->max_ewmh_ogsize.height / 2) - TITLE_BAR_HEIGHT - BORDER_SIZE);
-            }
 
-            max_win_animate(
-                c->max_ewmh_ogsize.x, 
-                c->max_ewmh_ogsize.y, 
-                c->max_ewmh_ogsize.width, 
-                c->max_ewmh_ogsize.height
-            );
-            c->unset_EWMH_fullscreen_state();
-        }
-        void button_max_win() {
-            c->save_max_button_ogsize();
-            max_win_animate(
-                0,
-                0,
-                screen->width_in_pixels,
-                screen->height_in_pixels
-            );
-        }
-        void button_unmax_win() {
-            max_win_animate(
-                c->max_button_ogsize.x,
-                c->max_button_ogsize.y,
-                c->max_button_ogsize.width,
-                c->max_button_ogsize.height
-            );
-        }
-    ;
-};
+                    switch (ev->response_type & ~0x80) {
+                        case XCB_MOTION_NOTIFY: {
+                            const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
+                            if (isTimeToRender()) {
+                                resize_client(e->root_x, e->root_y, edge);
+                                xcb_flush(conn); 
+                            }
+                            break;
+                        }
+                        case XCB_BUTTON_RELEASE: {
+                            shouldContinue = false;                        
+                            c->update();
+                            break;
+                        }
+                    }
+                    free(ev); 
+                }
+            }
+            bool isTimeToRender() {
+                const auto & currentTime = std::chrono::high_resolution_clock::now();
+                const std::chrono::duration<double, std::milli> & elapsedTime = currentTime - lastUpdateTime;
+
+                if (elapsedTime.count() >= frameDuration) {
+                    lastUpdateTime = currentTime;                         
+                    return true; 
+                }
+                return false; 
+            }
+        ;
+    };
+    class border {
+        public: // constructor 
+            border(client * & c, edge _edge)
+            : c(c) {
+                if (c->win.is_EWMH_fullscreen()) {
+                    return;
+                }
+
+                std::map<client *, edge> map = wm->get_client_next_to_client(c, _edge);
+                for (const auto & pair : map) {
+                    if (pair.first != nullptr) {
+                        c2 = pair.first;
+                        c2_edge = pair.second;
+                        pointer.grab();
+                        teleport_mouse(_edge);
+                        run_double(_edge);
+                        pointer.ungrab();
+                        return;
+                    }
+                }
+                
+                pointer.grab();
+                teleport_mouse(_edge);
+                run(_edge);
+                pointer.ungrab();
+            }
+        ;
+        private: // variables
+            client * & c;
+            client * c2;
+            edge c2_edge;
+            pointer pointer; 
+            const double frameRate = 120.0;
+            std::chrono::high_resolution_clock::time_point lastUpdateTime = std::chrono::high_resolution_clock::now();
+            const double frameDuration = 1000.0 / frameRate;
+        ;
+        private: // methods
+            void teleport_mouse(edge edge) {
+                switch (edge) {
+                    case edge::TOP:
+                        pointer.teleport(pointer.x(), c->y);
+                        break;
+                    case edge::BOTTOM_edge:
+                        pointer.teleport(pointer.x(), (c->y + c->height));
+                        break;
+                    case edge::LEFT:
+                        pointer.teleport(c->x, pointer.y());
+                        break;
+                    case edge::RIGHT:
+                        pointer.teleport((c->x + c->width), pointer.y());
+                        break;
+                    case edge::NONE:
+                        break;
+                    case edge::TOP_LEFT:
+                        pointer.teleport(c->x, c->y);
+                        break;
+                    case edge::TOP_RIGHT:
+                        pointer.teleport((c->x + c->width), c->y);
+                        break;
+                    case edge::BOTTOM_LEFT:
+                        pointer.teleport(c->x, (c->y + c->height));
+                        break;
+                    case edge::BOTTOM_RIGHT:
+                        pointer.teleport((c->x + c->width), (c->y + c->height));
+                        break;
+                }
+            }
+            void resize_client(const uint32_t x, const uint32_t y, edge edge) {
+                switch (edge) {
+                    case edge::LEFT:
+                        c->x_width(x, (c->width + c->x - x));
+                        break;
+                    case edge::RIGHT:
+                        c->_width((x - c->x));
+                        break;
+                    case edge::TOP:
+                        c->y_height(y, (c->height + c->y - y));   
+                        break;
+                    case edge::BOTTOM_edge:
+                        c->_height((y - c->y));
+                        break;
+                    case edge::NONE:
+                        return;
+                    case edge::TOP_LEFT:
+                        c->x_y_width_height(x, y, (c->width + c->x - x), (c->height + c->y - y));
+                        break;
+                    case edge::TOP_RIGHT:
+                        c->y_width_height(y, (x - c->x), (c->height + c->y - y));
+                        break;
+                    case edge::BOTTOM_LEFT:
+                        c->x_width_height(x, (c->width + c->x - x), (y - c->y));   
+                        break;
+                    case edge::BOTTOM_RIGHT:
+                        c->width_height((x - c->x), (y - c->y));   
+                        break;
+                }
+            }
+            void resize_client(client * c, const uint32_t x, const uint32_t y, edge edge) {
+                switch (edge) {
+                    case edge::LEFT:
+                        c->x_width(x, (c->width + c->x - x));
+                        break;
+                    case edge::RIGHT:
+                        c->_width((x - c->x));
+                        break;
+                    case edge::TOP:
+                        c->y_height(y, (c->height + c->y - y));   
+                        break;
+                    case edge::BOTTOM_edge:
+                        c->_height((y - c->y));
+                        break;
+                    case edge::NONE:
+                        return;
+                    case edge::TOP_LEFT:
+                        c->x_y_width_height(x, y, (c->width + c->x - x), (c->height + c->y - y));
+                        break;
+                    case edge::TOP_RIGHT:
+                        c->y_width_height(y, (x - c->x), (c->height + c->y - y));
+                        break;
+                    case edge::BOTTOM_LEFT:
+                        c->x_width_height(x, (c->width + c->x - x), (y - c->y));   
+                        break;
+                    case edge::BOTTOM_RIGHT:
+                        c->width_height((x - c->x), (y - c->y));   
+                        break;
+                }
+            }
+            void snap(const uint32_t x, const uint32_t y, edge edge, const uint8_t & prox) {
+                uint16_t left_border   = 0;
+                uint16_t right_border  = 0;
+                uint16_t top_border    = 0;
+                uint16_t bottom_border = 0;
+
+                for (const auto & c : wm->cur_d->current_clients) {
+                    if (c == this->c) {
+                        continue;
+                    }
+
+                    left_border = c->x;
+                    right_border = (c->x + c->width);
+                    top_border = c->y;
+                    bottom_border = (c->y + c->height);
+
+                    if (edge != edge::RIGHT
+                      && edge != edge::BOTTOM_RIGHT
+                      && edge != edge::TOP_RIGHT) {
+                        if ((x > right_border - prox && x < right_border + prox)
+                          && (y > top_border && y < bottom_border)) {
+                            resize_client(right_border, y, edge);
+                            return;
+                        }
+                    }
+
+                    if (edge != edge::LEFT
+                      && edge != edge::TOP_LEFT
+                      && edge != edge::BOTTOM_LEFT) {
+                        if ((x > left_border - prox && x < left_border + prox)
+                          && (y > top_border && y < bottom_border)) {
+                            resize_client(left_border, y, edge);
+                            return;
+                        }
+                    }
+
+                    if (edge != edge::BOTTOM_edge 
+                      && edge != edge::BOTTOM_LEFT 
+                      && edge != edge::BOTTOM_RIGHT) {
+                        if ((y > bottom_border - prox && y < bottom_border + prox)
+                          && (x > left_border && x < right_border)) {
+                            resize_client(x, bottom_border, edge);
+                            return;
+                        }
+                    }
+
+                    if (edge != edge::TOP
+                      && edge != edge::TOP_LEFT
+                      && edge != edge::TOP_RIGHT) {
+                        if ((y > top_border - prox && y < top_border + prox)
+                          && (x > left_border && x < right_border)) {
+                            resize_client(x, top_border, edge);
+                            return;
+                        }
+                    }
+                }
+                resize_client(x, y, edge);
+            }
+            void run(edge edge) {
+                xcb_generic_event_t * ev;
+                bool shouldContinue = true;
+
+                while (shouldContinue) {
+                    ev = xcb_wait_for_event(conn);
+                    if (!ev) {
+                        continue;
+                    }
+
+                    switch (ev->response_type & ~0x80) {
+                        case XCB_MOTION_NOTIFY: {
+                            const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
+                            if (isTimeToRender()) {
+                                snap(e->root_x, e->root_y, edge, 12);
+                                xcb_flush(conn); 
+                            }
+                            break;
+                        }
+                        case XCB_BUTTON_RELEASE: {
+                            shouldContinue = false;                        
+                            c->update();
+                            break;
+                        }
+                    }
+                    free(ev); 
+                }
+            }
+            void run_double(edge edge) {
+                xcb_generic_event_t * ev;
+                bool shouldContinue = true;
+
+                while (shouldContinue) {
+                    ev = xcb_wait_for_event(conn);
+                    if (!ev) {
+                        continue;
+                    }
+
+                    switch (ev->response_type & ~0x80) {
+                        case XCB_MOTION_NOTIFY: {
+                            const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
+                            if (isTimeToRender()) {
+                                resize_client(c, e->root_x, e->root_y, edge);
+                                resize_client(c2, e->root_x, e->root_y, c2_edge);
+                                xcb_flush(conn); 
+                            }
+                            break;
+                        }
+                        case XCB_BUTTON_RELEASE: {
+                            shouldContinue = false;                        
+                            c->update();
+                            c2->update();
+                            break;
+                        }
+                    }
+                    free(ev); 
+                }
+            }
+            bool isTimeToRender() {
+                const auto & currentTime = std::chrono::high_resolution_clock::now();
+                const std::chrono::duration<double, std::milli> & elapsedTime = currentTime - lastUpdateTime;
+
+                if (elapsedTime.count() >= frameDuration) {
+                    lastUpdateTime = currentTime; 
+                    
+                    return true; 
+                }
+                return false; 
+            }
+        ;
+    };
+  Private(client) * & c;
+  Private(uint32_t) x;
+  Private(pointer) pointer;
+  Private(uint32_t) y;
+  Private(const) double frameRate = 120.0;
+  Private(std)::chrono::high_resolution_clock::time_point lastUpdateTime = std::chrono::high_resolution_clock::now();
+  Private(const) double frameDuration = 1000.0 / frameRate;
+  Private(void) snap(const uint16_t & x, const uint16_t & y) {
+      // WINDOW TO WINDOW SNAPPING 
+      for(const auto & cli : wm->cur_d->current_clients) {
+        if(cli == this->c)
+          continue;
+        // SNAP WINSOW TO 'LEFT' BORDER OF 'NON_CONTROLLED' WINDOW
+        if((x > cli->x - N && x < cli->x + N) 
+         &&(y + this->c->height > cli->y && y < cli->y + cli->height)) {
+          c->width_height((cli->x - this->c->x), (y - this->c->y)); return; }
+        // SNAP WINDOW TO 'TOP' BORDER OF 'NON_CONTROLLED' WINDOW
+        if ((y > cli->y - N && y < cli->y + N) 
+         &&(x + this->c->width > cli->x && x < cli->x + cli->width)) {
+          c->width_height((x - this->c->x), (cli->y - this->c->y));
+          return; }}
+      c->width_height((x - this->c->x), (y - this->c->y)); }
+  Private(void) run() {
+      xcb_generic_event_t * ev;
+      bool shouldContinue = true;
+
+      while (shouldContinue) {
+        ev = xcb_wait_for_event(conn);
+        if(!ev) 
+          continue;
+        switch(ev->response_type & ~0x80) {
+          case(XCB_MOTION_NOTIFY): {
+            const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
+            if(isTimeToRender()) {
+              snap(e->root_x, e->root_y);
+              xcb_flush(conn); 
+            }
+            break; }
+          case(XCB_BUTTON_RELEASE): {
+            shouldContinue = false;                        
+            c->update();
+            break; }}
+        free(ev); 
+      }}
+  Private(bool) isTimeToRender() {
+      const auto & currentTime = std::chrono::high_resolution_clock::now();
+      const std::chrono::duration<double, std::milli> & elapsedTime = currentTime - lastUpdateTime;
+      if(elapsedTime.count() >= frameDuration) {
+        lastUpdateTime = currentTime; return(true); }
+      return(false); }};
+class max_win {
+  Public(enum max_win_type) {
+    BUTTON_MAXWIN,
+    EWMH_MAXWIN };
+  Public(max_win)(client * c, max_win_type type) : c(c) {
+    switch (type) {
+      case(EWMH_MAXWIN):
+        if(c->is_EWMH_fullscreen())
+          ewmh_unmax_win();
+        else 
+          ewmh_max_win();
+        break;
+      case(BUTTON_MAXWIN):
+        if(c->is_button_max_win())
+          button_unmax_win();
+        else 
+          button_max_win();
+        break; }}
+  Private(client *) c;
+  // functions
+  Private(void) max_win_animate(const int & endX, const int & endY, const int & endWidth, const int & endHeight) {
+    animate_client(
+      c, 
+      endX, 
+      endY, 
+      endWidth, 
+      endHeight, 
+      MAXWIN_ANIMATION_DURATION);
+    xcb_flush(conn); }
+  Private(void) ewmh_max_win() {
+    c->save_max_ewmh_ogsize();
+    max_win_animate(
+      - BORDER_SIZE,
+      - TITLE_BAR_HEIGHT - BORDER_SIZE,
+      screen->width_in_pixels + (BORDER_SIZE * 2),
+      screen->height_in_pixels + TITLE_BAR_HEIGHT + (BORDER_SIZE * 2));
+    c->set_EWMH_fullscreen_state(); }
+  Private(void) ewmh_unmax_win() {
+    if(c->max_ewmh_ogsize.width > screen->width_in_pixels) (c->max_ewmh_ogsize.width = screen->width_in_pixels / 2);
+    if(c->max_ewmh_ogsize.height > screen->height_in_pixels) (c->max_ewmh_ogsize.height = screen->height_in_pixels / 2);
+    if(c->max_ewmh_ogsize.x >= screen->width_in_pixels - 1) c->max_ewmh_ogsize.x = ((screen->width_in_pixels / 2) - (c->max_ewmh_ogsize.width / 2) - BORDER_SIZE);
+    if(c->max_ewmh_ogsize.y >= screen->height_in_pixels - 1) c->max_ewmh_ogsize.y = ((screen->height_in_pixels / 2) - (c->max_ewmh_ogsize.height / 2) - TITLE_BAR_HEIGHT - BORDER_SIZE);
+    max_win_animate(
+      c->max_ewmh_ogsize.x, 
+      c->max_ewmh_ogsize.y, 
+      c->max_ewmh_ogsize.width, 
+      c->max_ewmh_ogsize.height);
+    c->unset_EWMH_fullscreen_state(); }
+  Private(void) button_max_win() {
+    c->save_max_button_ogsize();
+    max_win_animate(
+      0,
+      0,
+      screen->width_in_pixels,
+      screen->height_in_pixels); }
+  Private(void) button_unmax_win() {
+    max_win_animate(
+      c->max_button_ogsize.x,
+      c->max_button_ogsize.y,
+      c->max_button_ogsize.width,
+      c->max_button_ogsize.height); }};
 /**
  * @class tile
  * @brief Represents a tile obj.
@@ -5934,670 +5558,531 @@ class max_win {
  * The class also includes helper methods to check the current tile position of a window and set the size and position of a window.
  */
 class tile {
-    public: // constructors
-        tile(client * & c, TILE tile)
-        : c(c) {
-            if (c->is_EWMH_fullscreen()) {
-                return;
+  Public(tile)(client * & c, TILE tile)
+  : c(c) {
+    if(c->is_EWMH_fullscreen()) 
+      return;
+    switch (tile) {
+      case(TILE::LEFT):
+        // IF 'CURRENTLT_TILED' TO 'LEFT'
+        if(current_tile_pos(TILEPOS::LEFT)) { 
+          set_tile_ogsize();
+          return; }
+        // IF 'CURRENTLY_TILED' TO 'RIGHT', 'LEFT_DOWN' OR 'LEFT_UP'
+        if(current_tile_pos(TILEPOS::RIGHT)
+         ||current_tile_pos(TILEPOS::LEFT_DOWN)
+         ||current_tile_pos(TILEPOS::LEFT_UP)) {
+          set_tile_sizepos(TILEPOS::LEFT);
+          return; }
+        // IF 'CURRENTLY_TILED' TO 'RIGHT_DOWN'
+        if(current_tile_pos(TILEPOS::RIGHT_DOWN)) { 
+          set_tile_sizepos(TILEPOS::LEFT_DOWN);
+          return; }
+        // IF 'CURRENTLY_TILED' TO 'RIGHT_UP'
+        if(current_tile_pos(TILEPOS::RIGHT_UP)) {
+          set_tile_sizepos(TILEPOS::LEFT_UP);
+          return; }
+        c->save_tile_ogsize();
+        set_tile_sizepos(TILEPOS::LEFT);
+        break;
+      case(TILE::RIGHT):
+        // IF 'CURRENTLY_TILED' TO 'RIGHT'
+        if(current_tile_pos(TILEPOS::RIGHT)) {
+          set_tile_ogsize();
+          return; }
+        // IF 'CURRENTLT_TILED' TO 'LEFT', 'RIGHT_DOWN' OR 'RIGHT_UP' 
+        if(current_tile_pos(TILEPOS::LEFT)
+         ||current_tile_pos(TILEPOS::RIGHT_UP)
+         ||current_tile_pos(TILEPOS::RIGHT_DOWN)) {
+          set_tile_sizepos(TILEPOS::RIGHT);
+          return; }
+        // IF 'CURRENTLT_TILED' 'LEFT_DOWN'
+        if(current_tile_pos(TILEPOS::LEFT_DOWN)) {
+          set_tile_sizepos(TILEPOS::RIGHT_DOWN);
+          return; }
+        // IF 'CURRENTLY_TILED' 'LEFT_UP'
+        if(current_tile_pos(TILEPOS::LEFT_UP)) {
+          set_tile_sizepos(TILEPOS::RIGHT_UP);
+          return; }
+        c->save_tile_ogsize();
+        set_tile_sizepos(TILEPOS::RIGHT);
+        break;
+      case(TILE::DOWN):
+        // IF 'CURRENTLY_TILED' 'LEFT' OR 'LEFT_UP'
+        if(current_tile_pos(TILEPOS::LEFT)
+          || current_tile_pos(TILEPOS::LEFT_UP)) {
+            set_tile_sizepos(TILEPOS::LEFT_DOWN);
+            return;
+        }
+        // IF 'CURRENTLY_TILED' 'RIGHT' OR 'RIGHT_UP'
+        if(current_tile_pos(TILEPOS::RIGHT) 
+          || current_tile_pos(TILEPOS::RIGHT_UP)) {
+            set_tile_sizepos(TILEPOS::RIGHT_DOWN);
+            return;
+        }
+        // IF 'CURRENTLY_TILED' 'LEFT_DOWN' OR 'RIGHT_DOWN'
+        if(current_tile_pos(TILEPOS::LEFT_DOWN)
+          || current_tile_pos(TILEPOS::RIGHT_DOWN)) {
+            set_tile_ogsize();
+            return;
+        }
+        break;
+      case(TILE::UP):
+        // IF 'CURRENTLY_TILED' 'LEFT'
+        if(current_tile_pos(TILEPOS::LEFT)
+         ||current_tile_pos(TILEPOS::LEFT_DOWN)) {
+          set_tile_sizepos(TILEPOS::LEFT_UP);
+          return; }
+        // IF 'CURRENTLY_TILED' 'RIGHT' OR RIGHT_DOWN
+        if(current_tile_pos(TILEPOS::RIGHT)
+         ||current_tile_pos(TILEPOS::RIGHT_DOWN)) {
+          set_tile_sizepos(TILEPOS::RIGHT_UP);
+          return; }
+        break; }}
+  Private(client *) c;
+  // functions
+  Private(bool) current_tile_pos(TILEPOS mode) {
+      switch(mode) {
+        case TILEPOS::LEFT:
+            if (c->x        == 0 
+              && c->y        == 0 
+              && c->width    == screen->width_in_pixels / 2 
+              && c->height   == screen->height_in_pixels) {
+                return true;
             }
-            switch (tile) {
-                case TILE::LEFT:
-                    // IF 'CURRENTLT_TILED' TO 'LEFT'
-                    if (current_tile_pos(TILEPOS::LEFT)) { 
-                        set_tile_ogsize();
-                        return;
-                    }
-                    // IF 'CURRENTLY_TILED' TO 'RIGHT', 'LEFT_DOWN' OR 'LEFT_UP'
-                    if (current_tile_pos(TILEPOS::RIGHT)
-                     || current_tile_pos(TILEPOS::LEFT_DOWN)
-                     || current_tile_pos(TILEPOS::LEFT_UP)) {
-                        set_tile_sizepos(TILEPOS::LEFT);
-                        return;
-                    }
-                    // IF 'CURRENTLY_TILED' TO 'RIGHT_DOWN'
-                    if (current_tile_pos(TILEPOS::RIGHT_DOWN)) { 
-                        set_tile_sizepos(TILEPOS::LEFT_DOWN);
-                        return;
-                    }
-                    // IF 'CURRENTLY_TILED' TO 'RIGHT_UP'
-                    if (current_tile_pos(TILEPOS::RIGHT_UP)) {
-                        set_tile_sizepos(TILEPOS::LEFT_UP);
-                        return;
-                    }
-
-                    c->save_tile_ogsize();
-                    set_tile_sizepos(TILEPOS::LEFT);
-                    break;
-                case TILE::RIGHT:
-                    // IF 'CURRENTLY_TILED' TO 'RIGHT'
-                    if (current_tile_pos(TILEPOS::RIGHT)) {
-                        set_tile_ogsize();
-                        return;
-                    }
-                    // IF 'CURRENTLT_TILED' TO 'LEFT', 'RIGHT_DOWN' OR 'RIGHT_UP' 
-                    if (current_tile_pos(TILEPOS::LEFT)
-                     || current_tile_pos(TILEPOS::RIGHT_UP)
-                     || current_tile_pos(TILEPOS::RIGHT_DOWN)) {
-                        set_tile_sizepos(TILEPOS::RIGHT);
-                        return;
-                    }
-                    // IF 'CURRENTLT_TILED' 'LEFT_DOWN'
-                    if (current_tile_pos(TILEPOS::LEFT_DOWN)) {
-                        set_tile_sizepos(TILEPOS::RIGHT_DOWN);
-                        return;
-                    }
-                    // IF 'CURRENTLY_TILED' 'LEFT_UP'
-                    if (current_tile_pos(TILEPOS::LEFT_UP)) {
-                        set_tile_sizepos(TILEPOS::RIGHT_UP);
-                        return;
-                    }
-
-                    c->save_tile_ogsize();
-                    set_tile_sizepos(TILEPOS::RIGHT);
-                    break;
-                case TILE::DOWN:
-                    // IF 'CURRENTLY_TILED' 'LEFT' OR 'LEFT_UP'
-                    if (current_tile_pos(TILEPOS::LEFT)
-                     || current_tile_pos(TILEPOS::LEFT_UP)) {
-                        set_tile_sizepos(TILEPOS::LEFT_DOWN);
-                        return;
-                    }
-                    // IF 'CURRENTLY_TILED' 'RIGHT' OR 'RIGHT_UP'
-                    if (current_tile_pos(TILEPOS::RIGHT) 
-                     || current_tile_pos(TILEPOS::RIGHT_UP)) {
-                        set_tile_sizepos(TILEPOS::RIGHT_DOWN);
-                        return;
-                    }
-                    // IF 'CURRENTLY_TILED' 'LEFT_DOWN' OR 'RIGHT_DOWN'
-                    if (current_tile_pos(TILEPOS::LEFT_DOWN)
-                     || current_tile_pos(TILEPOS::RIGHT_DOWN)) {
-                        set_tile_ogsize();
-                        return;
-                    }
-                    break;
-                case TILE::UP:
-                    // IF 'CURRENTLY_TILED' 'LEFT'
-                    if (current_tile_pos(TILEPOS::LEFT)
-                     || current_tile_pos(TILEPOS::LEFT_DOWN)) {
-                        set_tile_sizepos(TILEPOS::LEFT_UP);
-                        return;
-                    }
-                    // IF 'CURRENTLY_TILED' 'RIGHT' OR RIGHT_DOWN
-                    if (current_tile_pos(TILEPOS::RIGHT)
-                     || current_tile_pos(TILEPOS::RIGHT_DOWN)) {
-                        set_tile_sizepos(TILEPOS::RIGHT_UP);
-                        return;
-                    }
-                    break;
+            break;
+        case TILEPOS::RIGHT:
+            if (c->x        == screen->width_in_pixels / 2 
+              && c->y        == 0 
+              && c->width    == screen->width_in_pixels / 2
+              && c->height   == screen->height_in_pixels) {
+                return true;
             }
-        }
-    ;
-    private: // variabels
-        client * c;
-    ;
-    private: // functions
-        bool current_tile_pos(TILEPOS mode) {
-            switch (mode) {
-                case TILEPOS::LEFT:
-                    if (c->x        == 0 
-                     && c->y        == 0 
-                     && c->width    == screen->width_in_pixels / 2 
-                     && c->height   == screen->height_in_pixels) {
-                        return true;
-                    }
-                    break;
-                case TILEPOS::RIGHT:
-                    if (c->x        == screen->width_in_pixels / 2 
-                     && c->y        == 0 
-                     && c->width    == screen->width_in_pixels / 2
-                     && c->height   == screen->height_in_pixels) {
-                        return true;
-                    }
-                    break;
-                case TILEPOS::LEFT_DOWN:
-                    if (c->x        == 0
-                     && c->y        == screen->height_in_pixels / 2
-                     && c->width    == screen->width_in_pixels / 2
-                     && c->height   == screen->height_in_pixels / 2) {
-                        return true;
-                    }
-                    break;
-                case TILEPOS::RIGHT_DOWN:
-                    if (c->x        == screen->width_in_pixels / 2
-                     && c->y        == screen->height_in_pixels / 2
-                     && c->width    == screen->width_in_pixels / 2
-                     && c->height   == screen->height_in_pixels / 2) {
-                        return true;
-                    }
-                    break;
-                case TILEPOS::LEFT_UP:
-                    if (c->x        == 0
-                     && c->y        == 0
-                     && c->width    == screen->width_in_pixels / 2
-                     && c->height   == screen->height_in_pixels / 2) {
-                        return true;
-                    }
-                    break;
-                case TILEPOS::RIGHT_UP:
-                    if (c->x        == screen->width_in_pixels / 2
-                     && c->y        == 0
-                     && c->width    == screen->width_in_pixels / 2
-                     && c->height   == screen->height_in_pixels / 2) {
-                        return true;
-                    }
-                    break;
+            break;
+        case TILEPOS::LEFT_DOWN:
+            if (c->x        == 0
+              && c->y        == screen->height_in_pixels / 2
+              && c->width    == screen->width_in_pixels / 2
+              && c->height   == screen->height_in_pixels / 2) {
+                return true;
             }
-            return false;
-        }
-        void set_tile_sizepos(TILEPOS sizepos) {
-            switch (sizepos) {
-                case TILEPOS::LEFT:
-                    animate(
-                        0,
-                        0,
-                        screen->width_in_pixels / 2,
-                        screen->height_in_pixels
-                    );
-                    return;
-                case TILEPOS::RIGHT:
-                    animate(
-                        screen->width_in_pixels / 2,
-                        0,
-                        screen->width_in_pixels / 2,
-                        screen->height_in_pixels
-                    );
-                    return;
-                case TILEPOS::LEFT_DOWN:
-                    animate(
-                        0,
-                        screen->height_in_pixels / 2,
-                        screen->width_in_pixels / 2,
-                        screen->height_in_pixels / 2
-                    );
-                    return;
-                case TILEPOS::RIGHT_DOWN:
-                    animate(
-                        screen->width_in_pixels / 2,
-                        screen->height_in_pixels / 2,
-                        screen->width_in_pixels / 2,
-                        screen->height_in_pixels / 2
-                    );
-                    return;
-                case TILEPOS::LEFT_UP:
-                    animate(
-                        0,
-                        0,
-                        screen->width_in_pixels / 2,
-                        screen->height_in_pixels / 2
-                    );
-                    return;
-                case TILEPOS::RIGHT_UP:
-                    animate(
-                        screen->width_in_pixels / 2,
-                        0,
-                        screen->width_in_pixels / 2,
-                        screen->height_in_pixels / 2
-                    );
-                    return;
+            break;
+        case TILEPOS::RIGHT_DOWN:
+            if (c->x        == screen->width_in_pixels / 2
+              && c->y        == screen->height_in_pixels / 2
+              && c->width    == screen->width_in_pixels / 2
+              && c->height   == screen->height_in_pixels / 2) {
+                return true;
             }
-        }
-        void set_tile_ogsize() {
-            animate(
-                c->tile_ogsize.x,
-                c->tile_ogsize.y,
-                c->tile_ogsize.width,
-                c->tile_ogsize.height
-            );
-        }
-        void animate(const int & end_x, const int & end_y, const int & end_width, const int & end_height) {
-            Mwm_Animator anim(c);
-            anim.animate_client(
-                c->x,
-                c->y, 
-                c->width, 
-                c->height, 
-                end_x,
-                end_y, 
-                end_width, 
-                end_height, 
-                TILE_ANIMATION_DURATION
-            );
-            c->update();
-        }
-    ;
-};
+            break;
+        case TILEPOS::LEFT_UP:
+            if (c->x        == 0
+              && c->y        == 0
+              && c->width    == screen->width_in_pixels / 2
+              && c->height   == screen->height_in_pixels / 2) {
+                return true;
+            }
+            break;
+        case TILEPOS::RIGHT_UP:
+          if(c->x        == screen->width_in_pixels / 2
+           &&c->y        == 0
+           &&c->width    == screen->width_in_pixels / 2
+           &&c->height   == screen->height_in_pixels / 2)
+            return true;
+          break;
+      } return false; }
+  Private(void) set_tile_sizepos(TILEPOS sizepos) {
+        switch (sizepos) {
+            case TILEPOS::LEFT:
+              animate(
+                  0,
+                  0,
+                  screen->width_in_pixels / 2,
+                  screen->height_in_pixels
+              );
+              return;
+            case TILEPOS::RIGHT:
+              animate(
+                screen->width_in_pixels / 2,
+                0,
+                screen->width_in_pixels / 2,
+                screen->height_in_pixels); return;
+            case TILEPOS::LEFT_DOWN:
+              animate(
+                0,
+                screen->height_in_pixels / 2,
+                screen->width_in_pixels / 2,
+                screen->height_in_pixels / 2); return;
+            case TILEPOS::RIGHT_DOWN:
+              animate(
+                screen->width_in_pixels / 2,
+                screen->height_in_pixels / 2,
+                screen->width_in_pixels / 2,
+                screen->height_in_pixels / 2); return;
+            case TILEPOS::LEFT_UP:
+              animate(
+                0,
+                0,
+                screen->width_in_pixels / 2,
+                screen->height_in_pixels / 2); return;
+            case TILEPOS::RIGHT_UP:
+              animate(
+                screen->width_in_pixels / 2,
+                0,
+                screen->width_in_pixels / 2,
+                screen->height_in_pixels / 2); return; }}
+  Private(void) set_tile_ogsize() {
+      animate(
+        c->tile_ogsize.x,
+        c->tile_ogsize.y,
+        c->tile_ogsize.width,
+        c->tile_ogsize.height);}
+  Private(void) animate(const int & end_x, const int & end_y, const int & end_width, const int & end_height) {
+      Mwm_Animator anim(c);
+      anim.animate_client(
+          c->x,
+          c->y, 
+          c->width, 
+          c->height, 
+          end_x,
+          end_y, 
+          end_width, 
+          end_height, 
+          TILE_ANIMATION_DURATION
+      );
+      c->update(); }};
 class Events {
-    public: // constructor and destructor
-        Events() {}
-    ;
-    public: // methods
-        void setup() {
-            event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev){ key_press_handler(ev); });
-            event_handler->setEventCallback(XCB_MAP_NOTIFY, [&](Ev ev){ map_notify_handler(ev); });
-            event_handler->setEventCallback(XCB_MAP_REQUEST, [&](Ev ev){ map_req_handler(ev); });
-            event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev){ button_press_handler(ev); });
-            event_handler->setEventCallback(XCB_CONFIGURE_REQUEST, [&](Ev ev){ configure_request_handler(ev); });
-            event_handler->setEventCallback(XCB_FOCUS_IN, [&](Ev ev){ focus_in_handler(ev); });
-            event_handler->setEventCallback(XCB_FOCUS_OUT, [&](Ev ev){ focus_out_handler(ev); });
-            event_handler->setEventCallback(XCB_DESTROY_NOTIFY, [&](Ev ev){ destroy_notify_handler(ev); });
-            event_handler->setEventCallback(XCB_UNMAP_NOTIFY, [&](Ev ev){ unmap_notify_handler(ev); });
-            event_handler->setEventCallback(XCB_REPARENT_NOTIFY, [&](Ev ev){ reparent_notify_handler(ev); });
-            event_handler->setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev){ enter_notify_handler(ev); });
-            event_handler->setEventCallback(XCB_LEAVE_NOTIFY, [&](Ev ev){ leave_notify_handler(ev); });
-            event_handler->setEventCallback(XCB_MOTION_NOTIFY, [&](Ev ev){ motion_notify_handler(ev); });
-        }
-    ;
-    private: // event handling functions
-        void key_press_handler(const xcb_generic_event_t * & ev) {
-            const auto * e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
-                
-            if (e->detail == wm->key_codes.t) {
-                switch (e->state) {
-                    case CTRL + ALT:
-                        wm->launcher.program((char *) "konsole");
-                        break;
-                }
-            }
-            if (e->detail == wm->key_codes.q) {
-                switch (e->state) {
-                    case SHIFT + ALT:
-                        wm->quit(0);
-                        break;
-                }
-            }
-            if (e->detail == wm->key_codes.f11) {
-                client * c = wm->client_from_window(& e->event);
-                max_win(c, max_win::EWMH_MAXWIN);
-            }
-            if (e->detail == wm->key_codes.n_1) {
-                switch (e->state) {
-                    case ALT:
-                        change_desktop::teleport_to(1);
-                        break;
-                }
-            }
-            if (e->detail == wm->key_codes.n_2) {
-                switch (e->state) {
-                    case ALT:
-                        change_desktop::teleport_to(2);
-                        break;
-                }
-            }
-            if (e->detail == wm->key_codes.n_3) {
-                switch (e->state) {
-                    case ALT:
-                        change_desktop::teleport_to(3);
-                        break;
-                }
-            }
-            if (e->detail == wm->key_codes.n_4) {
-                switch (e->state) {
-                    case ALT:
-                        change_desktop::teleport_to(4);
-                        break;
-                }
-            }
-            if (e->detail == wm->key_codes.n_5) {
-                switch (e->state) {
-                    case ALT:
-                        change_desktop::teleport_to(5);
-                        break;
-                }
-            }
-            if (e->detail == wm->key_codes.r_arrow) {
-                switch (e->state) {
-                    case SHIFT + CTRL + SUPER: {
-                        move_to_next_desktop_w_app();
-                        break;
-                    }
-                    case CTRL + SUPER: {
-				        change_desktop change_desktop(conn);
-                        change_desktop.change_to(change_desktop::NEXT);
-                        break;
-                    }
-                    case SUPER: {
-                        client * c = wm->client_from_window(& e->event);
-                        tile(c, TILE::RIGHT);
-                        break;
-                    }
-                    return;
-                }
-            }
-            if (e->detail == wm->key_codes.l_arrow) {
-                switch (e->state) {
-                    case SHIFT + CTRL + SUPER: {
-                        move_to_previus_desktop_w_app();
-                        break;
-                    }
-                    case CTRL + SUPER: {
-				        change_desktop change_desktop(conn);
-                        change_desktop.change_to(change_desktop::PREV);
-                        break;
-                    }
-                    case SUPER: {
-                        client * c = wm->client_from_window(& e->event);
-                        tile(c, TILE::LEFT);
-                        break;
-                    }
-                }
-            }
-            if (e->detail == wm->key_codes.d_arrow) {
-                switch (e->state) {
-                    case SUPER:
-                        client * c = wm->client_from_window(& e->event);
-                        tile(c, TILE::DOWN);
-                        return;
-                        break;
-                }
-            }
-            if (e->detail == wm->key_codes.u_arrow) {
-                switch (e->state) {
-                    case SUPER:
-                        client * c = wm->client_from_window(& e->event);
-                        tile(c, TILE::UP);
-                        break;
-                }
-            }
-            if (e->detail == wm->key_codes.tab) {
-                switch (e->state) {
-                    case ALT:
-                        wm->cycle_focus();
-                        break;
-                }
-            }
-            if (e->detail == wm->key_codes.k) {
-                switch (e->state) {
-                    case SUPER:
-                        client * c = wm->client_from_window(& e->event);
-                        if (!c) {
-                            return;
-                        }
-
-                        if (c->win.is_mask_active(XCB_EVENT_MASK_ENTER_WINDOW)) {
-                            log_info("event_mask is active");
-                        } else {
-                            log_info("event_mask is NOT active");
-                        }
-                        break;
-                }
-            }
-        }
-        void map_notify_handler(const xcb_generic_event_t * & ev) {
-            const auto * e = reinterpret_cast<const xcb_map_notify_event_t *>(ev);
-            client * c = wm->client_from_window(& e->window);
-            if (c) {
-                c->update();
-            }
-        }
-        void map_req_handler(const xcb_generic_event_t * & ev) {
-            const auto * e = reinterpret_cast<const xcb_map_request_event_t *>(ev);
-            client * c = wm->client_from_window(& e->window);
-            if (c) {
-                return;
-            }
-            wm->manage_new_client(e->window);
-        }
-        void button_press_handler(const xcb_generic_event_t * & ev) {
-            const auto * e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
-            client * c;
-            if (BORDER_SIZE == 0) {
-                c = wm->client_from_pointer(10);
-                if (c) {
-                    if (e->detail == L_MOUSE_BUTTON) {
-                        c->raise();
-                        resize_client::no_border border(c, 0, 0);
-                        wm->focus_client(c);
-                    }
-                    return;
-                }
-            }
-            if (e->event == wm->root) {
-                if (e->detail == R_MOUSE_BUTTON) {
-                    wm->context_menu->show();
-                    return;
-                }
-            }
-            c = wm->client_from_any_window(& e->event);
-            if (!c) {
-                return;
-            }
-            if (e->detail == L_MOUSE_BUTTON) {
-                if (e->event == c->win) {
-                    switch (e->state) {
-                        case ALT:
-                            c->raise();
-                            mv_client mv(c, e->event_x, e->event_y + 20);
-                            wm->focus_client(c);
-                            break;
-                    }
-                    c->raise();
-                    wm->focus_client(c);
-                    return;
-                }
-                if (e->event == c->titlebar) {
-                    c->raise();
-                    mv_client mv(c, e->event_x, e->event_y);
-                    wm->focus_client(c);
-                    return;
-                }
-                if (e->event == c->close_button) {
-                    wm->send_sigterm_to_client(c);
-                    return;
-                }
-                if (e->event == c->max_button) {
-                    client * c = wm->client_from_any_window(& e->event);
-                    max_win(c, max_win::BUTTON_MAXWIN);
-                    return;
-                }
-                if (e->event == c->border.left) {
-                    resize_client::border border(c, edge::LEFT);
-                    return;
-                }
-                if (e->event == c->border.right) {
-                    resize_client::border border(c, edge::RIGHT);
-                    return;
-                }
-                if (e->event == c->border.top) {
-                    resize_client::border border(c, edge::TOP);
-                    return;
-                }
-                if (e->event == c->border.bottom) {
-                    resize_client::border(c, edge::BOTTOM_edge);
-                }
-                if (e->event == c->border.top_left) {
-                    resize_client::border border(c, edge::TOP_LEFT);
-                    return;
-                }
-                if (e->event == c->border.top_right) {
-                    resize_client::border border(c, edge::TOP_RIGHT);
-                    return;
-                }
-                if (e->event == c->border.bottom_left) {
-                    resize_client::border border(c, edge::BOTTOM_LEFT);
-                    return;
-                }
-                if (e->event == c->border.bottom_right) {
-                    resize_client::border border(c, edge::BOTTOM_RIGHT);
-                    return;
-                }
-            }
-            if (e->detail == R_MOUSE_BUTTON) {
-                switch (e->state) {
-                    case ALT:
-                        log_error("ALT + R_MOUSE_BUTTON");
-                        c->raise();
-                        resize_client resize(c, 0);
-                        wm->focus_client(c);
-                        return;
-                }
-            }
-        }
-        void configure_request_handler(const xcb_generic_event_t * & ev) {
-            const auto * e = reinterpret_cast<const xcb_configure_request_event_t *>(ev);
-            wm->data.width     = e->width;
-            wm->data.height    = e->height;
-            wm->data.x         = e->x;
-            wm->data.y         = e->y;
-        }
-        void focus_in_handler(const xcb_generic_event_t * & ev) {
-            const auto * e = reinterpret_cast<const xcb_focus_in_event_t *>(ev);
-            client * c = wm->client_from_window( & e->event);
-            if (c) {
-                c->win.ungrab_button({ { L_MOUSE_BUTTON, NULL } });
+  Public(Events)() {}
+  // methods
+    Public(void) setup() {
+      event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev){ key_press_handler(ev); });
+      event_handler->setEventCallback(XCB_MAP_NOTIFY, [&](Ev ev){ map_notify_handler(ev); });
+      event_handler->setEventCallback(XCB_MAP_REQUEST, [&](Ev ev){ map_req_handler(ev); });
+      event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev){ button_press_handler(ev); });
+      event_handler->setEventCallback(XCB_CONFIGURE_REQUEST, [&](Ev ev){ configure_request_handler(ev); });
+      event_handler->setEventCallback(XCB_FOCUS_IN, [&](Ev ev){ focus_in_handler(ev); });
+      event_handler->setEventCallback(XCB_FOCUS_OUT, [&](Ev ev){ focus_out_handler(ev); });
+      event_handler->setEventCallback(XCB_DESTROY_NOTIFY, [&](Ev ev){ destroy_notify_handler(ev); });
+      event_handler->setEventCallback(XCB_UNMAP_NOTIFY, [&](Ev ev){ unmap_notify_handler(ev); });
+      event_handler->setEventCallback(XCB_REPARENT_NOTIFY, [&](Ev ev){ reparent_notify_handler(ev); });
+      event_handler->setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev){ enter_notify_handler(ev); });
+      event_handler->setEventCallback(XCB_LEAVE_NOTIFY, [&](Ev ev){ leave_notify_handler(ev); });
+      event_handler->setEventCallback(XCB_MOTION_NOTIFY, [&](Ev ev){ motion_notify_handler(ev); }); }
+  // Event handling functions
+    Private(void) key_press_handler(const xcb_generic_event_t * & ev) {
+      const auto * e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
+          
+      if (e->detail == wm->key_codes.t) {
+          switch (e->state) {
+              case CTRL + ALT:
+                  wm->launcher.program((char *) "konsole");
+                  break;
+          }
+      }
+      if (e->detail == wm->key_codes.q) {
+          switch (e->state) {
+              case SHIFT + ALT:
+                  wm->quit(0);
+                  break;
+          }
+      }
+      if (e->detail == wm->key_codes.f11) {
+          client * c = wm->client_from_window(& e->event);
+          max_win(c, max_win::EWMH_MAXWIN);
+      }
+      if (e->detail == wm->key_codes.n_1) {
+          switch (e->state) {
+              case ALT:
+                  change_desktop::teleport_to(1);
+                  break;
+          }
+      }
+      if (e->detail == wm->key_codes.n_2) {
+          switch (e->state) {
+              case ALT:
+                  change_desktop::teleport_to(2);
+                  break;
+          }
+      }
+      if (e->detail == wm->key_codes.n_3) {
+          switch (e->state) {
+              case ALT:
+                  change_desktop::teleport_to(3);
+                  break;
+          }
+      }
+      if (e->detail == wm->key_codes.n_4) {
+          switch (e->state) {
+              case ALT:
+                  change_desktop::teleport_to(4);
+                  break;
+          }
+      }
+      if (e->detail == wm->key_codes.n_5) {
+          switch (e->state) {
+              case ALT:
+                  change_desktop::teleport_to(5);
+                  break;
+          }
+      }
+      if (e->detail == wm->key_codes.r_arrow) {
+          switch (e->state) {
+              case SHIFT + CTRL + SUPER: {
+                  move_to_next_desktop_w_app();
+                  break;
+              }
+              case CTRL + SUPER: {
+          change_desktop change_desktop(conn);
+                  change_desktop.change_to(change_desktop::NEXT);
+                  break;
+              }
+              case SUPER: {
+                  client * c = wm->client_from_window(& e->event);
+                  tile(c, TILE::RIGHT);
+                  break;
+              }
+              return;
+          }
+      }
+      if (e->detail == wm->key_codes.l_arrow) {
+          switch (e->state) {
+              case SHIFT + CTRL + SUPER: {
+                  move_to_previus_desktop_w_app();
+                  break;
+              }
+              case CTRL + SUPER: {
+          change_desktop change_desktop(conn);
+                  change_desktop.change_to(change_desktop::PREV);
+                  break;
+              }
+              case SUPER: {
+                  client * c = wm->client_from_window(& e->event);
+                  tile(c, TILE::LEFT);
+                  break;
+              }
+          }
+      }
+      if (e->detail == wm->key_codes.d_arrow) {
+          switch (e->state) {
+              case SUPER:
+                  client * c = wm->client_from_window(& e->event);
+                  tile(c, TILE::DOWN);
+                  return;
+                  break;
+          }
+      }
+      if (e->detail == wm->key_codes.u_arrow) {
+          switch (e->state) {
+              case SUPER:
+                  client * c = wm->client_from_window(& e->event);
+                  tile(c, TILE::UP);
+                  break;
+          }
+      }
+      if (e->detail == wm->key_codes.tab) {
+          switch (e->state) {
+              case ALT:
+                  wm->cycle_focus();
+                  break;
+          }
+      }
+      if (e->detail == wm->key_codes.k) {
+        switch (e->state) {
+          case SUPER:
+            client * c = wm->client_from_window(& e->event);
+            if(!c) return;
+            if(c->win.is_mask_active(XCB_EVENT_MASK_ENTER_WINDOW)) { log_info("event_mask is active"); } 
+            else { log_info("event_mask is NOT active"); }
+            break; }}}
+    Private(void) map_notify_handler(const xcb_generic_event_t * & ev) {
+      const auto * e = reinterpret_cast<const xcb_map_notify_event_t *>(ev);
+      client * c = wm->client_from_window(& e->window);
+      if(c) c->update(); }
+    Private(void) map_req_handler(const xcb_generic_event_t * & ev) {
+      const auto * e = reinterpret_cast<const xcb_map_request_event_t *>(ev);
+      client * c = wm->client_from_window(& e->window); 
+      if(c) return; wm->manage_new_client(e->window); }
+    Private(void) button_press_handler(const xcb_generic_event_t * & ev) {
+      const auto * e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
+      client * c;
+      if(BORDER_SIZE == 0) {
+        c = wm->client_from_pointer(10);
+        if(c) {
+          if(e->detail == L_MOUSE_BUTTON) {
+            c->raise();
+            resize_client::no_border border(c, 0, 0);
+            wm->focus_client(c); }
+        return; }}
+      if(e->event == wm->root)
+        if(e->detail == R_MOUSE_BUTTON) {
+          wm->context_menu->show(); return; }
+      c = wm->client_from_any_window(& e->event);
+      if(!c) return;
+      if(e->detail == L_MOUSE_BUTTON) {
+        if(e->event == c->win) {
+          switch (e->state) {
+              case ALT:
+                  c->raise();
+                  mv_client mv(c, e->event_x, e->event_y + 20);
+                  wm->focus_client(c);
+                  break; }
+          c->raise();
+          wm->focus_client(c);
+          return; }
+        if(e->event == c->titlebar) {
+          c->raise();
+          mv_client mv(c, e->event_x, e->event_y);
+          wm->focus_client(c);
+          return; }
+        if(e->event == c->close_button) {
+          wm->send_sigterm_to_client(c);
+          return; }
+        if(e->event == c->max_button) {
+          client * c = wm->client_from_any_window(& e->event);
+          max_win(c, max_win::BUTTON_MAXWIN);
+          return; }
+        if(e->event == c->border.left) {
+          resize_client::border border(c, edge::LEFT);
+          return; }
+        if(e->event == c->border.right) {
+          resize_client::border border(c, edge::RIGHT);
+          return; } 
+        if(e->event == c->border.top) {
+          resize_client::border border(c, edge::TOP);
+          return; }
+        if(e->event == c->border.bottom) {
+          resize_client::border(c, edge::BOTTOM_edge); }
+        if(e->event == c->border.top_left) {
+          resize_client::border border(c, edge::TOP_LEFT);
+          return; }
+        if(e->event == c->border.top_right) {
+          resize_client::border border(c, edge::TOP_RIGHT);
+          return; }
+        if(e->event == c->border.bottom_left) {
+            resize_client::border border(c, edge::BOTTOM_LEFT);
+            return; }
+        if(e->event == c->border.bottom_right) {
+          resize_client::border border(c, edge::BOTTOM_RIGHT);
+          return; }}
+      if(e->detail == R_MOUSE_BUTTON) {
+        switch (e->state) {
+            case ALT:
+                log_error("ALT + R_MOUSE_BUTTON");
                 c->raise();
-                c->win.set_active_EWMH_window();
-                wm->focused_client = c;
-            }
-        }
-        void focus_out_handler(const xcb_generic_event_t * & ev) {
-            const auto * e = reinterpret_cast<const xcb_focus_out_event_t *>(ev);
-            client * c = wm->client_from_window(& e->event);
-            if (c) {
-                c->win.grab_button({ { L_MOUSE_BUTTON, NULL } });
-            }
-        }
-        void destroy_notify_handler(const xcb_generic_event_t * & ev) {
-            const auto * e = reinterpret_cast<const xcb_destroy_notify_event_t *>(ev);
-            client * c = wm->client_from_window(& e->event);
-            if (!c) {
-                return;
-            }
-            wm->send_sigterm_to_client(c);
-        }
-        void unmap_notify_handler(const xcb_generic_event_t * & ev) {
-            const auto * e = reinterpret_cast<const xcb_unmap_notify_event_t *>(ev);
-            
-            client * c = wm->client_from_window(& e->window);
-            if (!c)
-            {
-                return;
-            }
-
-            // if (c->isKilleble)
-            // {
-            //     xcb_unmap_window(conn, c->titlebar);
-            //     xcb_unmap_window(conn, c->frame);
-            //     delete c;
-            //     XCB_flush();
-            // }
-        }
-        void reparent_notify_handler(const xcb_generic_event_t * & ev) {
-            const auto * e = reinterpret_cast<const xcb_reparent_notify_event_t *>(ev);
-        }
-        void enter_notify_handler(const xcb_generic_event_t * & ev) {
-            const auto * e = reinterpret_cast<const xcb_enter_notify_event_t *>(ev);
-        }
-        void leave_notify_handler(const xcb_generic_event_t * & ev) {
-            const auto * e = reinterpret_cast<const xcb_leave_notify_event_t *>(ev);
-        }
-        void motion_notify_handler(const xcb_generic_event_t * & ev) {
-            const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
-            // log_win("e->event: ", e->event);
-            // log_info(e->event_x);
-        }
-    ;
-};
+                resize_client resize(c, 0);
+                wm->focus_client(c);
+                return; }}}
+    Private(void) configure_request_handler(const xcb_generic_event_t * & ev) {
+      const auto * e = reinterpret_cast<const xcb_configure_request_event_t *>(ev);
+      wm->data.width     = e->width;
+      wm->data.height    = e->height;
+      wm->data.x         = e->x;
+      wm->data.y         = e->y; }
+    Private(void) focus_in_handler(const xcb_generic_event_t * & ev) {
+      const auto * e = reinterpret_cast<const xcb_focus_in_event_t *>(ev);
+      client * c = wm->client_from_window( & e->event);
+      if(c) {
+        c->win.ungrab_button({ { L_MOUSE_BUTTON, NULL } });
+        c->raise();
+        c->win.set_active_EWMH_window();
+        wm->focused_client = c; }}
+    Private(void) focus_out_handler(const xcb_generic_event_t * & ev) {
+      const auto * e = reinterpret_cast<const xcb_focus_out_event_t *>(ev);
+      client * c = wm->client_from_window(& e->event);
+      if(c) c->win.grab_button({ { L_MOUSE_BUTTON, NULL } }); }
+    Private(void) destroy_notify_handler(const xcb_generic_event_t * & ev) {
+      const auto * e = reinterpret_cast<const xcb_destroy_notify_event_t *>(ev);
+      client * c = wm->client_from_window(& e->event);
+      if(!c) return;
+      wm->send_sigterm_to_client(c); }
+    Private(void) unmap_notify_handler(const xcb_generic_event_t * & ev) {
+      const auto * e = reinterpret_cast<const xcb_unmap_notify_event_t *>(ev);
+      client * c = wm->client_from_window(& e->window);
+      if(!c) return; }
+    Private(void) reparent_notify_handler(const xcb_generic_event_t * & ev) {
+      const auto * e = reinterpret_cast<const xcb_reparent_notify_event_t *>(ev); }
+    Private(void) enter_notify_handler(const xcb_generic_event_t * & ev) {
+      const auto * e = reinterpret_cast<const xcb_enter_notify_event_t *>(ev); }
+    Private(void) leave_notify_handler(const xcb_generic_event_t * & ev) {
+      const auto * e = reinterpret_cast<const xcb_leave_notify_event_t *>(ev); }
+    Private(void) motion_notify_handler(const xcb_generic_event_t * & ev) {
+      const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev); }};
 class test {
-    public: // constructor
-        test() {}
-    ;
-    public: // vatiabels]
-        int running = 1;
-    ;
-    public: // methods
-        void setup_events() {
-            event_handler->setEventCallback(XCB_KEY_PRESS, [this](Ev ev) {
-                const auto * e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
-                if (e->detail == wm->key_codes.k) {
-                    if (e->state == SUPER) {
-                        running = 1;
-                        run_full();
-                    }
-                }
-                if (e->detail == wm->key_codes.q) {
-                    if (e->state == ALT) {
-                        running = 0;
-                    }
-                }
-            });
-        }
-        void run_full() {
-            cd_test();
-            mv_test();
-        }
-    ;
-    private: // functions
-        void cd_test() {
-            
-            // first test
-            int i = 0;
-            int end = 100;
-            change_desktop cd(conn);
-            const int og_duration = cd.duration;
+  Public(test) () {}
+  Public(int) running = 1;
+  Public(void) setup_events() {event_handler->setEventCallback(XCB_KEY_PRESS, [this](Ev ev) {
+      const auto * e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
+      if(e->detail == wm->key_codes.k) 
+        if(e->state == SUPER) {
+          running = 1; run_full(); }
+      if(e->detail == wm->key_codes.q)
+        if (e->state == ALT)
+          running = 0; });}
+  Public(void) run_full() {
+    cd_test();
+    mv_test(); }
+  Private(void) cd_test() {
+    // first test
+    int i = 0;
+    int end = 100;
+    change_desktop cd(conn);
+    const int og_duration = cd.duration;
 
-            while(i < (end + 1)) {
-                cd.change_to(change_desktop::NEXT);
-                cd.change_to(change_desktop::PREV);
-                cd.duration = (cd.duration - 1);
-                ++i;
-                if (running == 0) { 
-                    break;
-                }
-            }
-        }
-        void mv_test() {
-            window win_1;
-            win_1.create_default(wm->root, 0, 0, 300, 300);
-            win_1.raise();
-            win_1.set_backround_color(RED);
-            win_1.map();
-            Mwm_Animator win_1_animator(win_1);
-            
-            for (int i = 0; i < 400; ++i) {
-                win_1_animator.animate(0, 0, 300, 300, (screen->width_in_pixels - 300), 0, 300, 300, (400 - i));
-                win_1_animator.animate((screen->width_in_pixels - 300), 0, 300, 300, (screen->width_in_pixels - 300), (screen->height_in_pixels - 300), 300, 300, (400 - i));
-                win_1_animator.animate((screen->width_in_pixels - 300), (screen->height_in_pixels - 300), 300, 300, 0, (screen->height_in_pixels - 300), 300, 300, (400 - i));
-                win_1_animator.animate(0, (screen->height_in_pixels - 300), 300, 300, 0, 0, 300, 300, (400 - i));
-                if (running == 0) { 
-                    break;
-                }
-            }
-            
-            win_1.unmap();
-            win_1.kill();
-        }
-    ;
-};
+    while(i < (end + 1)) {
+      cd.change_to(change_desktop::NEXT);
+      cd.change_to(change_desktop::PREV);
+      cd.duration = (cd.duration - 1);
+      ++i;
+      if(running == 0) 
+        break; }}
+  Private(void) mv_test() {
+      window win_1;
+      win_1.create_default(wm->root, 0, 0, 300, 300);
+      win_1.raise();
+      win_1.set_backround_color(RED);
+      win_1.map();
+      Mwm_Animator win_1_animator(win_1);
+      
+      for(int i = 0; i < 400; ++i) {
+        win_1_animator.animate(0, 0, 300, 300, (screen->width_in_pixels - 300), 0, 300, 300, (400 - i));
+        win_1_animator.animate((screen->width_in_pixels - 300), 0, 300, 300, (screen->width_in_pixels - 300), (screen->height_in_pixels - 300), 300, 300, (400 - i));
+        win_1_animator.animate((screen->width_in_pixels - 300), (screen->height_in_pixels - 300), 300, 300, 0, (screen->height_in_pixels - 300), 300, 300, (400 - i));
+        win_1_animator.animate(0, (screen->height_in_pixels - 300), 300, 300, 0, 0, 300, 300, (400 - i));
+        if(running == 0)
+          break; 
+      }
+      
+      win_1.unmap();
+      win_1.kill(); }};
 void setup_wm() {
-    wm = new Window_Manager;
-    wm->init();
-    
-    change_desktop::teleport_to(1);
-    dock = new Dock;
-    dock->add_app("konsole");
-    dock->add_app("alacritty");
-    dock->add_app("google-chrome-stable");
-    dock->add_app("code");
-    dock->add_app("falkon");
-    dock->init();
+  wm = new Window_Manager;
+  wm->init();
+  
+  change_desktop::teleport_to(1);
+  dock = new Dock;
+  dock->add_app("konsole");
+  dock->add_app("alacritty");
+  dock->add_app("google-chrome-stable");
+  dock->add_app("code");
+  dock->add_app("falkon");
+  dock->init();
 
-    mwm_runner = new Mwm_Runner;
-    mwm_runner->init();
+  mwm_runner = new Mwm_Runner;
+  mwm_runner->init();
 
-    Events events;
-    events.setup();
+  Events events;
+  events.setup();
 
-    file_app = new File_App;
-    file_app->init();
-}
+  file_app = new File_App;
+  file_app->init(); }
 int main() {
-    LOG_start()
-    setup_wm();
+  LOG_start()
+  setup_wm();
 
-    test tester;
-    tester.setup_events();
-    
-    event_handler->run();
-    xcb_disconnect(conn);
-    return 0;
+  test tester;
+  tester.setup_events();
+  
+  event_handler->run();
+  xcb_disconnect(conn);
+  return 0;
 }
