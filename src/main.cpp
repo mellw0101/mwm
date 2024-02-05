@@ -368,46 +368,51 @@ class fast_vector {
   Private(vector<const char*> data); };
 class string_tokenizer {
   public: // constructors and destructor
-    string_tokenizer() {}
-    
-    string_tokenizer(const char* input, const char* delimiter) {
-        // Copy the input string
-        str = new char[strlen(input) + 1];
-        strcpy(str, input);
+  string_tokenizer() {}
+  
+  string_tokenizer(const char* input, const char* delimiter)
+  {
+      // Copy the input string
+      str = new char[strlen(input) + 1];
+      strcpy(str, input);
 
-        // Tokenize the string using strtok() and push tokens to the vector
-        char* token = strtok(str, delimiter);
-        while (token != nullptr) {
-            tokens.push_back(token);
-            token = strtok(nullptr, delimiter);
-        }
-    }
-    ~string_tokenizer() {
-        delete[] str;
-    }
+      // Tokenize the string using strtok() and push tokens to the vector
+      char* token = strtok(str, delimiter);
+      while (token != nullptr) {
+          tokens.push_back(token);
+          token = strtok(nullptr, delimiter);
+      }
+  }
+  ~string_tokenizer()
+  {
+      delete[] str;
+  }
   public: // methods
-    const fast_vector & tokenize(const char* input, const char* delimiter) {
-        tokens.clear();
+  const fast_vector & tokenize(const char* input, const char* delimiter)
+  {
+      tokens.clear();
 
-        str = new char[strlen(input) + 1];
-        strcpy(str, input); // Copy the input string
+      str = new char[strlen(input) + 1];
+      strcpy(str, input); // Copy the input string
 
-        char* token = strtok(str, delimiter); // Tokenize the string using strtok() and push tokens to the vector
-        while (token != nullptr) {
-            tokens.append(token);
-            token = strtok(nullptr, delimiter);
-        }
-        return tokens;
-    }
-    const fast_vector & get_tokens() const {
-        return tokens;
-    }
-    void clear() {
-        tokens.clear();
-    }
+      char* token = strtok(str, delimiter); // Tokenize the string using strtok() and push tokens to the vector
+      while (token != nullptr) {
+          tokens.append(token);
+          token = strtok(nullptr, delimiter);
+      }
+      return tokens;
+  }
+  const fast_vector & get_tokens() const
+  {
+      return tokens;
+  }
+  void clear()
+  {
+      tokens.clear();
+  }
   private: // variables
-      char* str;
-      fast_vector tokens;
+    char* str;
+    fast_vector tokens;
 };
 class str {
     public: // Constructor
@@ -4207,7 +4212,7 @@ class search_window {
   Public(string) string() {
       return(search_string); }
  // (Private) Functions
-  void setup_events() {
+  Private(void) setup_events() {
     event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev) { const auto * e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
       if(e->event == main_window) {
         if(e->detail == wm->key_codes.a) {
@@ -4260,122 +4265,88 @@ class search_window {
             search_string += "J";
           else 
             search_string += "j"; }
-        if (e->detail == wm->key_codes.k) {
-            if (e->state == SHIFT) {
-                search_string += "K";
-            } else {
-                search_string += "k";
-            }
-        }
-        if (e->detail == wm->key_codes.l) {
-            if (e->state == SHIFT) {
-                search_string += "L";
-            } else {
-                search_string += "l";
-            }
-        }
-        if (e->detail == wm->key_codes.m) {
-            if (e->state == SHIFT) {
-                search_string += "M";
-            } else {
-                search_string += "m";
-            }
-        }
-        if (e->detail == wm->key_codes.n) {
-            if (e->state == SHIFT) {
-                search_string += "N";
-            } else {
-                search_string += "n";
-            }
-        }
-        if (e->detail == wm->key_codes.o) {
-            if (e->state == SHIFT) {
-                search_string += "O";
-            } else {
-                search_string += "o";
-            }
-        }
-        if (e->detail == wm->key_codes.p) {
-            if (e->state == SHIFT) {
-                search_string += "P";
-            } else {
-                search_string += "p";
-            }
-        }
-        if (e->detail == wm->key_codes.q) {
-            if (e->state == SHIFT) {
-                search_string += "Q";
-            } else {
-                search_string += "q";
-            }
-        }
-        if (e->detail == wm->key_codes.r) {
-            if (e->state == SHIFT) {
-                search_string += "R";
-            } else {
-                search_string += "r";
-            }
-        }
-        if (e->detail == wm->key_codes.s) {
-            if (e->state == SHIFT) {
-                search_string += "S";
-            } else {
-                search_string += "s";
-            }
-        }
-        if (e->detail == wm->key_codes.t) {
-            if (e->state == SHIFT) {
-                search_string += "T";
-            } else {
-                search_string += "t";
-            }
-        }
-        if (e->detail == wm->key_codes.u) {
-            if (e->state == SHIFT) {
-                search_string += "U";
-            } else {
-                search_string += "u";
-            }
-        }
-        if (e->detail == wm->key_codes.v) {
-            if (e->state == SHIFT) {
-                search_string += "V";
-            } else {
-                search_string += "v";
-            }
-        }
-        if (e->detail == wm->key_codes.w) {
-            if (e->state == SHIFT) {
-                search_string += "W";
-            } else {
-                search_string += "w";
-            }
-        }
-        if (e->detail == wm->key_codes.x) {
-            if (e->state == SHIFT) {
-                search_string += "X";
-            } else {
-                search_string += "x";
-            }
-        }
-        if (e->detail == wm->key_codes.y) {
-            if (e->state == SHIFT) {
-                search_string += "Y";
-            } else {
-                search_string += "y";
-            }
-        }
-        if (e->detail == wm->key_codes.z) {
-            if (e->state == SHIFT) {
-                search_string += "Z";
-            } else {
-                search_string += "z";
-            }
-        }
-
-        if (e->detail == wm->key_codes.space_bar) {
-            search_string += " ";
-        }
+        if(e->detail == wm->key_codes.k) {
+          if(e->state == SHIFT)
+            search_string += "K";
+          else
+            search_string += "k"; }
+        if(e->detail == wm->key_codes.l) {
+          if(e->state == SHIFT)
+            search_string += "L";
+          else
+            search_string += "l"; }
+        if(e->detail == wm->key_codes.m) {
+          if(e->state == SHIFT)
+            search_string += "M";
+          else
+            search_string += "m"; }
+        if(e->detail == wm->key_codes.n) {
+          if(e->state == SHIFT)
+            search_string += "N";
+          else
+            search_string += "n"; }
+        if(e->detail == wm->key_codes.o) {
+          if(e->state == SHIFT)
+            search_string += "O";
+          else
+            search_string += "o";  }
+        if(e->detail == wm->key_codes.p) {
+          if(e->state == SHIFT)
+            search_string += "P";
+          else
+            search_string += "p"; }
+        if(e->detail == wm->key_codes.q) {
+          if(e->state == SHIFT)
+            search_string += "Q";
+          else 
+            search_string += "q"; }
+        if(e->detail == wm->key_codes.r) {
+          if(e->state == SHIFT)
+            search_string += "R";
+          else
+            search_string += "r"; }
+        if(e->detail == wm->key_codes.s) {
+          if(e->state == SHIFT)
+            search_string += "S";
+          else
+            search_string += "s"; }
+        if(e->detail == wm->key_codes.t) {
+          if(e->state == SHIFT)
+            search_string += "T";
+          else
+            search_string += "t"; }
+        if(e->detail == wm->key_codes.u) {
+          if(e->state == SHIFT)
+            search_string += "U";
+          else
+            search_string += "u"; }
+        if(e->detail == wm->key_codes.v) {
+          if(e->state == SHIFT)
+            search_string += "V";
+          else
+            search_string += "v"; }
+        if(e->detail == wm->key_codes.w) {
+          if(e->state == SHIFT)
+            search_string += "W";
+          else
+            search_string += "w"; }
+        if(e->detail == wm->key_codes.x) {
+          if(e->state == SHIFT)
+            search_string += "X";
+          else
+            search_string += "x"; }
+        if(e->detail == wm->key_codes.y) {
+          if(e->state == SHIFT)
+            search_string += "Y";
+          else
+            search_string += "y"; }
+        if(e->detail == wm->key_codes.z) {
+          if(e->state == SHIFT)
+            search_string += "Z";
+          else
+            search_string += "z"; }
+        if(e->detail == wm->key_codes.space_bar) {
+          search_string += " "; }
         if(e->detail == wm->key_codes._delete)
           if(search_string.length() > 0) {
             search_string.erase(search_string.length() - 1);
@@ -4390,28 +4361,22 @@ class search_window {
       if(e->event == main_window) {
         main_window.raise();
         main_window.focus_input(); }}); }
-  void draw_text() {
-      main_window.draw_text(search_string.c_str(), WHITE, BLACK, "7x14", 2, 14);
-      if (search_string.length() > 0) {
-          results = file.search_for_binary(search_string.c_str());
-          int entry_list_size = results.size(); 
-          if (results.size() > 7) {
-              entry_list_size = 7;
-          }
-          main_window.height(20 * entry_list_size);
-          xcb_flush(conn);
-          for (int i = 0; i < entry_list_size; ++i) {
-              entry_list[i].draw_text(results[i].c_str(), WHITE, BLACK, "7x14", 2, 14);
-          }
-      }
-  }
-  private: // variables
-      std::function<void()> enter_function;
-      File file;
-      std::vector<std::string> results;
-      std::vector<window> entry_list;
-  ;
-};
+  Private(void) draw_text() {
+    main_window.draw_text(search_string.c_str(), WHITE, BLACK, "7x14", 2, 14);
+    if(search_string.length() > 0) {
+      results = file.search_for_binary(search_string.c_str());
+      int entry_list_size = results.size(); 
+      if(results.size() > 7)
+        entry_list_size = 7;
+      main_window.height(20 * entry_list_size);
+      xcb_flush(conn);
+      for(int i = 0; i < entry_list_size; ++i)
+        entry_list[i].draw_text(results[i].c_str(), WHITE, BLACK, "7x14", 2, 14); }}
+ // (Private) variables
+  Private(function)<void()> enter_function;
+  Private(File) file;
+  Private(vector)<std::string> results;
+  Private(vector)<window> entry_list; };
 class Mwm_Runner {
  // (Public) variabels
   Public(window) main_window;
@@ -5238,68 +5203,96 @@ class resize_client {
         lastUpdateTime = currentTime; return(true); }
       return(false); }};
 class max_win {
- // Constructor
-  Public(enum max_win_type) {
-    BUTTON_MAXWIN,
-    EWMH_MAXWIN };
-  Public(max_win)(client * c, max_win_type type) : c(c) {
-    switch(type) {
+  private:
+    client * c;
+
+    void max_win_animate(const int & endX, const int & endY, const int & endWidth, const int & endHeight)
+    {
+      animate_client(
+        c, 
+        endX, 
+        endY, 
+        endWidth, 
+        endHeight, 
+        MAXWIN_ANIMATION_DURATION);
+      xcb_flush(conn);
+    }
+    void button_unmax_win()
+    {
+      max_win_animate(
+        c->max_button_ogsize.x,
+        c->max_button_ogsize.y,
+        c->max_button_ogsize.width,
+        c->max_button_ogsize.height
+      ); 
+    }
+    void button_max_win()
+    {
+      c->save_max_button_ogsize();
+      max_win_animate(
+        0,
+        0,
+        screen->width_in_pixels,
+        screen->height_in_pixels
+      );
+    }
+    void ewmh_max_win()
+    {
+      c->save_max_ewmh_ogsize();
+      max_win_animate(
+        - BORDER_SIZE,
+        - TITLE_BAR_HEIGHT - BORDER_SIZE,
+        screen->width_in_pixels + (BORDER_SIZE * 2),
+        screen->height_in_pixels + TITLE_BAR_HEIGHT + (BORDER_SIZE * 2)
+      );
+      c->set_EWMH_fullscreen_state();
+    }
+    void ewmh_unmax_win()
+    {
+      if(c->max_ewmh_ogsize.width > screen->width_in_pixels) {
+        (c->max_ewmh_ogsize.width = screen->width_in_pixels / 2);
+      } 
+      if(c->max_ewmh_ogsize.height > screen->height_in_pixels) {
+        (c->max_ewmh_ogsize.height = screen->height_in_pixels / 2);
+      } 
+      if(c->max_ewmh_ogsize.x >= screen->width_in_pixels - 1) c->max_ewmh_ogsize.x = ((screen->width_in_pixels / 2) - (c->max_ewmh_ogsize.width / 2) - BORDER_SIZE);
+      if(c->max_ewmh_ogsize.y >= screen->height_in_pixels - 1) c->max_ewmh_ogsize.y = ((screen->height_in_pixels / 2) - (c->max_ewmh_ogsize.height / 2) - TITLE_BAR_HEIGHT - BORDER_SIZE);
+      max_win_animate(
+        c->max_ewmh_ogsize.x, 
+        c->max_ewmh_ogsize.y, 
+        c->max_ewmh_ogsize.width, 
+        c->max_ewmh_ogsize.height
+      );
+      c->unset_EWMH_fullscreen_state();
+    }
+  public:
+    enum max_win_type {
+      BUTTON_MAXWIN,
+      EWMH_MAXWIN 
+    };
+  max_win(client * c, max_win_type type) : c(c)
+  {
+    switch(type)
+    {
       case(EWMH_MAXWIN):
+      {
         if(c->is_EWMH_fullscreen())
           ewmh_unmax_win();
         else 
           ewmh_max_win();
         break;
+      }
       case(BUTTON_MAXWIN):
+      {
         if(c->is_button_max_win())
           button_unmax_win();
         else 
           button_max_win();
-        break; }}
- // Variabels
-  Private(client *) c;
- // Functions
-  Private(void) max_win_animate(const int & endX, const int & endY, const int & endWidth, const int & endHeight) {
-    animate_client(
-      c, 
-      endX, 
-      endY, 
-      endWidth, 
-      endHeight, 
-      MAXWIN_ANIMATION_DURATION);
-    xcb_flush(conn); }
-  Private(void) ewmh_max_win() {
-    c->save_max_ewmh_ogsize();
-    max_win_animate(
-      - BORDER_SIZE,
-      - TITLE_BAR_HEIGHT - BORDER_SIZE,
-      screen->width_in_pixels + (BORDER_SIZE * 2),
-      screen->height_in_pixels + TITLE_BAR_HEIGHT + (BORDER_SIZE * 2));
-    c->set_EWMH_fullscreen_state(); }
-  Private(void) ewmh_unmax_win() {
-    if(c->max_ewmh_ogsize.width > screen->width_in_pixels) (c->max_ewmh_ogsize.width = screen->width_in_pixels / 2);
-    if(c->max_ewmh_ogsize.height > screen->height_in_pixels) (c->max_ewmh_ogsize.height = screen->height_in_pixels / 2);
-    if(c->max_ewmh_ogsize.x >= screen->width_in_pixels - 1) c->max_ewmh_ogsize.x = ((screen->width_in_pixels / 2) - (c->max_ewmh_ogsize.width / 2) - BORDER_SIZE);
-    if(c->max_ewmh_ogsize.y >= screen->height_in_pixels - 1) c->max_ewmh_ogsize.y = ((screen->height_in_pixels / 2) - (c->max_ewmh_ogsize.height / 2) - TITLE_BAR_HEIGHT - BORDER_SIZE);
-    max_win_animate(
-      c->max_ewmh_ogsize.x, 
-      c->max_ewmh_ogsize.y, 
-      c->max_ewmh_ogsize.width, 
-      c->max_ewmh_ogsize.height);
-    c->unset_EWMH_fullscreen_state(); }
-  Private(void) button_max_win() {
-    c->save_max_button_ogsize();
-    max_win_animate(
-      0,
-      0,
-      screen->width_in_pixels,
-      screen->height_in_pixels); }
-  Private(void) button_unmax_win() {
-    max_win_animate(
-      c->max_button_ogsize.x,
-      c->max_button_ogsize.y,
-      c->max_button_ogsize.width,
-      c->max_button_ogsize.height); }};
+        break; 
+      }
+    }
+  }
+};
 /**
  * @class tile
  * @brief Represents a tile obj.
@@ -5501,7 +5494,9 @@ class tile {
           end_height, 
           TILE_ANIMATION_DURATION
       );
-      c->update(); }};
+      c->update();
+  }
+};
 class Events {
   Public(Events)() {}
   // methods
@@ -5806,7 +5801,7 @@ class test {
       win_1.unmap();
       win_1.kill(); }};
 void setup_wm() {
-  wm = new Window_Manager;
+  wm = (new Window_Manager);
   wm->init();
   
   change_desktop::teleport_to(1);
@@ -5825,7 +5820,8 @@ void setup_wm() {
   events.setup();
 
   file_app = new File_App;
-  file_app->init(); }
+  file_app->init();
+}
 int main() {
   LOG_start()
   setup_wm();
