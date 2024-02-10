@@ -80,292 +80,423 @@ using Uint = unsigned int;
 using SUint = unsigned short int;
 
 struct size_pos {
-  int16_t x, y;
-  uint16_t width, height;
+    int16_t x, y;
+    uint16_t width, height;
 
-  void save(const int & x, const int & y, const int & width, const int & height) {
-    this->x = x;
-    this->y = y;
-    this->width = width;
-    this->height = height; }};
+    void save(const int & x, const int & y, const int & width, const int & height) {
+        this->x = x;
+        this->y = y;
+        this->width = width;
+        this->height = height;
+    }
+};
+
 class mxb {
-  Public(class) XConnection {
-    // constructor and destructor
-      Public(struct mxb_auth_info_t) {
-          int namelen;
-          char* name;
-          int datalen;
-          char* data; };
-      Public(XConnection)(const char * display) {
-        std::string socketPath = getSocketPath(display);
-        memset(&addr, 0, sizeof(addr)); // Initialize address
-        addr.sun_family = AF_UNIX;
-        strncpy(addr.sun_path, socketPath.c_str(), sizeof(addr.sun_path) - 1);
-        fd = socket(AF_UNIX, SOCK_STREAM, 0); // Create socket 
-        if(fd == -1)
-          throw 
-            std::runtime_error("Failed to create socket");
-        if(connect(fd, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr)) == -1) { // Connect to the X server's socket
-          ::close(fd);
-            throw
-              std::runtime_error("Failed to connect to X server"); }
-        int displayNumber = parseDisplayNumber(display); // Perform authentication 
-        if(!authenticate_x11_connection(displayNumber, auth_info)) {
-          ::close(fd);
-            throw 
-              std::runtime_error("Failed to authenticate with X server"); }}
-      Public(~XConnection()) {
-        if(fd != -1)
-          ::close(fd);
-        delete[] auth_info.name;
-        delete[] auth_info.data; }
-    // Methods
-      Public (int) getFd() const { return fd; }
-      Public (void) confirmConnection() {
-        const string extensionName = "BIG-REQUESTS";  // Example extension
-        uint16_t nameLength = static_cast<uint16_t>(extensionName.length());
+    class XConnection {
+        
+        public: // constructor and destructor
+            
+            struct mxb_auth_info_t {
+                int namelen;
+                char* name;
+                int datalen;
+                char* data;
+            };
 
-        // Calculate the total length of the request in 4-byte units, including padding
-        uint16_t requestLength = htons((8 + nameLength + 3) / 4); // Length in 4-byte units
-        char request[32] = {0};  // 32 bytes is enough for most requests
-        request[0] = 98;         // Opcode for QueryExtension
-        request[1] = 0;          // Unused
-        request[2] = (requestLength >> 8) & 0xFF;  // Length (high byte)
-        request[3] = requestLength & 0xFF;         // Length (low byte)
-        request[4] = nameLength & 0xFF;            // Length of the extension name (low byte)
-        request[5] = (nameLength >> 8) & 0xFF;     // Length of the extension name (high byte)
-        memcpy(&request[8], extensionName.c_str(), nameLength); // Copy the extension name
+            XConnection(const char * display) {
+                string socketPath = getSocketPath(display);
+                memset(&addr, 0, sizeof(addr)); // Initialize address
+                addr.sun_family = AF_UNIX;
+                strncpy(addr.sun_path, socketPath.c_str(), sizeof(addr.sun_path) - 1);
+                fd = socket(AF_UNIX, SOCK_STREAM, 0); // Create socket 
+                if(fd == -1) {
+                    throw runtime_error("Failed to create socket");
+                }
 
-        /* Send the request */
-        if(send(fd, request, 8 + nameLength, 0) == -1)
-          throw std::runtime_error("Failed to send QueryExtension request");
-        /* Prepare to receive the response */ 
-        char reply[32] = {0}; int received = 0;
+                if(connect(fd, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr)) == -1) { // Connect to the X server's socket
+                    ::close(fd);
+                    throw
+                    std::runtime_error("Failed to connect to X server");
+                }
+                int displayNumber = parseDisplayNumber(display); // Perform authentication 
+                if(!authenticate_x11_connection(displayNumber, auth_info)) {
+                    ::close(fd);
+                    throw runtime_error("Failed to authenticate with X server");
+                }
+            }
+            
+            ~XConnection() {
+                if(fd != -1) {
+                    ::close(fd);
+                }
 
-        while(received < sizeof(reply)) { // Read the response from the server
-          int n = recv(fd, reply + received, sizeof(reply) - received, 0);
-          if(n == -1)
-            throw runtime_error("Failed to receive QueryExtension reply"); 
-          else if(n == 0)
-            throw runtime_error("Connection closed by X server");
-          received += n; }
-        if(reply[0] != 1)
-          throw std::runtime_error("Invalid response received from X server");
-        bool extensionPresent = reply[1];
-        if(extensionPresent) 
-          log_info("BIG-REQUESTS extension is supported by the X server."); 
-        else
-          log_info("BIG-REQUESTS extension is not supported by the X server.");}
-      Public (string) sendMessage(const string &extensionName) {
-        uint16_t nameLength = static_cast<uint16_t>(extensionName.length());
+                delete[] auth_info.name;
+                delete[] auth_info.data;
+            }
 
-        // Calculate the total length of the request in 4-byte units, including padding
-        uint16_t requestLength = htons((8 + nameLength + 3) / 4); // Length in 4-byte units
-        char request[32] = {0};  // 32 bytes is enough for most requests
-        request[0] = 98;         // Opcode for QueryExtension
-        request[1] = 0;          // Unused
-        request[2] = (requestLength >> 8) & 0xFF;  // Length (high byte)
-        request[3] = requestLength & 0xFF;         // Length (low byte)
-        request[4] = nameLength & 0xFF;            // Length of the extension name (low byte)
-        request[5] = (nameLength >> 8) & 0xFF;     // Length of the extension name (high byte)
-        std::memcpy(&request[8], extensionName.c_str(), nameLength); // Copy the extension name
+        // Methods
 
-        /* Send the request */ if (send(fd, request, 8 + nameLength, 0) == -1)
-          throw runtime_error("Failed to send QueryExtension request");
-        /* Prepare to receive the response */ char reply[32] = {0}; int received = 0;
-        /* Read the response from the server */ while(received < sizeof(reply)) {
-          int n = recv(fd, reply + received, sizeof(reply) - received, 0);
-          if(n == -1)
-            throw runtime_error("Failed to receive QueryExtension reply");
-          else if(n == 0)
-            throw runtime_error("Connection closed by X server");
-          received += n; }
-        if (reply[0] != 1)
-          throw runtime_error("Invalid response received from X server");
-        bool extensionPresent = reply[1]; 
-        if(extensionPresent) // Check if the extension is present
-          return("Extension is supported by the X server."); 
-        else
-          return("Extension is not supported by the X server.");}
-    // Variabels
-      Private(int)fd;
-      Private(struct sockaddr_un)addr;
-      Private(mxb_auth_info_t)auth_info;
-      Private(Logger)log;
-    private: // functions
-      bool authenticate_x11_connection(int display_number, mxb_auth_info_t & auth_info) {
-        const char* xauthority_env = std::getenv("XAUTHORITY"); 
-        string xauthority_file = xauthority_env ? xauthority_env : "~/.Xauthority";
+            int getFd() const {
+                return fd;
+            }
 
-        FILE* auth_file = fopen(xauthority_file.c_str(), "rb");
-        if(!auth_file)
-          return(false);
-        Xauth* xauth_entry;
-        bool found = false;
-        while((xauth_entry = XauReadAuth(auth_file)) != nullptr) {
-          // Check if the entry matches your display number
-          // Assuming display_number is the display you're interested in
-          if(to_string(display_number) == string(xauth_entry->number, xauth_entry->number_length)) {
-            auth_info.namelen = xauth_entry->name_length;
-            auth_info.name = new char[xauth_entry->name_length];
-            memcpy(auth_info.name, xauth_entry->name, xauth_entry->name_length);
+            void confirmConnection() {
+                const string extensionName = "BIG-REQUESTS";  // Example extension
+                uint16_t nameLength = static_cast<uint16_t>(extensionName.length());
 
-            auth_info.datalen = xauth_entry->data_length;
-            auth_info.data = new char[xauth_entry->data_length];
-            memcpy(auth_info.data, xauth_entry->data, xauth_entry->data_length);
+                // Calculate the total length of the request in 4-byte units, including padding
+                uint16_t requestLength = htons((8 + nameLength + 3) / 4); // Length in 4-byte units
+                char request[32] = {0};  // 32 bytes is enough for most requests
+                request[0] = 98;         // Opcode for QueryExtension
+                request[1] = 0;          // Unused
+                request[2] = (requestLength >> 8) & 0xFF;  // Length (high byte)
+                request[3] = requestLength & 0xFF;         // Length (low byte)
+                request[4] = nameLength & 0xFF;            // Length of the extension name (low byte)
+                request[5] = (nameLength >> 8) & 0xFF;     // Length of the extension name (high byte)
+                memcpy(&request[8], extensionName.c_str(), nameLength); // Copy the extension name
 
-            found = true;
-            XauDisposeAuth(xauth_entry);
-            break; }
-          XauDisposeAuth(xauth_entry); }
-        fclose(auth_file);
-        return(found); }
-      string getSocketPath(const char * display) {
-        string displayStr;
-        if(display == nullptr) {
-          char* envDisplay = getenv("DISPLAY");
-          if(envDisplay != nullptr)
-            displayStr = envDisplay;
-          else
-            displayStr = ":0"; }
-        else
-          displayStr = display;
-        int displayNumber = 0;
-        size_t colonPos = displayStr.find(':'); // Extract the display number from the display string
-        if(colonPos != string::npos)
-          displayNumber = std::stoi(displayStr.substr(colonPos + 1));
-        return "/tmp/.X11-unix/X" + std::to_string(displayNumber); }
-      int parseDisplayNumber(const char * display) {
-        if(!display)
-          display = getenv("DISPLAY");
-        if(!display)
-          return 0;  // default to display 0
-        const string displayStr = display;
-        size_t colonPos = displayStr.find(':');
-        if(colonPos != string::npos)
-          return std::stoi(displayStr.substr(colonPos + 1));
-        return 0; }};
-  static XConnection * mxb_connect(const char* display) {
-    try { return(new XConnection(display)); }
-      catch (const exception & e) { cerr << "Connection error: " << e.what() << endl; return(nullptr); }}
-  static int mxb_connection_has_error(XConnection * conn) {
-    try {string response = conn->sendMessage("BIG-REQUESTS"); log_info(response);} 
-      catch (const exception &e) { log_error(e.what()); return(1); }
-        return(0); };};
-class pointer {
-  // methods
-    Public(uint32_t) x() {
-      xcb_query_pointer_cookie_t cookie = xcb_query_pointer(conn, screen->root);
-      xcb_query_pointer_reply_t * reply = xcb_query_pointer_reply(conn, cookie, nullptr);
-      if(!reply) {
-        log_error("reply is nullptr."); return(0); } 
-      uint32_t x = reply->root_x;
-      free(reply);
-      return x; }
-    Public(uint32_t) y() {
-      xcb_query_pointer_cookie_t cookie = xcb_query_pointer(conn, screen->root);
-      xcb_query_pointer_reply_t * reply = xcb_query_pointer_reply(conn, cookie, nullptr);
-      if(!reply) {
-        log_error("reply is nullptr."); return(0); }
-      uint32_t y = reply->root_y;
-      free(reply);
-      return y; }
-    Public(void) teleport(const int16_t &x, const int16_t &y) {
-      xcb_warp_pointer(conn, XCB_NONE, screen->root, 0, 0, 0, 0, x, y); xcb_flush(conn);}
-    Public(void) grab() {
-      xcb_grab_pointer_cookie_t cookie = xcb_grab_pointer(
-        conn,
-        false,
-        screen->root,
-        XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_POINTER_MOTION,
-        XCB_GRAB_MODE_ASYNC,
-        XCB_GRAB_MODE_ASYNC,
-        XCB_NONE,
-        XCB_NONE,
-        XCB_CURRENT_TIME);
+                /* Send the request */
+                if(send(fd, request, 8 + nameLength, 0) == -1) {
+                    throw std::runtime_error("Failed to send QueryExtension request");
+                }
 
-      xcb_grab_pointer_reply_t * reply = xcb_grab_pointer_reply(conn, cookie, nullptr);
-      if(!reply) {
-        log_error("reply is nullptr.");
-        free(reply); return; }
-      if(reply->status != XCB_GRAB_STATUS_SUCCESS) {
-        log_error("Could not grab pointer"); 
-        free(reply); return; }
-      free(reply); }
-    Public(void) ungrab() {
-      xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
-      xcb_flush(conn); }
-    Private(const char *) pointer_from_enum(CURSOR CURSOR) { switch(CURSOR) {
-      case(CURSOR::arrow)               : return("arrow");
-      case(CURSOR::hand1)               : return("hand1");
-      case(CURSOR::hand2)               : return("hand2");
-      case(CURSOR::watch)               : return("watch");
-      case(CURSOR::xterm)               : return("xterm");
-      case(CURSOR::cross)               : return("cross");
-      case(CURSOR::left_ptr)            : return("left_ptr");
-      case(CURSOR::right_ptr)           : return("right_ptr");
-      case(CURSOR::center_ptr)          : return("center_ptr");
-      case(CURSOR::sb_v_double_arrow)   : return("sb_v_double_arrow");
-      case(CURSOR::sb_h_double_arrow)   : return("sb_h_double_arrow");
-      case(CURSOR::fleur)               : return("fleur");
-      case(CURSOR::question_arrow)      : return("question_arrow");
-      case(CURSOR::pirate)              : return("pirate");
-      case(CURSOR::coffee_mug)          : return("coffee_mug");
-      case(CURSOR::umbrella)            : return("umbrella");
-      case(CURSOR::circle)              : return("circle");
-      case(CURSOR::xsb_left_arrow)      : return("xsb_left_arrow");
-      case(CURSOR::xsb_right_arrow)     : return("xsb_right_arrow");
-      case(CURSOR::xsb_up_arrow)        : return("xsb_up_arrow");
-      case(CURSOR::xsb_down_arrow)      : return("xsb_down_arrow");
-      case(CURSOR::top_left_corner)     : return("top_left_corner");
-      case(CURSOR::top_right_corner)    : return("top_right_corner");
-      case(CURSOR::bottom_left_corner)  : return("bottom_left_corner");
-      case(CURSOR::bottom_right_corner) : return("bottom_right_corner");
-      case(CURSOR::sb_left_arrow)       : return("sb_left_arrow");
-      case(CURSOR::sb_right_arrow)      : return("sb_right_arrow");
-      case(CURSOR::sb_up_arrow)         : return("sb_up_arrow");
-      case(CURSOR::sb_down_arrow)       : return("sb_down_arrow");
-      case(CURSOR::top_side)            : return("top_side");
-      case(CURSOR::bottom_side)         : return("bottom_side");
-      case(CURSOR::left_side)           : return("left_side");
-      case(CURSOR::right_side)          : return("right_side");
-      case(CURSOR::top_tee)             : return("top_tee");
-      case(CURSOR::bottom_tee)          : return("bottom_tee");
-      case(CURSOR::left_tee)            : return("left_tee");
-      case(CURSOR::right_tee)           : return("right_tee");
-      case(CURSOR::top_left_arrow)      : return("top_left_arrow");
-      case(CURSOR::top_right_arrow)     : return("top_right_arrow");
-      case(CURSOR::bottom_left_arrow)   : return("bottom_left_arrow");
-      case(CURSOR::bottom_right_arrow)  : return("bottom_right_arrow");
-      default                           : return("left_ptr"); }}
-  // Private Variabels
-    Private(Logger) log; };
-class fast_vector {
-  Public(operator vector<const char*>() const) {
-    return data; }
-  Public(~fast_vector()) {
-    for(auto str:data) 
-      delete[] str; }
-  Public(const char* operator[])(size_t index) const {
-    return data[index]; }
-  // methods
-    void push_back(const char* str) {
-      char* copy = new char[strlen(str) + 1];
-      strcpy(copy, str);
-      data.push_back(copy); }
-    void append(const char* str) {
-      char* copy = new char[strlen(str) + 1];
-      strcpy(copy, str);
-      data.push_back(copy); }
-    size_t size() const {
-      return data.size(); }
-    size_t index_size() const {
-      if(data.size() == 0)
+                /* Prepare to receive the response */ 
+                char reply[32] = {0}; int received = 0;
+
+                // Read the response from the server
+                while(received < sizeof(reply)) { 
+                    int n = recv(fd, reply + received, sizeof(reply) - received, 0);
+                    if(n == -1) {
+                        throw runtime_error("Failed to receive QueryExtension reply");
+                    } else if(n == 0) {
+                        throw runtime_error("Connection closed by X server");
+                    }
+
+                    received += n;
+                }
+
+                if(reply[0] != 1) {
+                    throw std::runtime_error("Invalid response received from X server");
+                }
+                
+                bool extensionPresent = reply[1];
+                if(extensionPresent) { 
+                    log_info("BIG-REQUESTS extension is supported by the X server."); 
+                } else {
+                    log_info("BIG-REQUESTS extension is not supported by the X server.");
+                }
+            }
+            
+            string sendMessage(const string &extensionName) {
+                uint16_t nameLength = static_cast<uint16_t>(extensionName.length());
+
+                // Calculate the total length of the request in 4-byte units, including padding
+                uint16_t requestLength = htons((8 + nameLength + 3) / 4); // Length in 4-byte units
+                char request[32] = {0};  // 32 bytes is enough for most requests
+                request[0] = 98;         // Opcode for QueryExtension
+                request[1] = 0;          // Unused
+                request[2] = (requestLength >> 8) & 0xFF;  // Length (high byte)
+                request[3] = requestLength & 0xFF;         // Length (low byte)
+                request[4] = nameLength & 0xFF;            // Length of the extension name (low byte)
+                request[5] = (nameLength >> 8) & 0xFF;     // Length of the extension name (high byte)
+                std::memcpy(&request[8], extensionName.c_str(), nameLength); // Copy the extension name
+
+                /* Send the request */ if (send(fd, request, 8 + nameLength, 0) == -1)
+                throw runtime_error("Failed to send QueryExtension request");
+                /* Prepare to receive the response */ char reply[32] = {0}; int received = 0;
+                /* Read the response from the server */ while(received < sizeof(reply)) {
+                int n = recv(fd, reply + received, sizeof(reply) - received, 0);
+                if(n == -1)
+                    throw runtime_error("Failed to receive QueryExtension reply");
+                else if(n == 0)
+                    throw runtime_error("Connection closed by X server");
+                received += n; }
+                if (reply[0] != 1) {
+                    throw runtime_error("Invalid response received from X server");
+                }
+                
+                bool extensionPresent = reply[1]; 
+                // Check if the extension is present
+                if(extensionPresent) {
+                    return("Extension is supported by the X server."); 
+                } else {
+                    return "Extension is not supported by the X server.";
+                }
+            }
+
+        private:
+
+            Private(int)fd;
+            Private(struct sockaddr_un)addr;
+            Private(mxb_auth_info_t)auth_info;
+            Private(Logger)log;
+            
+            bool authenticate_x11_connection(int display_number, mxb_auth_info_t & auth_info) {
+                const char* xauthority_env = std::getenv("XAUTHORITY"); 
+                string xauthority_file = xauthority_env ? xauthority_env : "~/.Xauthority";
+
+                FILE* auth_file = fopen(xauthority_file.c_str(), "rb");
+                if(!auth_file) {
+                    return false;
+                }
+                    
+                Xauth* xauth_entry;
+                bool found = false;
+                while((xauth_entry = XauReadAuth(auth_file)) != nullptr) {
+                    // Check if the entry matches your display number
+                    // Assuming display_number is the display you're interested in
+                    if(to_string(display_number) == string(xauth_entry->number, xauth_entry->number_length)) {
+                        auth_info.namelen = xauth_entry->name_length;
+                        auth_info.name = new char[xauth_entry->name_length];
+                        memcpy(auth_info.name, xauth_entry->name, xauth_entry->name_length);
+
+                        auth_info.datalen = xauth_entry->data_length;
+                        auth_info.data = new char[xauth_entry->data_length];
+                        memcpy(auth_info.data, xauth_entry->data, xauth_entry->data_length);
+
+                        found = true;
+                        XauDisposeAuth(xauth_entry);
+                        break;
+                    }
+
+                    XauDisposeAuth(xauth_entry);
+                }
+
+                fclose(auth_file);
+                return found;
+            }
+
+            string getSocketPath(const char * display) {
+                string displayStr;
+                if(display == nullptr) {
+                    char* envDisplay = getenv("DISPLAY");
+                    
+                    if(envDisplay != nullptr) {
+                        displayStr = envDisplay;
+                    } else {
+                        displayStr = ":0";
+                    }
+
+                } else {
+                    displayStr = display;
+                }
+                
+                int displayNumber = 0;
+                size_t colonPos = displayStr.find(':'); // Extract the display number from the display string
+                if(colonPos != string::npos) {
+                    displayNumber = std::stoi(displayStr.substr(colonPos + 1));
+                }
+                
+                return ("/tmp/.X11-unix/X" + std::to_string(displayNumber));
+            }
+
+            int parseDisplayNumber(const char * display) {
+                if(!display) {
+                    display = getenv("DISPLAY");
+                }
+                
+                if(!display) {
+                    return 0;  // default to display 0
+                }
+                
+                const string displayStr = display;
+                size_t colonPos = displayStr.find(':');
+                if(colonPos != string::npos) {
+                    return std::stoi(displayStr.substr(colonPos + 1));
+                }
+
+                return 0;
+            }
+    };
+
+    static XConnection * mxb_connect(const char* display) {
+        try {
+            return (new XConnection(display));
+        }
+        catch (const exception & e) {
+            cerr << "Connection error: " << e.what() << endl;
+            return nullptr; 
+        }
+    }
+
+    static int mxb_connection_has_error(XConnection * conn) {
+        try {
+            string response = conn->sendMessage("BIG-REQUESTS");
+            log_info(response);
+        } 
+        catch(const exception &e) {
+            log_error(e.what());
+            return 1;
+        }
+
         return(0);
-      return(data.size() - 1); }
-    void clear() {
-      data.clear(); }
-  Private(vector<const char*> data); };
+    };
+};
+
+class pointer {
+    public: // methods
+
+        uint32_t x() {
+            xcb_query_pointer_cookie_t cookie = xcb_query_pointer(conn, screen->root);
+            xcb_query_pointer_reply_t *reply = xcb_query_pointer_reply(conn, cookie, nullptr);
+            if(!reply) {
+                log_error("reply is nullptr."); return 0;
+            }
+
+            uint32_t x = reply->root_x;
+            free(reply);
+            return x;
+        }
+
+        uint32_t y() {
+            xcb_query_pointer_cookie_t cookie = xcb_query_pointer(conn, screen->root);
+            xcb_query_pointer_reply_t *reply = xcb_query_pointer_reply(conn, cookie, nullptr);
+            if(!reply) {
+                log_error("reply is nullptr."); return 0;
+            }
+
+            uint32_t y = reply->root_y;
+            free(reply);
+            return y;
+        }
+
+        void teleport(const int16_t &x, const int16_t &y) {
+            xcb_warp_pointer(conn, XCB_NONE, screen->root, 0, 0, 0, 0, x, y); xcb_flush(conn);
+        }
+
+        void grab() {
+            xcb_grab_pointer_cookie_t cookie = xcb_grab_pointer(
+                conn,
+                false,
+                screen->root,
+                XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_POINTER_MOTION,
+                XCB_GRAB_MODE_ASYNC,
+                XCB_GRAB_MODE_ASYNC,
+                XCB_NONE,
+                XCB_NONE,
+                XCB_CURRENT_TIME);
+
+            xcb_grab_pointer_reply_t * reply = xcb_grab_pointer_reply(conn, cookie, nullptr);
+            if(!reply) {
+                log_error("reply is nullptr.");
+                free(reply); return;
+            }
+
+            if(reply->status != XCB_GRAB_STATUS_SUCCESS) {
+                log_error("Could not grab pointer"); 
+                free(reply); return;
+            }
+
+            free(reply);
+        }
+
+        void ungrab() {
+            xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
+            xcb_flush(conn);
+        }
+
+        const char * pointer_from_enum(CURSOR CURSOR) { 
+            switch(CURSOR) {
+                case CURSOR::arrow               : return("arrow");
+                case CURSOR::hand1               : return("hand1");
+                case CURSOR::hand2               : return("hand2");
+                case CURSOR::watch               : return("watch");
+                case CURSOR::xterm               : return("xterm");
+                case CURSOR::cross               : return("cross");
+                case CURSOR::left_ptr            : return("left_ptr");
+                case CURSOR::right_ptr           : return("right_ptr");
+                case CURSOR::center_ptr          : return("center_ptr");
+                case CURSOR::sb_v_double_arrow   : return("sb_v_double_arrow");
+                case CURSOR::sb_h_double_arrow   : return("sb_h_double_arrow");
+                case CURSOR::fleur               : return("fleur");
+                case CURSOR::question_arrow      : return("question_arrow");
+                case CURSOR::pirate              : return("pirate");
+                case CURSOR::coffee_mug          : return("coffee_mug");
+                case CURSOR::umbrella            : return("umbrella");
+                case CURSOR::circle              : return("circle");
+                case CURSOR::xsb_left_arrow      : return("xsb_left_arrow");
+                case CURSOR::xsb_right_arrow     : return("xsb_right_arrow");
+                case CURSOR::xsb_up_arrow        : return("xsb_up_arrow");
+                case CURSOR::xsb_down_arrow      : return("xsb_down_arrow");
+                case CURSOR::top_left_corner     : return("top_left_corner");
+                case CURSOR::top_right_corner    : return("top_right_corner");
+                case CURSOR::bottom_left_corner  : return("bottom_left_corner");
+                case CURSOR::bottom_right_corner : return("bottom_right_corner");
+                case CURSOR::sb_left_arrow       : return("sb_left_arrow");
+                case CURSOR::sb_right_arrow      : return("sb_right_arrow");
+                case CURSOR::sb_up_arrow         : return("sb_up_arrow");
+                case CURSOR::sb_down_arrow       : return("sb_down_arrow");
+                case CURSOR::top_side            : return("top_side");
+                case CURSOR::bottom_side         : return("bottom_side");
+                case CURSOR::left_side           : return("left_side");
+                case CURSOR::right_side          : return("right_side");
+                case CURSOR::top_tee             : return("top_tee");
+                case CURSOR::bottom_tee          : return("bottom_tee");
+                case CURSOR::left_tee            : return("left_tee");
+                case CURSOR::right_tee           : return("right_tee");
+                case CURSOR::top_left_arrow      : return("top_left_arrow");
+                case CURSOR::top_right_arrow     : return("top_right_arrow");
+                case CURSOR::bottom_left_arrow   : return("bottom_left_arrow");
+                case CURSOR::bottom_right_arrow  : return("bottom_right_arrow");
+                default                          : return("left_ptr");
+            }
+        }
+        
+    private:
+        
+        Private(Logger) log;
+};
+
+class fast_vector {
+    public:
+        
+        operator vector<const char*>() const {
+            return data;
+        }
+
+        ~fast_vector() {
+            for(auto str:data) 
+            delete[] str;
+        }
+    
+        const char* operator[](size_t index) const {
+            return data[index];
+        }
+    
+    public: // methods
+
+        void push_back(const char* str) {
+            char* copy = new char[strlen(str) + 1];
+            strcpy(copy, str);
+            data.push_back(copy);
+        }
+
+        void append(const char* str) {
+            char* copy = new char[strlen(str) + 1];
+            strcpy(copy, str);
+            data.push_back(copy);
+        }
+
+        size_t size() const {
+            return data.size();
+        }
+
+        size_t index_size() const {
+            if(data.size() == 0) {
+                return(0);
+            }
+            return(data.size() - 1);
+        }
+
+        void clear() {
+            data.clear();
+        }
+
+    private:
+        
+        vector<const char*> data;
+};
+
 class string_tokenizer {
   public: // constructors and destructor
   string_tokenizer() {}
@@ -414,6 +545,7 @@ class string_tokenizer {
     char* str;
     fast_vector tokens;
 };
+
 class str {
     public: // Constructor
         str(const char* str = "") {
@@ -498,6 +630,7 @@ class str {
         bool is_null = false;
     ;
 };
+
 class fast_str_vector {
     public: // operators
         operator std::vector<str>() const {
@@ -535,6 +668,7 @@ class fast_str_vector {
         std::vector<str> data; // Internal vector to store const char* strings
     ;
 };
+
 class Directory_Searcher {
     public: // construtor
         Directory_Searcher() {}
@@ -581,6 +715,7 @@ class Directory_Searcher {
         Logger log;
     ;
 };
+
 class Directory_Lister {
     public: // constructor
         Directory_Lister() {}
@@ -608,6 +743,7 @@ class Directory_Lister {
         Logger log;
     ;
 };
+
 class File {
     public: // subclasses
         class search {
@@ -716,6 +852,7 @@ class File {
         }
     ;
 };
+
 class Launcher {
     public: // methods
         void program(char * program) {
@@ -733,6 +870,7 @@ class Launcher {
     ;
 };
 using Ev = const xcb_generic_event_t *;
+
 class Event_Handler {
     public: // methods
         using EventCallback = std::function<void(Ev)>;
@@ -780,7 +918,9 @@ class Event_Handler {
         bool shouldContinue = false;
         CallbackId nextCallbackId = 0;
     ;
-}; static Event_Handler * event_handler;
+};
+static Event_Handler * event_handler;
+
 class Bitmap {
     public: // constructor
         Bitmap(int width, int height) 
@@ -850,6 +990,7 @@ class Bitmap {
         Logger log;
     ;
 };
+
 class _scale {
     public:
         static uint16_t from_8_to_16_bit(const uint8_t & n) {
@@ -857,20 +998,25 @@ class _scale {
         }
     ;
 };
+
 class window {
     public: // construcers and operators
+
         window() {}
 
         operator uint32_t() const {
             return _window;
         }
+    
         window& operator=(uint32_t new_window) { // Overload the assignment operator for uint32_t
             _window = new_window;
             return *this;
         }
-    ;
+    
     public: // methods
+
         public: // main methods
+        
             void create(const uint8_t  & depth,
                         const uint32_t & parent,
                         const int16_t  & x,
@@ -896,6 +1042,7 @@ class window {
 
                 make_window();
             }
+
             void create_default(const uint32_t & parent, const int16_t & x, const int16_t & y, const uint16_t & width, const uint16_t & height) {
                 _depth = 0L;
                 _parent = parent;
@@ -911,6 +1058,7 @@ class window {
 
                 make_window();
             }
+            
             void create_client_window(const uint32_t & parent, const int16_t & x, const int16_t & y, const uint16_t & width, const uint16_t & height) {
                 _window = xcb_generate_id(conn);
                 uint32_t value_mask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
@@ -932,6 +1080,7 @@ class window {
                 
                 make_window();
             }
+            
             void raise() {
                 xcb_configure_window(
                     conn,
@@ -944,14 +1093,17 @@ class window {
                 );
                 xcb_flush(conn);
             }
+            
             void map() {
                 xcb_map_window(conn, _window);
                 xcb_flush(conn);
             }
+            
             void unmap() {
                 xcb_unmap_window(conn, _window);
                 xcb_flush(conn);
             }
+            
             void reparent(const uint32_t & new_parent, const int16_t & x, const int16_t & y) {
                 xcb_reparent_window(
                     conn, 
@@ -962,6 +1114,7 @@ class window {
                 );
                 xcb_flush(conn);
             }
+            
             void make_child(const uint32_t & window_to_make_child, const uint32_t & child_x, const uint32_t & child_y) {
                 xcb_reparent_window(
                     conn,
@@ -972,6 +1125,7 @@ class window {
                 );
                 xcb_flush(conn);
             }
+            
             void kill() {
                 xcb_intern_atom_cookie_t protocols_cookie = xcb_intern_atom(conn, 1, 12, "WM_PROTOCOLS");
                 xcb_intern_atom_reply_t *protocols_reply = xcb_intern_atom_reply(conn, protocols_cookie, NULL);
@@ -1005,6 +1159,7 @@ class window {
 
                 xcb_flush(conn);
             }
+            
             void clear() {
                 xcb_clear_area(
                     conn, 
@@ -1017,6 +1172,7 @@ class window {
                 );
                 xcb_flush(conn);
             }
+            
             void focus_input() {
                 xcb_set_input_focus(
                     conn, 
@@ -1026,8 +1182,9 @@ class window {
                 );
                 xcb_flush(conn);
             }
-        ;
+        
         public: // check methods
+
             bool is_EWMH_fullscreen() {
                 xcb_get_property_cookie_t cookie = xcb_ewmh_get_wm_state(ewmh, _window);
                 xcb_ewmh_get_atoms_reply_t wm_state;
@@ -1042,11 +1199,13 @@ class window {
                 }
                 return false;
             }
+            
             bool is_active_EWMH_window() {
                 uint32_t active_window = 0;
                 xcb_ewmh_get_active_window_reply(ewmh, xcb_ewmh_get_active_window(ewmh, 0), &active_window, NULL);
                 return _window == active_window;
             }
+            
             uint32_t check_event_mask_sum() {
                 uint32_t mask = 0;
                 xcb_get_window_attributes_cookie_t cookie = xcb_get_window_attributes(conn, _window);
@@ -1061,6 +1220,7 @@ class window {
                 free(reply);
                 return mask;
             }
+            
             std::vector<xcb_event_mask_t> check_event_mask_codes() {
                 uint32_t maskSum = check_event_mask_sum();
                 std::vector<xcb_event_mask_t> setMasks;
@@ -1071,6 +1231,7 @@ class window {
                 }
                 return setMasks;
             }
+            
             bool is_mask_active(const uint32_t & event_mask) {
                 std::vector<xcb_event_mask_t> masks = check_event_mask_codes();
                 for (const auto & ev_mask : masks) {
@@ -1080,6 +1241,7 @@ class window {
                 }
                 return false;
             }
+            
             bool is_mapped() {
                 xcb_get_window_attributes_cookie_t cookie = xcb_get_window_attributes(conn, _window);
                 xcb_get_window_attributes_reply_t *reply = xcb_get_window_attributes_reply(conn, cookie, NULL);
@@ -1092,12 +1254,14 @@ class window {
                 free(reply);
                 return isMapped;    
             }
-        ;
+        
         public: // set methods
+
             void set_active_EWMH_window() {
                 xcb_ewmh_set_active_window(ewmh, 0, _window); // 0 for the first (default) screen
                 xcb_flush(conn);
             }
+        
             void set_EWMH_fullscreen_state() {
                 xcb_change_property(
                     conn,
@@ -1111,8 +1275,9 @@ class window {
                 );
                 xcb_flush(conn);
             }
-        ;
+        
         public: // unset methods
+        
             void unset_EWMH_fullscreen_state() {
                 xcb_change_property(
                     conn,
@@ -1126,8 +1291,9 @@ class window {
                 );
                 xcb_flush(conn);
             }
-        ;
+        
         public: // get methods
+        
             char * property(const char * atom_name) {
                 xcb_get_property_reply_t *reply;
                 unsigned int reply_len;
@@ -1174,6 +1340,7 @@ class window {
                 log_info("property(" + std::string(atom_name) + ") = " + std::string(propertyValue));
                 return propertyValue;
             }
+        
             uint32_t root_window() {
                 xcb_query_tree_cookie_t cookie;
                 xcb_query_tree_reply_t *reply;
@@ -1190,6 +1357,7 @@ class window {
                 free(reply);
                 return root_window;
             }
+        
             uint32_t parent() {
                 xcb_query_tree_cookie_t cookie;
                 xcb_query_tree_reply_t *reply;
@@ -1206,6 +1374,7 @@ class window {
                 free(reply);
                 return parent_window;
             }
+        
             uint32_t * children(uint32_t * child_count) {
                 * child_count = 0;
                 xcb_query_tree_cookie_t cookie = xcb_query_tree(conn, _window);
@@ -1229,6 +1398,7 @@ class window {
                 free(reply);
                 return children;
             }
+        
             int16_t x_from_req() {
                 xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, _window);
                 xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
@@ -1242,6 +1412,7 @@ class window {
                 }
                 return x;
             }
+        
             int16_t y_from_req() {
                 xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, _window);
                 xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
@@ -1255,6 +1426,7 @@ class window {
                 }
                 return y;
             }
+        
             int16_t width_from_req() {
                 xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, _window);
                 xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
@@ -1268,6 +1440,7 @@ class window {
                 }
                 return width;
             }
+        
             int16_t height_from_req() {
                 xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, _window);
                 xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
@@ -1281,9 +1454,10 @@ class window {
                 }
                 return height;
             }
-        ;
+        
         public: // configuration methods
-            void apply_event_mask(const std::vector<uint32_t> & values) {
+            
+            void apply_event_mask(const vector<uint32_t> &values) {
                 if (values.empty()) {
                     log_error("values vector is empty");
                     return;
@@ -1297,24 +1471,27 @@ class window {
                 );
                 xcb_flush(conn);
             }
-            void apply_event_mask(const uint32_t * mask) {
+            
+            void apply_event_mask(const uint32_t *mask) {
                 xcb_change_window_attributes(
                     conn,
                     _window,
                     XCB_CW_EVENT_MASK,
                     mask
                 );
+
                 xcb_flush(conn);
             }
+            
             void set_pointer(CURSOR cursor_type) {
-                xcb_cursor_context_t * ctx;
-                if (xcb_cursor_context_new(conn, screen, &ctx) < 0) {
+                xcb_cursor_context_t *ctx;
+                if(xcb_cursor_context_new(conn, screen, &ctx) < 0) {
                     log_error("Unable to create cursor context.");
                     return;
                 }
 
                 xcb_cursor_t cursor = xcb_cursor_load_cursor(ctx, pointer_from_enum(cursor_type));
-                if (!cursor) {
+                if(!cursor) {
                     log_error("Unable to load cursor.");
                     return;
                 }
@@ -1323,16 +1500,17 @@ class window {
                     conn, 
                     _window, 
                     XCB_CW_CURSOR, 
-                    (uint32_t[1])
-                    {
+                    (uint32_t[1]) {
                         cursor 
                     }
                 );
+
                 xcb_flush(conn);
 
                 xcb_cursor_context_free(ctx);
                 xcb_free_cursor(conn, cursor);
             }
+            
             void draw_text(const char * str , const COLOR & text_color, const COLOR & backround_color, const char * font_name, const int16_t & x, const int16_t & y) {
                 get_font(font_name);
                 create_font_gc(text_color, backround_color, font);
@@ -1345,94 +1523,119 @@ class window {
                     y, 
                     str
                 );
+
                 xcb_flush(conn);
             }
+
             public: // size_pos configuration methods
+                
                 public: // fetch methods
+                
                     uint32_t x() {
                         return _x;
                     }
+                
                     uint32_t y() {
                         return _y;
                     }
+                
                     uint32_t width() {
                         return _width;
                     }
+                
                     uint32_t height() {
                         return _height;
                     }
-                ;    
+                  
                 void x(const uint32_t & x) {
                     config_window(MWM_CONFIG_x, x);
                     update(x, _y, _width, _height);
                 }
+                
                 void y(const uint32_t & y) {
                     config_window(XCB_CONFIG_WINDOW_Y, y);
                     update(_x, y, _width, _height);
                 }
+                
                 void width(const uint32_t & width) {
                     config_window(MWM_CONFIG_width, width);
                     update(_x, _y, width, _height);
                 }
+                
                 void height(const uint32_t & height) {
                     config_window(XCB_CONFIG_WINDOW_HEIGHT, height);
                     update(_x, _y, _width, height);
                 }
+                
                 void x_y(const uint32_t & x, const uint32_t & y) {
                     config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, {x, y});
                     update(x, y, _width, _height);
                 }
+                
                 void width_height(const uint32_t & width, const uint32_t & height) {
                     config_window(XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, {width, height});
                     update(_x, _y, width, height);
                 }
+                
                 void x_y_width_height(const uint32_t & x, const uint32_t & y, const uint32_t & width, const uint32_t & height) {
                     config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, {x, y, width, height});
                     update(x, y, width, height);
                 }
+                
                 void x_width_height(const uint32_t & x, const uint32_t & width, const uint32_t & height) {
                     config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, {x, width, height});
                     update(x, _y, width, height);
                 }
+                
                 void y_width_height(const uint32_t & y, const uint32_t & width, const uint32_t & height) {
                     config_window(XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, {y, width, height});
                     update(_x, y, width, height);
                 }
+                
                 void x_width(const uint32_t & x, const uint32_t & width) {
                     config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_WIDTH, {x, width});
                     update(x, _y, width, _height);
                 }
+                
                 void x_height(const uint32_t & x, const uint32_t & height) {
                     config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_HEIGHT, {x, height});
                     update(x, _y, _width, height);
                 }
+                
                 void y_width(const uint32_t & y, const uint32_t & width) {
                     config_window(XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH, {y, width});
                     update(_x, y, width, _height);
                 }
+                
                 void y_height(const uint32_t & y, const uint32_t & height) {
                     config_window(XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT, {y, height});
                     update(_x, y, _width, height);
                 }
+                
                 void x_y_width(const uint32_t & x, const uint32_t & y, const uint32_t & width) {
                     config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH, {x, y, width});
                     update(x, y, width, _height);
                 }
+                
                 void x_y_height(const uint32_t & x, const uint32_t & y, const uint32_t & height) {
                     config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT, {x, y, height});
                     update(x, y, _width, height);
                 }
-            ;
+            
             public: // backround methods
+                
                 void set_backround_color(COLOR color) {
                     change_back_pixel(get_color(color));
                 }
+                
                 void set_backround_color_8_bit(const uint8_t & red_value, const uint8_t & green_value, const uint8_t & blue_value) {
                     change_back_pixel(get_color(red_value, green_value, blue_value));
                 }
+                
                 void set_backround_color_16_bit(const uint16_t & red_value, const uint16_t & green_value, const uint16_t & blue_value) {
                     change_back_pixel(get_color(red_value, green_value, blue_value));
                 }
+                
                 void set_backround_png(const char * imagePath) {
                     Imlib_Image image = imlib_load_image(imagePath);
                     if (!image) {
@@ -1516,13 +1719,14 @@ class window {
 
                     clear_window();
                 }
+                
                 void make_then_set_png(const char * file_name, const std::vector<std::vector<bool>>& bitmap) {
                     create_png_from_vector_bitmap(file_name, bitmap);
                     set_backround_png(file_name);
                 }
-            ;
-        ;
+        
         public: // keys
+        
             void grab_default_keys() {
                 grab_keys({
                     {   T,          ALT | CTRL              }, // for launching terminal
@@ -1547,6 +1751,7 @@ class window {
                     {   F,          SUPER                   }, // key_binding for file_app
                 });
             }
+        
             void grab_keys(std::initializer_list<std::pair<const uint32_t, const uint16_t>> bindings) {
                 xcb_key_symbols_t * keysyms = xcb_key_symbols_alloc(conn);
             
@@ -1576,6 +1781,7 @@ class window {
 
                 xcb_flush(conn); 
             }
+        
             void grab_keys_for_typing() {
                 grab_keys({
                     { A,   NULL  },
@@ -1640,8 +1846,9 @@ class window {
                     { DELETE,       SHIFT       },
                 });
             }
-        ;
+        
         public: // buttons
+        
             void grab_button(std::initializer_list<std::pair<const uint8_t, const uint16_t>> bindings) {
                 for (const auto & binding : bindings) {
                     const uint8_t & button = binding.first;
@@ -1661,6 +1868,7 @@ class window {
                     xcb_flush(conn); 
                 }
             }
+        
             void ungrab_button(std::initializer_list<std::pair<const uint8_t, const uint16_t>> bindings) {
                 for (const auto & binding : bindings) {
                     const uint8_t & button = binding.first;
@@ -1674,10 +1882,11 @@ class window {
                 }
                 xcb_flush(conn); // Flush the request to the X server
             }
-        ;
-    ;
+    
     private: // variables
+        
         private: // main variables 
+        
             uint8_t        _depth;
             uint32_t       _window;
             uint32_t       _parent;
@@ -1690,15 +1899,17 @@ class window {
             uint32_t       _visual;
             uint32_t       _value_mask;
             const void     * _value_list;
-        ;
+        
         xcb_gcontext_t gc;
         xcb_gcontext_t font_gc;
         xcb_font_t     font;
         xcb_pixmap_t   pixmap;
         Logger log;
-    ;
+    
     private: // functions
+        
         private: // main functions 
+            
             void make_window() {
                 _window = xcb_generate_id(conn);
                 xcb_create_window(
@@ -1718,6 +1929,7 @@ class window {
                 );
                 xcb_flush(conn);
             }
+            
             void clear_window() {
                 xcb_clear_area(
                     conn, 
@@ -1730,12 +1942,14 @@ class window {
                 );
                 xcb_flush(conn);
             }
+            
             void update(const uint32_t & x, const uint32_t & y, const uint32_t & width, const uint32_t & height) {
                 _x = x;
                 _y = y;
                 _width = width;
                 _height = height;
             }
+
             /**
              *
              * @brief Configures the window with the specified mask and value.
@@ -1757,6 +1971,7 @@ class window {
                     }
                 );
             }
+            
             void config_window(uint32_t mask, const std::vector<uint32_t> & values) {
                 if (values.empty()) {
                     log_error("values vector is empty");
@@ -1770,7 +1985,7 @@ class window {
                     values.data()
                 );
             }
-        ;
+        
         void send_event(xcb_client_message_event_t ev) {
             xcb_send_event(
                 conn,
@@ -1780,6 +1995,7 @@ class window {
                 (char *) & ev
             );
         }
+        
         xcb_client_message_event_t make_client_message_event(const uint32_t & format, const uint32_t & type, const uint32_t & data) {
             xcb_client_message_event_t ev = { 0 };
             ev.response_type = XCB_CLIENT_MESSAGE;
@@ -1792,7 +2008,9 @@ class window {
 
             return ev;
         }
+        
         private: // pointer functions 
+        
             const char * pointer_from_enum(CURSOR CURSOR) {
                 switch (CURSOR) {
                     case CURSOR::arrow: return "arrow";
@@ -1839,9 +2057,11 @@ class window {
                     default: return "left_ptr";
                 }
             }
-        ;
+        
         private: // create functions 
+            
             private: // gc functions 
+            
                 void create_graphics_exposure_gc() {
                     gc = xcb_generate_id(conn);
                     uint32_t mask = XCB_GC_FOREGROUND | XCB_GC_BACKGROUND | XCB_GC_GRAPHICS_EXPOSURES;
@@ -1860,6 +2080,7 @@ class window {
                     );
                     xcb_flush(conn);
                 }
+            
                 void create_font_gc(const COLOR & text_color, const COLOR & backround_color, xcb_font_t font) {
                     font_gc = xcb_generate_id(conn);
                     xcb_create_gc(
@@ -1874,8 +2095,9 @@ class window {
                         }
                     );
                 }
-            ;
+            
             private: // pixmap functions 
+            
                 void create_pixmap() {
                     pixmap = xcb_generate_id(conn);
                     xcb_create_pixmap(
@@ -1888,8 +2110,9 @@ class window {
                     );
                     xcb_flush(conn);
                 }
-            ;
+            
             private: // png functions
+                
                 void create_png_from_vector_bitmap(const char * file_name, const std::vector<std::vector<bool>> & bitmap) {
                     int width = bitmap[0].size();
                     int height = bitmap.size();
@@ -1941,9 +2164,9 @@ class window {
                     fclose(fp);
                     png_destroy_write_struct(&png_ptr, &info_ptr);
                 }
-            ;
-        ;
+        
         private: // get functions 
+        
             xcb_atom_t atom(const char * atom_name) {
                 xcb_intern_atom_cookie_t cookie = xcb_intern_atom(
                     conn, 
@@ -1962,6 +2185,7 @@ class window {
                 free(reply);
                 return atom;
             }
+        
             std::string AtomName(xcb_atom_t atom) {
                 xcb_get_atom_name_cookie_t cookie = xcb_get_atom_name(conn, atom);
                 xcb_get_atom_name_reply_t* reply = xcb_get_atom_name_reply(conn, cookie, nullptr);
@@ -1979,6 +2203,7 @@ class window {
                 free(reply);
                 return atomName;
             }
+        
             void get_font(const char * font_name) {
                 font = xcb_generate_id(conn);
                 xcb_open_font(
@@ -1989,8 +2214,9 @@ class window {
                 );
                 xcb_flush(conn);
             }
-        ;
+        
         private: // backround functions 
+            
             void change_back_pixel(const uint32_t & pixel) {
                 xcb_change_window_attributes(
                     conn,
@@ -2002,6 +2228,7 @@ class window {
                 );
                 xcb_flush(conn);
             }
+            
             uint32_t get_color(COLOR color) {
                 uint32_t pixel = 0;
                 xcb_colormap_t colormap = screen->default_colormap;
@@ -2021,6 +2248,7 @@ class window {
                 free(reply);
                 return pixel;
             }
+            
             uint32_t get_color(const uint16_t & red_value, const uint16_t & green_value, const uint16_t & blue_value) {
                 uint32_t pixel = 0;
                 xcb_colormap_t colormap = screen->default_colormap;
@@ -2039,6 +2267,7 @@ class window {
                 free(reply);
                 return pixel;
             }
+            
             uint32_t get_color(const uint8_t & red_value, const uint8_t & green_value, const uint8_t & blue_value) {
                 uint32_t pixel = 0;
                 xcb_colormap_t colormap = screen->default_colormap;
@@ -2057,6 +2286,7 @@ class window {
                 free(reply);
                 return pixel;
             }
+            
             rgb_color_code rgb_code(COLOR COLOR) {
                 rgb_color_code color;
                 uint8_t r;
@@ -2155,13 +2385,14 @@ class window {
                 color.b = b;
                 return color;
             }
-        ;
-    ;
 };
+
 class client {
     public: // subclasses
-        class client_border_decor {
+    
+        class client_border_decor{
             public:
+
                 window left;
                 window right;
                 window top;
@@ -2171,10 +2402,10 @@ class client {
                 window top_right;
                 window bottom_left;
                 window bottom_right;
-            ;
         };
-    ;
+    
     public: // variabels
+    
         window win;
         window frame;
         window titlebar;
@@ -2194,9 +2425,11 @@ class client {
         size_pos max_button_ogsize;
 
         uint16_t desktop;
-    ;
+    
     public: // methods
+        
         public: // main methods
+        
             void make_decorations() {
                 make_frame();
                 make_titlebar();
@@ -2208,25 +2441,31 @@ class client {
                     make_borders();
                 }
             }
+        
             void raise() {
                 frame.raise();
             }
+        
             void focus() {
                 win.focus_input();
                 frame.raise();
             }
+        
             void update() {
                 x = frame.x();
                 y = frame.y();
                 width = frame.width();
                 height = frame.height();
             }
+        
             void map() {
                 frame.map();
             }
+        
             void unmap() {
                 frame.unmap();
             }
+        
             void kill() {
                 win.unmap();
                 close_button.unmap();
@@ -2258,17 +2497,21 @@ class client {
                 border.bottom_right.kill();
                 frame.kill();
             }
-        ;
+        
         public: // config methods
+        
             void x_y(const int32_t & x, const uint32_t & y) {
                 frame.x_y(x, y);
             }
+        
             void _x(const int & x) {
                 frame.x(x);
             }
+        
             void _y(const int & y) {
                 frame.y(y);
             }
+        
             void _width(const uint32_t & width) {
                 win.width((width - (BORDER_SIZE * 2)));
                 xcb_flush(conn);
@@ -2284,6 +2527,7 @@ class client {
                 border.bottom_right.x((width - BORDER_SIZE));
                 xcb_flush(conn);
             }
+        
             void _height(const uint32_t & height) {
                 win.height((height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
                 frame.height(height);
@@ -2293,6 +2537,7 @@ class client {
                 border.bottom_left.y((height - BORDER_SIZE));
                 border.bottom_right.y((height - BORDER_SIZE));
             }
+        
             void x_width(const uint32_t & x, const uint32_t & width) {
                 win.width((width - (BORDER_SIZE * 2)));
                 xcb_flush(conn);
@@ -2308,6 +2553,7 @@ class client {
                 border.bottom_right.x((width - BORDER_SIZE));
                 xcb_flush(conn);
             }
+        
             void y_height(const uint32_t & y, const uint32_t & height) {
                 win.height((height - TITLE_BAR_HEIGHT) - (BORDER_SIZE * 2));
                 xcb_flush(conn);
@@ -2319,6 +2565,7 @@ class client {
                 border.bottom_right.y((height - BORDER_SIZE));
                 xcb_flush(conn);
             }
+        
             void x_width_height(const uint32_t & x, const uint32_t & width, const uint32_t & height) {
                 frame.x_width_height(x, width, height);
                 win.width_height((width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
@@ -2334,6 +2581,7 @@ class client {
                 border.bottom_left.y((height - BORDER_SIZE));
                 border.bottom_right.x_y((width - BORDER_SIZE), (height - BORDER_SIZE));
             }
+        
             void y_width_height(const uint32_t & y, const uint32_t & width, const uint32_t & height) {
                 frame.y_width_height(y, width, height);
                 win.width_height((width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
@@ -2349,6 +2597,7 @@ class client {
                 border.bottom_left.y((height - BORDER_SIZE));
                 border.bottom_right.x_y((width - BORDER_SIZE), (height - BORDER_SIZE));
             }
+        
             void x_y_width_height(const uint32_t & x, const uint32_t & y, const uint32_t & width, const uint32_t & height) {
                 win.width_height((width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
                 xcb_flush(conn);
@@ -2366,6 +2615,7 @@ class client {
                 border.bottom_left.y((height - BORDER_SIZE));
                 xcb_flush(conn);
             }
+        
             void width_height(const uint32_t & width, const uint32_t & height) {
                 win.width_height((width - (BORDER_SIZE * 2)), (height - (BORDER_SIZE * 2) - TITLE_BAR_HEIGHT));
                 xcb_flush(conn);
@@ -2383,28 +2633,35 @@ class client {
                 border.bottom_left.y((height - BORDER_SIZE));
                 xcb_flush(conn);
             }
-        ;
+        
         public: // size_pos methods
+        
             void save_ogsize() {
                 ogsize.save(x, y, width, height);
             }
+        
             void save_tile_ogsize() {
                 tile_ogsize.save(x, y, width, height);
             }
+        
             void save_max_ewmh_ogsize() {
                 max_ewmh_ogsize.save(x, y, width, height);
             }
+        
             void save_max_button_ogsize() {
                 max_button_ogsize.save(x, y, width, height);
             }
-        ;
+        
         public: // check methods
+        
             bool is_active_EWMH_window() {
                 return win.is_active_EWMH_window();
             }
+        
             bool is_EWMH_fullscreen() {
                 return win.is_EWMH_fullscreen();
             }
+        
             bool is_button_max_win() {
                 if (x      == 0
                  && y      == 0
@@ -2414,22 +2671,25 @@ class client {
                 }
                 return false;
             }
-        ;
+        
         public: // set methods
+    
             void set_active_EWMH_window() {
                 win.set_active_EWMH_window();
             }
+    
             void set_EWMH_fullscreen_state() {
                 win.set_EWMH_fullscreen_state();
             }
-        ;
+    
         public: // unset methods
+        
             void unset_EWMH_fullscreen_state() {
                 win.unset_EWMH_fullscreen_state();
             }
-        ;
-    ;
+        
     private: // functions
+    
         void make_frame() {
             frame.create_default(screen->root, (x - BORDER_SIZE), (y - TITLE_BAR_HEIGHT - BORDER_SIZE), (width + (BORDER_SIZE * 2)), (height + TITLE_BAR_HEIGHT + (BORDER_SIZE * 2)));
             frame.set_backround_color(DARK_GREY);
@@ -2437,12 +2697,14 @@ class client {
             frame.apply_event_mask({XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY});
             frame.map();
         }
+    
         void make_titlebar() {
             titlebar.create_default(frame, BORDER_SIZE, BORDER_SIZE, width, TITLE_BAR_HEIGHT);
             titlebar.set_backround_color(BLACK);
             titlebar.grab_button({ { L_MOUSE_BUTTON, NULL } });
             titlebar.map();
         }
+    
         void make_close_button() {
             close_button.create_default(frame, (width - BUTTON_SIZE + BORDER_SIZE), BORDER_SIZE, BUTTON_SIZE, BUTTON_SIZE);
             close_button.apply_event_mask({XCB_EVENT_MASK_ENTER_WINDOW, XCB_EVENT_MASK_LEAVE_WINDOW});
@@ -2451,6 +2713,7 @@ class client {
             close_button.map();
             close_button.make_then_set_png("/home/mellw/close.png", CLOSE_BUTTON_BITMAP);
         }
+    
         void make_max_button() {
             max_button.create_default(frame, (width - (BUTTON_SIZE * 2) + BORDER_SIZE), BORDER_SIZE, BUTTON_SIZE, BUTTON_SIZE);
             max_button.set_backround_color(RED);
@@ -2485,6 +2748,7 @@ class client {
 
             max_button.set_backround_png("/home/mellw/max.png");
         }
+    
         void make_min_button() {
             min_button.create_default(frame, (width - (BUTTON_SIZE * 3) + BORDER_SIZE), BORDER_SIZE, BUTTON_SIZE, BUTTON_SIZE);
             min_button.set_backround_color(GREEN);
@@ -2499,6 +2763,7 @@ class client {
 
             min_button.set_backround_png("/home/mellw/min.png");
         }
+    
         void make_borders() {
             border.left.create_default(frame, 0, BORDER_SIZE, BORDER_SIZE, (height + TITLE_BAR_HEIGHT));
             border.left.set_backround_color(BLACK);
@@ -2548,9 +2813,10 @@ class client {
             border.bottom_right.grab_button({ { L_MOUSE_BUTTON, NULL } });
             border.bottom_right.map();
         }
-    ;
+    
     private: // variables
-        std::vector<std::vector<bool>> CLOSE_BUTTON_BITMAP = {
+        
+        vector<vector<bool>> CLOSE_BUTTON_BITMAP = {
             {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
             {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
             {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
@@ -2574,28 +2840,32 @@ class client {
         };
 
         Logger log;
-    ;
+    
 };
+
 class desktop {
     public: // variabels
-        std::vector<client *> current_clients;
+    
+        vector<client *> current_clients;
         uint16_t desktop;
         const uint16_t x = 0;
         const uint16_t y = 0;
         uint16_t width;
         uint16_t height;
-    ;
 };
+
 class Key_Codes {
     public: // constructor and destructor
+    
         Key_Codes() 
         : keysyms(nullptr) {}
 
         ~Key_Codes() {
             free(keysyms);
         }
-    ;
+    
     public: // methods
+    
         void init() {
             keysyms = xcb_key_symbols_alloc(conn);
             if (keysyms) {
@@ -2653,8 +2923,9 @@ class Key_Codes {
                 }
             }
         }
-    ;
+    
     public: // variabels
+        
         xcb_keycode_t
             a{},
             b{},
@@ -2697,34 +2968,40 @@ class Key_Codes {
             u_arrow{},
             d_arrow{},
             tab{},
-            _delete{}
-        ;
-    ;
+            _delete{};
+    
     private: // variabels
         xcb_key_symbols_t * keysyms;
-    ;
 };
+
 class Entry {
     public: // constructor
+    
         Entry() {}
-    ;
+    
     public: // variabels
+    
         window window;
         bool menu = false;
-    ;
+    
     public: // public methods
+    
         void add_name(const char * name) {
             entryName = name;
         }
+    
         void add_action(std::function<void()> action) {
             entryAction = action;
         }
+    
         void activate() const {
             entryAction();
         }
+    
         const char * getName() const {
             return entryName;
         }
+    
         void make_window(const xcb_window_t & parent_window, const int16_t & x, const int16_t & y, const uint16_t & width, const uint16_t & height) {
             window.create_default(parent_window, x, y, width, height);
             window.set_backround_color(BLACK);
@@ -2733,14 +3010,16 @@ class Entry {
             window.grab_button({ { L_MOUSE_BUTTON, NULL } });
             window.map();
         }
-    ;
+    
     private: // vatiabels
+    
         const char * entryName;
-        std::function<void()> entryAction;
-    ;
+        function<void()> entryAction;
 };
+
 class context_menu {
     public: // consructor
+        
         context_menu() {
             size_pos.x      = pointer.x();
             size_pos.y      = pointer.y();
@@ -2754,11 +3033,13 @@ class context_menu {
 
             create_dialog_win();
         }
-    ;
+    
     public: // public methods
+    
         void init() {
             configure_events();
         }
+        
         void show() {
             size_pos.x = pointer.x();
             size_pos.y = pointer.y();
@@ -2777,14 +3058,16 @@ class context_menu {
             context_window.raise();
             make_entries();
         }
+        
         void add_entry(const char * name, std::function<void()> action) {
             Entry entry;
             entry.add_name(name);
             entry.add_action(action);
             entries.push_back(entry);
         }
-    ;
+    
     private: // private variables
+    
         window context_window;
         size_pos size_pos;
         window_borders border;
@@ -2793,8 +3076,9 @@ class context_menu {
         std::vector<Entry> entries;
         pointer pointer;
         Launcher launcher;
-    ;
+    
     private: // private methods
+    
         void create_dialog_win() {
             context_window.create_default(screen->root, 0, 0, size_pos.width, size_pos.height);
             uint32_t mask = XCB_EVENT_MASK_FOCUS_CHANGE | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY | XCB_EVENT_MASK_POINTER_MOTION;
@@ -2802,25 +3086,29 @@ class context_menu {
             context_window.set_backround_color(DARK_GREY);
             context_window.raise();
         }
+        
         void hide() {
             context_window.unmap();
             context_window.kill();
         }
+        
         void configure_events() {
-            event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) {
+            event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) -> void {
                 const auto & e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
-                if (e->detail == L_MOUSE_BUTTON) {
+                if(e->detail == L_MOUSE_BUTTON) {
                     run_action(& e->event);
                     hide();
                 }
             });
-            event_handler->setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev) {
+
+            event_handler->setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev) ->void {
                 const auto * e = reinterpret_cast<const xcb_enter_notify_event_t *>(ev);
-                if (e->event == screen->root) {
+                if(e->event == screen->root) {
                     hide();
                 } 
             });
         }
+        
         void run_action(const xcb_window_t * w) {
             for (const auto & entry : entries) {
                 if (* w == entry.window) {
@@ -2828,6 +3116,7 @@ class context_menu {
                 }
             }
         }
+        
         void make_entries() {
             int y = 0;
             for (auto & entry : entries) {
@@ -2836,545 +3125,673 @@ class context_menu {
                 y += size_pos.height;
             }
         }
-    ;
 };
+
 class Window_Manager {
-  public: // constructor
-      Window_Manager() {}
-  ;
-  public: // variabels
-      window root;
-      Launcher launcher;
-      Logger log;
-      pointer pointer;
-      win_data data;
-      Key_Codes key_codes;
-      
-      context_menu * context_menu = nullptr;
-      
-      std::vector<client *> client_list;
-      std::vector<desktop *> desktop_list;
-      client * focused_client = nullptr;
-      desktop * cur_d = nullptr;
-  ;
-  public: // methods
-    // Main Methods
-      Public(void) init() {
-        _conn(nullptr, nullptr);
-        _setup();
-        _iter();
-        _screen();
-        root = screen->root;
-        root.width(screen->width_in_pixels);
-        root.height(screen->height_in_pixels);
-        setSubstructureRedirectMask();
-        configure_root();
-        _ewmh();
+    public: // constructor
 
-        key_codes.init();
+        Window_Manager() {}
+    
+    public: // variabels
+    
+        window root;
+        Launcher launcher;
+        Logger log;
+        pointer pointer;
+        win_data data;
+        Key_Codes key_codes;
+        
+        context_menu * context_menu = nullptr;
+        
+        std::vector<client *> client_list;
+        std::vector<desktop *> desktop_list;
+        client * focused_client = nullptr;
+        desktop * cur_d = nullptr;
+    
+    public: // methods
 
-        event_handler = new Event_Handler();
+        // Main Methods
 
-        create_new_desktop(1);
-        create_new_desktop(2);
-        create_new_desktop(3);
-        create_new_desktop(4);
-        create_new_desktop(5);
+            void init() {
+                _conn(nullptr, nullptr);
+                _setup();
+                _iter();
+                _screen();
+                root = screen->root;
+                root.width(screen->width_in_pixels);
+                root.height(screen->height_in_pixels);
+                setSubstructureRedirectMask();
+                configure_root();
+                _ewmh();
 
-        context_menu = new class context_menu();
-        context_menu->add_entry("konsole",
-        [this]() {
-          launcher.program((char *) "konsole");
-        });
-        context_menu->init();
+                key_codes.init();
 
-        // std::thread(check_volt()); // dosent work 
-        }
-      Public(void) launch_program(char * program) {
-        if(fork() == 0) {
-          setsid();
-          execvp(program, (char *[]) { program, NULL }); }}
-      Public(void) quit(const int & status) {
-        xcb_flush(conn);
-        delete_client_vec(client_list);
-        delete_desktop_vec(desktop_list);
-        xcb_ewmh_connection_wipe(ewmh);
-        xcb_disconnect(conn);
-        exit(status); }
-    public: // client methods
-      // focus methods
-        Public(void) focus_client(client * c) {
-          if(!c) {
-            log_error("c is null"); return; }
-          focused_client = c;
-          c->focus(); }
-        Public(void) cycle_focus() {
-          bool focus = false;
-          for(auto &c:client_list) {
-            if(c) {
-              if(c == focused_client) { 
-                  focus = true; continue; }    
-              if (focus) { focus_client(c); 
-                return; }}}}
-      // client fetch methods
-        Public(client) *client_from_window(const xcb_window_t * window) {
-          for (const auto &c:client_list)
-            if(*window == c->win)
-              return c;
-          return nullptr; }
-        Public(client) *client_from_any_window(const xcb_window_t * window) {
-          for(const auto &c:client_list)
-            if(*window == c->win 
-            || *window == c->frame 
-            || *window == c->titlebar 
-            || *window == c->close_button 
-            || *window == c->max_button 
-            || *window == c->min_button 
-            || *window == c->border.left 
-            || *window == c->border.right 
-            || *window == c->border.top 
-            || *window == c->border.bottom
-            || *window == c->border.top_left
-            || *window == c->border.top_right
-            || *window == c->border.bottom_left
-            || *window == c->border.bottom_right)
-              return(c);
-          return(nullptr); }
-        Public(client) *client_from_pointer(const int & prox) {
-          const uint32_t & x = pointer.x();
-          const uint32_t & y = pointer.y();
-          for (const auto & c : cur_d->current_clients) {
-            if (x > c->x - prox && x <= c->x) // LEFT EDGE OF CLIENT
-              return(c);
-            if (x >= c->x + c->width && x < c->x + c->width + prox) // RIGHT EDGE OF CLIENT
-              return(c);
-            if (y > c->y - prox && y <= c->y) // TOP EDGE OF CLIENT
-              return(c);
-            if (y >= c->y + c->height && y < c->y + c->height + prox) // BOTTOM EDGE OF CLIENT
-              return(c);
-          } return(nullptr); }
-        Public(map)<client *, edge> get_client_next_to_client(client * c, edge c_edge) {
-          map<client *, edge> map;
-          for(client *c2:cur_d->current_clients) {
-            if(c == c2)
-                continue;
-            if(c_edge == edge::LEFT) {
-              if (c->x == c2->x + c2->width) {
-                map[c2] = edge::RIGHT; return map; }}
-            if(c_edge == edge::RIGHT) {
-              if(c->x + c->width == c2->x) {
-                map[c2] = edge::LEFT; return map; }}
-            if(c_edge == edge::TOP) {
-              if(c->y == c2->y + c2->height) {
-                map[c2] = edge::BOTTOM_edge; return map; }}
-            if(c_edge == edge::BOTTOM_edge) {
-              if(c->y + c->height == c2->y) {
-                map[c2] = edge::TOP; return map; }}}
-          map[nullptr] = edge::NONE;
-          return(map); }
-        Public(edge) get_client_edge_from_pointer(client * c, const int & prox) {
-          const uint32_t &x = pointer.x();
-          const uint32_t &y = pointer.y();
+                event_handler = new Event_Handler();
 
-          const uint32_t &top_border = c->y;
-          const uint32_t &bottom_border = (c->y + c->height);
-          const uint32_t &left_border = c->x;
-          const uint32_t &right_border = (c->x + c->width);
+                create_new_desktop(1);
+                create_new_desktop(2);
+                create_new_desktop(3);
+                create_new_desktop(4);
+                create_new_desktop(5);
 
-          // TOP EDGE OF CLIENT
-          if(((y > top_border - prox) && (y <= top_border))
-           &&((x > left_border + prox) && (x < right_border - prox)))
-            return edge::TOP;
-          // BOTTOM EDGE OF CLIENT
-          if(((y >= bottom_border) && (y < bottom_border + prox))
-           &&((x > left_border + prox) && (x < right_border - prox)))
-            return edge::BOTTOM_edge;
-          // LEFT EDGE OF CLIENT
-          if(((x > left_border) - prox && (x <= left_border))
-           &&((y > top_border + prox) && (y < bottom_border - prox)))
-            return edge::LEFT;
-          // RIGHT EDGE OF CLIENT
-          if(((x >= right_border) && (x < right_border + prox))
-           &&((y > top_border + prox) && (y < bottom_border - prox)))
-            return edge::RIGHT;
-          // TOP LEFT CORNER OF CLIENT
-          if(((x > left_border - prox) && x < left_border + prox)
-           &&((y > top_border - prox) && y < top_border + prox))
-            return edge::TOP_LEFT;
-          // TOP RIGHT CORNER OF CLIENT
-          if(((x > right_border - prox) && x < right_border + prox)
-           &&((y > top_border - prox) && y < top_border + prox))
-            return edge::TOP_RIGHT;
-          // BOTTOM LEFT CORNER OF CLIENT
-          if(((x > left_border - prox) && x < left_border + prox) 
-           &&((y > bottom_border - prox) && y < bottom_border + prox))
-            return edge::BOTTOM_LEFT;
-          // BOTTOM RIGHT CORNER OF CLIENT
-          if(((x > right_border - prox) && x < right_border + prox)
-           &&((y > bottom_border - prox) && y < bottom_border + prox))
-            return edge::BOTTOM_RIGHT;
-          return edge::NONE; }
-      void manage_new_client(const uint32_t & window) {
-          client * c = make_client(window); if(!c){log_error("could not make client"); return;}
+                context_menu = new class context_menu();
+                context_menu->add_entry("konsole", [this]() -> void {
+                    launcher.program((char *) "konsole");
+                });
 
-          c->win.x_y_width_height(c->x, c->y, c->width, c->height); c->win.map();
-          c->win.grab_button({{L_MOUSE_BUTTON, ALT}, {R_MOUSE_BUTTON, ALT}, {L_MOUSE_BUTTON, 0}});
-          c->win.grab_default_keys();
-          c->make_decorations();
-          uint mask = XCB_EVENT_MASK_FOCUS_CHANGE | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW | XCB_EVENT_MASK_STRUCTURE_NOTIFY;
-          c->win.apply_event_mask(& mask);
+                context_menu->init();
 
-          c->update(); focus_client(c); check_client(c);
-      }
-      client * make_internal_client(window window) {
-          client * c = new client;
-          c->win = window;
-          c->x = window.x();
-          c->y = window.y();
-          c->width = window.width();
-          c->height = window.height();
-          
-          c->make_decorations();
-          client_list.push_back(c);
-          cur_d->current_clients.push_back(c);
-          c->focus();
+                // std::thread(check_volt()); // dosent work 
+            }
 
-          return c;
-      }
-      void send_sigterm_to_client(client * c) {
-          c->kill();
-          remove_client(c);
-      }
-    ;
-    public: // desktop methods
-        void create_new_desktop(const uint16_t & n) {
-            desktop * d = new desktop;
-            d->desktop  = n;
-            d->width    = screen->width_in_pixels;
-            d->height   = screen->height_in_pixels;
-            cur_d       = d;
-            desktop_list.push_back(d);
-        }
-    ;
-    public: // experimental methods
-        xcb_visualtype_t * find_argb_visual(xcb_connection_t *conn, xcb_screen_t *screen) {
-            xcb_depth_iterator_t depth_iter = xcb_screen_allowed_depths_iterator(screen);
+            void launch_program(char * program) {
+                if(fork() == 0) {
+                    setsid();
+                    execvp(program, (char *[]) { program, NULL });
+                }
+            }
 
-            for (; depth_iter.rem; xcb_depth_next(&depth_iter)) {
-                xcb_visualtype_iterator_t visual_iter = xcb_depth_visuals_iterator(depth_iter.data);
-                for (; visual_iter.rem; xcb_visualtype_next(&visual_iter)) {
-                    if (depth_iter.data->depth == 32) {
-                        return visual_iter.data;
+            void quit(const int & status) {
+                xcb_flush(conn);
+                delete_client_vec(client_list);
+                delete_desktop_vec(desktop_list);
+                xcb_ewmh_connection_wipe(ewmh);
+                xcb_disconnect(conn);
+                exit(status);
+            }
+        
+        public: // client methods
+            // focus methods
+
+                void focus_client(client * c) {
+                    if(!c) {
+                        log_error("c is null");
+                        return;
+                    }
+
+                    focused_client = c;
+                    c->focus();
+                }
+
+                void cycle_focus() {
+                    bool focus = false;
+                    for(auto &c:client_list) {
+                        if(c) {
+                            if(c == focused_client) { 
+                                focus = true;
+                                continue;
+                            }
+
+                            if(focus) {
+                                focus_client(c); 
+                                return;
+                            }
+                        }
                     }
                 }
-            }
-            return NULL;
-        }
-    ;
-  private: // variables
-      window start_window;
-  ;
-  private: // functions
-      private: // init functions
-        void _conn(const char * displayname, int * screenp) {
-            conn = xcb_connect(displayname, screenp);
-            check_conn();
-        }
-        void _ewmh() {
-            if (!(ewmh = static_cast<xcb_ewmh_connection_t *>(calloc(1, sizeof(xcb_ewmh_connection_t))))) {
-                log_error("ewmh faild to initialize");
-                quit(1);
-            }    
-            
-            xcb_intern_atom_cookie_t * cookie = xcb_ewmh_init_atoms(conn, ewmh);
-            if (!(xcb_ewmh_init_atoms_replies(ewmh, cookie, 0))) {
-                log_error("xcb_ewmh_init_atoms_replies:faild");
-                quit(1);
-            }
 
-            const char * str = "mwm";
-            check_error(
-                xcb_ewmh_set_wm_name(
-                    ewmh,
-                    screen->root,
-                    strlen(str),
-                    str
-                ), 
-                __func__,
-                "xcb_ewmh_set_wm_name"
-            );
-        }
-        void _setup() {
-            setup = xcb_get_setup(conn);
-        }
-        void _iter() {
-            iter = xcb_setup_roots_iterator(setup);
-        }
-        void _screen() {
-            screen = iter.data;
-        }
-        bool setSubstructureRedirectMask() {
-            xcb_void_cookie_t cookie = xcb_change_window_attributes_checked(
-                conn,
-                root,
-                XCB_CW_EVENT_MASK,
-                (const uint32_t[1])
-                {
-                    XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY
+            // client fetch methods
+                
+                client *client_from_window(const xcb_window_t * window) {
+                    for(const auto &c:client_list) {
+                        if(*window == c->win) {
+                            return c;
+                        }
+                    }
+
+                    return nullptr;
                 }
-            );
 
-            xcb_generic_error_t * error = xcb_request_check(conn, cookie);
-            if (error) {
-                log_error("Error: Another window manager is already running or failed to set SubstructureRedirect mask."); 
-                free(error);
-                return false;
-            }
-            return true;
-        }
-        void configure_root() {
-            root.set_backround_color(DARK_GREY);
-            uint32_t mask = 
-                XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT |
-                XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY |
-                XCB_EVENT_MASK_ENTER_WINDOW |
-                XCB_EVENT_MASK_LEAVE_WINDOW |
-                XCB_EVENT_MASK_STRUCTURE_NOTIFY |
-                XCB_EVENT_MASK_BUTTON_PRESS |
-                XCB_EVENT_MASK_BUTTON_RELEASE |
-                XCB_EVENT_MASK_KEY_PRESS |
-                XCB_EVENT_MASK_KEY_RELEASE |
-                XCB_EVENT_MASK_FOCUS_CHANGE |
-                XCB_EVENT_MASK_POINTER_MOTION
-            ; 
-            root.apply_event_mask(& mask);
-            root.clear();
+                client *client_from_any_window(const xcb_window_t * window) {
+                    for(const auto &c:client_list) {
+                        if(*window == c->win 
+                        || *window == c->frame 
+                        || *window == c->titlebar 
+                        || *window == c->close_button 
+                        || *window == c->max_button 
+                        || *window == c->min_button 
+                        || *window == c->border.left 
+                        || *window == c->border.right 
+                        || *window == c->border.top 
+                        || *window == c->border.bottom
+                        || *window == c->border.top_left
+                        || *window == c->border.top_right
+                        || *window == c->border.bottom_left
+                        || *window == c->border.bottom_right)
+                        {
+                            return(c);
+                        }
+                    }
 
-            root.set_backround_png("/home/mellw/mwm_png/galaxy17.png");
-            root.set_pointer(CURSOR::arrow);
-        }
-      ;
-      private: // check functions
-        void check_error(const int & code) {
-            switch (code) {
-                case CONN_ERR:
-                    log_error("Connection error.");
-                    quit(CONN_ERR);
-                    break;
-                case EXTENTION_NOT_SUPPORTED_ERR:
-                    log_error("Extension not supported.");
-                    quit(EXTENTION_NOT_SUPPORTED_ERR);
-                    break;
-                case MEMORY_INSUFFICIENT_ERR:
-                    log_error("Insufficient memory.");
-                    quit(MEMORY_INSUFFICIENT_ERR);
-                    break;
-                case REQUEST_TO_LONG_ERR:
-                    log_error("Request to long.");
-                    quit(REQUEST_TO_LONG_ERR);
-                    break;
-                case PARSE_ERR:
-                    log_error("Parse error.");
-                    quit(PARSE_ERR);
-                    break;
-                case SCREEN_NOT_FOUND_ERR:
-                    log_error("Screen not found.");
-                    quit(SCREEN_NOT_FOUND_ERR);
-                    break;
-                case FD_ERR:
-                    log_error("File descriptor error.");
-                    quit(FD_ERR);
-                    break;
+                    return nullptr;
+                }
+
+                client *client_from_pointer(const int & prox) {
+                    const uint32_t & x = pointer.x();
+                    const uint32_t & y = pointer.y();
+                    for(const auto & c : cur_d->current_clients) {
+                        // LEFT EDGE OF CLIENT
+                        if(x > c->x - prox && x <= c->x) {
+                            return(c);
+                        }
+                        
+                        // RIGHT EDGE OF CLIENT
+                        if(x >= c->x + c->width && x < c->x + c->width + prox) { 
+                            return(c);
+                        }
+                        
+                        // TOP EDGE OF CLIENT
+                        if(y > c->y - prox && y <= c->y) { 
+                            return(c);
+                        }
+                        // BOTTOM EDGE OF CLIENT
+                        if(y >= c->y + c->height && y < c->y + c->height + prox) {
+                            return(c);
+                        }
+                    } 
+                    
+                    return nullptr;
+                }
+
+                map<client *, edge> get_client_next_to_client(client * c, edge c_edge) {
+                    map<client *, edge> map;
+                    for(client *c2:cur_d->current_clients) {
+                        if(c == c2) {
+                            continue;
+                        }
+ 
+                        if(c_edge == edge::LEFT) {
+                            if(c->x == c2->x + c2->width) {
+                                map[c2] = edge::RIGHT;
+                                return map;
+                            }
+                        }
+
+                        if(c_edge == edge::RIGHT) {
+                            if(c->x + c->width == c2->x) {
+                                map[c2] = edge::LEFT;
+                                return map;
+                            }
+                        }
+
+                        if(c_edge == edge::TOP) {
+                            if(c->y == c2->y + c2->height) {
+                                map[c2] = edge::BOTTOM_edge;
+                                return map;
+                            }
+                        }
+
+                        if(c_edge == edge::BOTTOM_edge) {
+                            if(c->y + c->height == c2->y) {
+                                map[c2] = edge::TOP;
+                                return map;
+                            }
+                        }
+                    }
+
+                    map[nullptr] = edge::NONE;
+                    return map;
+                }
+
+                edge get_client_edge_from_pointer(client * c, const int & prox) {
+                    const uint32_t &x = pointer.x();
+                    const uint32_t &y = pointer.y();
+
+                    const uint32_t &top_border = c->y;
+                    const uint32_t &bottom_border = (c->y + c->height);
+                    const uint32_t &left_border = c->x;
+                    const uint32_t &right_border = (c->x + c->width);
+
+                    // TOP EDGE OF CLIENT
+                    if(((y > top_border - prox) && (y <= top_border))
+                    &&((x > left_border + prox) && (x < right_border - prox)))
+                    {
+                        return edge::TOP;
+                    }
+                    
+                    // BOTTOM EDGE OF CLIENT
+                    if(((y >= bottom_border) && (y < bottom_border + prox))
+                    &&((x > left_border + prox) && (x < right_border - prox)))
+                    {
+                        return edge::BOTTOM_edge;
+                    }
+                    
+                    // LEFT EDGE OF CLIENT
+                    if(((x > left_border) - prox && (x <= left_border))
+                    &&((y > top_border + prox) && (y < bottom_border - prox)))
+                    {
+                        return edge::LEFT;
+                    }
+                    
+                    // RIGHT EDGE OF CLIENT
+                    if(((x >= right_border) && (x < right_border + prox))
+                    &&((y > top_border + prox) && (y < bottom_border - prox)))
+                    {
+                        return edge::RIGHT;
+                    }
+                    
+                    // TOP LEFT CORNER OF CLIENT
+                    if(((x > left_border - prox) && x < left_border + prox)
+                    &&((y > top_border - prox) && y < top_border + prox))
+                    {
+                        return edge::TOP_LEFT;
+                    }
+
+                    // TOP RIGHT CORNER OF CLIENT
+                    if(((x > right_border - prox) && x < right_border + prox)
+                    &&((y > top_border - prox) && y < top_border + prox))
+                    {
+                        return edge::TOP_RIGHT;
+                    }
+
+                    // BOTTOM LEFT CORNER OF CLIENT
+                    if(((x > left_border - prox) && x < left_border + prox) 
+                    &&((y > bottom_border - prox) && y < bottom_border + prox))
+                    {
+                        return edge::BOTTOM_LEFT;
+                    }
+
+                    // BOTTOM RIGHT CORNER OF CLIENT
+                    if(((x > right_border - prox) && x < right_border + prox)
+                    &&((y > bottom_border - prox) && y < bottom_border + prox))
+                    {
+                        return edge::BOTTOM_RIGHT;
+                    }
+
+                    return edge::NONE;
+                }
+            
+            void manage_new_client(const uint32_t & window) {
+                client * c = make_client(window); if(!c){log_error("could not make client"); return;}
+
+                c->win.x_y_width_height(c->x, c->y, c->width, c->height); c->win.map();
+                c->win.grab_button({{L_MOUSE_BUTTON, ALT}, {R_MOUSE_BUTTON, ALT}, {L_MOUSE_BUTTON, 0}});
+                c->win.grab_default_keys();
+                c->make_decorations();
+                uint mask = XCB_EVENT_MASK_FOCUS_CHANGE | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW | XCB_EVENT_MASK_STRUCTURE_NOTIFY;
+                c->win.apply_event_mask(& mask);
+
+                c->update(); focus_client(c); check_client(c);
             }
-        }
-        void check_conn() {
-            int status = xcb_connection_has_error(conn);
-            check_error(status);
-        }
-        int cookie_error(xcb_void_cookie_t cookie , const char * sender_function) {
-            xcb_generic_error_t * err = xcb_request_check(conn, cookie);
-            if (err) {
-                log_error(err->error_code);
-                free(err);
-                return err->error_code;
+            
+            client * make_internal_client(window window) {
+                client * c = new client;
+                c->win = window;
+                c->x = window.x();
+                c->y = window.y();
+                c->width = window.width();
+                c->height = window.height();
+                
+                c->make_decorations();
+                client_list.push_back(c);
+                cur_d->current_clients.push_back(c);
+                c->focus();
+
+                return c;
             }
+            
+            void send_sigterm_to_client(client * c) {
+                c->kill();
+                remove_client(c);
+            }
+        
+        public: // desktop methods
+            
+            void create_new_desktop(const uint16_t & n) {
+                desktop * d = new desktop;
+                d->desktop  = n;
+                d->width    = screen->width_in_pixels;
+                d->height   = screen->height_in_pixels;
+                cur_d       = d;
+                desktop_list.push_back(d);
+            }
+        
+        public: // experimental methods
+            
+            xcb_visualtype_t * find_argb_visual(xcb_connection_t *conn, xcb_screen_t *screen) {
+                xcb_depth_iterator_t depth_iter = xcb_screen_allowed_depths_iterator(screen);
+
+                for (; depth_iter.rem; xcb_depth_next(&depth_iter)) {
+                    xcb_visualtype_iterator_t visual_iter = xcb_depth_visuals_iterator(depth_iter.data);
+                    for (; visual_iter.rem; xcb_visualtype_next(&visual_iter)) {
+                        if (depth_iter.data->depth == 32) {
+                            return visual_iter.data;
+                        }
+                    }
+                }
+                return NULL;
+            }
+        
+    private: // variables
+        
+        window start_window;
+    
+    private: // functions
+        
+        private: // init functions
+            
+            void _conn(const char * displayname, int * screenp) {
+                conn = xcb_connect(displayname, screenp);
+                check_conn();
+            }
+            
+            void _ewmh() {
+                if (!(ewmh = static_cast<xcb_ewmh_connection_t *>(calloc(1, sizeof(xcb_ewmh_connection_t))))) {
+                    log_error("ewmh faild to initialize");
+                    quit(1);
+                }    
+                
+                xcb_intern_atom_cookie_t * cookie = xcb_ewmh_init_atoms(conn, ewmh);
+                if (!(xcb_ewmh_init_atoms_replies(ewmh, cookie, 0))) {
+                    log_error("xcb_ewmh_init_atoms_replies:faild");
+                    quit(1);
+                }
+
+                const char * str = "mwm";
+                check_error(
+                    xcb_ewmh_set_wm_name(
+                        ewmh,
+                        screen->root,
+                        strlen(str),
+                        str
+                    ), 
+                    __func__,
+                    "xcb_ewmh_set_wm_name"
+                );
+            }
+            
+            void _setup() {
+                setup = xcb_get_setup(conn);
+            }
+            
+            void _iter() {
+                iter = xcb_setup_roots_iterator(setup);
+            }
+            
+            void _screen() {
+                screen = iter.data;
+            }
+            
+            bool setSubstructureRedirectMask() {
+                xcb_void_cookie_t cookie = xcb_change_window_attributes_checked(
+                    conn,
+                    root,
+                    XCB_CW_EVENT_MASK,
+                    (const uint32_t[1])
+                    {
+                        XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY
+                    }
+                );
+
+                xcb_generic_error_t * error = xcb_request_check(conn, cookie);
+                if (error) {
+                    log_error("Error: Another window manager is already running or failed to set SubstructureRedirect mask."); 
+                    free(error);
+                    return false;
+                }
+                return true;
+            }
+            
+            void configure_root() {
+                root.set_backround_color(DARK_GREY);
+                uint32_t mask = 
+                    XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT |
+                    XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY |
+                    XCB_EVENT_MASK_ENTER_WINDOW |
+                    XCB_EVENT_MASK_LEAVE_WINDOW |
+                    XCB_EVENT_MASK_STRUCTURE_NOTIFY |
+                    XCB_EVENT_MASK_BUTTON_PRESS |
+                    XCB_EVENT_MASK_BUTTON_RELEASE |
+                    XCB_EVENT_MASK_KEY_PRESS |
+                    XCB_EVENT_MASK_KEY_RELEASE |
+                    XCB_EVENT_MASK_FOCUS_CHANGE |
+                    XCB_EVENT_MASK_POINTER_MOTION
+                ; 
+                root.apply_event_mask(& mask);
+                root.clear();
+
+                root.set_backround_png("/home/mellw/mwm_png/galaxy17.png");
+                root.set_pointer(CURSOR::arrow);
+            }
+        
+        private: // check functions
+        
+            void check_error(const int & code) {
+                switch (code) {
+                    case CONN_ERR:
+                        log_error("Connection error.");
+                        quit(CONN_ERR);
+                        break;
+                    case EXTENTION_NOT_SUPPORTED_ERR:
+                        log_error("Extension not supported.");
+                        quit(EXTENTION_NOT_SUPPORTED_ERR);
+                        break;
+                    case MEMORY_INSUFFICIENT_ERR:
+                        log_error("Insufficient memory.");
+                        quit(MEMORY_INSUFFICIENT_ERR);
+                        break;
+                    case REQUEST_TO_LONG_ERR:
+                        log_error("Request to long.");
+                        quit(REQUEST_TO_LONG_ERR);
+                        break;
+                    case PARSE_ERR:
+                        log_error("Parse error.");
+                        quit(PARSE_ERR);
+                        break;
+                    case SCREEN_NOT_FOUND_ERR:
+                        log_error("Screen not found.");
+                        quit(SCREEN_NOT_FOUND_ERR);
+                        break;
+                    case FD_ERR:
+                        log_error("File descriptor error.");
+                        quit(FD_ERR);
+                        break;
+                }
+            }
+        
+            void check_conn() {
+                int status = xcb_connection_has_error(conn);
+                check_error(status);
+            }
+        
+            int cookie_error(xcb_void_cookie_t cookie , const char * sender_function) {
+                xcb_generic_error_t * err = xcb_request_check(conn, cookie);
+                if (err) {
+                    log_error(err->error_code);
+                    free(err);
+                    return err->error_code;
+                }
+                return 0;
+            }
+        
+            void check_error(xcb_void_cookie_t cookie , const char * sender_function, const char * err_msg) {
+                xcb_generic_error_t * err = xcb_request_check(conn, cookie);
+                if (err)
+                {
+                    log_error_code(err_msg, err->error_code);
+                    free(err);
+                }
+            }
+        
+        int start_screen_window() {
+            start_window.create_default(root, 0, 0, 0, 0);
+            start_window.set_backround_color(DARK_GREY);
+            start_window.map();
             return 0;
         }
-        void check_error(xcb_void_cookie_t cookie , const char * sender_function, const char * err_msg) {
-            xcb_generic_error_t * err = xcb_request_check(conn, cookie);
-            if (err)
-            {
-                log_error_code(err_msg, err->error_code);
-                free(err);
-            }
-        }
-      ;
-      int start_screen_window() {
-        start_window.create_default(root, 0, 0, 0, 0);
-        start_window.set_backround_color(DARK_GREY);
-        start_window.map();
-        return 0;
-      }
-      private: // delete functions
-        void delete_client_vec(std::vector<client *> & vec) {
-            for (client * c : vec) {
-                send_sigterm_to_client(c);
-                xcb_flush(conn);                    
-            }
 
-            vec.clear();
-
-            std::vector<client *>().swap(vec);
-        }
-        void delete_desktop_vec(std::vector<desktop *> & vec) {
-            for (desktop * d : vec) {
-                delete_client_vec(d->current_clients);
-                delete d;
-            }
-
-            vec.clear();
-
-            std::vector<desktop *>().swap(vec);
-        }
-        template <typename Type> 
-        static void delete_ptr_vector(std::vector<Type *>& vec) {
-            for (Type * ptr : vec) {
-                delete ptr;
-            }
-            vec.clear();
-
-            std::vector<Type *>().swap(vec);
-        }
-        void remove_client(client * c) {
-            client_list.erase(std::remove(client_list.begin(), client_list.end(), c), client_list.end());
-            cur_d->current_clients.erase(std::remove(cur_d->current_clients.begin(), cur_d->current_clients.end(), c), cur_d->current_clients.end());
-            delete c;
-        }
-        void remove_client_from_vector(client * c, std::vector<client *> & vec) {
-            if (!c) {
-                log_error("client is nullptr.");
-            }
-            vec.erase(std::remove(vec.begin(), vec.end(), c), vec.end());
-            delete c;
-        }
-      ;
-      private: // client functions
-        client * make_client(const uint32_t & window) {
-            client * c = new client;
-            if(!c){log_error("Could not allocate memory for client"); return(nullptr);}
-
-            c->win     = window;
-            c->height  = (data.height < 300) ? 300 : data.height;
-            c->width   = (data.width < 400)  ? 400 : data.width;
-            c->x       = c->win.x_from_req();
-            c->y       = c->win.y_from_req();
-            c->depth   = 24;
-            c->desktop = cur_d->desktop;
-
-            if(c->x <= 0 && c->y <= 0 && c->width != screen->width_in_pixels && c->height != screen->height_in_pixels){c->x=((screen->width_in_pixels - c->width) / 2); c->y=(((screen->height_in_pixels - c->height) / 2) + (BORDER_SIZE * 2));}
-            if(c->height > screen->height_in_pixels) c->height = screen->height_in_pixels;
-            if(c->width > screen->width_in_pixels) c->width = screen->width_in_pixels;
-            if(c->win.is_EWMH_fullscreen()){c->x=(0); c->y=(0); c->width=(screen->width_in_pixels); c->height=(screen->height_in_pixels); c->win.set_EWMH_fullscreen_state();}
+        private: // delete functions
             
-            client_list.push_back(c); cur_d->current_clients.push_back(c);
-            return(c);
-        }
-        void check_client(client * c) {
-            if (c->x == 0 // if client if full_screen but 'y' is offset for some reason, make 'y' (0)
-              && c->y != 0
-              && c->width == screen->width_in_pixels
-              && c->height == screen->height_in_pixels) {
-                c->_y(0);
-                xcb_flush(conn);
-                return;
-            }
-            if (c->x != 0 // if client is full_screen 'width' and 'height' but position is offset from (0, 0) then make pos (0, 0)
-              && c->y != 0
-              && c->width == screen->width_in_pixels
-              && c->height == screen->height_in_pixels) {
-                c->x_y(0,0);
-                xcb_flush(conn);
-                return;
-            }
-            if (c->x < 0) {
-                c->_x(0);
-                xcb_flush(conn);
-            }
-            if (c->y < 0) {
-                c->_y(0);
-                xcb_flush(conn);
-            }
-            if (c->width > screen->width_in_pixels) {
-                c->_width(screen->width_in_pixels);
-                xcb_flush(conn);
-            }
-            if (c->height > screen->height_in_pixels) {
-                c->_height(screen->height_in_pixels);
-                xcb_flush(conn);
-            }
-            if ((c->x + c->width) > screen->width_in_pixels) {
-                c->_width(screen->width_in_pixels - c->x);
-                xcb_flush(conn);
-            }
-            if ((c->y + c->height) > screen->height_in_pixels) {
-                c->_height(screen->height_in_pixels - c->y);
-                xcb_flush(conn);
-            }
-        }
-      ;
-      private: // window functions
-        void getWindowParameters(const uint32_t & window) {
-            xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
-            xcb_get_geometry_reply_t* geometry_reply = xcb_get_geometry_reply(conn, geometry_cookie, NULL);
+            void delete_client_vec(std::vector<client *> & vec) {
+                for (client * c : vec) {
+                    send_sigterm_to_client(c);
+                    xcb_flush(conn);                    
+                }
 
-            if (geometry_reply != NULL) {
-                log_info("Window Parameters");
-                log_info(std::to_string(geometry_reply->x));
-                log_info(std::to_string(geometry_reply->y));
-                log_info(std::to_string(geometry_reply->width));
-                log_info(std::to_string(geometry_reply->height));
+                vec.clear();
 
+                std::vector<client *>().swap(vec);
+            }
+            
+            void delete_desktop_vec(std::vector<desktop *> & vec) {
+                for (desktop * d : vec) {
+                    delete_client_vec(d->current_clients);
+                    delete d;
+                }
+
+                vec.clear();
+
+                std::vector<desktop *>().swap(vec);
+            }
+            
+            template <typename Type> 
+            static void delete_ptr_vector(vector<Type *>& vec) {
+                for (Type * ptr : vec) {
+                    delete ptr;
+                }
+                vec.clear();
+
+                vector<Type *>().swap(vec);
+            }
+            
+            void remove_client(client * c) {
+                client_list.erase(std::remove(client_list.begin(), client_list.end(), c), client_list.end());
+                cur_d->current_clients.erase(std::remove(cur_d->current_clients.begin(), cur_d->current_clients.end(), c), cur_d->current_clients.end());
+                delete c;
+            }
+
+            void remove_client_from_vector(client * c, std::vector<client *> & vec) {
+                if (!c) {
+                    log_error("client is nullptr.");
+                }
+                vec.erase(std::remove(vec.begin(), vec.end(), c), vec.end());
+                delete c;
+            }
+        
+        private: // client functions
+        
+            client * make_client(const uint32_t & window) {
+                client * c = new client;
+                if(!c){log_error("Could not allocate memory for client"); return(nullptr);}
+
+                c->win     = window;
+                c->height  = (data.height < 300) ? 300 : data.height;
+                c->width   = (data.width < 400)  ? 400 : data.width;
+                c->x       = c->win.x_from_req();
+                c->y       = c->win.y_from_req();
+                c->depth   = 24;
+                c->desktop = cur_d->desktop;
+
+                if(c->x <= 0 && c->y <= 0 && c->width != screen->width_in_pixels && c->height != screen->height_in_pixels){c->x=((screen->width_in_pixels - c->width) / 2); c->y=(((screen->height_in_pixels - c->height) / 2) + (BORDER_SIZE * 2));}
+                if(c->height > screen->height_in_pixels) c->height = screen->height_in_pixels;
+                if(c->width > screen->width_in_pixels) c->width = screen->width_in_pixels;
+                if(c->win.is_EWMH_fullscreen()){c->x=(0); c->y=(0); c->width=(screen->width_in_pixels); c->height=(screen->height_in_pixels); c->win.set_EWMH_fullscreen_state();}
+                
+                client_list.push_back(c); cur_d->current_clients.push_back(c);
+                return(c);
+            }
+        
+            void check_client(client * c) {
+                if (c->x == 0 // if client if full_screen but 'y' is offset for some reason, make 'y' (0)
+                && c->y != 0
+                && c->width == screen->width_in_pixels
+                && c->height == screen->height_in_pixels) {
+                    c->_y(0);
+                    xcb_flush(conn);
+                    return;
+                }
+                if (c->x != 0 // if client is full_screen 'width' and 'height' but position is offset from (0, 0) then make pos (0, 0)
+                && c->y != 0
+                && c->width == screen->width_in_pixels
+                && c->height == screen->height_in_pixels) {
+                    c->x_y(0,0);
+                    xcb_flush(conn);
+                    return;
+                }
+                if (c->x < 0) {
+                    c->_x(0);
+                    xcb_flush(conn);
+                }
+                if (c->y < 0) {
+                    c->_y(0);
+                    xcb_flush(conn);
+                }
+                if (c->width > screen->width_in_pixels) {
+                    c->_width(screen->width_in_pixels);
+                    xcb_flush(conn);
+                }
+                if (c->height > screen->height_in_pixels) {
+                    c->_height(screen->height_in_pixels);
+                    xcb_flush(conn);
+                }
+                if ((c->x + c->width) > screen->width_in_pixels) {
+                    c->_width(screen->width_in_pixels - c->x);
+                    xcb_flush(conn);
+                }
+                if ((c->y + c->height) > screen->height_in_pixels) {
+                    c->_height(screen->height_in_pixels - c->y);
+                    xcb_flush(conn);
+                }
+            }
+        
+        private: // window functions
+            
+            void getWindowParameters(const uint32_t & window) {
+                xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
+                xcb_get_geometry_reply_t* geometry_reply = xcb_get_geometry_reply(conn, geometry_cookie, NULL);
+
+                if (geometry_reply != NULL) {
+                    log_info("Window Parameters");
+                    log_info(std::to_string(geometry_reply->x));
+                    log_info(std::to_string(geometry_reply->y));
+                    log_info(std::to_string(geometry_reply->width));
+                    log_info(std::to_string(geometry_reply->height));
+
+                    free(geometry_reply);
+                } else {
+                    std::cerr << "Unable to get window geometry." << std::endl;
+                }
+            }
+            
+            void get_window_parameters(const uint32_t(&window), int16_t(*x), int16_t(*y), uint16_t(*width), uint16_t(*height)) {
+                xcb_get_geometry_cookie_t cookie = xcb_get_geometry(conn, window);
+                xcb_get_geometry_reply_t* reply = xcb_get_geometry_reply(conn, cookie, NULL);
+                if (!reply){log_error("unable to get window parameters for window: " + std::to_string(window)); return;}
+                x=(&reply->x); y=(&reply->y); width=(&reply->width); height=(&reply->height); free(reply);
+            }
+            
+            int16_t get_window_x(const uint32_t & window) {
+                xcb_get_geometry_cookie_t cookie = xcb_get_geometry(conn, window);
+                xcb_get_geometry_reply_t* reply = xcb_get_geometry_reply(conn, cookie, NULL);
+                if(!reply){log_error("Unable to get window geometry.");return(screen->width_in_pixels / 2);} 
+            
+                int16_t x(reply->x);
+                free(reply);
+                return x;
+            }
+            
+            int16_t get_window_y(const uint32_t & window) {
+                xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
+                xcb_get_geometry_reply_t* geometry_reply = xcb_get_geometry_reply(conn, geometry_cookie, NULL);
+                if (!geometry_reply) {
+                    log_error("Unable to get window geometry.");
+                    return (screen->height_in_pixels / 2);
+                } 
+            
+                int16_t y = geometry_reply->y;
                 free(geometry_reply);
-            } else {
-                std::cerr << "Unable to get window geometry." << std::endl;
+                return y;
             }
-        }
-        void get_window_parameters(const uint32_t(&window), int16_t(*x), int16_t(*y), uint16_t(*width), uint16_t(*height)) {
-            xcb_get_geometry_cookie_t cookie = xcb_get_geometry(conn, window);
-            xcb_get_geometry_reply_t* reply = xcb_get_geometry_reply(conn, cookie, NULL);
-            if (!reply){log_error("unable to get window parameters for window: " + std::to_string(window)); return;}
-            x=(&reply->x); y=(&reply->y); width=(&reply->width); height=(&reply->height); free(reply);
-        }
-        int16_t get_window_x(const uint32_t & window) {
-            xcb_get_geometry_cookie_t cookie = xcb_get_geometry(conn, window);
-            xcb_get_geometry_reply_t* reply = xcb_get_geometry_reply(conn, cookie, NULL);
-            if(!reply){log_error("Unable to get window geometry.");return(screen->width_in_pixels / 2);} 
         
-            int16_t x(reply->x);
-            free(reply);
-            return x;
-        }
-        int16_t get_window_y(const uint32_t & window) {
-            xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
-            xcb_get_geometry_reply_t* geometry_reply = xcb_get_geometry_reply(conn, geometry_cookie, NULL);
-            if (!geometry_reply) {
-                log_error("Unable to get window geometry.");
-                return (screen->height_in_pixels / 2);
-            } 
+        private: // status functions
         
-            int16_t y = geometry_reply->y;
-            free(geometry_reply);
-            return y;
-        }
-      ;
-      private: // status functions
-        void check_volt() {
-            log_info("running");
-            std::this_thread::sleep_for(std::chrono::minutes(1));
-            check_volt();
-        }
-      ;
+            void check_volt() {
+                log_info("running");
+                std::this_thread::sleep_for(std::chrono::minutes(1));
+                check_volt();
+            }
 }; static Window_Manager * wm;
+
 /**
  *
  * @class XCPPBAnimator
