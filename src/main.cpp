@@ -1001,33 +1001,33 @@ class _scale {
 
 class window {
     public: // construcers and operators
-
         window() {}
 
-        operator uint32_t() const {
+        operator uint32_t() const
+        {
             return _window;
         }
     
-        window& operator=(uint32_t new_window) { // Overload the assignment operator for uint32_t
+        window& operator=(uint32_t new_window) // Overload the assignment operator for uint32_t
+        { 
             _window = new_window;
             return *this;
         }
     
     public: // methods
-
         public: // main methods
-        
-            void create(const uint8_t  & depth,
-                        const uint32_t & parent,
-                        const int16_t  & x,
-                        const int16_t  & y,
-                        const uint16_t & width,
-                        const uint16_t & height,
-                        const uint16_t & border_width,
-                        const uint16_t & _class,
-                        const uint32_t & visual,
-                        const uint32_t & value_mask,
-                        const void     * value_list) { 
+            void create(const uint8_t  &depth,
+                        const uint32_t &parent,
+                        const int16_t  &x,
+                        const int16_t  &y,
+                        const uint16_t &width,
+                        const uint16_t &height,
+                        const uint16_t &border_width,
+                        const uint16_t &_class,
+                        const uint32_t &visual,
+                        const uint32_t &value_mask,
+                        const void     *value_list)
+            { 
                 _depth = depth;
                 _parent = parent;
                 _x = x;
@@ -1043,7 +1043,8 @@ class window {
                 make_window();
             }
 
-            void create_default(const uint32_t & parent, const int16_t & x, const int16_t & y, const uint16_t & width, const uint16_t & height) {
+            void create_default(const uint32_t &parent, const int16_t &x, const int16_t &y, const uint16_t &width, const uint16_t &height)
+            {
                 _depth = 0L;
                 _parent = parent;
                 _x = x;
@@ -1059,7 +1060,8 @@ class window {
                 make_window();
             }
             
-            void create_client_window(const uint32_t & parent, const int16_t & x, const int16_t & y, const uint16_t & width, const uint16_t & height) {
+            void create_client_window(const uint32_t &parent, const int16_t &x, const int16_t &y, const uint16_t &width, const uint16_t &height)
+            {
                 _window = xcb_generate_id(conn);
                 uint32_t value_mask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
                 uint32_t value_list[2];
@@ -1081,7 +1083,8 @@ class window {
                 make_window();
             }
             
-            void raise() {
+            void raise()
+            {
                 xcb_configure_window(
                     conn,
                     _window,
@@ -1094,17 +1097,20 @@ class window {
                 xcb_flush(conn);
             }
             
-            void map() {
+            void map()
+            {
                 xcb_map_window(conn, _window);
                 xcb_flush(conn);
             }
             
-            void unmap() {
+            void unmap()
+            {
                 xcb_unmap_window(conn, _window);
                 xcb_flush(conn);
             }
             
-            void reparent(const uint32_t & new_parent, const int16_t & x, const int16_t & y) {
+            void reparent(const uint32_t & new_parent, const int16_t & x, const int16_t & y)
+            {
                 xcb_reparent_window(
                     conn, 
                     _window, 
@@ -1115,7 +1121,8 @@ class window {
                 xcb_flush(conn);
             }
             
-            void make_child(const uint32_t & window_to_make_child, const uint32_t & child_x, const uint32_t & child_y) {
+            void make_child(const uint32_t & window_to_make_child, const uint32_t & child_x, const uint32_t & child_y)
+            {
                 xcb_reparent_window(
                     conn,
                     window_to_make_child,
@@ -1126,33 +1133,35 @@ class window {
                 xcb_flush(conn);
             }
             
-            void kill() {
+            void kill()
+            {
                 xcb_intern_atom_cookie_t protocols_cookie = xcb_intern_atom(conn, 1, 12, "WM_PROTOCOLS");
                 xcb_intern_atom_reply_t *protocols_reply = xcb_intern_atom_reply(conn, protocols_cookie, NULL);
 
                 xcb_intern_atom_cookie_t delete_cookie = xcb_intern_atom(conn, 0, 16, "WM_DELETE_WINDOW");
                 xcb_intern_atom_reply_t *delete_reply = xcb_intern_atom_reply(conn, delete_cookie, NULL);
 
-                if (!protocols_reply) {
+                if (protocols_reply == nullptr)
+                {
                     log_error("protocols reply is null");
                     free(protocols_reply);
                     free(delete_reply);
                     return;
                 }
-                if (!delete_reply) {
+
+                if (delete_reply == nullptr)
+                {
                     log_error("delete reply is null");
                     free(protocols_reply);
                     free(delete_reply);
                     return;
                 }
 
-                send_event(
-                    make_client_message_event(
-                        32,
-                        protocols_reply->atom,
-                        delete_reply->atom
-                    )
-                );
+                send_event(make_client_message_event(
+                    32,
+                    protocols_reply->atom,
+                    delete_reply->atom
+                ));
 
                 free(protocols_reply);
                 free(delete_reply);
@@ -1160,7 +1169,8 @@ class window {
                 xcb_flush(conn);
             }
             
-            void clear() {
+            void clear()
+            {
                 xcb_clear_area(
                     conn, 
                     0,
@@ -1173,7 +1183,8 @@ class window {
                 xcb_flush(conn);
             }
             
-            void focus_input() {
+            void focus_input()
+            {
                 xcb_set_input_focus(
                     conn, 
                     XCB_INPUT_FOCUS_POINTER_ROOT, 
@@ -1184,8 +1195,8 @@ class window {
             }
         
         public: // check methods
-
-            bool is_EWMH_fullscreen() {
+            bool is_EWMH_fullscreen()
+            {
                 xcb_get_property_cookie_t cookie = xcb_ewmh_get_wm_state(ewmh, _window);
                 xcb_ewmh_get_atoms_reply_t wm_state;
                 if (xcb_ewmh_get_wm_state_reply(ewmh, cookie, &wm_state, NULL) == 1) {
@@ -1200,18 +1211,26 @@ class window {
                 return false;
             }
             
-            bool is_active_EWMH_window() {
+            bool is_active_EWMH_window()
+            {
                 uint32_t active_window = 0;
-                xcb_ewmh_get_active_window_reply(ewmh, xcb_ewmh_get_active_window(ewmh, 0), &active_window, NULL);
+                xcb_ewmh_get_active_window_reply(
+                    ewmh,
+                    xcb_ewmh_get_active_window(ewmh, 0),
+                    &active_window,
+                    nullptr
+                );
                 return _window == active_window;
             }
             
-            uint32_t check_event_mask_sum() {
+            uint32_t check_event_mask_sum()
+            {
                 uint32_t mask = 0;
                 xcb_get_window_attributes_cookie_t cookie = xcb_get_window_attributes(conn, _window);
-                xcb_get_window_attributes_reply_t * reply = xcb_get_window_attributes_reply(conn, cookie, NULL);
+                xcb_get_window_attributes_reply_t *reply = xcb_get_window_attributes_reply(conn, cookie, nullptr);
 
-                if (!reply) { // Check if the reply is valid
+                if (reply == nullptr) // Check if the reply is valid
+                { 
                     log_error("Unable to get window attributes.");
                     return 0;
                 }
@@ -1221,31 +1240,41 @@ class window {
                 return mask;
             }
             
-            std::vector<xcb_event_mask_t> check_event_mask_codes() {
+            vector<xcb_event_mask_t> check_event_mask_codes()
+            {
                 uint32_t maskSum = check_event_mask_sum();
-                std::vector<xcb_event_mask_t> setMasks;
-                for (int mask = XCB_EVENT_MASK_KEY_PRESS; mask <= XCB_EVENT_MASK_OWNER_GRAB_BUTTON; mask <<= 1) {
-                    if (maskSum & mask) {
+                vector<xcb_event_mask_t>(setMasks);
+                for (int mask = XCB_EVENT_MASK_KEY_PRESS; mask <= XCB_EVENT_MASK_OWNER_GRAB_BUTTON; mask <<= 1)
+                {
+                    if (maskSum & mask)
+                    {
                         setMasks.push_back(static_cast<xcb_event_mask_t>(mask));
                     }
                 }
+
                 return setMasks;
             }
             
-            bool is_mask_active(const uint32_t & event_mask) {
-                std::vector<xcb_event_mask_t> masks = check_event_mask_codes();
-                for (const auto & ev_mask : masks) {
-                    if (ev_mask == event_mask) {
+            bool is_mask_active(const uint32_t & event_mask)
+            {
+                vector<xcb_event_mask_t>(masks) = check_event_mask_codes();
+                for (const auto &ev_mask : masks)
+                {
+                    if (ev_mask == event_mask)
+                    {
                         return true;
                     }
                 }
+
                 return false;
             }
             
-            bool is_mapped() {
+            bool is_mapped()
+            {
                 xcb_get_window_attributes_cookie_t cookie = xcb_get_window_attributes(conn, _window);
-                xcb_get_window_attributes_reply_t *reply = xcb_get_window_attributes_reply(conn, cookie, NULL);
-                if (!reply) {
+                xcb_get_window_attributes_reply_t *reply = xcb_get_window_attributes_reply(conn, cookie, nullptr);
+                if (reply == nullptr) 
+                {
                     log_error("Unable to get window attributes.");
                     return false;
                 }
@@ -1256,13 +1285,19 @@ class window {
             }
         
         public: // set methods
-
-            void set_active_EWMH_window() {
-                xcb_ewmh_set_active_window(ewmh, 0, _window); // 0 for the first (default) screen
+            void set_active_EWMH_window()
+            {
+                // 0 for the first (default) screen
+                xcb_ewmh_set_active_window(
+                    ewmh,
+                    0,
+                    _window
+                );
                 xcb_flush(conn);
             }
         
-            void set_EWMH_fullscreen_state() {
+            void set_EWMH_fullscreen_state()
+            {
                 xcb_change_property(
                     conn,
                     XCB_PROP_MODE_REPLACE,
@@ -1277,8 +1312,8 @@ class window {
             }
         
         public: // unset methods
-        
-            void unset_EWMH_fullscreen_state() {
+            void unset_EWMH_fullscreen_state()
+            {
                 xcb_change_property(
                     conn,
                     XCB_PROP_MODE_REPLACE,
@@ -1293,8 +1328,8 @@ class window {
             }
         
         public: // get methods
-        
-            char * property(const char * atom_name) {
+            char * property(const char *atom_name)
+            {
                 xcb_get_property_reply_t *reply;
                 unsigned int reply_len;
                 char * propertyValue;
@@ -1305,8 +1340,7 @@ class window {
                         conn,
                         false,
                         _window,
-                        atom
-                        (
+                        atom(
                             atom_name
                         ),
                         XCB_GET_PROPERTY_TYPE_ANY,
@@ -1316,8 +1350,10 @@ class window {
                     nullptr
                 );
 
-                if (!reply || xcb_get_property_value_length(reply) == 0) {
-                    if (reply != nullptr) {
+                if (reply == nullptr || xcb_get_property_value_length(reply) == 0)
+                {
+                    if (reply != nullptr)
+                    {
                         log_error("reply length for property(" + std::string(atom_name) + ") = 0");
                         free(reply);
                         return (char *) "";
@@ -1341,14 +1377,15 @@ class window {
                 return propertyValue;
             }
         
-            uint32_t root_window() {
+            uint32_t root_window()
+            {
                 xcb_query_tree_cookie_t cookie;
                 xcb_query_tree_reply_t *reply;
-
                 cookie = xcb_query_tree(conn, _window);
                 reply = xcb_query_tree_reply(conn, cookie, NULL);
 
-                if (!reply) {
+                if (reply == nullptr)
+                {
                     log_error("Unable to query the window tree.");
                     return (uint32_t) 0; // Invalid window ID
                 }
@@ -1358,14 +1395,15 @@ class window {
                 return root_window;
             }
         
-            uint32_t parent() {
+            uint32_t parent()
+            {
                 xcb_query_tree_cookie_t cookie;
                 xcb_query_tree_reply_t *reply;
-
                 cookie = xcb_query_tree(conn, _window);
-                reply = xcb_query_tree_reply(conn, cookie, NULL);
+                reply = xcb_query_tree_reply(conn, cookie, nullptr);
 
-                if (!reply) {
+                if (reply == nullptr)
+                {
                     log_error("Unable to query the window tree.");
                     return (uint32_t) 0; // Invalid window ID
                 }
@@ -1375,20 +1413,23 @@ class window {
                 return parent_window;
             }
         
-            uint32_t * children(uint32_t * child_count) {
-                * child_count = 0;
+            uint32_t *children(uint32_t *child_count)
+            {
+                *child_count = 0;
                 xcb_query_tree_cookie_t cookie = xcb_query_tree(conn, _window);
-                xcb_query_tree_reply_t *reply = xcb_query_tree_reply(conn, cookie, NULL);
+                xcb_query_tree_reply_t *reply = xcb_query_tree_reply(conn, cookie, nullptr);
 
-                if (!reply) {
+                if (reply == nullptr)
+                {
                     log_error("Unable to query the window tree.");
                     return nullptr;
                 }
 
-                * child_count = xcb_query_tree_children_length(reply);
-                uint32_t * children = static_cast<uint32_t *>(malloc(* child_count * sizeof(xcb_window_t)));
+                *child_count = xcb_query_tree_children_length(reply);
+                uint32_t *children = static_cast<uint32_t *>(malloc(*child_count *sizeof(xcb_window_t)));
 
-                if (!children) {
+                if (children == nullptr)
+                {
                     log_error("Unable to allocate memory for children.");
                     free(reply);
                     return nullptr;
@@ -1399,66 +1440,82 @@ class window {
                 return children;
             }
         
-            int16_t x_from_req() {
+            int16_t x_from_req()
+            {
                 xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, _window);
                 xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
 
                 int16_t x;
-                if (geometry) {
+                if (geometry == nullptr)
+                {
+                    x = 200;
+                    return x;
+                }
+                else
+                {
                     x = geometry->x;
                     free(geometry);
-                } else {
-                    x = 200;
                 }
+
                 return x;
             }
         
-            int16_t y_from_req() {
+            int16_t y_from_req()
+            {
                 xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, _window);
                 xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
 
                 int16_t y;
-                if (geometry) {
-                    y = geometry->y;
-                    free(geometry);
-                } else {
+                if (geometry == nullptr)
+                {
                     y = 200;
+                    return y;
                 }
+
+                y = geometry->y;
+                free(geometry);
                 return y;
             }
         
-            int16_t width_from_req() {
+            int16_t width_from_req()
+            {
                 xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, _window);
                 xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
 
                 int16_t width;
-                if (geometry) {
-                    width = geometry->width;
-                    free(geometry);
-                } else {
+                if (geometry == nullptr)
+                {
                     width = 200;
+                    return width;
                 }
+
+                width = geometry->width;
+                free(geometry);
                 return width;
             }
         
-            int16_t height_from_req() {
+            int16_t height_from_req()
+            {
                 xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, _window);
-                xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
+                xcb_get_geometry_reply_t *geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
 
                 int16_t height;
-                if (geometry) {
-                    height = geometry->height;
-                    free(geometry);
-                } else {
+                if (geometry == nullptr)
+                {
                     height = 200;
+                    return height;
                 }
+
+                height = geometry->height;
+                free(geometry);
                 return height;
             }
         
         public: // configuration methods
-            
-            void apply_event_mask(const vector<uint32_t> &values) {
-                if (values.empty()) {
+            void apply_event_mask(const vector<uint32_t> &values)
+            {
+                if (values.empty())
+                {
                     log_error("values vector is empty");
                     return;
                 }
@@ -1472,7 +1529,8 @@ class window {
                 xcb_flush(conn);
             }
             
-            void apply_event_mask(const uint32_t *mask) {
+            void apply_event_mask(const uint32_t *mask)
+            {
                 xcb_change_window_attributes(
                     conn,
                     _window,
@@ -1483,15 +1541,18 @@ class window {
                 xcb_flush(conn);
             }
             
-            void set_pointer(CURSOR cursor_type) {
+            void set_pointer(CURSOR cursor_type)
+            {
                 xcb_cursor_context_t *ctx;
-                if(xcb_cursor_context_new(conn, screen, &ctx) < 0) {
+                if (xcb_cursor_context_new(conn, screen, &ctx) < 0)
+                {
                     log_error("Unable to create cursor context.");
                     return;
                 }
 
                 xcb_cursor_t cursor = xcb_cursor_load_cursor(ctx, pointer_from_enum(cursor_type));
-                if(!cursor) {
+                if (!cursor)
+                {
                     log_error("Unable to load cursor.");
                     return;
                 }
@@ -1504,14 +1565,13 @@ class window {
                         cursor 
                     }
                 );
-
                 xcb_flush(conn);
-
                 xcb_cursor_context_free(ctx);
                 xcb_free_cursor(conn, cursor);
             }
             
-            void draw_text(const char * str , const COLOR & text_color, const COLOR & backround_color, const char * font_name, const int16_t & x, const int16_t & y) {
+            void draw_text(const char *str , const COLOR &text_color, const COLOR &backround_color, const char *font_name, const int16_t &x, const int16_t &y)
+            {
                 get_font(font_name);
                 create_font_gc(text_color, backround_color, font);
                 xcb_image_text_8(
@@ -1523,12 +1583,10 @@ class window {
                     y, 
                     str
                 );
-
                 xcb_flush(conn);
             }
 
             public: // size_pos configuration methods
-                
                 public: // fetch methods
                 
                     uint32_t x() {
@@ -1547,12 +1605,14 @@ class window {
                         return _height;
                     }
                   
-                void x(const uint32_t & x) {
+                void x(const uint32_t &x)
+                {
                     config_window(MWM_CONFIG_x, x);
                     update(x, _y, _width, _height);
                 }
                 
-                void y(const uint32_t & y) {
+                void y(const uint32_t &y)
+                {
                     config_window(XCB_CONFIG_WINDOW_Y, y);
                     update(_x, y, _width, _height);
                 }
@@ -1624,11 +1684,13 @@ class window {
             
             public: // backround methods
                 
-                void set_backround_color(COLOR color) {
+                void set_backround_color(COLOR color)
+                {
                     change_back_pixel(get_color(color));
                 }
                 
-                void set_backround_color_8_bit(const uint8_t & red_value, const uint8_t & green_value, const uint8_t & blue_value) {
+                void set_backround_color_8_bit(const uint8_t &red_value, const uint8_t &green_value, const uint8_t &blue_value)
+                {
                     change_back_pixel(get_color(red_value, green_value, blue_value));
                 }
                 
@@ -2387,12 +2449,12 @@ class window {
             }
 };
 
-class client {
+class client
+{
     public: // subclasses
-    
-        class client_border_decor{
+        class client_border_decor
+        {
             public:
-
                 window left;
                 window right;
                 window top;
@@ -2405,7 +2467,6 @@ class client {
         };
     
     public: // variabels
-    
         window win;
         window frame;
         window titlebar;
@@ -2427,46 +2488,52 @@ class client {
         uint16_t desktop;
     
     public: // methods
-        
         public: // main methods
-        
-            void make_decorations() {
+            void make_decorations()
+            {
                 make_frame();
                 make_titlebar();
                 make_close_button();
                 make_max_button();
                 make_min_button();
                 
-                if (BORDER_SIZE > 0) {
+                if (BORDER_SIZE > 0)
+                {
                     make_borders();
                 }
             }
         
-            void raise() {
+            void raise()
+            {
                 frame.raise();
             }
         
-            void focus() {
+            void focus()
+            {
                 win.focus_input();
                 frame.raise();
             }
         
-            void update() {
+            void update()
+            {
                 x = frame.x();
                 y = frame.y();
                 width = frame.width();
                 height = frame.height();
             }
         
-            void map() {
+            void map()
+            {
                 frame.map();
             }
         
-            void unmap() {
+            void unmap()
+            {
                 frame.unmap();
             }
         
-            void kill() {
+            void kill()
+            {
                 win.unmap();
                 close_button.unmap();
                 max_button.unmap();
@@ -2499,20 +2566,23 @@ class client {
             }
         
         public: // config methods
-        
-            void x_y(const int32_t & x, const uint32_t & y) {
+            void x_y(const int32_t &x, const uint32_t &y)
+            {
                 frame.x_y(x, y);
             }
         
-            void _x(const int & x) {
+            void _x(const int &x)
+            {
                 frame.x(x);
             }
         
-            void _y(const int & y) {
+            void _y(const int &y)
+            {
                 frame.y(y);
             }
         
-            void _width(const uint32_t & width) {
+            void _width(const uint32_t &width)
+            {
                 win.width((width - (BORDER_SIZE * 2)));
                 xcb_flush(conn);
                 frame.width((width));
@@ -2528,7 +2598,8 @@ class client {
                 xcb_flush(conn);
             }
         
-            void _height(const uint32_t & height) {
+            void _height(const uint32_t &height)
+            {
                 win.height((height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
                 frame.height(height);
                 border.left.height((height - (BORDER_SIZE * 2)));
@@ -2538,7 +2609,8 @@ class client {
                 border.bottom_right.y((height - BORDER_SIZE));
             }
         
-            void x_width(const uint32_t & x, const uint32_t & width) {
+            void x_width(const uint32_t &x, const uint32_t &width)
+            {
                 win.width((width - (BORDER_SIZE * 2)));
                 xcb_flush(conn);
                 frame.x_width(x, (width));
@@ -2554,7 +2626,8 @@ class client {
                 xcb_flush(conn);
             }
         
-            void y_height(const uint32_t & y, const uint32_t & height) {
+            void y_height(const uint32_t & y, const uint32_t & height)
+            {
                 win.height((height - TITLE_BAR_HEIGHT) - (BORDER_SIZE * 2));
                 xcb_flush(conn);
                 frame.y_height(y, height);
@@ -2566,7 +2639,8 @@ class client {
                 xcb_flush(conn);
             }
         
-            void x_width_height(const uint32_t & x, const uint32_t & width, const uint32_t & height) {
+            void x_width_height(const uint32_t &x, const uint32_t &width, const uint32_t &height)
+            {
                 frame.x_width_height(x, width, height);
                 win.width_height((width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
                 titlebar.width((width - BORDER_SIZE));
@@ -2582,7 +2656,8 @@ class client {
                 border.bottom_right.x_y((width - BORDER_SIZE), (height - BORDER_SIZE));
             }
         
-            void y_width_height(const uint32_t & y, const uint32_t & width, const uint32_t & height) {
+            void y_width_height(const uint32_t &y, const uint32_t &width, const uint32_t &height)
+            {
                 frame.y_width_height(y, width, height);
                 win.width_height((width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
                 titlebar.width((width - BORDER_SIZE));
@@ -2598,7 +2673,8 @@ class client {
                 border.bottom_right.x_y((width - BORDER_SIZE), (height - BORDER_SIZE));
             }
         
-            void x_y_width_height(const uint32_t & x, const uint32_t & y, const uint32_t & width, const uint32_t & height) {
+            void x_y_width_height(const uint32_t &x, const uint32_t &y, const uint32_t &width, const uint32_t &height)
+            {
                 win.width_height((width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
                 xcb_flush(conn);
                 frame.x_y_width_height(x, y, width, height);
@@ -2616,7 +2692,8 @@ class client {
                 xcb_flush(conn);
             }
         
-            void width_height(const uint32_t & width, const uint32_t & height) {
+            void width_height(const uint32_t &width, const uint32_t &height)
+            {
                 win.width_height((width - (BORDER_SIZE * 2)), (height - (BORDER_SIZE * 2) - TITLE_BAR_HEIGHT));
                 xcb_flush(conn);
                 frame.width_height(width, height);
@@ -2635,34 +2712,39 @@ class client {
             }
         
         public: // size_pos methods
-        
-            void save_ogsize() {
+            void save_ogsize()
+            {
                 ogsize.save(x, y, width, height);
             }
         
-            void save_tile_ogsize() {
+            void save_tile_ogsize()
+            {
                 tile_ogsize.save(x, y, width, height);
             }
         
-            void save_max_ewmh_ogsize() {
+            void save_max_ewmh_ogsize()
+            {
                 max_ewmh_ogsize.save(x, y, width, height);
             }
         
-            void save_max_button_ogsize() {
+            void save_max_button_ogsize()
+            {
                 max_button_ogsize.save(x, y, width, height);
             }
         
         public: // check methods
-        
-            bool is_active_EWMH_window() {
+            bool is_active_EWMH_window()
+            {
                 return win.is_active_EWMH_window();
             }
         
-            bool is_EWMH_fullscreen() {
+            bool is_EWMH_fullscreen()
+            {
                 return win.is_EWMH_fullscreen();
             }
         
-            bool is_button_max_win() {
+            bool is_button_max_win()
+            {
                 if (x      == 0
                  && y      == 0
                  && width  == screen->width_in_pixels
@@ -2673,24 +2755,25 @@ class client {
             }
         
         public: // set methods
-    
-            void set_active_EWMH_window() {
+            void set_active_EWMH_window()
+            {
                 win.set_active_EWMH_window();
             }
     
-            void set_EWMH_fullscreen_state() {
+            void set_EWMH_fullscreen_state()
+            {
                 win.set_EWMH_fullscreen_state();
             }
     
         public: // unset methods
-        
-            void unset_EWMH_fullscreen_state() {
+            void unset_EWMH_fullscreen_state()
+            {
                 win.unset_EWMH_fullscreen_state();
             }
         
     private: // functions
-    
-        void make_frame() {
+        void make_frame()
+        {
             frame.create_default(screen->root, (x - BORDER_SIZE), (y - TITLE_BAR_HEIGHT - BORDER_SIZE), (width + (BORDER_SIZE * 2)), (height + TITLE_BAR_HEIGHT + (BORDER_SIZE * 2)));
             frame.set_backround_color(DARK_GREY);
             win.reparent(frame, BORDER_SIZE, (TITLE_BAR_HEIGHT + BORDER_SIZE));
@@ -2698,14 +2781,16 @@ class client {
             frame.map();
         }
     
-        void make_titlebar() {
+        void make_titlebar()
+        {
             titlebar.create_default(frame, BORDER_SIZE, BORDER_SIZE, width, TITLE_BAR_HEIGHT);
             titlebar.set_backround_color(BLACK);
             titlebar.grab_button({ { L_MOUSE_BUTTON, NULL } });
             titlebar.map();
         }
     
-        void make_close_button() {
+        void make_close_button()
+        {
             close_button.create_default(frame, (width - BUTTON_SIZE + BORDER_SIZE), BORDER_SIZE, BUTTON_SIZE, BUTTON_SIZE);
             close_button.apply_event_mask({XCB_EVENT_MASK_ENTER_WINDOW, XCB_EVENT_MASK_LEAVE_WINDOW});
             close_button.set_backround_color(BLUE);
@@ -2714,7 +2799,8 @@ class client {
             close_button.make_then_set_png("/home/mellw/close.png", CLOSE_BUTTON_BITMAP);
         }
     
-        void make_max_button() {
+        void make_max_button()
+        {
             max_button.create_default(frame, (width - (BUTTON_SIZE * 2) + BORDER_SIZE), BORDER_SIZE, BUTTON_SIZE, BUTTON_SIZE);
             max_button.set_backround_color(RED);
             max_button.apply_event_mask({XCB_EVENT_MASK_ENTER_WINDOW, XCB_EVENT_MASK_LEAVE_WINDOW});
@@ -2749,7 +2835,8 @@ class client {
             max_button.set_backround_png("/home/mellw/max.png");
         }
     
-        void make_min_button() {
+        void make_min_button()
+        {
             min_button.create_default(frame, (width - (BUTTON_SIZE * 3) + BORDER_SIZE), BORDER_SIZE, BUTTON_SIZE, BUTTON_SIZE);
             min_button.set_backround_color(GREEN);
             min_button.apply_event_mask({XCB_EVENT_MASK_ENTER_WINDOW, XCB_EVENT_MASK_LEAVE_WINDOW});
@@ -2764,7 +2851,8 @@ class client {
             min_button.set_backround_png("/home/mellw/min.png");
         }
     
-        void make_borders() {
+        void make_borders()
+        {
             border.left.create_default(frame, 0, BORDER_SIZE, BORDER_SIZE, (height + TITLE_BAR_HEIGHT));
             border.left.set_backround_color(BLACK);
             border.left.set_pointer(CURSOR::left_side);
@@ -2815,7 +2903,6 @@ class client {
         }
     
     private: // variables
-        
         vector<vector<bool>> CLOSE_BUTTON_BITMAP = {
             {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
             {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
@@ -2838,15 +2925,13 @@ class client {
             {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
             {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
         };
-
         Logger log;
-    
 };
 
-class desktop {
-    public: // variabels
-    
-        vector<client *> current_clients;
+class desktop
+{
+    public: // variabels    
+        vector<client *>(current_clients);
         uint16_t desktop;
         const uint16_t x = 0;
         const uint16_t y = 0;
@@ -2860,16 +2945,18 @@ class Key_Codes {
         Key_Codes() 
         : keysyms(nullptr) {}
 
-        ~Key_Codes() {
+        ~Key_Codes()
+        {
             free(keysyms);
         }
     
     public: // methods
-    
-        void init() {
+        void init()
+        {
             keysyms = xcb_key_symbols_alloc(conn);
-            if (keysyms) {
-                std::map<uint32_t, xcb_keycode_t *> key_map = {
+            if (keysyms)
+            {
+                map<uint32_t, xcb_keycode_t *> key_map = {
                     { A,            &a         },
                     { B,            &b         },
                     { C,            &c         },
@@ -2925,87 +3012,62 @@ class Key_Codes {
         }
     
     public: // variabels
-        
         xcb_keycode_t
-            a{},
-            b{},
-            c{},
-            d{},
-            e{},
-            f{},
-            g{},
-            h{},
-            i{},
-            j{},
-            k{},
-            l{},
-            m{},
-            n{},
-            o{},
-            p{},
-            q{},
-            r{},
-            s{},
-            t{},
-            u{},
-            v{},
-            w{},
-            x{},
-            y{},
-            z{},
+            a{}, b{}, c{}, d{}, e{}, f{}, g{}, h{}, i{}, j{}, k{}, l{}, m{},
+            n{}, o{}, p{}, q{}, r{}, s{}, t{}, u{}, v{}, w{}, x{}, y{}, z{}, 
+            
+            space_bar{}, enter{},
 
-            space_bar{},
-            enter{},
-
-            f11{},
-            n_1{},
-            n_2{},
-            n_3{},
-            n_4{},
-            n_5{},
-            r_arrow{},
-            l_arrow{},
-            u_arrow{},
-            d_arrow{},
-            tab{},
-            _delete{};
+            f11{}, n_1{}, n_2{}, n_3{}, n_4{}, n_5{}, r_arrow{},
+            l_arrow{}, u_arrow{}, d_arrow{}, tab{}, _delete{};
     
     private: // variabels
         xcb_key_symbols_t * keysyms;
 };
 
-class Entry {
+class Entry
+{
     public: // constructor
-    
         Entry() {}
     
     public: // variabels
-    
         window window;
         bool menu = false;
     
     public: // public methods
-    
-        void add_name(const char * name) {
+        void add_name(const char *name)
+        {
             entryName = name;
         }
     
-        void add_action(std::function<void()> action) {
+        void add_action(function<void()> action)
+        {
             entryAction = action;
         }
     
-        void activate() const {
+        void activate() const
+        {
             entryAction();
         }
     
-        const char * getName() const {
+        const char * getName() const
+        {
             return entryName;
         }
     
-        void make_window(const xcb_window_t & parent_window, const int16_t & x, const int16_t & y, const uint16_t & width, const uint16_t & height) {
-            window.create_default(parent_window, x, y, width, height);
+        void make_window(const xcb_window_t & parent_window, const int16_t & x, const int16_t & y, const uint16_t & width, const uint16_t & height)
+        {
+            window.create_default(
+                parent_window,
+                x,
+                y,
+                width,
+                height
+            );
             window.set_backround_color(BLACK);
-            uint32_t mask = XCB_EVENT_MASK_POINTER_MOTION | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW;
+            uint32_t mask = XCB_EVENT_MASK_POINTER_MOTION |
+                            XCB_EVENT_MASK_ENTER_WINDOW   |
+                            XCB_EVENT_MASK_LEAVE_WINDOW;
             window.apply_event_mask(& mask);
             window.grab_button({ { L_MOUSE_BUTTON, NULL } });
             window.map();
@@ -3019,8 +3081,8 @@ class Entry {
 
 class context_menu {
     public: // consructor
-        
-        context_menu() {
+        context_menu()
+        {
             size_pos.x      = pointer.x();
             size_pos.y      = pointer.y();
             size_pos.width  = 120;
@@ -3035,21 +3097,23 @@ class context_menu {
         }
     
     public: // public methods
-    
-        void init() {
+        void init()
+        {
             configure_events();
         }
         
-        void show() {
+        void show()
+        {
             size_pos.x = pointer.x();
-            size_pos.y = pointer.y();
-            
+            size_pos.y = pointer.y();    
             uint32_t height = entries.size() * size_pos.height;
-            if (size_pos.y + height > screen->height_in_pixels) {
+            if (size_pos.y + height > screen->height_in_pixels)
+            {
                 size_pos.y = (screen->height_in_pixels - height);
             }
 
-            if (size_pos.x + size_pos.width > screen->width_in_pixels) {
+            if (size_pos.x + size_pos.width > screen->width_in_pixels)
+            {
                 size_pos.x = (screen->width_in_pixels - size_pos.width);
             }
 
@@ -3059,7 +3123,8 @@ class context_menu {
             make_entries();
         }
         
-        void add_entry(const char * name, std::function<void()> action) {
+        void add_entry(const char * name, std::function<void()> action)
+        {
             Entry entry;
             entry.add_name(name);
             entry.add_action(action);
@@ -3067,19 +3132,18 @@ class context_menu {
         }
     
     private: // private variables
-    
         window context_window;
         size_pos size_pos;
         window_borders border;
         int border_size = 1;
         
-        std::vector<Entry> entries;
+        vector<Entry>(entries);
         pointer pointer;
         Launcher launcher;
     
     private: // private methods
-    
-        void create_dialog_win() {
+        void create_dialog_win()
+        {
             context_window.create_default(screen->root, 0, 0, size_pos.width, size_pos.height);
             uint32_t mask = XCB_EVENT_MASK_FOCUS_CHANGE | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY | XCB_EVENT_MASK_POINTER_MOTION;
             context_window.apply_event_mask(& mask);
@@ -3087,53 +3151,76 @@ class context_menu {
             context_window.raise();
         }
         
-        void hide() {
+        void hide()
+        {
             context_window.unmap();
             context_window.kill();
         }
         
-        void configure_events() {
-            event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) -> void {
+        void configure_events()
+        {
+            event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev)
+            -> void {
                 const auto & e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
-                if(e->detail == L_MOUSE_BUTTON) {
+                if (e->detail == L_MOUSE_BUTTON)
+                {
                     run_action(& e->event);
                     hide();
                 }
             });
 
-            event_handler->setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev) ->void {
+            event_handler->setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev)
+            ->void {
                 const auto * e = reinterpret_cast<const xcb_enter_notify_event_t *>(ev);
-                if(e->event == screen->root) {
+                if (e->event == screen->root)
+                {
                     hide();
                 } 
             });
         }
         
-        void run_action(const xcb_window_t * w) {
-            for (const auto & entry : entries) {
-                if (* w == entry.window) {
+        void run_action(const xcb_window_t *w)
+        {
+            for (const auto & entry : entries)
+            {
+                if (* w == entry.window)
+                {
                     entry.activate();
                 }
             }
         }
         
-        void make_entries() {
+        void make_entries()
+        {
             int y = 0;
-            for (auto & entry : entries) {
-                entry.make_window(context_window, (0 + (BORDER_SIZE / 2)), (y + (BORDER_SIZE / 2)), (size_pos.width - BORDER_SIZE), (size_pos.height - BORDER_SIZE));
-                entry.window.draw_text(entry.getName(), WHITE, BLACK, "7x14", 2, 14);
+            for (auto & entry : entries)
+            {
+                entry.make_window(
+                    context_window,
+                    (0 + (BORDER_SIZE / 2)),
+                    (y + (BORDER_SIZE / 2)),
+                    (size_pos.width - BORDER_SIZE),
+                    (size_pos.height - BORDER_SIZE)
+                );
+                entry.window.draw_text(
+                    entry.getName(),
+                    WHITE,
+                    BLACK,
+                    "7x14",
+                    2,
+                    14
+                );
                 y += size_pos.height;
             }
         }
 };
 
-class Window_Manager {
+class Window_Manager
+{
     public: // constructor
-
         Window_Manager() {}
     
     public: // variabels
-    
         window root;
         Launcher launcher;
         Logger log;
@@ -3142,17 +3229,15 @@ class Window_Manager {
         Key_Codes key_codes;
         
         context_menu * context_menu = nullptr;
-        
-        std::vector<client *> client_list;
-        std::vector<desktop *> desktop_list;
+        vector<client *>(client_list);
+        vector<desktop *>(desktop_list);
         client * focused_client = nullptr;
         desktop * cur_d = nullptr;
     
     public: // methods
-
         // Main Methods
-
-            void init() {
+            void init()
+            {
                 _conn(nullptr, nullptr);
                 _setup();
                 _iter();
@@ -3175,7 +3260,8 @@ class Window_Manager {
                 create_new_desktop(5);
 
                 context_menu = new class context_menu();
-                context_menu->add_entry("konsole", [this]() -> void {
+                context_menu->add_entry("konsole", [this]()
+                -> void {
                     launcher.program((char *) "konsole");
                 });
 
@@ -3184,14 +3270,17 @@ class Window_Manager {
                 // std::thread(check_volt()); // dosent work 
             }
 
-            void launch_program(char * program) {
-                if(fork() == 0) {
+            void launch_program(char * program)
+            {
+                if (fork() == 0)
+                {
                     setsid();
                     execvp(program, (char *[]) { program, NULL });
                 }
             }
 
-            void quit(const int & status) {
+            void quit(const int & status)
+            {
                 xcb_flush(conn);
                 delete_client_vec(client_list);
                 delete_desktop_vec(desktop_list);
@@ -3202,9 +3291,10 @@ class Window_Manager {
         
         public: // client methods
             // focus methods
-
-                void focus_client(client * c) {
-                    if(!c) {
+                void focus_client(client *c)
+                {
+                    if(c == nullptr)
+                    {
                         log_error("c is null");
                         return;
                     }
@@ -3213,16 +3303,21 @@ class Window_Manager {
                     c->focus();
                 }
 
-                void cycle_focus() {
+                void cycle_focus()
+                {
                     bool focus = false;
-                    for(auto &c:client_list) {
-                        if(c) {
-                            if(c == focused_client) { 
+                    for (auto &c:client_list)
+                    {
+                        if (c != nullptr)
+                        {
+                            if (c == focused_client)
+                            { 
                                 focus = true;
                                 continue;
                             }
 
-                            if(focus) {
+                            if (focus)
+                            {
                                 focus_client(c); 
                                 return;
                             }
@@ -3231,10 +3326,12 @@ class Window_Manager {
                 }
 
             // client fetch methods
-                
-                client *client_from_window(const xcb_window_t * window) {
-                    for(const auto &c:client_list) {
-                        if(*window == c->win) {
+                client *client_from_window(const xcb_window_t *window)
+                {
+                    for (const auto &c:client_list)
+                    {
+                        if (*window == c->win)
+                        {
                             return c;
                         }
                     }
@@ -3242,22 +3339,24 @@ class Window_Manager {
                     return nullptr;
                 }
 
-                client *client_from_any_window(const xcb_window_t * window) {
-                    for(const auto &c:client_list) {
-                        if(*window == c->win 
-                        || *window == c->frame 
-                        || *window == c->titlebar 
-                        || *window == c->close_button 
-                        || *window == c->max_button 
-                        || *window == c->min_button 
-                        || *window == c->border.left 
-                        || *window == c->border.right 
-                        || *window == c->border.top 
-                        || *window == c->border.bottom
-                        || *window == c->border.top_left
-                        || *window == c->border.top_right
-                        || *window == c->border.bottom_left
-                        || *window == c->border.bottom_right)
+                client *client_from_any_window(const xcb_window_t *window)
+                {
+                    for (const auto &c:client_list)
+                    {
+                        if (*window == c->win 
+                        ||  *window == c->frame 
+                        ||  *window == c->titlebar 
+                        ||  *window == c->close_button 
+                        ||  *window == c->max_button 
+                        ||  *window == c->min_button 
+                        ||  *window == c->border.left 
+                        ||  *window == c->border.right 
+                        ||  *window == c->border.top 
+                        ||  *window == c->border.bottom
+                        ||  *window == c->border.top_left
+                        ||  *window == c->border.top_right
+                        ||  *window == c->border.bottom_left
+                        ||  *window == c->border.bottom_right)
                         {
                             return(c);
                         }
@@ -3266,26 +3365,33 @@ class Window_Manager {
                     return nullptr;
                 }
 
-                client *client_from_pointer(const int & prox) {
-                    const uint32_t & x = pointer.x();
-                    const uint32_t & y = pointer.y();
-                    for(const auto & c : cur_d->current_clients) {
+                client *client_from_pointer(const int &prox)
+                {
+                    const uint32_t &x = pointer.x();
+                    const uint32_t &y = pointer.y();
+                    for (const auto &c : cur_d->current_clients)
+                    {
                         // LEFT EDGE OF CLIENT
-                        if(x > c->x - prox && x <= c->x) {
+                        if (x > c->x - prox && x <= c->x)
+                        {
                             return(c);
                         }
                         
                         // RIGHT EDGE OF CLIENT
-                        if(x >= c->x + c->width && x < c->x + c->width + prox) { 
+                        if (x >= c->x + c->width && x < c->x + c->width + prox)
+                        { 
                             return(c);
                         }
                         
                         // TOP EDGE OF CLIENT
-                        if(y > c->y - prox && y <= c->y) { 
+                        if (y > c->y - prox && y <= c->y)
+                        { 
                             return(c);
                         }
+                        
                         // BOTTOM EDGE OF CLIENT
-                        if(y >= c->y + c->height && y < c->y + c->height + prox) {
+                        if (y >= c->y + c->height && y < c->y + c->height + prox)
+                        {
                             return(c);
                         }
                     } 
@@ -3293,36 +3399,47 @@ class Window_Manager {
                     return nullptr;
                 }
 
-                map<client *, edge> get_client_next_to_client(client * c, edge c_edge) {
+                map<client *, edge> get_client_next_to_client(client *c, edge c_edge)
+                {
                     map<client *, edge> map;
-                    for(client *c2:cur_d->current_clients) {
-                        if(c == c2) {
+                    for (client *c2:cur_d->current_clients)
+                    {
+                        if (c == c2)
+                        {
                             continue;
                         }
  
-                        if(c_edge == edge::LEFT) {
-                            if(c->x == c2->x + c2->width) {
+                        if (c_edge == edge::LEFT)
+                        {
+                            if(c->x == c2->x + c2->width)
+                            {
                                 map[c2] = edge::RIGHT;
                                 return map;
                             }
                         }
 
-                        if(c_edge == edge::RIGHT) {
-                            if(c->x + c->width == c2->x) {
+                        if (c_edge == edge::RIGHT)
+                        {
+                            if (c->x + c->width == c2->x)
+                            {
                                 map[c2] = edge::LEFT;
                                 return map;
                             }
                         }
 
-                        if(c_edge == edge::TOP) {
-                            if(c->y == c2->y + c2->height) {
+                        if (c_edge == edge::TOP)
+                        {
+                            if (c->y == c2->y + c2->height)
+                            {
                                 map[c2] = edge::BOTTOM_edge;
                                 return map;
                             }
                         }
 
-                        if(c_edge == edge::BOTTOM_edge) {
-                            if(c->y + c->height == c2->y) {
+                        if (c_edge == edge::BOTTOM_edge)
+                        {
+                            if (c->y + c->height == c2->y)
+                            {
                                 map[c2] = edge::TOP;
                                 return map;
                             }
@@ -3333,7 +3450,8 @@ class Window_Manager {
                     return map;
                 }
 
-                edge get_client_edge_from_pointer(client * c, const int & prox) {
+                edge get_client_edge_from_pointer(client *c, const int &prox)
+                {
                     const uint32_t &x = pointer.x();
                     const uint32_t &y = pointer.y();
 
@@ -3343,57 +3461,57 @@ class Window_Manager {
                     const uint32_t &right_border = (c->x + c->width);
 
                     // TOP EDGE OF CLIENT
-                    if(((y > top_border - prox) && (y <= top_border))
-                    &&((x > left_border + prox) && (x < right_border - prox)))
+                    if (((y > top_border - prox) && (y <= top_border))
+                    && ((x > left_border + prox) && (x < right_border - prox)))
                     {
                         return edge::TOP;
                     }
                     
                     // BOTTOM EDGE OF CLIENT
-                    if(((y >= bottom_border) && (y < bottom_border + prox))
-                    &&((x > left_border + prox) && (x < right_border - prox)))
+                    if (((y >= bottom_border) && (y < bottom_border + prox))
+                    && ((x > left_border + prox) && (x < right_border - prox)))
                     {
                         return edge::BOTTOM_edge;
                     }
                     
                     // LEFT EDGE OF CLIENT
-                    if(((x > left_border) - prox && (x <= left_border))
-                    &&((y > top_border + prox) && (y < bottom_border - prox)))
+                    if (((x > left_border) - prox && (x <= left_border))
+                    && ((y > top_border + prox) && (y < bottom_border - prox)))
                     {
                         return edge::LEFT;
                     }
                     
                     // RIGHT EDGE OF CLIENT
-                    if(((x >= right_border) && (x < right_border + prox))
-                    &&((y > top_border + prox) && (y < bottom_border - prox)))
+                    if (((x >= right_border) && (x < right_border + prox))
+                    && ((y > top_border + prox) && (y < bottom_border - prox)))
                     {
                         return edge::RIGHT;
                     }
                     
                     // TOP LEFT CORNER OF CLIENT
-                    if(((x > left_border - prox) && x < left_border + prox)
-                    &&((y > top_border - prox) && y < top_border + prox))
+                    if (((x > left_border - prox) && x < left_border + prox)
+                    && ((y > top_border - prox) && y < top_border + prox))
                     {
                         return edge::TOP_LEFT;
                     }
 
                     // TOP RIGHT CORNER OF CLIENT
-                    if(((x > right_border - prox) && x < right_border + prox)
-                    &&((y > top_border - prox) && y < top_border + prox))
+                    if (((x > right_border - prox) && x < right_border + prox)
+                    && ((y > top_border - prox) && y < top_border + prox))
                     {
                         return edge::TOP_RIGHT;
                     }
 
                     // BOTTOM LEFT CORNER OF CLIENT
-                    if(((x > left_border - prox) && x < left_border + prox) 
-                    &&((y > bottom_border - prox) && y < bottom_border + prox))
+                    if (((x > left_border - prox) && x < left_border + prox) 
+                    && ((y > bottom_border - prox) && y < bottom_border + prox))
                     {
                         return edge::BOTTOM_LEFT;
                     }
 
                     // BOTTOM RIGHT CORNER OF CLIENT
-                    if(((x > right_border - prox) && x < right_border + prox)
-                    &&((y > bottom_border - prox) && y < bottom_border + prox))
+                    if (((x > right_border - prox) && x < right_border + prox)
+                    && ((y > bottom_border - prox) && y < bottom_border + prox))
                     {
                         return edge::BOTTOM_RIGHT;
                     }
@@ -3401,20 +3519,41 @@ class Window_Manager {
                     return edge::NONE;
                 }
             
-            void manage_new_client(const uint32_t & window) {
-                client * c = make_client(window); if(!c){log_error("could not make client"); return;}
+            void manage_new_client(const uint32_t &window)
+            {
+                client * c = make_client(window);
+                if(c == nullptr)
+                {
+                    log_error("could not make client");
+                    return;
+                }
 
-                c->win.x_y_width_height(c->x, c->y, c->width, c->height); c->win.map();
-                c->win.grab_button({{L_MOUSE_BUTTON, ALT}, {R_MOUSE_BUTTON, ALT}, {L_MOUSE_BUTTON, 0}});
+                c->win.x_y_width_height(
+                    c->x,
+                    c->y,
+                    c->width,
+                    c->height
+                );
+                c->win.map();
+                c->win.grab_button({
+                    { L_MOUSE_BUTTON, ALT },
+                    { R_MOUSE_BUTTON, ALT },
+                    { L_MOUSE_BUTTON, 0   }
+                });
+
                 c->win.grab_default_keys();
                 c->make_decorations();
-                uint mask = XCB_EVENT_MASK_FOCUS_CHANGE | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW | XCB_EVENT_MASK_STRUCTURE_NOTIFY;
+                uint mask = XCB_EVENT_MASK_FOCUS_CHANGE |
+                            XCB_EVENT_MASK_ENTER_WINDOW |
+                            XCB_EVENT_MASK_LEAVE_WINDOW |
+                            XCB_EVENT_MASK_STRUCTURE_NOTIFY;
                 c->win.apply_event_mask(& mask);
 
                 c->update(); focus_client(c); check_client(c);
             }
             
-            client * make_internal_client(window window) {
+            client * make_internal_client(window window)
+            {
                 client * c = new client;
                 c->win = window;
                 c->x = window.x();
@@ -3430,14 +3569,15 @@ class Window_Manager {
                 return c;
             }
             
-            void send_sigterm_to_client(client * c) {
+            void send_sigterm_to_client(client * c)
+            {
                 c->kill();
                 remove_client(c);
             }
         
         public: // desktop methods
-            
-            void create_new_desktop(const uint16_t & n) {
+            void create_new_desktop(const uint16_t &n)
+            {
                 desktop * d = new desktop;
                 d->desktop  = n;
                 d->width    = screen->width_in_pixels;
@@ -3447,42 +3587,46 @@ class Window_Manager {
             }
         
         public: // experimental methods
-            
-            xcb_visualtype_t * find_argb_visual(xcb_connection_t *conn, xcb_screen_t *screen) {
+            xcb_visualtype_t *find_argb_visual(xcb_connection_t *conn, xcb_screen_t *screen)
+            {
                 xcb_depth_iterator_t depth_iter = xcb_screen_allowed_depths_iterator(screen);
-
-                for (; depth_iter.rem; xcb_depth_next(&depth_iter)) {
+                for (; depth_iter.rem; xcb_depth_next(&depth_iter))
+                {
                     xcb_visualtype_iterator_t visual_iter = xcb_depth_visuals_iterator(depth_iter.data);
-                    for (; visual_iter.rem; xcb_visualtype_next(&visual_iter)) {
-                        if (depth_iter.data->depth == 32) {
+                    for (; visual_iter.rem; xcb_visualtype_next(&visual_iter))
+                    {
+                        if (depth_iter.data->depth == 32)
+                        {
                             return visual_iter.data;
                         }
                     }
                 }
-                return NULL;
+
+                return nullptr;
             }
         
     private: // variables
-        
         window start_window;
     
     private: // functions
-        
         private: // init functions
-            
-            void _conn(const char * displayname, int * screenp) {
+            void _conn(const char *displayname, int *screenp)
+            {
                 conn = xcb_connect(displayname, screenp);
                 check_conn();
             }
             
-            void _ewmh() {
-                if (!(ewmh = static_cast<xcb_ewmh_connection_t *>(calloc(1, sizeof(xcb_ewmh_connection_t))))) {
+            void _ewmh()
+            {
+                if (!(ewmh = static_cast<xcb_ewmh_connection_t *>(calloc(1, sizeof(xcb_ewmh_connection_t)))))
+                {
                     log_error("ewmh faild to initialize");
                     quit(1);
                 }    
                 
                 xcb_intern_atom_cookie_t * cookie = xcb_ewmh_init_atoms(conn, ewmh);
-                if (!(xcb_ewmh_init_atoms_replies(ewmh, cookie, 0))) {
+                if (!(xcb_ewmh_init_atoms_replies(ewmh, cookie, 0)))
+                {
                     log_error("xcb_ewmh_init_atoms_replies:faild");
                     quit(1);
                 }
@@ -3500,19 +3644,23 @@ class Window_Manager {
                 );
             }
             
-            void _setup() {
+            void _setup()
+            {
                 setup = xcb_get_setup(conn);
             }
             
-            void _iter() {
+            void _iter()
+            {
                 iter = xcb_setup_roots_iterator(setup);
             }
             
-            void _screen() {
+            void _screen()
+            {
                 screen = iter.data;
             }
             
-            bool setSubstructureRedirectMask() {
+            bool setSubstructureRedirectMask()
+            {
                 xcb_void_cookie_t cookie = xcb_change_window_attributes_checked(
                     conn,
                     root,
@@ -3524,15 +3672,18 @@ class Window_Manager {
                 );
 
                 xcb_generic_error_t * error = xcb_request_check(conn, cookie);
-                if (error) {
+                if (error)
+                {
                     log_error("Error: Another window manager is already running or failed to set SubstructureRedirect mask."); 
                     free(error);
                     return false;
                 }
+
                 return true;
             }
             
-            void configure_root() {
+            void configure_root()
+            {
                 root.set_backround_color(DARK_GREY);
                 uint32_t mask = 
                     XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT |
@@ -3555,56 +3706,82 @@ class Window_Manager {
             }
         
         private: // check functions
-        
-            void check_error(const int & code) {
-                switch (code) {
+            void check_error(const int &code)
+            {
+                switch (code)
+                {
                     case CONN_ERR:
+                    {
                         log_error("Connection error.");
                         quit(CONN_ERR);
                         break;
+                    }
+
                     case EXTENTION_NOT_SUPPORTED_ERR:
+                    {
                         log_error("Extension not supported.");
                         quit(EXTENTION_NOT_SUPPORTED_ERR);
                         break;
+                    }
+                        
                     case MEMORY_INSUFFICIENT_ERR:
+                    {
                         log_error("Insufficient memory.");
                         quit(MEMORY_INSUFFICIENT_ERR);
                         break;
+                    }
+                        
                     case REQUEST_TO_LONG_ERR:
+                    {
                         log_error("Request to long.");
                         quit(REQUEST_TO_LONG_ERR);
                         break;
+                    }
+
                     case PARSE_ERR:
+                    {
                         log_error("Parse error.");
                         quit(PARSE_ERR);
                         break;
+                    }
+
                     case SCREEN_NOT_FOUND_ERR:
+                    {
                         log_error("Screen not found.");
                         quit(SCREEN_NOT_FOUND_ERR);
                         break;
+                    }
+
                     case FD_ERR:
+                    {
                         log_error("File descriptor error.");
                         quit(FD_ERR);
                         break;
+                    }
                 }
             }
         
-            void check_conn() {
+            void check_conn()
+            {
                 int status = xcb_connection_has_error(conn);
                 check_error(status);
             }
         
-            int cookie_error(xcb_void_cookie_t cookie , const char * sender_function) {
-                xcb_generic_error_t * err = xcb_request_check(conn, cookie);
-                if (err) {
+            int cookie_error(xcb_void_cookie_t cookie , const char *sender_function)
+            {
+                xcb_generic_error_t *err = xcb_request_check(conn, cookie);
+                if (err)
+                {
                     log_error(err->error_code);
                     free(err);
                     return err->error_code;
                 }
+
                 return 0;
             }
         
-            void check_error(xcb_void_cookie_t cookie , const char * sender_function, const char * err_msg) {
+            void check_error(xcb_void_cookie_t cookie , const char *sender_function, const char *err_msg)
+            {
                 xcb_generic_error_t * err = xcb_request_check(conn, cookie);
                 if (err)
                 {
@@ -3613,66 +3790,108 @@ class Window_Manager {
                 }
             }
         
-        int start_screen_window() {
-            start_window.create_default(root, 0, 0, 0, 0);
+        int start_screen_window()
+        {
+            start_window.create_default(
+                root,
+                0,
+                0,
+                0,
+                0
+            );
             start_window.set_backround_color(DARK_GREY);
             start_window.map();
             return 0;
         }
 
         private: // delete functions
-            
-            void delete_client_vec(std::vector<client *> & vec) {
-                for (client * c : vec) {
+            void delete_client_vec(vector<client *> &vec)
+            {
+                for (client * c : vec)
+                {
                     send_sigterm_to_client(c);
                     xcb_flush(conn);                    
                 }
 
                 vec.clear();
-
-                std::vector<client *>().swap(vec);
+                vector<client *>().swap(vec);
             }
             
-            void delete_desktop_vec(std::vector<desktop *> & vec) {
-                for (desktop * d : vec) {
+            void delete_desktop_vec(vector<desktop *> &vec)
+            {
+                for (desktop * d : vec)
+                {
                     delete_client_vec(d->current_clients);
                     delete d;
                 }
 
                 vec.clear();
-
-                std::vector<desktop *>().swap(vec);
+                vector<desktop *>().swap(vec);
             }
             
             template <typename Type> 
-            static void delete_ptr_vector(vector<Type *>& vec) {
-                for (Type * ptr : vec) {
+            static void delete_ptr_vector(vector<Type *>& vec)
+            {
+                for (Type * ptr : vec)
+                {
                     delete ptr;
                 }
-                vec.clear();
 
+                vec.clear();
                 vector<Type *>().swap(vec);
             }
             
-            void remove_client(client * c) {
-                client_list.erase(std::remove(client_list.begin(), client_list.end(), c), client_list.end());
-                cur_d->current_clients.erase(std::remove(cur_d->current_clients.begin(), cur_d->current_clients.end(), c), cur_d->current_clients.end());
+            void remove_client(client * c)
+            {
+                client_list.erase(
+                    std::remove(
+                        client_list.begin(),
+                        client_list.end(),
+                        c
+                    ), 
+                    client_list.end()
+                );
+
+                cur_d->current_clients.erase(
+                    std::remove(
+                        cur_d->current_clients.begin(),
+                        cur_d->current_clients.end(),
+                        c
+                    ),
+                    cur_d->current_clients.end()
+                );
+
                 delete c;
             }
 
-            void remove_client_from_vector(client * c, std::vector<client *> & vec) {
-                if (!c) {
+            void remove_client_from_vector(client * c, vector<client *> &vec)
+            {
+                if (c == nullptr)
+                {
                     log_error("client is nullptr.");
                 }
-                vec.erase(std::remove(vec.begin(), vec.end(), c), vec.end());
+
+                vec.erase(
+                    std::remove(
+                        vec.begin(),
+                        vec.end(),
+                        c
+                    ),
+                    vec.end()
+                );
+
                 delete c;
             }
         
         private: // client functions
-        
-            client * make_client(const uint32_t & window) {
+            client * make_client(const uint32_t &window)
+            {
                 client * c = new client;
-                if(!c){log_error("Could not allocate memory for client"); return(nullptr);}
+                if (c == nullptr)
+                {
+                    log_error("Could not allocate memory for client");
+                    return nullptr;
+                }
 
                 c->win     = window;
                 c->height  = (data.height < 300) ? 300 : data.height;
@@ -3682,65 +3901,103 @@ class Window_Manager {
                 c->depth   = 24;
                 c->desktop = cur_d->desktop;
 
-                if(c->x <= 0 && c->y <= 0 && c->width != screen->width_in_pixels && c->height != screen->height_in_pixels){c->x=((screen->width_in_pixels - c->width) / 2); c->y=(((screen->height_in_pixels - c->height) / 2) + (BORDER_SIZE * 2));}
-                if(c->height > screen->height_in_pixels) c->height = screen->height_in_pixels;
-                if(c->width > screen->width_in_pixels) c->width = screen->width_in_pixels;
-                if(c->win.is_EWMH_fullscreen()){c->x=(0); c->y=(0); c->width=(screen->width_in_pixels); c->height=(screen->height_in_pixels); c->win.set_EWMH_fullscreen_state();}
+                if (c->x <= 0 && c->y <= 0 && c->width != screen->width_in_pixels && c->height != screen->height_in_pixels)
+                {
+                    c->x = ((screen->width_in_pixels - c->width) / 2);
+                    c->y = (((screen->height_in_pixels - c->height) / 2) + (BORDER_SIZE * 2));
+                }
+
+                if (c->height > screen->height_in_pixels) 
+                {
+                    c->height = screen->height_in_pixels;
+                }
+                    
+                if (c->width > screen->width_in_pixels) 
+                {
+                    c->width = screen->width_in_pixels;
+                }
+                    
+                if (c->win.is_EWMH_fullscreen())
+                {
+                    c->x      =(0);
+                    c->y      =(0);
+                    c->width  =(screen->width_in_pixels);
+                    c->height =(screen->height_in_pixels);
+                    c->win.set_EWMH_fullscreen_state();
+                }
                 
                 client_list.push_back(c); cur_d->current_clients.push_back(c);
-                return(c);
+                return c;
             }
         
-            void check_client(client * c) {
-                if (c->x == 0 // if client if full_screen but 'y' is offset for some reason, make 'y' (0)
-                && c->y != 0
-                && c->width == screen->width_in_pixels
-                && c->height == screen->height_in_pixels) {
+            void check_client(client * c)
+            {
+                // if client if full_screen but 'y' is offset for some reason, make 'y' (0)
+                if (c->x == 0
+                &&  c->y != 0
+                &&  c->width == screen->width_in_pixels
+                &&  c->height == screen->height_in_pixels)
+                {
                     c->_y(0);
                     xcb_flush(conn);
                     return;
                 }
-                if (c->x != 0 // if client is full_screen 'width' and 'height' but position is offset from (0, 0) then make pos (0, 0)
-                && c->y != 0
-                && c->width == screen->width_in_pixels
-                && c->height == screen->height_in_pixels) {
+
+                // if client is full_screen 'width' and 'height' but position is offset from (0, 0) then make pos (0, 0)
+                if (c->x != 0
+                &&  c->y != 0
+                &&  c->width == screen->width_in_pixels
+                &&  c->height == screen->height_in_pixels)
+                {
                     c->x_y(0,0);
                     xcb_flush(conn);
                     return;
                 }
-                if (c->x < 0) {
+
+                if (c->x < 0)
+                {
                     c->_x(0);
                     xcb_flush(conn);
                 }
-                if (c->y < 0) {
+
+                if (c->y < 0)
+                {
                     c->_y(0);
                     xcb_flush(conn);
                 }
-                if (c->width > screen->width_in_pixels) {
+
+                if (c->width > screen->width_in_pixels)
+                {
                     c->_width(screen->width_in_pixels);
                     xcb_flush(conn);
                 }
-                if (c->height > screen->height_in_pixels) {
+
+                if (c->height > screen->height_in_pixels)
+                {
                     c->_height(screen->height_in_pixels);
                     xcb_flush(conn);
                 }
-                if ((c->x + c->width) > screen->width_in_pixels) {
+                
+                if ((c->x + c->width) > screen->width_in_pixels)
+                {
                     c->_width(screen->width_in_pixels - c->x);
                     xcb_flush(conn);
                 }
-                if ((c->y + c->height) > screen->height_in_pixels) {
+                
+                if ((c->y + c->height) > screen->height_in_pixels)
+                {
                     c->_height(screen->height_in_pixels - c->y);
                     xcb_flush(conn);
                 }
             }
         
         private: // window functions
-            
-            void getWindowParameters(const uint32_t & window) {
+            void getWindowParameters(const uint32_t & window)
+            {
                 xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
-                xcb_get_geometry_reply_t* geometry_reply = xcb_get_geometry_reply(conn, geometry_cookie, NULL);
-
-                if (geometry_reply != NULL) {
+                xcb_get_geometry_reply_t *geometry_reply = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
+                if (geometry_reply != nullptr)
+                {
                     log_info("Window Parameters");
                     log_info(std::to_string(geometry_reply->x));
                     log_info(std::to_string(geometry_reply->y));
@@ -3748,32 +4005,51 @@ class Window_Manager {
                     log_info(std::to_string(geometry_reply->height));
 
                     free(geometry_reply);
-                } else {
-                    std::cerr << "Unable to get window geometry." << std::endl;
+                }
+                else
+                {
+                    cerr << "Unable to get window geometry.\n";
                 }
             }
             
-            void get_window_parameters(const uint32_t(&window), int16_t(*x), int16_t(*y), uint16_t(*width), uint16_t(*height)) {
+            void get_window_parameters(const uint32_t(&window), int16_t(*x), int16_t(*y), uint16_t(*width), uint16_t(*height))
+            {
                 xcb_get_geometry_cookie_t cookie = xcb_get_geometry(conn, window);
                 xcb_get_geometry_reply_t* reply = xcb_get_geometry_reply(conn, cookie, NULL);
-                if (!reply){log_error("unable to get window parameters for window: " + std::to_string(window)); return;}
-                x=(&reply->x); y=(&reply->y); width=(&reply->width); height=(&reply->height); free(reply);
+                if (reply == nullptr)
+                {
+                    log_error("unable to get window parameters for window: " + std::to_string(window));
+                    return;
+                }
+
+                x      =(&reply->x);
+                y      =(&reply->y);
+                width  =(&reply->width);
+                height =(&reply->height);
+                free(reply);
             }
             
-            int16_t get_window_x(const uint32_t & window) {
+            int16_t get_window_x(const uint32_t &window)
+            {
                 xcb_get_geometry_cookie_t cookie = xcb_get_geometry(conn, window);
-                xcb_get_geometry_reply_t* reply = xcb_get_geometry_reply(conn, cookie, NULL);
-                if(!reply){log_error("Unable to get window geometry.");return(screen->width_in_pixels / 2);} 
+                xcb_get_geometry_reply_t *reply = xcb_get_geometry_reply(conn, cookie, nullptr);
+                if (reply == nullptr)
+                {
+                    log_error("Unable to get window geometry.");
+                    return(screen->width_in_pixels / 2);
+                } 
             
                 int16_t x(reply->x);
                 free(reply);
                 return x;
             }
             
-            int16_t get_window_y(const uint32_t & window) {
+            int16_t get_window_y(const uint32_t &window)
+            {
                 xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
-                xcb_get_geometry_reply_t* geometry_reply = xcb_get_geometry_reply(conn, geometry_cookie, NULL);
-                if (!geometry_reply) {
+                xcb_get_geometry_reply_t *geometry_reply = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
+                if (geometry_reply == nullptr)
+                {
                     log_error("Unable to get window geometry.");
                     return (screen->height_in_pixels / 2);
                 } 
@@ -3784,10 +4060,10 @@ class Window_Manager {
             }
         
         private: // status functions
-        
-            void check_volt() {
+            void check_volt()
+            {
                 log_info("running");
-                std::this_thread::sleep_for(std::chrono::minutes(1));
+                this_thread::sleep_for(chrono::minutes(1));
                 check_volt();
             }
 }; static Window_Manager * wm;
@@ -3798,23 +4074,23 @@ class Window_Manager {
  * @brief Class for animating the position and size of an XCB window.
  *
  */
-class Mwm_Animator {
-    public: // variables
+class Mwm_Animator
+{
+    public:
         Mwm_Animator(const uint32_t & window)
         : window(window) {}
 
         Mwm_Animator(client * c)
         : c(c) {}
-    ;
-    public: // destructor
-        /**
+
+        ~Mwm_Animator()/**
          * @brief Destructor to ensure the animation threads are stopped when the object is destroyed.
          */
-        ~Mwm_Animator() {
+        {
             stopAnimations();
         }
-    ;
-    public: // methods 
+    
+    public: 
         /**
          * @brief Animates the position and size of an object from a starting point to an ending point.
          * 
@@ -3828,7 +4104,8 @@ class Mwm_Animator {
          * @param endHeight The ending height.
          * @param duration The duration of the animation in milliseconds.
          */
-        void animate(int startX, int startY, int startWidth, int startHeight, int endX, int endY, int endWidth, int endHeight, int duration) {
+        void animate(int startX, int startY, int startWidth, int startHeight, int endX, int endY, int endWidth, int endHeight, int duration)
+        {
             stopAnimations(); // ENSURE ANY EXISTING ANIMATION IS STOPPED
             
             /* INITILIZE CLASS VARIABELS WITH INPUT VALUES */
@@ -3847,10 +4124,10 @@ class Mwm_Animator {
              * by the difference itself. This results in a value of 1 or -1, which is used to determine if the animation 
              * is moving in a positive (increasing) or negative (decreasing) direction for each property.
              */
-            stepX      = std::abs(endX - startX)           / (endX - startX);
-            stepY      = std::abs(endY - startY)           / (endY - startY);
-            stepWidth  = std::abs(endWidth - startWidth)   / (endWidth - startWidth);
-            stepHeight = std::abs(endHeight - startHeight) / (endHeight - startHeight);
+            stepX      = abs(endX - startX)           / (endX - startX);
+            stepY      = abs(endY - startY)           / (endY - startY);
+            stepWidth  = abs(endWidth - startWidth)   / (endWidth - startWidth);
+            stepHeight = abs(endHeight - startHeight) / (endHeight - startHeight);
 
             /**
              * @brief CALCULATE THE DURATION FOR EACH STEP BASED ON THE TOTAL ANIMATION DURATION AND THE ABSOLUTE VALUE OF THE LENGTH OF EACH ANIMATION 
@@ -3861,21 +4138,23 @@ class Mwm_Animator {
              * This ensures that each thread will iterate each pixel from start to end value,
              * ensuring that all threads will complete at the same time.
              */
-            XAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(std::abs(endX - startX));
-            YAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(std::abs(endY - startY)); 
-            WAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(std::abs(endWidth - startWidth));
-            HAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(std::abs(endHeight - startHeight)); 
+            XAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(abs(endX - startX));
+            YAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(abs(endY - startY)); 
+            WAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(abs(endWidth - startWidth));
+            HAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(abs(endHeight - startHeight)); 
 
             /* START ANIMATION THREADS */
-            XAnimationThread = std::thread(&Mwm_Animator::XAnimation, this, endX);
-            YAnimationThread = std::thread(&Mwm_Animator::YAnimation, this, endY);
-            WAnimationThread = std::thread(&Mwm_Animator::WAnimation, this, endWidth);
-            HAnimationThread = std::thread(&Mwm_Animator::HAnimation, this, endHeight);
+            XAnimationThread = thread(&Mwm_Animator::XAnimation, this, endX);
+            YAnimationThread = thread(&Mwm_Animator::YAnimation, this, endY);
+            WAnimationThread = thread(&Mwm_Animator::WAnimation, this, endWidth);
+            HAnimationThread = thread(&Mwm_Animator::HAnimation, this, endHeight);
 
-            std::this_thread::sleep_for(std::chrono::milliseconds(duration)); // WAIT FOR ANIMATION TO COMPLETE
+            this_thread::sleep_for(chrono::milliseconds(duration)); // WAIT FOR ANIMATION TO COMPLETE
             stopAnimations(); // STOP THE ANIMATION
         }
-        void animate_client(int startX, int startY, int startWidth, int startHeight, int endX, int endY, int endWidth, int endHeight, int duration) {
+
+        void animate_client(int startX, int startY, int startWidth, int startHeight, int endX, int endY, int endWidth, int endHeight, int duration)
+        {
             /* ENSURE ANY EXISTING ANIMATION IS STOPPED */
             stopAnimations();
             
@@ -3895,10 +4174,10 @@ class Mwm_Animator {
              * by the difference itself. This results in a value of 1 or -1, which is used to determine if the animation 
              * is moving in a positive (increasing) or negative (decreasing) direction for each property.
              */
-            stepX      = std::abs(endX - startX)           / (endX - startX);
-            stepY      = std::abs(endY - startY)           / (endY - startY);
-            stepWidth  = std::abs(endWidth - startWidth)   / (endWidth - startWidth);
-            stepHeight = std::abs(endHeight - startHeight) / (endHeight - startHeight);
+            stepX      = abs(endX - startX)           / (endX - startX);
+            stepY      = abs(endY - startY)           / (endY - startY);
+            stepWidth  = abs(endWidth - startWidth)   / (endWidth - startWidth);
+            stepHeight = abs(endHeight - startHeight) / (endHeight - startHeight);
 
             /**
              * @brief CALCULATE THE DURATION FOR EACH STEP BASED ON THE TOTAL ANIMATION DURATION AND THE ABSOLUTE VALUE OF THE LENGTH OF EACH ANIMATION 
@@ -3909,30 +4188,34 @@ class Mwm_Animator {
              * This ensures that each thread will iterate each pixel from start to end value,
              * ensuring that all threads will complete at the same time.
              */
-            XAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(std::abs(endX - startX));
-            YAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(std::abs(endY - startY)); 
-            WAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(std::abs(endWidth - startWidth));
-            HAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(std::abs(endHeight - startHeight)); 
+            XAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(abs(endX - startX));
+            YAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(abs(endY - startY)); 
+            WAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(abs(endWidth - startWidth));
+            HAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(abs(endHeight - startHeight)); 
             GAnimDuration = frameDuration;
 
             /* START ANIMATION THREADS */
-            GAnimationThread = std::thread(&Mwm_Animator::GFrameAnimation, this, endX, endY, endWidth, endHeight);
-            XAnimationThread = std::thread(&Mwm_Animator::CliXAnimation, this, endX);
-            YAnimationThread = std::thread(&Mwm_Animator::CliYAnimation, this, endY);
-            WAnimationThread = std::thread(&Mwm_Animator::CliWAnimation, this, endWidth);
-            HAnimationThread = std::thread(&Mwm_Animator::CliHAnimation, this, endHeight);
+            GAnimationThread = thread(&Mwm_Animator::GFrameAnimation, this, endX, endY, endWidth, endHeight);
+            XAnimationThread = thread(&Mwm_Animator::CliXAnimation, this, endX);
+            YAnimationThread = thread(&Mwm_Animator::CliYAnimation, this, endY);
+            WAnimationThread = thread(&Mwm_Animator::CliWAnimation, this, endWidth);
+            HAnimationThread = thread(&Mwm_Animator::CliHAnimation, this, endHeight);
 
             /* WAIT FOR ANIMATION TO COMPLETE */
-            std::this_thread::sleep_for(std::chrono::milliseconds(duration));
+            this_thread::sleep_for(chrono::milliseconds(duration));
 
             /* STOP THE ANIMATION */
             stopAnimations();
         }
-        enum DIRECTION {
+
+        enum DIRECTION
+        {
             NEXT,
             PREV
         };
-        void animate_client_x(int startX, int endX, int duration) {
+
+        void animate_client_x(int startX, int endX, int duration)
+        {
             /* ENSURE ANY EXISTING ANIMATION IS STOPPED */
             stopAnimations();
             
@@ -3949,7 +4232,7 @@ class Mwm_Animator {
              * by the difference itself. This results in a value of 1 or -1, which is used to determine if the animation 
              * is moving in a positive (increasing) or negative (decreasing) direction for each property.
              */
-            stepX = std::abs(endX - startX) / (endX - startX);
+            stepX = abs(endX - startX) / (endX - startX);
 
             /**
              * @brief CALCULATE THE DURATION FOR EACH STEP BASED ON THE TOTAL ANIMATION DURATION AND THE ABSOLUTE VALUE OF THE LENGTH OF EACH ANIMATION 
@@ -3960,28 +4243,29 @@ class Mwm_Animator {
              * This ensures that each thread will iterate each pixel from start to end value,
              * ensuring that all threads will complete at the same time.
              */
-            XAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(std::abs(endX - startX));
+            XAnimDuration = static_cast<const double &>(duration) / static_cast<const double &>(abs(endX - startX));
             GAnimDuration = frameDuration;
 
             /* START ANIMATION THREADS */
-            GAnimationThread = std::thread(&Mwm_Animator::GFrameAnimation_X, this, endX);
-            XAnimationThread = std::thread(&Mwm_Animator::CliXAnimation, this, endX);
+            GAnimationThread = thread(&Mwm_Animator::GFrameAnimation_X, this, endX);
+            XAnimationThread = thread(&Mwm_Animator::CliXAnimation, this, endX);
 
             /* WAIT FOR ANIMATION TO COMPLETE */
-            std::this_thread::sleep_for(std::chrono::milliseconds(duration));
+            this_thread::sleep_for(chrono::milliseconds(duration));
 
             /* STOP THE ANIMATION */
             stopAnimations();
         }
-    ;
+    
     private: // variabels
+        
         xcb_window_t window;
         client * c;
-        std::thread GAnimationThread;
-        std::thread XAnimationThread;
-        std::thread YAnimationThread;
-        std::thread WAnimationThread;
-        std::thread HAnimationThread;
+        thread(GAnimationThread);
+        thread(XAnimationThread);
+        thread(YAnimationThread);
+        thread(WAnimationThread);
+        thread(HAnimationThread);
         int currentX;
         int currentY;
         int currentWidth;
@@ -3995,20 +4279,20 @@ class Mwm_Animator {
         double YAnimDuration;
         double WAnimDuration;
         double HAnimDuration;
-        std::atomic<bool> stopGFlag{false};
-        std::atomic<bool> stopXFlag{false};
-        std::atomic<bool> stopYFlag{false};
-        std::atomic<bool> stopWFlag{false};
-        std::atomic<bool> stopHFlag{false};
-        std::chrono::high_resolution_clock::time_point XlastUpdateTime;
-        std::chrono::high_resolution_clock::time_point YlastUpdateTime;
-        std::chrono::high_resolution_clock::time_point WlastUpdateTime;
-        std::chrono::high_resolution_clock::time_point HlastUpdateTime;
+        atomic<bool> stopGFlag{false};
+        atomic<bool> stopXFlag{false};
+        atomic<bool> stopYFlag{false};
+        atomic<bool> stopWFlag{false};
+        atomic<bool> stopHFlag{false};
+        chrono::high_resolution_clock::time_point(XlastUpdateTime);
+        chrono::high_resolution_clock::time_point(YlastUpdateTime);
+        chrono::high_resolution_clock::time_point(WlastUpdateTime);
+        chrono::high_resolution_clock::time_point(HlastUpdateTime);
         const double frameRate = 120;
         const double frameDuration = 1000.0 / frameRate; 
-    ;
-    private: // funcrions
-        /**
+    
+    private:// functions
+        void XAnimation(const int & endX)/**
          *
          * @brief Performs animation on window 'x' position until the specified 'endX' is reached.
          * 
@@ -4019,18 +4303,22 @@ class Mwm_Animator {
          * @param endX The desired 'x' position of the window.
          *
          */
-        void XAnimation(const int & endX) {
-            XlastUpdateTime = std::chrono::high_resolution_clock::now();
-            while (true) {
-                if (currentX == endX) {
+        {
+            XlastUpdateTime = chrono::high_resolution_clock::now();
+            while (true)
+            {
+                if (currentX == endX)
+                {
                     config_window(XCB_CONFIG_WINDOW_X, endX);
                     break;
                 }
+
                 XStep();
                 thread_sleep(XAnimDuration);
             }
         }
-        /**
+
+        void XStep()/**
          * @brief Performs a step in the X direction.
          * 
          * This function increments the currentX variable by the stepX value.
@@ -4038,10 +4326,11 @@ class Mwm_Animator {
          * 
          * @note This function assumes that the connection and window variables are properly initialized.
          */
-        void XStep() {
+        {
             currentX += stepX;
             
-            if (XisTimeToRender()) {
+            if (XisTimeToRender())
+            {
                 xcb_configure_window(
                     conn,
                     window,
@@ -4053,7 +4342,8 @@ class Mwm_Animator {
                 xcb_flush(conn);
             }
         }
-        /**
+    
+        void YAnimation(const int & endY)/**
          *
          * @brief Performs animation on window 'y' position until the specified 'endY' is reached.
          * 
@@ -4064,28 +4354,33 @@ class Mwm_Animator {
          * @param endY The desired 'y' positon of the window.
          *
          */
-        void YAnimation(const int & endY) {
+        {
             YlastUpdateTime = std::chrono::high_resolution_clock::now();
-            while (true) {
-                if (currentY == endY) {
+            while (true)
+            {
+                if (currentY == endY)
+                {
                     config_window(XCB_CONFIG_WINDOW_Y, endY);
                     break;
                 }
+
                 YStep();
                 thread_sleep(YAnimDuration);
             }
         }
-        /**
+    
+        void YStep()/**
          * @brief Performs a step in the Y direction.
          * 
          * This function increments the currentY variable by the stepY value.
          * If it is time to render, it configures the window's Y position using xcb_configure_window
          * and flushes the connection using xcb_flush.
          */
-        void YStep() {
+        {
             currentY += stepY;
             
-            if (YisTimeToRender()) {
+            if (YisTimeToRender())
+            {
                 xcb_configure_window(
                     conn,
                     window,
@@ -4097,7 +4392,8 @@ class Mwm_Animator {
                 xcb_flush(conn);
             }
         }
-        /**
+        
+        void WAnimation(const int & endWidth)/**
          *
          * @brief Performs a 'width' animation until the specified end 'width' is reached.
          * 
@@ -4108,18 +4404,22 @@ class Mwm_Animator {
          * @param endWidth The desired 'width' of the window.
          *
          */
-        void WAnimation(const int & endWidth) {
-            WlastUpdateTime = std::chrono::high_resolution_clock::now();
-            while (true) {
-                if (currentWidth == endWidth) {
+        {
+            WlastUpdateTime = chrono::high_resolution_clock::now();
+            while (true)
+            {
+                if (currentWidth == endWidth)
+                {
                     config_window(XCB_CONFIG_WINDOW_WIDTH, endWidth);
                     break;
                 }
+
                 WStep();
                 thread_sleep(WAnimDuration);
             }
         }
-        /**
+    
+        void WStep()/**
          *
          * @brief Performs a step in the width calculation and updates the window width if it is time to render.
          * 
@@ -4127,10 +4427,11 @@ class Mwm_Animator {
          * using the XCB library and flushes the connection.
          *
          */
-        void WStep() {
+        {
             currentWidth += stepWidth;
 
-            if (WisTimeToRender()) {
+            if (WisTimeToRender())
+            {
                 xcb_configure_window(
                     conn,
                     window,
@@ -4142,7 +4443,8 @@ class Mwm_Animator {
                 xcb_flush(conn);
             }
         }
-        /**
+
+        void HAnimation(const int & endHeight)/**
          *
          * @brief Performs a 'height' animation until the specified end 'height' is reached.
          * 
@@ -4153,18 +4455,22 @@ class Mwm_Animator {
          * @param endWidth The desired 'height' of the window.
          *
          */
-        void HAnimation(const int & endHeight) {
-            HlastUpdateTime = std::chrono::high_resolution_clock::now();
-            while (true) {
-                if (currentHeight == endHeight) {
+        {
+            HlastUpdateTime = chrono::high_resolution_clock::now();
+            while (true)
+            {
+                if (currentHeight == endHeight)
+                {
                     config_window(XCB_CONFIG_WINDOW_HEIGHT, endHeight);
                     break;
                 }
+
                 HStep();
                 thread_sleep(HAnimDuration);
             }
         }
-        /**
+    
+        void HStep()/**
          *
          * @brief Increases the current height by the step height and updates the window height if it's time to render.
          * 
@@ -4173,10 +4479,11 @@ class Mwm_Animator {
          * flush the changes to the X server.
          *
          */
-        void HStep() {
+        {
             currentHeight += stepHeight;
             
-            if (HisTimeToRender()) {
+            if (HisTimeToRender())
+            {
                 xcb_configure_window(
                     conn,
                     window,
@@ -4188,27 +4495,38 @@ class Mwm_Animator {
                 xcb_flush(conn);
             }
         }
-        void GFrameAnimation(const int & endX, const int & endY, const int & endWidth, const int & endHeight) {
-            while (true) {
-                if (currentX == endX && currentY == endY && currentWidth == endWidth && currentHeight == endHeight) {
+    
+        void GFrameAnimation(const int & endX, const int & endY, const int & endWidth, const int & endHeight)
+        {
+            while (true)
+            {
+                if (currentX == endX && currentY == endY && currentWidth == endWidth && currentHeight == endHeight)
+                {
                     c->x_y_width_height(currentX, currentY, currentWidth, currentHeight);
                     break;
                 }
+
                 c->x_y_width_height(currentX, currentY, currentWidth, currentHeight);
                 thread_sleep(GAnimDuration);
             }
         }
-        void GFrameAnimation_X(const int & endX) {
-            while (true) {
-                if (currentX == endX) {
+    
+        void GFrameAnimation_X(const int & endX)
+        {
+            while (true)
+            {
+                if (currentX == endX)
+                {
                     conf_client_x();
                     break;
                 }
+
                 conf_client_x();
                 thread_sleep(GAnimDuration);
             }
         }
-        /**
+    
+        void CliXAnimation(const int & endX)/**
          *
          * @brief Performs animation on window 'x' position until the specified 'endX' is reached.
          * 
@@ -4219,17 +4537,21 @@ class Mwm_Animator {
          * @param endX The desired 'x' position of the window.
          *
          */
-        void CliXAnimation(const int & endX) {
+        {
             XlastUpdateTime = std::chrono::high_resolution_clock::now();
-            while (true) {
-                if (currentX == endX) {
+            while (true)
+            {
+                if (currentX == endX)
+                {
                     break;
                 }
+
                 currentX += stepX;
                 thread_sleep(XAnimDuration);
             }
         }
-        /**
+        
+        void CliYAnimation(const int & endY)/**
          *
          * @brief Performs animation on window 'y' position until the specified 'endY' is reached.
          * 
@@ -4240,17 +4562,21 @@ class Mwm_Animator {
          * @param endY The desired 'y' positon of the window.
          *
          */
-        void CliYAnimation(const int & endY) {
-            YlastUpdateTime = std::chrono::high_resolution_clock::now();
-            while (true) {
-                if (currentY == endY) {
+        {
+            YlastUpdateTime = chrono::high_resolution_clock::now();
+            while (true)
+            {
+                if (currentY == endY)
+                {
                     break;
                 }
+
                 currentY += stepY;
                 thread_sleep(YAnimDuration);
             }
         }
-        /**
+        
+        void CliWAnimation(const int & endWidth)/**
          *
          * @brief Performs a 'width' animation until the specified end 'width' is reached.
          * 
@@ -4261,17 +4587,21 @@ class Mwm_Animator {
          * @param endWidth The desired 'width' of the window.
          *
          */
-        void CliWAnimation(const int & endWidth) {
+        {
             WlastUpdateTime = std::chrono::high_resolution_clock::now();
-            while (true) {
-                if (currentWidth == endWidth) {
+            while (true)
+            {
+                if (currentWidth == endWidth)
+                {
                     break;
                 }
+
                 currentWidth += stepWidth;
                 thread_sleep(WAnimDuration);
             }
         }
-        /**
+    
+        void CliHAnimation(const int & endHeight)/**
          *
          * @brief Performs a 'height' animation until the specified end 'height' is reached.
          * 
@@ -4282,51 +4612,65 @@ class Mwm_Animator {
          * @param endWidth The desired 'height' of the window.
          *
          */
-        void CliHAnimation(const int & endHeight) {
-            HlastUpdateTime = std::chrono::high_resolution_clock::now();
-            while (true) {
-                if (currentHeight == endHeight) {
+        {
+            HlastUpdateTime = chrono::high_resolution_clock::now();
+            while (true)
+            {
+                if (currentHeight == endHeight)
+                {
                     break;
                 }
+
                 currentHeight += stepHeight;
                 thread_sleep(HAnimDuration);
             }
         }
-        /**
+
+        void stopAnimations()/**
          *
          * @brief Stops all animations by setting the corresponding flags to true and joining the animation threads.
          *        After joining the threads, the flags are set back to false.
          *
          */
-        void stopAnimations() {
+        {
             stopHFlag.store(true);
             stopXFlag.store(true);
             stopYFlag.store(true);
             stopWFlag.store(true);
             stopHFlag.store(true);
 
-            if (GAnimationThread.joinable()) {
+            if (GAnimationThread.joinable())
+            {
                 GAnimationThread.join();
                 stopGFlag.store(false);
             }
-            if (XAnimationThread.joinable()) {
+            
+            if (XAnimationThread.joinable())
+            {
                 XAnimationThread.join();
                 stopXFlag.store(false);
             }
-            if (YAnimationThread.joinable()) {
+            
+            if (YAnimationThread.joinable())
+            {
                 YAnimationThread.join();
                 stopYFlag.store(false);
             }
-            if (WAnimationThread.joinable()) {
+            
+            if (WAnimationThread.joinable())
+            {
                 WAnimationThread.join();
                 stopWFlag.store(false);
             }
-            if (HAnimationThread.joinable()) {
+            
+            if (HAnimationThread.joinable())
+            {
                 HAnimationThread.join();
                 stopHFlag.store(false);
             }
         }
-        /**
+    
+        void thread_sleep(const double & milliseconds)/**
          *
          * @brief Sleeps the current thread for the specified number of milliseconds.
          *
@@ -4337,47 +4681,54 @@ class Mwm_Animator {
          *       as this class is designed to iterate every pixel and then only update that to the X-server at the given framerate.
          *
          */
-        void thread_sleep(const double & milliseconds) {
-            auto duration = std::chrono::duration<double, std::milli>(milliseconds); // Creating a duration with a 'double' in milliseconds
-            std::this_thread::sleep_for(duration); // Sleeping for the duration
+        {
+            auto duration = chrono::duration<double, milli>(milliseconds); // Creating a duration with a 'double' in milliseconds
+            this_thread::sleep_for(duration); // Sleeping for the duration
         }
-        /**
+    
+        bool XisTimeToRender()/**
          *
          * Checks if it is time to render based on the elapsed time since the last update.
          * @return true if it is time to render, @return false otherwise.
          *
          */
-        bool XisTimeToRender() {
-            const auto & currentTime = std::chrono::high_resolution_clock::now();
-            const std::chrono::duration<double, std::milli> & elapsedTime = currentTime - XlastUpdateTime; // CALCULATE ELAPSED TIME SINCE THE LAST UPDATE
-            if (elapsedTime.count() >= frameDuration) {
+        {
+            const auto & currentTime = chrono::high_resolution_clock::now();
+            const chrono::duration<double, milli> & elapsedTime = currentTime - XlastUpdateTime; // CALCULATE ELAPSED TIME SINCE THE LAST UPDATE
+            if (elapsedTime.count() >= frameDuration)
+            {
                 XlastUpdateTime = currentTime; 
                 return true; 
             }
+
             return false; 
         }
-        /**
+
+        bool YisTimeToRender()/**
          *
          * Checks if it is time to render a frame based on the elapsed time since the last update.
          * @return true if it is time to render, @return false otherwise.
          *
          */
-        bool YisTimeToRender() {
-            const auto & currentTime = std::chrono::high_resolution_clock::now();
-            const std::chrono::duration<double, std::milli> & elapsedTime = currentTime - YlastUpdateTime; // CALCULATE ELAPSED TIME SINCE THE LAST UPDATE
-            if (elapsedTime.count() >= frameDuration) {
+        {
+            const auto & currentTime = chrono::high_resolution_clock::now();
+            const chrono::duration<double, milli> & elapsedTime = currentTime - YlastUpdateTime; // CALCULATE ELAPSED TIME SINCE THE LAST UPDATE
+            if (elapsedTime.count() >= frameDuration)
+            {
                 YlastUpdateTime = currentTime; 
                 return true; 
             }
+
             return false; 
         }
-        /**
+        
+        bool WisTimeToRender()/**
          *
          * Checks if it is time to render based on the elapsed time since the last update.
          * @return true if it is time to render, @return false otherwise.
          *
          */
-        bool WisTimeToRender() {
+        {
             const auto & currentTime = std::chrono::high_resolution_clock::now();
             const std::chrono::duration<double, std::milli> & elapsedTime = currentTime - WlastUpdateTime; // CALCULATE ELAPSED TIME SINCE THE LAST UPDATE
             if (elapsedTime.count() >= frameDuration) 
@@ -4387,22 +4738,26 @@ class Mwm_Animator {
             }
             return false; 
         }
-        /**
+        
+        bool HisTimeToRender()/**
          *
          * Checks if it is time to render based on the elapsed time since the last update.
          * @return true if it is time to render, @return false otherwise.
          *
          */
-        bool HisTimeToRender() {
-            const auto & currentTime = std::chrono::high_resolution_clock::now();
-            const std::chrono::duration<double, std::milli> & elapsedTime = currentTime - HlastUpdateTime; // CALCULATE ELAPSED TIME SINCE THE LAST UPDATE
-            if (elapsedTime.count() >= frameDuration) {
+        {
+            const auto &currentTime = chrono::high_resolution_clock::now();
+            const chrono::duration<double, milli> & elapsedTime = currentTime - HlastUpdateTime; // CALCULATE ELAPSED TIME SINCE THE LAST UPDATE
+            if (elapsedTime.count() >= frameDuration)
+            {
                 HlastUpdateTime = currentTime; 
                 return true; 
             }
+
             return false; 
         }
-        /**
+        
+        void config_window(const uint32_t & mask, const uint32_t & value)/**
          *
          * @brief Configures the window with the specified mask and value.
          * 
@@ -4413,7 +4768,7 @@ class Mwm_Animator {
          * @param value The value to set for the specified attributes.
          * 
          */
-        void config_window(const uint32_t & mask, const uint32_t & value) {
+        {
             xcb_configure_window(
                 conn,
                 window,
@@ -4424,7 +4779,8 @@ class Mwm_Animator {
             );
             xcb_flush(conn);
         }
-        /**
+     
+        void config_window(const xcb_window_t & win, const uint32_t & mask, const uint32_t & value)/**
          *
          * @brief Configures the window with the specified mask and value.
          * 
@@ -4435,7 +4791,7 @@ class Mwm_Animator {
          * @param value The value to set for the specified attributes.
          * 
          */
-        void config_window(const xcb_window_t & win, const uint32_t & mask, const uint32_t & value) {
+        {
             xcb_configure_window(
                 conn,
                 win,
@@ -4446,7 +4802,8 @@ class Mwm_Animator {
             );
             xcb_flush(conn);
         }
-        /**
+        
+        void config_client(const uint32_t & mask, const uint32_t & value)/**
          *
          * @brief Configures the window with the specified mask and value.
          * 
@@ -4457,7 +4814,7 @@ class Mwm_Animator {
          * @param value The value to set for the specified attributes.
          * 
          */
-        void config_client(const uint32_t & mask, const uint32_t & value) {
+        {
             xcb_configure_window(
                 conn,
                 c->win,
@@ -4466,7 +4823,6 @@ class Mwm_Animator {
                     static_cast<const uint32_t &>(value)
                 }
             );
-
             xcb_configure_window(
                 conn,
                 c->frame,
@@ -4477,14 +4833,17 @@ class Mwm_Animator {
             );
             xcb_flush(conn);
         }
-        void conf_client_x() {
+
+        void conf_client_x()
+        {
             const uint32_t x = currentX;
             c->frame.x(x);
             xcb_flush(conn);
         }
-    ;
 };
-void animate(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight, const int & duration) {
+
+void animate(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight, const int & duration)
+{
     Mwm_Animator anim(c->frame);
     anim.animate(
         c->x,
@@ -4499,7 +4858,9 @@ void animate(client * & c, const int & endX, const int & endY, const int & endWi
     );
     c->update();
 }
-void animate_client(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight, const int & duration) {
+
+void animate_client(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight, const int & duration)
+{
     Mwm_Animator client_anim(c);
     client_anim.animate_client(
         c->x,
@@ -4514,90 +4875,113 @@ void animate_client(client * & c, const int & endX, const int & endY, const int 
     );
     c->update();
 }
-class button {
-    public: // constructor 
+
+class button
+{
+    public: // constructor.
         button() {}
-    ;
-    public: // public variables 
+    
+    public: // public variables.
         window window;
         const char * name;
-    ;
-    public: // public methods 
-        void create(const uint32_t & parent_window, const int16_t & x, const int16_t & y, const uint16_t & width, const uint16_t & height, COLOR color) {
+    
+    public: // public methods.
+        void create(const uint32_t & parent_window, const int16_t & x, const int16_t & y, const uint16_t & width, const uint16_t & height, COLOR color)
+        {
             window.create_default(parent_window, x, y, width, height);
             window.set_backround_color(color);
-            window.grab_button({ { L_MOUSE_BUTTON, NULL } });
+            window.grab_button({
+                { L_MOUSE_BUTTON, NULL }
+            });
+
             window.map();
         }
-        void action(std::function<void()> action) {
+        
+        void action(std::function<void()> action)
+        {
             button_action = action;
         }
-        void add_event(std::function<void(Ev ev)> action) {
+
+        void add_event(std::function<void(Ev ev)> action)
+        {
             ev_a = action;
             event_id = event_handler->setEventCallback(XCB_BUTTON_PRESS, ev_a);
         }
-        void activate() const {
+        
+        void activate() const
+        {
             button_action();
         }
-        void put_icon_on_button() {
-            std::string icon_path = file.findPngFile(
-                {
-                    "/usr/share/icons/gnome/256x256/apps/",
-                    "/usr/share/icons/hicolor/256x256/apps/",
-                    "/usr/share/icons/gnome/48x48/apps/",
-                    "/usr/share/icons/gnome/32x32/apps/",
-                    "/usr/share/pixmaps"
-                },
-                name
-            );
+        
+        void put_icon_on_button()
+        {
+            string icon_path = file.findPngFile({
+                "/usr/share/icons/gnome/256x256/apps/",
+                "/usr/share/icons/hicolor/256x256/apps/",
+                "/usr/share/icons/gnome/48x48/apps/",
+                "/usr/share/icons/gnome/32x32/apps/",
+                "/usr/share/pixmaps"
+            }, name );
 
-            if (icon_path == "") {
+            if (icon_path == "")
+            {
                 log_info("could not find icon for button: " + std::string(name));
                 return;
             }
+
             window.set_backround_png(icon_path.c_str());
         }
-    ;
-    private: // private variables 
-        std::function<void()> button_action;
-        std::function<void(Ev ev)> ev_a;
+    
+    private: // private variables.
+        function<void()> button_action;
+        function<void(Ev ev)> ev_a;
         File file;
         Logger log;
         int event_id = 0;
-    ;
 };
-class buttons {
+
+class buttons
+{
     public: // constructors
         buttons() {}
-    ;
+
     public: // variables
-        std::vector<button> list;
-    ;
+        vector<button> list;
+    
     public: // methods
-        void add(const char * name, std::function<void()> action) {
+        void add(const char * name, function<void()> action)
+        {
             button button;
             button.name = name;
             button.action(action);
             list.push_back(button);
         }
-        int size() {
+
+        int size()
+        {
             return list.size();
         }
-        int index() {
+
+        int index()
+        {
             return list.size() - 1;
         }
-        void run_action(const uint32_t & window) {
-            for (const auto & button : list) {
-                if (window == button.window) {
+
+        void run_action(const uint32_t & window)
+        {
+            for (const auto & button : list)
+            {
+                if (window == button.window)
+                {
                     button.activate();
                     return;
                 }
             }
         }
-    ;
 };
 
-class search_window {
+class search_window
+{
     public:
     
         window main_window;
@@ -4605,7 +4989,8 @@ class search_window {
     
     public:
 
-        void create(const uint32_t & parent_window, const uint32_t & x, const uint32_t & y, const uint32_t & width, const uint32_t & height) {
+        void create(const uint32_t & parent_window, const uint32_t & x, const uint32_t & y, const uint32_t & width, const uint32_t & height)
+        {
             main_window.create_default(parent_window, x, y, width, height);
             main_window.set_backround_color(BLACK);
             uint32_t mask =  XCB_EVENT_MASK_STRUCTURE_NOTIFY | XCB_EVENT_MASK_FOCUS_CHANGE;
@@ -4618,7 +5003,8 @@ class search_window {
             main_window.grab_keys_for_typing();
             main_window.grab_default_keys();
 
-            for(int i = 0; i < 7; ++i) {
+            for (int i = 0; i < 7; ++i)
+            {
                 window entry;
                 entry.create_default(main_window, 0, (20 * (i + 1)) , 140, 20);
                 entry.set_backround_color(BLACK);
@@ -4631,19 +5017,23 @@ class search_window {
             main_window.focus_input();
         }
 
-        void add_enter_action(std::function<void()> enter_action) {
+        void add_enter_action(std::function<void()> enter_action)
+        {
             enter_function = enter_action;
         }
 
-        void init() {
+        void init()
+        {
             setup_events();
         }
 
-        void clear_search_string() {
+        void clear_search_string()
+        {
             search_string = "";
         }
 
-        string string() {
+        string string()
+        {
             return(search_string);
         }
     
@@ -4919,16 +5309,17 @@ class search_window {
         vector<window> entry_list;
 };
 
-class Mwm_Runner {
+class Mwm_Runner
+{
     public:
-        
         window main_window;
         search_window search_window;
         uint32_t BORDER = 2;
         Launcher launcher;
         
     public:
-        void init() {
+        void init()
+        {
             main_window.create_default(
                 screen->root,
                 (screen->width_in_pixels / 2) - ((140 + (BORDER * 2)) / 2),
@@ -4954,13 +5345,16 @@ class Mwm_Runner {
             );
 
             search_window.init();
-            search_window.add_enter_action([this]() {
+            search_window.add_enter_action([this]()
+            -> void
+            {
                 launcher.program((char *) search_window.string().c_str());
                 hide();
             });
         }
 
-        void show() {
+        void show()
+        {
             main_window.raise();
             main_window.map();
             search_window.main_window.focus_input();
@@ -4968,27 +5362,38 @@ class Mwm_Runner {
 
     private:
 
-        void hide() {
+        void hide()
+        {
             main_window.unmap();
             search_window.clear_search_string();
         }
 
-        void setup_events() {
-            event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev) { const auto * e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
-                if(e->detail == wm->key_codes.r) {
-                    if(e->state == SUPER) {
+        void setup_events()
+        {
+            event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev)
+            -> void
+            {
+                const auto * e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
+                if (e->detail == wm->key_codes.r)
+                {
+                    if (e->state == SUPER)
+                    {
                         show();
                     }
                 }
             });
 
-            event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) ->void {
+            event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev)
+            -> void
+            {
                 const auto * e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
-                if(!main_window.is_mapped()) {
+                if (!main_window.is_mapped())
+                {
                     return;
                 }
 
-                if(e->event != main_window && e->event != search_window.main_window) {
+                if (e->event != main_window && e->event != search_window.main_window)
+                {
                     hide();
                 }
             });
@@ -4996,9 +5401,9 @@ class Mwm_Runner {
 };
 static Mwm_Runner * mwm_runner;
 
-class add_app_dialog_window {
+class add_app_dialog_window
+{
     public:
-    
         window main_window;
         search_window search_window;
         client * c;
@@ -5007,29 +5412,32 @@ class add_app_dialog_window {
         Logger log;
     
     public:
-
-        void init() {
+        void init()
+        {
             create();
             configure_events();
         }
 
-        void show() {
+        void show()
+        {
             create_client();
             search_window.create(main_window, DOCK_BORDER, DOCK_BORDER, (main_window.width() - (DOCK_BORDER * 2)), 20);
             search_window.init();
         }
 
-        void add_enter_action(std::function<void()> enter_action) {
+        void add_enter_action(function<void()> enter_action)
+        {
             enter_function = enter_action;
         }
     
     private:
-
-        void hide() {
+        void hide()
+        {
             wm->send_sigterm_to_client(c);
         }
         
-        void create() {
+        void create()
+        {
             main_window.create_default(screen->root, pointer.x(), pointer.y(), 300, 200);
             uint32_t mask = XCB_EVENT_MASK_STRUCTURE_NOTIFY;
             main_window.apply_event_mask(& mask);
@@ -5041,53 +5449,68 @@ class add_app_dialog_window {
             main_window.set_backround_color(DARK_GREY);
         }
 
-        void create_client() {
-            main_window.x_y(pointer.x() - (main_window.width() / 2), pointer.y() - (main_window.height() / 2));
+        void create_client()
+        {
+            main_window.x_y(
+                pointer.x() - (main_window.width() / 2),
+                pointer.y() - (main_window.height() / 2)
+            );
             c = wm->make_internal_client(main_window);
-            c->x_y((pointer.x() - (c->width / 2)), (pointer.y() - (c->height / 2)));
+            c->x_y(
+                (pointer.x() - (c->width / 2)),
+                (pointer.y() - (c->height / 2))
+            );
             main_window.map();
             c->map();
         }
 
-        void configure_events() {
-            event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) -> void {
+        void configure_events()
+        {
+            event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev)
+            -> void {
                 const xcb_button_press_event_t * e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
-                if(e->event == search_window.main_window) {
+                if (e->event == search_window.main_window)
+                {
                     c->focus();
                 }
             });
         }
     
     private:
-
         function<void()> enter_function;
 };
 
-class File_App {
+class File_App
+{
     public:
-
         window main_window;
         window left_side_window;
         client * c;
     
     public:
-
-        void init() {
+        void init()
+        {
             create_main_window();
             create_left_side_window();
             setup_events();
         }
 
     private:
-    
-        void create_main_window() {
+        void create_main_window()
+        {
             int width = (screen->width_in_pixels / 2), height = (screen->height_in_pixels / 2);
             int x = ((screen->width_in_pixels / 2) - (width / 2)), y = ((screen->height_in_pixels / 2) - (height / 2));
-            main_window.create_default(screen->root, x, y, width, height);
-
+            main_window.create_default(
+                screen->root,
+                x,
+                y,
+                width,
+                height
+            );
             uint32_t mask = XCB_EVENT_MASK_STRUCTURE_NOTIFY;
             main_window.apply_event_mask(&mask);
-            if(!main_window.is_mask_active(XCB_EVENT_MASK_STRUCTURE_NOTIFY)) {
+            if (!main_window.is_mask_active(XCB_EVENT_MASK_STRUCTURE_NOTIFY))
+            {
                 log_error("could not apply XCB_EVENT_MASK_STRUCTURE_NOTIFY");
             }
             
@@ -5099,18 +5522,25 @@ class File_App {
             log_win("main_window: ", main_window);
         }
 
-        void create_left_side_window() {
-            left_side_window.create_default(main_window, 0, 0, 80, main_window.height());
-
+        void create_left_side_window()
+        {
+            left_side_window.create_default(
+                main_window,
+                0,
+                0,
+                80,
+                main_window.height()
+            );
             uint32_t mask = XCB_EVENT_MASK_STRUCTURE_NOTIFY;
-            left_side_window.apply_event_mask(& mask);
+            left_side_window.apply_event_mask(&mask);
             left_side_window.set_backround_color(DARK_GREY);
             left_side_window.grab_button({
                 { L_MOUSE_BUTTON, NULL }
             });
         }
 
-        void make_internal_client() {
+        void make_internal_client()
+        {
             c = new client;
             c->win = main_window;
             c->x = main_window.x();
@@ -5123,7 +5553,8 @@ class File_App {
             wm->client_list.push_back(c);
         }
 
-        void launch() {
+        void launch()
+        {
             main_window.raise();
             main_window.map();
             make_internal_client();
@@ -5131,34 +5562,37 @@ class File_App {
             left_side_window.map();
         }
 
-        void setup_events() {
-            event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev) {
+        void setup_events()
+        {
+            event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev)
+            -> void {
                 const xcb_key_press_event_t * e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
-                if(e->detail == wm->key_codes.f) {
-                    if(e->state == SUPER) { 
+                if (e->detail == wm->key_codes.f)
+                {
+                    if (e->state == SUPER)
+                    { 
                         launch();
                     }
                 }
             });
 
-            event_handler->setEventCallback(XCB_CONFIGURE_NOTIFY, [&](Ev ev) {
+            event_handler->setEventCallback(XCB_CONFIGURE_NOTIFY, [&](Ev ev)
+            -> void {
                 const auto * e = reinterpret_cast<const xcb_configure_notify_event_t *>(ev);
             });
         }
 
     private:
-
         Logger log; 
 };
 static File_App * file_app;
 
-class Dock {
+class Dock
+{
     public:
-        
         Dock() {}
         
     public:
-
         context_menu context_menu;
         window main_window;
         buttons buttons;
@@ -5166,14 +5600,15 @@ class Dock {
         add_app_dialog_window add_app_dialog_window; 
     
     public:
-
-        void init() {
+        void init()
+        {
             main_window.create_default(screen->root, 0, 0, width, height);
             setup_dock();
             configure_context_menu();
             make_apps();
             add_app_dialog_window.init();
-            add_app_dialog_window.search_window.add_enter_action([this]() {
+            add_app_dialog_window.search_window.add_enter_action([this]()
+            -> void {
                 launcher.program((char *) add_app_dialog_window.search_window.search_string.c_str());
             });
 
@@ -5181,8 +5616,10 @@ class Dock {
             configure_events();
         }
 
-        void add_app(const char * app_name) {
-            if(!file.check_if_binary_exists(app_name)) {
+        void add_app(const char * app_name)
+        {
+            if(!file.check_if_binary_exists(app_name))
+            {
                 return;
             }
             
@@ -5190,17 +5627,17 @@ class Dock {
         }
 
     private:
-        
         vector<const char *> apps;
         Launcher launcher;
         Logger log;
         File file;
         
     private:
-
-        void calc_size_pos() {
+        void calc_size_pos()
+        {
             int num_of_buttons = buttons.size();
-            if(num_of_buttons == 0) {
+            if(num_of_buttons == 0)
+            {
                 num_of_buttons = 1;
             }
 
@@ -5212,7 +5649,8 @@ class Dock {
             xcb_flush(conn);
         }
 
-        void setup_dock() {
+        void setup_dock()
+        {
             main_window.grab_button({
                 { R_MOUSE_BUTTON, NULL }
             });
@@ -5221,8 +5659,11 @@ class Dock {
             calc_size_pos();
             main_window.map();
         }
-        void configure_context_menu() {
-            context_menu.add_entry("Add app", [this] () {
+
+        void configure_context_menu()
+        {
+            context_menu.add_entry("Add app", [this] ()
+            -> void {
                 add_app_dialog_window.show();
             });
 
@@ -5233,13 +5674,14 @@ class Dock {
             context_menu.add_entry("test with nullptr", nullptr);
         }
 
-        void make_apps() {
-            for(const char *app : apps) {
-                buttons.add(
-                    app, [app, this] () -> void {
-                        launcher.program((char *) app);
-                    }
-                );
+        void make_apps()
+        {
+            for (const char *app : apps)
+            {
+                buttons.add(app, [app, this]()
+                -> void {
+                    launcher.program((char *) app);
+                });
 
                 buttons.list[buttons.index()].create(
                     main_window,
@@ -5249,24 +5691,31 @@ class Dock {
                     (height - (DOCK_BORDER * 2)),
                     BLACK
                 );
-
                 buttons.list[buttons.index()].put_icon_on_button();
             }
+
             calc_size_pos();
         }
 
-        void configure_events() {
-            event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) {
+        void configure_events()
+        {
+            event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev)
+            -> void {
                 const auto * e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
-                if(e->event == main_window) {
-                    if(e->detail == R_MOUSE_BUTTON) {
+                if (e->event == main_window)
+                {
+                    if (e->detail == R_MOUSE_BUTTON)
+                    {
                         context_menu.show();
                     }
                 }
 
-                for(int i = 0; i < buttons.size(); ++i) {
-                    if(e->event == buttons.list[i].window) {
-                        if(e->detail == L_MOUSE_BUTTON) {
+                for (int i = 0; i < buttons.size(); ++i)
+                {
+                    if (e->event == buttons.list[i].window)
+                    {
+                        if (e->detail == L_MOUSE_BUTTON)
+                        {
                             buttons.list[i].activate();
                         }
                     }
@@ -5276,12 +5725,12 @@ class Dock {
 };
 static Dock * dock;
 
-class mv_client {
+class mv_client
+{
     #define RIGHT_  screen->width_in_pixels  - c->width
     #define BOTTOM_ screen->height_in_pixels - c->height
    
     public:
-
         mv_client(client * c, int start_x, int start_y) : c(c), start_x(start_x), start_y(start_y) {
             if(c->win.is_EWMH_fullscreen()) {
                 return;
@@ -5293,7 +5742,6 @@ class mv_client {
         }
 
     private:
-
         client * c;
         pointer pointer;
         int start_x;
@@ -5305,25 +5753,30 @@ class mv_client {
         const double frameDuration = 1000.0 / frameRate;
     
     private:
-
-        void snap(int x, int y) {
+        void snap(int x, int y)
+        {
             // WINDOW TO WINDOW SNAPPING 
-            for(const client *cli : wm->cur_d->current_clients) {
-                if(cli == c) {
+            for (const client *cli : wm->cur_d->current_clients)
+            {
+                if (cli == c)
+                {
                     continue;
                 }
                 
                 // SNAP WINDOW TO 'RIGHT' BORDER OF 'NON_CONTROLLED' WINDOW
-                if((x > cli->x + cli->width - N && x < cli->x + cli->width + N)
-                &&(y + c->height > cli->y && y < cli->y + cli->height)) {
+                if ((x > cli->x + cli->width - N && x < cli->x + cli->width + N)
+                && (y + c->height > cli->y && y < cli->y + cli->height))
+                {
                     // SNAP WINDOW TO 'RIGHT_TOP' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
-                    if(y > cli->y - NC && y < cli->y + NC) {
+                    if (y > cli->y - NC && y < cli->y + NC)
+                    {
                         c->frame.x_y((cli->x + cli->width), cli->y);
                         return;
                     }
                     
                     // SNAP WINDOW TO 'RIGHT_BOTTOM' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
-                    if(y + c->height > cli->y + cli->height - NC && y + c->height < cli->y + cli->height + NC) { 
+                    if (y + c->height > cli->y + cli->height - NC && y + c->height < cli->y + cli->height + NC)
+                    {
                         c->frame.x_y((cli->x + cli->width), (cli->y + cli->height) - c->height);
                         return;
                     }
@@ -5333,16 +5786,19 @@ class mv_client {
                 }
 
                 // SNAP WINDOW TO 'LEFT' BORDER OF 'NON_CONTROLLED' WINDOW
-                if((x + c->width > cli->x - N && x + c->width < cli->x + N)       
-                && (y + c->height > cli->y && y < cli->y + cli->height)) {
+                if ((x + c->width > cli->x - N && x + c->width < cli->x + N)       
+                && (y + c->height > cli->y && y < cli->y + cli->height))
+                {
                     // SNAP WINDOW TO 'LEFT_TOP' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
-                    if(y > cli->y - NC && y < cli->y + NC) {  
+                    if (y > cli->y - NC && y < cli->y + NC)
+                    {  
                         c->frame.x_y((cli->x - c->width), cli->y);
                         return;
                     }
                     
                     // SNAP WINDOW TO 'LEFT_BOTTOM' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
-                    if(y + c->height > cli->y + cli->height - NC && y + c->height < cli->y + cli->height + NC) {
+                    if (y + c->height > cli->y + cli->height - NC && y + c->height < cli->y + cli->height + NC)
+                    {
                         c->frame.x_y((cli->x - c->width), (cli->y + cli->height) - c->height);
                         return;
                     }
@@ -5352,34 +5808,41 @@ class mv_client {
                 }
                 
                 // SNAP WINDOW TO 'BOTTOM' BORDER OF 'NON_CONTROLLED' WINDOW
-                if((y > cli->y + cli->height - N && y < cli->y + cli->height + N) 
-                && (x + c->width > cli->x && x < cli->x + cli->width)) {
+                if ((y > cli->y + cli->height - N && y < cli->y + cli->height + N) 
+                && (x + c->width > cli->x && x < cli->x + cli->width))
+                {
                     // SNAP WINDOW TO 'BOTTOM_LEFT' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
-                    if(x > cli->x - NC && x < cli->x + NC) {  
+                    if (x > cli->x - NC && x < cli->x + NC)
+                    {  
                         c->frame.x_y(cli->x, (cli->y + cli->height));
                         return;
                     }
                     
                     // SNAP WINDOW TO 'BOTTOM_RIGHT' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
-                    if(x + c->width > cli->x + cli->width - NC && x + c->width < cli->x + cli->width + NC) {
+                    if (x + c->width > cli->x + cli->width - NC && x + c->width < cli->x + cli->width + NC)
+                    {
                         c->frame.x_y(((cli->x + cli->width) - c->width), (cli->y + cli->height));
                         return;
                     }
+
                     c->frame.x_y(x, (cli->y + cli->height));
                     return;
                 }
 
                 // SNAP WINDOW TO 'TOP' BORDER OF 'NON_CONTROLLED' WINDOW
-                if((y + c->height > cli->y - N && y + c->height < cli->y + N)     
-                && (x + c->width > cli->x && x < cli->x + cli->width)) {
+                if ((y + c->height > cli->y - N && y + c->height < cli->y + N)     
+                && (x + c->width > cli->x && x < cli->x + cli->width))
+                {
                     // SNAP WINDOW TO 'TOP_LEFT' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
-                    if(x > cli->x - NC && x < cli->x + NC) {  
+                    if (x > cli->x - NC && x < cli->x + NC)
+                    {  
                         c->frame.x_y(cli->x, (cli->y - c->height));
                         return;
                     }
 
                     // SNAP WINDOW TO 'TOP_RIGHT' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET
-                    if(x + c->width > cli->x + cli->width - NC && x + c->width < cli->x + cli->width + NC) {
+                    if (x + c->width > cli->x + cli->width - NC && x + c->width < cli->x + cli->width + NC)
+                    {
                         c->frame.x_y(((cli->x + cli->width) - c->width), (cli->y - c->height));
                         return;
                     }
@@ -5390,49 +5853,37 @@ class mv_client {
             }
 
             // WINDOW TO EDGE OF SCREEN SNAPPING
-            if(((x < N) && (x > -N)) && ((y < N) && (y > -N))) {
-                c->frame.x_y(0, 0);
-            }
-            else if((x < RIGHT_ + N && x > RIGHT_ - N) && (y < N && y > -N)) {
-                c->frame.x_y(RIGHT_, 0);
-            }
-            else if((y < BOTTOM_ + N && y > BOTTOM_ - N) && (x < N && x > -N)) {
-                c->frame.x_y(0, BOTTOM_);
-            }
-            else if((x < N) && (x > -N)) {
-                c->frame.x_y(0, y);
-            }
-            else if(y < N && y > -N) {
-                c->frame.x_y(x, 0);
-            }
-            else if((x < RIGHT_ + N && x > RIGHT_ - N) && (y < BOTTOM_ + N && y > BOTTOM_ - N)) {
-                c->frame.x_y(RIGHT_, BOTTOM_);
-            }
-            else if((x < RIGHT_ + N) && (x > RIGHT_ - N)) {
-                c->frame.x_y(RIGHT_, y);
-            }
-            else if(y < BOTTOM_ + N && y > BOTTOM_ - N) {
-                c->frame.x_y(x, BOTTOM_);
-            }
-            else {
-                c->frame.x_y(x, y);
-            }
+            if     (((x < N) && (x > -N)) && ((y < N) && (y > -N)))                              c->frame.x_y(0, 0);
+            else if ((x < RIGHT_ + N && x > RIGHT_ - N) && (y < N && y > -N))                    c->frame.x_y(RIGHT_, 0);
+            else if ((y < BOTTOM_ + N && y > BOTTOM_ - N) && (x < N && x > -N))                  c->frame.x_y(0, BOTTOM_);
+            else if ((x < N) && (x > -N))                                                        c->frame.x_y(0, y);
+            else if  (y < N && y > -N)                                                           c->frame.x_y(x, 0);
+            else if ((x < RIGHT_ + N && x > RIGHT_ - N) && (y < BOTTOM_ + N && y > BOTTOM_ - N)) c->frame.x_y(RIGHT_, BOTTOM_);
+            else if ((x < RIGHT_ + N) && (x > RIGHT_ - N))                                       c->frame.x_y(RIGHT_, y);
+            else if  (y < BOTTOM_ + N && y > BOTTOM_ - N)                                        c->frame.x_y(x, BOTTOM_);
+            else                                                                                 c->frame.x_y(x, y);
         }
 
-        void run() { 
-            while(shouldContinue) {
+        void run()
+        {
+            while (shouldContinue)
+            {
                 ev = xcb_wait_for_event(conn);
-                if(!ev) {
+                if (ev == nullptr)
+                {
                     continue;
                 }
 
-                switch(ev->response_type & ~0x80) {
-                    case XCB_MOTION_NOTIFY: {
+                switch (ev->response_type & ~0x80)
+                {
+                    case XCB_MOTION_NOTIFY:
+                    {
                         const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
                         int new_x = e->root_x - start_x - BORDER_SIZE;
                         int new_y = e->root_y - start_y - BORDER_SIZE;
                         
-                        if(isTimeToRender()) {
+                        if(isTimeToRender())
+                        {
                             snap(new_x, new_y);
                             xcb_flush(conn);
                         }
@@ -5440,46 +5891,56 @@ class mv_client {
                         break;
                     }
                 
-                    case XCB_BUTTON_RELEASE: {
+                    case XCB_BUTTON_RELEASE:
+                    {
                         shouldContinue = false;
                         c->update();
                         break;
                     }
                 }
+
                 free(ev);
             }
         }
 
-        bool isTimeToRender() {
+        bool isTimeToRender()
+        {
             auto currentTime = chrono::high_resolution_clock::now();
             const chrono::duration<double, milli> elapsedTime = currentTime - lastUpdateTime;
 
-            if(elapsedTime.count() >= frameDuration) {
+            if (elapsedTime.count() >= frameDuration)
+            {
                 lastUpdateTime = currentTime;
-                return(true);
+                return true;
             }
-            return(false);
+
+            return false;
         }
 };
 mutex mtx;
 
-class change_desktop {
+class change_desktop
+{
     public:
-
-        change_desktop(xcb_connection_t * connection) : connection(connection) {}
+        change_desktop(xcb_connection_t * connection)
+        : connection(connection) {}
         int duration = 100;
     
     public:
-    
-        enum DIRECTION {
+        enum DIRECTION
+        {
             NEXT,
             PREV
         };
 
-        void change_to(const DIRECTION & direction) {
-            switch (direction) {
-                case NEXT: {
-                    if(wm->cur_d->desktop == wm->desktop_list.size()) {
+        void change_to(const DIRECTION & direction)
+        {
+            switch (direction)
+            {
+                case NEXT:
+                {
+                    if(wm->cur_d->desktop == wm->desktop_list.size())
+                    {
                         return;
                     }
 
@@ -5491,8 +5952,10 @@ class change_desktop {
                     break;
                 }
             
-                case PREV: {
-                    if(wm->cur_d->desktop == 1) {
+                case PREV:
+                {
+                    if(wm->cur_d->desktop == 1)
+                    {
                         return;
                     }
 
@@ -5511,29 +5974,35 @@ class change_desktop {
             mtx.unlock();
         }
 
-        static void teleport_to(const uint8_t & n) {
-            if(wm->cur_d == wm->desktop_list[n - 1] || n == 0 || n == wm->desktop_list.size()) {
+        static void teleport_to(const uint8_t & n)
+        {
+            if (wm->cur_d == wm->desktop_list[n - 1] || n == 0 || n == wm->desktop_list.size())
+            {
                 return;
             }
 
-            for(const auto &c:wm->cur_d->current_clients) {
-                if(c) {
-                    if(c->desktop == wm->cur_d->desktop) {
+            for (const auto &c:wm->cur_d->current_clients)
+            {
+                if (c != nullptr)
+                {
+                    if (c->desktop == wm->cur_d->desktop)
+                    {
                         c->unmap();
                     }
                 }
             }
 
             wm->cur_d = wm->desktop_list[n - 1];
-            for(const auto &c:wm->cur_d->current_clients) {
-                if(c) {
+            for (const auto &c : wm->cur_d->current_clients) 
+            {
+                if (c != nullptr)
+                {
                     c->map();
                 }
             }
         }
     
     private:
-
         xcb_connection_t * connection;
         vector<client *> show;
         vector<client *> hide;
@@ -5545,11 +6014,13 @@ class change_desktop {
         vector<thread> animation_threads;
     
     private:
-
-        vector<client *> get_clients_on_desktop(const uint8_t & desktop) {
+        vector<client *> get_clients_on_desktop(const uint8_t & desktop)
+        {
             vector<client *> clients;
-            for(const auto & c : wm->client_list) {
-                if(c->desktop == desktop) {
+            for (const auto & c : wm->client_list)
+            {
+                if (c->desktop == desktop)
+                {
                     clients.push_back(c);
                 }
             }
@@ -5557,11 +6028,16 @@ class change_desktop {
             return(clients);
         }
 
-        void animate(vector<client *> clients, const DIRECTION & direction) {
-            switch(direction) {
-                case NEXT: {
-                    for(const auto c : clients) {
-                        if(c) {
+        void animate(vector<client *> clients, const DIRECTION & direction)
+        {
+            switch (direction)
+            {
+                case NEXT:
+                {
+                    for (const auto c : clients)
+                    {
+                        if (c != nullptr)
+                        {
                             animation_threads.emplace_back(&change_desktop::anim_cli, this, c, c->x - screen->width_in_pixels);
                         }
 
@@ -5569,9 +6045,12 @@ class change_desktop {
                     }
                 }
 
-                case PREV: {
-                    for(const auto &c:clients) {
-                        if(c != nullptr) {
+                case PREV:
+                {
+                    for (const auto &c:clients)
+                    {
+                        if (c != nullptr)
+                        {
                             animation_threads.emplace_back(&change_desktop::anim_cli, this, c, c->x + screen->width_in_pixels);
                         }
 
@@ -5581,37 +6060,47 @@ class change_desktop {
             }
         }
 
-        void anim_cli(client * c, const int & endx) {
+        void anim_cli(client * c, const int & endx)
+        {
             Mwm_Animator anim(c);
-            anim.animate_client_x(c->x, endx, duration);
+            anim.animate_client_x(
+                c->x,
+                endx,
+                duration
+            );
             c->update();
         }
 
-        void thread_sleep(const double & milliseconds) {
-            // Creating a duration with double milliseconds
+        void thread_sleep(const double & milliseconds)
+        {
             auto duration = chrono::duration<double, milli>(milliseconds);
-            // Sleeping for the duration
             this_thread::sleep_for(duration);
         }
 
-        void stopAnimations() {
+        void stopAnimations()
+        {
             stop_show_flag.store(true);
             stop_hide_flag.store(true);
             
-            if(show_thread.joinable()) {
+            if (show_thread.joinable())
+            {
                 show_thread.join();
                 stop_show_flag.store(false);
             }
 
-            if(hide_thread.joinable()) {
+            if (hide_thread.joinable())
+            {
                 hide_thread.join();
                 stop_hide_flag.store(false);
             }
         }
 
-        void joinAndClearThreads() {
-            for(thread &t : animation_threads) {
-                if(t.joinable()) {
+        void joinAndClearThreads()
+        {
+            for (thread &t : animation_threads)
+            {
+                if (t.joinable())
+                {
                     t.join();
                 }
             }
@@ -5626,24 +6115,30 @@ class change_desktop {
         }
 };
 
-void move_to_next_desktop_w_app() {
-    if(wm->cur_d->desktop == wm->desktop_list.size()) {
+void move_to_next_desktop_w_app()
+{
+    if (wm->cur_d->desktop == wm->desktop_list.size())
+    {
         return;
     }
         
-    if(wm->focused_client) {
+    if (wm->focused_client)
+    {
         wm->focused_client->desktop = wm->cur_d->desktop + 1;
     }
     
     change_desktop::teleport_to(wm->cur_d->desktop + 1);
 }
 
-void move_to_previus_desktop_w_app() {
-    if(wm->cur_d->desktop == 1) {
+void move_to_previus_desktop_w_app()
+{
+    if(wm->cur_d->desktop == 1)
+    {
         return;
     }  
 
-    if(wm->focused_client) {
+    if(wm->focused_client)
+    {
         wm->focused_client->desktop = wm->cur_d->desktop - 1;
     }
     
@@ -5651,7 +6146,8 @@ void move_to_previus_desktop_w_app() {
     wm->focused_client->raise();
 }
 
-class resize_client {
+class resize_client
+{
     /**
         THE REASON FOR THE 'retard_int' IS BECUSE WITHOUT IT 
         I CANNOT CALL THIS CLASS LIKE THIS 'resize_client(c)' 
@@ -5661,8 +6157,10 @@ class resize_client {
      */
     public:
 
-        resize_client(client * & c , int retard_int) : c(c) {
-            if(c->win.is_EWMH_fullscreen()) {
+        resize_client(client * & c , int retard_int) : c(c)
+        {
+            if(c->win.is_EWMH_fullscreen())
+            {
                 return;
             }
 
@@ -5674,11 +6172,14 @@ class resize_client {
     
     public:
 
-        class no_border {
+        class no_border
+        {
             public:
 
-                no_border(client * & c, const uint32_t & x, const uint32_t & y) : c(c) {
-                    if(c->win.is_EWMH_fullscreen()) {
+                no_border(client * & c, const uint32_t & x, const uint32_t & y) : c(c)
+                {
+                    if(c->win.is_EWMH_fullscreen())
+                    {
                         return;
                     }
 
@@ -5701,48 +6202,59 @@ class resize_client {
             
             private:
 
-                void teleport_mouse(edge edge) {
-                    switch (edge) {
-                        case edge::TOP: {
+                constexpr void teleport_mouse(edge edge)
+                {
+                    switch (edge)
+                    {
+                        case edge::TOP:
+                        {
                             pointer.teleport(pointer.x(), c->y);
                             break;
                         }
 
-                        case edge::BOTTOM_edge: {
+                        case edge::BOTTOM_edge:
+                        {
                             pointer.teleport(pointer.x(), (c->y + c->height));
                             break;
                         }
 
-                        case edge::LEFT: {
+                        case edge::LEFT:
+                        {
                             pointer.teleport(c->x, pointer.y());
                             break;
                         }
 
-                        case edge::RIGHT: {
+                        case edge::RIGHT:
+                        {
                             pointer.teleport((c->x + c->width), pointer.y());
                             break;
                         }
 
-                        case edge::NONE: {
+                        case edge::NONE:
+                        {
                             break;
                         }
 
-                        case edge::TOP_LEFT:{
+                        case edge::TOP_LEFT:
+                        {
                             pointer.teleport(c->x, c->y);
                             break;
                         }
 
-                        case edge::TOP_RIGHT: {
+                        case edge::TOP_RIGHT:
+                        {
                             pointer.teleport((c->x + c->width), c->y);
                             break;
                         }
 
-                        case edge::BOTTOM_LEFT: {
+                        case edge::BOTTOM_LEFT:
+                        {
                             pointer.teleport(c->x, (c->y + c->height));
                             break;
                         }
 
-                        case edge::BOTTOM_RIGHT: {
+                        case edge::BOTTOM_RIGHT:
+                        {
                             pointer.teleport((c->x + c->width), (c->y + c->height));
                             break; 
                         }
@@ -5750,42 +6262,51 @@ class resize_client {
                 }
 
                 void resize_client(const uint32_t x, const uint32_t y, edge edge) {
-                    switch(edge) {
-                        case edge::LEFT: {
+                    switch(edge)
+                    {
+                        case edge::LEFT:
+                        {
                             c->x_width(x, (c->width + c->x - x));
                             break;
                         }
 
-                        case edge::RIGHT: {
+                        case edge::RIGHT:
+                        {
                             c->_width((x - c->x));
                             break;
                         }
 
-                        case edge::TOP: {
+                        case edge::TOP:
+                        {
                             c->y_height(y, (c->height + c->y - y));   
                             break;
                         }
 
-                        case edge::BOTTOM_edge: {
+                        case edge::BOTTOM_edge:
+                        {
                             c->_height((y - c->y));
                             break;
                         }
 
-                        case edge::NONE: {
+                        case edge::NONE:
+                        {
                             return;
                         }
 
-                        case edge::TOP_LEFT: {
+                        case edge::TOP_LEFT:
+                        {
                             c->x_y_width_height(x, y, (c->width + c->x - x), (c->height + c->y - y));
                             break;
                         }
 
-                        case edge::TOP_RIGHT: {
+                        case edge::TOP_RIGHT:
+                        {
                             c->y_width_height(y, (x - c->x), (c->height + c->y - y));
                             break;
                         }
 
-                        case edge::BOTTOM_LEFT: {
+                        case edge::BOTTOM_LEFT:
+                        {
                             c->x_width_height(x, (c->width + c->x - x), (y - c->y));   
                             break;
                         }
@@ -5797,65 +6318,84 @@ class resize_client {
                     }
                 }
 
-                void run(edge edge) {
+                void run(edge edge)
+                {
                     xcb_generic_event_t *ev;
                     bool shouldContinue = true;
-                    while(shouldContinue) {
+                    while(shouldContinue)
+                    {
                         ev = xcb_wait_for_event(conn);
-                        if(!ev) {
+                        if(ev == nullptr)
+                        {
                             continue;
                         }
 
-                        switch (ev->response_type & ~0x80) {
-                            case(XCB_MOTION_NOTIFY): {
+                        switch(ev->response_type & ~0x80)
+                        {
+                            case XCB_MOTION_NOTIFY:
+                            {
                                 const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
-                                if(isTimeToRender()) {
-                                resize_client(e->root_x, e->root_y, edge); xcb_flush(conn); }
+                                if(isTimeToRender())
+                                {
+                                    resize_client(e->root_x, e->root_y, edge); xcb_flush(conn);
+                                }
+
                                 break;
                             }
 
-                            case(XCB_BUTTON_RELEASE): {
+                            case XCB_BUTTON_RELEASE:
+                            {
                                 shouldContinue = false;                        
                                 c->update();
                                 break;
                             }
                         }
+
                         free(ev); 
                     }
                 }
 
-                bool isTimeToRender() {
-                    const auto & currentTime = std::chrono::high_resolution_clock::now();
-                    const std::chrono::duration<double, std::milli> & elapsedTime = currentTime - lastUpdateTime;
+                bool isTimeToRender()
+                {
+                    const auto &currentTime = chrono::high_resolution_clock::now();
+                    const chrono::duration<double, milli> & elapsedTime = currentTime - lastUpdateTime;
 
-                    if(elapsedTime.count() >= frameDuration) {
+                    if(elapsedTime.count() >= frameDuration)
+                    {
                         lastUpdateTime = currentTime;
                         return true;
                     }
 
-                    return(false);
+                    return false;
                 }
         };
 
-        class border {
+        class border
+        {
             public:
 
-                border(client * & c, edge _edge) : c(c) {
-                    if(c->win.is_EWMH_fullscreen()) {
+                border(client * & c, edge _edge) : c(c)
+                {
+                    if (c->win.is_EWMH_fullscreen())
+                    {
                         return;
                     }
 
                     map<client *, edge> map = wm->get_client_next_to_client(c, _edge);
-                    for(const auto &pair:map)
-                        if(pair.first != nullptr) {
-                        c2 = pair.first;
-                        c2_edge = pair.second;
-                        pointer.grab();
-                        teleport_mouse(_edge);
-                        run_double(_edge);
-                        pointer.ungrab();
-                        return; 
+                    for (const auto &pair : map)
+                    {
+                        if (pair.first != nullptr)
+                        {
+                            c2 = pair.first;
+                            c2_edge = pair.second;
+                            pointer.grab();
+                            teleport_mouse(_edge);
+                            run_double(_edge);
+                            pointer.ungrab();
+                            return; 
                         }
+                    }
+
                     pointer.grab();
                     teleport_mouse(_edge);
                     run(_edge);
@@ -5875,48 +6415,59 @@ class resize_client {
 
             private:
 
-                void teleport_mouse(edge edge) {
-                    switch(edge) {
-                        case edge::TOP: {
+                void teleport_mouse(edge edge)
+                {
+                    switch(edge)
+                    {
+                        case edge::TOP:
+                        {
                             pointer.teleport(pointer.x(), c->y);
                             break;
                         }
 
-                        case edge::BOTTOM_edge: {
+                        case edge::BOTTOM_edge:
+                        {
                             pointer.teleport(pointer.x(), (c->y + c->height));
                             break;
                         }
 
-                        case edge::LEFT: {
+                        case edge::LEFT:
+                        {
                             pointer.teleport(c->x, pointer.y());
                             break;
                         }
 
-                        case edge::RIGHT: {
+                        case edge::RIGHT:
+                        {
                             pointer.teleport((c->x + c->width), pointer.y());
                             break;
                         }
 
-                        case edge::NONE: {
+                        case edge::NONE:
+                        {
                             break;
                         }
 
-                        case edge::TOP_LEFT: {
+                        case edge::TOP_LEFT:
+                        {
                             pointer.teleport(c->x, c->y);
                             break;
                         }
 
-                        case edge::TOP_RIGHT: {
+                        case edge::TOP_RIGHT:
+                        {
                             pointer.teleport((c->x + c->width), c->y);
                             break;
                         }
 
-                        case edge::BOTTOM_LEFT: {
+                        case edge::BOTTOM_LEFT:
+                        {
                             pointer.teleport(c->x, (c->y + c->height));
                             break;
                         }
 
-                        case edge::BOTTOM_RIGHT: {
+                        case edge::BOTTOM_RIGHT:
+                        {
                             pointer.teleport((c->x + c->width), (c->y + c->height));
                             break;
                         }
@@ -6222,97 +6773,126 @@ class resize_client {
         }
 };
 
-class max_win {
+class max_win
+{
     private:
     
         client * c;
 
-        void max_win_animate(const int & endX, const int & endY, const int & endWidth, const int & endHeight) {
-        animate_client(
-            c, 
-            endX, 
-            endY, 
-            endWidth, 
-            endHeight, 
-            MAXWIN_ANIMATION_DURATION);
-        xcb_flush(conn);
+        void max_win_animate(const int & endX, const int & endY, const int & endWidth, const int & endHeight)
+        {
+            animate_client(
+                c, 
+                endX, 
+                endY, 
+                endWidth, 
+                endHeight, 
+                MAXWIN_ANIMATION_DURATION
+            );
+            xcb_flush(conn);
         }
         
-        void button_unmax_win() {
-        max_win_animate(
-            c->max_button_ogsize.x,
-            c->max_button_ogsize.y,
-            c->max_button_ogsize.width,
-            c->max_button_ogsize.height
-        ); 
+        void button_unmax_win()
+        {
+            max_win_animate(
+                c->max_button_ogsize.x,
+                c->max_button_ogsize.y,
+                c->max_button_ogsize.width,
+                c->max_button_ogsize.height
+            ); 
         }
         
-        void button_max_win() {
-        c->save_max_button_ogsize();
-        max_win_animate(
-            0,
-            0,
-            screen->width_in_pixels,
-            screen->height_in_pixels
-        );
+        void button_max_win()
+        {
+            c->save_max_button_ogsize();
+            max_win_animate(
+                0,
+                0,
+                screen->width_in_pixels,
+                screen->height_in_pixels
+            );
         }
         
-        void ewmh_max_win() {
-        c->save_max_ewmh_ogsize();
-        max_win_animate(
-            - BORDER_SIZE,
-            - TITLE_BAR_HEIGHT - BORDER_SIZE,
-            screen->width_in_pixels + (BORDER_SIZE * 2),
-            screen->height_in_pixels + TITLE_BAR_HEIGHT + (BORDER_SIZE * 2)
-        );
-        c->set_EWMH_fullscreen_state();
+        void ewmh_max_win()
+        {
+            c->save_max_ewmh_ogsize();
+            max_win_animate(
+                - BORDER_SIZE,
+                - TITLE_BAR_HEIGHT - BORDER_SIZE,
+                screen->width_in_pixels + (BORDER_SIZE * 2),
+                screen->height_in_pixels + TITLE_BAR_HEIGHT + (BORDER_SIZE * 2)
+            );
+            c->set_EWMH_fullscreen_state();
         }
 
-        void ewmh_unmax_win() {
-        if(c->max_ewmh_ogsize.width > screen->width_in_pixels) {
-            (c->max_ewmh_ogsize.width = screen->width_in_pixels / 2);
-        } 
-        if(c->max_ewmh_ogsize.height > screen->height_in_pixels) {
-            (c->max_ewmh_ogsize.height = screen->height_in_pixels / 2);
-        } 
-        if(c->max_ewmh_ogsize.x >= screen->width_in_pixels - 1) c->max_ewmh_ogsize.x = ((screen->width_in_pixels / 2) - (c->max_ewmh_ogsize.width / 2) - BORDER_SIZE);
-        if(c->max_ewmh_ogsize.y >= screen->height_in_pixels - 1) c->max_ewmh_ogsize.y = ((screen->height_in_pixels / 2) - (c->max_ewmh_ogsize.height / 2) - TITLE_BAR_HEIGHT - BORDER_SIZE);
-        max_win_animate(
-            c->max_ewmh_ogsize.x, 
-            c->max_ewmh_ogsize.y, 
-            c->max_ewmh_ogsize.width, 
-            c->max_ewmh_ogsize.height
-        );
-        c->unset_EWMH_fullscreen_state();
+        void ewmh_unmax_win()
+        {
+            if (c->max_ewmh_ogsize.width > screen->width_in_pixels)
+            {
+                (c->max_ewmh_ogsize.width = screen->width_in_pixels / 2);
+            }
+
+            if (c->max_ewmh_ogsize.height > screen->height_in_pixels)
+            {
+                (c->max_ewmh_ogsize.height = screen->height_in_pixels / 2);
+            }
+
+            if (c->max_ewmh_ogsize.x >= screen->width_in_pixels - 1)
+            {
+                c->max_ewmh_ogsize.x = ((screen->width_in_pixels / 2) - (c->max_ewmh_ogsize.width / 2) - BORDER_SIZE);
+            }
+
+            if (c->max_ewmh_ogsize.y >= screen->height_in_pixels - 1)
+            {
+                c->max_ewmh_ogsize.y = ((screen->height_in_pixels / 2) - (c->max_ewmh_ogsize.height / 2) - TITLE_BAR_HEIGHT - BORDER_SIZE);
+            }
+
+            max_win_animate(
+                c->max_ewmh_ogsize.x, 
+                c->max_ewmh_ogsize.y, 
+                c->max_ewmh_ogsize.width, 
+                c->max_ewmh_ogsize.height
+            );
+            c->unset_EWMH_fullscreen_state();
         }
 
     public:
 
-        enum max_win_type {
+        enum max_win_type
+        {
             BUTTON_MAXWIN,
             EWMH_MAXWIN 
         };
 
-    max_win(client * c, max_win_type type) : c(c) {
-        switch(type)
+    max_win(client * c, max_win_type type) : c(c)
+    {
+        switch (type)
         {
-            case(EWMH_MAXWIN):
+            case EWMH_MAXWIN:
             {
-                if(c->is_EWMH_fullscreen())
+                if (c->is_EWMH_fullscreen())
+                {
                     ewmh_unmax_win();
-                else 
+                }
+                else
+                {
                     ewmh_max_win();
+                }
 
                 break;
             }
             
-            case(BUTTON_MAXWIN):
+            case BUTTON_MAXWIN:
             {
                 if(c->is_button_max_win())
+                {
                     button_unmax_win();
-                else 
+                }
+                else
+                { 
                     button_max_win();
-                
+                }
+
                 break; 
             }
         }
@@ -6327,79 +6907,93 @@ class max_win {
  * It provides methods to tile windows to the left, right, *up, or *down positions on the screen.
  * The class also includes helper methods to check the current tile position of a window and set the size and position of a window.
  */
-class tile {
+class tile
+{
     private:
 
         client * c;
+
         bool current_tile_pos(TILEPOS mode)
         {
             switch(mode)
             {
                 case TILEPOS::LEFT:
-
-                    if(c->x        == 0 
-                    && c->y        == 0 
-                    && c->width    == screen->width_in_pixels / 2 
-                    && c->height   == screen->height_in_pixels)
-                    
+                {
+                    if(c->x      == 0 
+                    && c->y      == 0 
+                    && c->width  == screen->width_in_pixels / 2 
+                    && c->height == screen->height_in_pixels)
+                    {
                         return true;
-                    
+                    }
+
                     break;
-                    
+                }
+
                 case TILEPOS::RIGHT:
-                    
-                    if(c->x        == screen->width_in_pixels / 2 
-                    && c->y        == 0 
-                    && c->width    == screen->width_in_pixels / 2
-                    && c->height   == screen->height_in_pixels)
-                    
+                {
+                    if(c->x      == screen->width_in_pixels / 2 
+                    && c->y      == 0 
+                    && c->width  == screen->width_in_pixels / 2
+                    && c->height == screen->height_in_pixels)
+                    {
                         return true;
-                    
-                    break;
-                    
-                case TILEPOS::LEFT_DOWN:
-                    
-                    if(c->x        == 0
-                    && c->y        == screen->height_in_pixels / 2
-                    && c->width    == screen->width_in_pixels / 2
-                    && c->height   == screen->height_in_pixels / 2)
-                
-                        return true;
-                    
-                    break;
-                    
-                case TILEPOS::RIGHT_DOWN:
-                    
-                    if(c->x        == screen->width_in_pixels / 2
-                    && c->y        == screen->height_in_pixels / 2
-                    && c->width    == screen->width_in_pixels / 2
-                    && c->height   == screen->height_in_pixels / 2)
-                        
-                        return true;
-                        
-                    break;
-                        
-                case TILEPOS::LEFT_UP:
-                    
-                    if(c->x        == 0
-                    && c->y        == 0
-                    && c->width    == screen->width_in_pixels / 2
-                    && c->height   == screen->height_in_pixels / 2)
-                    
-                        return true;
-                    
-                    break;
-                    
-                case TILEPOS::RIGHT_UP:
-                    
-                    if(c->x        == screen->width_in_pixels / 2
-                    && c->y        == 0
-                    && c->width    == screen->width_in_pixels / 2
-                    && c->height   == screen->height_in_pixels / 2)
-                    
-                        return true;
+                    }
 
                     break;
+                }    
+                
+                case TILEPOS::LEFT_DOWN:
+                {
+                    if(c->x      == 0
+                    && c->y      == screen->height_in_pixels / 2
+                    && c->width  == screen->width_in_pixels / 2
+                    && c->height == screen->height_in_pixels / 2)
+                    {
+                        return true;
+                    }
+
+                    break;
+                }
+                
+                case TILEPOS::RIGHT_DOWN:
+                {
+                    if(c->x      == screen->width_in_pixels / 2
+                    && c->y      == screen->height_in_pixels / 2
+                    && c->width  == screen->width_in_pixels / 2
+                    && c->height == screen->height_in_pixels / 2)
+                    {    
+                        return true;
+                    }
+                        
+                    break;
+                }
+                
+                case TILEPOS::LEFT_UP:
+                {
+                    if(c->x      == 0
+                    && c->y      == 0
+                    && c->width  == screen->width_in_pixels / 2
+                    && c->height == screen->height_in_pixels / 2)
+                    {
+                        return true;
+                    }
+                    
+                    break;
+                }
+
+                case TILEPOS::RIGHT_UP:
+                {
+                    if(c->x      == screen->width_in_pixels / 2
+                    && c->y      == 0
+                    && c->width  == screen->width_in_pixels / 2
+                    && c->height == screen->height_in_pixels / 2)
+                    {
+                        return true;
+                    }
+
+                    break;
+                }
             }
 
             return false; 
@@ -6407,72 +7001,89 @@ class tile {
 
         void set_tile_sizepos(TILEPOS sizepos)
         {
-            switch (sizepos) 
+            switch(sizepos)
             {
                 case TILEPOS::LEFT:
-
+                {
                     animate(
                         0,
                         0,
                         screen->width_in_pixels / 2,
                         screen->height_in_pixels
                     );
-                    return;
-                
-                case TILEPOS::RIGHT:
-                    
-                    animate(
-                    screen->width_in_pixels / 2,
-                    0,
-                    screen->width_in_pixels / 2,
-                    screen->height_in_pixels);
-                    return;
-                    
-                case TILEPOS::LEFT_DOWN:
-                    
-                    animate(
-                    0,
-                    screen->height_in_pixels / 2,
-                    screen->width_in_pixels / 2,
-                    screen->height_in_pixels / 2);
-                    return;
-                    
-                case TILEPOS::RIGHT_DOWN:
 
-                    animate(
-                    screen->width_in_pixels / 2,
-                    screen->height_in_pixels / 2,
-                    screen->width_in_pixels / 2,
-                    screen->height_in_pixels / 2);
                     return;
-                
-                case TILEPOS::LEFT_UP:
+                }
+
+                case TILEPOS::RIGHT:
+                {
                     animate(
-                    0,
-                    0,
-                    screen->width_in_pixels / 2,
-                    screen->height_in_pixels / 2);
-                    return;
-                
-                case TILEPOS::RIGHT_UP:
-                
-                    animate(
-                    screen->width_in_pixels / 2,
-                    0,
-                    screen->width_in_pixels / 2,
-                    screen->height_in_pixels / 2
+                        screen->width_in_pixels / 2,
+                        0,
+                        screen->width_in_pixels / 2,
+                        screen->height_in_pixels
                     );
-                    return;   
+
+                    return;
+                }
+
+                case TILEPOS::LEFT_DOWN:
+                {
+                    animate(
+                        0,
+                        (screen->height_in_pixels / 2),
+                        (screen->width_in_pixels / 2),
+                        (screen->height_in_pixels / 2)
+                    );
+                    
+                    return;
+                }
+
+                case TILEPOS::RIGHT_DOWN:
+                {
+                    animate(
+                        screen->width_in_pixels / 2,
+                        screen->height_in_pixels / 2,
+                        screen->width_in_pixels / 2,
+                        screen->height_in_pixels / 2
+                    );
+
+                    return;
+                }
+
+                case TILEPOS::LEFT_UP:
+                {
+                    animate(
+                        0,
+                        0,
+                        screen->width_in_pixels / 2,
+                        screen->height_in_pixels / 2
+                    );
+
+                    return;
+                }
+
+                case TILEPOS::RIGHT_UP:
+                {
+                    animate(
+                        screen->width_in_pixels / 2,
+                        0,
+                        screen->width_in_pixels / 2,
+                        screen->height_in_pixels / 2
+                    );
+                
+                    return;
+                }
             }
         }
         
         void set_tile_ogsize()
         {
             animate(
-            c->tile_ogsize.x,
-            c->tile_ogsize.y,
-            c->tile_ogsize.width,
-            c->tile_ogsize.height
+                c->tile_ogsize.x,
+                c->tile_ogsize.y,
+                c->tile_ogsize.width,
+                c->tile_ogsize.height
             );
         }
 
@@ -6480,30 +7091,32 @@ class tile {
         {
             Mwm_Animator anim(c);
             anim.animate_client(
-            c->x,
-            c->y, 
-            c->width, 
-            c->height, 
-            end_x,
-            end_y, 
-            end_width, 
-            end_height, 
-            TILE_ANIMATION_DURATION
+                c->x,
+                c->y, 
+                c->width, 
+                c->height, 
+                end_x,
+                end_y, 
+                end_width, 
+                end_height, 
+                TILE_ANIMATION_DURATION
             );
+
             c->update();
         }
   
     public:
     tile(client * & c, TILE tile) : c(c)
     {
-        if(c->is_EWMH_fullscreen()) 
-            
-            return;
-        
-        switch (tile)
+        if(c->is_EWMH_fullscreen())
         {
-            case(TILE::LEFT):
-                
+            return;
+        }
+
+        switch(tile)
+        {
+            case TILE::LEFT:
+            {
                 // IF 'CURRENTLT_TILED' TO 'LEFT'
                 if(current_tile_pos(TILEPOS::LEFT))
                 { 
@@ -6513,8 +7126,8 @@ class tile {
                 
                 // IF 'CURRENTLY_TILED' TO 'RIGHT', 'LEFT_DOWN' OR 'LEFT_UP'
                 if(current_tile_pos(TILEPOS::RIGHT)
-                ||current_tile_pos(TILEPOS::LEFT_DOWN)
-                ||current_tile_pos(TILEPOS::LEFT_UP))
+                || current_tile_pos(TILEPOS::LEFT_DOWN)
+                || current_tile_pos(TILEPOS::LEFT_UP))
                 {
                     set_tile_sizepos(TILEPOS::LEFT);
                     return;
@@ -6537,9 +7150,10 @@ class tile {
                 c->save_tile_ogsize();
                 set_tile_sizepos(TILEPOS::LEFT);
                 break;
+            }
                 
-            case(TILE::RIGHT):
-
+            case TILE::RIGHT:
+            {
                 // IF 'CURRENTLY_TILED' TO 'RIGHT'
                 if(current_tile_pos(TILEPOS::RIGHT))
                 {
@@ -6573,9 +7187,10 @@ class tile {
                 c->save_tile_ogsize();
                 set_tile_sizepos(TILEPOS::RIGHT);
                 break;
+            }
             
-            case(TILE::DOWN):
-
+            case TILE::DOWN:
+            {
                 // IF 'CURRENTLY_TILED' 'LEFT' OR 'LEFT_UP'
                 if(current_tile_pos(TILEPOS::LEFT)
                 || current_tile_pos(TILEPOS::LEFT_UP))
@@ -6601,8 +7216,10 @@ class tile {
                 }
 
                 break;
-            case(TILE::UP):
+            }
 
+            case TILE::UP:
+            {
                 // IF 'CURRENTLY_TILED' 'LEFT'
                 if(current_tile_pos(TILEPOS::LEFT)
                 || current_tile_pos(TILEPOS::LEFT_DOWN))
@@ -6610,6 +7227,7 @@ class tile {
                     set_tile_sizepos(TILEPOS::LEFT_UP);
                     return;
                 }
+
                 // IF 'CURRENTLY_TILED' 'RIGHT' OR RIGHT_DOWN
                 if(current_tile_pos(TILEPOS::RIGHT)
                 || current_tile_pos(TILEPOS::RIGHT_DOWN))
@@ -6617,322 +7235,415 @@ class tile {
                     set_tile_sizepos(TILEPOS::RIGHT_UP);
                     return;
                 }
-                break; 
+
+                break;
+            }
         }
-    }  
+    }
 };
 
 class Events {
-  Public(Events)() {}
-  // methods
-    Public(void) setup() {
-      event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev){ key_press_handler(ev); });
-      event_handler->setEventCallback(XCB_MAP_NOTIFY, [&](Ev ev){ map_notify_handler(ev); });
-      event_handler->setEventCallback(XCB_MAP_REQUEST, [&](Ev ev){ map_req_handler(ev); });
-      event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev){ button_press_handler(ev); });
-      event_handler->setEventCallback(XCB_CONFIGURE_REQUEST, [&](Ev ev){ configure_request_handler(ev); });
-      event_handler->setEventCallback(XCB_FOCUS_IN, [&](Ev ev){ focus_in_handler(ev); });
-      event_handler->setEventCallback(XCB_FOCUS_OUT, [&](Ev ev){ focus_out_handler(ev); });
-      event_handler->setEventCallback(XCB_DESTROY_NOTIFY, [&](Ev ev){ destroy_notify_handler(ev); });
-      event_handler->setEventCallback(XCB_UNMAP_NOTIFY, [&](Ev ev){ unmap_notify_handler(ev); });
-      event_handler->setEventCallback(XCB_REPARENT_NOTIFY, [&](Ev ev){ reparent_notify_handler(ev); });
-      event_handler->setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev){ enter_notify_handler(ev); });
-      event_handler->setEventCallback(XCB_LEAVE_NOTIFY, [&](Ev ev){ leave_notify_handler(ev); });
-      event_handler->setEventCallback(XCB_MOTION_NOTIFY, [&](Ev ev){ motion_notify_handler(ev); }); }
-  // Event handling functions
-    Private(void) key_press_handler(const xcb_generic_event_t * & ev) {
-      const auto * e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
-          
-      if (e->detail == wm->key_codes.t) {
-          switch (e->state) {
-              case CTRL + ALT:
-                  wm->launcher.program((char *) "konsole");
-                  break;
-          }
-      }
-      if (e->detail == wm->key_codes.q) {
-          switch (e->state) {
-              case SHIFT + ALT:
-                  wm->quit(0);
-                  break;
-          }
-      }
-      if (e->detail == wm->key_codes.f11) {
-          client * c = wm->client_from_window(& e->event);
-          max_win(c, max_win::EWMH_MAXWIN);
-      }
-      if (e->detail == wm->key_codes.n_1) {
-          switch (e->state) {
-              case ALT:
-                  change_desktop::teleport_to(1);
-                  break;
-          }
-      }
-      if (e->detail == wm->key_codes.n_2) {
-          switch (e->state) {
-              case ALT:
-                  change_desktop::teleport_to(2);
-                  break;
-          }
-      }
-      if (e->detail == wm->key_codes.n_3) {
-          switch (e->state) {
-              case ALT:
-                  change_desktop::teleport_to(3);
-                  break;
-          }
-      }
-      if (e->detail == wm->key_codes.n_4) {
-          switch (e->state) {
-              case ALT:
-                  change_desktop::teleport_to(4);
-                  break;
-          }
-      }
-      if (e->detail == wm->key_codes.n_5) {
-          switch (e->state) {
-              case ALT:
-                  change_desktop::teleport_to(5);
-                  break;
-          }
-      }
-      if (e->detail == wm->key_codes.r_arrow) {
-          switch (e->state) {
-              case SHIFT + CTRL + SUPER: {
-                  move_to_next_desktop_w_app();
-                  break;
-              }
-              case CTRL + SUPER: {
-          change_desktop change_desktop(conn);
-                  change_desktop.change_to(change_desktop::NEXT);
-                  break;
-              }
-              case SUPER: {
-                  client * c = wm->client_from_window(& e->event);
-                  tile(c, TILE::RIGHT);
-                  break;
-              }
-              return;
-          }
-      }
-      if (e->detail == wm->key_codes.l_arrow) {
-          switch (e->state) {
-              case SHIFT + CTRL + SUPER: {
-                  move_to_previus_desktop_w_app();
-                  break;
-              }
-              case CTRL + SUPER: {
-          change_desktop change_desktop(conn);
-                  change_desktop.change_to(change_desktop::PREV);
-                  break;
-              }
-              case SUPER: {
-                  client * c = wm->client_from_window(& e->event);
-                  tile(c, TILE::LEFT);
-                  break;
-              }
-          }
-      }
-      if (e->detail == wm->key_codes.d_arrow) {
-          switch (e->state) {
-              case SUPER:
-                  client * c = wm->client_from_window(& e->event);
-                  tile(c, TILE::DOWN);
-                  return;
-                  break;
-          }
-      }
-      if (e->detail == wm->key_codes.u_arrow) {
-          switch (e->state) {
-              case SUPER:
-                  client * c = wm->client_from_window(& e->event);
-                  tile(c, TILE::UP);
-                  break;
-          }
-      }
-      if (e->detail == wm->key_codes.tab) {
-          switch (e->state) {
-              case ALT:
-                  wm->cycle_focus();
-                  break;
-          }
-      }
-      if (e->detail == wm->key_codes.k) {
-        switch (e->state) {
-          case SUPER:
-            client * c = wm->client_from_window(& e->event);
-            if(!c) return;
-            if(c->win.is_mask_active(XCB_EVENT_MASK_ENTER_WINDOW)) { log_info("event_mask is active"); } 
-            else { log_info("event_mask is NOT active"); }
-            break; }}}
-    Private(void) map_notify_handler(const xcb_generic_event_t * & ev) {
-      const auto * e = reinterpret_cast<const xcb_map_notify_event_t *>(ev);
-      client * c = wm->client_from_window(& e->window);
-      if(c) c->update(); }
-    Private(void) map_req_handler(const xcb_generic_event_t * & ev) {
-      const auto * e = reinterpret_cast<const xcb_map_request_event_t *>(ev);
-      client * c = wm->client_from_window(& e->window); 
-      if(c) return; wm->manage_new_client(e->window); }
-    Private(void) button_press_handler(const xcb_generic_event_t * & ev) {
-      const auto * e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
-      client * c;
-      if(BORDER_SIZE == 0) {
-        c = wm->client_from_pointer(10);
-        if(c) {
-          if(e->detail == L_MOUSE_BUTTON) {
-            c->raise();
-            resize_client::no_border border(c, 0, 0);
-            wm->focus_client(c); }
-        return; }}
-      if(e->event == wm->root)
-        if(e->detail == R_MOUSE_BUTTON) {
-          wm->context_menu->show(); return; }
-      c = wm->client_from_any_window(& e->event);
-      if(!c) return;
-      if(e->detail == L_MOUSE_BUTTON) {
-        if(e->event == c->win) {
-          switch (e->state) {
-              case ALT:
-                  c->raise();
-                  mv_client mv(c, e->event_x, e->event_y + 20);
-                  wm->focus_client(c);
-                  break; }
-          c->raise();
-          wm->focus_client(c);
-          return; }
-        if(e->event == c->titlebar) {
-          c->raise();
-          mv_client mv(c, e->event_x, e->event_y);
-          wm->focus_client(c);
-          return; }
-        if(e->event == c->close_button) {
-          wm->send_sigterm_to_client(c);
-          return; }
-        if(e->event == c->max_button) {
-          client * c = wm->client_from_any_window(& e->event);
-          max_win(c, max_win::BUTTON_MAXWIN);
-          return; }
-        if(e->event == c->border.left) {
-          resize_client::border border(c, edge::LEFT);
-          return; }
-        if(e->event == c->border.right) {
-          resize_client::border border(c, edge::RIGHT);
-          return; } 
-        if(e->event == c->border.top) {
-          resize_client::border border(c, edge::TOP);
-          return; }
-        if(e->event == c->border.bottom) {
-          resize_client::border(c, edge::BOTTOM_edge); }
-        if(e->event == c->border.top_left) {
-          resize_client::border border(c, edge::TOP_LEFT);
-          return; }
-        if(e->event == c->border.top_right) {
-          resize_client::border border(c, edge::TOP_RIGHT);
-          return; }
-        if(e->event == c->border.bottom_left) {
-            resize_client::border border(c, edge::BOTTOM_LEFT);
-            return; }
-        if(e->event == c->border.bottom_right) {
-          resize_client::border border(c, edge::BOTTOM_RIGHT);
-          return; }}
-      if(e->detail == R_MOUSE_BUTTON) {
-        switch (e->state) {
-            case ALT:
-                log_error("ALT + R_MOUSE_BUTTON");
-                c->raise();
-                resize_client resize(c, 0);
-                wm->focus_client(c);
-                return; }}}
-    Private(void) configure_request_handler(const xcb_generic_event_t * & ev) {
-      const auto * e = reinterpret_cast<const xcb_configure_request_event_t *>(ev);
-      wm->data.width     = e->width;
-      wm->data.height    = e->height;
-      wm->data.x         = e->x;
-      wm->data.y         = e->y; }
-    Private(void) focus_in_handler(const xcb_generic_event_t * & ev) {
-      const auto * e = reinterpret_cast<const xcb_focus_in_event_t *>(ev);
-      client * c = wm->client_from_window( & e->event);
-      if(c) {
-        c->win.ungrab_button({ { L_MOUSE_BUTTON, NULL } });
-        c->raise();
-        c->win.set_active_EWMH_window();
-        wm->focused_client = c; }}
-    Private(void) focus_out_handler(const xcb_generic_event_t * & ev) {
-      const auto * e = reinterpret_cast<const xcb_focus_out_event_t *>(ev);
-      client * c = wm->client_from_window(& e->event);
-      if(c) c->win.grab_button({ { L_MOUSE_BUTTON, NULL } }); }
-    Private(void) destroy_notify_handler(const xcb_generic_event_t * & ev)
-    {
+    public:
+
+        Events();
     
-        const auto * e = reinterpret_cast<const xcb_destroy_notify_event_t *>(ev);
-        client * c = wm->client_from_window(& e->event);
-        if(!c) return;
-        wm->send_sigterm_to_client(c);
-    
-    }
-    
-    Private(void) unmap_notify_handler(const xcb_generic_event_t * & ev)
-    {
-        const auto * e = reinterpret_cast<const xcb_unmap_notify_event_t *>(ev);
-        client * c = wm->client_from_window(& e->window);
-        if(!c) 
+        void setup() {
+            event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev){ key_press_handler(ev); });
+            event_handler->setEventCallback(XCB_MAP_NOTIFY, [&](Ev ev){ map_notify_handler(ev); });
+            event_handler->setEventCallback(XCB_MAP_REQUEST, [&](Ev ev){ map_req_handler(ev); });
+            event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev){ button_press_handler(ev); });
+            event_handler->setEventCallback(XCB_CONFIGURE_REQUEST, [&](Ev ev){ configure_request_handler(ev); });
+            event_handler->setEventCallback(XCB_FOCUS_IN, [&](Ev ev){ focus_in_handler(ev); });
+            event_handler->setEventCallback(XCB_FOCUS_OUT, [&](Ev ev){ focus_out_handler(ev); });
+            event_handler->setEventCallback(XCB_DESTROY_NOTIFY, [&](Ev ev){ destroy_notify_handler(ev); });
+            event_handler->setEventCallback(XCB_UNMAP_NOTIFY, [&](Ev ev){ unmap_notify_handler(ev); });
+            event_handler->setEventCallback(XCB_REPARENT_NOTIFY, [&](Ev ev){ reparent_notify_handler(ev); });
+            event_handler->setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev){ enter_notify_handler(ev); });
+            event_handler->setEventCallback(XCB_LEAVE_NOTIFY, [&](Ev ev){ leave_notify_handler(ev); });
+            event_handler->setEventCallback(XCB_MOTION_NOTIFY, [&](Ev ev){ motion_notify_handler(ev); });
+        }
+
+    private:
+
+        void key_press_handler(const xcb_generic_event_t * & ev) {
+            const auto * e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
+                
+            if(e->detail == wm->key_codes.t) {
+                switch(e->state) {
+                    case (CTRL + ALT): {
+                        wm->launcher.program((char *) "konsole");
+                        break;
+                    }
+                }
+            }
             
-            return;
-    
-    }
-    
-    Private(void) reparent_notify_handler(const xcb_generic_event_t * & ev)
-    {
-        const auto * e = reinterpret_cast<const xcb_reparent_notify_event_t *>(ev);
-    }
+            if (e->detail == wm->key_codes.q) {
+                switch (e->state) {
+                    case SHIFT + ALT:
+                        wm->quit(0);
+                        break;
+                }
+            }
+            
+            if (e->detail == wm->key_codes.f11) {
+                client * c = wm->client_from_window(& e->event);
+                max_win(c, max_win::EWMH_MAXWIN);
+            }
+            
+            if (e->detail == wm->key_codes.n_1) {
+                switch (e->state) {
+                    case ALT:
+                        change_desktop::teleport_to(1);
+                        break;
+                }
+            }
+            
+            if (e->detail == wm->key_codes.n_2) {
+                switch (e->state) {
+                    case ALT:
+                        change_desktop::teleport_to(2);
+                        break;
+                }
+            }
+            
+            if (e->detail == wm->key_codes.n_3) {
+                switch (e->state) {
+                    case ALT:
+                        change_desktop::teleport_to(3);
+                        break;
+                }
+            }
+            
+            if (e->detail == wm->key_codes.n_4) {
+                switch (e->state) {
+                    case ALT:
+                        change_desktop::teleport_to(4);
+                        break;
+                }
+            }
+            
+            if (e->detail == wm->key_codes.n_5) {
+                switch (e->state) {
+                    case ALT:
+                        change_desktop::teleport_to(5);
+                        break;
+                }
+            }
+            
+            if (e->detail == wm->key_codes.r_arrow) {
+                switch (e->state) {
+                    case SHIFT + CTRL + SUPER: {
+                        move_to_next_desktop_w_app();
+                        break;
+                    }
+                    case CTRL + SUPER: {
+                change_desktop change_desktop(conn);
+                        change_desktop.change_to(change_desktop::NEXT);
+                        break;
+                    }
+                    case SUPER: {
+                        client * c = wm->client_from_window(& e->event);
+                        tile(c, TILE::RIGHT);
+                        break;
+                    }
+                    return;
+                }
+            }
+            
+            if (e->detail == wm->key_codes.l_arrow) {
+                switch (e->state) {
+                    case SHIFT + CTRL + SUPER: {
+                        move_to_previus_desktop_w_app();
+                        break;
+                    }
+                    case CTRL + SUPER: {
+                change_desktop change_desktop(conn);
+                        change_desktop.change_to(change_desktop::PREV);
+                        break;
+                    }
+                    case SUPER: {
+                        client * c = wm->client_from_window(& e->event);
+                        tile(c, TILE::LEFT);
+                        break;
+                    }
+                }
+            }
+            
+            if (e->detail == wm->key_codes.d_arrow) {
+                switch (e->state) {
+                    case SUPER:
+                        client * c = wm->client_from_window(& e->event);
+                        tile(c, TILE::DOWN);
+                        return;
+                        break;
+                }
+            }
 
-    Private(void) enter_notify_handler(const xcb_generic_event_t * & ev)
-    {
+            if(e->detail == wm->key_codes.u_arrow) {
+                switch(e->state) {
+                    case SUPER: {
+                        client * c = wm->client_from_window(& e->event);
+                        tile(c, TILE::UP);
+                        break;
+                    }
+                }
+            }
 
-        const auto * e = reinterpret_cast<const xcb_enter_notify_event_t *>(ev);  
-    
-    }
+            if(e->detail == wm->key_codes.tab) {
+                switch(e->state) {
+                    case ALT : {
+                        wm->cycle_focus();
+                        break;
+                    }
+                }
+            }
 
-    Private(void) leave_notify_handler(const xcb_generic_event_t * & ev)
-    {
-    
-        const auto * e = reinterpret_cast<const xcb_leave_notify_event_t *>(ev);
-    
-    }
+            if(e->detail == wm->key_codes.k) {
+                switch(e->state) {
+                    case SUPER: {
+                        client * c = wm->client_from_window(& e->event);
+                        if(!c) {
+                            return;
+                        }
 
-    Private(void) motion_notify_handler(const xcb_generic_event_t * & ev)
-    {
-    
-        const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev); 
-    
-    }
+                        if(c->win.is_mask_active(XCB_EVENT_MASK_ENTER_WINDOW)) {
+                            log_info("event_mask is active");
+                        } else {
+                            log_info("event_mask is NOT active");
+                        }
+
+                        break;
+                    }
+                }
+            }
+        }
+
+        void map_notify_handler(const xcb_generic_event_t * & ev) {
+            const xcb_map_notify_event_t * e = reinterpret_cast<const xcb_map_notify_event_t *>(ev);
+            client * c = wm->client_from_window(& e->window);
+            if(c) {
+                c->update();
+            }
+        }
+
+        void map_req_handler(const xcb_generic_event_t * & ev) {
+            const xcb_map_request_event_t * e = reinterpret_cast<const xcb_map_request_event_t *>(ev);
+            client * c = wm->client_from_window(& e->window); 
+            if(c) {
+                return;
+            }
+
+            wm->manage_new_client(e->window);
+        }
+
+        void button_press_handler(const xcb_generic_event_t * & ev) {
+            const auto * e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
+            client * c;
+            if(BORDER_SIZE == 0) {
+                c = wm->client_from_pointer(10);
+                if(c) {
+                    if(e->detail == L_MOUSE_BUTTON) {
+                        c->raise();
+                        resize_client::no_border border(c, 0, 0);
+                        wm->focus_client(c);
+                    }
+
+                    return;
+                }
+            }
+
+            if(e->event == wm->root) {
+                if(e->detail == R_MOUSE_BUTTON) {
+                    wm->context_menu->show();
+                    return;
+                }
+            }
+
+            c = wm->client_from_any_window(& e->event);
+            if(!c) {
+                return;
+            }
+                
+            if(e->detail == L_MOUSE_BUTTON) {
+                if(e->event == c->win) {
+                    switch(e->state) {
+                        case ALT: {
+                            c->raise();
+                            mv_client mv(c, e->event_x, e->event_y + 20);
+                            wm->focus_client(c);
+                            break;
+                        }
+                    }
+
+                    c->raise();
+                    wm->focus_client(c);
+                    return;
+                }
+                
+                if(e->event == c->titlebar) {
+                    c->raise();
+                    mv_client mv(c, e->event_x, e->event_y);
+                    wm->focus_client(c);
+                    return;
+                }
+                
+                if(e->event == c->close_button) {
+                    wm->send_sigterm_to_client(c);
+                    return;
+                }
+                
+                if(e->event == c->max_button) {
+                    client * c = wm->client_from_any_window(& e->event);
+                    max_win(c, max_win::BUTTON_MAXWIN);
+                    return;
+                }
+                
+                if(e->event == c->border.left) {
+                    resize_client::border border(c, edge::LEFT);
+                    return;
+                }
+                
+                if(e->event == c->border.right) {
+                    resize_client::border border(c, edge::RIGHT);
+                    return;
+                } 
+                
+                if(e->event == c->border.top) {
+                    resize_client::border border(c, edge::TOP);
+                    return;
+                }
+                
+                if(e->event == c->border.bottom) {
+                    resize_client::border(c, edge::BOTTOM_edge);
+                }
+                
+                if(e->event == c->border.top_left) {
+                    resize_client::border border(c, edge::TOP_LEFT);
+                    return;
+                }
+
+                if(e->event == c->border.top_right) {
+                    resize_client::border border(c, edge::TOP_RIGHT);
+                    return;
+                }
+                
+                if(e->event == c->border.bottom_left) {
+                    resize_client::border border(c, edge::BOTTOM_LEFT);
+                    return;
+                }
+
+                if(e->event == c->border.bottom_right) {
+                    resize_client::border border(c, edge::BOTTOM_RIGHT);
+                    return;
+                }
+            }
+
+            if(e->detail == R_MOUSE_BUTTON) {
+                switch(e->state) {
+                    case ALT: {
+                        log_error("ALT + R_MOUSE_BUTTON");
+                        c->raise();
+                        resize_client resize(c, 0);
+                        wm->focus_client(c);
+                        return;
+                    }
+                }
+            }
+        }
+        
+        void configure_request_handler(const xcb_generic_event_t * & ev) {
+            const auto * e = reinterpret_cast<const xcb_configure_request_event_t *>(ev);
+            wm->data.width     = e->width;
+            wm->data.height    = e->height;
+            wm->data.x         = e->x;
+            wm->data.y         = e->y;
+        }
+
+        void focus_in_handler(const xcb_generic_event_t * & ev) {
+            const xcb_focus_in_event_t * e = reinterpret_cast<const xcb_focus_in_event_t *>(ev);
+            client * c = wm->client_from_window( & e->event);
+            if(c) {
+                c->win.ungrab_button({ { L_MOUSE_BUTTON, NULL } });
+                c->raise();
+                c->win.set_active_EWMH_window();
+                wm->focused_client = c;
+            }
+        }
+
+        void focus_out_handler(const xcb_generic_event_t * & ev) {
+            const xcb_focus_out_event_t * e = reinterpret_cast<const xcb_focus_out_event_t *>(ev);
+            client * c = wm->client_from_window(& e->event);
+            if(c) {
+                c->win.grab_button({
+                    { L_MOUSE_BUTTON, NULL }
+                });
+            }
+        }
+
+        void destroy_notify_handler(const xcb_generic_event_t * & ev) {
+            const auto * e = reinterpret_cast<const xcb_destroy_notify_event_t *>(ev);
+            client * c = wm->client_from_window(& e->event);
+            if(!c) {
+                return;
+            }
+
+            wm->send_sigterm_to_client(c);
+        }
+        
+        void unmap_notify_handler(const xcb_generic_event_t * & ev) {
+            const auto * e = reinterpret_cast<const xcb_unmap_notify_event_t *>(ev);
+            client * c = wm->client_from_window(& e->window);
+            if(!c) {
+                return;
+            }
+        }
+        
+        void reparent_notify_handler(const xcb_generic_event_t * & ev) {
+            const auto * e = reinterpret_cast<const xcb_reparent_notify_event_t *>(ev);
+        }
+
+        void enter_notify_handler(const xcb_generic_event_t * & ev) {
+            const auto * e = reinterpret_cast<const xcb_enter_notify_event_t *>(ev);  
+        }
+
+        void leave_notify_handler(const xcb_generic_event_t * & ev) {
+            const auto * e = reinterpret_cast<const xcb_leave_notify_event_t *>(ev);
+        }
+
+        void motion_notify_handler(const xcb_generic_event_t * & ev) {
+            const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev); 
+        }
 };
 
-class test {
+class test
+{
     public:
+    
         int running = 1;
+    
     test() {}
-        void setup_events()
+
+    void setup_events()
+    {
+        event_handler->setEventCallback(XCB_KEY_PRESS, [this](Ev ev)
+        -> void
         {
-            event_handler->setEventCallback(XCB_KEY_PRESS, [this](Ev ev)
-            {
-                const auto * e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
-                
-                if(e->detail == wm->key_codes.k)
-                    
-                    if(e->state == SUPER)
-                    {
+            const xcb_key_press_event_t *e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
+            
+            if(e->detail == wm->key_codes.k) {
+                if(e->state == SUPER) {
                     running = 1; run_full();
-                    }
+                }
+            }
 
-                if(e->detail == wm->key_codes.q)
-
-                    if(e->state == ALT)
-                    {   
-                        running = 0;
-                    }
-            });
-        }
+            if(e->detail == wm->key_codes.q) {
+                if(e->state == ALT) {   
+                    running = 0;
+                }
+            }
+        });
+    }
+    
     void run_full()
     {
         cd_test();
@@ -6947,33 +7658,86 @@ class test {
         change_desktop cd(conn);
         const int og_duration = cd.duration;
 
-        while(i < (end + 1)) {
-        cd.change_to(change_desktop::NEXT);
-        cd.change_to(change_desktop::PREV);
-        cd.duration = (cd.duration - 1);
-        ++i;
-        if(running == 0) 
-            break; 
+        while(i < (end + 1))
+        {
+            cd.change_to(change_desktop::NEXT);
+            cd.change_to(change_desktop::PREV);
+            cd.duration = (cd.duration - 1);
+            ++i;
+            if(running == 0)
+            {
+                break;
+            }
         }
     }
 
     void mv_test()
     {
         window win_1;
-        win_1.create_default(wm->root, 0, 0, 300, 300);
+        win_1.create_default(
+            wm->root,
+            0,
+            0,
+            300,
+            300
+        );
+
         win_1.raise();
         win_1.set_backround_color(RED);
         win_1.map();
         Mwm_Animator win_1_animator(win_1);
         
-        for(int i = 0; i < 400; ++i) {
-        win_1_animator.animate(0, 0, 300, 300, (screen->width_in_pixels - 300), 0, 300, 300, (400 - i));
-        win_1_animator.animate((screen->width_in_pixels - 300), 0, 300, 300, (screen->width_in_pixels - 300), (screen->height_in_pixels - 300), 300, 300, (400 - i));
-        win_1_animator.animate((screen->width_in_pixels - 300), (screen->height_in_pixels - 300), 300, 300, 0, (screen->height_in_pixels - 300), 300, 300, (400 - i));
-        win_1_animator.animate(0, (screen->height_in_pixels - 300), 300, 300, 0, 0, 300, 300, (400 - i));
-        if(running == 0) {
-            break; 
-        }
+        for (int i = 0; i < 400; ++i)
+        {
+            win_1_animator.animate(
+                0,
+                0,
+                300,
+                300,
+                (screen->width_in_pixels - 300),
+                0,
+                300,
+                300,
+                (400 - i)
+            );
+            
+            win_1_animator.animate(
+                (screen->width_in_pixels - 300),
+                0,
+                300, 
+                300, 
+                (screen->width_in_pixels - 300),
+                (screen->height_in_pixels - 300),
+                300,
+                300,
+                (400 - i)
+            );
+
+            win_1_animator.animate(
+                (screen->width_in_pixels - 300),
+                (screen->height_in_pixels - 300), 
+                300, 
+                300, 
+                0,
+                (screen->height_in_pixels - 300),
+                300, 
+                300, 
+                (400 - i)
+            );
+
+            win_1_animator.animate(
+                0,
+                (screen->height_in_pixels - 300),
+                300, 
+                300, 
+                0, 
+                0, 
+                300, 
+                300,
+                (400 - i)
+            );
+
+            if (!running) break;
         }
         
         win_1.unmap();
@@ -6981,8 +7745,9 @@ class test {
     }
 };
 
-void setup_wm() {
-    wm = (new Window_Manager);
+void setup_wm()
+{
+    wm = new Window_Manager;
     wm->init();
     
     change_desktop::teleport_to(1);
@@ -7004,7 +7769,8 @@ void setup_wm() {
     file_app->init();
 }
 
-int main() {
+int main()
+{
     LOG_start()
     setup_wm();
 
