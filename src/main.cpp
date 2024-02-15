@@ -6178,6 +6178,7 @@ class change_desktop
 
                         break;
                     }
+                    break;
                 }
 
                 case PREV:
@@ -6191,6 +6192,7 @@ class change_desktop
 
                         break;
                     }
+                    break;
                 }
             }
         }
