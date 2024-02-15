@@ -6077,7 +6077,7 @@ class change_desktop
             PREV
         };
 
-        void change_to(const DIRECTION & direction)
+        void change_to(const DIRECTION &direction)
         {
             switch (direction)
             {
@@ -6163,7 +6163,7 @@ class change_desktop
             return clients;
         }
 
-        void animate(vector<client *> clients, const DIRECTION & direction)
+        void animate(vector<client *> clients, const DIRECTION &direction)
         {
             switch (direction)
             {
