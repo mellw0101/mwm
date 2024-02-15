@@ -6169,7 +6169,7 @@ class change_desktop
             {
                 case NEXT:
                 {
-                    for (const auto &c : clients)
+                    for (const auto c : clients)
                     {
                         if (c != nullptr)
                         {
