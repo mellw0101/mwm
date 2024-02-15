@@ -6175,9 +6175,8 @@ class change_desktop
                         {
                             animation_threads.emplace_back(&change_desktop::anim_cli, this, c, c->x - screen->width_in_pixels);
                         }
-
-                        break;
                     }
+
                     break;
                 }
 
@@ -6189,9 +6188,8 @@ class change_desktop
                         {
                             animation_threads.emplace_back(&change_desktop::anim_cli, this, c, c->x + screen->width_in_pixels);
                         }
-
-                        break;
                     }
+                    
                     break;
                 }
             }
