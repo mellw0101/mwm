@@ -7465,7 +7465,7 @@ class tile
 class Events
 {
     public:
-        Events();
+        Events() {}
     
         void setup()
         {
