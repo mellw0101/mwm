@@ -7138,14 +7138,14 @@ class tile
 
         bool current_tile_pos(TILEPOS mode)
         {
-            switch(mode)
+            switch (mode)
             {
                 case TILEPOS::LEFT:
                 {
-                    if(c->x      == 0 
-                    && c->y      == 0 
-                    && c->width  == screen->width_in_pixels / 2 
-                    && c->height == screen->height_in_pixels)
+                    if (c->x      == 0 
+                    &&  c->y      == 0 
+                    &&  c->width  == screen->width_in_pixels / 2 
+                    &&  c->height == screen->height_in_pixels)
                     {
                         return true;
                     }
@@ -7155,10 +7155,10 @@ class tile
 
                 case TILEPOS::RIGHT:
                 {
-                    if(c->x      == screen->width_in_pixels / 2 
-                    && c->y      == 0 
-                    && c->width  == screen->width_in_pixels / 2
-                    && c->height == screen->height_in_pixels)
+                    if (c->x      == screen->width_in_pixels / 2 
+                    &&  c->y      == 0 
+                    &&  c->width  == screen->width_in_pixels / 2
+                    &&  c->height == screen->height_in_pixels)
                     {
                         return true;
                     }
@@ -7168,10 +7168,10 @@ class tile
                 
                 case TILEPOS::LEFT_DOWN:
                 {
-                    if(c->x      == 0
-                    && c->y      == screen->height_in_pixels / 2
-                    && c->width  == screen->width_in_pixels / 2
-                    && c->height == screen->height_in_pixels / 2)
+                    if (c->x      == 0
+                    &&  c->y      == screen->height_in_pixels / 2
+                    &&  c->width  == screen->width_in_pixels / 2
+                    &&  c->height == screen->height_in_pixels / 2)
                     {
                         return true;
                     }
@@ -7181,10 +7181,10 @@ class tile
                 
                 case TILEPOS::RIGHT_DOWN:
                 {
-                    if(c->x      == screen->width_in_pixels / 2
-                    && c->y      == screen->height_in_pixels / 2
-                    && c->width  == screen->width_in_pixels / 2
-                    && c->height == screen->height_in_pixels / 2)
+                    if (c->x      == screen->width_in_pixels / 2
+                    &&  c->y      == screen->height_in_pixels / 2
+                    &&  c->width  == screen->width_in_pixels / 2
+                    &&  c->height == screen->height_in_pixels / 2)
                     {    
                         return true;
                     }
@@ -7194,10 +7194,10 @@ class tile
                 
                 case TILEPOS::LEFT_UP:
                 {
-                    if(c->x      == 0
-                    && c->y      == 0
-                    && c->width  == screen->width_in_pixels / 2
-                    && c->height == screen->height_in_pixels / 2)
+                    if (c->x      == 0
+                    &&  c->y      == 0
+                    &&  c->width  == screen->width_in_pixels / 2
+                    &&  c->height == screen->height_in_pixels / 2)
                     {
                         return true;
                     }
@@ -7207,10 +7207,10 @@ class tile
 
                 case TILEPOS::RIGHT_UP:
                 {
-                    if(c->x      == screen->width_in_pixels / 2
-                    && c->y      == 0
-                    && c->width  == screen->width_in_pixels / 2
-                    && c->height == screen->height_in_pixels / 2)
+                    if (c->x      == screen->width_in_pixels / 2
+                    &&  c->y      == 0
+                    &&  c->width  == screen->width_in_pixels / 2
+                    &&  c->height == screen->height_in_pixels / 2)
                     {
                         return true;
                     }
@@ -7224,7 +7224,7 @@ class tile
 
         void set_tile_sizepos(TILEPOS sizepos)
         {
-            switch(sizepos)
+            switch (sizepos)
             {
                 case TILEPOS::LEFT:
                 {
@@ -7310,7 +7310,7 @@ class tile
             );
         }
 
-        void animate(const int & end_x, const int & end_y, const int & end_width, const int & end_height)
+        void animate(const int &end_x, const int &end_y, const int &end_width, const int &end_height)
         {
             Mwm_Animator anim(c);
             anim.animate_client(
@@ -7331,10 +7331,7 @@ class tile
     public:
     tile(client * & c, TILE tile) : c(c)
     {
-        if (c->is_EWMH_fullscreen())
-        {
-            return;
-        }
+        if (c->is_EWMH_fullscreen()) return;
 
         switch (tile)
         {
@@ -7946,7 +7943,6 @@ class Events
 class test
 {
     public:
-    
         int running = 1;
     
     test() {}
@@ -7958,14 +7954,18 @@ class test
         {
             const xcb_key_press_event_t *e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
             
-            if(e->detail == wm->key_codes.k) {
-                if(e->state == SUPER) {
+            if (e->detail == wm->key_codes.k)
+            {
+                if (e->state == SUPER)
+                {
                     running = 1; run_full();
                 }
             }
 
-            if(e->detail == wm->key_codes.q) {
-                if(e->state == ALT) {   
+            if (e->detail == wm->key_codes.q)
+            {
+                if (e->state == ALT)
+                {   
                     running = 0;
                 }
             }
@@ -7986,16 +7986,13 @@ class test
         change_desktop cd(conn);
         const int og_duration = cd.duration;
 
-        while(i < (end + 1))
+        while (i < (end + 1))
         {
             cd.change_to(change_desktop::NEXT);
             cd.change_to(change_desktop::PREV);
             cd.duration = (cd.duration - 1);
             ++i;
-            if(running == 0)
-            {
-                break;
-            }
+            if (!running) break;
         }
     }
 
