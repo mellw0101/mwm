@@ -3404,12 +3404,12 @@ class Window_Manager
         Window_Manager() {}
     
     public: // variabels
-        window root;
-        Launcher launcher;
-        Logger log;
-        pointer pointer;
-        win_data data;
-        Key_Codes key_codes;
+        window(root);
+        Launcher(launcher);
+        Logger(log);
+        pointer(pointer);
+        win_data(data);
+        Key_Codes(key_codes);
         
         context_menu *context_menu = nullptr;
         vector<client *>(client_list);
@@ -3431,20 +3431,16 @@ class Window_Manager
                 setSubstructureRedirectMask();
                 configure_root();
                 _ewmh();
-
                 key_codes.init();
-
                 event_handler = new Event_Handler();
-
                 create_new_desktop(1);
                 create_new_desktop(2);
                 create_new_desktop(3);
                 create_new_desktop(4);
                 create_new_desktop(5);
-
                 context_menu = new class context_menu();
-                context_menu->add_entry("konsole", [this]()
-                -> void {
+                context_menu->add_entry("konsole", [this]()-> void
+                {
                     launcher.program((char *) "konsole");
                 });
 
@@ -3453,7 +3449,7 @@ class Window_Manager
                 // std::thread(check_volt()); // dosent work 
             }
 
-            void launch_program(char * program)
+            void launch_program(char *program)
             {
                 if (fork() == 0)
                 {
@@ -3462,7 +3458,7 @@ class Window_Manager
                 }
             }
 
-            void quit(const int & status)
+            void quit(const int &status)
             {
                 xcb_flush(conn);
                 delete_client_vec(client_list);
@@ -3541,7 +3537,7 @@ class Window_Manager
                         ||  *window == c->border.bottom_left
                         ||  *window == c->border.bottom_right)
                         {
-                            return(c);
+                            return c;
                         }
                     }
 
@@ -3555,29 +3551,17 @@ class Window_Manager
                     for (const auto &c : cur_d->current_clients)
                     {
                         // LEFT EDGE OF CLIENT
-                        if (x > c->x - prox && x <= c->x)
-                        {
-                            return(c);
-                        }
+                        if (x > c->x - prox && x <= c->x) return c;
                         
                         // RIGHT EDGE OF CLIENT
-                        if (x >= c->x + c->width && x < c->x + c->width + prox)
-                        { 
-                            return(c);
-                        }
+                        if (x >= c->x + c->width && x < c->x + c->width + prox) return c;
                         
                         // TOP EDGE OF CLIENT
-                        if (y > c->y - prox && y <= c->y)
-                        { 
-                            return(c);
-                        }
+                        if (y > c->y - prox && y <= c->y) return c;
                         
                         // BOTTOM EDGE OF CLIENT
-                        if (y >= c->y + c->height && y < c->y + c->height + prox)
-                        {
-                            return(c);
-                        }
-                    } 
+                        if (y >= c->y + c->height && y < c->y + c->height + prox) return c;
+                    }
                     
                     return nullptr;
                 }
@@ -3587,10 +3571,7 @@ class Window_Manager
                     map<client *, edge> map;
                     for (client *c2:cur_d->current_clients)
                     {
-                        if (c == c2)
-                        {
-                            continue;
-                        }
+                        if (c == c2) continue;
  
                         if (c_edge == edge::LEFT)
                         {
@@ -3638,10 +3619,10 @@ class Window_Manager
                     const uint32_t &x = pointer.x();
                     const uint32_t &y = pointer.y();
 
-                    const uint32_t &top_border = c->y;
+                    const uint32_t &top_border    = c->y;
                     const uint32_t &bottom_border = (c->y + c->height);
-                    const uint32_t &left_border = c->x;
-                    const uint32_t &right_border = (c->x + c->width);
+                    const uint32_t &left_border   = c->x;
+                    const uint32_t &right_border  = (c->x + c->width);
 
                     // TOP EDGE OF CLIENT
                     if (((y > top_border - prox) && (y <= top_border))
@@ -3705,7 +3686,7 @@ class Window_Manager
             void manage_new_client(const uint32_t &window)
             {
                 client * c = make_client(window);
-                if(c == nullptr)
+                if (c == nullptr)
                 {
                     log_error("could not make client");
                     return;
@@ -3730,25 +3711,27 @@ class Window_Manager
                             XCB_EVENT_MASK_ENTER_WINDOW |
                             XCB_EVENT_MASK_LEAVE_WINDOW |
                             XCB_EVENT_MASK_STRUCTURE_NOTIFY;
-                c->win.apply_event_mask(& mask);
-
-                c->update(); focus_client(c); check_client(c);
+                c->win.apply_event_mask(&mask);
+                c->update();
+                focus_client(c);
+                check_client(c);
             }
             
             client * make_internal_client(window window)
             {
-                client * c = new client;
-                c->win = window;
-                c->x = window.x();
-                c->y = window.y();
-                c->width = window.width();
+                client *c = new client;
+                
+                c->win    = window;
+                c->x      = window.x();
+                c->y      = window.y();
+                c->width  = window.width();
                 c->height = window.height();
                 
                 c->make_decorations();
                 client_list.push_back(c);
                 cur_d->current_clients.push_back(c);
                 c->focus();
-
+                
                 return c;
             }
             
@@ -3761,11 +3744,13 @@ class Window_Manager
         public: // desktop methods
             void create_new_desktop(const uint16_t &n)
             {
-                desktop * d = new desktop;
-                d->desktop  = n;
-                d->width    = screen->width_in_pixels;
-                d->height   = screen->height_in_pixels;
-                cur_d       = d;
+                desktop *d = new desktop;
+                
+                d->desktop = n;
+                d->width   = screen->width_in_pixels;
+                d->height  = screen->height_in_pixels;
+                cur_d      = d;
+
                 desktop_list.push_back(d);
             }
         
@@ -3789,7 +3774,7 @@ class Window_Manager
             }
         
     private: // variables
-        window start_window;
+        window(start_window);
     
     private: // functions
         private: // init functions
@@ -3990,7 +3975,7 @@ class Window_Manager
         private: // delete functions
             void delete_client_vec(vector<client *> &vec)
             {
-                for (client * c : vec)
+                for (client *c : vec)
                 {
                     send_sigterm_to_client(c);
                     xcb_flush(conn);                    
@@ -4002,7 +3987,7 @@ class Window_Manager
             
             void delete_desktop_vec(vector<desktop *> &vec)
             {
-                for (desktop * d : vec)
+                for (desktop *d : vec)
                 {
                     delete_client_vec(d->current_clients);
                     delete d;
@@ -4015,7 +4000,7 @@ class Window_Manager
             template <typename Type> 
             static void delete_ptr_vector(vector<Type *>& vec)
             {
-                for (Type * ptr : vec)
+                for (Type *ptr : vec)
                 {
                     delete ptr;
                 }
@@ -4024,7 +4009,7 @@ class Window_Manager
                 vector<Type *>().swap(vec);
             }
             
-            void remove_client(client * c)
+            void remove_client(client *c)
             {
                 client_list.erase(
                     std::remove(
@@ -4049,10 +4034,7 @@ class Window_Manager
 
             void remove_client_from_vector(client * c, vector<client *> &vec)
             {
-                if (c == nullptr)
-                {
-                    log_error("client is nullptr.");
-                }
+                if (c == nullptr) log_error("client is nullptr.");
 
                 vec.erase(
                     std::remove(
@@ -4090,22 +4072,15 @@ class Window_Manager
                     c->y = (((screen->height_in_pixels - c->height) / 2) + (BORDER_SIZE * 2));
                 }
 
-                if (c->height > screen->height_in_pixels) 
-                {
-                    c->height = screen->height_in_pixels;
-                }
-                    
-                if (c->width > screen->width_in_pixels) 
-                {
-                    c->width = screen->width_in_pixels;
-                }
-                    
+                if (c->height > screen->height_in_pixels) c->height = screen->height_in_pixels;
+                if (c->width  > screen->width_in_pixels ) c->width  = screen->width_in_pixels;
+
                 if (c->win.is_EWMH_fullscreen())
                 {
-                    c->x      =(0);
-                    c->y      =(0);
-                    c->width  =(screen->width_in_pixels);
-                    c->height =(screen->height_in_pixels);
+                    c->x      = 0;
+                    c->y      = 0;
+                    c->width  = screen->width_in_pixels;
+                    c->height = screen->height_in_pixels;
                     c->win.set_EWMH_fullscreen_state();
                 }
                 
@@ -4175,24 +4150,23 @@ class Window_Manager
             }
         
         private: // window functions
-            void getWindowParameters(const uint32_t & window)
+            void getWindowParameters(const uint32_t &window)
             {
                 xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
                 xcb_get_geometry_reply_t *geometry_reply = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
-                if (geometry_reply != nullptr)
-                {
-                    log_info("Window Parameters");
-                    log_info(std::to_string(geometry_reply->x));
-                    log_info(std::to_string(geometry_reply->y));
-                    log_info(std::to_string(geometry_reply->width));
-                    log_info(std::to_string(geometry_reply->height));
-
-                    free(geometry_reply);
-                }
-                else
+                if (geometry_reply == nullptr)
                 {
                     cerr << "Unable to get window geometry.\n";
+                    return;
                 }
+            
+                log_info("Window Parameters");
+                log_info(to_string(geometry_reply->x));
+                log_info(to_string(geometry_reply->y));
+                log_info(to_string(geometry_reply->width));
+                log_info(to_string(geometry_reply->height));
+
+                free(geometry_reply);
             }
             
             void get_window_parameters(const uint32_t(&window), int16_t(*x), int16_t(*y), uint16_t(*width), uint16_t(*height))
@@ -4205,10 +4179,10 @@ class Window_Manager
                     return;
                 }
 
-                x      =(&reply->x);
-                y      =(&reply->y);
-                width  =(&reply->width);
-                height =(&reply->height);
+                x      = &reply->x;
+                y      = &reply->y;
+                width  = &reply->width;
+                height = &reply->height;
                 free(reply);
             }
             
@@ -4219,7 +4193,7 @@ class Window_Manager
                 if (reply == nullptr)
                 {
                     log_error("Unable to get window geometry.");
-                    return(screen->width_in_pixels / 2);
+                    return screen->width_in_pixels / 2;
                 } 
             
                 int16_t x(reply->x);
@@ -4234,7 +4208,7 @@ class Window_Manager
                 if (geometry_reply == nullptr)
                 {
                     log_error("Unable to get window geometry.");
-                    return (screen->height_in_pixels / 2);
+                    return screen->height_in_pixels / 2;
                 } 
             
                 int16_t y = geometry_reply->y;
@@ -4260,10 +4234,10 @@ class Window_Manager
 class Mwm_Animator
 {
     public:
-        Mwm_Animator(const uint32_t & window)
+        Mwm_Animator(const uint32_t &window)
         : window(window) {}
 
-        Mwm_Animator(client * c)
+        Mwm_Animator(client *c)
         : c(c) {}
 
         ~Mwm_Animator()/**
@@ -5065,8 +5039,8 @@ class button
         button() {}
     
     public: // public variables.
-        window window;
-        const char * name;
+        window(window);
+        const char *name;
     
     public: // public methods.
         void create(const uint32_t & parent_window, const int16_t & x, const int16_t & y, const uint16_t & width, const uint16_t & height, COLOR color)
@@ -5129,10 +5103,10 @@ class buttons
         buttons() {}
 
     public: // variables
-        vector<button> list;
+        vector<button>(list);
     
     public: // methods
-        void add(const char * name, function<void()> action)
+        void add(const char *name, function<void()>(action))
         {
             button button;
             button.name = name;
@@ -5152,7 +5126,7 @@ class buttons
 
         void run_action(const uint32_t & window)
         {
-            for (const auto & button : list)
+            for (const auto &button : list)
             {
                 if (window == button.window)
                 {
@@ -5166,7 +5140,7 @@ class buttons
 class search_window
 {
     public:
-        window main_window;
+        window(main_window);
         string search_string = "";
     
     public:
@@ -5523,8 +5497,7 @@ class Mwm_Runner
             );
 
             search_window.init();
-            search_window.add_enter_action([this]()
-            -> void
+            search_window.add_enter_action([this]()-> void
             {
                 launcher.program((char *) search_window.string().c_str());
                 hide();
@@ -5539,7 +5512,6 @@ class Mwm_Runner
         }
 
     private:
-
         void hide()
         {
             main_window.unmap();
@@ -5548,10 +5520,9 @@ class Mwm_Runner
 
         void setup_events()
         {
-            event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev)
-            -> void
+            event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev)-> void
             {
-                const auto * e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
+                const auto *e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
                 if (e->detail == wm->key_codes.r)
                 {
                     if (e->state == SUPER)
@@ -5561,14 +5532,10 @@ class Mwm_Runner
                 }
             });
 
-            event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev)
-            -> void
+            event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev)-> void
             {
-                const auto * e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
-                if (!main_window.is_mapped())
-                {
-                    return;
-                }
+                const auto *e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
+                if (!main_window.is_mapped()) return;
 
                 if (e->event != main_window && e->event != search_window.main_window)
                 {
@@ -5582,12 +5549,12 @@ static Mwm_Runner * mwm_runner;
 class add_app_dialog_window
 {
     public:
-        window main_window;
-        search_window search_window;
-        client * c;
-        buttons buttons;
-        pointer pointer;
-        Logger log;
+        window(main_window);
+        search_window(search_window);
+        client(*c);
+        buttons(buttons);
+        pointer(pointer);
+        Logger(log);
     
     public:
         void init()
@@ -5599,7 +5566,13 @@ class add_app_dialog_window
         void show()
         {
             create_client();
-            search_window.create(main_window, DOCK_BORDER, DOCK_BORDER, (main_window.width() - (DOCK_BORDER * 2)), 20);
+            search_window.create(
+                main_window,
+                DOCK_BORDER,
+                DOCK_BORDER,
+                (main_window.width() - (DOCK_BORDER * 2)),
+                20
+            );
             search_window.init();
         }
 
@@ -5661,9 +5634,9 @@ class add_app_dialog_window
 class File_App
 {
     public:
-        window main_window;
-        window left_side_window;
-        client * c;
+        window(main_window);
+        window(left_side_window);
+        client(*c);
     
     public:
         void init()
@@ -5742,8 +5715,8 @@ class File_App
 
         void setup_events()
         {
-            event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev)
-            -> void {
+            event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev)-> void
+            {
                 const xcb_key_press_event_t * e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
                 if (e->detail == wm->key_codes.f)
                 {
@@ -5754,14 +5727,14 @@ class File_App
                 }
             });
 
-            event_handler->setEventCallback(XCB_CONFIGURE_NOTIFY, [&](Ev ev)
-            -> void {
+            event_handler->setEventCallback(XCB_CONFIGURE_NOTIFY, [&](Ev ev)-> void
+            {
                 const auto * e = reinterpret_cast<const xcb_configure_notify_event_t *>(ev);
             });
         }
 
     private:
-        Logger log; 
+        Logger(log); 
 };
 static File_App *file_app;
 
@@ -5771,11 +5744,11 @@ class Dock
         Dock() {}
         
     public:
-        context_menu context_menu;
-        window main_window;
-        buttons buttons;
+        context_menu(context_menu);
+        window(main_window);
+        buttons(buttons);
         uint32_t x = 0, y = 0, width = 48, height = 48;
-        add_app_dialog_window add_app_dialog_window;
+        add_app_dialog_window(add_app_dialog_window);
     
     public:
         void init()
@@ -6110,10 +6083,7 @@ class change_desktop
             {
                 case NEXT:
                 {
-                    if(wm->cur_d->desktop == wm->desktop_list.size())
-                    {
-                        return;
-                    }
+                    if (wm->cur_d->desktop == wm->desktop_list.size()) return;
 
                     hide = get_clients_on_desktop(wm->cur_d->desktop);
                     show = get_clients_on_desktop(wm->cur_d->desktop + 1);
@@ -6125,10 +6095,7 @@ class change_desktop
             
                 case PREV:
                 {
-                    if(wm->cur_d->desktop == 1)
-                    {
-                        return;
-                    }
+                    if (wm->cur_d->desktop == 1) return;
 
                     hide = get_clients_on_desktop(wm->cur_d->desktop);
                     show = get_clients_on_desktop(wm->cur_d->desktop - 1);
@@ -6147,10 +6114,7 @@ class change_desktop
 
         static void teleport_to(const uint8_t & n)
         {
-            if (wm->cur_d == wm->desktop_list[n - 1] || n == 0 || n == wm->desktop_list.size())
-            {
-                return;
-            }
+            if (wm->cur_d == wm->desktop_list[n - 1] || n == 0 || n == wm->desktop_list.size()) return;
 
             for (const auto &c:wm->cur_d->current_clients)
             {
@@ -6174,15 +6138,15 @@ class change_desktop
         }
     
     private:
-        xcb_connection_t *connection;
+        xcb_connection_t(*connection);
         vector<client *>(show);
         vector<client *>(hide);
-        thread show_thread;
-        thread hide_thread;
-        atomic<bool> stop_show_flag{false};
-        atomic<bool> stop_hide_flag{false};
-        atomic<bool> reverse_animation_flag{false};
-        vector<thread> animation_threads;
+        thread(show_thread);
+        thread(hide_thread);
+        atomic<bool>(stop_show_flag){false};
+        atomic<bool>(stop_hide_flag){false};
+        atomic<bool>(reverse_animation_flag){false};
+        vector<thread>(animation_threads);
     
     private:
         vector<client *> get_clients_on_desktop(const uint8_t &desktop)
@@ -6982,7 +6946,7 @@ class resize_client
 class max_win
 {
     private:
-        client *c;
+        client(*c);
 
         void max_win_animate(const int &endX, const int &endY, const int &endWidth, const int &endHeight)
         {
@@ -7032,25 +6996,10 @@ class max_win
 
         void ewmh_unmax_win()
         {
-            if (c->max_ewmh_ogsize.width > screen->width_in_pixels)
-            {
-                (c->max_ewmh_ogsize.width = screen->width_in_pixels / 2);
-            }
-
-            if (c->max_ewmh_ogsize.height > screen->height_in_pixels)
-            {
-                (c->max_ewmh_ogsize.height = screen->height_in_pixels / 2);
-            }
-
-            if (c->max_ewmh_ogsize.x >= screen->width_in_pixels - 1)
-            {
-                c->max_ewmh_ogsize.x = ((screen->width_in_pixels / 2) - (c->max_ewmh_ogsize.width / 2) - BORDER_SIZE);
-            }
-
-            if (c->max_ewmh_ogsize.y >= screen->height_in_pixels - 1)
-            {
-                c->max_ewmh_ogsize.y = ((screen->height_in_pixels / 2) - (c->max_ewmh_ogsize.height / 2) - TITLE_BAR_HEIGHT - BORDER_SIZE);
-            }
+            if (c->max_ewmh_ogsize.width  > screen->width_in_pixels ) c->max_ewmh_ogsize.width  = screen->width_in_pixels  / 2;
+            if (c->max_ewmh_ogsize.height > screen->height_in_pixels) c->max_ewmh_ogsize.height = screen->height_in_pixels / 2;
+            if (c->max_ewmh_ogsize.x >= screen->width_in_pixels - 1 ) c->max_ewmh_ogsize.x = ((screen->width_in_pixels / 2) - (c->max_ewmh_ogsize.width / 2) - BORDER_SIZE);
+            if (c->max_ewmh_ogsize.y >= screen->height_in_pixels - 1) c->max_ewmh_ogsize.y = ((screen->height_in_pixels / 2) - (c->max_ewmh_ogsize.height / 2) - TITLE_BAR_HEIGHT - BORDER_SIZE);
 
             max_win_animate(
                 c->max_ewmh_ogsize.x, 
@@ -7068,7 +7017,8 @@ class max_win
             EWMH_MAXWIN 
         };
 
-    max_win(client * c, max_win_type type) : c(c)
+    max_win(client *c, max_win_type type)
+    : c(c)
     {
         switch (type)
         {
@@ -7114,7 +7064,7 @@ class max_win
 class tile
 {
     private:
-        client *c;
+        client(*c);
 
         bool current_tile_pos(TILEPOS mode)
         {
@@ -7150,7 +7100,7 @@ class tile
                 {
                     if (c->x      == 0
                     &&  c->y      == screen->height_in_pixels / 2
-                    &&  c->width  == screen->width_in_pixels / 2
+                    &&  c->width  == screen->width_in_pixels  / 2
                     &&  c->height == screen->height_in_pixels / 2)
                     {
                         return true;
@@ -7161,9 +7111,9 @@ class tile
                 
                 case TILEPOS::RIGHT_DOWN:
                 {
-                    if (c->x      == screen->width_in_pixels / 2
+                    if (c->x      == screen->width_in_pixels  / 2
                     &&  c->y      == screen->height_in_pixels / 2
-                    &&  c->width  == screen->width_in_pixels / 2
+                    &&  c->width  == screen->width_in_pixels  / 2
                     &&  c->height == screen->height_in_pixels / 2)
                     {    
                         return true;
@@ -7176,7 +7126,7 @@ class tile
                 {
                     if (c->x      == 0
                     &&  c->y      == 0
-                    &&  c->width  == screen->width_in_pixels / 2
+                    &&  c->width  == screen->width_in_pixels  / 2
                     &&  c->height == screen->height_in_pixels / 2)
                     {
                         return true;
@@ -7187,9 +7137,9 @@ class tile
 
                 case TILEPOS::RIGHT_UP:
                 {
-                    if (c->x      == screen->width_in_pixels / 2
+                    if (c->x      == screen->width_in_pixels  / 2
                     &&  c->y      == 0
-                    &&  c->width  == screen->width_in_pixels / 2
+                    &&  c->width  == screen->width_in_pixels  / 2
                     &&  c->height == screen->height_in_pixels / 2)
                     {
                         return true;
@@ -7214,7 +7164,6 @@ class tile
                         screen->width_in_pixels / 2,
                         screen->height_in_pixels
                     );
-
                     return;
                 }
 
@@ -7234,11 +7183,10 @@ class tile
                 {
                     animate(
                         0,
-                        (screen->height_in_pixels / 2),
-                        (screen->width_in_pixels / 2),
-                        (screen->height_in_pixels / 2)
+                        screen->height_in_pixels / 2,
+                        screen->width_in_pixels / 2,
+                        screen->height_in_pixels / 2
                     );
-                    
                     return;
                 }
 
@@ -7250,7 +7198,6 @@ class tile
                         screen->width_in_pixels / 2,
                         screen->height_in_pixels / 2
                     );
-
                     return;
                 }
 
@@ -7262,7 +7209,6 @@ class tile
                         screen->width_in_pixels / 2,
                         screen->height_in_pixels / 2
                     );
-
                     return;
                 }
 
@@ -7274,7 +7220,6 @@ class tile
                         screen->width_in_pixels / 2,
                         screen->height_in_pixels / 2
                     );
-                
                     return;
                 }
             }
@@ -7304,15 +7249,14 @@ class tile
                 end_height, 
                 TILE_ANIMATION_DURATION
             );
-
             c->update();
         }
   
     public:
-    tile(client * & c, TILE tile) : c(c)
+    tile(client *&c, TILE tile)
+    : c(c)
     {
         if (c->is_EWMH_fullscreen()) return;
-
         switch (tile)
         {
             case TILE::LEFT:
@@ -7467,7 +7411,7 @@ class Events
     private:
         void key_press_handler(const xcb_generic_event_t *&ev)
         {
-            const auto * e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
+            const auto *e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
             if (e->detail == wm->key_codes.t)
             {
                 switch (e->state)
@@ -7494,7 +7438,7 @@ class Events
             
             if (e->detail == wm->key_codes.f11)
             {
-                client * c = wm->client_from_window(& e->event);
+                client *c = wm->client_from_window(&e->event);
                 max_win(c, max_win::EWMH_MAXWIN);
             }
             
@@ -7577,7 +7521,7 @@ class Events
 
                     case SUPER:
                     {
-                        client * c = wm->client_from_window(& e->event);
+                        client *c = wm->client_from_window(&e->event);
                         tile(c, TILE::RIGHT);
                         break;
                     }
@@ -7658,10 +7602,7 @@ class Events
                     case SUPER:
                     {
                         client *c = wm->client_from_window(&e->event);
-                        if (c == nullptr)
-                        {
-                            return;
-                        }
+                        if (c == nullptr) return;
 
                         if (c->win.is_mask_active(XCB_EVENT_MASK_ENTER_WINDOW))
                         {
@@ -7682,21 +7623,14 @@ class Events
         {
             const xcb_map_notify_event_t *e = reinterpret_cast<const xcb_map_notify_event_t *>(ev);
             client *c = wm->client_from_window(&e->window);
-            if (c != nullptr)
-            {
-                c->update();
-            }
+            if (c != nullptr) c->update();
         }
 
         void map_req_handler(const xcb_generic_event_t *&ev)
         {
             const xcb_map_request_event_t *e = reinterpret_cast<const xcb_map_request_event_t *>(ev);
             client *c = wm->client_from_window(&e->window); 
-            if (c != nullptr)
-            {
-                return;
-            }
-
+            if (c != nullptr) return;
             wm->manage_new_client(e->window);
         }
 
@@ -7730,10 +7664,7 @@ class Events
             }
 
             c = wm->client_from_any_window(&e->event);
-            if (c == nullptr)
-            {
-                return;
-            }
+            if (c == nullptr) return;
                 
             if (e->detail == L_MOUSE_BUTTON)
             {
@@ -7771,7 +7702,7 @@ class Events
                 
                 if (e->event == c->max_button)
                 {
-                    client * c = wm->client_from_any_window(& e->event);
+                    client *c = wm->client_from_any_window(&e->event);
                     max_win(c, max_win::BUTTON_MAXWIN);
                     return;
                 }
@@ -7869,23 +7800,17 @@ class Events
         {
             const xcb_focus_out_event_t *e = reinterpret_cast<const xcb_focus_out_event_t *>(ev);
             client *c = wm->client_from_window(&e->event);
-            if (c != nullptr)
-            {
-                c->win.grab_button({
-                    { L_MOUSE_BUTTON, NULL }
-                });
-            }
+            if (c == nullptr) return;
+            c->win.grab_button({
+                { L_MOUSE_BUTTON, NULL }
+            });
         }
 
         void destroy_notify_handler(const xcb_generic_event_t *&ev)
         {
             const auto *e = reinterpret_cast<const xcb_destroy_notify_event_t *>(ev);
             client *c = wm->client_from_window(&e->event);
-            if (c == nullptr)
-            {
-                return;
-            }
-
+            if (c == nullptr) return;
             wm->send_sigterm_to_client(c);
         }
         
@@ -7893,10 +7818,7 @@ class Events
         {
             const auto *e = reinterpret_cast<const xcb_unmap_notify_event_t *>(ev);
             client *c = wm->client_from_window(&e->window);
-            if (c == nullptr)
-            {
-                return;
-            }
+            if (c == nullptr) return;
         }
         
         void reparent_notify_handler(const xcb_generic_event_t *&ev)
@@ -7937,7 +7859,8 @@ class test
             {
                 if (e->state == SUPER)
                 {
-                    running = 1; run_full();
+                    running = 1;
+                    run_full();
                 }
             }
 
@@ -7960,8 +7883,7 @@ class test
     void cd_test()
     {
         // first test
-        int i = 0;
-        int end = 100;
+        int i(0), end(100);
         change_desktop cd(conn);
         const int og_duration = cd.duration;
 
@@ -7977,7 +7899,7 @@ class test
 
     void mv_test()
     {
-        window win_1;
+        window(win_1);
         win_1.create_default(
             wm->root,
             0,
@@ -7985,7 +7907,6 @@ class test
             300,
             300
         );
-
         win_1.raise();
         win_1.set_backround_color(RED);
         win_1.map();
@@ -8004,7 +7925,6 @@ class test
                 300,
                 (400 - i)
             );
-            
             win_1_animator.animate(
                 (screen->width_in_pixels - 300),
                 0,
@@ -8016,7 +7936,6 @@ class test
                 300,
                 (400 - i)
             );
-
             win_1_animator.animate(
                 (screen->width_in_pixels - 300),
                 (screen->height_in_pixels - 300), 
@@ -8028,7 +7947,6 @@ class test
                 300, 
                 (400 - i)
             );
-
             win_1_animator.animate(
                 0,
                 (screen->height_in_pixels - 300),
