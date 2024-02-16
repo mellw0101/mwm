@@ -115,6 +115,13 @@ class __net_logger__
                 perror("send");
                 return;
             }
+
+            char __char__('\0');
+            if (send(__socket__, &__char__, 1, 0) < 0)
+            {
+                perror("send");
+                return;
+            }
         }
 
     private:
