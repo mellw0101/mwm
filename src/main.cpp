@@ -6162,7 +6162,7 @@ class change_desktop
             {
                 case NEXT:
                 {
-                    for (const auto &c : clients)
+                    for (client *const &c : clients)
                     {
                         if (c != nullptr)
                         {
@@ -6175,7 +6175,7 @@ class change_desktop
 
                 case PREV:
                 {
-                    for (const auto &c:clients)
+                    for (client *const &c : clients)
                     {
                         if (c != nullptr)
                         {
@@ -6510,10 +6510,10 @@ class resize_client
                 }
 
             private:
-                client *&c;
-                client *c2;
-                edge c2_edge;
-                pointer pointer; 
+                client(*&c);
+                client(*c2);
+                edge(c2_edge);
+                pointer(pointer); 
                 const double frameRate = 120.0;
                 chrono::high_resolution_clock::time_point lastUpdateTime = chrono::high_resolution_clock::now();
                 const double frameDuration = 1000.0 / frameRate;
@@ -6701,7 +6701,7 @@ class resize_client
                 {
                     uint16_t left_border(0), right_border(0), top_border(0), bottom_border(0);
 
-                    for (const auto &c : wm->cur_d->current_clients)
+                    for (client *const &c : wm->cur_d->current_clients)
                     {
                         if (c == this->c) continue;
 
@@ -7501,24 +7501,22 @@ class Events
                     case (SHIFT + CTRL + SUPER):
                     {
                         move_to_next_desktop_w_app();
-                        break;
+                        return;
                     }
                     
                     case (CTRL + SUPER):
                     {
                         change_desktop change_desktop(conn);
                         change_desktop.change_to(change_desktop::NEXT);
-                        break;
+                        return;
                     }
 
                     case SUPER:
                     {
                         client *c = wm->client_from_window(&e->event);
                         tile(c, TILE::RIGHT);
-                        break;
+                        return;
                     }
-                    
-                    return;
                 }
             }
             
@@ -7529,21 +7527,21 @@ class Events
                     case (SHIFT + CTRL + SUPER):
                     {
                         move_to_previus_desktop_w_app();
-                        break;
+                        return;
                     }
 
                     case (CTRL + SUPER):
                     {
                         change_desktop change_desktop(conn);
                         change_desktop.change_to(change_desktop::PREV);
-                        break;
+                        return;
                     }
                     
                     case SUPER:
                     {
                         client *c = wm->client_from_window(&e->event);
                         tile(c, TILE::LEFT);
-                        break;
+                        return;
                     }
                 }
             }
