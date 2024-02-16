@@ -79,6 +79,49 @@ using namespace std;
 using Uint = unsigned int;
 using SUint = unsigned short int;
 
+class __net_logger__
+{
+    public:
+        __net_logger__() {}
+
+        void __init__() 
+        {
+            if ((__socket__ = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+            {
+                perror("socket");
+                return;
+            }
+
+            __sock_addr__.sin_family = AF_INET;
+            __sock_addr__.sin_port   = htons(8001); 
+
+            if (inet_pton(AF_INET, "192.168.0.14", &__sock_addr__.sin_addr) < 0)
+            {
+                perror("inet_pton");
+                return;
+            }
+
+            if (connect(__socket__, (struct sockaddr*)&__sock_addr__, sizeof(__sock_addr__)) < 0)
+            {
+                perror("connect");
+                return;
+            }
+        }
+
+        void __send__(const string &__input)
+        {
+            if (send(__socket__, __input.c_str(), __input.length(), 0) < 0)
+            {
+                perror("send");
+                return;
+            }
+        }
+
+    private:
+        long __socket__;
+        struct sockaddr_in(__sock_addr__);
+};
+
 struct size_pos
 {
     int16_t x, y;
@@ -6268,15 +6311,15 @@ void move_to_previus_desktop_w_app()
 
 class resize_client
 {
-    /**
-        THE REASON FOR THE 'retard_int' IS BECUSE WITHOUT IT 
-        I CANNOT CALL THIS CLASS LIKE THIS 'resize_client(c)' 
-        INSTEAD I WOULD HAVE TO CALL IT LIKE THIS 'resize_client rc(c)'
-        AND NOW WITH THE 'retard_int' I CAN CALL IT LIKE THIS 'resize_client(c, 0)'
-        
-     */
     public:
-        resize_client(client * & c , int retard_int)
+        resize_client(client * & c , int retard_int)/**
+            
+            THE REASON FOR THE 'retard_int' IS BECUSE WITHOUT IT 
+            I CANNOT CALL THIS CLASS LIKE THIS 'resize_client(c)' 
+            INSTEAD I WOULD HAVE TO CALL IT LIKE THIS 'resize_client rc(c)'
+            AND NOW WITH THE 'retard_int' I CAN CALL IT LIKE THIS 'resize_client(c, 0)'
+            
+         */
         : c(c)
         {
             if (c->win.is_EWMH_fullscreen()) return;
@@ -7423,7 +7466,7 @@ class Events
                     case (SHIFT + ALT):
                     {
                         wm->quit(0);
-                        break;
+                        return;
                     }
                 }
             }
@@ -7432,6 +7475,7 @@ class Events
             {
                 client *c = wm->client_from_window(&e->event);
                 max_win(c, max_win::EWMH_MAXWIN);
+                return;
             }
             
             if (e->detail == wm->key_codes.n_1)
@@ -7441,7 +7485,7 @@ class Events
                     case ALT:
                     {
                         change_desktop::teleport_to(1);
-                        break;
+                        return;
                     }
                 }
             }
@@ -7453,7 +7497,7 @@ class Events
                     case ALT:
                     {
                         change_desktop::teleport_to(2);
-                        break;
+                        return;
                     }
                 }
             }
@@ -7555,7 +7599,6 @@ class Events
                         client *c = wm->client_from_window(&e->event);
                         tile(c, TILE::DOWN);
                         return;
-                        break;
                     }
                 }
             }
@@ -7568,7 +7611,7 @@ class Events
                     {
                         client *c = wm->client_from_window(&e->event);
                         tile(c, TILE::UP);
-                        break;
+                        return;
                     }
                 }
             }
@@ -7580,7 +7623,7 @@ class Events
                     case ALT:
                     {
                         wm->cycle_focus();
-                        break;
+                        return;
                     }
                 }
             }
@@ -7603,7 +7646,7 @@ class Events
                             log_info("event_mask is NOT active");
                         }
 
-                        break;
+                        return;
                     }
                 }
             }
@@ -7631,17 +7674,16 @@ class Events
             if (BORDER_SIZE == 0)
             {
                 c = wm->client_from_pointer(10);
-                if (c != nullptr)
+                if (c == nullptr) return;
+                
+                if (e->detail == L_MOUSE_BUTTON)
                 {
-                    if (e->detail == L_MOUSE_BUTTON)
-                    {
-                        c->raise();
-                        resize_client::no_border border(c, 0, 0);
-                        wm->focus_client(c);
-                    }
-
-                    return;
+                    c->raise();
+                    resize_client::no_border border(c, 0, 0);
+                    wm->focus_client(c);
                 }
+
+                return;
             }
 
             if (e->event == wm->root)
@@ -7660,14 +7702,14 @@ class Events
             {
                 if (e->event == c->win)
                 {
-                    switch(e->state)
+                    switch (e->state)
                     {
                         case ALT:
                         {
                             c->raise();
                             mv_client mv(c, e->event_x, e->event_y + 20);
                             wm->focus_client(c);
-                            break;
+                            return;
                         }
                     }
 
@@ -7717,7 +7759,8 @@ class Events
                 
                 if (e->event == c->border.bottom)
                 {
-                    resize_client::border(c, edge::BOTTOM_edge);
+                    resize_client::border border(c, edge::BOTTOM_edge);
+                    return;
                 }
                 
                 if (e->event == c->border.top_left)
@@ -7774,16 +7817,15 @@ class Events
         {
             const xcb_focus_in_event_t *e = reinterpret_cast<const xcb_focus_in_event_t *>(ev);
             client *c = wm->client_from_window( &e->event);
-            if (c != nullptr)
-            {
-                c->win.ungrab_button({
-                    { L_MOUSE_BUTTON, NULL }
-                });
+            if (c == nullptr) return;
 
-                c->raise();
-                c->win.set_active_EWMH_window();
-                wm->focused_client = c;
-            }
+            c->win.ungrab_button({
+                { L_MOUSE_BUTTON, NULL }
+            });
+
+            c->raise();
+            c->win.set_active_EWMH_window();
+            wm->focused_client = c;
         }
 
         void focus_out_handler(const xcb_generic_event_t *&ev)
@@ -7988,7 +8030,11 @@ int main()
 
     test tester;
     tester.setup_events();
-    
+
+    __net_logger__(net_logger);
+    net_logger.__init__();
+    net_logger.__send__("hello");
+
     event_handler->run();
     xcb_disconnect(conn);
     return 0;
