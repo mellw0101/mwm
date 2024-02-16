@@ -3271,9 +3271,9 @@ class context_menu
             size_pos.width  = 120;
             size_pos.height = 20;
 
-            border.left = size_pos.x;
-            border.right = (size_pos.x + size_pos.width);
-            border.top = size_pos.y;
+            border.left   = size_pos.x;
+            border.right  = (size_pos.x + size_pos.width);
+            border.top    = size_pos.y;
             border.bottom = (size_pos.y + size_pos.height);
 
             create_dialog_win();
@@ -3472,7 +3472,7 @@ class Window_Manager
             // focus methods
                 void focus_client(client *c)
                 {
-                    if(c == nullptr)
+                    if (c == nullptr)
                     {
                         log_error("c is null");
                         return;
@@ -3685,7 +3685,7 @@ class Window_Manager
             
             void manage_new_client(const uint32_t &window)
             {
-                client * c = make_client(window);
+                client *c = make_client(window);
                 if (c == nullptr)
                 {
                     log_error("could not make client");
@@ -3717,7 +3717,7 @@ class Window_Manager
                 check_client(c);
             }
             
-            client * make_internal_client(window window)
+            client *make_internal_client(window window)
             {
                 client *c = new client;
                 
@@ -3735,7 +3735,7 @@ class Window_Manager
                 return c;
             }
             
-            void send_sigterm_to_client(client * c)
+            void send_sigterm_to_client(client *c)
             {
                 c->kill();
                 remove_client(c);
@@ -5782,11 +5782,8 @@ class Dock
     private:
         void calc_size_pos()
         {
-            int num_of_buttons = buttons.size();
-            if(num_of_buttons == 0)
-            {
-                num_of_buttons = 1;
-            }
+            int num_of_buttons(buttons.size());
+            if (num_of_buttons == 0) num_of_buttons = 1;
 
             uint32_t calc_width = width * num_of_buttons;
             x = ((screen->width_in_pixels / 2) - (calc_width / 2));
@@ -5809,8 +5806,8 @@ class Dock
 
         void configure_context_menu()
         {
-            context_menu.add_entry("Add app", [this] ()
-            -> void {
+            context_menu.add_entry("Add app", [this]()-> void
+            {
                 add_app_dialog_window.show();
             });
 
@@ -5825,8 +5822,8 @@ class Dock
         {
             for (const char *app : apps)
             {
-                buttons.add(app, [app, this]()
-                -> void {
+                buttons.add(app, [app, this]()-> void
+                {
                     launcher.program((char *) app);
                 });
 
@@ -5846,9 +5843,9 @@ class Dock
 
         void configure_events()
         {
-            event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev)
-            -> void {
-                const auto * e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
+            event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev)-> void
+            {
+                const auto *e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
                 if (e->event == main_window)
                 {
                     if (e->detail == R_MOUSE_BUTTON)
@@ -5889,12 +5886,11 @@ class mv_client
         }
 
     private:
-        client *c;
-        pointer pointer;
-        int start_x;
-        int start_y;
+        client(*c);
+        pointer(pointer);
+        int start_x, start_y;
         bool shouldContinue = true;
-        xcb_generic_event_t *ev;
+        xcb_generic_event_t(*ev);
         const double frameRate = 120.0;
         chrono::high_resolution_clock::time_point lastUpdateTime = chrono::high_resolution_clock::now();
         const double frameDuration = 1000.0 / frameRate;
@@ -5905,10 +5901,7 @@ class mv_client
             // WINDOW TO WINDOW SNAPPING 
             for (const client *cli : wm->cur_d->current_clients)
             {
-                if (cli == c)
-                {
-                    continue;
-                }
+                if (cli == c) continue;
                 
                 // SNAP WINDOW TO 'RIGHT' BORDER OF 'NON_CONTROLLED' WINDOW
                 if (x > cli->x + cli->width - N && x < cli->x + cli->width + N
@@ -6116,7 +6109,7 @@ class change_desktop
         {
             if (wm->cur_d == wm->desktop_list[n - 1] || n == 0 || n == wm->desktop_list.size()) return;
 
-            for (const auto &c:wm->cur_d->current_clients)
+            for (client *const &c:wm->cur_d->current_clients)
             {
                 if (c != nullptr)
                 {
@@ -6152,7 +6145,7 @@ class change_desktop
         vector<client *> get_clients_on_desktop(const uint8_t &desktop)
         {
             vector<client *>(clients);
-            for (const auto &c : wm->client_list)
+            for (client *const &c : wm->client_list)
             {
                 if (c->desktop == desktop) 
                 {
@@ -6169,7 +6162,7 @@ class change_desktop
             {
                 case NEXT:
                 {
-                    for (const auto c : clients)
+                    for (const auto &c : clients)
                     {
                         if (c != nullptr)
                         {
@@ -6189,7 +6182,7 @@ class change_desktop
                             animation_threads.emplace_back(&change_desktop::anim_cli, this, c, c->x + screen->width_in_pixels);
                         }
                     }
-                    
+
                     break;
                 }
             }
@@ -7038,7 +7031,7 @@ class max_win
             
             case BUTTON_MAXWIN:
             {
-                if(c->is_button_max_win())
+                if (c->is_button_max_win())
                 {
                     button_unmax_win();
                 }
@@ -7175,7 +7168,6 @@ class tile
                         screen->width_in_pixels / 2,
                         screen->height_in_pixels
                     );
-
                     return;
                 }
 
