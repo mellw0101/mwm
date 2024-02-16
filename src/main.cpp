@@ -128,6 +128,7 @@ class __net_logger__
         long __socket__;
         struct sockaddr_in(__sock_addr__);
 };
+static __net_logger__ *net_logger(nullptr);
 
 struct size_pos
 {
@@ -6073,6 +6074,8 @@ class mv_client
                         {
                             snap(new_x, new_y);
                             xcb_flush(conn);
+                            string msg(to_string(new_x) + " " + to_string(new_y));
+                            net_logger->__send__(msg);
                         }
                         
                         break;
@@ -8032,15 +8035,15 @@ void setup_wm()
 
 int main()
 {
+    net_logger = new __net_logger__;
+    net_logger->__init__();
+    net_logger->__send__("starting mwm");
+    
     LOG_start()
     setup_wm();
 
     test tester;
     tester.setup_events();
-
-    __net_logger__(net_logger);
-    net_logger.__init__();
-    net_logger.__send__("hello");
 
     event_handler->run();
     xcb_disconnect(conn);
