@@ -8033,9 +8033,9 @@ void setup_wm()
 
 int main()
 {
-    net_logger = new __net_logger__;
-    net_logger->__init__();
-    net_logger->__send__("starting mwm");
+    // net_logger = new __net_logger__;
+    // net_logger->__init__();
+    // net_logger->__send__("starting mwm");
     
     LOG_start()
     setup_wm();
