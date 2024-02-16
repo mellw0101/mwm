@@ -6074,8 +6074,6 @@ class mv_client
                         {
                             snap(new_x, new_y);
                             xcb_flush(conn);
-                            string msg(to_string(new_x) + " " + to_string(new_y));
-                            net_logger->__send__(msg);
                         }
                         
                         break;
