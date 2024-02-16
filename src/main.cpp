@@ -82,7 +82,8 @@ using SUint = unsigned short int;
 class __net_logger__
 {
     public:
-        __net_logger__() {}
+        __net_logger__()
+        : __connected__(0) {}
 
         void __init__() 
         {
@@ -106,10 +107,14 @@ class __net_logger__
                 perror("connect");
                 return;
             }
+
+            __connected__ = 1;
         }
 
         void __send__(const string &__input)
         {
+            if (!__connected__) return;
+
             if (send(__socket__, __input.c_str(), __input.length(), 0) < 0)
             {
                 perror("send");
@@ -126,6 +131,7 @@ class __net_logger__
 
     private:
         long __socket__;
+        int __connected__;
         struct sockaddr_in(__sock_addr__);
 };
 static __net_logger__ *net_logger(nullptr);
@@ -8033,9 +8039,9 @@ void setup_wm()
 
 int main()
 {
-    // net_logger = new __net_logger__;
-    // net_logger->__init__();
-    // net_logger->__send__("starting mwm");
+    net_logger = new __net_logger__;
+    net_logger->__init__();
+    net_logger->__send__("starting mwm");
     
     LOG_start()
     setup_wm();
