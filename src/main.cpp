@@ -3587,7 +3587,7 @@ class Window_Manager
                 for (int i = 0; i < mode_count; i++)
                 {
                     float refresh_rate = calculate_refresh_rate(&mode_info[i]);
-                    log_info("Resolution:" + to_string(mode_info[i].width) + ":" + to_string(mode_info[i].height) + ", Refresh Rate:" + to_string(refresh_rate) + "Hz\n");
+                    log_info("Resolution: " + to_string(mode_info[i].width) + ":" + to_string(mode_info[i].height) + ", Refresh Rate: " + to_string(refresh_rate) + " Hz");
                 }
 
                 free(res_reply);
