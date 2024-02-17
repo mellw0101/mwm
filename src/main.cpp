@@ -3546,22 +3546,20 @@ class Window_Manager
 
                 void cycle_focus()
                 {
-                    bool focus = false;
-                    for (auto &c:client_list)
+                    for (int i(0); i < client_list.size(); ++i)
                     {
-                        if (c != nullptr)
-                        {
-                            if (c == focused_client)
-                            { 
-                                focus = true;
-                                continue;
-                            }
+                        if (client_list[i] == nullptr) continue;
 
-                            if (focus)
+                        if (client_list[i] == focused_client)
+                        {
+                            if (i == (client_list.size() - 1))
                             {
-                                focus_client(c); 
+                                focus_client(client_list[0]);
                                 return;
                             }
+                            
+                            focus_client(client_list[i + 1]);
+                            return;
                         }
                     }
                 }
