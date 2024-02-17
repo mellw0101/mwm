@@ -5795,8 +5795,8 @@ class File_App
                 const auto * e = reinterpret_cast<const xcb_configure_notify_event_t *>(ev);
                 if (e->window == main_window)
                 {
-                    c->width  = e->width;
-                    c->height = e->height;
+                    c->_width(e->width);
+                    c->_height(e->height);
                 }
             });
         }
