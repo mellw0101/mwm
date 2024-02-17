@@ -3554,11 +3554,13 @@ class Window_Manager
                         {
                             if (i == (client_list.size() - 1))
                             {
-                                focus_client(client_list[0]);
+                                client_list[0]->focus();
+                                focused_client = client_list[0];
                                 return;
                             }
-                            
-                            focus_client(client_list[i + 1]);
+
+                            client_list[i + 1]->focus();
+                            focused_client = client_list[i + 1];
                             return;
                         }
                     }
