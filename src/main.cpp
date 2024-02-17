@@ -5797,6 +5797,7 @@ class File_App
                 {
                     c->_width(e->width);
                     c->_height(e->height);
+                    xcb_flush(conn);
                 }
             });
         }
