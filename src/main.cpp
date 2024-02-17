@@ -5971,6 +5971,16 @@ class __StatusBar__
 
             _bar_window.set_backround_color(DARK_GREY);
             _bar_window.map();
+
+            _bar_window.draw_text(
+                get_time__().c_str(),
+                WHITE,
+                DARK_GREY,
+                "7x14",
+                screen->width_in_pixels - 100,
+                14
+            );
+            xcb_flush(conn);
         }
 };
 static __StatusBar__ *status_bar(nullptr);
