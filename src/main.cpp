@@ -5720,7 +5720,8 @@ class File_App
                 width,
                 height
             );
-            uint32_t mask = XCB_EVENT_MASK_STRUCTURE_NOTIFY;
+            uint32_t mask = XCB_EVENT_MASK_STRUCTURE_NOTIFY |
+                            XCB_EVENT_MASK_PROPERTY_CHANGE;
             main_window.apply_event_mask(&mask);
             if (!main_window.is_mask_active(XCB_EVENT_MASK_STRUCTURE_NOTIFY))
             {
@@ -5792,6 +5793,11 @@ class File_App
             event_handler->setEventCallback(XCB_CONFIGURE_NOTIFY, [&](Ev ev)-> void
             {
                 const auto * e = reinterpret_cast<const xcb_configure_notify_event_t *>(ev);
+                if (e->window == main_window)
+                {
+                    c->width  = e->width;
+                    c->height = e->height;
+                }
             });
         }
 
@@ -6250,7 +6256,7 @@ class change_desktop
             }
 
             wm->cur_d = wm->desktop_list[n - 1];
-            for (const auto &c : wm->cur_d->current_clients) 
+            for (client *const &c : wm->cur_d->current_clients) 
             {
                 if (c != nullptr)
                 {
@@ -7091,8 +7097,6 @@ class max_win
             if (c->max_button_ogsize.width  == 0 || c->max_button_ogsize.width  > screen->width_in_pixels ) c->max_button_ogsize.width  = screen->width_in_pixels  / 2;
             if (c->max_button_ogsize.height == 0 || c->max_button_ogsize.height > screen->height_in_pixels) c->max_button_ogsize.height = screen->height_in_pixels / 2;
 
-            // log_info(to_string(c->max_button_ogsize.x) + " " + to_string(c->max_button_ogsize.y) + " " + to_string(c->max_button_ogsize.width) + " " + to_string(c->max_button_ogsize.height));
-
             max_win_animate(
                 c->max_button_ogsize.x,
                 c->max_button_ogsize.y,
@@ -7128,7 +7132,8 @@ class max_win
         {
             if (c->max_ewmh_ogsize.width  > screen->width_in_pixels ) c->max_ewmh_ogsize.width  = screen->width_in_pixels  / 2;
             if (c->max_ewmh_ogsize.height > screen->height_in_pixels) c->max_ewmh_ogsize.height = screen->height_in_pixels / 2;
-            if (c->max_ewmh_ogsize.x >= screen->width_in_pixels - 1 ) c->max_ewmh_ogsize.x = ((screen->width_in_pixels / 2) - (c->max_ewmh_ogsize.width / 2) - BORDER_SIZE);
+            
+            if (c->max_ewmh_ogsize.x >= screen->width_in_pixels  - 1) c->max_ewmh_ogsize.x = ((screen->width_in_pixels / 2) - (c->max_ewmh_ogsize.width / 2) - BORDER_SIZE);
             if (c->max_ewmh_ogsize.y >= screen->height_in_pixels - 1) c->max_ewmh_ogsize.y = ((screen->height_in_pixels / 2) - (c->max_ewmh_ogsize.height / 2) - TITLE_BAR_HEIGHT - BORDER_SIZE);
 
             max_win_animate(
