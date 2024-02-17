@@ -3552,6 +3552,35 @@ class Window_Manager
                 free(res_reply);
             }
         
+            vector<xcb_randr_mode_t> find_mode()
+            {
+                vector<xcb_randr_mode_t>(mode_vec);
+
+                xcb_randr_get_screen_resources_current_cookie_t res_cookie;
+                xcb_randr_get_screen_resources_current_reply_t *res_reply;
+
+                // Get screen resources
+                res_cookie = xcb_randr_get_screen_resources_current(conn, screen->root);
+                res_reply = xcb_randr_get_screen_resources_current_reply(conn, res_cookie, nullptr);
+
+                if (!res_reply)
+                {
+                    log_error("Could not get screen resources");
+                    return{};
+                }
+
+                xcb_randr_mode_info_t *modes = xcb_randr_get_screen_resources_current_modes(res_reply);
+                int mode_count = xcb_randr_get_screen_resources_current_modes_length(res_reply);
+
+                // Iterate through modes to find matching resolution and refresh rate
+                for (int i = 0; i < mode_count; ++i)
+                {
+                    mode_vec.push_back(modes[i].id);
+                }
+
+                return mode_vec;
+            }
+
             // Function to calculate the refresh rate from mode info
             static float calculate_refresh_rate(const xcb_randr_mode_info_t *mode_info)
             {
@@ -3576,7 +3605,7 @@ class Window_Manager
 
                 if (!res_reply)
                 {
-                    log_error("Could not get screen resources\n");
+                    log_error("Could not get screen resources");
                     return;
                 }
 
@@ -3590,6 +3619,79 @@ class Window_Manager
                     log_info("Resolution: " + to_string(mode_info[i].width) + ":" + to_string(mode_info[i].height) + ", Refresh Rate: " + to_string(refresh_rate) + " Hz");
                 }
 
+                free(res_reply);
+            }
+
+            void change_resolution()
+            {
+                xcb_randr_get_screen_resources_current_cookie_t res_cookie;
+                xcb_randr_get_screen_resources_current_reply_t *res_reply;
+                xcb_randr_output_t *outputs;
+                int outputs_len;
+
+                // Get current screen resources
+                res_cookie = xcb_randr_get_screen_resources_current(conn, screen->root);
+                res_reply = xcb_randr_get_screen_resources_current_reply(conn, res_cookie, NULL);
+
+                if (!res_reply)
+                {
+                    log_error("Could not get screen resources");
+                    return;
+                }
+
+                // Get outputs; assuming the first output is the one we want to change
+                outputs = xcb_randr_get_screen_resources_current_outputs(res_reply);
+                outputs_len = xcb_randr_get_screen_resources_current_outputs_length(res_reply);
+
+                if (!outputs_len)
+                {
+                    log_error("No outputs found");
+                    free(res_reply);
+                    return;
+                }
+
+                xcb_randr_output_t output = outputs[0]; // Assuming we change the first output
+
+                // Get the current configuration for the output
+                xcb_randr_get_output_info_cookie_t output_info_cookie = xcb_randr_get_output_info(conn, output, XCB_CURRENT_TIME);
+                xcb_randr_get_output_info_reply_t *output_info_reply = xcb_randr_get_output_info_reply(conn, output_info_cookie, NULL);
+
+                if (!output_info_reply || output_info_reply->crtc == XCB_NONE)
+                {
+                    log_error("Output is not connected to any CRTC");
+                    free(output_info_reply);
+                    free(res_reply);
+                    return;
+                }
+
+                
+
+                // Set the mode
+                xcb_randr_set_crtc_config_cookie_t set_crtc_config_cookie = xcb_randr_set_crtc_config(
+                    conn,
+                    output_info_reply->crtc,
+                    XCB_CURRENT_TIME,
+                    XCB_CURRENT_TIME,
+                    0, // x
+                    0, // y
+                    find_mode()[2],
+                    XCB_RANDR_ROTATION_ROTATE_0,
+                    1, &output
+                );
+
+                xcb_randr_set_crtc_config_reply_t *set_crtc_config_reply = xcb_randr_set_crtc_config_reply(conn, set_crtc_config_cookie, NULL);
+
+                if (!set_crtc_config_reply)
+                {
+                    log_error("Failed to set mode");
+                }
+                else
+                {
+                    log_info("Mode set successfully");
+                }
+
+                free(set_crtc_config_reply);
+                free(output_info_reply);
                 free(res_reply);
             }
 
@@ -7797,7 +7899,8 @@ class Events
                 {
                     case SUPER:
                     {
-                        wm->list_screen_res_and_refresh_rates();
+                        // wm->list_screen_res_and_refresh_rates();
+                        wm->change_resolution();
                         return;
                     }
                 }
