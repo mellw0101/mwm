@@ -5962,7 +5962,8 @@ class __StatusBar__
                 screen->width_in_pixels,
                 20
             );
-            uint32_t _mask = XCB_EVENT_MASK_ENTER_WINDOW;
+            uint32_t _mask = XCB_EVENT_MASK_ENTER_WINDOW |
+                             XCB_EVENT_MASK_EXPOSURE;
             _bar_window.apply_event_mask(&_mask);
             if (!_bar_window.is_mask_active(XCB_EVENT_MASK_ENTER_WINDOW))
             {
@@ -5981,6 +5982,18 @@ class __StatusBar__
                 14
             );
             xcb_flush(conn);
+        }
+
+        void setup_events__()
+        {
+            event_handler->setEventCallback(XCB_EXPOSE, [&](Ev ev)-> void
+            {
+                const auto *e = reinterpret_cast<const xcb_expose_event_t *>(ev);
+                if (e->window == _bar_window)
+                {
+                    log_info("expose event _bar_window");
+                }
+            });
         }
 };
 static __StatusBar__ *status_bar(nullptr);
