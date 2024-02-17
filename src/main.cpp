@@ -3516,7 +3516,7 @@ class Window_Manager
                 if (fork() == 0)
                 {
                     setsid();
-                    execvp(program, (char *[]) { program, NULL });
+                    execvp(program, (char *[]) { program, nullptr });
                 }
             }
 
@@ -3532,17 +3532,17 @@ class Window_Manager
         
         // client methods
             // focus methods
-                void focus_client(client *c)
-                {
-                    if (c == nullptr)
-                    {
-                        log_error("c is null");
-                        return;
-                    }
+                // void focus_client(client *c)
+                // {
+                //     if (c == nullptr)
+                //     {
+                //         log_error("c is null");
+                //         return;
+                //     }
 
-                    focused_client = c;
-                    c->focus();
-                }
+                //     focused_client = c;
+                //     c->focus();
+                // }
 
                 void cycle_focus()
                 {
@@ -3745,9 +3745,9 @@ class Window_Manager
                     return edge::NONE;
                 }
             
-            void manage_new_client(const uint32_t &window)
+            void manage_new_client(const uint32_t &__window)
             {
-                client *c = make_client(window);
+                client *c = make_client(__window);
                 if (c == nullptr)
                 {
                     log_error("could not make client");
@@ -3775,7 +3775,8 @@ class Window_Manager
                             XCB_EVENT_MASK_STRUCTURE_NOTIFY;
                 c->win.apply_event_mask(&mask);
                 c->update();
-                focus_client(c);
+                c->focus();
+                focused_client = c;
                 check_client(c);
             }
             
@@ -7778,8 +7779,9 @@ class Events
                 if (e->detail == L_MOUSE_BUTTON)
                 {
                     c->raise();
+                    c->focus();
                     resize_client::no_border border(c, 0, 0);
-                    wm->focus_client(c);
+                    wm->focused_client = c;
                 }
 
                 return;
@@ -7807,21 +7809,24 @@ class Events
                         {
                             c->raise();
                             mv_client mv(c, e->event_x, e->event_y + 20);
-                            wm->focus_client(c);
+                            c->focus();
+                            wm->focused_client = c;
                             return;
                         }
                     }
 
                     c->raise();
-                    wm->focus_client(c);
+                    c->focus();
+                    wm->focused_client = c;
                     return;
                 }
                 
                 if (e->event == c->titlebar)
                 {
                     c->raise();
+                    c->focus();
                     mv_client mv(c, e->event_x, e->event_y);
-                    wm->focus_client(c);
+                    wm->focused_client = c;
                     return;
                 }
                 
@@ -7895,8 +7900,9 @@ class Events
                     {
                         log_error("ALT + R_MOUSE_BUTTON");
                         c->raise();
+                        c->focus();
                         resize_client resize(c, 0);
-                        wm->focus_client(c);
+                        wm->focused_client = c;
                         return;
                     }
                 }
