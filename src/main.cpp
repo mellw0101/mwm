@@ -5969,8 +5969,8 @@ class __StatusBar__
                 log_error("could not apply enter window event mask.");
             }
 
-            // _bar_window.set_backround_color(RED);
-            // _bar_window.map();
+            _bar_window.set_backround_color(RED);
+            _bar_window.map();
         }
 };
 static __StatusBar__ *status_bar(nullptr);
