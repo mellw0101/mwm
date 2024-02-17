@@ -5935,7 +5935,6 @@ class __StatusBar__
 {
     private:
         window(_bar_window);
-        uint32_t(_mask);
 
         string get_time__()
         {
@@ -5963,12 +5962,12 @@ class __StatusBar__
                 screen->width_in_pixels,
                 20
             );
-            // _mask = XCB_EVENT_MASK_ENTER_WINDOW;
-            // _bar_window.apply_event_mask(&_mask);
-            // if (!_bar_window.is_mask_active(XCB_EVENT_MASK_ENTER_WINDOW))
-            // {
-            //     log_error("could not apply enter window event mask.");
-            // }
+            uint32_t _mask = XCB_EVENT_MASK_ENTER_WINDOW;
+            _bar_window.apply_event_mask(&_mask);
+            if (!_bar_window.is_mask_active(XCB_EVENT_MASK_ENTER_WINDOW))
+            {
+                log_error("could not apply enter window event mask.");
+            }
 
             // _bar_window.set_backround_color(RED);
             // _bar_window.map();
