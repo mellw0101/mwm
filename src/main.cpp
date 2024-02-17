@@ -5982,6 +5982,7 @@ class __StatusBar__
                 14
             );
             xcb_flush(conn);
+            setup_events__();
         }
 
         void setup_events__()
