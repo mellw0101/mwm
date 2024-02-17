@@ -1054,8 +1054,8 @@ class Launcher
     private: // variabels
         File file;
 };
-using Ev = const xcb_generic_event_t *;
 
+using Ev = const xcb_generic_event_t *;
 class Event_Handler
 {
     public: // methods
@@ -1078,7 +1078,7 @@ class Event_Handler
                 auto it = eventCallbacks.find(responseType);
                 if (it != eventCallbacks.end())
                 {
-                    for (const auto& callback : it->second)
+                    for (const auto &callback : it->second)
                     {
                         callback.second(ev);
                     }
@@ -8033,126 +8033,132 @@ class Events
 
 class test
 {
+    private:
+        void setup_events()
+        {
+            event_handler->setEventCallback(XCB_KEY_PRESS, [this](Ev ev)-> void
+            {
+                const xcb_key_press_event_t *e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
+                
+                if (e->detail == wm->key_codes.k)
+                {
+                    if (e->state == (SUPER + ALT))
+                    {
+                        running = 1;
+                        run_full();
+                    }
+                }
+
+                if (e->detail == wm->key_codes.q)
+                {
+                    if (e->state == ALT)
+                    {   
+                        running = 0;
+                    }
+                }
+            });
+        }
+        
+        void run_full()
+        {
+            cd_test();
+            mv_test();
+        }
+        
+        void cd_test()
+        {
+            // first test
+            int i(0), end(100);
+            change_desktop cd(conn);
+            const int og_duration = cd.duration;
+
+            while (i < (end + 1))
+            {
+                cd.change_to(change_desktop::NEXT);
+                cd.change_to(change_desktop::PREV);
+                cd.duration = (cd.duration - 1);
+                ++i;
+                if (!running) break;
+            }
+        }
+
+        void mv_test()
+        {
+            window(win_1);
+            win_1.create_default(
+                wm->root,
+                0,
+                0,
+                300,
+                300
+            );
+            win_1.raise();
+            win_1.set_backround_color(RED);
+            win_1.map();
+            Mwm_Animator win_1_animator(win_1);
+            
+            for (int i = 0; i < 400; ++i)
+            {
+                win_1_animator.animate(
+                    0,
+                    0,
+                    300,
+                    300,
+                    (screen->width_in_pixels - 300),
+                    0,
+                    300,
+                    300,
+                    (400 - i)
+                );
+                win_1_animator.animate(
+                    (screen->width_in_pixels - 300),
+                    0,
+                    300, 
+                    300, 
+                    (screen->width_in_pixels - 300),
+                    (screen->height_in_pixels - 300),
+                    300,
+                    300,
+                    (400 - i)
+                );
+                win_1_animator.animate(
+                    (screen->width_in_pixels - 300),
+                    (screen->height_in_pixels - 300), 
+                    300, 
+                    300, 
+                    0,
+                    (screen->height_in_pixels - 300),
+                    300, 
+                    300, 
+                    (400 - i)
+                );
+                win_1_animator.animate(
+                    0,
+                    (screen->height_in_pixels - 300),
+                    300, 
+                    300, 
+                    0, 
+                    0, 
+                    300, 
+                    300,
+                    (400 - i)
+                );
+
+                if (!running) break;
+            }
+            
+            win_1.unmap();
+            win_1.kill(); 
+        }
+
     public:
         int running = 1;
     
     test() {}
 
-    void setup_events()
+    void init()
     {
-        event_handler->setEventCallback(XCB_KEY_PRESS, [this](Ev ev)-> void
-        {
-            const xcb_key_press_event_t *e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
-            
-            if (e->detail == wm->key_codes.k)
-            {
-                if (e->state == SUPER)
-                {
-                    running = 1;
-                    run_full();
-                }
-            }
-
-            if (e->detail == wm->key_codes.q)
-            {
-                if (e->state == ALT)
-                {   
-                    running = 0;
-                }
-            }
-        });
-    }
-    
-    void run_full()
-    {
-        cd_test();
-        mv_test();
-    }
-    
-    void cd_test()
-    {
-        // first test
-        int i(0), end(100);
-        change_desktop cd(conn);
-        const int og_duration = cd.duration;
-
-        while (i < (end + 1))
-        {
-            cd.change_to(change_desktop::NEXT);
-            cd.change_to(change_desktop::PREV);
-            cd.duration = (cd.duration - 1);
-            ++i;
-            if (!running) break;
-        }
-    }
-
-    void mv_test()
-    {
-        window(win_1);
-        win_1.create_default(
-            wm->root,
-            0,
-            0,
-            300,
-            300
-        );
-        win_1.raise();
-        win_1.set_backround_color(RED);
-        win_1.map();
-        Mwm_Animator win_1_animator(win_1);
-        
-        for (int i = 0; i < 400; ++i)
-        {
-            win_1_animator.animate(
-                0,
-                0,
-                300,
-                300,
-                (screen->width_in_pixels - 300),
-                0,
-                300,
-                300,
-                (400 - i)
-            );
-            win_1_animator.animate(
-                (screen->width_in_pixels - 300),
-                0,
-                300, 
-                300, 
-                (screen->width_in_pixels - 300),
-                (screen->height_in_pixels - 300),
-                300,
-                300,
-                (400 - i)
-            );
-            win_1_animator.animate(
-                (screen->width_in_pixels - 300),
-                (screen->height_in_pixels - 300), 
-                300, 
-                300, 
-                0,
-                (screen->height_in_pixels - 300),
-                300, 
-                300, 
-                (400 - i)
-            );
-            win_1_animator.animate(
-                0,
-                (screen->height_in_pixels - 300),
-                300, 
-                300, 
-                0, 
-                0, 
-                300, 
-                300,
-                (400 - i)
-            );
-
-            if (!running) break;
-        }
-        
-        win_1.unmap();
-        win_1.kill(); 
+        setup_events();
     }
 };
 
@@ -8193,7 +8199,7 @@ int main()
     setup_wm();
 
     test tester;
-    tester.setup_events();
+    tester.init();
 
     event_handler->run();
     xcb_disconnect(conn);
