@@ -3546,7 +3546,7 @@ class Window_Manager
                 int mode_count = xcb_randr_get_screen_resources_current_modes_length(res_reply);
                 for (int i = 0; i < mode_count; ++i)
                 {
-                    log_info(modes[i]);    
+                    // log_info(modes[i]);
                 }
 
                 free(res_reply);
