@@ -7085,10 +7085,10 @@ class max_win
         
         void button_unmax_win()
         {
-            if (c->max_button_ogsize.x      == 0) c->max_button_ogsize.x      = screen->width_in_pixels  / 2;
-            if (c->max_button_ogsize.y      == 0) c->max_button_ogsize.y      = screen->height_in_pixels / 2;
-            if (c->max_button_ogsize.width  == 0) c->max_button_ogsize.width  = screen->width_in_pixels  / 2;
-            if (c->max_button_ogsize.height == 0) c->max_button_ogsize.height = screen->height_in_pixels / 2;
+            // if (c->max_button_ogsize.x      == 0) c->max_button_ogsize.x      = screen->width_in_pixels  / 2;
+            // if (c->max_button_ogsize.y      == 0) c->max_button_ogsize.y      = screen->height_in_pixels / 2;
+            // if (c->max_button_ogsize.width  == 0) c->max_button_ogsize.width  = screen->width_in_pixels  / 2;
+            // if (c->max_button_ogsize.height == 0) c->max_button_ogsize.height = screen->height_in_pixels / 2;
 
             max_win_animate(
                 c->max_button_ogsize.x,
