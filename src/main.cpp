@@ -3520,16 +3520,79 @@ class Window_Manager
                 }
             }
 
-            void quit(const int &status)
+            void quit(const int &__status)
             {
                 xcb_flush(conn);
                 delete_client_vec(client_list);
                 delete_desktop_vec(desktop_list);
                 xcb_ewmh_connection_wipe(ewmh);
                 xcb_disconnect(conn);
-                exit(status);
+                exit(__status);
+            }
+
+            void change_refresh_rate(xcb_connection_t *conn, int desired_width, int desired_height, int desired_refresh)
+            {
+                // Initialize RandR and get screen resources
+                // This is highly simplified and assumes you have the output and CRTC IDs
+
+                xcb_randr_get_screen_resources_current_reply_t *res_reply = xcb_randr_get_screen_resources_current_reply(
+                    conn,
+                    xcb_randr_get_screen_resources_current(conn, screen->root),
+                    nullptr
+                );
+
+                // Iterate through modes to find matching resolution and refresh rate
+                xcb_randr_mode_info_t *modes = xcb_randr_get_screen_resources_current_modes(res_reply);
+                int mode_count = xcb_randr_get_screen_resources_current_modes_length(res_reply);
+                for (int i = 0; i < mode_count; ++i)
+                {
+                    log_info(modes[i]);    
+                }
+
+                free(res_reply);
             }
         
+            // Function to calculate the refresh rate from mode info
+            static float calculate_refresh_rate(const xcb_randr_mode_info_t *mode_info)
+            {
+                if (mode_info->htotal && mode_info->vtotal)
+                {
+                    return ((float)mode_info->dot_clock / (float)(mode_info->htotal * mode_info->vtotal));
+                }
+
+                return 0.0f;
+            }
+
+            void list_screen_res_and_refresh_rates()
+            {
+                xcb_randr_get_screen_resources_current_cookie_t res_cookie;
+                xcb_randr_get_screen_resources_current_reply_t *res_reply;
+                xcb_randr_mode_info_t *mode_info;
+                int mode_count;
+
+                // Get screen resources
+                res_cookie = xcb_randr_get_screen_resources_current(conn, screen->root);
+                res_reply = xcb_randr_get_screen_resources_current_reply(conn, res_cookie, nullptr);
+
+                if (!res_reply)
+                {
+                    log_error("Could not get screen resources\n");
+                    return;
+                }
+
+                mode_info = xcb_randr_get_screen_resources_current_modes(res_reply);
+                mode_count = xcb_randr_get_screen_resources_current_modes_length(res_reply);
+
+                // Iterate through all modes
+                for (int i = 0; i < mode_count; i++)
+                {
+                    float refresh_rate = calculate_refresh_rate(&mode_info[i]);
+                    log_info("Resolution:" + to_string(mode_info[i].width) + ":" + to_string(mode_info[i].height) + ", Refresh Rate:" + to_string(refresh_rate) + "Hz\n");
+                }
+
+                free(res_reply);
+            }
+
         // client methods
             // focus methods
                 // void focus_client(client *c)
@@ -4075,7 +4138,7 @@ class Window_Manager
             void remove_client(client *c)
             {
                 client_list.erase(
-                    std::remove(
+                    remove(
                         client_list.begin(),
                         client_list.end(),
                         c
@@ -4084,7 +4147,7 @@ class Window_Manager
                 );
 
                 cur_d->current_clients.erase(
-                    std::remove(
+                    remove(
                         cur_d->current_clients.begin(),
                         cur_d->current_clients.end(),
                         c
@@ -7734,18 +7797,7 @@ class Events
                 {
                     case SUPER:
                     {
-                        client *c = wm->client_from_window(&e->event);
-                        if (c == nullptr) return;
-
-                        if (c->win.is_mask_active(XCB_EVENT_MASK_ENTER_WINDOW))
-                        {
-                            log_info("event_mask is active");
-                        }
-                        else
-                        {
-                            log_info("event_mask is NOT active");
-                        }
-
+                        wm->list_screen_res_and_refresh_rates();
                         return;
                     }
                 }
