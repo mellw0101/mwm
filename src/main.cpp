@@ -3482,19 +3482,24 @@ class Window_Manager
                 _setup();
                 _iter();
                 _screen();
+                
                 root = screen->root;
                 root.width(screen->width_in_pixels);
                 root.height(screen->height_in_pixels);
+                
                 setSubstructureRedirectMask();
                 configure_root();
                 _ewmh();
+                
                 key_codes.init();
                 event_handler = new Event_Handler();
+                
                 create_new_desktop(1);
                 create_new_desktop(2);
                 create_new_desktop(3);
                 create_new_desktop(4);
                 create_new_desktop(5);
+
                 context_menu = new class context_menu();
                 context_menu->add_entry("konsole", [this]()-> void
                 {
@@ -3525,7 +3530,7 @@ class Window_Manager
                 exit(status);
             }
         
-        public: // client methods
+        // client methods
             // focus methods
                 void focus_client(client *c)
                 {
@@ -3798,7 +3803,7 @@ class Window_Manager
                 remove_client(c);
             }
         
-        public: // desktop methods
+        // desktop methods
             void create_new_desktop(const uint16_t &n)
             {
                 desktop *d = new desktop;
@@ -3811,7 +3816,7 @@ class Window_Manager
                 desktop_list.push_back(d);
             }
         
-        public: // experimental methods
+        // experimental methods
             xcb_visualtype_t *find_argb_visual(xcb_connection_t *conn, xcb_screen_t *screen)
             {
                 xcb_depth_iterator_t depth_iter = xcb_screen_allowed_depths_iterator(screen);
@@ -5926,6 +5931,51 @@ class Dock
 };
 static Dock * dock;
 
+class __StatusBar__
+{
+    private:
+        window(_bar_window);
+        uint32_t(_mask);
+
+        string get_time__()
+        {
+            long now(time({}));
+            char buf[80];
+            strftime(
+                buf,
+                sizeof(buf),
+                "%Y-%m-%d %H:%M:%S", 
+                localtime(&now)
+            );
+
+            return string(buf);
+        }
+
+    public:
+        __StatusBar__() {}
+
+        void init__()
+        {
+            _bar_window.create_default(
+                screen->root,
+                0,
+                0,
+                screen->width_in_pixels,
+                20
+            );
+            _mask = XCB_EVENT_MASK_ENTER_WINDOW;
+            _bar_window.apply_event_mask(&_mask);
+            if (!_bar_window.is_mask_active(XCB_EVENT_MASK_ENTER_WINDOW))
+            {
+                log_error("could not apply enter window event mask.");
+            }
+
+            _bar_window.set_backround_color(RED);
+            _bar_window.map();
+        }
+};
+static __StatusBar__ *status_bar(nullptr);
+
 class mv_client
 {
     #define RIGHT_  screen->width_in_pixels  - c->width
@@ -7468,7 +7518,7 @@ class Events
                     case (CTRL + ALT):
                     {
                         wm->launcher.program((char *) "konsole");
-                        break;
+                        return;
                     }
                 }
             }
@@ -8035,6 +8085,9 @@ void setup_wm()
 
     file_app = new File_App;
     file_app->init();
+
+    status_bar = new __StatusBar__;
+    status_bar->init__();
 }
 
 int main()
