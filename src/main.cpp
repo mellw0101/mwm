@@ -3664,7 +3664,22 @@ class Window_Manager
                     return;
                 }
 
-                
+                xcb_randr_mode_t mode_id;
+                vector<xcb_randr_mode_t> (mode_vector)(find_mode());
+                for (int i(0); i < mode_vector.size(); ++i)
+                {
+                    if (mode_vector[i] == get_current_resolution_and_refresh())
+                    {
+                        if (i == (mode_vector.size() - 1))
+                        {
+                            mode_id = mode_vector[0];
+                            break;
+                        }
+
+                        mode_id = mode_vector[i + 1];
+                        break;
+                    }
+                }
 
                 // Set the mode
                 xcb_randr_set_crtc_config_cookie_t set_crtc_config_cookie = xcb_randr_set_crtc_config(
@@ -3674,7 +3689,7 @@ class Window_Manager
                     XCB_CURRENT_TIME,
                     0, // x
                     0, // y
-                    find_mode()[2],
+                    mode_id,
                     XCB_RANDR_ROTATION_ROTATE_0,
                     1, &output
                 );
@@ -3693,6 +3708,67 @@ class Window_Manager
                 free(set_crtc_config_reply);
                 free(output_info_reply);
                 free(res_reply);
+            }
+            
+            xcb_randr_mode_t get_current_resolution_and_refresh()
+            {
+                xcb_randr_get_screen_resources_current_cookie_t res_cookie = xcb_randr_get_screen_resources_current(conn, screen->root);
+                xcb_randr_get_screen_resources_current_reply_t *res_reply = xcb_randr_get_screen_resources_current_reply(conn, res_cookie, nullptr);
+
+                if (!res_reply)
+                {
+                    log_error("Could not get screen resources");
+                    return{};
+                }
+
+                xcb_randr_output_t *outputs = xcb_randr_get_screen_resources_current_outputs(res_reply);
+                if (!res_reply->num_outputs)
+                {
+                    log_error("No outputs found");
+                    free(res_reply);
+                    return{};
+                }
+
+                // Assuming the first output is the primary one
+                xcb_randr_output_t output = outputs[0];
+                xcb_randr_get_output_info_cookie_t output_info_cookie = xcb_randr_get_output_info(conn, output, XCB_CURRENT_TIME);
+                xcb_randr_get_output_info_reply_t *output_info_reply = xcb_randr_get_output_info_reply(conn, output_info_cookie, nullptr);
+
+                if (!output_info_reply || output_info_reply->crtc == XCB_NONE)
+                {
+                    log_error("Output is not currently connected to a CRTC");
+                    free(output_info_reply);
+                    free(res_reply);
+                    return{};
+                }
+
+                xcb_randr_get_crtc_info_cookie_t crtc_info_cookie = xcb_randr_get_crtc_info(conn, output_info_reply->crtc, XCB_CURRENT_TIME);
+                xcb_randr_get_crtc_info_reply_t *crtc_info_reply = xcb_randr_get_crtc_info_reply(conn, crtc_info_cookie, nullptr);
+
+                if (!crtc_info_reply)
+                {
+                    log_error("Could not get CRTC info");
+                    free(output_info_reply);
+                    free(res_reply);
+                    return{};
+                }
+
+                xcb_randr_mode_t mode_id;
+                xcb_randr_mode_info_t *mode_info = nullptr;
+                xcb_randr_mode_info_iterator_t mode_iter = xcb_randr_get_screen_resources_current_modes_iterator(res_reply);
+                for (; mode_iter.rem; xcb_randr_mode_info_next(&mode_iter))
+                {
+                    if (mode_iter.data->id == crtc_info_reply->mode)
+                    {
+                        mode_id = mode_iter.data->id;
+                        break;
+                    }
+                }
+
+                free(crtc_info_reply);
+                free(output_info_reply);
+                free(res_reply);
+                return mode_id;
             }
 
         // client methods
