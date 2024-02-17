@@ -5972,6 +5972,15 @@ class __StatusBar__
 
             _bar_window.set_backround_color(DARK_GREY);
             _bar_window.map();
+            _bar_window.draw_text(
+                get_time__().c_str(),
+                WHITE,
+                DARK_GREY,
+                "7x14",
+                screen->width_in_pixels - 200,
+                14
+            );
+            xcb_flush(conn);
             setup_events__();
         }
 
@@ -5983,15 +5992,6 @@ class __StatusBar__
                 if (e->window == _bar_window)
                 {
                     log_info("expose event _bar_window");
-                    _bar_window.draw_text(
-                        get_time__().c_str(),
-                        WHITE,
-                        DARK_GREY,
-                        "7x14",
-                        screen->width_in_pixels - 200,
-                        14
-                    );
-                    xcb_flush(conn);
                 }
             });
         }
