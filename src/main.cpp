@@ -3172,6 +3172,7 @@ class desktop
 {
     public: // variabels
         vector<client *>(current_clients);
+        client *focused_client = nullptr;
         uint16_t desktop;
         const uint16_t x = 0;
         const uint16_t y = 0;
@@ -6454,13 +6455,22 @@ class change_desktop
                 case NEXT:
                 {
                     if (wm->cur_d->desktop == wm->desktop_list.size()) return;
+                    if (wm->focused_client != nullptr)
+                    {
+                        wm->cur_d->focused_client = wm->focused_client;
+                    }
 
                     hide = get_clients_on_desktop(wm->cur_d->desktop);
                     show = get_clients_on_desktop(wm->cur_d->desktop + 1);
                     animate(show, NEXT);
                     animate(hide, NEXT);
                     wm->cur_d = wm->desktop_list[wm->cur_d->desktop];
-                    if (wm->cur_d->current_clients.size() > 0)
+                    if (wm->cur_d->focused_client != nullptr)
+                    {
+                        wm->cur_d->focused_client->focus();
+                        wm->focused_client = wm->cur_d->focused_client;
+                    }
+                    else if (wm->cur_d->current_clients.size() > 0)
                     {
                         wm->cur_d->current_clients[0]->focus();
                         wm->focused_client = wm->cur_d->current_clients[0];
@@ -6476,13 +6486,22 @@ class change_desktop
                 case PREV:
                 {
                     if (wm->cur_d->desktop == 1) return;
+                    if (wm->focused_client != nullptr)
+                    {
+                        wm->cur_d->focused_client = wm->focused_client;
+                    }
 
                     hide = get_clients_on_desktop(wm->cur_d->desktop);
                     show = get_clients_on_desktop(wm->cur_d->desktop - 1);
                     animate(show, PREV);
                     animate(hide, PREV);
                     wm->cur_d = wm->desktop_list[wm->cur_d->desktop - 2];
-                    if (wm->cur_d->current_clients.size() > 0)
+                    if (wm->cur_d->focused_client != nullptr)
+                    {
+                        wm->cur_d->focused_client->focus();
+                        wm->focused_client = wm->cur_d->focused_client;
+                    }
+                    else if (wm->cur_d->current_clients.size() > 0)
                     {
                         wm->cur_d->current_clients[0]->focus();
                         wm->focused_client = wm->cur_d->current_clients[0];
