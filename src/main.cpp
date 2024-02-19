@@ -3795,10 +3795,15 @@ class Window_Manager
                             return;
                         }
 
-                        cur_d->current_clients[0]->focus();
-                        focused_client = cur_d->current_clients[0];
-
-                        return;
+                        for (long i(0); i < cur_d->current_clients.size(); ++i)
+                        {
+                            if (cur_d->current_clients[i] == nullptr) continue;
+                            
+                            cur_d->current_clients[i]->focus();
+                            focused_client = cur_d->current_clients[i];
+                            
+                            return;
+                        }
                     }
 
                     for (int i(0); i < cur_d->current_clients.size(); ++i)
