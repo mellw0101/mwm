@@ -6643,10 +6643,15 @@ class change_desktop
             vector<client *>(clients);
             for (client *const &c : wm->client_list)
             {
-                if (c->desktop == desktop)
+                if (c->desktop == desktop && c != wm->focused_client)
                 {
                     clients.push_back(c);
                 }
+            }
+
+            if (wm->focused_client != nullptr && wm->focused_client->desktop == desktop)
+            {
+                clients.push_back(wm->focused_client);
             }
 
             return clients;
