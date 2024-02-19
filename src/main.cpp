@@ -6547,6 +6547,7 @@ class change_desktop
                     wm->cur_d = wm->desktop_list[wm->cur_d->desktop];
                     wm->focused_client->desktop = wm->cur_d->desktop;
                     wm->cur_d->current_clients.push_back(wm->focused_client);
+
                     break;
                 }
             
@@ -6570,6 +6571,7 @@ class change_desktop
                     wm->cur_d = wm->desktop_list[wm->cur_d->desktop - 2];
                     wm->focused_client->desktop = wm->cur_d->desktop;
                     wm->cur_d->current_clients.push_back(wm->focused_client);
+                    
                     break;
                 }
             }
@@ -7263,7 +7265,7 @@ class resize_client
                     }
                 }
 
-                void run_double(edge edge)
+                void run_double(edge edge, bool __double = false)
                 {
                     xcb_generic_event_t *ev;
                     bool shouldContinue(true);
@@ -7520,19 +7522,33 @@ class max_win
 };
 
 /**
+ *
  * @class tile
  * @brief Represents a tile obj.
  * 
  * The `tile` class is responsible for managing the tiling behavior of windows in the window manager.
  * It provides methods to tile windows to the left, right, *up, or *down positions on the screen.
  * The class also includes helper methods to check the current tile position of a window and set the size and position of a window.
+ *
  */
 class tile
 {
     private:
         client(*c);
 
-        bool current_tile_pos(TILEPOS mode)
+        bool current_tile_pos(TILEPOS mode)/**
+         *
+         * @brief Checks if the current tile position of a window is the specified tile position.
+         *
+         * This method checks if the current tile position of a window is the specified tile position.
+         * It takes a `TILEPOS` enum value as an argument, which specifies the tile position to check.
+         * The method returns `true` if the current tile position is the specified tile position, and `false` otherwise.
+         *
+         * @param mode The tile position to check.
+         * @return true if the current tile position is the specified tile position.
+         * @return false if the current tile position is not the specified tile position.
+         *
+         */
         {
             switch (mode)
             {
@@ -7618,7 +7634,17 @@ class tile
             return false; 
         }
 
-        void set_tile_sizepos(TILEPOS sizepos)
+        void set_tile_sizepos(TILEPOS sizepos)/**
+         *
+         * @brief Sets the size and position of a window to a specific tile position.
+         *
+         * This method sets the size and position of a window to a specific tile position.
+         * It takes a `TILEPOS` enum value as an argument, which specifies the tile position to set.
+         * The method uses the `animate` method to animate the window to the specified tile position.
+         *
+         * @param sizepos The tile position to set.
+         *
+         */
         {
             switch (sizepos)
             {
@@ -7690,7 +7716,7 @@ class tile
             }
         }
         
-        void set_tile_ogsize()
+        void restore_og_tile_pos()
         {
             animate(
                 c->tile_ogsize.x,
@@ -7729,7 +7755,7 @@ class tile
                 // IF 'CURRENTLT_TILED' TO 'LEFT'
                 if (current_tile_pos(TILEPOS::LEFT))
                 {
-                    set_tile_ogsize();
+                    restore_og_tile_pos();
                     return;
                 }
                 
@@ -7766,7 +7792,7 @@ class tile
                 // IF 'CURRENTLY_TILED' TO 'RIGHT'
                 if (current_tile_pos(TILEPOS::RIGHT))
                 {
-                    set_tile_ogsize();
+                    restore_og_tile_pos();
                     return;
                 }
                 
@@ -7820,7 +7846,7 @@ class tile
                 if (current_tile_pos(TILEPOS::LEFT_DOWN)
                 ||  current_tile_pos(TILEPOS::RIGHT_DOWN))
                 {
-                    set_tile_ogsize();
+                    restore_og_tile_pos();
                     return;
                 }
 
