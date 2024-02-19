@@ -6460,6 +6460,16 @@ class change_desktop
                     animate(show, NEXT);
                     animate(hide, NEXT);
                     wm->cur_d = wm->desktop_list[wm->cur_d->desktop];
+                    if (wm->cur_d->current_clients.size() > 0)
+                    {
+                        wm->cur_d->current_clients[0]->focus();
+                        wm->focused_client = wm->cur_d->current_clients[0];
+                    }
+                    else
+                    {
+                        wm->focused_client = nullptr;
+                    }
+
                     break;
                 }
             
@@ -6472,6 +6482,16 @@ class change_desktop
                     animate(show, PREV);
                     animate(hide, PREV);
                     wm->cur_d = wm->desktop_list[wm->cur_d->desktop - 2];
+                    if (wm->cur_d->current_clients.size() > 0)
+                    {
+                        wm->cur_d->current_clients[0]->focus();
+                        wm->focused_client = wm->cur_d->current_clients[0];
+                    }
+                    else
+                    {
+                        wm->focused_client = nullptr;
+                    }
+
                     break;
                 }
             }
@@ -6484,11 +6504,14 @@ class change_desktop
 
         void change_with_app(const DIRECTION &direction)
         {
+            if (wm->focused_client == nullptr) return;
+
             switch (direction)
             {
                 case NEXT:
                 {
                     if (wm->cur_d->desktop == wm->desktop_list.size()) return;
+                    if (wm->focused_client->desktop != wm->cur_d->desktop) return;
 
                     hide = get_clients_on_desktop_with_app(wm->cur_d->desktop);
                     show = get_clients_on_desktop_with_app(wm->cur_d->desktop + 1);
@@ -6511,6 +6534,7 @@ class change_desktop
                 case PREV:
                 {
                     if (wm->cur_d->desktop == 1) return;
+                    if (wm->focused_client->desktop != wm->cur_d->desktop) return;
 
                     hide = get_clients_on_desktop_with_app(wm->cur_d->desktop);
                     show = get_clients_on_desktop_with_app(wm->cur_d->desktop - 1);
@@ -6688,29 +6712,6 @@ class change_desktop
             vector<client *>().swap(hide);
         }
 };
-
-void move_to_next_desktop_w_app()
-{
-    if (wm->cur_d->desktop == wm->desktop_list.size()) return;
-    if (wm->focused_client)
-    {
-        wm->focused_client->desktop = wm->cur_d->desktop + 1;
-    }
-    
-    change_desktop::teleport_to(wm->cur_d->desktop + 1);
-}
-
-void move_to_previus_desktop_w_app()
-{
-    if (wm->cur_d->desktop == 1) return;
-    if (wm->focused_client)
-    {
-        wm->focused_client->desktop = wm->cur_d->desktop - 1;
-    }
-    
-    change_desktop::teleport_to(wm->cur_d->desktop - 1);
-    wm->focused_client->raise();
-}
 
 class resize_client
 {
@@ -7954,7 +7955,6 @@ class Events
                 {
                     case (SHIFT + CTRL + SUPER):
                     {
-                        // move_to_next_desktop_w_app();
                         change_desktop cd(conn);
                         cd.change_with_app(change_desktop::NEXT);
                         return;
@@ -7982,7 +7982,6 @@ class Events
                 {
                     case (SHIFT + CTRL + SUPER):
                     {
-                        // move_to_previus_desktop_w_app();
                         change_desktop cd(conn);
                         cd.change_with_app(change_desktop::PREV);
                         return;
