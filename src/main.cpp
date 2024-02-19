@@ -3788,6 +3788,19 @@ class Window_Manager
 
                 void cycle_focus()
                 {
+                    if (focused_client == nullptr)
+                    {
+                        if (client_list.size() == 0)
+                        {
+                            return;
+                        }
+
+                        focused_client->focus();
+                        focused_client = client_list[0];
+
+                        return;
+                    }
+
                     for (int i(0); i < cur_d->current_clients.size(); ++i)
                     {
                         if (cur_d->current_clients[i] == nullptr) continue;
@@ -3798,11 +3811,13 @@ class Window_Manager
                             {
                                 cur_d->current_clients[0]->focus();
                                 focused_client = cur_d->current_clients[0];
+                            
                                 return;
                             }
 
                             cur_d->current_clients[i + 1]->focus();
                             focused_client = cur_d->current_clients[i + 1];
+
                             return;
                         }
                     }
