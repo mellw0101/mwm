@@ -6457,8 +6457,7 @@ mutex mtx;
 class change_desktop
 {
     public:
-        change_desktop(xcb_connection_t * connection)
-        : connection(connection) {}
+        change_desktop(xcb_connection_t *connection) {}
         int duration = 100;
     
     public:
@@ -6628,7 +6627,7 @@ class change_desktop
         }
     
     private:
-        xcb_connection_t(*connection);
+        // xcb_connection_t(*connection);
         vector<client *>(show);
         vector<client *>(hide);
         thread(show_thread);
@@ -6642,9 +6641,14 @@ class change_desktop
         vector<client *> get_clients_on_desktop(const uint8_t &desktop)
         {
             vector<client *>(clients);
+            if (wm->focused_client != nullptr && wm->focused_client->desktop == desktop)
+            {
+                clients.push_back(wm->focused_client);
+            }
+
             for (client *const &c : wm->client_list)
             {
-                if (c->desktop == desktop) 
+                if (c->desktop == desktop && c != wm->focused_client)
                 {
                     clients.push_back(c);
                 }
