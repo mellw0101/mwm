@@ -3790,13 +3790,13 @@ class Window_Manager
                 {
                     if (focused_client == nullptr)
                     {
-                        if (client_list.size() == 0)
+                        if (cur_d->current_clients.size() == 0)
                         {
                             return;
                         }
 
-                        focused_client->focus();
-                        focused_client = client_list[0];
+                        cur_d->current_clients[0]->focus();
+                        focused_client = cur_d->current_clients[0];
 
                         return;
                     }
