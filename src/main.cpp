@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include <pstl/glue_algorithm_defs.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -6494,8 +6495,10 @@ class change_desktop
                     show = get_clients_on_desktop_with_app(wm->cur_d->desktop + 1);
                     animate(show, NEXT);
                     animate(hide, NEXT);
+                    wm->cur_d->current_clients.erase(remove(wm->cur_d->current_clients.begin(), wm->cur_d->current_clients.end(), wm->focused_client));
                     wm->cur_d = wm->desktop_list[wm->cur_d->desktop];
                     wm->focused_client->desktop = wm->cur_d->desktop;
+                    wm->cur_d->current_clients.push_back(wm->focused_client);
                     break;
                 }
             
@@ -6507,8 +6510,10 @@ class change_desktop
                     show = get_clients_on_desktop_with_app(wm->cur_d->desktop - 1);
                     animate(show, PREV);
                     animate(hide, PREV);
+                    wm->cur_d->current_clients.erase(remove(wm->cur_d->current_clients.begin(), wm->cur_d->current_clients.end(), wm->focused_client));
                     wm->cur_d = wm->desktop_list[wm->cur_d->desktop - 2];
                     wm->focused_client->desktop = wm->cur_d->desktop;
+                    wm->cur_d->current_clients.push_back(wm->focused_client);
                     break;
                 }
             }
