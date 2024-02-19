@@ -6490,8 +6490,8 @@ class change_desktop
                 {
                     if (wm->cur_d->desktop == wm->desktop_list.size()) return;
 
-                    hide = get_clients_on_desktop(wm->cur_d->desktop);
-                    show = get_clients_on_desktop(wm->cur_d->desktop + 1);
+                    hide = get_clients_on_desktop_with_app(wm->cur_d->desktop);
+                    show = get_clients_on_desktop_with_app(wm->cur_d->desktop + 1);
                     animate(show, NEXT);
                     animate(hide, NEXT);
                     wm->cur_d = wm->desktop_list[wm->cur_d->desktop];
@@ -6503,8 +6503,8 @@ class change_desktop
                 {
                     if (wm->cur_d->desktop == 1) return;
 
-                    hide = get_clients_on_desktop(wm->cur_d->desktop);
-                    show = get_clients_on_desktop(wm->cur_d->desktop - 1);
+                    hide = get_clients_on_desktop_with_app(wm->cur_d->desktop);
+                    show = get_clients_on_desktop_with_app(wm->cur_d->desktop - 1);
                     animate(show, PREV);
                     animate(hide, PREV);
                     wm->cur_d = wm->desktop_list[wm->cur_d->desktop - 2];
