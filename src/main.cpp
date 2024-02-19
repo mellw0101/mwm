@@ -3665,7 +3665,7 @@ class Window_Manager
                 }
 
                 xcb_randr_mode_t mode_id;
-                vector<xcb_randr_mode_t> (mode_vector)(find_mode());
+                vector<xcb_randr_mode_t>(mode_vector)(find_mode());
                 for (int i(0); i < mode_vector.size(); ++i)
                 {
                     if (mode_vector[i] == get_current_resolution_and_refresh())
@@ -6482,6 +6482,43 @@ class change_desktop
             mtx.unlock();
         }
 
+        void change_with_app(const DIRECTION &direction)
+        {
+            switch (direction)
+            {
+                case NEXT:
+                {
+                    if (wm->cur_d->desktop == wm->desktop_list.size()) return;
+
+                    hide = get_clients_on_desktop(wm->cur_d->desktop);
+                    show = get_clients_on_desktop(wm->cur_d->desktop + 1);
+                    animate(show, NEXT);
+                    animate(hide, NEXT);
+                    wm->cur_d = wm->desktop_list[wm->cur_d->desktop];
+                    wm->focused_client->desktop = wm->cur_d->desktop;
+                    break;
+                }
+            
+                case PREV:
+                {
+                    if (wm->cur_d->desktop == 1) return;
+
+                    hide = get_clients_on_desktop(wm->cur_d->desktop);
+                    show = get_clients_on_desktop(wm->cur_d->desktop - 1);
+                    animate(show, PREV);
+                    animate(hide, PREV);
+                    wm->cur_d = wm->desktop_list[wm->cur_d->desktop - 2];
+                    wm->focused_client->desktop = wm->cur_d->desktop;
+                    break;
+                }
+            }
+
+            mtx.lock();
+            thread_sleep(duration + 20);
+            joinAndClearThreads();
+            mtx.unlock();
+        }
+
         static void teleport_to(const uint8_t & n)
         {
             if (wm->cur_d == wm->desktop_list[n - 1] || n == 0 || n == wm->desktop_list.size()) return;
@@ -6525,6 +6562,20 @@ class change_desktop
             for (client *const &c : wm->client_list)
             {
                 if (c->desktop == desktop) 
+                {
+                    clients.push_back(c);
+                }
+            }
+
+            return clients;
+        }
+
+        vector<client *> get_clients_on_desktop_with_app(const uint8_t &desktop)
+        {
+            vector<client *>(clients);
+            for (client *const &c : wm->client_list)
+            {
+                if (c->desktop == desktop && c != wm->focused_client) 
                 {
                     clients.push_back(c);
                 }
@@ -7885,7 +7936,9 @@ class Events
                 {
                     case (SHIFT + CTRL + SUPER):
                     {
-                        move_to_next_desktop_w_app();
+                        // move_to_next_desktop_w_app();
+                        change_desktop cd(conn);
+                        cd.change_with_app(change_desktop::NEXT);
                         return;
                     }
                     
@@ -7911,7 +7964,9 @@ class Events
                 {
                     case (SHIFT + CTRL + SUPER):
                     {
-                        move_to_previus_desktop_w_app();
+                        // move_to_previus_desktop_w_app();
+                        change_desktop cd(conn);
+                        cd.change_with_app(change_desktop::PREV);
                         return;
                     }
 
