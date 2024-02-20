@@ -6501,7 +6501,7 @@ class change_desktop
                     else
                     {
                         wm->focused_client = nullptr;
-                        wm->unfocus();
+                        wm->root.focus_input();
                     }
 
                     break;
@@ -6533,7 +6533,7 @@ class change_desktop
                     else
                     {
                         wm->focused_client = nullptr;
-                        wm->unfocus();
+                        wm->root.focus_input();
                     }
 
                     break;
