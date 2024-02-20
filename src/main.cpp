@@ -8046,6 +8046,7 @@ class Events
                     case SUPER:
                     {
                         client *c = wm->client_from_window(&e->event);
+                        if (c == nullptr) return;
                         tile(c, TILE::RIGHT);
                         return;
                     }
@@ -8087,6 +8088,7 @@ class Events
                     case SUPER:
                     {
                         client *c = wm->client_from_window(&e->event);
+                        if (c == nullptr) return;
                         tile(c, TILE::DOWN);
                         return;
                     }
@@ -8100,6 +8102,7 @@ class Events
                     case SUPER:
                     {
                         client *c = wm->client_from_window(&e->event);
+                        if (c == nullptr) return;
                         tile(c, TILE::UP);
                         return;
                     }
