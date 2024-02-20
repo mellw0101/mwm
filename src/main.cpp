@@ -3816,15 +3816,20 @@ class Window_Manager
                     }
                 }
 
-                void focus_root()
+                void unfocus()
                 {
-                    xcb_set_input_focus(
-                        conn,
-                        XCB_INPUT_FOCUS_POINTER_ROOT,
+                    window(tmp);
+                    tmp.create_default(
                         screen->root,
-                        XCB_CURRENT_TIME
+                        -20,
+                        -20,
+                        20,
+                        20
                     );
-                    xcb_flush(conn);
+                    tmp.map();
+                    tmp.focus_input();
+                    tmp.unmap();
+                    tmp.kill();
                 }
 
             // client fetch methods.
@@ -6496,7 +6501,7 @@ class change_desktop
                     else
                     {
                         wm->focused_client = nullptr;
-                        wm->focus_root();
+                        wm->unfocus();
                     }
 
                     break;
@@ -6528,7 +6533,7 @@ class change_desktop
                     else
                     {
                         wm->focused_client = nullptr;
-                        wm->focus_root();
+                        wm->unfocus();
                     }
 
                     break;
