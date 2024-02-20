@@ -3458,10 +3458,10 @@ class context_menu
 
 class Window_Manager
 {
-    public: // constructor
+    public: // constructor.
         Window_Manager() {}
     
-    public: // variabels
+    public: // variabels.
         window(root);
         Launcher(launcher);
         Logger(log);
@@ -3475,8 +3475,8 @@ class Window_Manager
         client *focused_client = nullptr;
         desktop *cur_d = nullptr;
     
-    public: // methods
-        // Main Methods
+    public: // methods.
+        // Main Methods.
             void init()
             {
                 _conn(nullptr, nullptr);
@@ -3772,20 +3772,8 @@ class Window_Manager
                 return mode_id;
             }
 
-        // client methods
-            // focus methods
-                // void focus_client(client *c)
-                // {
-                //     if (c == nullptr)
-                //     {
-                //         log_error("c is null");
-                //         return;
-                //     }
-
-                //     focused_client = c;
-                //     c->focus();
-                // }
-
+        // client methods.
+            // focus methods.
                 void cycle_focus()
                 {
                     if (focused_client == nullptr)
@@ -3828,7 +3816,18 @@ class Window_Manager
                     }
                 }
 
-            // client fetch methods
+                void focus_none()
+                {
+                    xcb_set_input_focus(
+                        conn,
+                        XCB_INPUT_FOCUS_NONE,
+                        XCB_NONE,
+                        XCB_CURRENT_TIME
+                    );
+                    xcb_flush(conn);
+                }
+
+            // client fetch methods.
                 client *client_from_window(const xcb_window_t *window)
                 {
                     for (const auto &c:client_list)
@@ -6497,7 +6496,7 @@ class change_desktop
                     else
                     {
                         wm->focused_client = nullptr;
-                        wm->root.focus_input();
+                        wm->focus_none();
                     }
 
                     break;
@@ -6529,7 +6528,7 @@ class change_desktop
                     else
                     {
                         wm->focused_client = nullptr;
-                        wm->root.focus_input();
+                        wm->focus_none();
                     }
 
                     break;
