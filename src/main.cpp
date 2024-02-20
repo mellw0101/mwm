@@ -4552,7 +4552,7 @@ class Window_Manager
                 this_thread::sleep_for(chrono::minutes(1));
                 check_volt();
             }
-}; static Window_Manager * wm;
+}; static Window_Manager *wm;
 
 /**
  *
