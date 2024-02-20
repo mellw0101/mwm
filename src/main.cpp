@@ -3816,12 +3816,12 @@ class Window_Manager
                     }
                 }
 
-                void focus_none()
+                void focus_root()
                 {
                     xcb_set_input_focus(
                         conn,
                         XCB_INPUT_FOCUS_POINTER_ROOT,
-                        XCB_NONE,
+                        screen->root,
                         XCB_CURRENT_TIME
                     );
                     xcb_flush(conn);
@@ -6496,7 +6496,7 @@ class change_desktop
                     else
                     {
                         wm->focused_client = nullptr;
-                        wm->focus_none();
+                        wm->focus_root();
                     }
 
                     break;
@@ -6528,7 +6528,7 @@ class change_desktop
                     else
                     {
                         wm->focused_client = nullptr;
-                        wm->focus_none();
+                        wm->focus_root();
                     }
 
                     break;
