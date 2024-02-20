@@ -7960,6 +7960,7 @@ class Events
             if (e->detail == wm->key_codes.f11)
             {
                 client *c = wm->client_from_window(&e->event);
+                if (c == nullptr) return;
                 max_win(c, max_win::EWMH_MAXWIN);
                 return;
             }
@@ -8072,6 +8073,7 @@ class Events
                     case SUPER:
                     {
                         client *c = wm->client_from_window(&e->event);
+                        if (c == nullptr) return;
                         tile(c, TILE::LEFT);
                         return;
                     }
