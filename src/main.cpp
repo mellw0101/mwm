@@ -8709,7 +8709,6 @@ void setup_wm()
 
     wifi = new __wifi__;
     wifi->init();
-    wifi->scan__("wlo1");
 }
 
 int main()
