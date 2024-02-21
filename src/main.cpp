@@ -6244,7 +6244,7 @@ class __StatusBar__
                 WHITE,
                 DARK_GREY,
                 "7x14",
-                0,
+                2,
                 14
             );
             xcb_flush(conn);
@@ -6257,7 +6257,7 @@ class __StatusBar__
                 WHITE,
                 DARK_GREY,
                 "7x14",
-                0,
+                2,
                 14
             );
             xcb_flush(conn);
