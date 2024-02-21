@@ -54,7 +54,9 @@ install_dependencies() {
                             xinit                   \
                             libimlib2-dev           \
                             libxau-dev              \
-                            libpolkit-agent-1-dev
+                            libpolkit-agent-1-dev   \
+                            wireless-tools          \
+                            libiw-dev
     elif [ -x "$(command -v dnf)" ]; then
         # Fedora/RHEL
         sudo dnf install -y package1 package2
