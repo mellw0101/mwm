@@ -1069,10 +1069,7 @@ class Event_Handler
             while (shouldContinue)
             {
                 ev = xcb_wait_for_event(conn);
-                if (!ev)
-                {
-                    continue;
-                }
+                if (!ev) continue;
 
                 uint8_t responseType = ev->response_type & ~0x80;
                 auto it = eventCallbacks.find(responseType);
@@ -6343,8 +6340,9 @@ class mv_client
             if (c->win.is_EWMH_fullscreen()) return;
 
             pointer.grab();
-            run();
-            pointer.ungrab();
+            test__();
+            // run();
+            // pointer.ungrab();
         }
 
     private:
@@ -6500,6 +6498,30 @@ class mv_client
 
                 free(ev);
             }
+        }
+
+        void test__()
+        {
+            int id = event_handler->setEventCallback(XCB_MOTION_NOTIFY, [&](Ev ev)-> void
+            {
+                const auto *e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
+                int new_x = e->root_x - start_x - BORDER_SIZE;
+                int new_y = e->root_y - start_y - BORDER_SIZE;
+                
+                if (isTimeToRender())
+                {
+                    snap(new_x, new_y);
+                    xcb_flush(conn);
+                }
+            });
+
+            int id2 = event_handler->setEventCallback(XCB_BUTTON_RELEASE, [&](Ev ev)-> void
+            {
+                c->update();
+                pointer.ungrab();
+                event_handler->removeEventCallback(XCB_MOTION_NOTIFY, id);
+                event_handler->removeEventCallback(XCB_BUTTON_RELEASE, id2);
+            });
         }
 
         bool isTimeToRender()
