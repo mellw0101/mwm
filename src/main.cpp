@@ -6280,7 +6280,7 @@ class __StatusBar__
 
             _time_window.create_default(
                 _bar_window,
-                (screen->width_in_pixels - 140),
+                (screen->width_in_pixels - 60),
                 0,
                 60,
                 20
@@ -6291,9 +6291,9 @@ class __StatusBar__
 
             _date_window.create_default(
                 _bar_window,
-                (screen->width_in_pixels - 60),
+                (screen->width_in_pixels - 140),
                 0,
-                60,
+                80,
                 20
             );
             _date_window.apply_event_mask(&_mask);
