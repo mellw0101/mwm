@@ -6497,6 +6497,7 @@ class mv_client
                     case XCB_EXPOSE:
                     {
                         const auto *e = reinterpret_cast<const xcb_expose_event_t *>(ev);
+
                         if (e->window == status_bar->_date_window)
                         {
                             status_bar->draw_date__();
@@ -7362,6 +7363,23 @@ class resize_client
                                 c->update();
                                 break;
                             }
+
+                            case XCB_EXPOSE:
+                            {
+                                const auto *e = reinterpret_cast<const xcb_expose_event_t *>(ev);
+
+                                if (e->window == status_bar->_date_window)
+                                {
+                                    status_bar->draw_date__();
+                                }
+
+                                if (e->window == status_bar->_time_window)
+                                {
+                                    status_bar->draw_time__();
+                                }
+
+                                break;
+                            }
                         }
 
                         free(ev);
@@ -7487,7 +7505,25 @@ class resize_client
                         c->update();
                         break; 
                     }
+                    
+                    case XCB_EXPOSE:
+                    {
+                        const auto *e = reinterpret_cast<const xcb_expose_event_t *>(ev);
+
+                        if (e->window == status_bar->_date_window)
+                        {
+                            status_bar->draw_date__();
+                        }
+
+                        if (e->window == status_bar->_time_window)
+                        {
+                            status_bar->draw_time__();
+                        }
+
+                        break;
+                    }
                 }
+
 
                 free(ev);
             }
