@@ -6360,7 +6360,19 @@ class __StatusBar__
             _wifi_window.apply_event_mask(&_mask);
             _wifi_window.set_backround_color(DARK_GREY);
             Bitmap bitmap(20, 20);
-            bitmap.modify(9, 2, 17, 1);
+            
+            bitmap.modify(1, 2, 17, 1);
+            bitmap.modify(2, 2, 17, 1);
+            bitmap.modify(3, 3, 16, 1);
+            
+            bitmap.modify(6, 3, 16, 1);
+            bitmap.modify(7, 4, 15, 1);
+            bitmap.modify(8, 4, 15, 1);
+            
+            bitmap.modify(11, 5, 14, 1);
+            bitmap.modify(12, 5, 14, 1);
+            bitmap.modify(13, 6, 13, 1);
+            
             bitmap.exportToPng("/home/mellw/wifi.png");
             _wifi_window.set_backround_png("/home/mellw/wifi.png");
             _wifi_window.map();
@@ -6419,7 +6431,7 @@ class __StatusBar__
             );
             xcb_flush(conn);
         }
-        
+
     public:
         __StatusBar__() {}
 };
