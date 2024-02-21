@@ -6204,8 +6204,6 @@ static Dock * dock;
 class __StatusBar__
 {
     private:
-        window(_bar_window), (_time_window), (_date_window);
-
         string get_time__()
         {
             long now(time({}));
@@ -6232,32 +6230,6 @@ class __StatusBar__
             );
 
             return string(buf);
-        }
-
-        void draw_time__()
-        {
-            _time_window.draw_text(
-                get_time__().c_str(),
-                WHITE,
-                DARK_GREY,
-                "7x14",
-                2,
-                14
-            );
-            xcb_flush(conn);
-        }
-
-        void draw_date__()
-        {
-            _date_window.draw_text(
-                get_date__().c_str(),
-                WHITE,
-                DARK_GREY,
-                "7x14",
-                2,
-                14
-            );
-            xcb_flush(conn);
         }
 
         void create_windows__()
@@ -6316,7 +6288,7 @@ class __StatusBar__
         }
 
     public:
-        __StatusBar__() {}
+        window(_bar_window), (_time_window), (_date_window);
 
         void init__()
         {
@@ -6324,7 +6296,35 @@ class __StatusBar__
             draw_time__();
             draw_date__();
             setup_events__();
-        }        
+        }
+
+        void draw_time__()
+        {
+            _time_window.draw_text(
+                get_time__().c_str(),
+                WHITE,
+                DARK_GREY,
+                "7x14",
+                2,
+                14
+            );
+            xcb_flush(conn);
+        }
+
+        void draw_date__()
+        {
+            _date_window.draw_text(
+                get_date__().c_str(),
+                WHITE,
+                DARK_GREY,
+                "7x14",
+                2,
+                14
+            );
+            xcb_flush(conn);
+        }
+    public:
+        __StatusBar__() {}
 };
 static __StatusBar__ *status_bar(nullptr);
 
@@ -6340,7 +6340,6 @@ class mv_client
             if (c->win.is_EWMH_fullscreen()) return;
 
             pointer.grab();
-            // test__();
             run();
             pointer.ungrab();
         }
@@ -6492,6 +6491,22 @@ class mv_client
                     {
                         shouldContinue = false;
                         c->update();
+                        break;
+                    }
+
+                    case XCB_EXPOSE:
+                    {
+                        const auto *e = reinterpret_cast<const xcb_expose_event_t *>(ev);
+                        if (e->window == status_bar->_date_window)
+                        {
+                            status_bar->draw_date__();
+                        }
+
+                        if (e->window == status_bar->_time_window)
+                        {
+                            status_bar->draw_time__();
+                        }
+
                         break;
                     }
                 }
