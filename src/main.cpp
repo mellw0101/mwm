@@ -6306,11 +6306,6 @@ class __StatusBar__
             event_handler->setEventCallback(XCB_EXPOSE, [&](Ev ev)-> void
             {
                 const auto *e = reinterpret_cast<const xcb_expose_event_t *>(ev);
-                if (e->x > screen->width_in_pixels - 60)
-                {
-                    draw_time__();
-                }
-
                 if (e->window == _date_window)
                 {
                     draw_date__();
