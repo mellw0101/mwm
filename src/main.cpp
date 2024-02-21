@@ -6243,7 +6243,14 @@ class __wifi__
                 if (result->b.has_essid)
                 {
                     string ssid(result->b.essid);
-                    log_info("SSID: " + ssid + " STATUS: " + to_string(result->stats.status));
+                    log_info(
+                        "\nSSID: "    + ssid +
+                        "\nSTATUS: "  + to_string(result->stats.status) +
+                        "\nQUAL: "    + to_string(result->stats.qual.qual) +
+                        "\nLEVEL: "   + to_string(result->stats.qual.level) +
+                        "\nNOICE: "   + to_string(result->stats.qual.noise) +
+                        "\nBITRATE: " + to_string(result->maxbitrate.value)
+                    );
                 }
 
                 result = result->next;
