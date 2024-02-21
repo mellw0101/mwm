@@ -6515,13 +6515,13 @@ class mv_client
                 }
             });
 
-            int id2 = event_handler->setEventCallback(XCB_BUTTON_RELEASE, [&](Ev ev)-> void
-            {
-                c->update();
-                pointer.ungrab();
-                event_handler->removeEventCallback(XCB_MOTION_NOTIFY, id);
-                event_handler->removeEventCallback(XCB_BUTTON_RELEASE, id2);
-            });
+            // int id2 = event_handler->setEventCallback(XCB_BUTTON_RELEASE, [&](Ev ev)-> void
+            // {
+            //     c->update();
+            //     pointer.ungrab();
+            //     event_handler->removeEventCallback(XCB_MOTION_NOTIFY, id);
+            //     event_handler->removeEventCallback(XCB_BUTTON_RELEASE, id2);
+            // });
         }
 
         bool isTimeToRender()
