@@ -6419,6 +6419,7 @@ class __StatusBar__
             );
             xcb_flush(conn);
         }
+        
     public:
         __StatusBar__() {}
 };
