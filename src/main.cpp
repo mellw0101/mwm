@@ -6361,10 +6361,10 @@ class __StatusBar__
             _wifi_window.set_backround_color(DARK_GREY);
             Bitmap bitmap(20, 20);
             
-            bitmap.modify(1, 2, 17, 1);
-            bitmap.modify(2, 2, 17, 1);
-            bitmap.modify(3, 3, 16, 1);
-            bitmap.modify(4, 3, 16, 1);
+            bitmap.modify(1, 8, 11, 1);
+            bitmap.modify(2, 7, 12, 1);
+            bitmap.modify(3, 6, 13, 1);
+            bitmap.modify(4, 5, 14, 1);
             
             bitmap.modify(8, 6, 13, 1);
             bitmap.modify(9, 6, 13, 1);
