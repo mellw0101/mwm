@@ -505,11 +505,11 @@ class Logger
 #define LOG_warning(message)        	    Log::WARNING(__FUNCTION__, "]:[", message);
 #define LOG_start()                 	    Log::Start("mwm");
 #define log_event_response_typ()		    Log::xcb_event_response_type(__func__, e->response_type)
-#define log_info(message)                   log.log(INFO, __func__, message)
-#define log_error(message)                  log.log(ERROR, __FUNCTION__, message)
+#define log_info(message)                   logger.log(INFO, __func__, message)
+#define log_error(message)                  logger.log(ERROR, __FUNCTION__, message)
 #define log_error_long(message, message_2)                  log.log(ERROR, __FUNCTION__, message, message_2)
-#define log_error_code(message, err_code)   log.log(ERROR, __FUNCTION__, message, err_code)
-#define log_win(win_name ,window)           log.log(INFO, __func__, win_name + std::to_string(window))
-#define log_func                            log.log(FUNC, __func__)
+#define log_error_code(message, err_code)   logger.log(ERROR, __FUNCTION__, message, err_code)
+#define log_win(win_name ,window)           logger.log(INFO, __func__, win_name + std::to_string(window))
+#define log_func                            logger.log(FUNC, __func__)
 
 #endif // DWMLOG_HPP
