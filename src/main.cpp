@@ -6502,7 +6502,7 @@ class mv_client
 
         void test__()
         {
-            int id = event_handler->setEventCallback(XCB_MOTION_NOTIFY, [&](Ev ev)-> void
+            int id = event_handler->setEventCallback(XCB_MOTION_NOTIFY, [this](Ev ev)-> void
             {
                 const auto *e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
                 int new_x = e->root_x - start_x - BORDER_SIZE;
