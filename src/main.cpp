@@ -6502,7 +6502,7 @@ class mv_client
 
         void test__()
         {
-            int id = event_handler->setEventCallback(XCB_MOTION_NOTIFY, [this](Ev ev)-> void
+            event_handler->setEventCallback(XCB_MOTION_NOTIFY, [this](Ev ev)-> void
             {
                 const auto *e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
                 if (e->event != c->titlebar) return;
