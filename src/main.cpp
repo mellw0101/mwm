@@ -6340,9 +6340,9 @@ class mv_client
             if (c->win.is_EWMH_fullscreen()) return;
 
             pointer.grab();
-            test__();
-            // run();
-            // pointer.ungrab();
+            // test__();
+            run();
+            pointer.ungrab();
         }
 
     private:
