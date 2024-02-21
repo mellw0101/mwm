@@ -6262,7 +6262,7 @@ class __wifi__
                 {
                     if (e->state == (ALT + SUPER))
                     {
-                        scan__("wlo0");
+                        scan__("wlo1");
                     }
                 }
             });
