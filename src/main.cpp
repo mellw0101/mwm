@@ -6361,7 +6361,7 @@ class mv_client
         void snap(int x, int y)
         {
             // WINDOW TO WINDOW SNAPPING 
-            for (const client *cli : wm->cur_d->current_clients)
+            for (client * const &cli : wm->cur_d->current_clients)
             {
                 if (cli == c) continue;
                 
