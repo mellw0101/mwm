@@ -6505,9 +6505,9 @@ class mv_client
             int id = event_handler->setEventCallback(XCB_MOTION_NOTIFY, [this](Ev ev)-> void
             {
                 const auto *e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
+                if (e->event != c->titlebar) return;
                 int new_x = e->root_x - start_x - BORDER_SIZE;
                 int new_y = e->root_y - start_y - BORDER_SIZE;
-                
                 if (isTimeToRender())
                 {
                     snap(new_x, new_y);
