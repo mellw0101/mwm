@@ -6293,7 +6293,7 @@ class __StatusBar__
                 _bar_window,
                 (screen->width_in_pixels - 140),
                 0,
-                76,
+                74,
                 20
             );
             _date_window.apply_event_mask(&_mask);
