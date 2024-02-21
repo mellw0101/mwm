@@ -6204,7 +6204,7 @@ static Dock * dock;
 
 class __wifi__
 {
-    private:
+    public:
         void scan__(const char* interface)
         {
             wireless_scan_head head;
@@ -6216,14 +6216,14 @@ class __wifi__
             sock = iw_sockets_open();
             if (sock < 0)
             {
-                cerr << "Error opening socket." << endl;
+                log_error("could not open socket");
                 return;
             }
 
             // Get the range of settings
             if (iw_get_range_info(sock, interface, &range) < 0)
             {
-                cerr << "Error getting range info." << endl;
+                log_error("could not get range info");
                 iw_sockets_close(sock);
                 return;
             }
@@ -6231,7 +6231,7 @@ class __wifi__
             // Perform the scan
             if (iw_scan(sock, const_cast<char*>(interface), range.we_version_compiled, &head) < 0)
             {
-                cerr << "Error scanning." << endl;
+                log_error("could not scan");
                 iw_sockets_close(sock);
                 return;
             }
@@ -6252,8 +6252,7 @@ class __wifi__
             // Close the socket to the wireless driver
             iw_sockets_close(sock);
         }
-    
-    public:
+
         void init()
         {
             event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev)-> void
@@ -8703,6 +8702,7 @@ void setup_wm()
 
     wifi = new __wifi__;
     wifi->init();
+    wifi->scan__("wlo1");
 }
 
 int main()
