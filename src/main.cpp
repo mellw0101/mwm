@@ -6244,7 +6244,7 @@ class __StatusBar__
                 WHITE,
                 DARK_GREY,
                 "7x14",
-                screen->width_in_pixels - 60,
+                0,
                 14
             );
             xcb_flush(conn);
@@ -6257,7 +6257,7 @@ class __StatusBar__
                 WHITE,
                 DARK_GREY,
                 "7x14",
-                screen->width_in_pixels - 140,
+                0,
                 14
             );
             xcb_flush(conn);
