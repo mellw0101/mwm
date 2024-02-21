@@ -6207,7 +6207,7 @@ static Dock * dock;
 class __StatusBar__
 {
     private:
-        window(_bar_window);
+        window(_bar_window), (_time_window), (_date_window);
 
         string get_time__()
         {
@@ -6216,7 +6216,21 @@ class __StatusBar__
             strftime(
                 buf,
                 sizeof(buf),
-                "%Y-%m-%d %H:%M:%S", 
+                "%H:%M:%S", 
+                localtime(&now)
+            );
+
+            return string(buf);
+        }
+
+        string get_date__()
+        {
+            long now(time({}));
+            char buf[80];
+            strftime(
+                buf,
+                sizeof(buf),
+                "%Y-%m-%d", 
                 localtime(&now)
             );
 
@@ -6225,8 +6239,21 @@ class __StatusBar__
 
         void draw_time__()
         {
-            _bar_window.draw_text(
+            _time_window.draw_text(
                 get_time__().c_str(),
+                WHITE,
+                DARK_GREY,
+                "7x14",
+                screen->width_in_pixels - 60,
+                14
+            );
+            xcb_flush(conn);
+        }
+
+        void draw_date__()
+        {
+            _date_window.draw_text(
+                get_date__().c_str(),
                 WHITE,
                 DARK_GREY,
                 "7x14",
@@ -6236,11 +6263,10 @@ class __StatusBar__
             xcb_flush(conn);
         }
 
-    public:
-        __StatusBar__() {}
-
-        void init__()
+        void create_windows__()
         {
+            uint32_t _mask = XCB_EVENT_MASK_EXPOSURE;
+
             _bar_window.create_default(
                 screen->root,
                 0,
@@ -6248,17 +6274,41 @@ class __StatusBar__
                 screen->width_in_pixels,
                 20
             );
-            uint32_t _mask = XCB_EVENT_MASK_ENTER_WINDOW |
-                             XCB_EVENT_MASK_EXPOSURE;
             _bar_window.apply_event_mask(&_mask);
-            if (!_bar_window.is_mask_active(XCB_EVENT_MASK_ENTER_WINDOW))
-            {
-                log_error("could not apply enter window event mask.");
-            }
-
             _bar_window.set_backround_color(DARK_GREY);
             _bar_window.map();
+
+            _time_window.create_default(
+                _bar_window,
+                (screen->width_in_pixels - 140),
+                0,
+                60,
+                20
+            );
+            _time_window.apply_event_mask(&_mask);
+            _time_window.set_backround_color(BLUE);
+            _time_window.map();
+
+            _date_window.create_default(
+                _bar_window,
+                (screen->width_in_pixels - 60),
+                0,
+                60,
+                20
+            );
+            _date_window.apply_event_mask(&_mask);
+            _date_window.set_backround_color(RED);
+            _date_window.map();
+        }
+
+    public:
+        __StatusBar__() {}
+
+        void init__()
+        {
+            create_windows__();
             draw_time__();
+            draw_date__();
             setup_events__();
         }
 
@@ -6270,6 +6320,7 @@ class __StatusBar__
                 if (e->window == _bar_window)
                 {
                     draw_time__();
+                    draw_date__();
                 }
             });
         }
