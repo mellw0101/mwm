@@ -6212,7 +6212,7 @@ class __StatusBar__
             char buf[80];
             strftime(
                 buf,
-                sizeof(buf),
+                size(buf),
                 "%H:%M:%S", 
                 localtime(&now)
             );
@@ -6226,7 +6226,7 @@ class __StatusBar__
             char buf[80];
             strftime(
                 buf,
-                sizeof(buf),
+                size(buf),
                 "%Y-%m-%d", 
                 localtime(&now)
             );
@@ -6498,30 +6498,6 @@ class mv_client
 
                 free(ev);
             }
-        }
-
-        void test__()
-        {
-            int id = event_handler->setEventCallback(XCB_MOTION_NOTIFY, [this](Ev ev)-> void
-            {
-                const auto *e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
-                if (e->event != c->titlebar) return;
-                // int new_x = e->root_x - start_x - BORDER_SIZE;
-                // int new_y = e->root_y - start_y - BORDER_SIZE;
-                // if (isTimeToRender())
-                // {
-                //     snap(new_x, new_y);
-                //     xcb_flush(conn);
-                // }
-            });
-
-            // int id2 = event_handler->setEventCallback(XCB_BUTTON_RELEASE, [&](Ev ev)-> void
-            // {
-            //     c->update();
-            //     pointer.ungrab();
-            //     event_handler->removeEventCallback(XCB_MOTION_NOTIFY, id);
-            //     event_handler->removeEventCallback(XCB_BUTTON_RELEASE, id2);
-            // });
         }
 
         bool isTimeToRender()
