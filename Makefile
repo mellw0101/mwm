@@ -25,7 +25,8 @@ LIBS = 	-lxcb 			\
 		-lxcb-randr     \
 		-lImlib2		\
 		-lXau			\
-		-lpthread		
+		-lpthread		\
+		-liw
 
 LDFLAGS = 	${LIBS} 		\
 			-flto 			\

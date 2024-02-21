@@ -61,9 +61,12 @@
 #include <unordered_map>
 #include <xcb/xproto.h>
 #include <filesystem>
+#include <iwlib.h>
+#include <wpa_ctrl.h>
+
 
 #include "Log.hpp"
-Logger log;
+Logger logger;
 #include "defenitions.hpp"
 #include "structs.hpp"
 
@@ -6201,6 +6204,78 @@ class Dock
 };
 static Dock * dock;
 
+class __wifi__
+{
+    private:
+        void scan__(const char* interface)
+        {
+            wireless_scan_head head;
+            wireless_scan* result;
+            iwrange range;
+            int sock;
+
+            // Open a socket to the wireless driver
+            sock = iw_sockets_open();
+            if (sock < 0)
+            {
+                cerr << "Error opening socket." << endl;
+                return;
+            }
+
+            // Get the range of settings
+            if (iw_get_range_info(sock, interface, &range) < 0)
+            {
+                cerr << "Error getting range info." << endl;
+                iw_sockets_close(sock);
+                return;
+            }
+
+            // Perform the scan
+            if (iw_scan(sock, const_cast<char*>(interface), range.we_version_compiled, &head) < 0)
+            {
+                cerr << "Error scanning." << endl;
+                iw_sockets_close(sock);
+                return;
+            }
+
+            // Iterate through the scan results
+            result = head.result;
+            while (nullptr != result)
+            {
+                if (result->b.has_essid)
+                {
+                    string ssid(result->b.essid);
+                    log_info("SSID: " + ssid);
+                }
+
+                result = result->next;
+            }
+
+            // Close the socket to the wireless driver
+            iw_sockets_close(sock);
+        }
+    
+    public:
+        void init()
+        {
+            event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev)-> void
+            {
+                const auto *e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
+                if (e->detail == wm->key_codes.f)
+                {
+                    if (e->state == (ALT + SUPER))
+                    {
+                        scan__("wlan0");
+                    }
+                }
+            });
+        }
+
+    public:
+        __wifi__() {}
+};
+static __wifi__ *wifi(nullptr);
+
 class __StatusBar__
 {
     private:
@@ -8627,6 +8702,9 @@ void setup_wm()
 
     status_bar = new __StatusBar__;
     status_bar->init__();
+
+    wifi = new __wifi__;
+    wifi->init();
 }
 
 int main()
