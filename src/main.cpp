@@ -6204,7 +6204,7 @@ static Dock * dock;
 
 class __wifi__
 {
-    public:
+    private:
         void scan__(const char* interface)
         {
             wireless_scan_head head;
@@ -6259,7 +6259,8 @@ class __wifi__
             // Close the socket to the wireless driver
             iw_sockets_close(sock);
         }
-
+    
+    public:
         void init()
         {
             event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev)-> void
@@ -6347,6 +6348,22 @@ class __StatusBar__
             _date_window.apply_event_mask(&_mask);
             _date_window.set_backround_color(DARK_GREY);
             _date_window.map();
+
+            _wifi_window.create_default(
+                _bar_window,
+                (screen->width_in_pixels - 160),
+                0,
+                20,
+                20
+            );
+            _mask = XCB_EVENT_MASK_BUTTON_PRESS;
+            _wifi_window.apply_event_mask(&_mask);
+            _wifi_window.set_backround_color(DARK_GREY);
+            Bitmap bitmap(20, 20);
+            bitmap.modify(9, 2, 17, 1);
+            bitmap.exportToPng("/home/mellw/wifi.png");
+            _wifi_window.set_backround_png("/home/mellw/wifi.png");
+            _wifi_window.map();
         }
 
         void setup_events__()
@@ -6367,7 +6384,7 @@ class __StatusBar__
         }
 
     public:
-        window(_bar_window), (_time_window), (_date_window);
+        window(_bar_window), (_time_window), (_date_window), (_wifi_window);
 
         void init__()
         {
