@@ -6286,7 +6286,7 @@ class __StatusBar__
                 20
             );
             _time_window.apply_event_mask(&_mask);
-            _time_window.set_backround_color(BLUE);
+            _time_window.set_backround_color(DARK_GREY);
             _time_window.map();
 
             _date_window.create_default(
@@ -6297,8 +6297,25 @@ class __StatusBar__
                 20
             );
             _date_window.apply_event_mask(&_mask);
-            _date_window.set_backround_color(RED);
+            _date_window.set_backround_color(DARK_GREY);
             _date_window.map();
+        }
+
+        void setup_events__()
+        {
+            event_handler->setEventCallback(XCB_EXPOSE, [&](Ev ev)-> void
+            {
+                const auto *e = reinterpret_cast<const xcb_expose_event_t *>(ev);
+                if (e->window == _date_window)
+                {
+                    draw_date__();
+                }
+
+                if (e->window == _time_window)
+                {
+                    draw_time__();
+                }
+            });
         }
 
     public:
@@ -6310,20 +6327,7 @@ class __StatusBar__
             draw_time__();
             draw_date__();
             setup_events__();
-        }
-
-        void setup_events__()
-        {
-            event_handler->setEventCallback(XCB_EXPOSE, [&](Ev ev)-> void
-            {
-                const auto *e = reinterpret_cast<const xcb_expose_event_t *>(ev);
-                if (e->window == _bar_window)
-                {
-                    draw_time__();
-                    draw_date__();
-                }
-            });
-        }
+        }        
 };
 static __StatusBar__ *status_bar(nullptr);
 
