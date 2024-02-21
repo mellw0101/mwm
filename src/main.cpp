@@ -62,8 +62,6 @@
 #include <xcb/xproto.h>
 #include <filesystem>
 #include <iwlib.h>
-#include <wpa_ctrl.h>
-
 
 #include "Log.hpp"
 Logger logger;
