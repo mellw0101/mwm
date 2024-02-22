@@ -6368,8 +6368,8 @@ class __StatusBar__
             
             bitmap.modify(6, 7, 12, 1);
             bitmap.modify(7, 6, 13, 1);
-            bitmap.modify(8, 4, 7, 1); bitmap.modify(8, 12, 15, 1);
-            bitmap.modify(9, 3, 5, 1); bitmap.modify(9, 14, 16, 1);
+            bitmap.modify(8, 5, 8, 1); bitmap.modify(8, 11, 14, 1);
+            bitmap.modify(9, 4, 6, 1); bitmap.modify(9, 13, 15, 1);
             
             bitmap.modify(15, 9, 10, 1);
             bitmap.modify(16, 9, 10, 1);
@@ -6383,6 +6383,11 @@ class __StatusBar__
 
         void create_wifi_dropdown_window__()
         {
+            uint32_t _wifi_dropdown_window_x((screen->width_in_pixels - 150) - 110),
+                     _wifi_dropdown_window_y(20),
+                     _wifi_dropdown_window_width(220),
+                     _wifi_dropdown_window_height(240);
+
             _wifi_dropdown_window.create_default(
                 screen->root,
                 (screen->width_in_pixels - 150) - 110,
@@ -6392,6 +6397,16 @@ class __StatusBar__
             );
             _wifi_dropdown_window.set_backround_color(DARK_GREY);
             _wifi_dropdown_window.map();
+
+            _wifi_close_window.create_default(
+                _wifi_dropdown_window,
+                10,
+                (_wifi_dropdown_window_height - 10),
+                40,
+                20
+            );
+            _wifi_close_window.set_backround_color(RED);
+            _wifi_close_window.map();
         }
 
         void hide_wifi_dropdown_window__()
@@ -6434,7 +6449,7 @@ class __StatusBar__
         }
 
     public:
-        window(_bar_window), (_time_window), (_date_window), (_wifi_window), (_wifi_dropdown_window);
+        window(_bar_window), (_time_window), (_date_window), (_wifi_window), (_wifi_dropdown_window), (_wifi_close_window);
 
         void init__()
         {
