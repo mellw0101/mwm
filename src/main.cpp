@@ -6381,6 +6381,19 @@ class __StatusBar__
             _wifi_window.map();
         }
 
+        void create_wifi_dropdown_window__()
+        {
+            _wifi_dropdown_window.create_default(
+                screen->root,
+                (screen->width_in_pixels - 160),
+                20,
+                160,
+                240
+            );
+            _wifi_dropdown_window.set_backround_color(DARK_GREY);
+            _wifi_dropdown_window.map();
+        }
+
         void setup_events__()
         {
             event_handler->setEventCallback(XCB_EXPOSE, [&](Ev ev)-> void
@@ -6396,10 +6409,19 @@ class __StatusBar__
                     draw_time__();
                 }
             });
+
+            event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev)-> void
+            {
+                const auto *e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
+                if (e->event == _wifi_window)
+                {
+                    create_wifi_dropdown_window__();
+                }
+            });
         }
 
     public:
-        window(_bar_window), (_time_window), (_date_window), (_wifi_window);
+        window(_bar_window), (_time_window), (_date_window), (_wifi_window), (_wifi_dropdown_window);
 
         void init__()
         {
