@@ -6402,7 +6402,7 @@ class __StatusBar__
                 _wifi_dropdown_window,
                 20,
                 (_wifi_dropdown_window_height - 40),
-                40,
+                80,
                 20
             );
             _wifi_close_window.set_backround_color(RED);
