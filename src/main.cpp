@@ -6363,8 +6363,8 @@ class __StatusBar__
             
             bitmap.modify(1, 6, 13, 1);
             bitmap.modify(2, 4, 15, 1);
-            bitmap.modify(3, 2, 7, 1); bitmap.modify(3, 12, 17, 1);
-            bitmap.modify(4, 1, 5, 1); bitmap.modify(4, 14, 18, 1);
+            bitmap.modify(3, 2, 6, 1); bitmap.modify(3, 13, 17, 1);
+            bitmap.modify(4, 1, 4, 1); bitmap.modify(4, 15, 18, 1);
             
             bitmap.modify(6, 8, 11, 1);
             bitmap.modify(7, 6, 13, 1);
