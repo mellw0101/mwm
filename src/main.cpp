@@ -6394,6 +6394,12 @@ class __StatusBar__
             _wifi_dropdown_window.map();
         }
 
+        void hide_wifi_dropdown_window__()
+        {
+            _wifi_dropdown_window.unmap();
+            _wifi_dropdown_window.kill();
+        }
+
         void setup_events__()
         {
             event_handler->setEventCallback(XCB_EXPOSE, [&](Ev ev)-> void
@@ -6415,7 +6421,14 @@ class __StatusBar__
                 const auto *e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
                 if (e->event == _wifi_window)
                 {
-                    create_wifi_dropdown_window__();
+                    if (_wifi_dropdown_window.is_mapped())
+                    {
+                        hide_wifi_dropdown_window__();
+                    }
+                    else
+                    {
+                        create_wifi_dropdown_window__();
+                    }
                 }
             });
         }
