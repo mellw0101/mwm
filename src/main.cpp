@@ -6446,6 +6446,11 @@ class __StatusBar__
                         create_wifi_dropdown_window__();
                     }
                 }
+
+                if (e->event == _wifi_close_window)
+                {
+                    hide_wifi_dropdown_window__();
+                }
             });
         }
 
