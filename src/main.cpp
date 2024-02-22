@@ -6385,9 +6385,9 @@ class __StatusBar__
         {
             _wifi_dropdown_window.create_default(
                 screen->root,
-                (screen->width_in_pixels - 160),
+                (screen->width_in_pixels - 150) - 110,
                 20,
-                160,
+                220,
                 240
             );
             _wifi_dropdown_window.set_backround_color(DARK_GREY);
