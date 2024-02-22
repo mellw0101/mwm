@@ -6367,15 +6367,15 @@ class __StatusBar__
             bitmap.modify(4, 2, 5, 1); bitmap.modify(4, 14, 17, 1);
             bitmap.modify(5, 1, 4, 1); bitmap.modify(5, 15, 18, 1);
             
-            bitmap.modify(5, 7, 12, 1);
-            bitmap.modify(6, 5, 14, 1);
-            bitmap.modify(7, 4, 8, 1); bitmap.modify(7, 11, 15, 1);
-            bitmap.modify(8, 3, 6, 1); bitmap.modify(8, 12, 16, 1);
+            bitmap.modify(5, 8, 11, 1);
+            bitmap.modify(6, 6, 13, 1);
+            bitmap.modify(7, 6, 8, 1); bitmap.modify(7, 11, 13, 1);
+            bitmap.modify(8, 5, 7, 1); bitmap.modify(8, 12, 14, 1);
             
-            bitmap.modify(11, 8, 11, 1);
-            bitmap.modify(12, 6, 13, 1);
-            bitmap.modify(13, 5, 7, 1); bitmap.modify(13, 10, 14, 1);
-            bitmap.modify(14, 3, 6, 1); bitmap.modify(14, 11, 15, 1);
+            bitmap.modify(9, 9, 10, 1);
+            bitmap.modify(10, 6, 13, 1);
+            bitmap.modify(11, 5, 7, 1); bitmap.modify(11, 10, 14, 1);
+            bitmap.modify(12, 3, 6, 1); bitmap.modify(12, 12, 15, 1);
 
             bitmap.exportToPng("/home/mellw/wifi.png");
             _wifi_window.set_backround_png("/home/mellw/wifi.png");
