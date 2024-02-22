@@ -6366,7 +6366,7 @@ class __StatusBar__
             bitmap.modify(3, 2, 7, 1); bitmap.modify(3, 12, 17, 1);
             bitmap.modify(4, 1, 5, 1); bitmap.modify(4, 14, 18, 1);
             
-            bitmap.modify(6, 7, 12, 1);
+            bitmap.modify(6, 8, 11, 1);
             bitmap.modify(7, 6, 13, 1);
             bitmap.modify(8, 5, 8, 1); bitmap.modify(8, 11, 14, 1);
             bitmap.modify(9, 4, 6, 1); bitmap.modify(9, 13, 15, 1);
@@ -6400,8 +6400,8 @@ class __StatusBar__
 
             _wifi_close_window.create_default(
                 _wifi_dropdown_window,
-                10,
-                (_wifi_dropdown_window_height - 10),
+                20,
+                (_wifi_dropdown_window_height - 40),
                 40,
                 20
             );
