@@ -6281,7 +6281,7 @@ class __wifi__
 };
 static __wifi__ *wifi(nullptr);
 
-class __StatusBar__
+class __status_bar__
 {
     private:
         string get_time__()
@@ -6416,6 +6416,8 @@ class __StatusBar__
 
         void hide_wifi_dropdown_window__()
         {
+            _wifi_close_window.unmap();
+            _wifi_close_window.kill();
             _wifi_dropdown_window.unmap();
             _wifi_dropdown_window.kill();
         }
@@ -6496,9 +6498,9 @@ class __StatusBar__
         }
 
     public:
-        __StatusBar__() {}
+        __status_bar__() {}
 };
-static __StatusBar__ *status_bar(nullptr);
+static __status_bar__ *status_bar(nullptr);
 
 class mv_client
 {
@@ -8797,7 +8799,7 @@ void setup_wm()
     file_app = new File_App;
     file_app->init();
 
-    status_bar = new __StatusBar__;
+    status_bar = new __status_bar__;
     status_bar->init__();
 
     wifi = new __wifi__;
