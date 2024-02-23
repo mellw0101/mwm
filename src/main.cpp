@@ -6393,7 +6393,7 @@ class __status_bar__
 
             _wifi_dropdown_window.create_default(
                 screen->root,
-                (screen->width_in_pixels - 150) - 110,
+                ((screen->width_in_pixels - 150) - 110),
                 20,
                 220,
                 240
@@ -6461,7 +6461,7 @@ class __status_bar__
         }
 
     public:
-        window(_bar_window), (_time_window), (_date_window), (_wifi_window), (_wifi_dropdown_window), (_wifi_close_window);
+        window(_bar_window), (_time_window), (_date_window), (_wifi_window), (_wifi_dropdown_window), (_wifi_close_window), (_wifi_info_window);
 
         void init__()
         {
