@@ -62,6 +62,8 @@
 #include <xcb/xproto.h>
 #include <filesystem>
 #include <iwlib.h>
+#include <ifaddrs.h>
+#include <netdb.h>
 
 #include "Log.hpp"
 Logger logger;
@@ -6259,6 +6261,41 @@ class __wifi__
             // Close the socket to the wireless driver
             iw_sockets_close(sock);
         }
+
+        void check_network_interfaces__()
+        {
+            struct ifaddrs* ifAddrStruct = nullptr;
+            struct ifaddrs* ifa = nullptr;
+            void* tmpAddrPtr = nullptr;
+
+            getifaddrs(&ifAddrStruct);
+
+            for (ifa = ifAddrStruct; ifa != nullptr; ifa = ifa->ifa_next)
+            {
+                if (!ifa->ifa_addr) continue;
+
+                if (ifa->ifa_addr->sa_family == AF_INET) // check it is IP4
+                { 
+                    // is a valid IP4 Address
+                    tmpAddrPtr = &((struct sockaddr_in*)ifa->ifa_addr)->sin_addr;
+                    char addressBuffer[INET_ADDRSTRLEN];
+                    inet_ntop(AF_INET, tmpAddrPtr, addressBuffer, INET_ADDRSTRLEN);
+                    log_info("Interface: " + string(ifa->ifa_name) + " Address: " + addressBuffer);
+                }
+                else if (ifa->ifa_addr->sa_family == AF_INET6) // check it is IP6
+                {
+                    // is a valid IP6 Address
+                    tmpAddrPtr = &((struct sockaddr_in6*)ifa->ifa_addr)->sin6_addr;
+                    char addressBuffer[INET6_ADDRSTRLEN];
+                    inet_ntop(AF_INET6, tmpAddrPtr, addressBuffer, INET6_ADDRSTRLEN);
+                    log_info("Interface: " + string(ifa->ifa_name) + " Address: " + addressBuffer);
+                } 
+                // Here, you could attempt to deduce the interface type (e.g., wlan for WiFi) by name or other means
+            }
+
+            if (ifAddrStruct != nullptr) freeifaddrs(ifAddrStruct);
+            return;
+        }
     
     public:
         void init()
@@ -6274,6 +6311,8 @@ class __wifi__
                     }
                 }
             });
+
+            check_network_interfaces__();
         }
 
     public:
