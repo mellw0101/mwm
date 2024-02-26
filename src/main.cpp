@@ -6525,7 +6525,7 @@ class __status_bar__
                 80,
                 20
             );
-            uint32_t _mask = XCB_EVENT_MASK_BUTTON_PRESS | XCB_EXPOSE;
+            uint32_t _mask = XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE;
             _wifi_close_window.apply_event_mask(&_mask);
             _wifi_close_window.set_backround_color(RED);
             _wifi_close_window.map();
