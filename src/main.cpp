@@ -5543,38 +5543,57 @@ class search_window
         }
     
     private:
-        void setup_events() {
-            event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev) -> void {
+        void setup_events()
+        {
+            event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev) -> void
+            {
                 const xcb_key_press_event_t * e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
-                if(e->event == main_window) {
-                    if(e->detail == wm->key_codes.a) {
-                        if(e->state == SHIFT) {
+                if (e->event == main_window)
+                {
+                    if (e->detail == wm->key_codes.a)
+                    {
+                        if (e->state == SHIFT)
+                        {
                             search_string += "A";
-                        } else {
+                        }
+                        else
+                        {
                             search_string += "a";
                         }
                     }
 
-                    if(e->detail == wm->key_codes.b) {
-                        if(e->state == SHIFT) {
+                    if (e->detail == wm->key_codes.b)
+                    {
+                        if (e->state == SHIFT)
+                        {
                             search_string += "B";
-                        } else {
+                        }
+                        else
+                        {
                             search_string += "b";
                         }
                     }
                     
-                    if(e->detail == wm->key_codes.c) {
-                        if(e->state == SHIFT) {
+                    if (e->detail == wm->key_codes.c)
+                    {
+                        if (e->state == SHIFT)
+                        {
                             search_string += "C";
-                        } else {
+                        }
+                        else
+                        {
                             search_string += "c";
                         }
                     }
                     
-                    if(e->detail == wm->key_codes.d) {
-                        if(e->state == SHIFT) {
+                    if (e->detail == wm->key_codes.d)
+                    {
+                        if (e->state == SHIFT)
+                        {
                             search_string += "D";
-                        } else {
+                        }
+                        else
+                        {
                             search_string += "d";
                         }
                     }
@@ -6228,12 +6247,18 @@ static Dock * dock;
 class __network__
 {
     public:
-        string get_local_ip()
+        enum
+        {
+            LOCAL_IP = 0,
+            INTERFACE_FOR_LOCAL_IP = 1
+        };
+
+        string get_local_ip_info(int type)
         {
             struct ifaddrs* ifAddrStruct = nullptr;
             struct ifaddrs* ifa = nullptr;
             void* tmpAddrPtr = nullptr;
-            string ip;
+            string result;
 
             getifaddrs(&ifAddrStruct);
             for (ifa = ifAddrStruct; ifa != nullptr; ifa = ifa->ifa_next)
@@ -6250,14 +6275,23 @@ class __network__
                     &&  addressBuffer[1] == '9'
                     &&  addressBuffer[2] == '2')
                     {
-                        ip = addressBuffer;
-                        break;
+                        if (type == LOCAL_IP)
+                        {
+                            result = addressBuffer;
+                            break;
+                        }
+
+                        if (type == INTERFACE_FOR_LOCAL_IP)
+                        {
+                            result = ifa->ifa_name;
+                            break;
+                        }
                     }
                 }
             }
 
             if (ifAddrStruct != nullptr) freeifaddrs(ifAddrStruct);
-            return ip;
+            return result;
         }
 
     public:
@@ -6683,14 +6717,24 @@ class __status_bar__
 
         void draw_wifi_info_window()
         {
-            string info("Local ip: " + network->get_local_ip());
+            string local_ip("Local ip: " + network->get_local_ip_info(__network__::LOCAL_IP));
             _wifi_info_window.draw_text(
-                info.c_str(),
+                local_ip.c_str(),
                 WHITE,
                 DARK_GREY,
                 "7x14",
                 2,
                 14
+            );
+
+            string local_interface("interface: " + network->get_local_ip_info(__network__::INTERFACE_FOR_LOCAL_IP));
+            _wifi_info_window.draw_text(
+                local_interface.c_str(),
+                WHITE,
+                DARK_GREY,
+                "7x14",
+                2,
+                28
             );
         }
 
