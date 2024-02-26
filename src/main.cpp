@@ -1410,7 +1410,7 @@ class window
                 );
                 xcb_flush(conn);
             }
-        
+
         public: // check methods
             bool is_EWMH_fullscreen()
             {
@@ -2209,10 +2209,9 @@ class window
         Logger log;
     
     private: // functions
-        
         private: // main functions 
-            
-            void make_window() {
+            void make_window()
+            {
                 _window = xcb_generate_id(conn);
                 xcb_create_window(
                     conn,
@@ -2232,7 +2231,8 @@ class window
                 xcb_flush(conn);
             }
             
-            void clear_window() {
+            void clear_window()
+            {
                 xcb_clear_area(
                     conn, 
                     0,
@@ -2245,14 +2245,15 @@ class window
                 xcb_flush(conn);
             }
             
-            void update(const uint32_t & x, const uint32_t & y, const uint32_t & width, const uint32_t & height) {
+            void update(const uint32_t & x, const uint32_t & y, const uint32_t & width, const uint32_t & height)
+            {
                 _x = x;
                 _y = y;
                 _width = width;
                 _height = height;
             }
 
-            /**
+            void config_window(const uint16_t & mask, const uint16_t & value)/**
              *
              * @brief Configures the window with the specified mask and value.
              * 
@@ -2263,19 +2264,22 @@ class window
              * @param value The value to set for the specified attributes.
              * 
              */
-            void config_window(const uint16_t & mask, const uint16_t & value) {
+            {
                 xcb_configure_window(
                     conn,
                     _window,
                     mask,
-                    (const uint32_t[1]) {
+                    (const uint32_t[1])
+                    {
                         static_cast<const uint32_t &>(value)
                     }
                 );
             }
             
-            void config_window(uint32_t mask, const std::vector<uint32_t> & values) {
-                if (values.empty()) {
+            void config_window(uint32_t mask, const std::vector<uint32_t> & values)
+            {
+                if (values.empty())
+                {
                     log_error("values vector is empty");
                     return;
                 }
@@ -2288,17 +2292,19 @@ class window
                 );
             }
         
-        void send_event(xcb_client_message_event_t ev) {
+        void send_event(xcb_client_message_event_t ev)
+        {
             xcb_send_event(
                 conn,
                 0,
                 _window,
                 XCB_EVENT_MASK_NO_EVENT,
-                (char *) & ev
+                (char *) &ev
             );
         }
         
-        xcb_client_message_event_t make_client_message_event(const uint32_t & format, const uint32_t & type, const uint32_t & data) {
+        xcb_client_message_event_t make_client_message_event(const uint32_t & format, const uint32_t & type, const uint32_t & data)
+        {
             xcb_client_message_event_t ev = { 0 };
             ev.response_type = XCB_CLIENT_MESSAGE;
             ev.window = _window;
@@ -2312,9 +2318,10 @@ class window
         }
         
         private: // pointer functions 
-        
-            const char * pointer_from_enum(CURSOR CURSOR) {
-                switch (CURSOR) {
+            const char * pointer_from_enum(CURSOR CURSOR)
+            {
+                switch (CURSOR)
+                {
                     case CURSOR::arrow: return "arrow";
                     case CURSOR::hand1: return "hand1";
                     case CURSOR::hand2: return "hand2";
@@ -2361,10 +2368,9 @@ class window
             }
         
         private: // create functions 
-            
             private: // gc functions 
-            
-                void create_graphics_exposure_gc() {
+                void create_graphics_exposure_gc()
+                {
                     gc = xcb_generate_id(conn);
                     uint32_t mask = XCB_GC_FOREGROUND | XCB_GC_BACKGROUND | XCB_GC_GRAPHICS_EXPOSURES;
                     uint32_t values[3] = {
@@ -2383,14 +2389,16 @@ class window
                     xcb_flush(conn);
                 }
             
-                void create_font_gc(const COLOR & text_color, const COLOR & backround_color, xcb_font_t font) {
+                void create_font_gc(const COLOR & text_color, const COLOR & backround_color, xcb_font_t font)
+                {
                     font_gc = xcb_generate_id(conn);
                     xcb_create_gc(
                         conn, 
                         font_gc, 
                         _window, 
                         XCB_GC_FOREGROUND | XCB_GC_BACKGROUND | XCB_GC_FONT, 
-                        (const uint32_t[3]) {
+                        (const uint32_t[3])
+                        {
                             get_color(text_color),
                             get_color(backround_color),
                             font
@@ -2399,8 +2407,8 @@ class window
                 }
             
             private: // pixmap functions 
-            
-                void create_pixmap() {
+                void create_pixmap()
+                {
                     pixmap = xcb_generate_id(conn);
                     xcb_create_pixmap(
                         conn, 
@@ -2414,33 +2422,37 @@ class window
                 }
             
             private: // png functions
-                
-                void create_png_from_vector_bitmap(const char * file_name, const std::vector<std::vector<bool>> & bitmap) {
+                void create_png_from_vector_bitmap(const char *file_name, const vector<vector<bool>> &bitmap)
+                {
                     int width = bitmap[0].size();
                     int height = bitmap.size();
 
                     FILE *fp = fopen(file_name, "wb");
-                    if (!fp) {
+                    if (!fp)
+                    {
                         log_error("Failed to open file: " + std::string(file_name));
                         return;
                     }
 
                     png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-                    if (!png_ptr) {
+                    if (!png_ptr)
+                    {
                         fclose(fp);
                         log_error("Failed to create PNG write struct");
                         return;
                     }
 
                     png_infop info_ptr = png_create_info_struct(png_ptr);
-                    if (!info_ptr) {
+                    if (!info_ptr)
+                    {
                         fclose(fp);
                         png_destroy_write_struct(&png_ptr, NULL);
                         log_error("Failed to create PNG info struct");
                         return;
                     }
 
-                    if (setjmp(png_jmpbuf(png_ptr))) {
+                    if (setjmp(png_jmpbuf(png_ptr)))
+                    {
                         fclose(fp);
                         png_destroy_write_struct(&png_ptr, &info_ptr);
                         log_error("Error during PNG creation");
@@ -2453,23 +2465,25 @@ class window
 
                     // Write bitmap to PNG
                     png_bytep row = new png_byte[width];
-                    for (int y = 0; y < height; y++) {
-                        for (int x = 0; x < width; x++) {
+                    for (int y = 0; y < height; y++)
+                    {
+                        for (int x = 0; x < width; x++)
+                        {
                             row[x] = bitmap[y][x] ? 0xFF : 0x00;
                         }
+
                         png_write_row(png_ptr, row);
                     }
+
                     delete[] row;
-
                     png_write_end(png_ptr, NULL);
-
                     fclose(fp);
                     png_destroy_write_struct(&png_ptr, &info_ptr);
                 }
         
         private: // get functions 
-        
-            xcb_atom_t atom(const char * atom_name) {
+            xcb_atom_t atom(const char *atom_name)
+            {
                 xcb_intern_atom_cookie_t cookie = xcb_intern_atom(
                     conn, 
                     0, 
@@ -2488,7 +2502,8 @@ class window
                 return atom;
             }
         
-            std::string AtomName(xcb_atom_t atom) {
+            string AtomName(xcb_atom_t atom)
+            {
                 xcb_get_atom_name_cookie_t cookie = xcb_get_atom_name(conn, atom);
                 xcb_get_atom_name_reply_t* reply = xcb_get_atom_name_reply(conn, cookie, nullptr);
 
@@ -2506,7 +2521,8 @@ class window
                 return atomName;
             }
         
-            void get_font(const char * font_name) {
+            void get_font(const char *font_name)
+            {
                 font = xcb_generate_id(conn);
                 xcb_open_font(
                     conn, 
@@ -2518,20 +2534,22 @@ class window
             }
         
         private: // backround functions 
-            
-            void change_back_pixel(const uint32_t & pixel) {
+            void change_back_pixel(const uint32_t &pixel)
+            {
                 xcb_change_window_attributes(
                     conn,
                     _window,
                     XCB_CW_BACK_PIXEL,
-                    (const uint32_t[1]) {
+                    (const uint32_t[1])
+                    {
                         pixel
                     }
                 );
                 xcb_flush(conn);
             }
             
-            uint32_t get_color(COLOR color) {
+            uint32_t get_color(COLOR color)
+            {
                 uint32_t pixel = 0;
                 xcb_colormap_t colormap = screen->default_colormap;
                 rgb_color_code color_code = rgb_code(color);
@@ -2551,7 +2569,8 @@ class window
                 return pixel;
             }
             
-            uint32_t get_color(const uint16_t & red_value, const uint16_t & green_value, const uint16_t & blue_value) {
+            uint32_t get_color(const uint16_t &red_value, const uint16_t &green_value, const uint16_t &blue_value)
+            {
                 uint32_t pixel = 0;
                 xcb_colormap_t colormap = screen->default_colormap;
                 xcb_alloc_color_reply_t * reply = xcb_alloc_color_reply(
@@ -2570,7 +2589,8 @@ class window
                 return pixel;
             }
             
-            uint32_t get_color(const uint8_t & red_value, const uint8_t & green_value, const uint8_t & blue_value) {
+            uint32_t get_color(const uint8_t & red_value, const uint8_t & green_value, const uint8_t & blue_value)
+            {
                 uint32_t pixel = 0;
                 xcb_colormap_t colormap = screen->default_colormap;
                 xcb_alloc_color_reply_t * reply = xcb_alloc_color_reply(
@@ -2589,7 +2609,8 @@ class window
                 return pixel;
             }
             
-            rgb_color_code rgb_code(COLOR COLOR) {
+            rgb_color_code rgb_code(COLOR COLOR)
+            {
                 rgb_color_code color;
                 uint8_t r;
                 uint8_t g;
@@ -6204,6 +6225,46 @@ class Dock
 };
 static Dock * dock;
 
+class __network__
+{
+    public:
+        string get_local_ip()
+        {
+            struct ifaddrs* ifAddrStruct = nullptr;
+            struct ifaddrs* ifa = nullptr;
+            void* tmpAddrPtr = nullptr;
+            string ip;
+
+            getifaddrs(&ifAddrStruct);
+            for (ifa = ifAddrStruct; ifa != nullptr; ifa = ifa->ifa_next)
+            {
+                if (!ifa->ifa_addr) continue;
+
+                if (ifa->ifa_addr->sa_family == AF_INET) // check it is IP4
+                { 
+                    // is a valid IP4 Address
+                    tmpAddrPtr = &((struct sockaddr_in*)ifa->ifa_addr)->sin_addr;
+                    char addressBuffer[INET_ADDRSTRLEN];
+                    inet_ntop(AF_INET, tmpAddrPtr, addressBuffer, INET_ADDRSTRLEN);
+                    if (addressBuffer[0] == '1'
+                    &&  addressBuffer[1] == '9'
+                    &&  addressBuffer[2] == '2')
+                    {
+                        ip = addressBuffer;
+                        break;
+                    }
+                }
+            }
+
+            if (ifAddrStruct != nullptr) freeifaddrs(ifAddrStruct);
+            return ip;
+        }
+
+    public:
+        __network__() {}
+};
+static __network__ *network(nullptr);
+
 class __wifi__
 {
     private:
@@ -6456,6 +6517,16 @@ class __status_bar__
             _wifi_close_window.apply_event_mask(&_mask);
             _wifi_close_window.set_backround_color(RED);
             _wifi_close_window.map();
+
+            _wifi_info_window.create_default(
+                _wifi_dropdown_window,
+                20,
+                20,
+                _wifi_dropdown_window_width - 40,
+                _wifi_dropdown_window_height - 60
+            );
+            _wifi_info_window.set_backround_color(RED);
+            _wifi_info_window.map();
         }
 
         void hide_wifi_dropdown_window__()
@@ -8848,6 +8919,8 @@ void setup_wm()
 
     wifi = new __wifi__;
     wifi->init();
+
+    network = new __network__;
 }
 
 int main()
