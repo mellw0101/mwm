@@ -6489,6 +6489,18 @@ class __status_bar__
             _wifi_window.map();
         }
 
+        void draw_close_window()
+        {
+            _wifi_close_window.draw_text(
+                "close",
+                WHITE,
+                DARK_GREY,
+                "7x14",
+                2,
+                12
+            );
+        }
+
         void create_wifi_dropdown_window__()
         {
             uint32_t _wifi_dropdown_window_x((screen->width_in_pixels - 150) - 110),
@@ -6513,10 +6525,11 @@ class __status_bar__
                 80,
                 20
             );
-            uint32_t _mask = XCB_EVENT_MASK_BUTTON_PRESS;
+            uint32_t _mask = XCB_EVENT_MASK_BUTTON_PRESS | XCB_EXPOSE;
             _wifi_close_window.apply_event_mask(&_mask);
             _wifi_close_window.set_backround_color(RED);
             _wifi_close_window.map();
+            draw_close_window();
 
             _wifi_info_window.create_default(
                 _wifi_dropdown_window,
@@ -6550,6 +6563,11 @@ class __status_bar__
                 if (e->window == _time_window)
                 {
                     draw_time__();
+                }
+
+                if (e->window == _wifi_close_window)
+                {
+                    draw_close_window();
                 }
             });
 
