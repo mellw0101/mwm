@@ -6587,50 +6587,7 @@ class __status_bar__
             );
             _wifi_dropdown_window.set_backround_color(DARK_GREY);
             _wifi_dropdown_window.map();
-
             __window_decor__::make_borders(_wifi_dropdown_window, 2);
-            // #define WIFI_DROPDOWN_BORDER 2
-
-            // window left, right, up, down;
-            // left.create_default(
-            //     _wifi_dropdown_window,
-            //     0,
-            //     0,
-            //     WIFI_DROPDOWN_BORDER,
-            //     _wifi_dropdown_window_height
-            // );
-            // left.set_backround_color(BLACK);
-            // left.map();
-
-            // right.create_default(
-            //     _wifi_dropdown_window,
-            //     (_wifi_dropdown_window_width - WIFI_DROPDOWN_BORDER),
-            //     0,
-            //     WIFI_DROPDOWN_BORDER,
-            //     _wifi_dropdown_window_height
-            // );
-            // right.set_backround_color(BLACK);
-            // right.map();
-
-            // up.create_default(
-            //     _wifi_dropdown_window,
-            //     WIFI_DROPDOWN_BORDER,
-            //     0,
-            //     (_wifi_dropdown_window_width - WIFI_DROPDOWN_BORDER),
-            //     WIFI_DROPDOWN_BORDER
-            // );
-            // up.set_backround_color(BLACK);
-            // up.map();
-
-            // down.create_default(
-            //     _wifi_dropdown_window,
-            //     WIFI_DROPDOWN_BORDER,
-            //     (_wifi_dropdown_window_height - WIFI_DROPDOWN_BORDER),
-            //     (_wifi_dropdown_window_width - WIFI_DROPDOWN_BORDER),
-            //     WIFI_DROPDOWN_BORDER
-            // );
-            // down.set_backround_color(BLACK);
-            // down.map();
 
             _wifi_close_window.create_default(
                 _wifi_dropdown_window,
@@ -6643,6 +6600,7 @@ class __status_bar__
             _wifi_close_window.apply_event_mask(&_mask);
             _wifi_close_window.set_backround_color(RED);
             _wifi_close_window.map();
+            __window_decor__::make_borders(_wifi_close_window, 2);
             draw_wifi_close_window();
 
             _wifi_info_window.create_default(
@@ -6656,6 +6614,7 @@ class __status_bar__
             _wifi_info_window.apply_event_mask(&_mask);
             _wifi_info_window.set_backround_color(RED);
             _wifi_info_window.map();
+            __window_decor__::make_borders(_wifi_info_window, 2);
             draw_wifi_info_window();
         }
 
@@ -6760,7 +6719,7 @@ class __status_bar__
                 DARK_GREY,
                 "7x14",
                 22,
-                16
+                15
             );
         }
 
@@ -6773,7 +6732,7 @@ class __status_bar__
                 DARK_GREY,
                 "7x14",
                 4,
-                14
+                16
             );
 
             string local_interface("interface: " + network->get_local_ip_info(__network__::INTERFACE_FOR_LOCAL_IP));
