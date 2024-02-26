@@ -6526,6 +6526,8 @@ class __status_bar__
                 _wifi_dropdown_window_width - 40,
                 _wifi_dropdown_window_height - 120
             );
+            _mask = XCB_EVENT_MASK_EXPOSURE;
+            _wifi_info_window.apply_event_mask(&_mask);
             _wifi_info_window.set_backround_color(RED);
             _wifi_info_window.map();
             draw_wifi_info_window();
@@ -6557,6 +6559,11 @@ class __status_bar__
                 if (e->window == _wifi_close_window)
                 {
                     draw_wifi_close_window();
+                }
+
+                if (e->window == _wifi_info_window)
+                {
+                    draw_wifi_info_window();
                 }
             });
 
@@ -6831,6 +6838,11 @@ class mv_client
                         if (e->window == status_bar->_wifi_close_window)
                         {
                             status_bar->draw_wifi_close_window();
+                        }
+
+                        if (e->window == status_bar->_wifi_info_window)
+                        {
+                            status_bar->draw_wifi_info_window();
                         }
 
                         break;
@@ -7707,6 +7719,11 @@ class resize_client
                                     status_bar->draw_wifi_close_window();
                                 }
 
+                                if (e->window == status_bar->_wifi_info_window)
+                                {
+                                    status_bar->draw_wifi_info_window();
+                                }
+
                                 break;
                             }
                         }
@@ -7852,7 +7869,6 @@ class resize_client
                         break;
                     }
                 }
-
 
                 free(ev);
             }
