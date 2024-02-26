@@ -6517,7 +6517,7 @@ class __status_bar__
             _wifi_close_window.apply_event_mask(&_mask);
             _wifi_close_window.set_backround_color(RED);
             _wifi_close_window.map();
-            draw_close_window();
+            draw_wifi_close_window();
 
             _wifi_info_window.create_default(
                 _wifi_dropdown_window,
@@ -6528,6 +6528,7 @@ class __status_bar__
             );
             _wifi_info_window.set_backround_color(RED);
             _wifi_info_window.map();
+            draw_wifi_info_window();
         }
 
         void hide_wifi_dropdown_window__()
@@ -6555,7 +6556,7 @@ class __status_bar__
 
                 if (e->window == _wifi_close_window)
                 {
-                    draw_close_window();
+                    draw_wifi_close_window();
                 }
             });
 
@@ -6618,7 +6619,7 @@ class __status_bar__
             xcb_flush(conn);
         }
 
-        void draw_close_window()
+        void draw_wifi_close_window()
         {
             _wifi_close_window.draw_text(
                 "close",
@@ -6626,6 +6627,19 @@ class __status_bar__
                 DARK_GREY,
                 "7x14",
                 22,
+                14
+            );
+        }
+
+        void draw_wifi_info_window()
+        {
+            string info("Local ip: " + network->get_local_ip());
+            _wifi_info_window.draw_text(
+                info.c_str(),
+                WHITE,
+                DARK_GREY,
+                "7x14",
+                2,
                 14
             );
         }
@@ -6804,7 +6818,6 @@ class mv_client
                     case XCB_EXPOSE:
                     {
                         const auto *e = reinterpret_cast<const xcb_expose_event_t *>(ev);
-
                         if (e->window == status_bar->_date_window)
                         {
                             status_bar->draw_date__();
@@ -6813,6 +6826,11 @@ class mv_client
                         if (e->window == status_bar->_time_window)
                         {
                             status_bar->draw_time__();
+                        }
+
+                        if (e->window == status_bar->_wifi_close_window)
+                        {
+                            status_bar->draw_wifi_close_window();
                         }
 
                         break;
@@ -6837,8 +6855,8 @@ class mv_client
             return false;
         }
 };
-mutex mtx;
 
+mutex mtx;
 class change_desktop
 {
     public:
@@ -7674,15 +7692,19 @@ class resize_client
                             case XCB_EXPOSE:
                             {
                                 const auto *e = reinterpret_cast<const xcb_expose_event_t *>(ev);
-
-                                if (e->window == status_bar->_date_window)
+                                if (e->window == status_bar->_date_window) 
                                 {
                                     status_bar->draw_date__();
                                 }
-
-                                if (e->window == status_bar->_time_window)
+                                
+                                if (e->window == status_bar->_time_window) 
                                 {
                                     status_bar->draw_time__();
+                                }
+
+                                if (e->window == status_bar->_wifi_close_window)
+                                {
+                                    status_bar->draw_wifi_close_window();
                                 }
 
                                 break;
