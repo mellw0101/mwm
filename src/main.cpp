@@ -6734,7 +6734,7 @@ class __status_bar__
                 DARK_GREY,
                 "7x14",
                 2,
-                28
+                30
             );
         }
 
