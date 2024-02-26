@@ -6489,18 +6489,6 @@ class __status_bar__
             _wifi_window.map();
         }
 
-        void draw_close_window()
-        {
-            _wifi_close_window.draw_text(
-                "close",
-                WHITE,
-                DARK_GREY,
-                "7x14",
-                2,
-                12
-            );
-        }
-
         void create_wifi_dropdown_window__()
         {
             uint32_t _wifi_dropdown_window_x((screen->width_in_pixels - 150) - 110),
@@ -6628,6 +6616,18 @@ class __status_bar__
                 14
             );
             xcb_flush(conn);
+        }
+
+        void draw_close_window()
+        {
+            _wifi_close_window.draw_text(
+                "close",
+                WHITE,
+                DARK_GREY,
+                "7x14",
+                4,
+                42
+            );
         }
 
     public:
