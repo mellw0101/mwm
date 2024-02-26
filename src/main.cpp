@@ -6506,6 +6506,49 @@ class __status_bar__
             _wifi_dropdown_window.set_backround_color(DARK_GREY);
             _wifi_dropdown_window.map();
 
+            #define WIFI_DROPDOWN_BORDER 2
+
+            window left, right, up, down;
+            left.create_default(
+                _wifi_dropdown_window,
+                0,
+                0,
+                WIFI_DROPDOWN_BORDER,
+                _wifi_dropdown_window_height
+            );
+            left.set_backround_color(BLACK);
+            left.map();
+
+            right.create_default(
+                _wifi_dropdown_window,
+                (_wifi_dropdown_window_width - WIFI_DROPDOWN_BORDER),
+                0,
+                WIFI_DROPDOWN_BORDER,
+                _wifi_dropdown_window_height
+            );
+            right.set_backround_color(BLACK);
+            right.map();
+
+            up.create_default(
+                _wifi_dropdown_window,
+                WIFI_DROPDOWN_BORDER,
+                0,
+                (_wifi_dropdown_window_width - WIFI_DROPDOWN_BORDER),
+                WIFI_DROPDOWN_BORDER
+            );
+            up.set_backround_color(BLACK);
+            up.map();
+
+            down.create_default(
+                _wifi_dropdown_window,
+                WIFI_DROPDOWN_BORDER,
+                (_wifi_dropdown_window_height - WIFI_DROPDOWN_BORDER),
+                (_wifi_dropdown_window_width - WIFI_DROPDOWN_BORDER),
+                WIFI_DROPDOWN_BORDER
+            );
+            down.set_backround_color(BLACK);
+            down.map();
+
             _wifi_close_window.create_default(
                 _wifi_dropdown_window,
                 20,
