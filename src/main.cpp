@@ -6523,7 +6523,7 @@ class __status_bar__
                 20,
                 20,
                 _wifi_dropdown_window_width - 40,
-                _wifi_dropdown_window_height - 60
+                _wifi_dropdown_window_height - 120
             );
             _wifi_info_window.set_backround_color(RED);
             _wifi_info_window.map();
