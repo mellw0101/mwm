@@ -3569,13 +3569,7 @@ class Window_Manager
                 create_new_desktop(4);
                 create_new_desktop(5);
 
-                context_menu = new class context_menu();
-                context_menu->add_entry("konsole", [this]()-> void
-                {
-                    launcher.program((char *) "konsole");
-                });
-
-                context_menu->init();
+                
 
                 // std::thread(check_volt()); // dosent work 
             }
@@ -9101,6 +9095,13 @@ void setup_wm()
 {
     wm = new Window_Manager;
     wm->init();
+    wm->context_menu = new class context_menu();
+    wm->context_menu->add_entry("konsole", [&]()-> void
+    {
+        wm->launcher.program((char *) "konsole");
+    });
+
+    wm->context_menu->init();
     
     change_desktop::teleport_to(1);
     dock = new Dock;
