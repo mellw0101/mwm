@@ -6167,14 +6167,17 @@ class __system_settings__
 
         void make_windows()
         {
+            int width = (screen->width_in_pixels / 2), height = (screen->height_in_pixels / 2);
+            int x = ((screen->width_in_pixels / 2) - (width / 2)), y = ((screen->height_in_pixels / 2) - (height / 2));
             _main_window.create_default(
                 screen->root,
-                (screen->width_in_pixels / 4),
-                (screen->width_in_pixels / 4),
-                (screen->width_in_pixels / 2),
-                (screen->width_in_pixels / 2)
+                x,
+                y,
+                width,
+                height
             );
             _main_window.set_backround_color(DARK_GREY);
+            _main_window.grab_default_keys();
             _main_window.map();
             _main_window.raise();
 
