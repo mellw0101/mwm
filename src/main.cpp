@@ -6194,7 +6194,7 @@ class __system_settings__
 
             _screen_menu_entry_window.create_default(
                 _menu_window,
-                0,
+                -2,
                 0,
                 MENU_WINDOW_WIDTH,
                 MENU_ENTRY_HEIGHT
@@ -6207,7 +6207,7 @@ class __system_settings__
 
             _audio_menu_entry_window.create_default(
                 _menu_window,
-                0,
+                -2,
                 18,
                 MENU_WINDOW_WIDTH,
                 MENU_ENTRY_HEIGHT
@@ -6220,7 +6220,7 @@ class __system_settings__
 
             _network_menu_entry_window.create_default(
                 _menu_window,
-                0,
+                -2,
                 36,
                 MENU_WINDOW_WIDTH,
                 MENU_ENTRY_HEIGHT
