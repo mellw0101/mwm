@@ -3390,58 +3390,7 @@ class Entry
 
 class context_menu
 {
-    public: // consructor
-        context_menu()
-        {
-            size_pos.x      = pointer.x();
-            size_pos.y      = pointer.y();
-            size_pos.width  = 120;
-            size_pos.height = 20;
-
-            border.left   = size_pos.x;
-            border.right  = (size_pos.x + size_pos.width);
-            border.top    = size_pos.y;
-            border.bottom = (size_pos.y + size_pos.height);
-
-            create_dialog_win();
-        }
-    
-    public: // public methods
-        void init()
-        {
-            configure_events();
-        }
-        
-        void show()
-        {
-            size_pos.x = pointer.x();
-            size_pos.y = pointer.y();    
-            uint32_t height = entries.size() * size_pos.height;
-            if (size_pos.y + height > screen->height_in_pixels)
-            {
-                size_pos.y = (screen->height_in_pixels - height);
-            }
-
-            if (size_pos.x + size_pos.width > screen->width_in_pixels)
-            {
-                size_pos.x = (screen->width_in_pixels - size_pos.width);
-            }
-
-            context_window.x_y_height((size_pos.x - BORDER_SIZE), (size_pos.y - BORDER_SIZE), height);
-            context_window.map();
-            context_window.raise();
-            make_entries();
-        }
-        
-        void add_entry(const char * name, std::function<void()> action)
-        {
-            Entry entry;
-            entry.add_name(name);
-            entry.add_action(action);
-            entries.push_back(entry);
-        }
-    
-    private: // private variables
+    private:
         window context_window;
         size_pos size_pos;
         window_borders border;
@@ -3451,7 +3400,6 @@ class context_menu
         pointer pointer;
         Launcher launcher;
     
-    private: // private methods
         void create_dialog_win()
         {
             context_window.create_default(screen->root, 0, 0, size_pos.width, size_pos.height);
@@ -3522,6 +3470,57 @@ class context_menu
                 );
                 y += size_pos.height;
             }
+        }
+    
+    public: // public methods
+        void init()
+        {
+            configure_events();
+        }
+        
+        void show()
+        {
+            size_pos.x = pointer.x();
+            size_pos.y = pointer.y();    
+            uint32_t height = entries.size() * size_pos.height;
+            if (size_pos.y + height > screen->height_in_pixels)
+            {
+                size_pos.y = (screen->height_in_pixels - height);
+            }
+
+            if (size_pos.x + size_pos.width > screen->width_in_pixels)
+            {
+                size_pos.x = (screen->width_in_pixels - size_pos.width);
+            }
+
+            context_window.x_y_height((size_pos.x - BORDER_SIZE), (size_pos.y - BORDER_SIZE), height);
+            context_window.map();
+            context_window.raise();
+            make_entries();
+        }
+        
+        void add_entry(const char * name, std::function<void()> action)
+        {
+            Entry entry;
+            entry.add_name(name);
+            entry.add_action(action);
+            entries.push_back(entry);
+        }
+    
+    public: // consructor
+        context_menu()
+        {
+            size_pos.x      = pointer.x();
+            size_pos.y      = pointer.y();
+            size_pos.width  = 120;
+            size_pos.height = 20;
+
+            border.left   = size_pos.x;
+            border.right  = (size_pos.x + size_pos.width);
+            border.top    = size_pos.y;
+            border.bottom = (size_pos.y + size_pos.height);
+
+            create_dialog_win();
         }
 };
 
