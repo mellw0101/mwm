@@ -6208,7 +6208,7 @@ class __system_settings__
             _audio_menu_entry_window.create_default(
                 _menu_window,
                 0,
-                20,
+                18,
                 MENU_WINDOW_WIDTH,
                 MENU_ENTRY_HEIGHT
             );
@@ -6221,7 +6221,7 @@ class __system_settings__
             _network_menu_entry_window.create_default(
                 _menu_window,
                 0,
-                40,
+                36,
                 MENU_WINDOW_WIDTH,
                 MENU_ENTRY_HEIGHT
             );
@@ -6309,7 +6309,7 @@ class __system_settings__
                 DARK_GREY,
                 DEFAULT_FONT,
                 4,
-                14
+                15
             );
         }
 
@@ -6321,7 +6321,7 @@ class __system_settings__
                 DARK_GREY,
                 DEFAULT_FONT,
                 4,
-                14
+                15
             );
         }
 
@@ -6333,7 +6333,7 @@ class __system_settings__
                 DARK_GREY,
                 DEFAULT_FONT,
                 4,
-                14
+                15
             );
         }
 
