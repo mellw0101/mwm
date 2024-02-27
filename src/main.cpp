@@ -2050,6 +2050,7 @@ class window
                     {   K,          SUPER                   },
                     {   R,          SUPER                   }, // key_binding for runner_window
                     {   F,          SUPER                   }, // key_binding for file_app
+                    {   S,          SUPER                   }  // key_binding for system_settings
                 });
             }
         
@@ -3569,7 +3570,13 @@ class Window_Manager
                 create_new_desktop(4);
                 create_new_desktop(5);
 
-                
+                context_menu = new class context_menu();
+                context_menu->add_entry("konsole", [this]()-> void
+                {
+                    launcher.program((char *) "konsole");
+                });
+
+                context_menu->init();
 
                 // std::thread(check_volt()); // dosent work 
             }
@@ -6200,6 +6207,26 @@ class __system_settings__
         {
             make_windows();
             make_internal_client();
+        }
+
+        void setup_events()
+        {
+            event_handler->setEventCallback(XCB_KEY_PRESS, [this](Ev ev)->void
+            {
+                const auto e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
+                if (e->detail == wm->key_codes.s)
+                {
+                    if (e->state == SUPER)
+                    {
+                        launch();
+                    }
+                }
+            });
+        }
+
+        void init()
+        {
+            setup_events();
         }
 
     public:
@@ -9095,13 +9122,6 @@ void setup_wm()
 {
     wm = new Window_Manager;
     wm->init();
-    wm->context_menu = new class context_menu();
-    wm->context_menu->add_entry("konsole", [&]()-> void
-    {
-        wm->launcher.program((char *) "konsole");
-    });
-
-    wm->context_menu->init();
     
     change_desktop::teleport_to(1);
     dock = new Dock;
@@ -9130,7 +9150,7 @@ void setup_wm()
     network = new __network__;
 
     system_settings = new __system_settings__;
-    // wm->context_menu->add_entry("settings", [&]()-> void { system_settings->launch(); });
+    system_settings->init();
 }
 
 int main()
