@@ -3469,18 +3469,18 @@ class context_menu
         
         void configure_events()
         {
-            event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev)
-            -> void {
+            event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev)-> void
+            {
                 const auto & e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
                 if (e->detail == L_MOUSE_BUTTON)
                 {
-                    run_action(& e->event);
+                    run_action(&e->event);
                     hide();
                 }
             });
 
-            event_handler->setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev)
-            ->void {
+            event_handler->setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev)->void
+            {
                 const auto * e = reinterpret_cast<const xcb_enter_notify_event_t *>(ev);
                 if (e->event == screen->root)
                 {
@@ -3493,7 +3493,7 @@ class context_menu
         {
             for (const auto & entry : entries)
             {
-                if (* w == entry.window)
+                if (*w == entry.window)
                 {
                     entry.activate();
                 }
