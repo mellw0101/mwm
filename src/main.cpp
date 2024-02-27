@@ -6225,6 +6225,16 @@ class __system_settings__
                     }
                 }
             });
+
+            event_handler->setEventCallback(XCB_CONFIGURE_NOTIFY, [this](Ev ev)->void
+            {
+                const auto e = reinterpret_cast<const xcb_configure_notify_event_t *>(ev);
+                if (e->window == _main_window)
+                {
+                    _menu_window.height(e->height);
+                    xcb_flush(conn);
+                }
+            });
         }
 
         void init()
@@ -7907,6 +7917,7 @@ class resize_client
                                 if (e->window == system_settings->_main_window)
                                 {
                                     system_settings->_menu_window.height(e->height);
+                                    xcb_flush(conn);
                                 }
                             }
                         }
