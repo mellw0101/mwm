@@ -6581,12 +6581,12 @@ class __status_bar__
 
             _wifi_dropdown_window.create_default(
                 screen->root,
-                ((screen->width_in_pixels - 150) - 110),
-                20,
-                220,
-                240
+                WIFI_DROPDOWN_X,
+                WIFI_DROPDOWN_Y,
+                WIFI_DROPDOWN_WIDTH,
+                WIFI_DROPDOWN_HEIGHT
             );
-            _wifi_dropdown_window.set_backround_color(DARK_GREY);
+            _wifi_dropdown_window.set_backround_color(WHITE);
             _wifi_dropdown_window.map();
             __window_decor__::make_borders(_wifi_dropdown_window, WIFI_DROPDOWN_BORDER, BLACK);
 
@@ -6599,7 +6599,7 @@ class __status_bar__
             );
             uint32_t _mask = XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE;
             _wifi_close_window.apply_event_mask(&_mask);
-            _wifi_close_window.set_backround_color(DARK_GREY);
+            _wifi_close_window.set_backround_color(WHITE);
             _wifi_close_window.map();
             __window_decor__::make_borders(_wifi_close_window, WIFI_DROPDOWN_BORDER, BLACK);
             draw_wifi_close_window();
@@ -6613,7 +6613,7 @@ class __status_bar__
             );
             _mask = XCB_EVENT_MASK_EXPOSURE;
             _wifi_info_window.apply_event_mask(&_mask);
-            _wifi_info_window.set_backround_color(DARK_GREY);
+            _wifi_info_window.set_backround_color(WHITE);
             _wifi_info_window.map();
             __window_decor__::make_borders(_wifi_info_window, WIFI_DROPDOWN_BORDER, BLACK);
             draw_wifi_info_window();
@@ -6718,8 +6718,8 @@ class __status_bar__
         {
             _wifi_close_window.draw_text(
                 "close",
+                BLACK,
                 WHITE,
-                DARK_GREY,
                 "7x14",
                 22,
                 15
@@ -6731,8 +6731,8 @@ class __status_bar__
             string local_ip("Local ip: " + network->get_local_ip_info(__network__::LOCAL_IP));
             _wifi_info_window.draw_text(
                 local_ip.c_str(),
+                BLACK,
                 WHITE,
-                DARK_GREY,
                 "7x14",
                 4,
                 16
@@ -6741,8 +6741,8 @@ class __status_bar__
             string local_interface("interface: " + network->get_local_ip_info(__network__::INTERFACE_FOR_LOCAL_IP));
             _wifi_info_window.draw_text(
                 local_interface.c_str(),
+                BLACK,
                 WHITE,
-                DARK_GREY,
                 "7x14",
                 4,
                 30
