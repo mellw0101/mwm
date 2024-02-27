@@ -76,7 +76,7 @@ static const xcb_setup_t * setup;
 static xcb_screen_iterator_t iter;
 static xcb_screen_t * screen;
 
-#define DEFULT_FONT "7x14"
+#define DEFAULT_FONT "7x14"
 using namespace std;
 using Uint = unsigned int;
 using SUint = unsigned short int;
@@ -6202,6 +6202,7 @@ class __system_settings__
             _screen_menu_entry_window.apply_event_mask(&mask);
             _screen_menu_entry_window.set_backround_color(BLUE);
             _screen_menu_entry_window.map();
+            __window_decor__::make_borders(_screen_menu_entry_window, 2, BLACK);
             draw_screen();
 
             _audio_menu_entry_window.create_default(
@@ -6214,6 +6215,7 @@ class __system_settings__
             _audio_menu_entry_window.set_backround_color(BLUE);
             _audio_menu_entry_window.apply_event_mask(&mask);
             _audio_menu_entry_window.map();
+            __window_decor__::make_borders(_audio_menu_entry_window, 2, BLACK);
             draw_audio();
 
             _network_menu_entry_window.create_default(
@@ -6226,6 +6228,7 @@ class __system_settings__
             _network_menu_entry_window.set_backround_color(BLUE);
             _network_menu_entry_window.apply_event_mask(&mask);
             _network_menu_entry_window.map();
+            __window_decor__::make_borders(_network_menu_entry_window, 2, BLACK);
             draw_network();
         }
 
@@ -6304,9 +6307,9 @@ class __system_settings__
                 "Screen",
                 WHITE,
                 DARK_GREY,
-                DEFULT_FONT,
-                2,
-                12
+                DEFAULT_FONT,
+                4,
+                14
             );
         }
 
@@ -6316,9 +6319,9 @@ class __system_settings__
                 "Audio",
                 WHITE,
                 DARK_GREY,
-                DEFULT_FONT,
-                2,
-                12
+                DEFAULT_FONT,
+                4,
+                14
             );
         }
 
@@ -6328,9 +6331,9 @@ class __system_settings__
                 "Network",
                 WHITE,
                 DARK_GREY,
-                DEFULT_FONT,
+                DEFAULT_FONT,
                 4,
-                46
+                14
             );
         }
 
