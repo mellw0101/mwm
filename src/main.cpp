@@ -7900,6 +7900,15 @@ class resize_client
 
                                 break;
                             }
+
+                            case XCB_CONFIGURE_NOTIFY:
+                            {
+                                const auto e = reinterpret_cast<const xcb_configure_notify_event_t *>(ev);
+                                if (e->window == system_settings->_main_window)
+                                {
+                                    system_settings->_menu_window.height(e->height);
+                                }
+                            }
                         }
 
                         free(ev);
