@@ -6586,7 +6586,7 @@ class __status_bar__
                 WIFI_DROPDOWN_WIDTH,
                 WIFI_DROPDOWN_HEIGHT
             );
-            _wifi_dropdown_window.set_backround_color(WHITE);
+            _wifi_dropdown_window.set_backround_color(DARK_GREY);
             _wifi_dropdown_window.map();
             __window_decor__::make_borders(_wifi_dropdown_window, WIFI_DROPDOWN_BORDER, BLACK);
 
