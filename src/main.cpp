@@ -2713,7 +2713,7 @@ class window
 class __window_decor__
 {
     public:
-        static void make_borders(window &__window, int __size)
+        static void make_borders(window &__window, const int &__size, COLOR __color)
         {
             window left, right, up, down;
             left.create_default(
@@ -2723,7 +2723,7 @@ class __window_decor__
                 __size,
                 __window.height()
             );
-            left.set_backround_color(BLACK);
+            left.set_backround_color(__color);
             left.map();
 
             right.create_default(
@@ -2733,7 +2733,7 @@ class __window_decor__
                 __size,
                 __window.height()
             );
-            right.set_backround_color(BLACK);
+            right.set_backround_color(__color);
             right.map();
 
             up.create_default(
@@ -2743,7 +2743,7 @@ class __window_decor__
                 (__window.width() - __size),
                 __size
             );
-            up.set_backround_color(BLACK);
+            up.set_backround_color(__color);
             up.map();
 
             down.create_default(
@@ -2753,7 +2753,7 @@ class __window_decor__
                 (__window.width() - __size),
                 __size
             );
-            down.set_backround_color(BLACK);
+            down.set_backround_color(__color);
             down.map();
         }
 };
@@ -6311,7 +6311,7 @@ class __network__
             getifaddrs(&ifAddrStruct);
             for (ifa = ifAddrStruct; ifa != nullptr; ifa = ifa->ifa_next)
             {
-                if (!ifa->ifa_addr) continue;
+                if (ifa->ifa_addr == nullptr) continue;
 
                 if (ifa->ifa_addr->sa_family == AF_INET) // check it is IP4
                 { 
@@ -6587,7 +6587,7 @@ class __status_bar__
             );
             _wifi_dropdown_window.set_backround_color(DARK_GREY);
             _wifi_dropdown_window.map();
-            __window_decor__::make_borders(_wifi_dropdown_window, 2);
+            __window_decor__::make_borders(_wifi_dropdown_window, 2, BLACK);
 
             _wifi_close_window.create_default(
                 _wifi_dropdown_window,
@@ -6600,7 +6600,7 @@ class __status_bar__
             _wifi_close_window.apply_event_mask(&_mask);
             _wifi_close_window.set_backround_color(RED);
             _wifi_close_window.map();
-            __window_decor__::make_borders(_wifi_close_window, 2);
+            __window_decor__::make_borders(_wifi_close_window, 2, BLACK);
             draw_wifi_close_window();
 
             _wifi_info_window.create_default(
@@ -6614,7 +6614,7 @@ class __status_bar__
             _wifi_info_window.apply_event_mask(&_mask);
             _wifi_info_window.set_backround_color(RED);
             _wifi_info_window.map();
-            __window_decor__::make_borders(_wifi_info_window, 2);
+            __window_decor__::make_borders(_wifi_info_window, 2, BLACK);
             draw_wifi_info_window();
         }
 
