@@ -9129,7 +9129,7 @@ void setup_wm()
     network = new __network__;
 
     system_settings = new __system_settings__;
-    wm->context_menu->add_entry("settings", [&]()-> void { system_settings->launch(); });
+    // wm->context_menu->add_entry("settings", [&]()-> void { system_settings->launch(); });
 }
 
 int main()
