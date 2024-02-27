@@ -6086,8 +6086,6 @@ class File_App
             main_window.grab_button({
                 { L_MOUSE_BUTTON, NULL }
             });
-
-            log_win("main_window: ", main_window);
         }
 
         void create_left_side_window()
@@ -6159,6 +6157,61 @@ class File_App
         Logger(log); 
 };
 static File_App *file_app;
+
+class __system_settings__
+{
+    public:
+        window(_main_window), (_menu_window);
+        client(*c);
+
+        void make_windows()
+        {
+            _main_window.create_default(
+                screen->root,
+                (screen->width_in_pixels / 4),
+                (screen->width_in_pixels / 4),
+                (screen->width_in_pixels / 2),
+                (screen->width_in_pixels / 2)
+            );
+            _main_window.set_backround_color(DARK_GREY);
+            _main_window.map();
+            _main_window.raise();
+
+            _menu_window.create_default(
+                _main_window,
+                0,
+                0,
+                120,
+                _main_window.height()
+            );
+            _menu_window.set_backround_color(RED);
+            _menu_window.map();
+        }
+
+        void make_internal_client()
+        {
+            c         = new client;
+            c->win    = _main_window;
+            c->x      = _main_window.x();
+            c->y      = _main_window.y();
+            c->width  = _main_window.width();
+            c->height = _main_window.height();
+            c->make_decorations();
+            uint32_t mask = XCB_EVENT_MASK_STRUCTURE_NOTIFY;
+            _main_window.apply_event_mask(&mask);
+            wm->client_list.push_back(c);
+        }
+
+        void launch()
+        {
+            make_windows();
+            make_internal_client();
+        }
+
+    public:
+        __system_settings__() {}
+};
+static __system_settings__ *system_settings(nullptr);
 
 class Dock
 {
@@ -9074,6 +9127,9 @@ void setup_wm()
     wifi->init();
 
     network = new __network__;
+
+    system_settings = new __system_settings__;
+    wm->context_menu->add_entry("settings", [&]()-> void { system_settings->launch(); });
 }
 
 int main()
