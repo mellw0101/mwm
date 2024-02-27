@@ -6160,10 +6160,7 @@ static File_App *file_app;
 
 class __system_settings__
 {
-    public:
-        window(_main_window), (_menu_window);
-        client(*c);
-
+    private:
         void make_windows()
         {
             int width = (screen->width_in_pixels / 2), height = (screen->height_in_pixels / 2);
@@ -6180,18 +6177,56 @@ class __system_settings__
             _main_window.map();
             _main_window.raise();
 
+            #define MENU_WINDOW_WIDTH 120
+            #define MENU_ENTRY_HEIGHT 20
+
             _menu_window.create_default(
                 _main_window,
                 0,
                 0,
-                120,
+                MENU_WINDOW_WIDTH,
                 _main_window.height()
             );
-            uint32_t mask = XCB_EVENT_MASK_EXPOSURE;
-            _menu_window.apply_event_mask(&mask);
             _menu_window.set_backround_color(RED);
             _menu_window.map();
-            draw_menu();
+            
+            uint32_t mask = XCB_EVENT_MASK_EXPOSURE;
+
+            _screen_menu_entry_window.create_default(
+                _menu_window,
+                0,
+                0,
+                MENU_WINDOW_WIDTH,
+                MENU_ENTRY_HEIGHT
+            );
+            _screen_menu_entry_window.apply_event_mask(&mask);
+            _screen_menu_entry_window.set_backround_color(BLUE);
+            _screen_menu_entry_window.map();
+            draw_screen();
+
+            _audio_menu_entry_window.create_default(
+                _menu_window,
+                0,
+                20,
+                MENU_WINDOW_WIDTH,
+                MENU_ENTRY_HEIGHT
+            );
+            _audio_menu_entry_window.set_backround_color(BLUE);
+            _audio_menu_entry_window.apply_event_mask(&mask);
+            _audio_menu_entry_window.map();
+            draw_audio();
+
+            _network_menu_entry_window.create_default(
+                _menu_window,
+                0,
+                40,
+                MENU_WINDOW_WIDTH,
+                MENU_ENTRY_HEIGHT
+            );
+            _network_menu_entry_window.set_backround_color(BLUE);
+            _network_menu_entry_window.apply_event_mask(&mask);
+            _network_menu_entry_window.map();
+            draw_network();
         }
 
         void make_internal_client()
@@ -6207,40 +6242,6 @@ class __system_settings__
             _main_window.apply_event_mask(&mask);
             wm->client_list.push_back(c);
             c->focus();
-        }
-
-        void launch()
-        {
-            make_windows();
-            make_internal_client();
-        }
-
-        void draw_menu()
-        {
-            _menu_window.draw_text(
-                "Screen",
-                WHITE,
-                DARK_GREY,
-                DEFULT_FONT,
-                4,
-                14
-            );
-            _menu_window.draw_text(
-                "Audio",
-                WHITE,
-                DARK_GREY,
-                DEFULT_FONT,
-                4,
-                30
-            );
-            _menu_window.draw_text(
-                "Network",
-                WHITE,
-                DARK_GREY,
-                DEFULT_FONT,
-                4,
-                46
-            );
         }
 
         void setup_events()
@@ -6270,11 +6271,67 @@ class __system_settings__
             event_handler->setEventCallback(XCB_EXPOSE, [this](Ev ev)->void
             {
                 const auto e = reinterpret_cast<const xcb_expose_event_t *>(ev);
-                if (e->window == _menu_window)
+                if (e->window == _screen_menu_entry_window)
                 {
-                    draw_menu();
+                    draw_screen();
+                }
+
+                if (e->window == _audio_menu_entry_window)
+                {
+                    draw_audio();
+                }
+
+                if (e->window == _network_menu_entry_window)
+                {
+                    draw_network();
                 }
             });
+        }
+
+    public:
+        window(_main_window), (_menu_window), (_screen_menu_entry_window), (_audio_menu_entry_window), (_network_menu_entry_window);
+        client(*c);
+
+        void launch()
+        {
+            make_windows();
+            make_internal_client();
+        }
+
+        void draw_screen()
+        {
+            _screen_menu_entry_window.draw_text(
+                "Screen",
+                WHITE,
+                DARK_GREY,
+                DEFULT_FONT,
+                2,
+                12
+            );
+        }
+
+        void draw_audio()
+        {
+            _audio_menu_entry_window.draw_text(
+                "Audio",
+                WHITE,
+                DARK_GREY,
+                DEFULT_FONT,
+                2,
+                12
+            );
+        }
+
+        void draw_network()
+        {
+            _network_menu_entry_window.draw_text(
+                "Network",
+                WHITE,
+                DARK_GREY,
+                DEFULT_FONT,
+                4,
+                46
+            );
         }
 
         void init()
@@ -7069,9 +7126,19 @@ class mv_client
                             status_bar->draw_wifi_info_window();
                         }
 
-                        if (e->window == system_settings->_menu_window)
+                        if (e->window == system_settings->_screen_menu_entry_window)
                         {
-                            system_settings->draw_menu();
+                            system_settings->draw_screen();
+                        }
+
+                        if (e->window == system_settings->_audio_menu_entry_window)
+                        {
+                            system_settings->draw_audio();
+                        }
+
+                        if (e->window == system_settings->_network_menu_entry_window)
+                        {
+                            system_settings->draw_network();
                         }
 
                         break;
@@ -7953,9 +8020,19 @@ class resize_client
                                     status_bar->draw_wifi_info_window();
                                 }
 
-                                if (e->window == system_settings->_menu_window)
+                                if (e->window == system_settings->_screen_menu_entry_window)
                                 {
-                                    system_settings->draw_menu();
+                                    system_settings->draw_screen();
+                                }
+
+                                if (e->window == system_settings->_audio_menu_entry_window)
+                                {
+                                    system_settings->draw_audio();
+                                }
+
+                                if (e->window == system_settings->_network_menu_entry_window)
+                                {
+                                    system_settings->draw_network();
                                 }
 
                                 break;
