@@ -6574,10 +6574,10 @@ class __status_bar__
         void create_wifi_dropdown_window__()
         {
             #define WIFI_DROPDOWN_BORDER 2
-            #define WIFI_DROPDOWN_X ((screen->width_in_pixels - 150) - 110)
-            #define WIFI_DROPDOWN_Y 20
-            #define WIFI_DROPDOWN_WIDTH 220
-            #define WIFI_DROPDOWN_HEIGHT 240
+            uint32_t _wifi_dropdown_window_x((screen->width_in_pixels - 150) - 110),
+                     _wifi_dropdown_window_y(20),
+                     _wifi_dropdown_window_width(220),
+                     _wifi_dropdown_window_height(240);
 
             _wifi_dropdown_window.create_default(
                 screen->root,
@@ -6593,7 +6593,7 @@ class __status_bar__
             _wifi_close_window.create_default(
                 _wifi_dropdown_window,
                 20,
-                (WIFI_DROPDOWN_HEIGHT - 40),
+                (_wifi_dropdown_window_height - 40),
                 80,
                 20
             );
@@ -6608,8 +6608,8 @@ class __status_bar__
                 _wifi_dropdown_window,
                 20,
                 20,
-                (WIFI_DROPDOWN_WIDTH - 40),
-                (WIFI_DROPDOWN_HEIGHT - 120)
+                _wifi_dropdown_window_width - 40,
+                _wifi_dropdown_window_height - 120
             );
             _mask = XCB_EVENT_MASK_EXPOSURE;
             _wifi_info_window.apply_event_mask(&_mask);
@@ -6623,8 +6623,6 @@ class __status_bar__
         {
             _wifi_close_window.unmap();
             _wifi_close_window.kill();
-            _wifi_info_window.unmap();
-            _wifi_info_window.kill();
             _wifi_dropdown_window.unmap();
             _wifi_dropdown_window.kill();
         }
