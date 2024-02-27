@@ -76,8 +76,7 @@ static const xcb_setup_t * setup;
 static xcb_screen_iterator_t iter;
 static xcb_screen_t * screen;
 
-#define Public(type) public:type
-#define Private(type) private:type
+#define DEFULT_FONT "7x14"
 using namespace std;
 using Uint = unsigned int;
 using SUint = unsigned short int;
@@ -6188,9 +6187,11 @@ class __system_settings__
                 120,
                 _main_window.height()
             );
-            _menu_window.set_backround_color(DARK_GREY);
+            uint32_t mask = XCB_EVENT_MASK_EXPOSURE;
+            _menu_window.apply_event_mask(&mask);
+            _menu_window.set_backround_color(RED);
             _menu_window.map();
-            __window_decor__::make_borders(_menu_window, 2, BLUE);
+            draw_menu();
         }
 
         void make_internal_client()
@@ -6214,6 +6215,34 @@ class __system_settings__
             make_internal_client();
         }
 
+        void draw_menu()
+        {
+            _menu_window.draw_text(
+                "Screen",
+                WHITE,
+                DARK_GREY,
+                DEFULT_FONT,
+                4,
+                14
+            );
+            _menu_window.draw_text(
+                "Audio",
+                WHITE,
+                DARK_GREY,
+                DEFULT_FONT,
+                4,
+                30
+            );
+            _menu_window.draw_text(
+                "Network",
+                WHITE,
+                DARK_GREY,
+                DEFULT_FONT,
+                4,
+                46
+            );
+        }
+
         void setup_events()
         {
             event_handler->setEventCallback(XCB_KEY_PRESS, [this](Ev ev)->void
@@ -6235,6 +6264,15 @@ class __system_settings__
                 {
                     _menu_window.height(e->height);
                     xcb_flush(conn);
+                }
+            });
+
+            event_handler->setEventCallback(XCB_EXPOSE, [this](Ev ev)->void
+            {
+                const auto e = reinterpret_cast<const xcb_expose_event_t *>(ev);
+                if (e->window == _menu_window)
+                {
+                    draw_menu();
                 }
             });
         }
@@ -7029,6 +7067,11 @@ class mv_client
                         if (e->window == status_bar->_wifi_info_window)
                         {
                             status_bar->draw_wifi_info_window();
+                        }
+
+                        if (e->window == system_settings->_menu_window)
+                        {
+                            system_settings->draw_menu();
                         }
 
                         break;
@@ -7908,6 +7951,11 @@ class resize_client
                                 if (e->window == status_bar->_wifi_info_window)
                                 {
                                     status_bar->draw_wifi_info_window();
+                                }
+
+                                if (e->window == system_settings->_menu_window)
+                                {
+                                    system_settings->draw_menu();
                                 }
 
                                 break;
