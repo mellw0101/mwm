@@ -6204,6 +6204,7 @@ class __system_settings__
             uint32_t mask = XCB_EVENT_MASK_STRUCTURE_NOTIFY;
             _main_window.apply_event_mask(&mask);
             wm->client_list.push_back(c);
+            c->focus();
         }
 
         void launch()
