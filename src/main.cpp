@@ -6460,7 +6460,7 @@ class __wifi__
                 }
             });
 
-            check_network_interfaces__();
+            // check_network_interfaces__();
         }
 
     public:
