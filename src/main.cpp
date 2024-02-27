@@ -6188,8 +6188,9 @@ class __system_settings__
                 120,
                 _main_window.height()
             );
-            _menu_window.set_backround_color(RED);
+            _menu_window.set_backround_color(DARK_GREY);
             _menu_window.map();
+            __window_decor__::make_borders(_menu_window, 2, BLUE);
         }
 
         void make_internal_client()
