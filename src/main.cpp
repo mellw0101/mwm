@@ -6588,8 +6588,6 @@ class __system_settings__
             );
             _default_settings_window.set_backround_color(ORANGE);
             _default_settings_window.map();
-            
-            mask = XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS;
 
             make_menu_entry_window__(_screen_menu_entry_window, 0);
             make_settings_window__(_screen_settings_window);
@@ -6651,6 +6649,12 @@ class __system_settings__
             xcb_flush(conn);
             __window.map();
             __window.raise();
+
+            if (__window == _screen_settings_window)
+            {
+                _current_res_hz_window.map();
+                draw(_current_res_hz_window);
+            }
         }
 
         void setup_events__()
