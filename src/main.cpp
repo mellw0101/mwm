@@ -6188,6 +6188,9 @@ static File_App *file_app;
 class __screen_settings__
 {
     public:
+        xcb_randr_mode_t(_current_res_hz);
+        vector<pair<xcb_randr_mode_t, string>>(_avalible_modes);
+
         void change_refresh_rate(xcb_connection_t *conn, int desired_width, int desired_height, int desired_refresh)
         {
             // Initialize RandR and get screen resources
@@ -6253,9 +6256,9 @@ class __screen_settings__
             return 0.0f;
         }
 
-        vector<string> list_screen_res_and_refresh_rates()
+        vector<pair<xcb_randr_mode_t, string>> list_screen_res_and_refresh_rates()
         {
-            vector<string>(results);
+            vector<pair<xcb_randr_mode_t, string>>(results);
             xcb_randr_get_screen_resources_current_cookie_t res_cookie;
             xcb_randr_get_screen_resources_current_reply_t *res_reply;
             xcb_randr_mode_info_t *mode_info;
@@ -6277,8 +6280,9 @@ class __screen_settings__
             for (int i = 0; i < mode_count; i++) // Iterate through all modes
             {
                 float refresh_rate = calculate_refresh_rate(&mode_info[i]);
-                string s("Resolution: " + to_string(mode_info[i].width) + ":" + to_string(mode_info[i].height) + ", Refresh Rate: " + to_string(refresh_rate) + " Hz");
-                results.push_back(s);
+                string s(to_string(mode_info[i].width) + "x" + to_string(mode_info[i].height) + to_string(refresh_rate) + " Hz");
+                
+                results.push_back({mode_info[i].id, s});
             }
 
             free(res_reply);
@@ -6503,10 +6507,9 @@ class __screen_settings__
                         break;
                     }
 
-                    float refresh_rate = calculate_refresh_rate(&mode_info[i]);
                     if (__type == REFRESH_RATE)
                     {
-                        result = to_string(refresh_rate);
+                        result = to_string(calculate_refresh_rate(&mode_info[i]));
                         break;
                     }
                 }
@@ -6562,28 +6565,19 @@ class __system_settings__
                     _main_window.height()
                 );
                 _screen_settings_window.set_backround_color(GREEN);
-
-                _current_resolution_window.create_default(
-                    _screen_settings_window,
-                    0,
-                    0,
-                    300,
-                    20
-                );
                 mask = XCB_EVENT_MASK_EXPOSURE;
-                _current_resolution_window.apply_event_mask(&mask);
-                _current_resolution_window.set_backround_color(BLUE);
+                _screen_settings_window.apply_event_mask(&mask);
 
-                _current_refresh_rate_window.create_default(
+                _screen_resolution_window.create_default(
                     _screen_settings_window,
-                    0,
+                    40,
                     20,
-                    300,
+                    120,
                     20
                 );
-                mask = XCB_EVENT_MASK_EXPOSURE;
-                _current_refresh_rate_window.apply_event_mask(&mask);
-                _current_refresh_rate_window.set_backround_color(BLUE);
+                mask = XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS;
+                _screen_resolution_window.apply_event_mask(&mask);
+                _screen_resolution_window.set_backround_color(BLUE);
             }
         }
 
@@ -6691,10 +6685,9 @@ class __system_settings__
 
             if (__window == _screen_settings_window)
             {
-                _current_resolution_window.map();
-                draw(_current_resolution_window);
-                _current_refresh_rate_window.map();
-                draw(_current_refresh_rate_window);
+                draw(__window);
+                _screen_resolution_window.map();
+                draw(_screen_resolution_window);
             }
         }
 
@@ -6777,7 +6770,7 @@ class __system_settings__
     public:
         window(_main_window),
             (_menu_window), (_default_settings_window),
-            (_screen_menu_entry_window), (_screen_settings_window), (_current_resolution_window), (_current_refresh_rate_window),
+            (_screen_menu_entry_window), (_screen_settings_window), (_screen_resolution_window),
             (_audio_menu_entry_window), (_audio_settings_window),
             (_network_menu_entry_window), (_network_settings_window);
         
@@ -6811,6 +6804,33 @@ class __system_settings__
                 );
             }
 
+            if (__window == _screen_settings_window)
+            {
+                _screen_settings_window.draw_text(
+                    "Resolution ",
+                    WHITE,
+                    DARK_GREY,
+                    DEFAULT_FONT,
+                    4,
+                    35
+                );
+            }
+
+            if (__window == _screen_resolution_window)
+            {
+                string resolution(screen_settings->get_current_res_hz(__screen_settings__::RESOLUTION));
+                if (resolution.empty()) return;
+
+                _screen_resolution_window.draw_text(
+                    resolution.c_str(),
+                    WHITE,
+                    DARK_GREY,
+                    DEFAULT_FONT,
+                    2,
+                    12
+                );
+            }
+
             if (__window == _audio_menu_entry_window)
             {
                 _audio_menu_entry_window.draw_text(
@@ -6834,43 +6854,12 @@ class __system_settings__
                     15
                 );
             }
-
-            if (__window == _current_resolution_window)
-            {
-                string resolution(screen_settings->get_current_res_hz(__screen_settings__::RESOLUTION));
-                if (resolution.empty()) return;
-
-                _current_resolution_window.draw_text(
-                    resolution.c_str(),
-                    WHITE,
-                    DARK_GREY,
-                    DEFAULT_FONT,
-                    2,
-                    12
-                );
-            }
-
-            if (__window == _current_refresh_rate_window)
-            {
-                string refresh_rate(screen_settings->get_current_res_hz(__screen_settings__::REFRESH_RATE));
-                if (refresh_rate.empty()) return;
-
-                _current_refresh_rate_window.draw_text(
-                    refresh_rate.c_str(),
-                    WHITE,
-                    DARK_GREY,
-                    DEFAULT_FONT,
-                    2,
-                    12
-                );
-            }
         }
 
         void expose(const uint32_t &__window)
         {
             if (__window == _screen_menu_entry_window   ) draw(_screen_menu_entry_window);
-            if (__window == _current_resolution_window  ) draw(_current_resolution_window);
-            if (__window == _current_refresh_rate_window) draw(_current_refresh_rate_window);
+            if (__window == _screen_resolution_window   ) draw(_screen_resolution_window);
             if (__window == _audio_menu_entry_window    ) draw(_audio_menu_entry_window);
             if (__window == _network_menu_entry_window  ) draw(_network_menu_entry_window);
         }
