@@ -6188,6 +6188,8 @@ class __system_settings__
     private:
         void make_windows()
         {
+            uint32_t mask;
+
             int width = (screen->width_in_pixels / 2), height = (screen->height_in_pixels / 2);
             int x = ((screen->width_in_pixels / 2) - (width / 2)), y = ((screen->height_in_pixels / 2) - (height / 2));
             _main_window.create_default(
@@ -6205,6 +6207,8 @@ class __system_settings__
             #define MENU_WINDOW_WIDTH 120
             #define MENU_ENTRY_HEIGHT 20
 
+            mask = XCB_EVENT_MASK_BUTTON_PRESS;
+
             _menu_window.create_default(
                 _main_window,
                 0,
@@ -6212,10 +6216,21 @@ class __system_settings__
                 MENU_WINDOW_WIDTH,
                 _main_window.height()
             );
+            _menu_window.apply_event_mask(&mask);
             _menu_window.set_backround_color(RED);
             _menu_window.map();
+
+            _default_settings_window.create_default(
+                _main_window,
+                MENU_WINDOW_WIDTH,
+                0,
+                (_main_window.width() - MENU_WINDOW_WIDTH),
+                _main_window.height()
+            );
+            _default_settings_window.set_backround_color(ORANGE);
+            _default_settings_window.map();
             
-            uint32_t mask = XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS;
+            mask = XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS;
 
             _screen_menu_entry_window.create_default(
                 _menu_window,
@@ -6228,7 +6243,16 @@ class __system_settings__
             _screen_menu_entry_window.set_backround_color(BLUE);
             _screen_menu_entry_window.map();
             __window_decor__::make_menu_borders(_screen_menu_entry_window, 2, BLACK);
-            draw_screen();
+            draw(SCREEN);
+
+            _screen_settings_window.create_default(
+                _main_window,
+                MENU_WINDOW_WIDTH,
+                0,
+                (_main_window.width() - MENU_WINDOW_WIDTH),
+                _main_window.height()
+            );
+            _screen_settings_window.set_backround_color(GREEN);
 
             _audio_menu_entry_window.create_default(
                 _menu_window,
@@ -6241,7 +6265,7 @@ class __system_settings__
             _audio_menu_entry_window.apply_event_mask(&mask);
             _audio_menu_entry_window.map();
             __window_decor__::make_menu_borders(_audio_menu_entry_window, 2, BLACK);
-            draw_audio();
+            draw(AUDIO);
 
             _network_menu_entry_window.create_default(
                 _menu_window,
@@ -6254,7 +6278,7 @@ class __system_settings__
             _network_menu_entry_window.apply_event_mask(&mask);
             _network_menu_entry_window.map();
             __window_decor__::make_menu_borders(_network_menu_entry_window, 2, BLACK);
-            draw_network();
+            draw(NETWORK);
         }
 
         void make_internal_client()
@@ -6274,6 +6298,26 @@ class __system_settings__
 
         void setup_events()
         {
+            event_handler->setEventCallback(XCB_BUTTON_PRESS, [this](Ev ev)-> void
+            {
+                const auto e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
+                if (e->event == _menu_window)
+                {
+                    if (!_default_settings_window.is_mapped())
+                    {
+                        display(DEFAULT);
+                    }
+                }
+
+                if (e->event == _screen_menu_entry_window)
+                {
+                    if (!_screen_settings_window.is_mapped())
+                    {
+                        display(SCREEN);
+                    }
+                }
+            });
+
             event_handler->setEventCallback(XCB_KEY_PRESS, [this](Ev ev)->void
             {
                 const auto e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
@@ -6301,23 +6345,23 @@ class __system_settings__
                 const auto e = reinterpret_cast<const xcb_expose_event_t *>(ev);
                 if (e->window == _screen_menu_entry_window)
                 {
-                    draw_screen();
+                    draw(SCREEN);
                 }
 
                 if (e->window == _audio_menu_entry_window)
                 {
-                    draw_audio();
+                    draw(__system_settings__::AUDIO);
                 }
 
                 if (e->window == _network_menu_entry_window)
                 {
-                    draw_network();
+                    draw(__system_settings__::NETWORK);
                 }
             });
         }
 
     public:
-        window(_main_window), (_menu_window), (_screen_menu_entry_window), (_audio_menu_entry_window), (_network_menu_entry_window);
+        window(_main_window), (_menu_window), (_default_settings_window), (_screen_menu_entry_window), (_screen_settings_window), (_audio_menu_entry_window), (_network_menu_entry_window);
         client(*c);
 
         void launch()
@@ -6326,40 +6370,76 @@ class __system_settings__
             make_internal_client();
         }
 
-        void draw_screen()
+        enum
         {
-            _screen_menu_entry_window.draw_text(
-                "Screen",
-                WHITE,
-                DARK_GREY,
-                DEFAULT_FONT,
-                4,
-                15
-            );
+            SCREEN  = 0,
+            AUDIO   = 1,
+            NETWORK = 2,
+            DEFAULT = 3
+        };
+
+        void draw(int __type)
+        {
+            if (__type == SCREEN)
+            {
+                _screen_menu_entry_window.draw_text(
+                    "Screen",
+                    WHITE,
+                    DARK_GREY,
+                    DEFAULT_FONT,
+                    4,
+                    15
+                );
+            }
+
+            if (__type == AUDIO)
+            {
+                _audio_menu_entry_window.draw_text(
+                    "Audio",
+                    WHITE,
+                    DARK_GREY,
+                    DEFAULT_FONT,
+                    4,
+                    15
+                );
+            }
+
+            if (__type == NETWORK)
+            {
+                _network_menu_entry_window.draw_text(
+                    "Network",
+                    WHITE,
+                    DARK_GREY,
+                    DEFAULT_FONT,
+                    4,
+                    15
+                );
+            }
         }
 
-        void draw_audio()
+        void display(int __type)
         {
-            _audio_menu_entry_window.draw_text(
-                "Audio",
-                WHITE,
-                DARK_GREY,
-                DEFAULT_FONT,
-                4,
-                15
-            );
-        }
+            if (__type == DEFAULT)
+            {
+                if (_screen_settings_window.is_mapped())
+                {
+                    _screen_settings_window.unmap();
+                }
 
-        void draw_network()
-        {
-            _network_menu_entry_window.draw_text(
-                "Network",
-                WHITE,
-                DARK_GREY,
-                DEFAULT_FONT,
-                4,
-                15
-            );
+                _default_settings_window.map();
+                _default_settings_window.raise();
+            }
+
+            if (__type == SCREEN)
+            {
+                if (_default_settings_window.is_mapped())
+                {
+                    _default_settings_window.unmap();
+                }
+
+                _screen_settings_window.map();
+                _screen_settings_window.raise();
+            }
         }
 
         void init()
@@ -7156,17 +7236,17 @@ class mv_client
 
                         if (e->window == system_settings->_screen_menu_entry_window)
                         {
-                            system_settings->draw_screen();
+                            system_settings->draw(__system_settings__::SCREEN);
                         }
 
                         if (e->window == system_settings->_audio_menu_entry_window)
                         {
-                            system_settings->draw_audio();
+                            system_settings->draw(__system_settings__::AUDIO);
                         }
 
                         if (e->window == system_settings->_network_menu_entry_window)
                         {
-                            system_settings->draw_network();
+                            system_settings->draw(__system_settings__::NETWORK);
                         }
 
                         break;
@@ -8050,17 +8130,17 @@ class resize_client
 
                                 if (e->window == system_settings->_screen_menu_entry_window)
                                 {
-                                    system_settings->draw_screen();
+                                    system_settings->draw(__system_settings__::SCREEN);
                                 }
 
                                 if (e->window == system_settings->_audio_menu_entry_window)
                                 {
-                                    system_settings->draw_audio();
+                                    system_settings->draw(__system_settings__::AUDIO);
                                 }
 
                                 if (e->window == system_settings->_network_menu_entry_window)
                                 {
-                                    system_settings->draw_network();
+                                    system_settings->draw(__system_settings__::NETWORK);
                                 }
 
                                 break;
