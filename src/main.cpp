@@ -6215,11 +6215,11 @@ class __system_settings__
             _menu_window.set_backround_color(RED);
             _menu_window.map();
             
-            uint32_t mask = XCB_EVENT_MASK_EXPOSURE;
+            uint32_t mask = XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS;
 
             _screen_menu_entry_window.create_default(
                 _menu_window,
-                -2,
+                0,
                 0,
                 MENU_WINDOW_WIDTH,
                 MENU_ENTRY_HEIGHT
@@ -6227,33 +6227,33 @@ class __system_settings__
             _screen_menu_entry_window.apply_event_mask(&mask);
             _screen_menu_entry_window.set_backround_color(BLUE);
             _screen_menu_entry_window.map();
-            __window_decor__::make_borders(_screen_menu_entry_window, 2, BLACK);
+            __window_decor__::make_menu_borders(_screen_menu_entry_window, 2, BLACK);
             draw_screen();
 
             _audio_menu_entry_window.create_default(
                 _menu_window,
-                -2,
-                18,
+                0,
+                20,
                 MENU_WINDOW_WIDTH,
                 MENU_ENTRY_HEIGHT
             );
             _audio_menu_entry_window.set_backround_color(BLUE);
             _audio_menu_entry_window.apply_event_mask(&mask);
             _audio_menu_entry_window.map();
-            __window_decor__::make_borders(_audio_menu_entry_window, 2, BLACK);
+            __window_decor__::make_menu_borders(_audio_menu_entry_window, 2, BLACK);
             draw_audio();
 
             _network_menu_entry_window.create_default(
                 _menu_window,
-                -2,
-                36,
+                0,
+                40,
                 MENU_WINDOW_WIDTH,
                 MENU_ENTRY_HEIGHT
             );
             _network_menu_entry_window.set_backround_color(BLUE);
             _network_menu_entry_window.apply_event_mask(&mask);
             _network_menu_entry_window.map();
-            __window_decor__::make_borders(_network_menu_entry_window, 2, BLACK);
+            __window_decor__::make_menu_borders(_network_menu_entry_window, 2, BLACK);
             draw_network();
         }
 
