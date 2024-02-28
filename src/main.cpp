@@ -2775,7 +2775,7 @@ class __window_decor__
                 __window,
                 __size,
                 (__window.height() - __size),
-                (__window.width() - __size),
+                __window.width(),
                 __size
             );
             down.set_backround_color(__color);
