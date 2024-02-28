@@ -6564,9 +6564,9 @@ class __system_settings__
 
                 _screen_resolution_window.create_default(
                     _screen_settings_window,
-                    40,
+                    100,
                     20,
-                    120,
+                    160,
                     20
                 );
                 mask = XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS;
