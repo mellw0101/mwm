@@ -4646,7 +4646,8 @@ class Window_Manager
                 this_thread::sleep_for(chrono::minutes(1));
                 check_volt();
             }
-}; static Window_Manager *wm;
+};
+static Window_Manager *wm;
 
 /**
  *
@@ -6184,6 +6185,322 @@ class File_App
 };
 static File_App *file_app;
 
+class __screen_settings__
+{
+    public:
+        void change_refresh_rate(xcb_connection_t *conn, int desired_width, int desired_height, int desired_refresh)
+        {
+            // Initialize RandR and get screen resources
+            // This is highly simplified and assumes you have the output and CRTC IDs
+
+            xcb_randr_get_screen_resources_current_reply_t *res_reply = xcb_randr_get_screen_resources_current_reply(
+                conn,
+                xcb_randr_get_screen_resources_current(conn, screen->root),
+                nullptr
+            );
+
+            // Iterate through modes to find matching resolution and refresh rate
+            xcb_randr_mode_info_t *modes = xcb_randr_get_screen_resources_current_modes(res_reply);
+            int mode_count = xcb_randr_get_screen_resources_current_modes_length(res_reply);
+            for (int i = 0; i < mode_count; ++i)
+            {
+                // log_info(modes[i]);
+            }
+
+            free(res_reply);
+        }
+    
+        vector<xcb_randr_mode_t> find_mode()
+        {
+            vector<xcb_randr_mode_t>(mode_vec);
+
+            xcb_randr_get_screen_resources_current_cookie_t res_cookie;
+            xcb_randr_get_screen_resources_current_reply_t *res_reply;
+
+            // Get screen resources
+            res_cookie = xcb_randr_get_screen_resources_current(conn, screen->root);
+            res_reply = xcb_randr_get_screen_resources_current_reply(conn, res_cookie, nullptr);
+
+            if (!res_reply)
+            {
+                log_error("Could not get screen resources");
+                return{};
+            }
+
+            xcb_randr_mode_info_t *modes = xcb_randr_get_screen_resources_current_modes(res_reply);
+            int mode_count = xcb_randr_get_screen_resources_current_modes_length(res_reply);
+
+            // Iterate through modes to find matching resolution and refresh rate
+            for (int i = 0; i < mode_count; ++i)
+            {
+                mode_vec.push_back(modes[i].id);
+            }
+
+            return mode_vec;
+        }
+
+        static float calculate_refresh_rate(const xcb_randr_mode_info_t *mode_info) /**
+         *
+         * Function to calculate the refresh rate from mode info
+         *
+         */
+        {
+            if (mode_info->htotal && mode_info->vtotal)
+            {
+                return ((float)mode_info->dot_clock / (float)(mode_info->htotal * mode_info->vtotal));
+            }
+
+            return 0.0f;
+        }
+
+        vector<string> list_screen_res_and_refresh_rates()
+        {
+            vector<string>(results);
+            xcb_randr_get_screen_resources_current_cookie_t res_cookie;
+            xcb_randr_get_screen_resources_current_reply_t *res_reply;
+            xcb_randr_mode_info_t *mode_info;
+            int mode_count;
+
+            // Get screen resources
+            res_cookie = xcb_randr_get_screen_resources_current(conn, screen->root);
+            res_reply = xcb_randr_get_screen_resources_current_reply(conn, res_cookie, nullptr);
+
+            if (!res_reply)
+            {
+                log_error("Could not get screen resources");
+                return {};
+            }
+
+            mode_info = xcb_randr_get_screen_resources_current_modes(res_reply);
+            mode_count = xcb_randr_get_screen_resources_current_modes_length(res_reply);
+
+            for (int i = 0; i < mode_count; i++) // Iterate through all modes
+            {
+                float refresh_rate = calculate_refresh_rate(&mode_info[i]);
+                string s("Resolution: " + to_string(mode_info[i].width) + ":" + to_string(mode_info[i].height) + ", Refresh Rate: " + to_string(refresh_rate) + " Hz");
+                results.push_back(s);
+            }
+
+            free(res_reply);
+            return results;
+        }
+
+        void change_resolution()
+        {
+            xcb_randr_get_screen_resources_current_cookie_t res_cookie;
+            xcb_randr_get_screen_resources_current_reply_t *res_reply;
+            xcb_randr_output_t *outputs;
+            int outputs_len;
+
+            // Get current screen resources
+            res_cookie = xcb_randr_get_screen_resources_current(conn, screen->root);
+            res_reply = xcb_randr_get_screen_resources_current_reply(conn, res_cookie, NULL);
+
+            if (!res_reply)
+            {
+                log_error("Could not get screen resources");
+                return;
+            }
+
+            // Get outputs; assuming the first output is the one we want to change
+            outputs = xcb_randr_get_screen_resources_current_outputs(res_reply);
+            outputs_len = xcb_randr_get_screen_resources_current_outputs_length(res_reply);
+
+            if (!outputs_len)
+            {
+                log_error("No outputs found");
+                free(res_reply);
+                return;
+            }
+
+            xcb_randr_output_t output = outputs[0]; // Assuming we change the first output
+
+            // Get the current configuration for the output
+            xcb_randr_get_output_info_cookie_t output_info_cookie = xcb_randr_get_output_info(conn, output, XCB_CURRENT_TIME);
+            xcb_randr_get_output_info_reply_t *output_info_reply = xcb_randr_get_output_info_reply(conn, output_info_cookie, NULL);
+
+            if (!output_info_reply || output_info_reply->crtc == XCB_NONE)
+            {
+                log_error("Output is not connected to any CRTC");
+                free(output_info_reply);
+                free(res_reply);
+                return;
+            }
+
+            xcb_randr_mode_t mode_id;
+            vector<xcb_randr_mode_t>(mode_vector)(find_mode());
+            for (int i(0); i < mode_vector.size(); ++i)
+            {
+                if (mode_vector[i] == get_current_resolution_and_refresh())
+                {
+                    if (i == (mode_vector.size() - 1))
+                    {
+                        mode_id = mode_vector[0];
+                        break;
+                    }
+
+                    mode_id = mode_vector[i + 1];
+                    break;
+                }
+            }
+
+            // Set the mode
+            xcb_randr_set_crtc_config_cookie_t set_crtc_config_cookie = xcb_randr_set_crtc_config(
+                conn,
+                output_info_reply->crtc,
+                XCB_CURRENT_TIME,
+                XCB_CURRENT_TIME,
+                0, // x
+                0, // y
+                mode_id,
+                XCB_RANDR_ROTATION_ROTATE_0,
+                1, &output
+            );
+
+            xcb_randr_set_crtc_config_reply_t *set_crtc_config_reply = xcb_randr_set_crtc_config_reply(conn, set_crtc_config_cookie, NULL);
+
+            if (!set_crtc_config_reply)
+            {
+                log_error("Failed to set mode");
+            }
+            else
+            {
+                log_info("Mode set successfully");
+            }
+
+            free(set_crtc_config_reply);
+            free(output_info_reply);
+            free(res_reply);
+        }
+        
+        xcb_randr_mode_t get_current_resolution_and_refresh()
+        {
+            xcb_randr_get_screen_resources_current_cookie_t res_cookie = xcb_randr_get_screen_resources_current(conn, screen->root);
+            xcb_randr_get_screen_resources_current_reply_t *res_reply = xcb_randr_get_screen_resources_current_reply(conn, res_cookie, nullptr);
+
+            if (!res_reply)
+            {
+                log_error("Could not get screen resources");
+                return {};
+            }
+
+            xcb_randr_output_t *outputs = xcb_randr_get_screen_resources_current_outputs(res_reply);
+            if (!res_reply->num_outputs)
+            {
+                log_error("No outputs found");
+                free(res_reply);
+                return {};
+            }
+
+            // Assuming the first output is the primary one
+            xcb_randr_output_t output = outputs[0];
+            xcb_randr_get_output_info_cookie_t output_info_cookie = xcb_randr_get_output_info(conn, output, XCB_CURRENT_TIME);
+            xcb_randr_get_output_info_reply_t *output_info_reply = xcb_randr_get_output_info_reply(conn, output_info_cookie, nullptr);
+
+            if (!output_info_reply || output_info_reply->crtc == XCB_NONE)
+            {
+                log_error("Output is not currently connected to a CRTC");
+                free(output_info_reply);
+                free(res_reply);
+                return{};
+            }
+
+            xcb_randr_get_crtc_info_cookie_t crtc_info_cookie = xcb_randr_get_crtc_info(conn, output_info_reply->crtc, XCB_CURRENT_TIME);
+            xcb_randr_get_crtc_info_reply_t *crtc_info_reply = xcb_randr_get_crtc_info_reply(conn, crtc_info_cookie, nullptr);
+
+            if (!crtc_info_reply)
+            {
+                log_error("Could not get CRTC info");
+                free(output_info_reply);
+                free(res_reply);
+                return{};
+            }
+
+            xcb_randr_mode_t mode_id;
+            xcb_randr_mode_info_t *mode_info = nullptr;
+            xcb_randr_mode_info_iterator_t mode_iter = xcb_randr_get_screen_resources_current_modes_iterator(res_reply);
+            for (; mode_iter.rem; xcb_randr_mode_info_next(&mode_iter))
+            {
+                if (mode_iter.data->id == crtc_info_reply->mode)
+                {
+                    mode_id = mode_iter.data->id;
+                    break;
+                }
+            }
+
+            free(crtc_info_reply);
+            free(output_info_reply);
+            free(res_reply);
+            return mode_id;
+        }
+
+        string get_current_res_and_hz()
+        {
+            xcb_randr_get_screen_resources_current_cookie_t res_cookie = xcb_randr_get_screen_resources_current(conn, screen->root);
+            xcb_randr_get_screen_resources_current_reply_t *res_reply = xcb_randr_get_screen_resources_current_reply(conn, res_cookie, nullptr);
+
+            if (!res_reply)
+            {
+                log_error("Could not get screen resources");
+                return {};
+            }
+
+            xcb_randr_output_t *outputs = xcb_randr_get_screen_resources_current_outputs(res_reply);
+            if (!res_reply->num_outputs)
+            {
+                log_error("No outputs found");
+                free(res_reply);
+                return {};
+            }
+
+            // Assuming the first output is the primary one
+            xcb_randr_output_t output = outputs[0];
+            xcb_randr_get_output_info_cookie_t output_info_cookie = xcb_randr_get_output_info(conn, output, XCB_CURRENT_TIME);
+            xcb_randr_get_output_info_reply_t *output_info_reply = xcb_randr_get_output_info_reply(conn, output_info_cookie, nullptr);
+
+            if (!output_info_reply || output_info_reply->crtc == XCB_NONE)
+            {
+                log_error("Output is not currently connected to a CRTC");
+                free(output_info_reply);
+                free(res_reply);
+                return{};
+            }
+
+            xcb_randr_get_crtc_info_cookie_t crtc_info_cookie = xcb_randr_get_crtc_info(conn, output_info_reply->crtc, XCB_CURRENT_TIME);
+            xcb_randr_get_crtc_info_reply_t *crtc_info_reply = xcb_randr_get_crtc_info_reply(conn, crtc_info_cookie, nullptr);
+
+            if (!crtc_info_reply)
+            {
+                log_error("Could not get CRTC info");
+                free(output_info_reply);
+                free(res_reply);
+                return{};
+            }
+
+            string mode_id;
+            xcb_randr_mode_info_t *mode_info = nullptr;
+            xcb_randr_mode_info_iterator_t mode_iter = xcb_randr_get_screen_resources_current_modes_iterator(res_reply);
+            for (; mode_iter.rem; xcb_randr_mode_info_next(&mode_iter))
+            {
+                if (mode_iter.data->id == crtc_info_reply->mode)
+                {
+                    float refresh_rate = calculate_refresh_rate(mode_info);
+                    mode_id = ("Resolution: " + to_string(mode_iter.data->width) + ":" + to_string(mode_iter.data->height) + ", Refresh Rate: " + to_string(refresh_rate) + " Hz");
+                    break;
+                }
+            }
+
+            free(crtc_info_reply);
+            free(output_info_reply);
+            free(res_reply);
+            return mode_id;
+        }
+
+    public:
+        __screen_settings__() {}
+};
+static __screen_settings__ *screen_settings(nullptr);
+
 #define MENU_WINDOW_WIDTH 120
 #define MENU_ENTRY_HEIGHT 20
 class __system_settings__
@@ -6205,6 +6522,32 @@ class __system_settings__
             __window.map();
             __window_decor__::make_menu_borders(__window, 2, BLACK);
             draw(__window);
+        }
+
+        void make_settings_window__(window &__window)
+        {
+            if (__window == _screen_settings_window)
+            {
+                _screen_settings_window.create_default(
+                    _main_window,
+                    MENU_WINDOW_WIDTH,
+                    0,
+                    (_main_window.width() - MENU_WINDOW_WIDTH),
+                    _main_window.height()
+                );
+                _screen_settings_window.set_backround_color(GREEN);
+
+                _current_res_hz_window.create_default(
+                    _screen_settings_window,
+                    0,
+                    0,
+                    120,
+                    20
+                );
+                _current_res_hz_window.set_backround_color(BLUE);
+                _current_res_hz_window.map();
+                draw(_current_res_hz_window);
+            }
         }
 
         void make_windows__()
@@ -6251,14 +6594,7 @@ class __system_settings__
             mask = XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS;
 
             make_menu_entry_window__(_screen_menu_entry_window, 0);
-            _screen_settings_window.create_default(
-                _main_window,
-                MENU_WINDOW_WIDTH,
-                0,
-                (_main_window.width() - MENU_WINDOW_WIDTH),
-                _main_window.height()
-            );
-            _screen_settings_window.set_backround_color(GREEN);
+            make_settings_window__(_screen_settings_window);
 
             make_menu_entry_window__(_audio_menu_entry_window, 20);
             _audio_settings_window.create_default(
@@ -6409,8 +6745,12 @@ class __system_settings__
         }
 
     public:
-        window(_main_window), (_menu_window), (_default_settings_window), (_screen_menu_entry_window), (_screen_settings_window),
-            (_audio_menu_entry_window), (_audio_settings_window), (_network_menu_entry_window), (_network_settings_window);
+        window(_main_window),
+            (_menu_window), (_default_settings_window),
+            (_screen_menu_entry_window), (_screen_settings_window), (_current_res_hz_window),
+            (_audio_menu_entry_window), (_audio_settings_window),
+            (_network_menu_entry_window), (_network_settings_window);
+        
         client(*c);
 
         void check_and_configure_mapped_window(window &__window, const uint32_t &__width, const uint32_t &__height)
@@ -6462,6 +6802,18 @@ class __system_settings__
                     DEFAULT_FONT,
                     4,
                     15
+                );
+            }
+
+            if (__window == _current_res_hz_window)
+            {
+                _current_res_hz_window.draw_text(
+                    screen_settings->get_current_res_and_hz().c_str(),
+                    WHITE,
+                    DARK_GREY,
+                    DEFAULT_FONT,
+                    2,
+                    12
                 );
             }
         }
@@ -9437,6 +9789,8 @@ void setup_wm()
 
     system_settings = new __system_settings__;
     system_settings->init();
+
+    screen_settings = new __screen_settings__;
 }
 
 int main()
