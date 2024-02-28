@@ -6835,6 +6835,29 @@ class __system_settings__
             }
         }
 
+        void expose(const uint32_t &__window)
+        {
+            if (__window == _screen_menu_entry_window)
+            {
+                draw(_screen_menu_entry_window);
+            }
+
+            if (__window == _current_res_hz_window)
+            {
+                draw(_current_res_hz_window);
+            }
+
+            if (__window == _audio_menu_entry_window)
+            {
+                draw(_audio_menu_entry_window);
+            }
+
+            if (__window == _network_menu_entry_window)
+            {
+                draw(_network_menu_entry_window);
+            }
+        }
+
         void init()
         {
             setup_events__();
@@ -8526,25 +8549,27 @@ class resize_client
                                     status_bar->draw_wifi_info_window();
                                 }
 
-                                if (e->window == system_settings->_screen_menu_entry_window)
-                                {
-                                    system_settings->draw(system_settings->_screen_menu_entry_window);
-                                }
+                                system_settings->expose(e->window);
 
-                                if (e->window == system_settings->_current_res_hz_window)
-                                {
-                                    system_settings->draw(system_settings->_current_res_hz_window);
-                                }
+                                // if (e->window == system_settings->_screen_menu_entry_window)
+                                // {
+                                //     system_settings->draw(system_settings->_screen_menu_entry_window);
+                                // }
 
-                                if (e->window == system_settings->_audio_menu_entry_window)
-                                {
-                                    system_settings->draw(system_settings->_audio_menu_entry_window);
-                                }
+                                // if (e->window == system_settings->_current_res_hz_window)
+                                // {
+                                //     system_settings->draw(system_settings->_current_res_hz_window);
+                                // }
 
-                                if (e->window == system_settings->_network_menu_entry_window)
-                                {
-                                    system_settings->draw(system_settings->_network_menu_entry_window);
-                                }
+                                // if (e->window == system_settings->_audio_menu_entry_window)
+                                // {
+                                //     system_settings->draw(system_settings->_audio_menu_entry_window);
+                                // }
+
+                                // if (e->window == system_settings->_network_menu_entry_window)
+                                // {
+                                //     system_settings->draw(system_settings->_network_menu_entry_window);
+                                // }
 
                                 break;
                             }
