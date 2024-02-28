@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include <features.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -6183,6 +6184,8 @@ class File_App
 };
 static File_App *file_app;
 
+#define MENU_WINDOW_WIDTH 120
+#define MENU_ENTRY_HEIGHT 20
 class __system_settings__
 {
     private:
@@ -6203,9 +6206,6 @@ class __system_settings__
             _main_window.grab_default_keys();
             _main_window.map();
             _main_window.raise();
-
-            #define MENU_WINDOW_WIDTH 120
-            #define MENU_ENTRY_HEIGHT 20
 
             mask = XCB_EVENT_MASK_BUTTON_PRESS;
 
@@ -6336,6 +6336,17 @@ class __system_settings__
                 if (e->window == _main_window)
                 {
                     _menu_window.height(e->height);
+
+                    if (_default_settings_window.is_mapped())
+                    {
+                        _default_settings_window.width_height((e->width - MENU_WINDOW_WIDTH), e->height);
+                    }
+
+                    if (_screen_settings_window.is_mapped())
+                    {
+                        _screen_settings_window.width_height((e->width - MENU_WINDOW_WIDTH), e->height);
+                    }
+
                     xcb_flush(conn);
                 }
             });
@@ -6426,6 +6437,8 @@ class __system_settings__
                     _screen_settings_window.unmap();
                 }
 
+                _default_settings_window.width_height((_main_window.width() - MENU_WINDOW_WIDTH), _main_window.height());
+                xcb_flush(conn);
                 _default_settings_window.map();
                 _default_settings_window.raise();
             }
@@ -6437,6 +6450,8 @@ class __system_settings__
                     _default_settings_window.unmap();
                 }
 
+                _screen_settings_window.width_height((_main_window.width() - MENU_WINDOW_WIDTH), _main_window.height());
+                xcb_flush(conn);
                 _screen_settings_window.map();
                 _screen_settings_window.raise();
             }
@@ -8152,6 +8167,17 @@ class resize_client
                                 if (e->window == system_settings->_main_window)
                                 {
                                     system_settings->_menu_window.height(e->height);
+
+                                    if (system_settings->_default_settings_window.is_mapped())
+                                    {
+                                        system_settings->_default_settings_window.width_height((e->width - MENU_WINDOW_WIDTH), e->height);
+                                    }
+
+                                    if (system_settings->_screen_settings_window.is_mapped())
+                                    {
+                                        system_settings->_screen_settings_window.width_height((e->width - MENU_WINDOW_WIDTH), e->height);
+                                    }
+
                                     xcb_flush(conn);
                                 }
                             }
