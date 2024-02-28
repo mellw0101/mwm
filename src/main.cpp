@@ -6434,7 +6434,13 @@ class __screen_settings__
             return mode_id;
         }
 
-        string get_current_res_hz()
+        enum
+        {
+            RESOLUTION   = 0,
+            REFRESH_RATE = 1
+        };
+
+        string get_current_res_hz(const int &__type)
         {
             string result;
             xcb_randr_get_screen_resources_current_cookie_t res_cookie;
@@ -6491,8 +6497,18 @@ class __screen_settings__
             {
                 if (mode_info[i].id == crtc_info_reply->mode)
                 {
+                    if (__type == RESOLUTION)
+                    {
+                        result = to_string(mode_info[i].width) + "x" + to_string(mode_info[i].height);
+                        break;
+                    }
+
                     float refresh_rate = calculate_refresh_rate(&mode_info[i]);
-                    result = ("Resolution: " + to_string(mode_info[i].width) + ":" + to_string(mode_info[i].height) + ", Refresh Rate: " + to_string(refresh_rate) + " Hz");
+                    if (__type == REFRESH_RATE)
+                    {
+                        result = to_string(refresh_rate);
+                        break;
+                    }
                 }
             }
 
@@ -6515,7 +6531,7 @@ class __system_settings__
     private:
         void make_menu_entry_window__(window &__window, const uint32_t &__y)
         {
-            uint32_t mask = XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS;
+            uint32_t mask;
 
             __window.create_default(
                 _menu_window,
@@ -6524,6 +6540,7 @@ class __system_settings__
                 MENU_WINDOW_WIDTH,
                 MENU_ENTRY_HEIGHT
             );
+            mask = XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS;
             __window.apply_event_mask(&mask);
             __window.set_backround_color(BLUE);
             __window.map();
@@ -6546,16 +6563,27 @@ class __system_settings__
                 );
                 _screen_settings_window.set_backround_color(GREEN);
 
-                _current_res_hz_window.create_default(
+                _current_resolution_window.create_default(
                     _screen_settings_window,
                     0,
                     0,
-                    500,
+                    300,
                     20
                 );
                 mask = XCB_EVENT_MASK_EXPOSURE;
-                _current_res_hz_window.apply_event_mask(&mask);
-                _current_res_hz_window.set_backround_color(BLUE);
+                _current_resolution_window.apply_event_mask(&mask);
+                _current_resolution_window.set_backround_color(BLUE);
+
+                _current_refresh_rate_window.create_default(
+                    _screen_settings_window,
+                    0,
+                    20,
+                    300,
+                    20
+                );
+                mask = XCB_EVENT_MASK_EXPOSURE;
+                _current_refresh_rate_window.apply_event_mask(&mask);
+                _current_refresh_rate_window.set_backround_color(BLUE);
             }
         }
 
@@ -6663,8 +6691,10 @@ class __system_settings__
 
             if (__window == _screen_settings_window)
             {
-                _current_res_hz_window.map();
-                draw(_current_res_hz_window);
+                _current_resolution_window.map();
+                draw(_current_resolution_window);
+                _current_refresh_rate_window.map();
+                draw(_current_refresh_rate_window);
             }
         }
 
@@ -6747,7 +6777,7 @@ class __system_settings__
     public:
         window(_main_window),
             (_menu_window), (_default_settings_window),
-            (_screen_menu_entry_window), (_screen_settings_window), (_current_res_hz_window),
+            (_screen_menu_entry_window), (_screen_settings_window), (_current_resolution_window), (_current_refresh_rate_window),
             (_audio_menu_entry_window), (_audio_settings_window),
             (_network_menu_entry_window), (_network_settings_window);
         
@@ -6805,13 +6835,28 @@ class __system_settings__
                 );
             }
 
-            if (__window == _current_res_hz_window)
+            if (__window == _current_resolution_window)
             {
-                string res_hz(screen_settings->get_current_res_hz());
-                if (res_hz.empty()) return;
+                string resolution(screen_settings->get_current_res_hz(__screen_settings__::RESOLUTION));
+                if (resolution.empty()) return;
 
-                _current_res_hz_window.draw_text(
-                    res_hz.c_str(),
+                _current_resolution_window.draw_text(
+                    resolution.c_str(),
+                    WHITE,
+                    DARK_GREY,
+                    DEFAULT_FONT,
+                    2,
+                    12
+                );
+            }
+
+            if (__window == _current_refresh_rate_window)
+            {
+                string refresh_rate(screen_settings->get_current_res_hz(__screen_settings__::REFRESH_RATE));
+                if (refresh_rate.empty()) return;
+
+                _current_refresh_rate_window.draw_text(
+                    refresh_rate.c_str(),
                     WHITE,
                     DARK_GREY,
                     DEFAULT_FONT,
@@ -6823,25 +6868,11 @@ class __system_settings__
 
         void expose(const uint32_t &__window)
         {
-            if (__window == _screen_menu_entry_window)
-            {
-                draw(_screen_menu_entry_window);
-            }
-
-            if (__window == _current_res_hz_window)
-            {
-                draw(_current_res_hz_window);
-            }
-
-            if (__window == _audio_menu_entry_window)
-            {
-                draw(_audio_menu_entry_window);
-            }
-
-            if (__window == _network_menu_entry_window)
-            {
-                draw(_network_menu_entry_window);
-            }
+            if (__window == _screen_menu_entry_window   ) draw(_screen_menu_entry_window);
+            if (__window == _current_resolution_window  ) draw(_current_resolution_window);
+            if (__window == _current_refresh_rate_window) draw(_current_refresh_rate_window);
+            if (__window == _audio_menu_entry_window    ) draw(_audio_menu_entry_window);
+            if (__window == _network_menu_entry_window  ) draw(_network_menu_entry_window);
         }
 
         void init()
