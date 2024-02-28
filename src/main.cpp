@@ -6437,7 +6437,7 @@ class __system_settings__
                     _screen_settings_window.unmap();
                 }
 
-                _default_settings_window.width_height((_main_window.width() - MENU_WINDOW_WIDTH), _main_window.height());
+                _default_settings_window.width_height((c->win.width() - MENU_WINDOW_WIDTH), c->win.height());
                 xcb_flush(conn);
                 _default_settings_window.map();
                 _default_settings_window.raise();
