@@ -6434,10 +6434,17 @@ class __screen_settings__
             return mode_id;
         }
 
-        string get_current_res_and_hz()
+        string get_current_res_hz()
         {
-            xcb_randr_get_screen_resources_current_cookie_t res_cookie = xcb_randr_get_screen_resources_current(conn, screen->root);
-            xcb_randr_get_screen_resources_current_reply_t *res_reply = xcb_randr_get_screen_resources_current_reply(conn, res_cookie, nullptr);
+            string result;
+            xcb_randr_get_screen_resources_current_cookie_t res_cookie;
+            xcb_randr_get_screen_resources_current_reply_t *res_reply;
+            xcb_randr_mode_info_t *mode_info;
+            int mode_count;
+
+            // Get screen resources
+            res_cookie = xcb_randr_get_screen_resources_current(conn, screen->root);
+            res_reply = xcb_randr_get_screen_resources_current_reply(conn, res_cookie, nullptr);
 
             if (!res_reply)
             {
@@ -6477,23 +6484,23 @@ class __screen_settings__
                 return{};
             }
 
-            string mode_id;
-            xcb_randr_mode_info_t *mode_info = nullptr;
-            xcb_randr_mode_info_iterator_t mode_iter = xcb_randr_get_screen_resources_current_modes_iterator(res_reply);
-            for (; mode_iter.rem; xcb_randr_mode_info_next(&mode_iter))
+            mode_info = xcb_randr_get_screen_resources_current_modes(res_reply);
+            mode_count = xcb_randr_get_screen_resources_current_modes_length(res_reply);
+
+            for (int i = 0; i < mode_count; i++) // Iterate through all modes
             {
-                if (mode_iter.data->id == crtc_info_reply->mode)
+                if (mode_info->id == crtc_info_reply->mode)
                 {
-                    float refresh_rate = calculate_refresh_rate(mode_info);
-                    mode_id = ("Resolution: " + to_string(mode_iter.data->width) + ":" + to_string(mode_iter.data->height) + ", Refresh Rate: " + to_string(refresh_rate) + " Hz");
-                    break;
+                    float refresh_rate = calculate_refresh_rate(&mode_info[i]);
+                    result = ("Resolution: " + to_string(mode_info[i].width) + ":" + to_string(mode_info[i].height) + ", Refresh Rate: " + to_string(refresh_rate) + " Hz");
                 }
             }
 
             free(crtc_info_reply);
             free(output_info_reply);
             free(res_reply);
-            return mode_id;
+
+            return result;
         }
 
     public:
@@ -6809,8 +6816,9 @@ class __system_settings__
 
             if (__window == _current_res_hz_window)
             {
+                string res_hz(screen_settings->get_current_res_hz());
                 _current_res_hz_window.draw_text(
-                    "hello",
+                    res_hz.c_str(),
                     WHITE,
                     DARK_GREY,
                     DEFAULT_FONT,
