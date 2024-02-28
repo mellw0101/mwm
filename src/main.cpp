@@ -2756,6 +2756,31 @@ class __window_decor__
             down.set_backround_color(__color);
             down.map();
         }
+
+        static void make_menu_borders(window &__window, const int &__size, COLOR __color)
+        {
+            window right, down;
+
+            right.create_default(
+                __window,
+                (__window.width() - __size),
+                0,
+                __size,
+                __window.height()
+            );
+            right.set_backround_color(__color);
+            right.map();
+
+            down.create_default(
+                __window,
+                __size,
+                (__window.height() - __size),
+                (__window.width() - __size),
+                __size
+            );
+            down.set_backround_color(__color);
+            down.map();
+        }
 };
 
 class client
