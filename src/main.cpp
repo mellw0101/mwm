@@ -6548,7 +6548,7 @@ class __system_settings__
                     _screen_settings_window,
                     0,
                     0,
-                    300,
+                    500,
                     20
                 );
                 _current_res_hz_window.set_backround_color(BLUE);
@@ -6741,6 +6741,11 @@ class __system_settings__
                     draw(_screen_menu_entry_window);
                 }
 
+                if (e->window == _current_res_hz_window)
+                {
+                    draw(_current_res_hz_window);
+                }
+
                 if (e->window == _audio_menu_entry_window)
                 {
                     draw(_audio_menu_entry_window);
@@ -6817,6 +6822,8 @@ class __system_settings__
             if (__window == _current_res_hz_window)
             {
                 string res_hz(screen_settings->get_current_res_hz());
+                if (res_hz.empty()) return;
+
                 _current_res_hz_window.draw_text(
                     res_hz.c_str(),
                     WHITE,
@@ -7623,6 +7630,11 @@ class mv_client
                         if (e->window == system_settings->_screen_menu_entry_window)
                         {
                             system_settings->draw(system_settings->_screen_menu_entry_window);
+                        }
+
+                        if (e->window == system_settings->_current_res_hz_window)
+                        {
+                            system_settings->draw(system_settings->_current_res_hz_window);
                         }
 
                         if (e->window == system_settings->_audio_menu_entry_window)
@@ -8517,6 +8529,11 @@ class resize_client
                                 if (e->window == system_settings->_screen_menu_entry_window)
                                 {
                                     system_settings->draw(system_settings->_screen_menu_entry_window);
+                                }
+
+                                if (e->window == system_settings->_current_res_hz_window)
+                                {
+                                    system_settings->draw(system_settings->_current_res_hz_window);
                                 }
 
                                 if (e->window == system_settings->_audio_menu_entry_window)
