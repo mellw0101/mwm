@@ -6187,10 +6187,7 @@ static File_App *file_app;
 
 class __screen_settings__
 {
-    public:
-        xcb_randr_mode_t(_current_res_hz);
-        vector<pair<xcb_randr_mode_t, string>>(_avalible_modes);
-
+    private:
         void change_refresh_rate(xcb_connection_t *conn, int desired_width, int desired_height, int desired_refresh)
         {
             // Initialize RandR and get screen resources
@@ -6256,7 +6253,7 @@ class __screen_settings__
             return 0.0f;
         }
 
-        vector<pair<xcb_randr_mode_t, string>> list_screen_res_and_refresh_rates()
+        vector<pair<xcb_randr_mode_t, string>> get_avalible_resolutions__()
         {
             vector<pair<xcb_randr_mode_t, string>>(results);
             xcb_randr_get_screen_resources_current_cookie_t res_cookie;
@@ -6335,7 +6332,7 @@ class __screen_settings__
             vector<xcb_randr_mode_t>(mode_vector)(find_mode());
             for (int i(0); i < mode_vector.size(); ++i)
             {
-                if (mode_vector[i] == get_current_resolution_and_refresh())
+                if (mode_vector[i] == get_current_resolution__())
                 {
                     if (i == (mode_vector.size() - 1))
                     {
@@ -6377,7 +6374,7 @@ class __screen_settings__
             free(res_reply);
         }
         
-        xcb_randr_mode_t get_current_resolution_and_refresh()
+        xcb_randr_mode_t get_current_resolution__()
         {
             xcb_randr_get_screen_resources_current_cookie_t res_cookie = xcb_randr_get_screen_resources_current(conn, screen->root);
             xcb_randr_get_screen_resources_current_reply_t *res_reply = xcb_randr_get_screen_resources_current_reply(conn, res_cookie, nullptr);
@@ -6438,13 +6435,7 @@ class __screen_settings__
             return mode_id;
         }
 
-        enum
-        {
-            RESOLUTION   = 0,
-            REFRESH_RATE = 1
-        };
-
-        string get_current_res_hz(const int &__type)
+        string get_current_resolution_string__()
         {
             string result;
             xcb_randr_get_screen_resources_current_cookie_t res_cookie;
@@ -6501,17 +6492,8 @@ class __screen_settings__
             {
                 if (mode_info[i].id == crtc_info_reply->mode)
                 {
-                    if (__type == RESOLUTION)
-                    {
-                        result = to_string(mode_info[i].width) + "x" + to_string(mode_info[i].height);
-                        break;
-                    }
-
-                    if (__type == REFRESH_RATE)
-                    {
-                        result = to_string(calculate_refresh_rate(&mode_info[i]));
-                        break;
-                    }
+                    result = to_string(mode_info[i].width) + "x" + to_string(mode_info[i].height) + " " + to_string(calculate_refresh_rate(&mode_info[i]));
+                    break;
                 }
             }
 
@@ -6520,6 +6502,18 @@ class __screen_settings__
             free(res_reply);
 
             return result;
+        }
+
+    public:
+        xcb_randr_mode_t(_current_resolution);
+        string(_current_resoluton_string);
+        vector<pair<xcb_randr_mode_t, string>>(_avalible_resolutions);
+
+        void init()
+        {
+            _avalible_resolutions     = get_avalible_resolutions__();
+            _current_resolution       = get_current_resolution__();
+            _current_resoluton_string = get_current_resolution_string__();
         }
 
     public:
@@ -6818,7 +6812,7 @@ class __system_settings__
 
             if (__window == _screen_resolution_window)
             {
-                string resolution(screen_settings->get_current_res_hz(__screen_settings__::RESOLUTION));
+                string resolution(screen_settings->_current_resoluton_string);
                 if (resolution.empty()) return;
 
                 _screen_resolution_window.draw_text(
@@ -6826,8 +6820,8 @@ class __system_settings__
                     WHITE,
                     DARK_GREY,
                     DEFAULT_FONT,
-                    2,
-                    12
+                    4,
+                    15
                 );
             }
 
@@ -9807,10 +9801,11 @@ void setup_wm()
 
     network = new __network__;
 
+    screen_settings = new __screen_settings__;
+    screen_settings->init();
+    
     system_settings = new __system_settings__;
     system_settings->init();
-
-    screen_settings = new __screen_settings__;
 }
 
 int main()
