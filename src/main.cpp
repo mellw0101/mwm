@@ -6324,7 +6324,7 @@ class __system_settings__
             event_handler->setEventCallback(XCB_BUTTON_PRESS,     [this](Ev ev)-> void
             {
                 const auto e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
-                if (wm->focused_client == nullptr)
+                if (wm->focused_client != this->c)
                 {
                     if (e->event == _main_window
                     ||  e->event == _menu_window
@@ -6336,7 +6336,8 @@ class __system_settings__
                     ||  e->event == _network_menu_entry_window
                     ||  e->event == _network_settings_window)
                     {
-                        c->focus();
+                        this->c->focus();
+                        wm->focused_client = this->c;
                     }
                 }
 
