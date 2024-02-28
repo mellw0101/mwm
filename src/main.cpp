@@ -6561,7 +6561,7 @@ class __system_settings__
                     (_main_window.width() - MENU_WINDOW_WIDTH),
                     _main_window.height()
                 );
-                _screen_settings_window.set_backround_color(DARK_GREY);
+                _screen_settings_window.set_backround_color(WHITE);
                 mask = XCB_EVENT_MASK_EXPOSURE;
                 _screen_settings_window.apply_event_mask(&mask);
 
@@ -6806,10 +6806,10 @@ class __system_settings__
             {
                 _screen_settings_window.draw_text(
                     "Resolution ",
+                    BLACK,
                     WHITE,
-                    DARK_GREY,
                     DEFAULT_FONT,
-                    14,
+                    24,
                     35
                 );
             }
@@ -6857,6 +6857,7 @@ class __system_settings__
         void expose(const uint32_t &__window)
         {
             if (__window == _screen_menu_entry_window   ) draw(_screen_menu_entry_window);
+            if (__window == _screen_settings_window     ) draw(_screen_settings_window);
             if (__window == _screen_resolution_window   ) draw(_screen_resolution_window);
             if (__window == _audio_menu_entry_window    ) draw(_audio_menu_entry_window);
             if (__window == _network_menu_entry_window  ) draw(_network_menu_entry_window);
