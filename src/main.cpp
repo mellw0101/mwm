@@ -6189,7 +6189,7 @@ static File_App *file_app;
 class __system_settings__
 {
     private:
-        void make_menu_entry_window__(window &__window, const uint32_t &__y, COLOR __color)
+        void make_menu_entry_window__(window &__window, const uint32_t &__y)
         {
             uint32_t mask = XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS;
 
@@ -6201,9 +6201,10 @@ class __system_settings__
                 MENU_ENTRY_HEIGHT
             );
             __window.apply_event_mask(&mask);
-            __window.set_backround_color(__color);
+            __window.set_backround_color(BLUE);
             __window.map();
             __window_decor__::make_menu_borders(__window, 2, BLACK);
+            draw(__window);
         }
 
         void make_windows__()
@@ -6249,20 +6250,7 @@ class __system_settings__
             
             mask = XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS;
 
-            // _screen_menu_entry_window.create_default(
-            //     _menu_window,
-            //     0,
-            //     0,
-            //     MENU_WINDOW_WIDTH,
-            //     MENU_ENTRY_HEIGHT
-            // );
-            // _screen_menu_entry_window.apply_event_mask(&mask);
-            // _screen_menu_entry_window.set_backround_color(BLUE);
-            // _screen_menu_entry_window.map();
-            // __window_decor__::make_menu_borders(_screen_menu_entry_window, 2, BLACK);
-            make_menu_entry_window__(_screen_menu_entry_window, 0, BLUE);
-            draw(SCREEN);
-
+            make_menu_entry_window__(_screen_menu_entry_window, 0);
             _screen_settings_window.create_default(
                 _main_window,
                 MENU_WINDOW_WIDTH,
@@ -6272,19 +6260,7 @@ class __system_settings__
             );
             _screen_settings_window.set_backround_color(GREEN);
 
-            _audio_menu_entry_window.create_default(
-                _menu_window,
-                0,
-                20,
-                MENU_WINDOW_WIDTH,
-                MENU_ENTRY_HEIGHT
-            );
-            _audio_menu_entry_window.set_backround_color(BLUE);
-            _audio_menu_entry_window.apply_event_mask(&mask);
-            _audio_menu_entry_window.map();
-            __window_decor__::make_menu_borders(_audio_menu_entry_window, 2, BLACK);
-            draw(AUDIO);
-
+            make_menu_entry_window__(_audio_menu_entry_window, 20);
             _audio_settings_window.create_default(
                 _main_window,
                 MENU_WINDOW_WIDTH,
@@ -6294,19 +6270,7 @@ class __system_settings__
             );
             _audio_settings_window.set_backround_color(PURPLE);
 
-            _network_menu_entry_window.create_default(
-                _menu_window,
-                0,
-                40,
-                MENU_WINDOW_WIDTH,
-                MENU_ENTRY_HEIGHT
-            );
-            _network_menu_entry_window.set_backround_color(BLUE);
-            _network_menu_entry_window.apply_event_mask(&mask);
-            _network_menu_entry_window.map();
-            __window_decor__::make_menu_borders(_network_menu_entry_window, 2, BLACK);
-            draw(NETWORK);
-
+            make_menu_entry_window__(_network_menu_entry_window, 40);
             _network_settings_window.create_default(
                 _main_window,
                 MENU_WINDOW_WIDTH,
@@ -6357,9 +6321,25 @@ class __system_settings__
 
         void setup_events__()
         {
-            event_handler->setEventCallback(XCB_BUTTON_PRESS, [this](Ev ev)-> void
+            event_handler->setEventCallback(XCB_BUTTON_PRESS,     [this](Ev ev)-> void
             {
                 const auto e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
+                if (wm->focused_client == nullptr)
+                {
+                    if (e->event == _main_window
+                    ||  e->event == _menu_window
+                    ||  e->event == _default_settings_window
+                    ||  e->event == _screen_menu_entry_window
+                    ||  e->event == _screen_settings_window
+                    ||  e->event == _audio_menu_entry_window
+                    ||  e->event == _audio_settings_window
+                    ||  e->event == _network_menu_entry_window
+                    ||  e->event == _network_settings_window)
+                    {
+                        c->focus();
+                    }
+                }
+
                 if (e->event == _menu_window)
                 {
                     adjust_and_map_subwindow__(_default_settings_window);
@@ -6381,7 +6361,7 @@ class __system_settings__
                 }
             });
 
-            event_handler->setEventCallback(XCB_KEY_PRESS, [this](Ev ev)->void
+            event_handler->setEventCallback(XCB_KEY_PRESS,        [this](Ev ev)->void
             {
                 const auto e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
                 if (e->detail == wm->key_codes.s)
@@ -6407,22 +6387,22 @@ class __system_settings__
                 }
             });
 
-            event_handler->setEventCallback(XCB_EXPOSE, [this](Ev ev)->void
+            event_handler->setEventCallback(XCB_EXPOSE,           [this](Ev ev)->void
             {
                 const auto e = reinterpret_cast<const xcb_expose_event_t *>(ev);
                 if (e->window == _screen_menu_entry_window)
                 {
-                    draw(SCREEN);
+                    draw(_screen_menu_entry_window);
                 }
 
                 if (e->window == _audio_menu_entry_window)
                 {
-                    draw(__system_settings__::AUDIO);
+                    draw(_audio_menu_entry_window);
                 }
 
                 if (e->window == _network_menu_entry_window)
                 {
-                    draw(__system_settings__::NETWORK);
+                    draw(_network_menu_entry_window);
                 }
             });
         }
@@ -6446,17 +6426,9 @@ class __system_settings__
             make_internal_client__();
         }
 
-        enum
+        void draw(window &__window)
         {
-            SCREEN  = 0,
-            AUDIO   = 1,
-            NETWORK = 2,
-            DEFAULT = 3
-        };
-
-        void draw(int __type)
-        {
-            if (__type == SCREEN)
+            if (__window == _screen_menu_entry_window)
             {
                 _screen_menu_entry_window.draw_text(
                     "Screen",
@@ -6468,7 +6440,7 @@ class __system_settings__
                 );
             }
 
-            if (__type == AUDIO)
+            if (__window == _audio_menu_entry_window)
             {
                 _audio_menu_entry_window.draw_text(
                     "Audio",
@@ -6480,7 +6452,7 @@ class __system_settings__
                 );
             }
 
-            if (__type == NETWORK)
+            if (__window == _network_menu_entry_window)
             {
                 _network_menu_entry_window.draw_text(
                     "Network",
@@ -7287,17 +7259,17 @@ class mv_client
 
                         if (e->window == system_settings->_screen_menu_entry_window)
                         {
-                            system_settings->draw(__system_settings__::SCREEN);
+                            system_settings->draw(system_settings->_screen_menu_entry_window);
                         }
 
                         if (e->window == system_settings->_audio_menu_entry_window)
                         {
-                            system_settings->draw(__system_settings__::AUDIO);
+                            system_settings->draw(system_settings->_audio_menu_entry_window);
                         }
 
                         if (e->window == system_settings->_network_menu_entry_window)
                         {
-                            system_settings->draw(__system_settings__::NETWORK);
+                            system_settings->draw(system_settings->_network_menu_entry_window);
                         }
 
                         break;
@@ -8181,17 +8153,17 @@ class resize_client
 
                                 if (e->window == system_settings->_screen_menu_entry_window)
                                 {
-                                    system_settings->draw(__system_settings__::SCREEN);
+                                    system_settings->draw(system_settings->_screen_menu_entry_window);
                                 }
 
                                 if (e->window == system_settings->_audio_menu_entry_window)
                                 {
-                                    system_settings->draw(__system_settings__::AUDIO);
+                                    system_settings->draw(system_settings->_audio_menu_entry_window);
                                 }
 
                                 if (e->window == system_settings->_network_menu_entry_window)
                                 {
-                                    system_settings->draw(__system_settings__::NETWORK);
+                                    system_settings->draw(system_settings->_network_menu_entry_window);
                                 }
 
                                 break;
