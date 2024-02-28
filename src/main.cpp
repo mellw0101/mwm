@@ -2773,7 +2773,7 @@ class __window_decor__
 
             down.create_default(
                 __window,
-                __size,
+                0,
                 (__window.height() - __size),
                 __window.width(),
                 __size
