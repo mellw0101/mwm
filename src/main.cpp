@@ -2717,6 +2717,7 @@ class __window_decor__
         static void make_borders(window &__window, const int &__size, COLOR __color)
         {
             window left, right, up, down;
+
             left.create_default(
                 __window,
                 0,
@@ -2777,6 +2778,76 @@ class __window_decor__
                 0,
                 (__window.height() - __size),
                 __window.width(),
+                __size
+            );
+            down.set_backround_color(__color);
+            down.map();
+        }
+
+        static void make_right_side_button_borders(window &__window, const int &__size, COLOR __color)
+        {
+            window right, up, down;
+
+            right.create_default(
+                __window,
+                (__window.width() - __size),
+                0,
+                __size,
+                __window.height()
+            );
+            right.set_backround_color(__color);
+            right.map();
+
+            up.create_default(
+                __window,
+                0,
+                0,
+                (__window.width() - __size),
+                __size
+            );
+            up.set_backround_color(__color);
+            up.map();
+
+            down.create_default(
+                __window,
+                0,
+                (__window.height() - __size),
+                (__window.width() - __size),
+                __size
+            );
+            down.set_backround_color(__color);
+            down.map();
+        }
+
+        static void make_dropdown_menu_entry_borders(window &__window, const int &__size, COLOR __color)
+        {
+            window left, right, down;
+
+            left.create_default(
+                __window,
+                0,
+                0,
+                __size,
+                __window.height()
+            );
+            left.set_backround_color(__color);
+            left.map();
+
+            right.create_default(
+                __window,
+                (__window.width() - __size),
+                0,
+                __size,
+                __window.height()
+            );
+            right.set_backround_color(__color);
+            right.map();
+
+            down.create_default(
+                __window,
+                __size,
+                (__window.height() - __size),
+                (__window.width() - __size),
                 __size
             );
             down.set_backround_color(__color);
@@ -6574,7 +6645,18 @@ class __system_settings__
                 );
                 mask = XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS;
                 _screen_resolution_window.apply_event_mask(&mask);
-                _screen_resolution_window.set_backround_color(DARK_GREY);   
+                _screen_resolution_window.set_backround_color(DARK_GREY);
+
+                _screen_resolution_button_window.create_default(
+                    _screen_settings_window,
+                    260,
+                    20,
+                    20,
+                    20
+                );
+                mask = XCB_EVENT_MASK_BUTTON_PRESS;
+                _screen_resolution_button_window.apply_event_mask(&mask);
+                _screen_resolution_button_window.set_backround_color(DARK_GREY);
             }
         }
 
@@ -6686,6 +6768,48 @@ class __system_settings__
                 _screen_resolution_window.map();
                 __window_decor__::make_borders(_screen_resolution_window, 2, BLACK);
                 draw(_screen_resolution_window);
+                _screen_resolution_button_window.map();
+                __window_decor__::make_right_side_button_borders(_screen_resolution_window, 2, BLACK);
+            }
+        }
+
+        enum
+        {
+            RESOLUTION_DROPDOWN_WINDOW = 0
+        };
+
+        void show(const int &__type)
+        {
+            switch (__type)
+            {
+                case RESOLUTION_DROPDOWN_WINDOW:
+                {
+                    _screen_resolution_dropdown_window.create_default(
+                        _screen_settings_window,
+                        100,
+                        40,
+                        180,
+                        (screen_settings->_avalible_resolutions.size() * 20)
+                    );
+                    _screen_resolution_dropdown_window.set_backround_color(DARK_GREY);
+                    _screen_resolution_dropdown_window.map();
+
+                    break;
+                }
+            }
+        }
+
+        void hide(const int &__type)
+        {
+            switch (__type)
+            {
+                case RESOLUTION_DROPDOWN_WINDOW:
+                {
+                    _screen_resolution_dropdown_window.unmap();
+                    _screen_resolution_dropdown_window.kill();
+
+                    break;
+                }
             }
         }
 
@@ -6714,21 +6838,37 @@ class __system_settings__
                 if (e->event == _menu_window)
                 {
                     adjust_and_map_subwindow__(_default_settings_window);
+                    return;
                 }
 
                 if (e->event == _screen_menu_entry_window)
                 {
                     adjust_and_map_subwindow__(_screen_settings_window);
+                    return;
+                }
+
+                if (e->event == _screen_resolution_button_window)
+                {
+                    if (!_screen_resolution_dropdown_window.is_mapped())
+                    {
+                        show(RESOLUTION_DROPDOWN_WINDOW);
+                        return;
+                    }
+
+                    hide(RESOLUTION_DROPDOWN_WINDOW);
+                    return;
                 }
 
                 if (e->event == _audio_menu_entry_window)
                 {
                     adjust_and_map_subwindow__(_audio_settings_window);
+                    return;
                 }
 
                 if (e->event == _network_menu_entry_window)
                 {
                     adjust_and_map_subwindow__(_network_settings_window);
+                    return;
                 }
             });
 
@@ -6768,7 +6908,7 @@ class __system_settings__
     public:
         window(_main_window),
             (_menu_window), (_default_settings_window),
-            (_screen_menu_entry_window), (_screen_settings_window), (_screen_resolution_window),
+            (_screen_menu_entry_window), (_screen_settings_window), (_screen_resolution_window), (_screen_resolution_button_window), (_screen_resolution_dropdown_window),
             (_audio_menu_entry_window), (_audio_settings_window),
             (_network_menu_entry_window), (_network_settings_window);
         
