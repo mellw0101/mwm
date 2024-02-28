@@ -6810,7 +6810,7 @@ class __system_settings__
             if (__window == _current_res_hz_window)
             {
                 _current_res_hz_window.draw_text(
-                    screen_settings->get_current_res_and_hz().c_str(),
+                    "hello",
                     WHITE,
                     DARK_GREY,
                     DEFAULT_FONT,
