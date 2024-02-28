@@ -6545,8 +6545,6 @@ class __system_settings__
                     20
                 );
                 _current_res_hz_window.set_backround_color(BLUE);
-                _current_res_hz_window.map();
-                draw(_current_res_hz_window);
             }
         }
 
