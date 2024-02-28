@@ -6492,7 +6492,7 @@ class __screen_settings__
             {
                 if (mode_info[i].id == crtc_info_reply->mode)
                 {
-                    result = to_string(mode_info[i].width) + "x" + to_string(mode_info[i].height) + " " + to_string(calculate_refresh_rate(&mode_info[i]));
+                    result = to_string(mode_info[i].width) + "x" + to_string(mode_info[i].height) + " " + to_string(calculate_refresh_rate(&mode_info[i])) + " Hz";
                     break;
                 }
             }
@@ -6523,6 +6523,9 @@ static __screen_settings__ *screen_settings(nullptr);
 
 #define MENU_WINDOW_WIDTH 120
 #define MENU_ENTRY_HEIGHT 20
+#define MENU_ENTRY_TEXT_Y 14
+#define MENU_ENTRY_TEXT_X 4
+
 class __system_settings__
 {
     private:
@@ -6558,7 +6561,7 @@ class __system_settings__
                     (_main_window.width() - MENU_WINDOW_WIDTH),
                     _main_window.height()
                 );
-                _screen_settings_window.set_backround_color(GREEN);
+                _screen_settings_window.set_backround_color(DARK_GREY);
                 mask = XCB_EVENT_MASK_EXPOSURE;
                 _screen_settings_window.apply_event_mask(&mask);
 
@@ -6571,7 +6574,7 @@ class __system_settings__
                 );
                 mask = XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS;
                 _screen_resolution_window.apply_event_mask(&mask);
-                _screen_resolution_window.set_backround_color(BLUE);
+                _screen_resolution_window.set_backround_color(DARK_GREY);   
             }
         }
 
@@ -6681,6 +6684,7 @@ class __system_settings__
             {
                 draw(__window);
                 _screen_resolution_window.map();
+                __window_decor__::make_borders(_screen_resolution_window, 2, BLACK);
                 draw(_screen_resolution_window);
             }
         }
@@ -6793,8 +6797,8 @@ class __system_settings__
                     WHITE,
                     DARK_GREY,
                     DEFAULT_FONT,
-                    4,
-                    15
+                    MENU_ENTRY_TEXT_X,
+                    MENU_ENTRY_TEXT_Y
                 );
             }
 
@@ -6805,7 +6809,7 @@ class __system_settings__
                     WHITE,
                     DARK_GREY,
                     DEFAULT_FONT,
-                    4,
+                    14,
                     35
                 );
             }
@@ -6832,8 +6836,8 @@ class __system_settings__
                     WHITE,
                     DARK_GREY,
                     DEFAULT_FONT,
-                    4,
-                    15
+                    MENU_ENTRY_TEXT_X,
+                    MENU_ENTRY_TEXT_Y
                 );
             }
 
@@ -6844,8 +6848,8 @@ class __system_settings__
                     WHITE,
                     DARK_GREY,
                     DEFAULT_FONT,
-                    4,
-                    15
+                    MENU_ENTRY_TEXT_X,
+                    MENU_ENTRY_TEXT_Y
                 );
             }
         }
