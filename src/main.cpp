@@ -6371,6 +6371,26 @@ class __system_settings__
             });
         }
 
+        void adjust_and_map_subwindow__(window &__window)
+        {
+            if (__window.is_mapped()) return;
+
+            if (_screen_settings_window.is_mapped())
+            {
+                _screen_settings_window.unmap();
+            }
+
+            if (_default_settings_window.is_mapped())
+            {
+                _default_settings_window.unmap();
+            }
+            
+            __window.width_height((c->win.width() - MENU_WINDOW_WIDTH), c->win.height());
+            xcb_flush(conn);
+            __window.map();
+            __window.raise();
+        }
+
     public:
         window(_main_window), (_menu_window), (_default_settings_window), (_screen_menu_entry_window), (_screen_settings_window), (_audio_menu_entry_window), (_network_menu_entry_window);
         client(*c);
@@ -6432,28 +6452,12 @@ class __system_settings__
         {
             if (__type == DEFAULT)
             {
-                if (_screen_settings_window.is_mapped())
-                {
-                    _screen_settings_window.unmap();
-                }
-
-                _default_settings_window.width_height((c->win.width() - MENU_WINDOW_WIDTH), c->win.height());
-                xcb_flush(conn);
-                _default_settings_window.map();
-                _default_settings_window.raise();
+                adjust_and_map_subwindow__(_default_settings_window);
             }
 
             if (__type == SCREEN)
             {
-                if (_default_settings_window.is_mapped())
-                {
-                    _default_settings_window.unmap();
-                }
-
-                _screen_settings_window.width_height((_main_window.width() - MENU_WINDOW_WIDTH), _main_window.height());
-                xcb_flush(conn);
-                _screen_settings_window.map();
-                _screen_settings_window.raise();
+                adjust_and_map_subwindow__(_screen_settings_window);
             }
         }
 
