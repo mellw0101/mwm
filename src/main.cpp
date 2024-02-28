@@ -6535,6 +6535,8 @@ class __system_settings__
         {
             if (__window == _screen_settings_window)
             {
+                uint32_t mask;
+
                 _screen_settings_window.create_default(
                     _main_window,
                     MENU_WINDOW_WIDTH,
@@ -6551,6 +6553,8 @@ class __system_settings__
                     500,
                     20
                 );
+                mask = XCB_EVENT_MASK_EXPOSURE;
+                _current_res_hz_window.apply_event_mask(&mask);
                 _current_res_hz_window.set_backround_color(BLUE);
             }
         }
@@ -6736,25 +6740,7 @@ class __system_settings__
             event_handler->setEventCallback(XCB_EXPOSE,           [this](Ev ev)->void
             {
                 const auto e = reinterpret_cast<const xcb_expose_event_t *>(ev);
-                if (e->window == _screen_menu_entry_window)
-                {
-                    draw(_screen_menu_entry_window);
-                }
-
-                if (e->window == _current_res_hz_window)
-                {
-                    draw(_current_res_hz_window);
-                }
-
-                if (e->window == _audio_menu_entry_window)
-                {
-                    draw(_audio_menu_entry_window);
-                }
-
-                if (e->window == _network_menu_entry_window)
-                {
-                    draw(_network_menu_entry_window);
-                }
+                expose(e->window);
             });
         }
 
@@ -7650,25 +7636,7 @@ class mv_client
                             status_bar->draw_wifi_info_window();
                         }
 
-                        if (e->window == system_settings->_screen_menu_entry_window)
-                        {
-                            system_settings->draw(system_settings->_screen_menu_entry_window);
-                        }
-
-                        if (e->window == system_settings->_current_res_hz_window)
-                        {
-                            system_settings->draw(system_settings->_current_res_hz_window);
-                        }
-
-                        if (e->window == system_settings->_audio_menu_entry_window)
-                        {
-                            system_settings->draw(system_settings->_audio_menu_entry_window);
-                        }
-
-                        if (e->window == system_settings->_network_menu_entry_window)
-                        {
-                            system_settings->draw(system_settings->_network_menu_entry_window);
-                        }
+                        system_settings->expose(e->window);
 
                         break;
                     }
@@ -8550,26 +8518,6 @@ class resize_client
                                 }
 
                                 system_settings->expose(e->window);
-
-                                // if (e->window == system_settings->_screen_menu_entry_window)
-                                // {
-                                //     system_settings->draw(system_settings->_screen_menu_entry_window);
-                                // }
-
-                                // if (e->window == system_settings->_current_res_hz_window)
-                                // {
-                                //     system_settings->draw(system_settings->_current_res_hz_window);
-                                // }
-
-                                // if (e->window == system_settings->_audio_menu_entry_window)
-                                // {
-                                //     system_settings->draw(system_settings->_audio_menu_entry_window);
-                                // }
-
-                                // if (e->window == system_settings->_network_menu_entry_window)
-                                // {
-                                //     system_settings->draw(system_settings->_network_menu_entry_window);
-                                // }
 
                                 break;
                             }
