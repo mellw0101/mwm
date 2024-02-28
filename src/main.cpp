@@ -6489,7 +6489,7 @@ class __screen_settings__
 
             for (int i = 0; i < mode_count; i++) // Iterate through all modes
             {
-                if (mode_info->id == crtc_info_reply->mode)
+                if (mode_info[i].id == crtc_info_reply->mode)
                 {
                     float refresh_rate = calculate_refresh_rate(&mode_info[i]);
                     result = ("Resolution: " + to_string(mode_info[i].width) + ":" + to_string(mode_info[i].height) + ", Refresh Rate: " + to_string(refresh_rate) + " Hz");
@@ -6548,7 +6548,7 @@ class __system_settings__
                     _screen_settings_window,
                     0,
                     0,
-                    120,
+                    300,
                     20
                 );
                 _current_res_hz_window.set_backround_color(BLUE);
