@@ -6825,42 +6825,37 @@ class __system_settings__
                         180,
                         (screen_settings->_avalible_resolutions.size() * MENU_ENTRY_HEIGHT)
                     );
-                    if (!screen_settings->_avalible_resolutions.empty())
-                    {
-                        log_info(screen_settings->_avalible_resolutions[0].second);
-                    }
-                    
                     _screen_resolution_dropdown_window.set_backround_color(DARK_GREY);
                     _screen_resolution_dropdown_window.map();
 
-                    // for (int i(0), x_pos(0); i < screen_settings->_avalible_resolutions.size(); ++i, x_pos += MENU_ENTRY_HEIGHT)
-                    // {
-                    //     window option;
-                    //     uint32_t mask;
+                    for (int i(0), x_pos(0); i < screen_settings->_avalible_resolutions.size(); ++i, x_pos += MENU_ENTRY_HEIGHT)
+                    {
+                        window option;
+                        uint32_t mask;
                         
-                    //     option.create_default(
-                    //         _screen_resolution_dropdown_window,
-                    //         x_pos,
-                    //         0,
-                    //         _screen_resolution_dropdown_window.width(),
-                    //         MENU_ENTRY_HEIGHT
-                    //     );
-                    //     option.set_backround_color(RED);
-                    //     mask = XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE;
-                    //     option.apply_event_mask(&mask);
-                    //     option.map();
-                    //     __window_decor__::make_dropdown_menu_entry_borders(option, 2, BLACK);
-                    //     option.draw_text(
-                    //         screen_settings->_avalible_resolutions[i].second.c_str(),
-                    //         WHITE,
-                    //         DARK_GREY,
-                    //         DEFAULT_FONT,
-                    //         MENU_ENTRY_TEXT_X,
-                    //         MENU_ENTRY_TEXT_Y
-                    //     );
+                        option.create_default(
+                            _screen_resolution_dropdown_window,
+                            x_pos,
+                            0,
+                            _screen_resolution_dropdown_window.width(),
+                            MENU_ENTRY_HEIGHT
+                        );
+                        option.set_backround_color(RED);
+                        mask = XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE;
+                        option.apply_event_mask(&mask);
+                        option.map();
+                        __window_decor__::make_dropdown_menu_entry_borders(option, 2, BLACK);
+                        option.draw_text(
+                            screen_settings->_avalible_resolutions[i].second.c_str(),
+                            WHITE,
+                            DARK_GREY,
+                            DEFAULT_FONT,
+                            MENU_ENTRY_TEXT_X,
+                            MENU_ENTRY_TEXT_Y
+                        );
 
-                    //     _screen_resolution_options_vector.push_back(option);
-                    // }
+                        _screen_resolution_options_vector.push_back(option);
+                    }
 
                     break;
                 }
@@ -6994,14 +6989,6 @@ class __system_settings__
 
         void launch()
         {
-            if (c->win.is_mapped())
-            {
-                c->focus();
-                c->raise();
-                wm->focused_client = c;
-                return;
-            }
-
             make_windows__();
             make_internal_client__();
         }
