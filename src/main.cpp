@@ -6342,17 +6342,51 @@ class __screen_settings__
                 return {};
             }
 
+            xcb_randr_output_t *outputs = xcb_randr_get_screen_resources_current_outputs(res_reply);
+            if (!res_reply->num_outputs)
+            {
+                log_error("No outputs found");
+                free(res_reply);
+                return {};
+            }
+
+            // Assuming the first output is the primary one
+            xcb_randr_output_t output = outputs[0];
+            xcb_randr_get_output_info_cookie_t output_info_cookie = xcb_randr_get_output_info(conn, output, XCB_CURRENT_TIME);
+            xcb_randr_get_output_info_reply_t *output_info_reply = xcb_randr_get_output_info_reply(conn, output_info_cookie, nullptr);
+
+            if (!output_info_reply || output_info_reply->crtc == XCB_NONE)
+            {
+                log_error("Output is not currently connected to a CRTC");
+                free(output_info_reply);
+                free(res_reply);
+                return{};
+            }
+
+            xcb_randr_get_crtc_info_cookie_t crtc_info_cookie = xcb_randr_get_crtc_info(conn, output_info_reply->crtc, XCB_CURRENT_TIME);
+            xcb_randr_get_crtc_info_reply_t *crtc_info_reply = xcb_randr_get_crtc_info_reply(conn, crtc_info_cookie, nullptr);
+
+            if (!crtc_info_reply)
+            {
+                log_error("Could not get CRTC info");
+                free(output_info_reply);
+                free(res_reply);
+                return{};
+            }
+
             mode_info = xcb_randr_get_screen_resources_current_modes(res_reply);
             mode_count = xcb_randr_get_screen_resources_current_modes_length(res_reply);
 
             for (int i = 0; i < mode_count; i++) // Iterate through all modes
             {
-                float refresh_rate = calculate_refresh_rate(&mode_info[i]);
-                string s(to_string(mode_info[i].width) + "x" + to_string(mode_info[i].height) + to_string(refresh_rate) + " Hz");
-                
-                results.push_back({mode_info[i].id, s});
+                string s = to_string(mode_info[i].width) + "x" + to_string(mode_info[i].height) + " " + to_string(calculate_refresh_rate(&mode_info[i])) + " Hz";
+                pair<xcb_randr_mode_t, string> pair{mode_info[i].id, s};
+                results.push_back(pair);
+                break;
             }
 
+            free(crtc_info_reply);
+            free(output_info_reply);
             free(res_reply);
             return results;
         }
