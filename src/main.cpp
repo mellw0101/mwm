@@ -7007,6 +7007,8 @@ class __system_settings__
                     if (e->event == _screen_resolution_options_vector[i])
                     {
                         screen_settings->set_resolution(screen_settings->_avalible_resolutions[i].first);
+                        log_info("screen->width_in_pixels: " + to_string(screen->width_in_pixels));
+                        log_info("screen->height_in_pixels: " + to_string(screen->height_in_pixels));
                     }
                 }
             });
