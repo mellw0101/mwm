@@ -6663,9 +6663,9 @@ class __system_settings__
         void make_windows__()
         {
             uint32_t mask;
-
             int width = (screen->width_in_pixels / 2), height = (screen->height_in_pixels / 2);
             int x = ((screen->width_in_pixels / 2) - (width / 2)), y = ((screen->height_in_pixels / 2) - (height / 2));
+
             _main_window.create_default(
                 screen->root,
                 x,
@@ -6913,7 +6913,7 @@ class __system_settings__
             (_audio_menu_entry_window), (_audio_settings_window),
             (_network_menu_entry_window), (_network_settings_window);
         
-        client(*c);
+        client *c = nullptr;
 
         void check_and_configure_mapped_window(window &__window, const uint32_t &__width, const uint32_t &__height)
         {
@@ -6925,6 +6925,7 @@ class __system_settings__
 
         void launch()
         {
+            if (c != nullptr) return;
             make_windows__();
             make_internal_client__();
         }
