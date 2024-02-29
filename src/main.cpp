@@ -6769,7 +6769,7 @@ class __system_settings__
                 __window_decor__::make_borders(_screen_resolution_window, 2, BLACK);
                 draw(_screen_resolution_window);
                 _screen_resolution_button_window.map();
-                __window_decor__::make_right_side_button_borders(_screen_resolution_window, 2, BLACK);
+                __window_decor__::make_right_side_button_borders(_screen_resolution_button_window, 2, BLACK);
             }
         }
 
@@ -6791,6 +6791,7 @@ class __system_settings__
                         180,
                         (screen_settings->_avalible_resolutions.size() * 20)
                     );
+                    log_info(to_string(screen_settings->_avalible_resolutions.size()));
                     _screen_resolution_dropdown_window.set_backround_color(DARK_GREY);
                     _screen_resolution_dropdown_window.map();
 
@@ -6996,11 +6997,11 @@ class __system_settings__
 
         void expose(const uint32_t &__window)
         {
-            if (__window == _screen_menu_entry_window   ) draw(_screen_menu_entry_window);
-            if (__window == _screen_settings_window     ) draw(_screen_settings_window);
-            if (__window == _screen_resolution_window   ) draw(_screen_resolution_window);
-            if (__window == _audio_menu_entry_window    ) draw(_audio_menu_entry_window);
-            if (__window == _network_menu_entry_window  ) draw(_network_menu_entry_window);
+            if (__window == _screen_menu_entry_window ) draw(_screen_menu_entry_window);
+            if (__window == _screen_settings_window   ) draw(_screen_settings_window);
+            if (__window == _screen_resolution_window ) draw(_screen_resolution_window);
+            if (__window == _audio_menu_entry_window  ) draw(_audio_menu_entry_window);
+            if (__window == _network_menu_entry_window) draw(_network_menu_entry_window);
         }
 
         void init()
