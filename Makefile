@@ -14,6 +14,7 @@ LIBS = 	-lxcb 			\
 		-lxcb-cursor 	\
 		-lxcb-icccm 	\
 		-lxcb-ewmh 		\
+		-lxcb-xinput	\
 		-lpng 			\
 		-lxcb-image 	\
 		-lxcb-render 	\
