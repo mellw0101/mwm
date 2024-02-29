@@ -6387,6 +6387,7 @@ class __screen_settings__
             free(crtc_info_reply);
             free(output_info_reply);
             free(res_reply);
+
             return results;
         }
 
@@ -6827,15 +6828,15 @@ class __system_settings__
                     _screen_resolution_dropdown_window.set_backround_color(DARK_GREY);
                     _screen_resolution_dropdown_window.map();
 
-                    for (int i(0), x_pos(0); i < screen_settings->_avalible_resolutions.size(); ++i, x_pos += MENU_ENTRY_HEIGHT)
+                    for (int i(0), y_pos(0); i < screen_settings->_avalible_resolutions.size(); ++i, y_pos += MENU_ENTRY_HEIGHT)
                     {
                         window option;
                         uint32_t mask;
                         
                         option.create_default(
                             _screen_resolution_dropdown_window,
-                            x_pos,
                             0,
+                            y_pos,
                             _screen_resolution_dropdown_window.width(),
                             MENU_ENTRY_HEIGHT
                         );
