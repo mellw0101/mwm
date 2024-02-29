@@ -6789,11 +6789,40 @@ class __system_settings__
                         100,
                         40,
                         180,
-                        (screen_settings->_avalible_resolutions.size() * 20)
+                        (screen_settings->_avalible_resolutions.size() * MENU_ENTRY_HEIGHT)
                     );
                     log_info(to_string(screen_settings->_avalible_resolutions.size()));
                     _screen_resolution_dropdown_window.set_backround_color(DARK_GREY);
                     _screen_resolution_dropdown_window.map();
+
+                    for (int i(0), x_pos(0); i < screen_settings->_avalible_resolutions.size(); ++i, x_pos += MENU_ENTRY_HEIGHT)
+                    {
+                        window option;
+                        uint32_t mask;
+                        
+                        option.create_default(
+                            _screen_resolution_dropdown_window,
+                            x_pos,
+                            0,
+                            _screen_resolution_dropdown_window.width(),
+                            MENU_ENTRY_HEIGHT
+                        );
+                        option.set_backround_color(RED);
+                        mask = XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE;
+                        option.apply_event_mask(&mask);
+                        option.map();
+                        __window_decor__::make_dropdown_menu_entry_borders(option, 2, BLACK);
+                        option.draw_text(
+                            screen_settings->_avalible_resolutions[i].second.c_str(),
+                            WHITE,
+                            DARK_GREY,
+                            DEFAULT_FONT,
+                            MENU_ENTRY_TEXT_X,
+                            MENU_ENTRY_TEXT_Y
+                        );
+
+                        _screen_resolution_options_vector.push_back(option);
+                    }
 
                     break;
                 }
@@ -6913,6 +6942,8 @@ class __system_settings__
             (_audio_menu_entry_window), (_audio_settings_window),
             (_network_menu_entry_window), (_network_settings_window);
         
+        vector<window>(_screen_resolution_options_vector);
+
         client(*c);
 
         void check_and_configure_mapped_window(window &__window, const uint32_t &__width, const uint32_t &__height)
