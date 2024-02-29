@@ -6614,6 +6614,73 @@ class __screen_settings__
         string(_current_resoluton_string);
         vector<pair<xcb_randr_mode_t, string>>(_avalible_resolutions);
 
+        void set_resolution(xcb_randr_mode_t __mode_id)
+        {
+            xcb_randr_get_screen_resources_current_cookie_t res_cookie;
+            xcb_randr_get_screen_resources_current_reply_t *res_reply;
+            xcb_randr_output_t *outputs;
+            int outputs_len;
+
+            // Get current screen resources
+            res_cookie = xcb_randr_get_screen_resources_current(conn, screen->root);
+            res_reply = xcb_randr_get_screen_resources_current_reply(conn, res_cookie, NULL);
+
+            if (!res_reply)
+            {
+                log_error("Could not get screen resources");
+                return;
+            }
+
+            // Get outputs; assuming the first output is the one we want to change
+            outputs = xcb_randr_get_screen_resources_current_outputs(res_reply);
+            outputs_len = xcb_randr_get_screen_resources_current_outputs_length(res_reply);
+
+            if (!outputs_len)
+            {
+                log_error("No outputs found");
+                free(res_reply);
+                return;
+            }
+
+            xcb_randr_output_t output = outputs[0]; // Assuming we change the first output
+
+            // Get the current configuration for the output
+            xcb_randr_get_output_info_cookie_t output_info_cookie = xcb_randr_get_output_info(conn, output, XCB_CURRENT_TIME);
+            xcb_randr_get_output_info_reply_t *output_info_reply = xcb_randr_get_output_info_reply(conn, output_info_cookie, NULL);
+
+            if (!output_info_reply || output_info_reply->crtc == XCB_NONE)
+            {
+                log_error("Output is not connected to any CRTC");
+                free(output_info_reply);
+                free(res_reply);
+                return;
+            }
+
+            // Set the mode
+            xcb_randr_set_crtc_config_cookie_t set_crtc_config_cookie = xcb_randr_set_crtc_config(
+                conn,
+                output_info_reply->crtc,
+                XCB_CURRENT_TIME,
+                XCB_CURRENT_TIME,
+                0, // x
+                0, // y
+                __mode_id,
+                XCB_RANDR_ROTATION_ROTATE_0,
+                1, &output
+            );
+
+            xcb_randr_set_crtc_config_reply_t *set_crtc_config_reply = xcb_randr_set_crtc_config_reply(conn, set_crtc_config_cookie, NULL);
+
+            if (!set_crtc_config_reply)
+            {
+                log_error("Failed to set mode");
+            }
+
+            free(set_crtc_config_reply);
+            free(output_info_reply);
+            free(res_reply);
+        }
+
         void init()
         {
             _avalible_resolutions     = get_avalible_resolutions__();
@@ -6932,6 +6999,14 @@ class __system_settings__
                 {
                     adjust_and_map_subwindow__(_network_settings_window);
                     return;
+                }
+
+                for (int i(0); i < _screen_resolution_options_vector.size(); ++i)
+                {
+                    if (e->event == _screen_resolution_options_vector[i])
+                    {
+                        screen_settings->set_resolution(screen_settings->_avalible_resolutions[i].first);
+                    }
                 }
             });
 
