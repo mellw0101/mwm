@@ -6908,7 +6908,7 @@ class __system_settings__
                             _screen_resolution_dropdown_window.width(),
                             MENU_ENTRY_HEIGHT
                         );
-                        option.set_backround_color(RED);
+                        option.set_backround_color(DARK_GREY);
                         mask = XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE;
                         option.apply_event_mask(&mask);
                         option.map();
