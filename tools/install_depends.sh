@@ -56,7 +56,8 @@ install_dependencies() {
                             libxau-dev              \
                             libpolkit-agent-1-dev   \
                             wireless-tools          \
-                            libiw-dev
+                            libiw-dev               \
+                            libxcb-xinput-dev
     elif [ -x "$(command -v dnf)" ]; then
         # Fedora/RHEL
         sudo dnf install -y package1 package2
@@ -86,7 +87,9 @@ install_dependencies() {
                                         libxv               \
                                         libxvmc             \
                                         libxshmfence        \
-                                        libxxf86vm                        
+                                        libxxf86vm          \
+                                        libxi               \
+                                        xcb-util
     else
         echo "Unsupported distribution. Please install dependencies manually."
         exit 1
