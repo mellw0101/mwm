@@ -7144,6 +7144,21 @@ class __system_settings__
             if (__window == _screen_resolution_window ) draw(_screen_resolution_window);
             if (__window == _audio_menu_entry_window  ) draw(_audio_menu_entry_window);
             if (__window == _network_menu_entry_window) draw(_network_menu_entry_window);
+
+            for (int i(0); i < _screen_resolution_options_vector.size(); ++i)
+            {
+                if (__window == _screen_resolution_options_vector[i])
+                {
+                    _screen_resolution_options_vector[i].draw_text(
+                        screen_settings->_avalible_resolutions[i].second.c_str(),
+                        WHITE,
+                        DARK_GREY,
+                        DEFAULT_FONT,
+                        MENU_ENTRY_TEXT_X,
+                        MENU_ENTRY_TEXT_Y
+                    );
+                }
+            }
         }
 
         void init()
