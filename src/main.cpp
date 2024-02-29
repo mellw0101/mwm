@@ -6382,7 +6382,6 @@ class __screen_settings__
                 string s = to_string(mode_info[i].width) + "x" + to_string(mode_info[i].height) + " " + to_string(calculate_refresh_rate(&mode_info[i])) + " Hz";
                 pair<xcb_randr_mode_t, string> pair{mode_info[i].id, s};
                 results.push_back(pair);
-                break;
             }
 
             free(crtc_info_reply);
