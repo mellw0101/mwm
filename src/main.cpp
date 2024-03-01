@@ -6150,8 +6150,6 @@ class add_app_dialog_window
 class __file_app__
 {
     private:
-        Logger(log);
-
         void create_main_window()
         {
             int width = (screen->width_in_pixels / 2), height = (screen->height_in_pixels / 2);
