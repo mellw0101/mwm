@@ -1374,6 +1374,28 @@ class window
                 map();
                 raise();
             }
+
+            void create_def_and_map_no_keys_with_borders(const uint32_t &__parent, const int16_t &__x, const int16_t &__y, const uint16_t &__width, const uint16_t &__height, COLOR __color, const uint32_t &__mask, int __border_info[3])
+            {
+                _depth        = 0L;
+                _parent       = __parent;
+                _x            = __x;
+                _y            = __y;
+                _width        = __width;
+                _height       = __height;
+                _border_width = 0;
+                __class       = XCB_WINDOW_CLASS_INPUT_OUTPUT;
+                _visual       = screen->root_visual;
+                _value_mask   = 0;
+                _value_list   = nullptr;
+
+                make_window();
+                set_backround_color(__color);
+                if (__mask > 0) apply_event_mask(&__mask);
+                map();
+                raise();
+                make_borders(__border_info[0], __border_info[1], __border_info[2]);
+            }
             
             void create_client_window(const uint32_t &parent, const int16_t &x, const int16_t &y, const uint16_t &width, const uint16_t &height)
             {
@@ -1398,7 +1420,7 @@ class window
                 make_window();
             }
 
-            void make_borders(int __border_mask, const uint32_t &__size, COLOR __color)
+            void make_borders(int __border_mask, const uint32_t &__size, const int &__color)
             {
                 if (__border_mask & UP)
                 {
@@ -2689,11 +2711,11 @@ class window
                 xcb_flush(conn);
             }
 
-            uint32_t get_color(COLOR color)
+            uint32_t get_color(const int &__color)
             {
                 uint32_t pixel = 0;
                 xcb_colormap_t colormap = screen->default_colormap;
-                rgb_color_code color_code = rgb_code(color);
+                rgb_color_code color_code = rgb_code(__color);
                 xcb_alloc_color_reply_t * reply = xcb_alloc_color_reply(
                     conn, 
                     xcb_alloc_color(
@@ -2750,14 +2772,14 @@ class window
                 return pixel;
             }
             
-            rgb_color_code rgb_code(COLOR COLOR)
+            rgb_color_code rgb_code(const int &__color)
             {
                 rgb_color_code color;
                 uint8_t r;
                 uint8_t g;
                 uint8_t b;
                 
-                switch (COLOR)
+                switch (__color)
                 {
                     case COLOR::WHITE:
                         r = 255; g = 255; b = 255;
@@ -2852,7 +2874,7 @@ class window
             }
         
         private: // borders
-            void make_border_window(BORDER __border, const uint32_t &__size, COLOR __color)
+            void make_border_window(BORDER __border, const uint32_t &__size, const int &__color)
             {
                 switch (__border)
                 {
@@ -7183,16 +7205,16 @@ class __system_settings__
         
         void make_menu_entry_window__(window &__window, const uint32_t &__y)
         {
-            __window.create_def_and_map_no_keys(
+            __window.create_def_and_map_no_keys_with_borders(
                 _menu_window,
                 0,
                 __y,
                 MENU_WINDOW_WIDTH,
                 MENU_ENTRY_HEIGHT,
                 BLUE,
-                XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE
+                XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE,
+                (int[]){DOWN | RIGHT, 2, BLACK}
             );
-            __window.make_borders(DOWN | RIGHT, 2, BLACK);
             draw(__window);
         }
 
