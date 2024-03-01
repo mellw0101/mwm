@@ -2789,17 +2789,7 @@ class __window_decor__
 
         static void make_file_app_menu_borders(window &__window, const int &__size, COLOR __color)
         {
-            window up, down;
-
-            up.create_default(
-                __window,
-                0,
-                0,
-                __window.width(),
-                __size
-            );
-            up.set_backround_color(__color);
-            up.map();
+            window down;
 
             down.create_default(
                 __window,
@@ -6257,7 +6247,7 @@ class __file_app__
 
             public:
                 window(_window), (_border);
-                
+
                 void create(window &__parent_window)
                 {
                     uint32_t mask;
