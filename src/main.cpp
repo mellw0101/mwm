@@ -6711,7 +6711,11 @@ class __system_settings__
                     xcb_input_xi_query_device_cookie_t cookie = xcb_input_xi_query_device(conn, XCB_INPUT_DEVICE_ALL);
                     xcb_input_xi_query_device_reply_t* reply = xcb_input_xi_query_device_reply(conn, cookie, NULL);
 
-                    if (!reply) return;
+                    if (reply == nullptr)
+                    {
+                        log_error("xcb_input_xi_query_device_reply_t == nullptr");
+                        return;
+                    }
 
                     xcb_input_xi_device_info_iterator_t iter;
                     for (iter = xcb_input_xi_query_device_infos_iterator(reply); iter.rem; xcb_input_xi_device_info_next(&iter))
@@ -6721,19 +6725,15 @@ class __system_settings__
                         char* device_name = (char*)(device + 1); // Device name is stored immediately after the device info structure.
                         if (device->type == XCB_INPUT_DEVICE_TYPE_SLAVE_POINTER || device->type == XCB_INPUT_DEVICE_TYPE_FLOATING_SLAVE)
                         {
-                            // Check if the device name contains "mouse", "touchpad", etc.
-                            if (strstr(device_name, "mouse") != NULL || strstr(device_name, "touchpad") != NULL)
-                            {
-                                log_info("Found pointing device:" + string(device_name));
-                                log_info("Device ID:" + to_string(device->deviceid));
-                            }
+                            log_info("Found pointing device:" + string(device_name));
+                            log_info("Device ID:" + to_string(device->deviceid));
                         }
                     }
 
                     free(reply);
                 }
         };
-        __mouse_settings__ mouse_settings;
+        
 
         void make_menu_entry_window__(window &__window, const uint32_t &__y)
         {
@@ -7198,6 +7198,7 @@ class __system_settings__
         void init()
         {
             setup_events__();
+            __mouse_settings__ mouse_settings;
             mouse_settings.query_input_devices();
         }
 
