@@ -1313,6 +1313,25 @@ class window
                 }
             }
 
+            void create_def_no_keys(const uint32_t &__parent, const int16_t &__x, const int16_t &__y, const uint16_t &__width, const uint16_t &__height, COLOR __color, const uint32_t &__mask)
+            {
+                _depth        = 0L;
+                _parent       = __parent;
+                _x            = __x;
+                _y            = __y;
+                _width        = __width;
+                _height       = __height;
+                _border_width = 0;
+                __class       = XCB_WINDOW_CLASS_INPUT_OUTPUT;
+                _visual       = screen->root_visual;
+                _value_mask   = 0;
+                _value_list   = nullptr;
+
+                make_window();
+                set_backround_color(__color);
+                if (__mask > 0) apply_event_mask(&__mask);
+            }
+
             void create_def_and_map(const uint32_t &__parent, const int16_t &__x, const int16_t &__y, const uint16_t &__width, const uint16_t &__height, COLOR __color, const uint32_t &__mask)
             {
                 _depth        = 0L;
@@ -7181,7 +7200,7 @@ class __system_settings__
         {
             if (__window == _screen_settings_window)
             {
-                _screen_settings_window.create_def_and_map_no_keys(
+                _screen_settings_window.create_def_no_keys(
                     _main_window,
                     MENU_WINDOW_WIDTH,
                     0,
@@ -7191,7 +7210,7 @@ class __system_settings__
                     XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS
                 );
 
-                _screen_resolution_window.create_def_and_map_no_keys(
+                _screen_resolution_window.create_def_no_keys(
                     _screen_settings_window,
                     100,
                     20,
@@ -7201,7 +7220,7 @@ class __system_settings__
                     XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS
                 );
 
-                _screen_resolution_button_window.create_def_and_map_no_keys(
+                _screen_resolution_button_window.create_def_no_keys(
                     _screen_settings_window,
                     260,
                     20,
@@ -7228,9 +7247,6 @@ class __system_settings__
                 DARK_GREY,
                 0
             );
-
-            mask = XCB_EVENT_MASK_BUTTON_PRESS;
-
             _menu_window.create_def_and_map_no_keys(
                 _main_window,
                 0,
@@ -7240,7 +7256,6 @@ class __system_settings__
                 RED,
                 XCB_EVENT_MASK_BUTTON_PRESS
             );
-
             _default_settings_window.create_def_and_map_no_keys(
                 _main_window,
                 MENU_WINDOW_WIDTH,
@@ -7250,30 +7265,28 @@ class __system_settings__
                 ORANGE,
                 XCB_EVENT_MASK_BUTTON_PRESS
             );
-
             make_menu_entry_window__(_screen_menu_entry_window, 0);
             make_settings_window__(_screen_settings_window);
-
             make_menu_entry_window__(_audio_menu_entry_window, 20);
-            _audio_settings_window.create_default(
+            _audio_settings_window.create_def_no_keys(
                 _main_window,
                 MENU_WINDOW_WIDTH,
                 0,
                 (_main_window.width() - MENU_WINDOW_WIDTH),
-                _main_window.height()
+                _main_window.height(),
+                PURPLE,
+                XCB_EVENT_MASK_BUTTON_PRESS
             );
-            _audio_settings_window.apply_event_mask(&mask);
-            _audio_settings_window.set_backround_color(PURPLE);
-
             make_menu_entry_window__(_network_menu_entry_window, 40);
-            _network_settings_window.create_default(
+            _network_settings_window.create_def_no_keys(
                 _main_window,
                 MENU_WINDOW_WIDTH,
                 0,
                 (_main_window.width() - MENU_WINDOW_WIDTH),
-                _main_window.height()
+                _main_window.height(),
+                MAGENTA,
+                0
             );
-            _network_settings_window.set_backround_color(MAGENTA);
         }
 
         void make_internal_client__()
@@ -7317,10 +7330,10 @@ class __system_settings__
             {
                 draw(__window);
                 _screen_resolution_window.map();
-                __window_decor__::make_borders(_screen_resolution_window, 2, BLACK);
+                _screen_resolution_window.make_borders(UP | DOWN | LEFT | RIGHT, 2, BLACK);
                 draw(_screen_resolution_window);
                 _screen_resolution_button_window.map();
-                __window_decor__::make_right_side_button_borders(_screen_resolution_button_window, 2, BLACK);
+                _screen_resolution_button_window.make_borders(UP | RIGHT | DOWN, 2, BLACK);
             }
         }
 
@@ -7335,34 +7348,30 @@ class __system_settings__
             {
                 case RESOLUTION_DROPDOWN_WINDOW:
                 {
-                    _screen_resolution_dropdown_window.create_default(
+                    _screen_resolution_dropdown_window.create_def_and_map_no_keys(
                         _screen_settings_window,
                         100,
                         40,
                         180,
-                        (screen_settings->_avalible_resolutions.size() * MENU_ENTRY_HEIGHT)
+                        (screen_settings->_avalible_resolutions.size() * MENU_ENTRY_HEIGHT),
+                        DARK_GREY,
+                        0
                     );
-                    _screen_resolution_dropdown_window.set_backround_color(DARK_GREY);
-                    _screen_resolution_dropdown_window.map();
                     _screen_resolution_options_vector.clear();
 
                     for (int i(0), y_pos(0); i < screen_settings->_avalible_resolutions.size(); ++i, y_pos += MENU_ENTRY_HEIGHT)
                     {
                         window option;
-                        uint32_t mask;
-                        
-                        option.create_default(
+                        option.create_def_and_map_no_keys(
                             _screen_resolution_dropdown_window,
                             0,
                             y_pos,
                             _screen_resolution_dropdown_window.width(),
-                            MENU_ENTRY_HEIGHT
+                            MENU_ENTRY_HEIGHT,
+                            DARK_GREY,
+                            XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE  
                         );
-                        option.set_backround_color(DARK_GREY);
-                        mask = XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE;
-                        option.apply_event_mask(&mask);
-                        option.map();
-                        __window_decor__::make_dropdown_menu_entry_borders(option, 2, BLACK);
+                        option.make_borders(RIGHT | LEFT | DOWN, 2, BLACK);
                         option.draw_text(
                             screen_settings->_avalible_resolutions[i].second.c_str(),
                             WHITE,
