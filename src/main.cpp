@@ -1279,6 +1279,52 @@ class window
 
                 make_window();
             }
+
+            void create_def(const uint32_t &__parent, const int16_t &__x, const int16_t &__y, const uint16_t &__width, const uint16_t &__height, COLOR __color, const uint32_t &__mask)
+            {
+                _depth        = 0L;
+                _parent       = __parent;
+                _x            = __x;
+                _y            = __y;
+                _width        = __width;
+                _height       = __height;
+                _border_width = 0;
+                __class       = XCB_WINDOW_CLASS_INPUT_OUTPUT;
+                _visual       = screen->root_visual;
+                _value_mask   = 0;
+                _value_list   = nullptr;
+
+                make_window();
+                set_backround_color(__color);
+                grab_default_keys();
+
+                if (__mask > 0)
+                {
+                    apply_event_mask(&__mask);
+                }
+            }
+
+            void create_def_and_map(const uint32_t &__parent, const int16_t &__x, const int16_t &__y, const uint16_t &__width, const uint16_t &__height, COLOR __color, const uint32_t &__mask)
+            {
+                _depth        = 0L;
+                _parent       = __parent;
+                _x            = __x;
+                _y            = __y;
+                _width        = __width;
+                _height       = __height;
+                _border_width = 0;
+                __class       = XCB_WINDOW_CLASS_INPUT_OUTPUT;
+                _visual       = screen->root_visual;
+                _value_mask   = 0;
+                _value_list   = nullptr;
+
+                make_window();
+                set_backround_color(__color);
+                grab_default_keys();
+                if (__mask > 0) apply_event_mask(&__mask);
+                map();
+                raise();
+            }
             
             void create_client_window(const uint32_t &parent, const int16_t &x, const int16_t &y, const uint16_t &width, const uint16_t &height)
             {
@@ -6224,6 +6270,7 @@ class __menu__
 {
     public:
         vector<__menu_entry__>(_entry_vector);
+        uint32_t(_width), (_parent_window), (_mask);
 
         void add_entry()
         {
@@ -7003,17 +7050,27 @@ class __system_settings__
             int width = (screen->width_in_pixels / 2), height = (screen->height_in_pixels / 2);
             int x = ((screen->width_in_pixels / 2) - (width / 2)), y = ((screen->height_in_pixels / 2) - (height / 2));
 
-            _main_window.create_default(
+            _main_window.create_def_and_map(
                 screen->root,
                 x,
                 y,
                 width,
-                height
+                height,
+                DARK_GREY,
+                0
             );
-            _main_window.set_backround_color(DARK_GREY);
-            _main_window.grab_default_keys();
-            _main_window.map();
-            _main_window.raise();
+
+            // _main_window.create_default(
+            //     screen->root,
+            //     x,
+            //     y,
+            //     width,
+            //     height
+            // );
+            // _main_window.set_backround_color(DARK_GREY);
+            // _main_window.grab_default_keys();
+            // _main_window.map();
+            // _main_window.raise();
 
             mask = XCB_EVENT_MASK_BUTTON_PRESS;
 
