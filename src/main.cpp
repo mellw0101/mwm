@@ -1,5 +1,6 @@
 #include <cstdlib>
 #include <features.h>
+#include <iterator>
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -2774,6 +2775,31 @@ class __window_decor__
             );
             right.set_backround_color(__color);
             right.map();
+
+            down.create_default(
+                __window,
+                0,
+                (__window.height() - __size),
+                __window.width(),
+                __size
+            );
+            down.set_backround_color(__color);
+            down.map();
+        }
+
+        static void make_file_app_menu_borders(window &__window, const int &__size, COLOR __color)
+        {
+            window up, down;
+
+            up.create_default(
+                __window,
+                0,
+                0,
+                __window.width(),
+                __size
+            );
+            up.set_backround_color(__color);
+            up.map();
 
             down.create_default(
                 __window,
@@ -6147,6 +6173,9 @@ class add_app_dialog_window
         function<void()> enter_function;
 };
 
+#define FILE_APP_LEFT_MENU_WIDTH 120
+#define FILE_APP_LEFT_MENU_ENTRY_HEIGHT 20
+#define FILE_APP_BORDER_SIZE 2
 class __file_app__
 {
     private:
@@ -6186,7 +6215,7 @@ class __file_app__
                         _window.set_backround_color(DARK_GREY);
                         _window.map();
                         draw();
-                        __window_decor__::make_menu_borders(_window, 2, BLACK);
+                        __window_decor__::make_file_app_menu_borders(_window, FILE_APP_BORDER_SIZE, BLACK);
                     }
 
                     void draw()
@@ -6208,7 +6237,6 @@ class __file_app__
                     }
                 };
 
-                window(_window);
                 vector<__menu_entry__>(_menu_entry_vector);
                 uint32_t(_current_menu_y);
 
@@ -6216,13 +6244,24 @@ class __file_app__
                 {
                     __menu_entry__(menu_entry);
                     menu_entry._string = __name;
-                    menu_entry.create(_window, 0, _current_menu_y, 120, 20);
-                    _current_menu_y += 20;
+                    menu_entry.create(
+                        _window,
+                        0,
+                        _current_menu_y,
+                        FILE_APP_LEFT_MENU_WIDTH,
+                        FILE_APP_LEFT_MENU_ENTRY_HEIGHT
+                    );
+                    _menu_entry_vector.push_back(menu_entry);
+                    _current_menu_y += FILE_APP_LEFT_MENU_ENTRY_HEIGHT;
                 }
 
             public:
+                window(_window), (_border);
+                
                 void create(window &__parent_window)
                 {
+                    uint32_t mask;
+
                     _window.create_default(
                         __parent_window,
                         0,
@@ -6230,24 +6269,38 @@ class __file_app__
                         120,
                         __parent_window.height()
                     );
-                    uint32_t mask = XCB_EVENT_MASK_STRUCTURE_NOTIFY;
+                    mask = XCB_EVENT_MASK_STRUCTURE_NOTIFY;
                     _window.apply_event_mask(&mask);
                     _window.set_backround_color(DARK_GREY);
                     _window.grab_button({
                         { L_MOUSE_BUTTON, NULL }
                     });
+
+                    _border.create_default(
+                        __parent_window,
+                        FILE_APP_LEFT_MENU_WIDTH,
+                        0,
+                        FILE_APP_BORDER_SIZE,
+                        __parent_window.height()
+                    );
+                    mask = XCB_EVENT_MASK_BUTTON_PRESS;
+                    _border.apply_event_mask(&mask);
+                    _border.set_backround_color(BLACK);
                 }
 
                 void show()
                 {
                     _window.map();
                     _window.raise();
+                    _border.map();
+                    _border.raise();
                     create_menu_entry__("hello");
                 }
 
                 void configure(const uint32_t &__width, const uint32_t &__height)
                 {
                     _window.height(__height);
+                    _border.height(__height);
                     xcb_flush(conn);
                 }
 
@@ -6306,8 +6359,14 @@ class __file_app__
 
             event_handler->setEventCallback(XCB_CONFIGURE_NOTIFY, [&](Ev ev)-> void
             {
-                const auto * e = reinterpret_cast<const xcb_configure_notify_event_t *>(ev);
+                const auto *e = reinterpret_cast<const xcb_configure_notify_event_t *>(ev);
                 configure(e->window, e->width, e->height);
+            });
+
+            event_handler->setEventCallback(XCB_EXPOSE,           [this](Ev ev)->void
+            {
+                const auto *e = reinterpret_cast<const xcb_expose_event_t *>(ev);
+                expose(e->window);
             });
         }
 
@@ -6321,6 +6380,11 @@ class __file_app__
             {
                 _left_menu.configure(__width, __height);
             }
+        }
+
+        void expose(const uint32_t &__window)
+        {
+            _left_menu.expose(__window);
         }
 
         void init()
@@ -8954,6 +9018,7 @@ class resize_client
                                     status_bar->draw_wifi_info_window();
                                 }
 
+                                file_app->expose(e->window);
                                 system_settings->expose(e->window);
 
                                 break;
@@ -8964,15 +9029,6 @@ class resize_client
                                 const auto e = reinterpret_cast<const xcb_configure_notify_event_t *>(ev);
                                 file_app->configure(e->window, e->width, e->height);
                                 system_settings->configure(e->window, e->width, e->height);
-                                // if (e->window == system_settings->_main_window)
-                                // {
-                                //     system_settings->_menu_window.height(e->height);
-                                //     system_settings->check_and_configure_mapped_window(system_settings->_default_settings_window, (e->width - MENU_WINDOW_WIDTH), e->height);
-                                //     system_settings->check_and_configure_mapped_window(system_settings->_screen_settings_window,  (e->width - MENU_WINDOW_WIDTH), e->height);
-                                //     system_settings->check_and_configure_mapped_window(system_settings->_audio_settings_window,   (e->width - MENU_WINDOW_WIDTH), e->height);
-                                //     system_settings->check_and_configure_mapped_window(system_settings->_network_settings_window, (e->width - MENU_WINDOW_WIDTH), e->height);
-                                //     xcb_flush(conn);
-                                // }
                             }
                         }
 
