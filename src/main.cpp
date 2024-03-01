@@ -6163,19 +6163,26 @@ class add_app_dialog_window
         function<void()> enter_function;
 };
 
-class __menu_entry_window__
+class __menu_entry__
 {
     public:
-        __menu_entry_window__() {}
+        window(_window);
+        string(_string);
+        uint32_t(_parent_window), (_x), (_y), (_width), (_height);
+
+        void create()
+        {
+
+        }
 };
 
-class __menu_window__
+class __menu__
 {
     public:
-        vector<__menu_entry_window__>(_entry_vector);
+        vector<__menu_entry__>(_entry_vector);
 
     public:
-        __menu_window__() {}
+        __menu__() {}
 };
 
 #define FILE_APP_LEFT_MENU_WIDTH 120
@@ -6219,9 +6226,9 @@ class __file_app__
                         uint32_t mask = XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE;
                         _window.apply_event_mask(&mask);
                         _window.set_backround_color(DARK_GREY);
+                        __window_decor__::make_file_app_menu_borders(_window, FILE_APP_BORDER_SIZE, BLACK);
                         _window.map();
                         draw();
-                        __window_decor__::make_file_app_menu_borders(_window, FILE_APP_BORDER_SIZE, BLACK);
                     }
 
                     void draw()
