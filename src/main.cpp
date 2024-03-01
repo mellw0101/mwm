@@ -7175,62 +7175,41 @@ class __system_settings__
             );
             __window.make_borders(DOWN | RIGHT, 2, BLACK);
             draw(__window);
-
-            // uint32_t mask;
-
-            // __window.create_default(
-            //     _menu_window,
-            //     0,
-            //     __y,
-            //     MENU_WINDOW_WIDTH,
-            //     MENU_ENTRY_HEIGHT
-            // );
-            // mask = XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS;
-            // __window.apply_event_mask(&mask);
-            // __window.set_backround_color(BLUE);
-            // __window.map();
-            // __window_decor__::make_menu_borders(__window, 2, BLACK);
-            // draw(__window);
         }
 
         void make_settings_window__(window &__window)
         {
             if (__window == _screen_settings_window)
             {
-                uint32_t mask;
-
-                _screen_settings_window.create_default(
+                _screen_settings_window.create_def_and_map_no_keys(
                     _main_window,
                     MENU_WINDOW_WIDTH,
                     0,
-                    (_main_window.width() - MENU_WINDOW_WIDTH),
-                    _main_window.height()
+                    (_main_window.width()),
+                    _main_window.height(),
+                    WHITE,
+                    XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS
                 );
-                _screen_settings_window.set_backround_color(WHITE);
-                mask = XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS;
-                _screen_settings_window.apply_event_mask(&mask);
 
-                _screen_resolution_window.create_default(
+                _screen_resolution_window.create_def_and_map_no_keys(
                     _screen_settings_window,
                     100,
                     20,
                     160,
-                    20
+                    20,
+                    DARK_GREY,
+                    XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS
                 );
-                mask = XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS;
-                _screen_resolution_window.apply_event_mask(&mask);
-                _screen_resolution_window.set_backround_color(DARK_GREY);
 
-                _screen_resolution_button_window.create_default(
+                _screen_resolution_button_window.create_def_and_map_no_keys(
                     _screen_settings_window,
                     260,
                     20,
                     20,
-                    20
+                    20,
+                    DARK_GREY,
+                    XCB_EVENT_MASK_BUTTON_PRESS
                 );
-                mask = XCB_EVENT_MASK_BUTTON_PRESS;
-                _screen_resolution_button_window.apply_event_mask(&mask);
-                _screen_resolution_button_window.set_backround_color(DARK_GREY);
             }
         }
 
