@@ -7980,51 +7980,43 @@ class __status_bar__
 
         void create_windows__()
         {
-            uint32_t _mask = XCB_EVENT_MASK_EXPOSURE;
-
-            _bar_window.create_default(
+            _bar_window.create_def_and_map_no_keys(
                 screen->root,
                 0,
                 0,
                 screen->width_in_pixels,
-                20
+                20,
+                DARK_GREY,
+                0
             );
-            _bar_window.apply_event_mask(&_mask);
-            _bar_window.set_backround_color(DARK_GREY);
-            _bar_window.map();
-
-            _time_window.create_default(
+            _time_window.create_def_and_map_no_keys(
                 _bar_window,
-                (screen->width_in_pixels - 60),
+                (screen->width_in_pixels - 60 ),
                 0,
                 60,
-                20
+                20,
+                DARK_GREY,
+                XCB_EVENT_MASK_EXPOSURE
             );
-            _time_window.apply_event_mask(&_mask);
-            _time_window.set_backround_color(DARK_GREY);
-            _time_window.map();
-
-            _date_window.create_default(
+            _date_window.create_def_and_map_no_keys(
                 _bar_window,
                 (screen->width_in_pixels - 140),
                 0,
                 74,
-                20
+                20,
+                DARK_GREY,
+                XCB_EVENT_MASK_EXPOSURE
             );
-            _date_window.apply_event_mask(&_mask);
-            _date_window.set_backround_color(DARK_GREY);
-            _date_window.map();
-
-            _wifi_window.create_default(
+            _wifi_window.create_def_no_keys(
                 _bar_window,
                 (screen->width_in_pixels - 160),
                 0,
                 20,
-                20
+                20,
+                DARK_GREY,
+                XCB_EVENT_MASK_BUTTON_PRESS
             );
-            _mask = XCB_EVENT_MASK_BUTTON_PRESS;
-            _wifi_window.apply_event_mask(&_mask);
-            _wifi_window.set_backround_color(DARK_GREY);
+
             Bitmap bitmap(20, 20);
             
             bitmap.modify(1, 6, 13, 1);
@@ -8050,88 +8042,72 @@ class __status_bar__
             _wifi_window.map();
         }
 
-        void create_wifi_dropdown_window__()
+        void show__(const uint32_t &__window)
         {
-            #define WIFI_DROPDOWN_BORDER 2
-            #define WIFI_DROPDOWN_X ((screen->width_in_pixels - 150) - 110)
-            #define WIFI_DROPDOWN_Y 20
-            #define WIFI_DROPDOWN_WIDTH 220
-            #define WIFI_DROPDOWN_HEIGHT 240
+            if (__window == _wifi_dropdown_window)
+            {
+                #define WIFI_DROPDOWN_BORDER 2
+                #define WIFI_DROPDOWN_X ((screen->width_in_pixels - 150) - 110)
+                #define WIFI_DROPDOWN_Y 20
+                #define WIFI_DROPDOWN_WIDTH 220
+                #define WIFI_DROPDOWN_HEIGHT 240
 
-            _wifi_dropdown_window.create_default(
-                screen->root,
-                WIFI_DROPDOWN_X,
-                WIFI_DROPDOWN_Y,
-                WIFI_DROPDOWN_WIDTH,
-                WIFI_DROPDOWN_HEIGHT
-            );
-            _wifi_dropdown_window.set_backround_color(DARK_GREY);
-            _wifi_dropdown_window.map();
-            __window_decor__::make_borders(_wifi_dropdown_window, WIFI_DROPDOWN_BORDER, BLACK);
+                _wifi_dropdown_window.create_def_and_map_no_keys(
+                    screen->root,
+                    WIFI_DROPDOWN_X,
+                    WIFI_DROPDOWN_Y,
+                    WIFI_DROPDOWN_WIDTH,
+                    WIFI_DROPDOWN_HEIGHT,
+                    DARK_GREY,
+                    0
+                );
+                _wifi_dropdown_window.make_borders(UP | DOWN | LEFT | RIGHT, WIFI_DROPDOWN_BORDER, BLACK);
 
-            _wifi_close_window.create_default(
-                _wifi_dropdown_window,
-                20,
-                (WIFI_DROPDOWN_HEIGHT - 40),
-                80,
-                20
-            );
-            uint32_t _mask = XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE;
-            _wifi_close_window.apply_event_mask(&_mask);
-            _wifi_close_window.set_backround_color(WHITE);
-            _wifi_close_window.map();
-            __window_decor__::make_borders(_wifi_close_window, WIFI_DROPDOWN_BORDER, BLACK);
-            draw_wifi_close_window();
+                _wifi_close_window.create_def_and_map_no_keys(
+                    _wifi_dropdown_window,
+                    20,
+                    (WIFI_DROPDOWN_HEIGHT - 40),
+                    80,
+                    20,
+                    WHITE,
+                    XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE
+                );
+                _wifi_close_window.make_borders(UP | DOWN | LEFT | RIGHT, WIFI_DROPDOWN_BORDER, BLACK);
+                draw(_wifi_close_window);
 
-            _wifi_info_window.create_default(
-                _wifi_dropdown_window,
-                20,
-                20,
-                (WIFI_DROPDOWN_WIDTH - 40),
-                (WIFI_DROPDOWN_HEIGHT - 120)
-            );
-            _mask = XCB_EVENT_MASK_EXPOSURE;
-            _wifi_info_window.apply_event_mask(&_mask);
-            _wifi_info_window.set_backround_color(WHITE);
-            _wifi_info_window.map();
-            __window_decor__::make_borders(_wifi_info_window, WIFI_DROPDOWN_BORDER, BLACK);
-            draw_wifi_info_window();
+                _wifi_info_window.create_def_and_map_no_keys(
+                    _wifi_dropdown_window,
+                    20,
+                    20,
+                    (WIFI_DROPDOWN_WIDTH - 40),
+                    (WIFI_DROPDOWN_HEIGHT - 120),
+                    WHITE,
+                    XCB_EVENT_MASK_EXPOSURE
+                );
+                _wifi_info_window.make_borders(UP | DOWN | LEFT | RIGHT, WIFI_DROPDOWN_BORDER, BLACK);
+                draw(_wifi_info_window);
+            }
         }
 
-        void hide_wifi_dropdown_window__()
+        void hide__(const uint32_t &__window)
         {
-            _wifi_close_window.unmap();
-            _wifi_close_window.kill();
-            _wifi_info_window.unmap();
-            _wifi_info_window.kill();
-            _wifi_dropdown_window.unmap();
-            _wifi_dropdown_window.kill();
+            if (__window == _wifi_dropdown_window)
+            {
+                _wifi_close_window.unmap();
+                _wifi_close_window.kill();
+                _wifi_info_window.unmap();
+                _wifi_info_window.kill();
+                _wifi_dropdown_window.unmap();
+                _wifi_dropdown_window.kill();
+            }
         }
 
         void setup_events__()
         {
-            event_handler->setEventCallback(XCB_EXPOSE, [&](Ev ev)-> void
+            event_handler->setEventCallback(XCB_EXPOSE,       [&](Ev ev)-> void
             {
                 const auto *e = reinterpret_cast<const xcb_expose_event_t *>(ev);
-                if (e->window == _date_window)
-                {
-                    draw_date__();
-                }
-
-                if (e->window == _time_window)
-                {
-                    draw_time__();
-                }
-
-                if (e->window == _wifi_close_window)
-                {
-                    draw_wifi_close_window();
-                }
-
-                if (e->window == _wifi_info_window)
-                {
-                    draw_wifi_info_window();
-                }
+                draw(e->window);
             });
 
             event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev)-> void
@@ -8141,17 +8117,17 @@ class __status_bar__
                 {
                     if (_wifi_dropdown_window.is_mapped())
                     {
-                        hide_wifi_dropdown_window__();
+                        hide__(_wifi_dropdown_window);
                     }
                     else
                     {
-                        create_wifi_dropdown_window__();
+                        show__(_wifi_dropdown_window);
                     }
                 }
 
                 if (e->event == _wifi_close_window)
                 {
-                    hide_wifi_dropdown_window__();
+                    hide__(_wifi_dropdown_window);
                 }
             });
         }
@@ -8162,70 +8138,73 @@ class __status_bar__
         void init__()
         {
             create_windows__();
-            draw_time__();
-            draw_date__();
+            draw(_time_window);
+            draw(_date_window);
             setup_events__();
         }
 
-        void draw_time__()
+        void draw(const uint32_t &__window)
         {
-            _time_window.draw_text(
-                get_time__().c_str(),
-                WHITE,
-                DARK_GREY,
-                "7x14",
-                2,
-                14
-            );
-            xcb_flush(conn);
-        }
+            if (__window == _time_window)
+            {
+                _time_window.draw_text(
+                    get_time__().c_str(),
+                    WHITE,
+                    DARK_GREY,
+                    "7x14",
+                    2,
+                    14
+                );
+                xcb_flush(conn);
+            }
 
-        void draw_date__()
-        {
-            _date_window.draw_text(
-                get_date__().c_str(),
-                WHITE,
-                DARK_GREY,
-                "7x14",
-                2,
-                14
-            );
-            xcb_flush(conn);
-        }
+            if (__window == _date_window)
+            {
+                _date_window.draw_text(
+                    get_date__().c_str(),
+                    WHITE,
+                    DARK_GREY,
+                    "7x14",
+                    2,
+                    14
+                );
+                xcb_flush(conn);
+            }
 
-        void draw_wifi_close_window()
-        {
-            _wifi_close_window.draw_text(
-                "close",
-                BLACK,
-                WHITE,
-                "7x14",
-                22,
-                15
-            );
-        }
+            if (__window == _wifi_close_window)
+            {
+                _wifi_close_window.draw_text(
+                    "close",
+                    BLACK,
+                    WHITE,
+                    "7x14",
+                    22,
+                    15
+                );
+            }
 
-        void draw_wifi_info_window()
-        {
-            string local_ip("Local ip: " + network->get_local_ip_info(__network__::LOCAL_IP));
-            _wifi_info_window.draw_text(
-                local_ip.c_str(),
-                BLACK,
-                WHITE,
-                "7x14",
-                4,
-                16
-            );
+            if (__window == _wifi_info_window)
+            {
+                string local_ip("Local ip: " + network->get_local_ip_info(__network__::LOCAL_IP));
+                _wifi_info_window.draw_text(
+                    local_ip.c_str(),
+                    BLACK,
+                    WHITE,
+                    "7x14",
+                    4,
+                    16
+                );
 
-            string local_interface("interface: " + network->get_local_ip_info(__network__::INTERFACE_FOR_LOCAL_IP));
-            _wifi_info_window.draw_text(
-                local_interface.c_str(),
-                BLACK,
-                WHITE,
-                "7x14",
-                4,
-                30
-            );
+                string local_interface("interface: " + network->get_local_ip_info(__network__::INTERFACE_FOR_LOCAL_IP));
+                _wifi_info_window.draw_text(
+                    local_interface.c_str(),
+                    BLACK,
+                    WHITE,
+                    "7x14",
+                    4,
+                    30
+                );
+            }
         }
 
     public:
@@ -8402,26 +8381,7 @@ class mv_client
                     case XCB_EXPOSE:
                     {
                         const auto *e = reinterpret_cast<const xcb_expose_event_t *>(ev);
-                        if (e->window == status_bar->_date_window)
-                        {
-                            status_bar->draw_date__();
-                        }
-
-                        if (e->window == status_bar->_time_window)
-                        {
-                            status_bar->draw_time__();
-                        }
-
-                        if (e->window == status_bar->_wifi_close_window)
-                        {
-                            status_bar->draw_wifi_close_window();
-                        }
-
-                        if (e->window == status_bar->_wifi_info_window)
-                        {
-                            status_bar->draw_wifi_info_window();
-                        }
-
+                        status_bar->draw(e->window);
                         file_app->expose(e->window);
                         system_settings->expose(e->window);
 
@@ -9284,26 +9244,7 @@ class resize_client
                             case XCB_EXPOSE:
                             {
                                 const auto *e = reinterpret_cast<const xcb_expose_event_t *>(ev);
-                                if (e->window == status_bar->_date_window) 
-                                {
-                                    status_bar->draw_date__();
-                                }
-                                
-                                if (e->window == status_bar->_time_window) 
-                                {
-                                    status_bar->draw_time__();
-                                }
-
-                                if (e->window == status_bar->_wifi_close_window)
-                                {
-                                    status_bar->draw_wifi_close_window();
-                                }
-
-                                if (e->window == status_bar->_wifi_info_window)
-                                {
-                                    status_bar->draw_wifi_info_window();
-                                }
-
+                                status_bar->draw(e->window);
                                 file_app->expose(e->window);
                                 system_settings->expose(e->window);
 
@@ -9445,16 +9386,7 @@ class resize_client
                     case XCB_EXPOSE:
                     {
                         const auto *e = reinterpret_cast<const xcb_expose_event_t *>(ev);
-
-                        if (e->window == status_bar->_date_window)
-                        {
-                            status_bar->draw_date__();
-                        }
-
-                        if (e->window == status_bar->_time_window)
-                        {
-                            status_bar->draw_time__();
-                        }
+                        status_bar->draw(e->window);
 
                         break;
                     }
