@@ -1748,6 +1748,11 @@ class window
                 );
                 xcb_flush(conn);
             }
+
+            void set_event_mask(const uint32_t &__mask)
+            {
+                apply_event_mask(&__mask);
+            }
             
             void apply_event_mask(const uint32_t *mask)
             {
@@ -6165,14 +6170,53 @@ class add_app_dialog_window
 
 class __menu_entry__
 {
-    public:
+    private:
         window(_window);
         string(_string);
-        uint32_t(_parent_window), (_x), (_y), (_width), (_height);
+        uint32_t(_parent_window), (_x), (_y), (_width), (_height), (_mask), (_border_size);
+
+    public:
+        void init(  const uint32_t &__parent_window,
+                    const uint32_t &__x,
+                    const uint32_t &__y,
+                    const uint32_t &__width,
+                    const uint32_t &__height,
+                    const uint32_t &__mask,
+                    const uint32_t &__border_size)
+        {
+            _parent_window = __parent_window;
+            _x = __x;
+            _y = __y;
+            _width = __width;
+            _height = __height;
+            _mask = __mask;
+            _border_size = __border_size;
+        }
 
         void create()
         {
+            _window.create_default(_parent_window, _x, _y, _width, _height);
+            _window.apply_event_mask(&_mask);
+            _window.set_backround_color(DARK_GREY);
+            __window_decor__::make_file_app_menu_borders(_window, _border_size, BLACK);
+        }
 
+        void draw()
+        {
+            _window.draw_text(
+                _string.c_str(),
+                WHITE,
+                DARK_GREY,
+                DEFAULT_FONT,
+                4,
+                14
+            );
+        }
+
+        void configure(const uint32_t &__width)
+        {
+            _window.width(__width);
+            xcb_flush(conn);
         }
 };
 
@@ -6180,6 +6224,11 @@ class __menu__
 {
     public:
         vector<__menu_entry__>(_entry_vector);
+
+        void add_entry()
+        {
+            __menu_entry__ menu_entry;
+        }
 
     public:
         __menu__() {}
@@ -6223,8 +6272,9 @@ class __file_app__
                     void create(const uint32_t &__parent_window, const uint32_t &__x, const uint32_t &__y, const uint32_t &__width, const uint32_t &__height)
                     {
                         _window.create_default(__parent_window, __x, __y, __width, __height);
-                        uint32_t mask = XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE;
-                        _window.apply_event_mask(&mask);
+                        // uint32_t mask = XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE;
+                        // _window.apply_event_mask(&mask);
+                        _window.set_event_mask(XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE);
                         _window.set_backround_color(DARK_GREY);
                         __window_decor__::make_file_app_menu_borders(_window, FILE_APP_BORDER_SIZE, BLACK);
                         _window.map();
