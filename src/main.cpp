@@ -2857,6 +2857,7 @@ class window
                         );
                         xcb_flush(conn);
                         change_back_pixel(get_color(__color), window);
+                        xcb_map_window(conn, window);
 
                         break;
                     }
@@ -2881,6 +2882,7 @@ class window
                         );
                         xcb_flush(conn);
                         change_back_pixel(get_color(__color), window);
+                        xcb_map_window(conn, window);
 
                         break;
                     }
@@ -2905,6 +2907,7 @@ class window
                         );
                         xcb_flush(conn);
                         change_back_pixel(get_color(__color), window);
+                        xcb_map_window(conn, window);
 
                         break;
                     }
@@ -2929,6 +2932,7 @@ class window
                         );
                         xcb_flush(conn);
                         change_back_pixel(get_color(__color), window);
+                        xcb_map_window(conn, window);
 
                         break;
                     }
