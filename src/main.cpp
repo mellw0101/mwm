@@ -1218,9 +1218,18 @@ class _scale
         }
 };
 
+enum BORDER
+{
+    NONE  = 0,
+    LEFT  = 1 << 0, // 1
+    RIGHT = 1 << 1, // 2
+    UP    = 1 << 2, // 4
+    DOWN  = 1 << 3  // 8
+};
+
 class window
 {
-    public: // construcers and operators
+    public:  // construcers and operators
         window() {}
 
         operator uint32_t() const
@@ -1234,7 +1243,7 @@ class window
             return *this;
         }
     
-    public: // methods
+    public:  // methods
         public: // main methods
             void create(const uint8_t  &depth,
                         const uint32_t &parent,
@@ -1325,6 +1334,27 @@ class window
                 map();
                 raise();
             }
+
+            void create_def_and_map_no_keys(const uint32_t &__parent, const int16_t &__x, const int16_t &__y, const uint16_t &__width, const uint16_t &__height, COLOR __color, const uint32_t &__mask)
+            {
+                _depth        = 0L;
+                _parent       = __parent;
+                _x            = __x;
+                _y            = __y;
+                _width        = __width;
+                _height       = __height;
+                _border_width = 0;
+                __class       = XCB_WINDOW_CLASS_INPUT_OUTPUT;
+                _visual       = screen->root_visual;
+                _value_mask   = 0;
+                _value_list   = nullptr;
+
+                make_window();
+                set_backround_color(__color);
+                if (__mask > 0) apply_event_mask(&__mask);
+                map();
+                raise();
+            }
             
             void create_client_window(const uint32_t &parent, const int16_t &x, const int16_t &y, const uint16_t &width, const uint16_t &height)
             {
@@ -1347,6 +1377,29 @@ class window
                 _value_list = value_list;
                 
                 make_window();
+            }
+
+            void make_borders(int __border_mask, const uint32_t &__size, COLOR __color)
+            {
+                if (__border_mask & UP)
+                {
+                    make_border_window(UP, __size, __color);
+                }
+
+                if (__border_mask & DOWN)
+                {
+                    make_border_window(DOWN, __size, __color);
+                }
+
+                if (__border_mask & LEFT)
+                {
+                    make_border_window(LEFT, __size, __color);
+                }
+
+                if (__border_mask & RIGHT)
+                {
+                    make_border_window(RIGHT, __size, __color);
+                }
             }
             
             void raise()
@@ -2241,7 +2294,7 @@ class window
                 }
                 xcb_flush(conn); // Flush the request to the X server
             }
-    
+        
     private: // variables
         private: // main variables 
             uint8_t        _depth;
@@ -2602,7 +2655,21 @@ class window
                 );
                 xcb_flush(conn);
             }
-            
+
+            void change_back_pixel(const uint32_t &pixel, const uint32_t &__window)
+            {
+                xcb_change_window_attributes(
+                    conn,
+                    __window,
+                    XCB_CW_BACK_PIXEL,
+                    (const uint32_t[1])
+                    {
+                        pixel
+                    }
+                );
+                xcb_flush(conn);
+            }
+
             uint32_t get_color(COLOR color)
             {
                 uint32_t pixel = 0;
@@ -2671,7 +2738,8 @@ class window
                 uint8_t g;
                 uint8_t b;
                 
-                switch (COLOR) {
+                switch (COLOR)
+                {
                     case COLOR::WHITE:
                         r = 255; g = 255; b = 255;
                         break;
@@ -2763,6 +2831,112 @@ class window
                 color.b = b;
                 return color;
             }
+        
+        private: // borders
+            void make_border_window(BORDER __border, const uint32_t &__size, COLOR __color)
+            {
+                switch (__border)
+                {
+                    case UP:
+                    {
+                        uint32_t window = xcb_generate_id(conn);
+                        xcb_create_window(
+                            conn,
+                            _depth,
+                            window,
+                            _window,
+                            0,
+                            0,
+                            _width,
+                            __size,
+                            0,
+                            __class,
+                            _visual,
+                            _value_mask,
+                            _value_list
+                        );
+                        xcb_flush(conn);
+                        change_back_pixel(get_color(__color), window);
+
+                        break;
+                    }
+
+                    case DOWN:
+                    {
+                        uint32_t window = xcb_generate_id(conn);
+                        xcb_create_window(
+                            conn,
+                            _depth,
+                            window,
+                            _window,
+                            0,
+                            (_height - __size),
+                            _width,
+                            __size,
+                            0,
+                            __class,
+                            _visual,
+                            _value_mask,
+                            _value_list
+                        );
+                        xcb_flush(conn);
+                        change_back_pixel(get_color(__color), window);
+
+                        break;
+                    }
+
+                    case LEFT:
+                    {
+                        uint32_t window = xcb_generate_id(conn);
+                        xcb_create_window(
+                            conn,
+                            _depth,
+                            window,
+                            _window,
+                            0,
+                            0,
+                            __size,
+                            _height,
+                            0,
+                            __class,
+                            _visual,
+                            _value_mask,
+                            _value_list
+                        );
+                        xcb_flush(conn);
+                        change_back_pixel(get_color(__color), window);
+
+                        break;
+                    }
+
+                    case RIGHT:
+                    {
+                        uint32_t window = xcb_generate_id(conn);
+                        xcb_create_window(
+                            conn,
+                            _depth,
+                            window,
+                            _window,
+                            (_width - __size),
+                            0,
+                            __size,
+                            _height,
+                            0,
+                            __class,
+                            _visual,
+                            _value_mask,
+                            _value_list
+                        );
+                        xcb_flush(conn);
+                        change_back_pixel(get_color(__color), window);
+
+                        break;
+                    }
+
+                    case NONE: break;
+                }
+            }
+
 };
 
 class __window_decor__
@@ -6986,21 +7160,33 @@ class __system_settings__
         
         void make_menu_entry_window__(window &__window, const uint32_t &__y)
         {
-            uint32_t mask;
-
-            __window.create_default(
+            __window.create_def_and_map_no_keys(
                 _menu_window,
                 0,
                 __y,
                 MENU_WINDOW_WIDTH,
-                MENU_ENTRY_HEIGHT
+                MENU_ENTRY_HEIGHT,
+                BLUE,
+                0
             );
-            mask = XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS;
-            __window.apply_event_mask(&mask);
-            __window.set_backround_color(BLUE);
-            __window.map();
-            __window_decor__::make_menu_borders(__window, 2, BLACK);
+            __window.make_borders(DOWN | RIGHT, 2, BLACK);
             draw(__window);
+
+            // uint32_t mask;
+
+            // __window.create_default(
+            //     _menu_window,
+            //     0,
+            //     __y,
+            //     MENU_WINDOW_WIDTH,
+            //     MENU_ENTRY_HEIGHT
+            // );
+            // mask = XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS;
+            // __window.apply_event_mask(&mask);
+            // __window.set_backround_color(BLUE);
+            // __window.map();
+            // __window_decor__::make_menu_borders(__window, 2, BLACK);
+            // draw(__window);
         }
 
         void make_settings_window__(window &__window)
@@ -7060,41 +7246,27 @@ class __system_settings__
                 0
             );
 
-            // _main_window.create_default(
-            //     screen->root,
-            //     x,
-            //     y,
-            //     width,
-            //     height
-            // );
-            // _main_window.set_backround_color(DARK_GREY);
-            // _main_window.grab_default_keys();
-            // _main_window.map();
-            // _main_window.raise();
-
             mask = XCB_EVENT_MASK_BUTTON_PRESS;
 
-            _menu_window.create_default(
+            _menu_window.create_def_and_map_no_keys(
                 _main_window,
                 0,
                 0,
                 MENU_WINDOW_WIDTH,
-                _main_window.height()
+                _main_window.height(),
+                RED,
+                XCB_EVENT_MASK_BUTTON_PRESS
             );
-            _menu_window.apply_event_mask(&mask);
-            _menu_window.set_backround_color(RED);
-            _menu_window.map();
 
-            _default_settings_window.create_default(
+            _default_settings_window.create_def_and_map_no_keys(
                 _main_window,
                 MENU_WINDOW_WIDTH,
                 0,
                 (_main_window.width() - MENU_WINDOW_WIDTH),
-                _main_window.height()
+                _main_window.height(),
+                ORANGE,
+                XCB_EVENT_MASK_BUTTON_PRESS
             );
-            _default_settings_window.apply_event_mask(&mask);
-            _default_settings_window.set_backround_color(ORANGE);
-            _default_settings_window.map();
 
             make_menu_entry_window__(_screen_menu_entry_window, 0);
             make_settings_window__(_screen_settings_window);

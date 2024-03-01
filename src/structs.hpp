@@ -5,7 +5,8 @@
 #include <xcb/xcb_ewmh.h>
 #include <xcb/xproto.h>
 
-enum {
+enum
+{
     N = 12, /* 
         THIS IS HOW FAR AWAY SNAPING WILL HAPPEN 
      */ 
@@ -13,15 +14,21 @@ enum {
         THIS IS HOW FAR AWAY WINDOW TO WINDOW CORNER SNAPPING WILL HAPPEN 
      */
 };
-enum SET_COLOR {
+
+enum SET_COLOR
+{
     RAW
 };
-struct rgb_color_code {
+
+struct rgb_color_code
+{
     uint8_t r;
     uint8_t g;
     uint8_t b;
 };
-enum COLOR {
+
+enum COLOR
+{
     BLACK,
     WHITE,
     RED,
@@ -48,8 +55,10 @@ enum COLOR {
     ORANGE,
     BROWN,
     PINK,
-    PURPLE
+    PURPLE,
+    NO_COLOR
 };
+
 typedef enum Error_codes {
     OK                          = 0,
     CONN_ERR                    = 1,
@@ -60,6 +69,7 @@ typedef enum Error_codes {
     SCREEN_NOT_FOUND_ERR        = 6,
     FD_ERR                      = 7
 } Error_codes;
+
 enum class TILEPOS {
     LEFT        = 1,
     RIGHT       = 2,
@@ -68,21 +78,26 @@ enum class TILEPOS {
     LEFT_UP     = 5,
     RIGHT_UP    = 6
 };
+
 enum class TILE {
     LEFT    = 1 ,
     RIGHT   = 2 ,
     DOWN    = 3 ,
     UP      = 4
 };
-enum TILE_ANIMATION {
+
+enum TILE_ANIMATION
+{
     TILE_ANIMATION_DURATION = 80
 };
+
 typedef enum Decor_data {
     BORDER_SIZE      = 4,
     DOCK_BORDER      = 2,
     TITLE_BAR_HEIGHT = 20,
     BUTTON_SIZE      = TITLE_BAR_HEIGHT
 } Decor_data;
+
 enum MAXWIN_ANIMATION {
     MAXWIN_ANIMATION_DURATION = 80
 };
