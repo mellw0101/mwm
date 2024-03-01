@@ -6164,27 +6164,47 @@ class __file_app__
             uint32_t mask = XCB_EVENT_MASK_STRUCTURE_NOTIFY | XCB_EVENT_MASK_PROPERTY_CHANGE;
             main_window.apply_event_mask(&mask);
             main_window.set_backround_color(BLUE);
+            main_window.grab_default_keys();
             main_window.grab_button({
                 { L_MOUSE_BUTTON, NULL }
             });
         }
 
-        void create_left_side_window()
+        struct __left_menu__
         {
-            left_side_window.create_default(
-                main_window,
-                0,
-                0,
-                80,
-                main_window.height()
-            );
-            uint32_t mask = XCB_EVENT_MASK_STRUCTURE_NOTIFY;
-            left_side_window.apply_event_mask(&mask);
-            left_side_window.set_backround_color(DARK_GREY);
-            left_side_window.grab_button({
-                { L_MOUSE_BUTTON, NULL }
-            });
-        }
+            window(_main_window);
+            uint32_t(_x), (_y), (_width), (_height);
+
+            void create(window &__parent_window)
+            {
+                _main_window.create_default(
+                    __parent_window,
+                    0,
+                    0,
+                    120,
+                    __parent_window.height()
+                );
+                uint32_t mask = XCB_EVENT_MASK_STRUCTURE_NOTIFY;
+                _main_window.apply_event_mask(&mask);
+                _main_window.set_backround_color(DARK_GREY);
+                _main_window.grab_button({
+                    { L_MOUSE_BUTTON, NULL }
+                });
+            }
+
+            void show()
+            {
+                _main_window.map();
+                _main_window.raise();
+            }
+
+            void configure(const uint32_t &__window, const uint32_t &__width, const uint32_t &__height)
+            {
+                _main_window.height(__height);
+                xcb_flush(conn);
+            }
+        };
+        __left_menu__(_left_menu);
 
         void make_internal_client()
         {
@@ -6198,15 +6218,18 @@ class __file_app__
             uint32_t mask = XCB_EVENT_MASK_STRUCTURE_NOTIFY;
             main_window.apply_event_mask(&mask);
             wm->client_list.push_back(c);
+            c->focus();
+            wm->focused_client = c;
         }
 
-        void launch()
+        void launch__()
         {
+            create_main_window();
+            _left_menu.create(main_window);
             main_window.raise();
             main_window.map();
             make_internal_client();
-            left_side_window.raise();
-            left_side_window.map();
+            _left_menu.show();
         }
 
         void setup_events()
@@ -6218,7 +6241,7 @@ class __file_app__
                 {
                     if (e->state == SUPER)
                     { 
-                        launch();
+                        launch__();
                     }
                 }
             });
@@ -6232,22 +6255,18 @@ class __file_app__
 
     public:
         window(main_window);
-        window(left_side_window);
         client(*c);
     
         void configure(const uint32_t &__window, const uint32_t &__width, const uint32_t &__height)
         {
             if (__window == main_window)
             {
-                left_side_window.height(__height);
-                xcb_flush(conn);
+                _left_menu.configure(__window, __width, __height);
             }
         }
 
         void init()
         {
-            create_main_window();
-            create_left_side_window();
             setup_events();
         }
 
