@@ -6299,6 +6299,9 @@ class __file_app__
                     _border.map();
                     _border.raise();
                     create_menu_entry__("hello");
+                    create_menu_entry__("hello");
+                    create_menu_entry__("hello");
+                    create_menu_entry__("hello");
                 }
 
                 void configure(const uint32_t &__width, const uint32_t &__height)
