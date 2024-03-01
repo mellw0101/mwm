@@ -7167,7 +7167,7 @@ class __system_settings__
                 MENU_WINDOW_WIDTH,
                 MENU_ENTRY_HEIGHT,
                 BLUE,
-                0
+                XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE
             );
             __window.make_borders(DOWN | RIGHT, 2, BLACK);
             draw(__window);
