@@ -6170,39 +6170,97 @@ class __file_app__
             });
         }
 
-        struct __left_menu__
+        class __left_menu__
         {
-            window(_main_window);
-            uint32_t(_x), (_y), (_width), (_height);
+            private:
+                struct __menu_entry__
+                {
+                    window(_window);
+                    string(_string);
 
-            void create(window &__parent_window)
-            {
-                _main_window.create_default(
-                    __parent_window,
-                    0,
-                    0,
-                    120,
-                    __parent_window.height()
-                );
-                uint32_t mask = XCB_EVENT_MASK_STRUCTURE_NOTIFY;
-                _main_window.apply_event_mask(&mask);
-                _main_window.set_backround_color(DARK_GREY);
-                _main_window.grab_button({
-                    { L_MOUSE_BUTTON, NULL }
-                });
-            }
+                    void create(const uint32_t &__parent_window, const uint32_t &__x, const uint32_t &__y, const uint32_t &__width, const uint32_t &__height)
+                    {
+                        _window.create_default(__parent_window, __x, __y, __width, __height);
+                        uint32_t mask = XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE;
+                        _window.apply_event_mask(&mask);
+                        _window.set_backround_color(DARK_GREY);
+                        _window.map();
+                        draw();
+                        __window_decor__::make_menu_borders(_window, 2, BLACK);
+                    }
 
-            void show()
-            {
-                _main_window.map();
-                _main_window.raise();
-            }
+                    void draw()
+                    {
+                        _window.draw_text(
+                            _string.c_str(),
+                            WHITE,
+                            DARK_GREY,
+                            DEFAULT_FONT,
+                            4,
+                            14
+                        );
+                    }
 
-            void configure(const uint32_t &__window, const uint32_t &__width, const uint32_t &__height)
-            {
-                _main_window.height(__height);
-                xcb_flush(conn);
-            }
+                    void configure(const uint32_t &__width)
+                    {
+                        _window.width(__width);
+                        xcb_flush(conn);
+                    }
+                };
+
+                window(_window);
+                vector<__menu_entry__>(_menu_entry_vector);
+                uint32_t(_current_menu_y);
+
+                void create_menu_entry__(const string &__name)
+                {
+                    __menu_entry__(menu_entry);
+                    menu_entry._string = __name;
+                    menu_entry.create(_window, 0, _current_menu_y, 120, 20);
+                    _current_menu_y += 20;
+                }
+
+            public:
+                void create(window &__parent_window)
+                {
+                    _window.create_default(
+                        __parent_window,
+                        0,
+                        0,
+                        120,
+                        __parent_window.height()
+                    );
+                    uint32_t mask = XCB_EVENT_MASK_STRUCTURE_NOTIFY;
+                    _window.apply_event_mask(&mask);
+                    _window.set_backround_color(DARK_GREY);
+                    _window.grab_button({
+                        { L_MOUSE_BUTTON, NULL }
+                    });
+                }
+
+                void show()
+                {
+                    _window.map();
+                    _window.raise();
+                    create_menu_entry__("hello");
+                }
+
+                void configure(const uint32_t &__width, const uint32_t &__height)
+                {
+                    _window.height(__height);
+                    xcb_flush(conn);
+                }
+
+                void expose(const uint32_t &__window)
+                {
+                    for (int i(0); i < _menu_entry_vector.size(); ++i)
+                    {
+                        if (__window == _menu_entry_vector[i]._window)
+                        {
+                            _menu_entry_vector[i].draw();
+                        }
+                    }
+                }
         };
         __left_menu__(_left_menu);
 
@@ -6261,7 +6319,7 @@ class __file_app__
         {
             if (__window == main_window)
             {
-                _left_menu.configure(__window, __width, __height);
+                _left_menu.configure(__width, __height);
             }
         }
 
@@ -6751,7 +6809,6 @@ class __system_settings__
                 }
         };
         
-
         void make_menu_entry_window__(window &__window, const uint32_t &__y)
         {
             uint32_t mask;
@@ -6785,7 +6842,7 @@ class __system_settings__
                     _main_window.height()
                 );
                 _screen_settings_window.set_backround_color(WHITE);
-                mask = XCB_EVENT_MASK_EXPOSURE;
+                mask = XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS;
                 _screen_settings_window.apply_event_mask(&mask);
 
                 _screen_resolution_window.create_default(
@@ -6850,6 +6907,7 @@ class __system_settings__
                 (_main_window.width() - MENU_WINDOW_WIDTH),
                 _main_window.height()
             );
+            _default_settings_window.apply_event_mask(&mask);
             _default_settings_window.set_backround_color(ORANGE);
             _default_settings_window.map();
 
@@ -6864,6 +6922,7 @@ class __system_settings__
                 (_main_window.width() - MENU_WINDOW_WIDTH),
                 _main_window.height()
             );
+            _audio_settings_window.apply_event_mask(&mask);
             _audio_settings_window.set_backround_color(PURPLE);
 
             make_menu_entry_window__(_network_menu_entry_window, 40);
@@ -6878,7 +6937,7 @@ class __system_settings__
         }
 
         void make_internal_client__()
-        {
+        { 
             c         = new client;
             c->win    = _main_window;
             c->x      = _main_window.x();
