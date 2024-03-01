@@ -8127,6 +8127,7 @@ class mv_client
                             status_bar->draw_wifi_info_window();
                         }
 
+                        file_app->expose(e->window);
                         system_settings->expose(e->window);
 
                         break;
