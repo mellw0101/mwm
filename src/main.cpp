@@ -7359,13 +7359,13 @@ class __system_settings__
                     );
                     _screen_resolution_options_vector.clear();
 
-                    for (int i(0), y_pos(0); i < screen_settings->_avalible_resolutions.size(); ++i, y_pos += MENU_ENTRY_HEIGHT)
+                    for (int i(0), y_pos(0); i < screen_settings->_avalible_resolutions.size(); ++i)
                     {
                         window option;
                         option.create_def_and_map_no_keys(
                             _screen_resolution_dropdown_window,
                             0,
-                            y_pos,
+                            (_screen_resolution_options_vector.size() * MENU_ENTRY_HEIGHT),
                             _screen_resolution_dropdown_window.width(),
                             MENU_ENTRY_HEIGHT,
                             DARK_GREY,
