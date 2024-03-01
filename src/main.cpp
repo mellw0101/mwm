@@ -6163,9 +6163,25 @@ class add_app_dialog_window
         function<void()> enter_function;
 };
 
+class __menu_entry_window__
+{
+    public:
+        __menu_entry_window__() {}
+};
+
+class __menu_window__
+{
+    public:
+        vector<__menu_entry_window__>(_entry_vector);
+
+    public:
+        __menu_window__() {}
+};
+
 #define FILE_APP_LEFT_MENU_WIDTH 120
 #define FILE_APP_LEFT_MENU_ENTRY_HEIGHT 20
 #define FILE_APP_BORDER_SIZE 2
+
 class __file_app__
 {
     private:
@@ -6228,7 +6244,6 @@ class __file_app__
                 };
 
                 vector<__menu_entry__>(_menu_entry_vector);
-                uint32_t(_current_menu_y);
 
                 void create_menu_entry__(const string &__name)
                 {
@@ -6237,12 +6252,11 @@ class __file_app__
                     menu_entry.create(
                         _window,
                         0,
-                        _current_menu_y,
+                        (FILE_APP_LEFT_MENU_ENTRY_HEIGHT * _menu_entry_vector.size()),
                         FILE_APP_LEFT_MENU_WIDTH,
                         FILE_APP_LEFT_MENU_ENTRY_HEIGHT
                     );
                     _menu_entry_vector.push_back(menu_entry);
-                    _current_menu_y += FILE_APP_LEFT_MENU_ENTRY_HEIGHT;
                 }
 
             public:
