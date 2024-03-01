@@ -6147,22 +6147,11 @@ class add_app_dialog_window
         function<void()> enter_function;
 };
 
-class File_App
+class __file_app__
 {
-    public:
-        window(main_window);
-        window(left_side_window);
-        client(*c);
-    
-    public:
-        void init()
-        {
-            create_main_window();
-            create_left_side_window();
-            setup_events();
-        }
-
     private:
+        Logger(log);
+
         void create_main_window()
         {
             int width = (screen->width_in_pixels / 2), height = (screen->height_in_pixels / 2);
@@ -6230,7 +6219,7 @@ class File_App
 
         void setup_events()
         {
-            event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev)-> void
+            event_handler->setEventCallback(XCB_KEY_PRESS,        [&](Ev ev)-> void
             {
                 const xcb_key_press_event_t * e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
                 if (e->detail == wm->key_codes.f)
@@ -6245,18 +6234,35 @@ class File_App
             event_handler->setEventCallback(XCB_CONFIGURE_NOTIFY, [&](Ev ev)-> void
             {
                 const auto * e = reinterpret_cast<const xcb_configure_notify_event_t *>(ev);
-                if (e->window == main_window)
-                {
-                    left_side_window.height(e->height);
-                    xcb_flush(conn);
-                }
+                configure(e->window, e->width, e->height);
             });
         }
 
-    private:
-        Logger(log); 
+    public:
+        window(main_window);
+        window(left_side_window);
+        client(*c);
+    
+        void configure(const uint32_t &__window, const uint32_t &__width, const uint32_t &__height)
+        {
+            if (__window == main_window)
+            {
+                left_side_window.height(__height);
+                xcb_flush(conn);
+            }
+        }
+
+        void init()
+        {
+            create_main_window();
+            create_left_side_window();
+            setup_events();
+        }
+
+    public:
+        __file_app__() {}
 };
-static File_App *file_app;
+static __file_app__ *file_app;
 
 class __screen_settings__
 {
@@ -6983,66 +6989,69 @@ class __system_settings__
             event_handler->setEventCallback(XCB_BUTTON_PRESS,     [this](Ev ev)-> void
             {
                 const auto e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
-                if (wm->focused_client != this->c)
+                if (e->detail == L_MOUSE_BUTTON)
                 {
-                    if (e->event == _main_window
-                    ||  e->event == _menu_window
-                    ||  e->event == _default_settings_window
-                    ||  e->event == _screen_menu_entry_window
-                    ||  e->event == _screen_settings_window
-                    ||  e->event == _audio_menu_entry_window
-                    ||  e->event == _audio_settings_window
-                    ||  e->event == _network_menu_entry_window
-                    ||  e->event == _network_settings_window)
+                    if (wm->focused_client != this->c)
                     {
-                        this->c->focus();
-                        wm->focused_client = this->c;
+                        if (e->event == _main_window
+                        ||  e->event == _menu_window
+                        ||  e->event == _default_settings_window
+                        ||  e->event == _screen_menu_entry_window
+                        ||  e->event == _screen_settings_window
+                        ||  e->event == _audio_menu_entry_window
+                        ||  e->event == _audio_settings_window
+                        ||  e->event == _network_menu_entry_window
+                        ||  e->event == _network_settings_window)
+                        {
+                            this->c->focus();
+                            wm->focused_client = this->c;
+                        }
                     }
-                }
 
-                if (e->event == _menu_window)
-                {
-                    adjust_and_map_subwindow__(_default_settings_window);
-                    return;
-                }
-
-                if (e->event == _screen_menu_entry_window)
-                {
-                    adjust_and_map_subwindow__(_screen_settings_window);
-                    return;
-                }
-
-                if (e->event == _screen_resolution_button_window)
-                {
-                    if (!_screen_resolution_dropdown_window.is_mapped())
+                    if (e->event == _menu_window)
                     {
-                        show(RESOLUTION_DROPDOWN_WINDOW);
+                        adjust_and_map_subwindow__(_default_settings_window);
                         return;
                     }
 
-                    hide(RESOLUTION_DROPDOWN_WINDOW);
-                    return;
-                }
-
-                if (e->event == _audio_menu_entry_window)
-                {
-                    adjust_and_map_subwindow__(_audio_settings_window);
-                    return;
-                }
-
-                if (e->event == _network_menu_entry_window)
-                {
-                    adjust_and_map_subwindow__(_network_settings_window);
-                    return;
-                }
-
-                for (int i(0); i < _screen_resolution_options_vector.size(); ++i)
-                {
-                    if (e->event == _screen_resolution_options_vector[i])
+                    if (e->event == _screen_menu_entry_window)
                     {
-                        screen_settings->set_resolution(screen_settings->_avalible_resolutions[i].first);
-                        log_info("screen->width_in_pixels: " + to_string(screen->width_in_pixels));
-                        log_info("screen->height_in_pixels: " + to_string(screen->height_in_pixels));
+                        adjust_and_map_subwindow__(_screen_settings_window);
+                        return;
+                    }
+
+                    if (e->event == _screen_resolution_button_window)
+                    {
+                        if (!_screen_resolution_dropdown_window.is_mapped())
+                        {
+                            show(RESOLUTION_DROPDOWN_WINDOW);
+                            return;
+                        }
+
+                        hide(RESOLUTION_DROPDOWN_WINDOW);
+                        return;
+                    }
+
+                    if (e->event == _audio_menu_entry_window)
+                    {
+                        adjust_and_map_subwindow__(_audio_settings_window);
+                        return;
+                    }
+
+                    if (e->event == _network_menu_entry_window)
+                    {
+                        adjust_and_map_subwindow__(_network_settings_window);
+                        return;
+                    }
+
+                    for (int i(0); i < _screen_resolution_options_vector.size(); ++i)
+                    {
+                        if (e->event == _screen_resolution_options_vector[i])
+                        {
+                            screen_settings->set_resolution(screen_settings->_avalible_resolutions[i].first);
+                            log_info("screen->width_in_pixels: " + to_string(screen->width_in_pixels));
+                            log_info("screen->height_in_pixels: " + to_string(screen->height_in_pixels));
+                        }
                     }
                 }
             });
@@ -7062,15 +7071,7 @@ class __system_settings__
             event_handler->setEventCallback(XCB_CONFIGURE_NOTIFY, [this](Ev ev)->void
             {
                 const auto e = reinterpret_cast<const xcb_configure_notify_event_t *>(ev);
-                if (e->window == _main_window)
-                {
-                    _menu_window.height(e->height);
-                    check_and_configure_mapped_window(_default_settings_window, (e->width - MENU_WINDOW_WIDTH), e->height);
-                    check_and_configure_mapped_window(_screen_settings_window,  (e->width - MENU_WINDOW_WIDTH), e->height);
-                    check_and_configure_mapped_window(_audio_settings_window,   (e->width - MENU_WINDOW_WIDTH), e->height);
-                    check_and_configure_mapped_window(_network_settings_window, (e->width - MENU_WINDOW_WIDTH), e->height);
-                    xcb_flush(conn);
-                }
+                configure(e->window, e->width, e->height);
             });
 
             event_handler->setEventCallback(XCB_EXPOSE,           [this](Ev ev)->void
@@ -7192,6 +7193,19 @@ class __system_settings__
                         MENU_ENTRY_TEXT_Y
                     );
                 }
+            }
+        }
+
+        void configure(const uint32_t &__window, const uint32_t &__width, const uint32_t &__height)
+        {
+            if (__window == _main_window)
+            {
+                _menu_window.height(__height);
+                check_and_configure_mapped_window(_default_settings_window, (__width - MENU_WINDOW_WIDTH), __height);
+                check_and_configure_mapped_window(_screen_settings_window,  (__width - MENU_WINDOW_WIDTH), __height);
+                check_and_configure_mapped_window(_audio_settings_window,   (__width - MENU_WINDOW_WIDTH), __height);
+                check_and_configure_mapped_window(_network_settings_window, (__width - MENU_WINDOW_WIDTH), __height);
+                xcb_flush(conn);
             }
         }
 
@@ -8878,15 +8892,17 @@ class resize_client
                             case XCB_CONFIGURE_NOTIFY:
                             {
                                 const auto e = reinterpret_cast<const xcb_configure_notify_event_t *>(ev);
-                                if (e->window == system_settings->_main_window)
-                                {
-                                    system_settings->_menu_window.height(e->height);
-                                    system_settings->check_and_configure_mapped_window(system_settings->_default_settings_window, (e->width - MENU_WINDOW_WIDTH), e->height);
-                                    system_settings->check_and_configure_mapped_window(system_settings->_screen_settings_window,  (e->width - MENU_WINDOW_WIDTH), e->height);
-                                    system_settings->check_and_configure_mapped_window(system_settings->_audio_settings_window,   (e->width - MENU_WINDOW_WIDTH), e->height);
-                                    system_settings->check_and_configure_mapped_window(system_settings->_network_settings_window, (e->width - MENU_WINDOW_WIDTH), e->height);
-                                    xcb_flush(conn);
-                                }
+                                file_app->configure(e->window, e->width, e->height);
+                                system_settings->configure(e->window, e->width, e->height);
+                                // if (e->window == system_settings->_main_window)
+                                // {
+                                //     system_settings->_menu_window.height(e->height);
+                                //     system_settings->check_and_configure_mapped_window(system_settings->_default_settings_window, (e->width - MENU_WINDOW_WIDTH), e->height);
+                                //     system_settings->check_and_configure_mapped_window(system_settings->_screen_settings_window,  (e->width - MENU_WINDOW_WIDTH), e->height);
+                                //     system_settings->check_and_configure_mapped_window(system_settings->_audio_settings_window,   (e->width - MENU_WINDOW_WIDTH), e->height);
+                                //     system_settings->check_and_configure_mapped_window(system_settings->_network_settings_window, (e->width - MENU_WINDOW_WIDTH), e->height);
+                                //     xcb_flush(conn);
+                                // }
                             }
                         }
 
@@ -10129,7 +10145,7 @@ void setup_wm()
     Events events;
     events.setup();
 
-    file_app = new File_App;
+    file_app = new __file_app__;
     file_app->init();
 
     status_bar = new __status_bar__;
