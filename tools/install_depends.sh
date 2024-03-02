@@ -90,7 +90,8 @@ install_dependencies() {
                                         libxshmfence        \
                                         libxxf86vm          \
                                         libxi               \
-                                        xcb-util
+                                        xcb-util            \
+                                        xorg-fonts-misc
     else
         echo "Unsupported distribution. Please install dependencies manually."
         exit 1
