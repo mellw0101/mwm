@@ -1256,7 +1256,7 @@ class window
                         const uint32_t &visual,
                         const uint32_t &value_mask,
                         const void     *value_list)
-            { 
+            {
                 _depth = depth;
                 _parent = parent;
                 _x = x;
@@ -2981,7 +2981,6 @@ class window
                     case NONE: break;
                 }
             }
-
 };
 
 class __window_decor__
@@ -7653,8 +7652,6 @@ class __system_settings__
         void init()
         {
             setup_events__();
-            __mouse_settings__ mouse_settings;
-            mouse_settings.query_input_devices();
         }
 
     public:
