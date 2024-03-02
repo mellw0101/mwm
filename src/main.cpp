@@ -1227,6 +1227,12 @@ enum BORDER
     DOWN  = 1 << 3  // 8
 };
 
+enum window_flags
+{
+    MAP          = 1 << 0,
+    DEFAULT_KEYS = 1 << 1
+};
+
 class window
 {
     public:  // construcers and operators
@@ -1395,6 +1401,36 @@ class window
                 map();
                 raise();
                 make_borders(__border_info[0], __border_info[1], __border_info[2]);
+            }
+
+            void create_window(const uint32_t &__parent, const int16_t &__x, const int16_t &__y, const uint16_t &__width, const uint16_t &__height, COLOR __color, const uint32_t &__event_mask, const int &__flags, int __border_info[3])
+            {
+                _depth        = 0L;
+                _parent       = __parent;
+                _x            = __x;
+                _y            = __y;
+                _width        = __width;
+                _height       = __height;
+                _border_width = 0;
+                __class       = XCB_WINDOW_CLASS_INPUT_OUTPUT;
+                _visual       = screen->root_visual;
+                _value_mask   = 0;
+                _value_list   = nullptr;
+
+                make_window();
+                set_backround_color(__color);
+                if (__flags & DEFAULT_KEYS) grab_default_keys();
+                if (__event_mask > 0) apply_event_mask(&__event_mask);
+                if (__flags & MAP)
+                {
+                    map();
+                    raise();
+                }
+
+                if (__border_info != nullptr)
+                {
+                    make_borders(__border_info[0], __border_info[1], __border_info[2]);
+                }
             }
             
             void create_client_window(const uint32_t &parent, const int16_t &x, const int16_t &y, const uint16_t &width, const uint16_t &height)
@@ -8002,14 +8038,26 @@ class __status_bar__
 
         void create_windows__()
         {
-            _bar_window.create_def_and_map_no_keys(
+            // _bar_window.create_def_and_map_no_keys(
+            //     screen->root,
+            //     0,
+            //     0,
+            //     screen->width_in_pixels,
+            //     20,
+            //     DARK_GREY,
+            //     0
+            // );
+
+            _bar_window.create_window(
                 screen->root,
                 0,
                 0,
                 screen->width_in_pixels,
                 20,
                 DARK_GREY,
-                0
+                NONE,
+                MAP,
+                nullptr
             );
             _time_window.create_def_and_map_no_keys(
                 _bar_window,
