@@ -6970,51 +6970,44 @@ class __screen_settings__
                 return {};
             }
 
-            bool found_output = false;
-            for (int i(0); i < 2; ++i)
+            // Assuming the first output is the primary one
+            xcb_randr_output_t output = outputs[0];
+            xcb_randr_get_output_info_cookie_t output_info_cookie = xcb_randr_get_output_info(conn, output, XCB_CURRENT_TIME);
+            xcb_randr_get_output_info_reply_t *output_info_reply = xcb_randr_get_output_info_reply(conn, output_info_cookie, nullptr);
+
+            if (!output_info_reply || output_info_reply->crtc == XCB_NONE)
             {
-                // Assuming the first output is the primary one
-                xcb_randr_output_t output = outputs[i];
-                xcb_randr_get_output_info_cookie_t output_info_cookie = xcb_randr_get_output_info(conn, output, XCB_CURRENT_TIME);
-                xcb_randr_get_output_info_reply_t *output_info_reply = xcb_randr_get_output_info_reply(conn, output_info_cookie, nullptr);
-
-                if (!output_info_reply || output_info_reply->crtc == XCB_NONE)
-                {
-                    log_error("Output is not currently connected to a CRTC");
-                    free(output_info_reply);
-                    free(res_reply);
-                    mode_id = {};
-                    continue;
-                }
-
-                log_info("correct output number: " + to_string(i));
-
-                xcb_randr_get_crtc_info_cookie_t crtc_info_cookie = xcb_randr_get_crtc_info(conn, output_info_reply->crtc, XCB_CURRENT_TIME);
-                xcb_randr_get_crtc_info_reply_t *crtc_info_reply = xcb_randr_get_crtc_info_reply(conn, crtc_info_cookie, nullptr);
-
-                if (!crtc_info_reply)
-                {
-                    log_error("Could not get CRTC info");
-                    free(output_info_reply);
-                    free(res_reply);
-                    return{};
-                }
-
-                xcb_randr_mode_info_t *mode_info = nullptr;
-                xcb_randr_mode_info_iterator_t mode_iter = xcb_randr_get_screen_resources_current_modes_iterator(res_reply);
-                for (; mode_iter.rem; xcb_randr_mode_info_next(&mode_iter))
-                {
-                    if (mode_iter.data->id == crtc_info_reply->mode)
-                    {
-                        mode_id = mode_iter.data->id;
-                        break;
-                    }
-                }
-
-                free(crtc_info_reply);
+                log_error("Output is not currently connected to a CRTC");
                 free(output_info_reply);
                 free(res_reply);
+                return {};
             }
+
+            xcb_randr_get_crtc_info_cookie_t crtc_info_cookie = xcb_randr_get_crtc_info(conn, output_info_reply->crtc, XCB_CURRENT_TIME);
+            xcb_randr_get_crtc_info_reply_t *crtc_info_reply = xcb_randr_get_crtc_info_reply(conn, crtc_info_cookie, nullptr);
+
+            if (!crtc_info_reply)
+            {
+                log_error("Could not get CRTC info");
+                free(output_info_reply);
+                free(res_reply);
+                return{};
+            }
+
+            xcb_randr_mode_info_t *mode_info = nullptr;
+            xcb_randr_mode_info_iterator_t mode_iter = xcb_randr_get_screen_resources_current_modes_iterator(res_reply);
+            for (; mode_iter.rem; xcb_randr_mode_info_next(&mode_iter))
+            {
+                if (mode_iter.data->id == crtc_info_reply->mode)
+                {
+                    mode_id = mode_iter.data->id;
+                    break;
+                }
+            }
+
+            free(crtc_info_reply);
+            free(output_info_reply);
+            free(res_reply);
 
             return mode_id;
         }
