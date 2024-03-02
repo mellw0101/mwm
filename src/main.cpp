@@ -1218,21 +1218,24 @@ class _scale
         }
 };
 
-enum BORDER
+namespace // window flag enums
 {
-    NONE  = 0,
-    LEFT  = 1 << 0, // 1
-    RIGHT = 1 << 1, // 2
-    UP    = 1 << 2, // 4
-    DOWN  = 1 << 3, // 8
-    ALL   = 1 << 4
-};
+    enum BORDER
+    {
+        NONE  = 0,
+        LEFT  = 1 << 0, // 1
+        RIGHT = 1 << 1, // 2
+        UP    = 1 << 2, // 4
+        DOWN  = 1 << 3, // 8
+        ALL   = 1 << 4
+    };
 
-enum window_flags
-{
-    MAP          = 1 << 0,
-    DEFAULT_KEYS = 1 << 1
-};
+    enum window_flags
+    {
+        MAP          = 1 << 0,
+        DEFAULT_KEYS = 1 << 1
+    };
+}
 
 class window
 {
@@ -1484,6 +1487,21 @@ class window
                     make_border_window(ALL, __size, __color);
                 }
             }
+
+            template<typename Callback>
+            void on_expose_event(Callback&& callback)
+            {
+                if (!is_mask_active(XCB_EVENT_MASK_EXPOSURE)) set_event_mask(XCB_EVENT_MASK_EXPOSURE);
+
+                event_handler->setEventCallback(XCB_EXPOSE, [this, callback](Ev ev)
+                {
+                    auto e = reinterpret_cast<const xcb_expose_event_t *>(ev);
+                    if (e->window == _window)
+                    {
+                        callback();
+                    }
+                });
+            }
             
             void raise()
             {
@@ -1594,6 +1612,25 @@ class window
                     XCB_CURRENT_TIME
                 );
                 xcb_flush(conn);
+            }
+
+            void send_event(const uint32_t &__event_mask)
+            {
+                if (__event_mask & XCB_EVENT_MASK_EXPOSURE)
+                {
+                    xcb_expose_event_t expose_event = {
+                        .response_type = XCB_EXPOSE,
+                        .window = _window,
+                        .x      = 0,                              /* < Top-left x coordinate of the area to be redrawn                 */
+                        .y      = 0,                              /* < Top-left y coordinate of the area to be redrawn                 */
+                        .width  = static_cast<uint16_t>(_width),  /* < Width of the area to be redrawn                                 */
+                        .height = static_cast<uint16_t>(_height), /* < Height of the area to be redrawn                                */
+                        .count  = 0                               /* < Number of expose events to follow if this is part of a sequence */
+                    };
+
+                    xcb_send_event(conn, false, _window, XCB_EVENT_MASK_EXPOSURE, (char *)&expose_event);
+                    xcb_flush(conn);
+                }
             }
 
         public: // check methods
@@ -4680,8 +4717,13 @@ class Window_Manager
 
                 return nullptr;
             }
+
+            void synchronize_xcb()
+            {
+                free(xcb_get_input_focus_reply(conn, xcb_get_input_focus(conn), NULL));
+            }
         
-        // xcb
+        // xcb.
             void send_expose_event(window &__window)
             {
                 xcb_expose_event_t expose_event = {
@@ -8287,6 +8329,11 @@ class __status_bar__
                 draw(e->window);
             });
 
+            _time_window.on_expose_event([this]()
+            {
+                draw_time();
+            });
+
             event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev)-> void
             {
                 const auto *e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
@@ -8315,24 +8362,37 @@ class __status_bar__
         void init__()
         {
             create_windows__();
-            draw(_time_window);
+            draw_time();
+            // draw(_time_window);
             draw(_date_window);
             setup_events__();
         }
 
+        void draw_time()
+        {
+            _time_window.draw_text(
+                get_time__().c_str(),
+                WHITE,
+                DARK_GREY,
+                "7x14",
+                2,
+                14
+            );
+        }
+
         void draw(const uint32_t &__window)
         {
-            if (__window == _time_window)
-            {
-                _time_window.draw_text(
-                    get_time__().c_str(),
-                    WHITE,
-                    DARK_GREY,
-                    "7x14",
-                    2,
-                    14
-                );
-            }
+            // if (__window == _time_window)
+            // {
+            //     _time_window.draw_text(
+            //         get_time__().c_str(),
+            //         WHITE,
+            //         DARK_GREY,
+            //         "7x14",
+            //         2,
+            //         14
+            //     );
+            // }
 
             if (__window == _date_window)
             {
@@ -10278,7 +10338,8 @@ class Events
                 {
                     case SUPER:
                     {
-                        wm->send_expose_event(status_bar->_time_window);
+                        // wm->send_expose_event(status_bar->_time_window);
+                        status_bar->_time_window.send_event(XCB_EVENT_MASK_EXPOSURE);
                         return;
                     }
                 }
