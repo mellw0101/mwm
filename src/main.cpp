@@ -1224,7 +1224,8 @@ enum BORDER
     LEFT  = 1 << 0, // 1
     RIGHT = 1 << 1, // 2
     UP    = 1 << 2, // 4
-    DOWN  = 1 << 3  // 8
+    DOWN  = 1 << 3, // 8
+    ALL   = 1 << 4
 };
 
 enum window_flags
@@ -1476,6 +1477,11 @@ class window
                 if (__border_mask & RIGHT)
                 {
                     make_border_window(RIGHT, __size, __color);
+                }
+
+                if (__border_mask & ALL)
+                {
+                    make_border_window(ALL, __size, __color);
                 }
             }
             
@@ -3010,6 +3016,91 @@ class window
                         xcb_flush(conn);
                         change_back_pixel(get_color(__color), window);
                         xcb_map_window(conn, window);
+
+                        break;
+                    }
+
+                    case ALL:
+                    {
+                        uint32_t up = xcb_generate_id(conn);
+                        xcb_create_window(
+                            conn,
+                            _depth,
+                            up,
+                            _window,
+                            0,
+                            0,
+                            _width,
+                            __size,
+                            0,
+                            __class,
+                            _visual,
+                            _value_mask,
+                            _value_list
+                        );
+                        xcb_flush(conn);
+                        change_back_pixel(get_color(__color), up);
+                        xcb_map_window(conn, up);
+
+                        uint32_t down = xcb_generate_id(conn);
+                        xcb_create_window(
+                            conn,
+                            _depth,
+                            down,
+                            _window,
+                            0,
+                            (_height - __size),
+                            _width,
+                            __size,
+                            0,
+                            __class,
+                            _visual,
+                            _value_mask,
+                            _value_list
+                        );
+                        xcb_flush(conn);
+                        change_back_pixel(get_color(__color), down);
+                        xcb_map_window(conn, down);
+
+                        uint32_t left = xcb_generate_id(conn);
+                        xcb_create_window(
+                            conn,
+                            _depth,
+                            left,
+                            _window,
+                            0,
+                            0,
+                            __size,
+                            _height,
+                            0,
+                            __class,
+                            _visual,
+                            _value_mask,
+                            _value_list
+                        );
+                        xcb_flush(conn);
+                        change_back_pixel(get_color(__color), left);
+                        xcb_map_window(conn, left);
+
+                        uint32_t right = xcb_generate_id(conn);
+                        xcb_create_window(
+                            conn,
+                            _depth,
+                            right,
+                            _window,
+                            (_width - __size),
+                            0,
+                            __size,
+                            _height,
+                            0,
+                            __class,
+                            _visual,
+                            _value_mask,
+                            _value_list
+                        );
+                        xcb_flush(conn);
+                        change_back_pixel(get_color(__color), right);
+                        xcb_map_window(conn, right);
 
                         break;
                     }
@@ -4590,6 +4681,23 @@ class Window_Manager
                 return nullptr;
             }
         
+        // xcb
+            void send_expose_event(window &__window)
+            {
+                xcb_expose_event_t expose_event = {
+                    .response_type = XCB_EXPOSE,
+                    .window = __window,
+                    .x      = 0,                                        /* < Top-left x coordinate of the area to be redrawn                 */
+                    .y      = 0,                                        /* < Top-left y coordinate of the area to be redrawn                 */
+                    .width  = static_cast<uint16_t>(__window.width()),  /* < Width of the area to be redrawn                                 */
+                    .height = static_cast<uint16_t>(__window.height()), /* < Height of the area to be redrawn                                */
+                    .count  = 0                                         /* < Number of expose events to follow if this is part of a sequence */
+                };
+
+                xcb_send_event(conn, false, __window, XCB_EVENT_MASK_EXPOSURE, (char *)&expose_event);
+                xcb_flush(conn);
+            }
+
     private: // variables
         window(start_window);
     
@@ -8038,16 +8146,6 @@ class __status_bar__
 
         void create_windows__()
         {
-            // _bar_window.create_def_and_map_no_keys(
-            //     screen->root,
-            //     0,
-            //     0,
-            //     screen->width_in_pixels,
-            //     20,
-            //     DARK_GREY,
-            //     0
-            // );
-
             _bar_window.create_window(
                 screen->root,
                 0,
@@ -8059,32 +8157,38 @@ class __status_bar__
                 MAP,
                 nullptr
             );
-            _time_window.create_def_and_map_no_keys(
+            _time_window.create_window(
                 _bar_window,
-                (screen->width_in_pixels - 60 ),
+                (screen->width_in_pixels - 60),
                 0,
                 60,
                 20,
                 DARK_GREY,
-                XCB_EVENT_MASK_EXPOSURE
+                XCB_EVENT_MASK_EXPOSURE,
+                MAP,
+                nullptr
             );
-            _date_window.create_def_and_map_no_keys(
+            _date_window.create_window(
                 _bar_window,
                 (screen->width_in_pixels - 140),
                 0,
                 74,
                 20,
                 DARK_GREY,
-                XCB_EVENT_MASK_EXPOSURE
+                XCB_EVENT_MASK_EXPOSURE,
+                MAP,
+                nullptr
             );
-            _wifi_window.create_def_no_keys(
+            _wifi_window.create_window(
                 _bar_window,
                 (screen->width_in_pixels - 160),
                 0,
                 20,
                 20,
                 DARK_GREY,
-                XCB_EVENT_MASK_BUTTON_PRESS
+                XCB_EVENT_MASK_BUTTON_PRESS,
+                MAP,
+                nullptr
             );
 
             Bitmap bitmap(20, 20);
@@ -8122,39 +8226,42 @@ class __status_bar__
                 #define WIFI_DROPDOWN_WIDTH 220
                 #define WIFI_DROPDOWN_HEIGHT 240
 
-                _wifi_dropdown_window.create_def_and_map_no_keys(
+                _wifi_dropdown_window.create_window(
                     screen->root,
                     WIFI_DROPDOWN_X,
                     WIFI_DROPDOWN_Y,
                     WIFI_DROPDOWN_WIDTH,
                     WIFI_DROPDOWN_HEIGHT,
                     DARK_GREY,
-                    0
+                    NONE,
+                    MAP,
+                    (int[]){ALL, WIFI_DROPDOWN_BORDER, BLACK}
                 );
-                _wifi_dropdown_window.make_borders(UP | DOWN | LEFT | RIGHT, WIFI_DROPDOWN_BORDER, BLACK);
-
-                _wifi_close_window.create_def_and_map_no_keys(
+                
+                _wifi_close_window.create_window(
                     _wifi_dropdown_window,
                     20,
                     (WIFI_DROPDOWN_HEIGHT - 40),
                     80,
                     20,
                     WHITE,
-                    XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE
+                    XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE,
+                    MAP,
+                    (int[]){ALL, WIFI_DROPDOWN_BORDER, BLACK}
                 );
-                _wifi_close_window.make_borders(UP | DOWN | LEFT | RIGHT, WIFI_DROPDOWN_BORDER, BLACK);
                 draw(_wifi_close_window);
 
-                _wifi_info_window.create_def_and_map_no_keys(
+                _wifi_info_window.create_window(
                     _wifi_dropdown_window,
                     20,
                     20,
                     (WIFI_DROPDOWN_WIDTH - 40),
                     (WIFI_DROPDOWN_HEIGHT - 120),
                     WHITE,
-                    XCB_EVENT_MASK_EXPOSURE
+                    XCB_EVENT_MASK_EXPOSURE,
+                    MAP,
+                    (int[]){ALL, WIFI_DROPDOWN_BORDER, BLACK}
                 );
-                _wifi_info_window.make_borders(UP | DOWN | LEFT | RIGHT, WIFI_DROPDOWN_BORDER, BLACK);
                 draw(_wifi_info_window);
             }
         }
@@ -8225,7 +8332,6 @@ class __status_bar__
                     2,
                     14
                 );
-                xcb_flush(conn);
             }
 
             if (__window == _date_window)
@@ -8234,11 +8340,10 @@ class __status_bar__
                     get_date__().c_str(),
                     WHITE,
                     DARK_GREY,
-                    "7x14",
+                    DEFAULT_FONT,
                     2,
                     14
                 );
-                xcb_flush(conn);
             }
 
             if (__window == _wifi_close_window)
@@ -8247,7 +8352,7 @@ class __status_bar__
                     "close",
                     BLACK,
                     WHITE,
-                    "7x14",
+                    DEFAULT_FONT,
                     22,
                     15
                 );
@@ -8260,7 +8365,7 @@ class __status_bar__
                     local_ip.c_str(),
                     BLACK,
                     WHITE,
-                    "7x14",
+                    DEFAULT_FONT,
                     4,
                     16
                 );
@@ -8270,7 +8375,7 @@ class __status_bar__
                     local_interface.c_str(),
                     BLACK,
                     WHITE,
-                    "7x14",
+                    DEFAULT_FONT,
                     4,
                     30
                 );
@@ -10173,8 +10278,7 @@ class Events
                 {
                     case SUPER:
                     {
-                        // wm->list_screen_res_and_refresh_rates();
-                        wm->change_resolution();
+                        wm->send_expose_event(status_bar->_time_window);
                         return;
                     }
                 }
