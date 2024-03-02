@@ -6971,7 +6971,7 @@ class __screen_settings__
             }
 
             bool found_output = false;
-            for (int i(0); i < 5; ++i)
+            for (int i(0); i < 2; ++i)
             {
                 // Assuming the first output is the primary one
                 xcb_randr_output_t output = outputs[i];
