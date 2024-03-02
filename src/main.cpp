@@ -8323,15 +8323,27 @@ class __status_bar__
 
         void setup_events__()
         {
-            event_handler->setEventCallback(XCB_EXPOSE,       [&](Ev ev)-> void
-            {
-                const auto *e = reinterpret_cast<const xcb_expose_event_t *>(ev);
-                draw(e->window);
-            });
+            // event_handler->setEventCallback(XCB_EXPOSE,       [&](Ev ev)-> void
+            // {
+            //     const auto *e = reinterpret_cast<const xcb_expose_event_t *>(ev);
+            //     draw(e->window);
+            // });
 
-            _time_window.on_expose_event([this]()
+            _time_window.on_expose_event([&]()-> void
             {
-                draw_time();
+                draw(_time_window);
+            });
+            _date_window.on_expose_event([&]()-> void
+            {
+                draw(_date_window);
+            });
+            _wifi_close_window.on_expose_event([&]()-> void
+            {
+                draw(_wifi_close_window);
+            });
+            _wifi_info_window.on_expose_event([&]()-> void
+            {
+                draw(_wifi_info_window);
             });
 
             event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev)-> void
@@ -8362,37 +8374,24 @@ class __status_bar__
         void init__()
         {
             create_windows__();
-            draw_time();
-            // draw(_time_window);
+            draw(_time_window);
             draw(_date_window);
             setup_events__();
         }
 
-        void draw_time()
-        {
-            _time_window.draw_text(
-                get_time__().c_str(),
-                WHITE,
-                DARK_GREY,
-                "7x14",
-                2,
-                14
-            );
-        }
-
         void draw(const uint32_t &__window)
         {
-            // if (__window == _time_window)
-            // {
-            //     _time_window.draw_text(
-            //         get_time__().c_str(),
-            //         WHITE,
-            //         DARK_GREY,
-            //         "7x14",
-            //         2,
-            //         14
-            //     );
-            // }
+            if (__window == _time_window)
+            {
+                _time_window.draw_text(
+                    get_time__().c_str(),
+                    WHITE,
+                    DARK_GREY,
+                    "7x14",
+                    2,
+                    14
+                );
+            }
 
             if (__window == _date_window)
             {
