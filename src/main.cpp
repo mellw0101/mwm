@@ -5586,54 +5586,17 @@ class __status_bar__
 
         void setup_events__()
         {
-            _time_date_window.on_expose_event(       [&]()-> void
+            event_handler->setEventCallback(XCB_EXPOSE, [&](Ev ev)
             {
-                _time_date_window.draw_text(
-                    get_time_and_date__().c_str(),
-                    WHITE,
-                    DARK_GREY,
-                    DEFAULT_FONT,
-                    4,
-                    14
-                );
+                auto e = reinterpret_cast<const xcb_expose_event_t *>(ev);
+                expose(e->window);
             });
-            _wifi_close_window.on_expose_event(      [&]()-> void
-            {
-                _wifi_close_window.draw_text(
-                    "close",
-                    BLACK,
-                    WHITE,
-                    DEFAULT_FONT,
-                    22,
-                    15
-                );
-            });
+            
             _wifi_close_window.on_button_press_event([&]()-> void
             {
                 hide__(_wifi_dropdown_window);
             });
-            _wifi_info_window.on_expose_event(       [&]()-> void
-            {
-                string local_ip("Local ip: " + network->get_local_ip_info(__network__::LOCAL_IP));
-                _wifi_info_window.draw_text(
-                    local_ip.c_str(),
-                    BLACK,
-                    WHITE,
-                    DEFAULT_FONT,
-                    4,
-                    16
-                );
-
-                string local_interface("interface: " + network->get_local_ip_info(__network__::INTERFACE_FOR_LOCAL_IP));
-                _wifi_info_window.draw_text(
-                    local_interface.c_str(),
-                    BLACK,
-                    WHITE,
-                    DEFAULT_FONT,
-                    4,
-                    30
-                );
-            });
+            
             _wifi_window.on_button_press_event(      [&]()-> void
             {
                 if (_wifi_dropdown_window.is_mapped())
@@ -5676,9 +5639,52 @@ class __status_bar__
 
         void expose(const uint32_t &__window)
         {
-            if (__window == _time_date_window ) _time_date_window.send_event(XCB_EVENT_MASK_EXPOSURE);
-            if (__window == _wifi_close_window) _wifi_close_window.send_event(XCB_EVENT_MASK_EXPOSURE);
-            if (__window == _wifi_info_window ) _wifi_info_window.send_event(XCB_EVENT_MASK_EXPOSURE);
+            if (__window == _time_date_window )
+            {
+                _time_date_window.draw_text(
+                    get_time_and_date__().c_str(),
+                    WHITE,
+                    DARK_GREY,
+                    DEFAULT_FONT,
+                    4,
+                    14
+                );
+            }
+
+            if (__window == _wifi_close_window) 
+            {
+                _wifi_close_window.draw_text(
+                    "close",
+                    BLACK,
+                    WHITE,
+                    DEFAULT_FONT,
+                    22,
+                    15
+                );
+            }
+
+            if (__window == _wifi_info_window ) 
+            {
+                string local_ip("Local ip: " + network->get_local_ip_info(__network__::LOCAL_IP));
+                _wifi_info_window.draw_text(
+                    local_ip.c_str(),
+                    BLACK,
+                    WHITE,
+                    DEFAULT_FONT,
+                    4,
+                    16
+                );
+
+                string local_interface("interface: " + network->get_local_ip_info(__network__::INTERFACE_FOR_LOCAL_IP));
+                _wifi_info_window.draw_text(
+                    local_interface.c_str(),
+                    BLACK,
+                    WHITE,
+                    DEFAULT_FONT,
+                    4,
+                    30
+                );
+            }
         }
 
     public:
