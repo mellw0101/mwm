@@ -1428,7 +1428,7 @@ class window
                                 const int16_t  &__y,
                                 const uint16_t &__width,
                                 const uint16_t &__height,
-                                const COLOR    &__color,
+                                const COLOR    &__color = DEFAULT_COLOR,
                                 const uint32_t &__event_mask = 0,
                                 const int      &__flags = NONE,
                                 void           *__data = nullptr)
@@ -7201,20 +7201,17 @@ class __file_app__
         {
             int width = (screen->width_in_pixels / 2), height = (screen->height_in_pixels / 2);
             int x = ((screen->width_in_pixels / 2) - (width / 2)), y = ((screen->height_in_pixels / 2) - (height / 2));
-            main_window.create_default(
+            main_window.create_window(
                 screen->root,
                 x,
                 y,
                 width,
-                height
+                height,
+                BLUE,
+                XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY | XCB_EVENT_MASK_PROPERTY_CHANGE,
+                MAP | DEFAULT_KEYS
             );
-            uint32_t mask = XCB_EVENT_MASK_STRUCTURE_NOTIFY | XCB_EVENT_MASK_PROPERTY_CHANGE;
-            main_window.apply_event_mask(&mask);
-            main_window.set_backround_color(BLUE);
-            main_window.grab_default_keys();
-            main_window.grab_button({
-                { L_MOUSE_BUTTON, NULL }
-            });
+            main_window.grab_button({{ L_MOUSE_BUTTON, NULL }});
         }
 
         class __left_menu__
@@ -8015,7 +8012,7 @@ class __system_settings__
         }
 
         void make_internal_client__()
-        { 
+        {
             c         = new client;
             c->win    = _main_window;
             c->x      = _main_window.x();
@@ -8023,8 +8020,7 @@ class __system_settings__
             c->width  = _main_window.width();
             c->height = _main_window.height();
             c->make_decorations();
-            uint32_t mask = XCB_EVENT_MASK_STRUCTURE_NOTIFY;
-            _main_window.apply_event_mask(&mask);
+            _main_window.set_event_mask(XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY);
             wm->client_list.push_back(c);
             wm->cur_d->current_clients.push_back(c);
             c->focus();
