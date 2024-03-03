@@ -8344,17 +8344,14 @@ class __status_bar__
             //     draw(e->window);
             // });
 
-            _time_window.on_expose_event([&]()-> void
-            {
-                _time_window.draw_text(
-                    get_time__().c_str(),
-                    WHITE,
-                    DARK_GREY,
-                    "7x14",
-                    2,
-                    14
-                );
-            });
+            _time_window.draw_on_expose_event(
+                get_time__(),
+                WHITE,
+                DARK_GREY,
+                "7x14",
+                2,
+                14
+            );
             _date_window.on_expose_event([&]()-> void
             {
                 _date_window.draw_text(
