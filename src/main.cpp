@@ -7886,7 +7886,7 @@ class __system_settings__
         
         void make_menu_entry_window__(window &__window, const uint32_t &__y)
         {
-            __window.create_def_and_map_no_keys_with_borders(
+            __window.create_window(
                 _menu_window,
                 0,
                 __y,
@@ -7894,6 +7894,7 @@ class __system_settings__
                 MENU_ENTRY_HEIGHT,
                 BLUE,
                 XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE,
+                MAP,
                 (int[]){DOWN | RIGHT, 2, BLACK}
             );
             draw(__window);
