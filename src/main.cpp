@@ -1516,8 +1516,6 @@ class window
                         __y
                     );
                 });
-
-                send_event(XCB_EVENT_MASK_EXPOSURE);
             }
             
             void raise()
