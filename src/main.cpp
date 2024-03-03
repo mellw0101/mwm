@@ -1423,7 +1423,7 @@ class window
                 make_borders(__border_info[0], __border_info[1], __border_info[2]);
             }
 
-            void create_window(const uint32_t &__parent, const int16_t &__x, const int16_t &__y, const uint16_t &__width, const uint16_t &__height, COLOR __color, const uint32_t &__event_mask, const int &__flags, int __border_info[3])
+            void create_window(const uint32_t &__parent, const int16_t &__x, const int16_t &__y, const uint16_t &__width, const uint16_t &__height, COLOR __color, const uint32_t &__event_mask, const int &__flags,  void *__data)
             {
                 _depth        = 0L;
                 _parent       = __parent;
@@ -1447,8 +1447,9 @@ class window
                     raise();
                 }
 
-                if (__border_info != nullptr)
+                if (__data != nullptr)
                 {
+                    int *__border_info = static_cast<int *>(__data);
                     make_borders(__border_info[0], __border_info[1], __border_info[2]);
                 }
             }
