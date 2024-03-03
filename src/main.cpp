@@ -8192,6 +8192,40 @@ class __wifi__
 };
 static __wifi__ *wifi(nullptr);
 
+namespace 
+{
+    #define BAR_WINDOW_X      0
+    #define BAR_WINDOW_Y      0
+    #define BAR_WINDOW_WIDTH  screen->width_in_pixels
+    #define BAR_WINDOW_HEIGHT 20 
+
+    #define TIME_DATE_WINDOW_X      screen->width_in_pixels - 140
+    #define TIME_DATE_WINDOW_Y      0
+    #define TIME_DATE_WINDOW_WIDTH  140
+    #define TIME_DATE_WINDOW_HEIGHT 20
+
+    #define WIFI_WINDOW_X      screen->width_in_pixels - 160
+    #define WIFI_WINDOW_Y      0
+    #define WIFI_WINDOW_WIDTH  20
+    #define WIFI_WINDOW_HEIGHT 20
+
+    #define WIFI_DROPDOWN_BORDER 2
+    #define WIFI_DROPDOWN_X      ((screen->width_in_pixels - 150) - 110)
+    #define WIFI_DROPDOWN_Y      20
+    #define WIFI_DROPDOWN_WIDTH  220
+    #define WIFI_DROPDOWN_HEIGHT 240
+
+    #define WIFI_CLOSE_WINDOW_X      20
+    #define WIFI_CLOSE_WINDOW_Y      WIFI_DROPDOWN_HEIGHT - 40
+    #define WIFI_CLOSE_WINDOW_WIDTH  80
+    #define WIFI_CLOSE_WINDOW_HEIGHT 20
+
+    #define WIFI_INFO_WINDOW_X      20
+    #define WIFI_INFO_WINDOW_Y      20
+    #define WIFI_INFO_WINDOW_WIDTH  WIFI_DROPDOWN_WIDTH - 40
+    #define WIFI_INFO_WINDOW_HEIGHT WIFI_CLOSE_WINDOW_HEIGHT - 120
+}
+
 class __status_bar__
 {
     private:
@@ -8213,10 +8247,10 @@ class __status_bar__
         {
             _bar_window.create_window(
                 screen->root,
-                0,
-                0,
-                screen->width_in_pixels,
-                20,
+                BAR_WINDOW_X,
+                BAR_WINDOW_Y,
+                BAR_WINDOW_WIDTH,
+                BAR_WINDOW_HEIGHT,
                 DARK_GREY,
                 NONE,
                 MAP,
@@ -8224,10 +8258,10 @@ class __status_bar__
             );
             _time_date_window.create_window(
                 _bar_window,
-                (screen->width_in_pixels - 140),
-                0,
-                140,
-                20,
+                TIME_DATE_WINDOW_X,
+                TIME_DATE_WINDOW_Y,
+                TIME_DATE_WINDOW_WIDTH,
+                TIME_DATE_WINDOW_HEIGHT,
                 DARK_GREY,
                 XCB_EVENT_MASK_EXPOSURE,
                 MAP,
@@ -8235,10 +8269,10 @@ class __status_bar__
             );
             _wifi_window.create_window(
                 _bar_window,
-                (screen->width_in_pixels - 160),
-                0,
-                20,
-                20,
+                WIFI_WINDOW_X,
+                WIFI_WINDOW_Y,
+                WIFI_WINDOW_WIDTH,
+                WIFI_WINDOW_HEIGHT,
                 DARK_GREY,
                 XCB_EVENT_MASK_BUTTON_PRESS,
                 MAP,
@@ -8274,12 +8308,6 @@ class __status_bar__
         {
             if (__window == _wifi_dropdown_window)
             {
-                #define WIFI_DROPDOWN_BORDER 2
-                #define WIFI_DROPDOWN_X ((screen->width_in_pixels - 150) - 110)
-                #define WIFI_DROPDOWN_Y 20
-                #define WIFI_DROPDOWN_WIDTH 220
-                #define WIFI_DROPDOWN_HEIGHT 240
-
                 _wifi_dropdown_window.create_window(
                     screen->root,
                     WIFI_DROPDOWN_X,
@@ -8291,25 +8319,23 @@ class __status_bar__
                     MAP,
                     (int[]){ALL, WIFI_DROPDOWN_BORDER, BLACK}
                 );
-                
                 _wifi_close_window.create_window(
                     _wifi_dropdown_window,
-                    20,
-                    (WIFI_DROPDOWN_HEIGHT - 40),
-                    80,
-                    20,
+                    WIFI_CLOSE_WINDOW_X,
+                    WIFI_CLOSE_WINDOW_Y,
+                    WIFI_CLOSE_WINDOW_WIDTH,
+                    WIFI_CLOSE_WINDOW_HEIGHT,
                     WHITE,
                     XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE,
                     MAP,
                     (int[]){ALL, WIFI_DROPDOWN_BORDER, BLACK}
                 );
-
                 _wifi_info_window.create_window(
                     _wifi_dropdown_window,
-                    20,
-                    20,
-                    (WIFI_DROPDOWN_WIDTH - 40),
-                    (WIFI_DROPDOWN_HEIGHT - 120),
+                    WIFI_INFO_WINDOW_X,
+                    WIFI_INFO_WINDOW_Y,
+                    WIFI_INFO_WINDOW_WIDTH,
+                    WIFI_INFO_WINDOW_HEIGHT,
                     WHITE,
                     XCB_EVENT_MASK_EXPOSURE,
                     MAP,
@@ -8339,8 +8365,8 @@ class __status_bar__
                     get_time_and_date__().c_str(),
                     WHITE,
                     DARK_GREY,
-                    "7x14",
-                    2,
+                    DEFAULT_FONT,
+                    4,
                     14
                 );
             });
