@@ -1121,14 +1121,14 @@ class Event_Handler
         }
 
         template<typename Callback>
-        void set_key_press_callback(const uint16_t &__state, const xcb_keycode_t &__detail, Callback &&callback)
+        void set_key_press_callback(const uint16_t &__mask, const xcb_keycode_t &__key, Callback &&callback)
         {
-            setEventCallback(XCB_KEY_PRESS, [this, callback, __detail, __state](Ev ev)
+            setEventCallback(XCB_KEY_PRESS, [this, callback, __key, __mask](Ev ev)
             {
                 auto e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
-                if (e->detail == __detail)
+                if (e->detail == __key)
                 {
-                    if (e->state == __state)
+                    if (e->state == __mask)
                     {
                         callback();
                     }
@@ -6912,16 +6912,9 @@ class __file_app__
 
         void setup_events()
         {
-            event_handler->setEventCallback(XCB_KEY_PRESS,        [&](Ev ev)-> void
+            event_handler->set_key_press_callback(SUPER, wm->key_codes.f, [this]()-> void
             {
-                const xcb_key_press_event_t * e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
-                if (e->detail == wm->key_codes.f)
-                {
-                    if (e->state == SUPER)
-                    { 
-                        launch__();
-                    }
-                }
+                launch__();
             });
 
             event_handler->setEventCallback(XCB_CONFIGURE_NOTIFY, [&](Ev ev)-> void
@@ -8365,7 +8358,7 @@ class __status_bar__
 
         void setup_events__()
         {
-            _time_window.on_expose_event([&]()-> void
+            _time_window.on_expose_event(            [&]()-> void
             {
                 _time_window.draw_text(
                     get_time__().c_str(),
@@ -8376,7 +8369,7 @@ class __status_bar__
                     14
                 );
             });
-            _date_window.on_expose_event([&]()-> void
+            _date_window.on_expose_event(            [&]()-> void
             {
                 _date_window.draw_text(
                     get_date__().c_str(),
@@ -8387,7 +8380,7 @@ class __status_bar__
                     14
                 );
             });
-            _wifi_close_window.on_expose_event([&]()-> void
+            _wifi_close_window.on_expose_event(      [&]()-> void
             {
                 _wifi_close_window.draw_text(
                     "close",
@@ -8402,7 +8395,7 @@ class __status_bar__
             {
                 hide__(_wifi_dropdown_window);
             });
-            _wifi_info_window.on_expose_event([&]()-> void
+            _wifi_info_window.on_expose_event(       [&]()-> void
             {
                 string local_ip("Local ip: " + network->get_local_ip_info(__network__::LOCAL_IP));
                 _wifi_info_window.draw_text(
@@ -8424,7 +8417,7 @@ class __status_bar__
                     30
                 );
             });
-            _wifi_window.on_button_press_event([&]()-> void
+            _wifi_window.on_button_press_event(      [&]()-> void
             {
                 if (_wifi_dropdown_window.is_mapped())
                 {
@@ -8437,6 +8430,20 @@ class __status_bar__
             });
         }
 
+        void setup_thread(const uint32_t &__window)
+        {
+            if (__window == _time_window)
+            {
+                function<void()> __time_thread__ = [this]()-> void
+                {
+                    _time_window.send_event(XCB_EVENT_MASK_EXPOSURE);
+                    this_thread::sleep_for(chrono::seconds(1));
+                };
+
+                thread(__time_thread__).detach();
+            }
+        }
+
     public:
         window(_bar_window), (_time_window), (_date_window), (_wifi_window), (_wifi_dropdown_window), (_wifi_close_window), (_wifi_info_window);
 
@@ -8444,6 +8451,7 @@ class __status_bar__
         {
             create_windows__();
             setup_events__();
+            setup_thread(_time_window);
         }
 
         void expose(const uint32_t &__window)
@@ -10737,22 +10745,22 @@ void setup_wm()
     Events events;
     events.setup();
 
-    // file_app = new __file_app__;
-    // file_app->init();
+    file_app = new __file_app__;
+    file_app->init();
 
-    // status_bar = new __status_bar__;
-    // status_bar->init__();
+    status_bar = new __status_bar__;
+    status_bar->init__();
 
-    // wifi = new __wifi__;
-    // wifi->init();
+    wifi = new __wifi__;
+    wifi->init();
 
-    // network = new __network__;
+    network = new __network__;
 
-    // screen_settings = new __screen_settings__;
-    // screen_settings->init();
+    screen_settings = new __screen_settings__;
+    screen_settings->init();
     
-    // system_settings = new __system_settings__;
-    // system_settings->init();
+    system_settings = new __system_settings__;
+    system_settings->init();
 }
 
 int main()
