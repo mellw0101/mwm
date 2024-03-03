@@ -8346,38 +8346,61 @@ class __status_bar__
             //     draw(e->window);
             // });
 
-            _time_window.draw_on_expose_event(
-                get_time__(),
-                WHITE,
-                DARK_GREY,
-                "7x14",
-                2,
-                14
-            );
-            _date_window.draw_on_expose_event(
-                get_date__(),
-                WHITE,
-                DARK_GREY,
-                DEFAULT_FONT,
-                2,
-                14
-            );
-            _wifi_close_window.draw_on_expose_event(
-                "close",
-                BLACK,
-                WHITE,
-                DEFAULT_FONT,
-                22,
-                15
-            );
-            _wifi_info_window.draw_on_expose_event(
-                "Local ip: " + network->get_local_ip_info(__network__::LOCAL_IP),
-                BLACK,
-                WHITE,
-                DEFAULT_FONT,
-                4,
-                16
-            );
+            _time_window.on_expose_event([&]()-> void
+            {
+                _time_window.draw_text(
+                    get_time__().c_str(),
+                    WHITE,
+                    DARK_GREY,
+                    "7x14",
+                    2,
+                    14
+                );
+            });
+            _date_window.on_expose_event([&]()-> void
+            {
+                _date_window.draw_text(
+                    get_date__().c_str(),
+                    WHITE,
+                    DARK_GREY,
+                    DEFAULT_FONT,
+                    2,
+                    14
+                );
+            });
+            _wifi_close_window.on_expose_event([&]()-> void
+            {
+                _wifi_close_window.draw_text(
+                    "close",
+                    BLACK,
+                    WHITE,
+                    DEFAULT_FONT,
+                    22,
+                    15
+                );
+            });
+            _wifi_info_window.on_expose_event([&]()-> void
+            {
+                string local_ip("Local ip: " + network->get_local_ip_info(__network__::LOCAL_IP));
+                _wifi_info_window.draw_text(
+                    local_ip.c_str(),
+                    BLACK,
+                    WHITE,
+                    DEFAULT_FONT,
+                    4,
+                    16
+                );
+
+                string local_interface("interface: " + network->get_local_ip_info(__network__::INTERFACE_FOR_LOCAL_IP));
+                _wifi_info_window.draw_text(
+                    local_interface.c_str(),
+                    BLACK,
+                    WHITE,
+                    DEFAULT_FONT,
+                    4,
+                    30
+                );
+            });
 
             event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev)-> void
             {
