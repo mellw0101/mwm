@@ -1491,7 +1491,7 @@ class window
             template<typename Callback>
             void on_expose_event(Callback&& callback)
             {
-                // if (!is_mask_active(XCB_EVENT_MASK_EXPOSURE)) set_event_mask(XCB_EVENT_MASK_EXPOSURE);
+                if (!is_mask_active(XCB_EVENT_MASK_EXPOSURE)) set_event_mask(XCB_EVENT_MASK_EXPOSURE);
 
                 event_handler->setEventCallback(XCB_EXPOSE, [this, callback](Ev ev)
                 {
@@ -1501,6 +1501,23 @@ class window
                         callback();
                     }
                 });
+            }
+
+            void draw_on_expose_event(const string &__str, const int &__text_color, const int &__backround_color, const char *__font_name, const int16_t &__x, const int16_t &__y)
+            {
+                on_expose_event([this, &__str, &__text_color, &__backround_color, &__font_name, &__x, &__y]()-> void
+                {
+                    draw_text(
+                        __str.c_str(),
+                        __text_color,
+                        __backround_color,
+                        __font_name,
+                        __x,
+                        __y
+                    );
+                });
+
+                send_event(XCB_EVENT_MASK_EXPOSURE);
             }
             
             void raise()
@@ -2014,7 +2031,7 @@ class window
                 xcb_free_cursor(conn, cursor);
             }
             
-            void draw_text(const char *str , const COLOR &text_color, const COLOR &backround_color, const char *font_name, const int16_t &x, const int16_t &y)
+            void draw_text(const char *str , const int &text_color, const int &backround_color, const char *font_name, const int16_t &x, const int16_t &y)
             {
                 get_font(font_name);
                 create_font_gc(text_color, backround_color, font);
@@ -2617,7 +2634,7 @@ class window
                     xcb_flush(conn);
                 }
             
-                void create_font_gc(const COLOR & text_color, const COLOR & backround_color, xcb_font_t font)
+                void create_font_gc(const int & text_color, const int & backround_color, xcb_font_t font)
                 {
                     font_gc = xcb_generate_id(conn);
                     xcb_create_gc(
@@ -8323,11 +8340,44 @@ class __status_bar__
 
         void setup_events__()
         {
-            event_handler->setEventCallback(XCB_EXPOSE,       [&](Ev ev)-> void
-            {
-                const auto *e = reinterpret_cast<const xcb_expose_event_t *>(ev);
-                draw(e->window);
-            });
+            // event_handler->setEventCallback(XCB_EXPOSE,       [&](Ev ev)-> void
+            // {
+            //     const auto *e = reinterpret_cast<const xcb_expose_event_t *>(ev);
+            //     draw(e->window);
+            // });
+
+            _time_window.draw_on_expose_event(
+                get_time__(),
+                WHITE,
+                DARK_GREY,
+                "7x14",
+                2,
+                14
+            );
+            _date_window.draw_on_expose_event(
+                get_date__(),
+                WHITE,
+                DARK_GREY,
+                DEFAULT_FONT,
+                2,
+                14
+            );
+            _wifi_close_window.draw_on_expose_event(
+                "close",
+                BLACK,
+                WHITE,
+                DEFAULT_FONT,
+                22,
+                15
+            );
+            _wifi_info_window.draw_on_expose_event(
+                "Local ip: " + network->get_local_ip_info(__network__::LOCAL_IP),
+                BLACK,
+                WHITE,
+                DEFAULT_FONT,
+                4,
+                16
+            );
 
             event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev)-> void
             {
@@ -8357,9 +8407,17 @@ class __status_bar__
         void init__()
         {
             create_windows__();
-            draw(_time_window);
-            draw(_date_window);
+            // draw(_time_window);
+            // draw(_date_window);
             setup_events__();
+        }
+
+        void expose(const uint32_t &__window)
+        {
+            if (__window == _time_window) _time_window.send_event(XCB_EVENT_MASK_EXPOSURE);
+            if (__window == _date_window) _date_window.send_event(XCB_EVENT_MASK_EXPOSURE);
+            if (__window == _wifi_close_window) _wifi_close_window.send_event(XCB_EVENT_MASK_EXPOSURE);
+            if (__window == _wifi_info_window) _wifi_info_window.send_event(XCB_EVENT_MASK_EXPOSURE);
         }
 
         void draw(const uint32_t &__window)
@@ -8598,7 +8656,8 @@ class mv_client
                     case XCB_EXPOSE:
                     {
                         const auto *e = reinterpret_cast<const xcb_expose_event_t *>(ev);
-                        status_bar->draw(e->window);
+                        // status_bar->draw(e->window);
+                        status_bar->expose(e->window);
                         file_app->expose(e->window);
                         system_settings->expose(e->window);
 
@@ -9461,7 +9520,8 @@ class resize_client
                             case XCB_EXPOSE:
                             {
                                 const auto *e = reinterpret_cast<const xcb_expose_event_t *>(ev);
-                                status_bar->draw(e->window);
+                                // status_bar->draw(e->window);
+                                status_bar->expose(e->window);
                                 file_app->expose(e->window);
                                 system_settings->expose(e->window);
 
