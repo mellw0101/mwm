@@ -7944,7 +7944,7 @@ class __system_settings__
                 _main_window,
                 MENU_WINDOW_WIDTH,
                 0,
-                (_main_window.width()),
+                (_main_window.width() - MENU_WINDOW_WIDTH),
                 _main_window.height(),
                 WHITE,
                 XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS
