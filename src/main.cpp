@@ -8434,13 +8434,16 @@ class __status_bar__
         {
             if (__window == _time_window)
             {
-                function<void()> __time_thread__ = [this]()-> void
+                function<void()> __time__ = [&]()-> void
                 {
-                    _time_window.send_event(XCB_EVENT_MASK_EXPOSURE);
-                    this_thread::sleep_for(chrono::seconds(1));
+                    while (true)
+                    {
+                        this->_time_window.send_event(XCB_EVENT_MASK_EXPOSURE);
+                        this_thread::sleep_for(chrono::seconds(1));
+                    }
                 };
 
-                thread(__time_thread__).detach();
+                thread(__time__).detach();
             }
         }
 
