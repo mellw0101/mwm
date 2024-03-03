@@ -5451,7 +5451,7 @@ namespace
     #define WIFI_INFO_WINDOW_X      20
     #define WIFI_INFO_WINDOW_Y      20
     #define WIFI_INFO_WINDOW_WIDTH  WIFI_DROPDOWN_WIDTH - 40
-    #define WIFI_INFO_WINDOW_HEIGHT WIFI_CLOSE_WINDOW_HEIGHT - 120
+    #define WIFI_INFO_WINDOW_HEIGHT WIFI_DROPDOWN_HEIGHT - 120
 }
 class __status_bar__
 {
@@ -5596,7 +5596,7 @@ class __status_bar__
             {
                 hide__(_wifi_dropdown_window);
             });
-            
+
             _wifi_window.on_button_press_event(      [&]()-> void
             {
                 if (_wifi_dropdown_window.is_mapped())
