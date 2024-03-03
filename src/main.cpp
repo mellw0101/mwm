@@ -1491,10 +1491,6 @@ class window
             template<typename Callback>
             void on_expose_event(Callback&& callback)
             {
-                // if (!is_mask_active(XCB_EVENT_MASK_EXPOSURE)) set_event_mask(XCB_EVENT_MASK_EXPOSURE);
-                uint32_t mask = XCB_EVENT_MASK_EXPOSURE;
-                apply_event_mask(&mask);
-
                 event_handler->setEventCallback(XCB_EXPOSE, [this, callback](Ev ev)
                 {
                     auto e = reinterpret_cast<const xcb_expose_event_t *>(ev);
@@ -1505,6 +1501,19 @@ class window
                 });
             }
             
+            template<typename Callback>
+            void on_button_press_event(Callback&& callback)
+            {
+                event_handler->setEventCallback(XCB_BUTTON_PRESS, [this, callback](Ev ev)
+                {
+                    auto e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
+                    if (e->event == _window)
+                    {
+                        callback();
+                    }
+                });
+            }
+
             void raise()
             {
                 xcb_configure_window(
@@ -8208,7 +8217,7 @@ class __status_bar__
                 60,
                 20,
                 DARK_GREY,
-                NONE,
+                XCB_EVENT_MASK_EXPOSURE,
                 MAP,
                 nullptr
             );
@@ -8358,6 +8367,10 @@ class __status_bar__
                     15
                 );
             });
+            _wifi_close_window.on_button_press_event([&]()-> void
+            {
+                hide__(_wifi_dropdown_window);
+            });
             _wifi_info_window.on_expose_event([&]()-> void
             {
                 string local_ip("Local ip: " + network->get_local_ip_info(__network__::LOCAL_IP));
@@ -8380,27 +8393,37 @@ class __status_bar__
                     30
                 );
             });
-
-            event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev)-> void
+            _wifi_window.on_button_press_event([&]()-> void
             {
-                const auto *e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
-                if (e->event == _wifi_window)
-                {
-                    if (_wifi_dropdown_window.is_mapped())
-                    {
-                        hide__(_wifi_dropdown_window);
-                    }
-                    else
-                    {
-                        show__(_wifi_dropdown_window);
-                    }
-                }
-
-                if (e->event == _wifi_close_window)
+                if (_wifi_dropdown_window.is_mapped())
                 {
                     hide__(_wifi_dropdown_window);
                 }
+                else
+                {
+                    show__(_wifi_dropdown_window);
+                }
             });
+            // event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev)-> void
+            // {
+            //     const auto *e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
+            //     if (e->event == _wifi_window)
+            //     {
+            //         if (_wifi_dropdown_window.is_mapped())
+            //         {
+            //             hide__(_wifi_dropdown_window);
+            //         }
+            //         else
+            //         {
+            //             show__(_wifi_dropdown_window);
+            //         }
+            //     }
+
+            //     if (e->event == _wifi_close_window)
+            //     {
+            //         hide__(_wifi_dropdown_window);
+            //     }
+            // });   
         }
 
     public:
