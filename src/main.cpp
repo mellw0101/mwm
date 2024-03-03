@@ -1423,7 +1423,15 @@ class window
                 make_borders(__border_info[0], __border_info[1], __border_info[2]);
             }
 
-            void create_window(const uint32_t &__parent, const int16_t &__x, const int16_t &__y, const uint16_t &__width, const uint16_t &__height, COLOR __color, const uint32_t &__event_mask, const int &__flags,  void *__data)
+            void create_window( const uint32_t &__parent,
+                                const int16_t  &__x,
+                                const int16_t  &__y,
+                                const uint16_t &__width,
+                                const uint16_t &__height,
+                                const COLOR    &__color,
+                                const uint32_t &__event_mask = 0,
+                                const int      &__flags = NONE,
+                                void           *__data = nullptr)
             {
                 _depth        = 0L;
                 _parent       = __parent;
@@ -5481,8 +5489,7 @@ class __status_bar__
                 BAR_WINDOW_HEIGHT,
                 DARK_GREY,
                 NONE,
-                MAP,
-                nullptr
+                MAP
             );
             _time_date_window.create_window(
                 _bar_window,
@@ -5492,8 +5499,7 @@ class __status_bar__
                 TIME_DATE_WINDOW_HEIGHT,
                 DARK_GREY,
                 XCB_EVENT_MASK_EXPOSURE,
-                MAP,
-                nullptr
+                MAP
             );
             _wifi_window.create_window(
                 _bar_window,
@@ -5503,8 +5509,7 @@ class __status_bar__
                 WIFI_WINDOW_HEIGHT,
                 DARK_GREY,
                 XCB_EVENT_MASK_BUTTON_PRESS,
-                MAP,
-                nullptr
+                MAP
             );
 
             Bitmap bitmap(20, 20);
@@ -5529,7 +5534,6 @@ class __status_bar__
 
             bitmap.exportToPng("/home/mellw/wifi.png");
             _wifi_window.set_backround_png("/home/mellw/wifi.png");
-            _wifi_window.map();
         }
 
         void show__(const uint32_t &__window)
@@ -5587,7 +5591,7 @@ class __status_bar__
 
         void setup_events__()
         {
-            event_handler->setEventCallback(XCB_EXPOSE, [&](Ev ev)
+            event_handler->setEventCallback(XCB_EXPOSE,  [&](Ev ev)-> void
             {
                 auto e = reinterpret_cast<const xcb_expose_event_t *>(ev);
                 expose(e->window);
@@ -5598,7 +5602,7 @@ class __status_bar__
                 hide__(_wifi_dropdown_window);
             });
 
-            _wifi_window.on_button_press_event(      [&]()-> void
+            _wifi_window.on_button_press_event([&]()-> void
             {
                 if (_wifi_dropdown_window.is_mapped())
                 {
@@ -7883,58 +7887,7 @@ class __system_settings__
                     free(reply);
                 }
         };
-        
-        void make_menu_entry_window__(window &__window, const uint32_t &__y)
-        {
-            __window.create_window(
-                _menu_window,
-                0,
-                __y,
-                MENU_WINDOW_WIDTH,
-                MENU_ENTRY_HEIGHT,
-                BLUE,
-                XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE,
-                MAP,
-                (int[]){DOWN | RIGHT, 2, BLACK}
-            );
-            draw(__window);
-        }
-
-        void make_settings_window__(window &__window)
-        {
-            if (__window == _screen_settings_window)
-            {
-                _screen_settings_window.create_def_no_keys(
-                    _main_window,
-                    MENU_WINDOW_WIDTH,
-                    0,
-                    (_main_window.width()),
-                    _main_window.height(),
-                    WHITE,
-                    XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS
-                );
-
-                _screen_resolution_window.create_def_no_keys(
-                    _screen_settings_window,
-                    100,
-                    20,
-                    160,
-                    20,
-                    DARK_GREY,
-                    XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS
-                );
-
-                _screen_resolution_button_window.create_def_no_keys(
-                    _screen_settings_window,
-                    260,
-                    20,
-                    20,
-                    20,
-                    DARK_GREY,
-                    XCB_EVENT_MASK_BUTTON_PRESS
-                );
-            }
-        }
+        __mouse_settings__ mouse_settings;
 
         void make_windows__()
         {
@@ -7942,37 +7895,94 @@ class __system_settings__
             int width = (screen->width_in_pixels / 2), height = (screen->height_in_pixels / 2);
             int x = ((screen->width_in_pixels / 2) - (width / 2)), y = ((screen->height_in_pixels / 2) - (height / 2));
 
-            _main_window.create_def_and_map(
+            _main_window.create_window(
                 screen->root,
                 x,
                 y,
                 width,
                 height,
                 DARK_GREY,
-                0
+                NONE,
+                MAP | DEFAULT_KEYS
             );
-            _menu_window.create_def_and_map_no_keys(
+
+            _menu_window.create_window(
                 _main_window,
                 0,
                 0,
                 MENU_WINDOW_WIDTH,
                 _main_window.height(),
                 RED,
-                XCB_EVENT_MASK_BUTTON_PRESS
+                XCB_EVENT_MASK_BUTTON_PRESS,
+                MAP
             );
-            _default_settings_window.create_def_and_map_no_keys(
+            
+            _default_settings_window.create_window(
                 _main_window,
                 MENU_WINDOW_WIDTH,
                 0,
                 (_main_window.width() - MENU_WINDOW_WIDTH),
                 _main_window.height(),
                 ORANGE,
+                XCB_EVENT_MASK_BUTTON_PRESS,
+                MAP
+            );
+
+            _screen_menu_entry_window.create_window(
+                _menu_window,
+                0,
+                0,
+                MENU_WINDOW_WIDTH,
+                MENU_ENTRY_HEIGHT,
+                BLUE,
+                MAP,
+                XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE,
+                (int[]){DOWN | RIGHT, 2, BLACK}
+            );
+
+            _screen_settings_window.create_window(
+                _main_window,
+                MENU_WINDOW_WIDTH,
+                0,
+                (_main_window.width()),
+                _main_window.height(),
+                WHITE,
+                XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS
+            );
+
+            _screen_resolution_window.create_window(
+                _screen_settings_window,
+                100,
+                20,
+                160,
+                20,
+                DARK_GREY,
+                XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS
+            );
+
+            _screen_resolution_button_window.create_window(
+                _screen_settings_window,
+                260,
+                20,
+                20,
+                20,
+                DARK_GREY,
                 XCB_EVENT_MASK_BUTTON_PRESS
             );
-            make_menu_entry_window__(_screen_menu_entry_window, 0);
-            make_settings_window__(_screen_settings_window);
-            make_menu_entry_window__(_audio_menu_entry_window, 20);
-            _audio_settings_window.create_def_no_keys(
+            
+            _audio_menu_entry_window.create_window(
+                _menu_window,
+                0,
+                20,
+                MENU_WINDOW_WIDTH,
+                MENU_ENTRY_HEIGHT,
+                BLUE,
+                MAP,
+                XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE,
+                (int[]){DOWN | RIGHT, 2, BLACK}
+            );
+
+            _audio_settings_window.create_window(
                 _main_window,
                 MENU_WINDOW_WIDTH,
                 0,
@@ -7981,15 +7991,26 @@ class __system_settings__
                 PURPLE,
                 XCB_EVENT_MASK_BUTTON_PRESS
             );
-            make_menu_entry_window__(_network_menu_entry_window, 40);
-            _network_settings_window.create_def_no_keys(
+
+            _network_menu_entry_window.create_window(
+                _menu_window,
+                0,
+                40,
+                MENU_WINDOW_WIDTH,
+                MENU_ENTRY_HEIGHT,
+                BLUE,
+                MAP,
+                XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE,
+                (int[]){DOWN | RIGHT, 2, BLACK}
+            );
+
+            _network_settings_window.create_window(
                 _main_window,
                 MENU_WINDOW_WIDTH,
                 0,
                 (_main_window.width() - MENU_WINDOW_WIDTH),
                 _main_window.height(),
-                MAGENTA,
-                0
+                MAGENTA
             );
         }
 

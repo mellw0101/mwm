@@ -56,7 +56,8 @@ enum COLOR
     BROWN,
     PINK,
     PURPLE,
-    NO_COLOR
+    NO_COLOR,
+    DEFAULT_COLOR = DARK_GREY
 };
 
 typedef enum Error_codes {
