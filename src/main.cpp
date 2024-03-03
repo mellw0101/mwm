@@ -1502,21 +1502,6 @@ class window
                     }
                 });
             }
-
-            void draw_on_expose_event(const string &__str, const int &__text_color, const int &__backround_color, const char *__font_name, const int16_t &__x, const int16_t &__y)
-            {
-                on_expose_event([this, &__str, &__text_color, &__backround_color, &__font_name, &__x, &__y]()-> void
-                {
-                    draw_text(
-                        __str.c_str(),
-                        __text_color,
-                        __backround_color,
-                        __font_name,
-                        __x,
-                        __y
-                    );
-                });
-            }
             
             void raise()
             {
@@ -8221,7 +8206,7 @@ class __status_bar__
                 60,
                 20,
                 DARK_GREY,
-                XCB_EVENT_MASK_EXPOSURE,
+                NONE,
                 MAP,
                 nullptr
             );
@@ -8338,20 +8323,17 @@ class __status_bar__
 
         void setup_events__()
         {
-            // event_handler->setEventCallback(XCB_EXPOSE,       [&](Ev ev)-> void
-            // {
-            //     const auto *e = reinterpret_cast<const xcb_expose_event_t *>(ev);
-            //     draw(e->window);
-            // });
-
-            _time_window.draw_on_expose_event(
-                get_time__(),
-                WHITE,
-                DARK_GREY,
-                "7x14",
-                2,
-                14
-            );
+            _time_window.on_expose_event([&]()-> void
+            {
+                _time_window.draw_text(
+                    get_time__().c_str(),
+                    WHITE,
+                    DARK_GREY,
+                    "7x14",
+                    2,
+                    14
+                );
+            });
             _date_window.on_expose_event([&]()-> void
             {
                 _date_window.draw_text(
@@ -8425,8 +8407,6 @@ class __status_bar__
         void init__()
         {
             create_windows__();
-            // draw(_time_window);
-            // draw(_date_window);
             setup_events__();
         }
 
