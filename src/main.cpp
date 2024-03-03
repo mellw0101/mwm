@@ -7736,18 +7736,6 @@ class __system_settings__
                 }
             });
 
-            // event_handler->setEventCallback(XCB_KEY_PRESS,        [this](Ev ev)->void
-            // {
-            //     const auto e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
-            //     if (e->detail == wm->key_codes.s)
-            //     {
-            //         if (e->state == SUPER)
-            //         {
-            //             launch();
-            //         }
-            //     }
-            // });
-
             event_handler->set_key_press_callback(SUPER, wm->key_codes.s, [this]()-> void
             {
                 launch();
@@ -10749,22 +10737,22 @@ void setup_wm()
     Events events;
     events.setup();
 
-    file_app = new __file_app__;
-    file_app->init();
+    // file_app = new __file_app__;
+    // file_app->init();
 
-    status_bar = new __status_bar__;
-    status_bar->init__();
+    // status_bar = new __status_bar__;
+    // status_bar->init__();
 
-    wifi = new __wifi__;
-    wifi->init();
+    // wifi = new __wifi__;
+    // wifi->init();
 
-    network = new __network__;
+    // network = new __network__;
 
-    screen_settings = new __screen_settings__;
-    screen_settings->init();
+    // screen_settings = new __screen_settings__;
+    // screen_settings->init();
     
-    system_settings = new __system_settings__;
-    system_settings->init();
+    // system_settings = new __system_settings__;
+    // system_settings->init();
 }
 
 int main()
