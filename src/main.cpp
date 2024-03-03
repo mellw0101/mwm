@@ -8195,28 +8195,14 @@ static __wifi__ *wifi(nullptr);
 class __status_bar__
 {
     private:
-        string get_time__()
+        string get_time_and_date__()
         {
             long now(time({}));
             char buf[80];
             strftime(
                 buf,
                 size(buf),
-                "%H:%M:%S", 
-                localtime(&now)
-            );
-
-            return string(buf);
-        }
-
-        string get_date__()
-        {
-            long now(time({}));
-            char buf[80];
-            strftime(
-                buf,
-                size(buf),
-                "%Y-%m-%d", 
+                "%Y-%m-%d %H:%M:%S",
                 localtime(&now)
             );
 
@@ -8236,22 +8222,11 @@ class __status_bar__
                 MAP,
                 nullptr
             );
-            _time_window.create_window(
-                _bar_window,
-                (screen->width_in_pixels - 60),
-                0,
-                60,
-                20,
-                DARK_GREY,
-                XCB_EVENT_MASK_EXPOSURE,
-                MAP,
-                nullptr
-            );
-            _date_window.create_window(
+            _time_date_window.create_window(
                 _bar_window,
                 (screen->width_in_pixels - 140),
                 0,
-                74,
+                140,
                 20,
                 DARK_GREY,
                 XCB_EVENT_MASK_EXPOSURE,
@@ -8358,24 +8333,13 @@ class __status_bar__
 
         void setup_events__()
         {
-            _time_window.on_expose_event(            [&]()-> void
+            _time_date_window.on_expose_event(       [&]()-> void
             {
-                _time_window.draw_text(
-                    get_time__().c_str(),
+                _time_date_window.draw_text(
+                    get_time_and_date__().c_str(),
                     WHITE,
                     DARK_GREY,
                     "7x14",
-                    2,
-                    14
-                );
-            });
-            _date_window.on_expose_event(            [&]()-> void
-            {
-                _date_window.draw_text(
-                    get_date__().c_str(),
-                    WHITE,
-                    DARK_GREY,
-                    DEFAULT_FONT,
                     2,
                     14
                 );
@@ -8432,13 +8396,13 @@ class __status_bar__
 
         void setup_thread(const uint32_t &__window)
         {
-            if (__window == _time_window)
+            if (__window == _time_date_window)
             {
                 function<void()> __time__ = [&]()-> void
                 {
                     while (true)
                     {
-                        this->_time_window.send_event(XCB_EVENT_MASK_EXPOSURE);
+                        this->_time_date_window.send_event(XCB_EVENT_MASK_EXPOSURE);
                         this_thread::sleep_for(chrono::seconds(1));
                     }
                 };
@@ -8448,19 +8412,18 @@ class __status_bar__
         }
 
     public:
-        window(_bar_window), (_time_window), (_date_window), (_wifi_window), (_wifi_dropdown_window), (_wifi_close_window), (_wifi_info_window);
+        window(_bar_window), (_time_date_window), (_wifi_window), (_wifi_dropdown_window), (_wifi_close_window), (_wifi_info_window);
 
         void init__()
         {
             create_windows__();
             setup_events__();
-            setup_thread(_time_window);
+            setup_thread(_time_date_window);
         }
 
         void expose(const uint32_t &__window)
         {
-            if (__window == _time_window) _time_window.send_event(XCB_EVENT_MASK_EXPOSURE);
-            if (__window == _date_window) _date_window.send_event(XCB_EVENT_MASK_EXPOSURE);
+            if (__window == _time_date_window) _time_date_window.send_event(XCB_EVENT_MASK_EXPOSURE);
             if (__window == _wifi_close_window) _wifi_close_window.send_event(XCB_EVENT_MASK_EXPOSURE);
             if (__window == _wifi_info_window) _wifi_info_window.send_event(XCB_EVENT_MASK_EXPOSURE);
         }
@@ -10362,8 +10325,6 @@ class Events
                 {
                     case SUPER:
                     {
-                        // wm->send_expose_event(status_bar->_time_window);
-                        status_bar->_time_window.send_event(XCB_EVENT_MASK_EXPOSURE);
                         return;
                     }
                 }
