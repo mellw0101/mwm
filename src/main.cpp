@@ -7336,15 +7336,14 @@ class __file_app__
 
         void make_internal_client()
         {
-            c = new client;
-            c->win = main_window;
-            c->x = main_window.x();
-            c->y = main_window.y();
-            c->width = main_window.width();
+            c         = new client;
+            c->win    = main_window;
+            c->x      = main_window.x();
+            c->y      = main_window.y();
+            c->width  = main_window.width();
             c->height = main_window.height();
             c->make_decorations();
-            uint32_t mask = XCB_EVENT_MASK_STRUCTURE_NOTIFY;
-            main_window.apply_event_mask(&mask);
+            main_window.set_event_mask(XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY);
             wm->client_list.push_back(c);
             wm->cur_d->current_clients.push_back(c);
             c->focus();
