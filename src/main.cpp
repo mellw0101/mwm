@@ -1491,7 +1491,9 @@ class window
             template<typename Callback>
             void on_expose_event(Callback&& callback)
             {
-                if (!is_mask_active(XCB_EVENT_MASK_EXPOSURE)) set_event_mask(XCB_EVENT_MASK_EXPOSURE);
+                // if (!is_mask_active(XCB_EVENT_MASK_EXPOSURE)) set_event_mask(XCB_EVENT_MASK_EXPOSURE);
+                uint32_t mask = XCB_EVENT_MASK_EXPOSURE;
+                apply_event_mask(&mask);
 
                 event_handler->setEventCallback(XCB_EXPOSE, [this, callback](Ev ev)
                 {
