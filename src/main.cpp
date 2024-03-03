@@ -8019,10 +8019,12 @@ class __system_settings__
             c->width  = _main_window.width();
             c->height = _main_window.height();
             c->make_decorations();
-            _main_window.set_event_mask(XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY);
+            uint32_t mask = XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY;
+            c->frame.apply_event_mask(&mask);
             wm->client_list.push_back(c);
             wm->cur_d->current_clients.push_back(c);
             c->focus();
+            wm->focused_client = c;
         }
 
         void check_and_unmap_window__(window &__window)
