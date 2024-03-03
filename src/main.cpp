@@ -5244,6 +5244,448 @@ class Window_Manager
 };
 static Window_Manager *wm;
 
+class __network__
+{
+    public:
+        enum
+        {
+            LOCAL_IP = 0,
+            INTERFACE_FOR_LOCAL_IP = 1
+        };
+
+        string get_local_ip_info(int type)
+        {
+            struct ifaddrs* ifAddrStruct = nullptr;
+            struct ifaddrs* ifa = nullptr;
+            void* tmpAddrPtr = nullptr;
+            string result;
+
+            getifaddrs(&ifAddrStruct);
+            for (ifa = ifAddrStruct; ifa != nullptr; ifa = ifa->ifa_next)
+            {
+                if (ifa->ifa_addr == nullptr) continue;
+
+                if (ifa->ifa_addr->sa_family == AF_INET) // check it is IP4
+                { 
+                    // is a valid IP4 Address
+                    tmpAddrPtr = &((struct sockaddr_in*)ifa->ifa_addr)->sin_addr;
+                    char addressBuffer[INET_ADDRSTRLEN];
+                    inet_ntop(AF_INET, tmpAddrPtr, addressBuffer, INET_ADDRSTRLEN);
+                    if (addressBuffer[0] == '1'
+                    &&  addressBuffer[1] == '9'
+                    &&  addressBuffer[2] == '2')
+                    {
+                        if (type == LOCAL_IP)
+                        {
+                            result = addressBuffer;
+                            break;
+                        }
+
+                        if (type == INTERFACE_FOR_LOCAL_IP)
+                        {
+                            result = ifa->ifa_name;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (ifAddrStruct != nullptr) freeifaddrs(ifAddrStruct);
+            return result;
+        }
+
+    public:
+        __network__() {}
+};
+static __network__ *network(nullptr);
+
+class __wifi__
+{
+    private:
+        void scan__(const char* interface)
+        {
+            wireless_scan_head head;
+            wireless_scan* result;
+            iwrange range;
+            int sock;
+
+            // Open a socket to the wireless driver
+            sock = iw_sockets_open();
+            if (sock < 0)
+            {
+                log_error("could not open socket");
+                return;
+            }
+
+            // Get the range of settings
+            if (iw_get_range_info(sock, interface, &range) < 0)
+            {
+                log_error("could not get range info");
+                iw_sockets_close(sock);
+                return;
+            }
+
+            // Perform the scan
+            if (iw_scan(sock, const_cast<char*>(interface), range.we_version_compiled, &head) < 0)
+            {
+                log_error("could not scan");
+                iw_sockets_close(sock);
+                return;
+            }
+
+            // Iterate through the scan results
+            result = head.result;
+            while (nullptr != result)
+            {
+                if (result->b.has_essid)
+                {
+                    string ssid(result->b.essid);
+                    log_info(
+                        "\nSSID: "    + ssid +
+                        "\nSTATUS: "  + to_string(result->stats.status) +
+                        "\nQUAL: "    + to_string(result->stats.qual.qual) +
+                        "\nLEVEL: "   + to_string(result->stats.qual.level) +
+                        "\nNOICE: "   + to_string(result->stats.qual.noise) +
+                        "\nBITRATE: " + to_string(result->maxbitrate.value)
+                    );
+                }
+
+                result = result->next;
+            }
+
+            // Close the socket to the wireless driver
+            iw_sockets_close(sock);
+        }
+
+        void check_network_interfaces__()
+        {
+            struct ifaddrs* ifAddrStruct = nullptr;
+            struct ifaddrs* ifa = nullptr;
+            void* tmpAddrPtr = nullptr;
+
+            getifaddrs(&ifAddrStruct);
+
+            for (ifa = ifAddrStruct; ifa != nullptr; ifa = ifa->ifa_next)
+            {
+                if (!ifa->ifa_addr) continue;
+
+                if (ifa->ifa_addr->sa_family == AF_INET) // check it is IP4
+                { 
+                    // is a valid IP4 Address
+                    tmpAddrPtr = &((struct sockaddr_in*)ifa->ifa_addr)->sin_addr;
+                    char addressBuffer[INET_ADDRSTRLEN];
+                    inet_ntop(AF_INET, tmpAddrPtr, addressBuffer, INET_ADDRSTRLEN);
+                    if (addressBuffer[0] == '1'
+                    &&  addressBuffer[1] == '9'
+                    &&  addressBuffer[2] == '2')
+                    {
+                        log_info("Interface: " + string(ifa->ifa_name) + " Address: " + addressBuffer);
+                    }
+                }
+                else if (ifa->ifa_addr->sa_family == AF_INET6) // check it is IP6
+                {
+                    // is a valid IP6 Address
+                    tmpAddrPtr = &((struct sockaddr_in6*)ifa->ifa_addr)->sin6_addr;
+                    char addressBuffer[INET6_ADDRSTRLEN];
+                    inet_ntop(AF_INET6, tmpAddrPtr, addressBuffer, INET6_ADDRSTRLEN);
+                    log_info("Interface: " + string(ifa->ifa_name) + " Address: " + addressBuffer);
+                } 
+                // Here, you could attempt to deduce the interface type (e.g., wlan for WiFi) by name or other means
+            }
+
+            if (ifAddrStruct != nullptr) freeifaddrs(ifAddrStruct);
+            return;
+        }
+    
+    public:
+        void init()
+        {
+            event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev)-> void
+            {
+                const auto *e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
+                if (e->detail == wm->key_codes.f)
+                {
+                    if (e->state == (ALT + SUPER))
+                    {
+                        scan__("wlo1");
+                    }
+                }
+            });
+
+            // check_network_interfaces__();
+        }
+
+    public:
+        __wifi__() {}
+};
+static __wifi__ *wifi(nullptr);
+
+namespace 
+{
+    #define BAR_WINDOW_X      0
+    #define BAR_WINDOW_Y      0
+    #define BAR_WINDOW_WIDTH  screen->width_in_pixels
+    #define BAR_WINDOW_HEIGHT 20 
+
+    #define TIME_DATE_WINDOW_X      screen->width_in_pixels - 140
+    #define TIME_DATE_WINDOW_Y      0
+    #define TIME_DATE_WINDOW_WIDTH  140
+    #define TIME_DATE_WINDOW_HEIGHT 20
+
+    #define WIFI_WINDOW_X      screen->width_in_pixels - 160
+    #define WIFI_WINDOW_Y      0
+    #define WIFI_WINDOW_WIDTH  20
+    #define WIFI_WINDOW_HEIGHT 20
+
+    #define WIFI_DROPDOWN_BORDER 2
+    #define WIFI_DROPDOWN_X      ((screen->width_in_pixels - 150) - 110)
+    #define WIFI_DROPDOWN_Y      20
+    #define WIFI_DROPDOWN_WIDTH  220
+    #define WIFI_DROPDOWN_HEIGHT 240
+
+    #define WIFI_CLOSE_WINDOW_X      20
+    #define WIFI_CLOSE_WINDOW_Y      WIFI_DROPDOWN_HEIGHT - 40
+    #define WIFI_CLOSE_WINDOW_WIDTH  80
+    #define WIFI_CLOSE_WINDOW_HEIGHT 20
+
+    #define WIFI_INFO_WINDOW_X      20
+    #define WIFI_INFO_WINDOW_Y      20
+    #define WIFI_INFO_WINDOW_WIDTH  WIFI_DROPDOWN_WIDTH - 40
+    #define WIFI_INFO_WINDOW_HEIGHT WIFI_CLOSE_WINDOW_HEIGHT - 120
+}
+class __status_bar__
+{
+    private:
+        string get_time_and_date__()
+        {
+            long now(time({}));
+            char buf[80];
+            strftime(
+                buf,
+                size(buf),
+                "%Y-%m-%d %H:%M:%S",
+                localtime(&now)
+            );
+
+            return string(buf);
+        }
+
+        void create_windows__()
+        {
+            _bar_window.create_window(
+                screen->root,
+                BAR_WINDOW_X,
+                BAR_WINDOW_Y,
+                BAR_WINDOW_WIDTH,
+                BAR_WINDOW_HEIGHT,
+                DARK_GREY,
+                NONE,
+                MAP,
+                nullptr
+            );
+            _time_date_window.create_window(
+                _bar_window,
+                TIME_DATE_WINDOW_X,
+                TIME_DATE_WINDOW_Y,
+                TIME_DATE_WINDOW_WIDTH,
+                TIME_DATE_WINDOW_HEIGHT,
+                DARK_GREY,
+                XCB_EVENT_MASK_EXPOSURE,
+                MAP,
+                nullptr
+            );
+            _wifi_window.create_window(
+                _bar_window,
+                WIFI_WINDOW_X,
+                WIFI_WINDOW_Y,
+                WIFI_WINDOW_WIDTH,
+                WIFI_WINDOW_HEIGHT,
+                DARK_GREY,
+                XCB_EVENT_MASK_BUTTON_PRESS,
+                MAP,
+                nullptr
+            );
+
+            Bitmap bitmap(20, 20);
+            
+            bitmap.modify(1, 6, 13, 1);
+            bitmap.modify(2, 4, 15, 1);
+            bitmap.modify(3, 3, 7, 1); bitmap.modify(3, 12, 16, 1);
+            bitmap.modify(4, 2, 5, 1); bitmap.modify(4, 14, 17, 1);
+            bitmap.modify(5, 1, 4, 1); bitmap.modify(5, 15, 18, 1);
+            
+            bitmap.modify(5, 7, 12, 1);
+            bitmap.modify(6, 6, 13, 1);
+            bitmap.modify(7, 5, 9, 1); bitmap.modify(7, 10, 14, 1);
+            bitmap.modify(8, 4, 7, 1); bitmap.modify(8, 12, 15, 1);
+            bitmap.modify(9, 3, 6, 1); bitmap.modify(9, 13, 16, 1);
+            
+            bitmap.modify(10, 9, 10, 1);
+            bitmap.modify(11, 8, 11, 1);
+            bitmap.modify(12, 7, 12, 1);
+            bitmap.modify(13, 8, 11, 1);
+            bitmap.modify(14, 9, 10, 1);
+
+            bitmap.exportToPng("/home/mellw/wifi.png");
+            _wifi_window.set_backround_png("/home/mellw/wifi.png");
+            _wifi_window.map();
+        }
+
+        void show__(const uint32_t &__window)
+        {
+            if (__window == _wifi_dropdown_window)
+            {
+                _wifi_dropdown_window.create_window(
+                    screen->root,
+                    WIFI_DROPDOWN_X,
+                    WIFI_DROPDOWN_Y,
+                    WIFI_DROPDOWN_WIDTH,
+                    WIFI_DROPDOWN_HEIGHT,
+                    DARK_GREY,
+                    NONE,
+                    MAP,
+                    (int[]){ALL, WIFI_DROPDOWN_BORDER, BLACK}
+                );
+                _wifi_close_window.create_window(
+                    _wifi_dropdown_window,
+                    WIFI_CLOSE_WINDOW_X,
+                    WIFI_CLOSE_WINDOW_Y,
+                    WIFI_CLOSE_WINDOW_WIDTH,
+                    WIFI_CLOSE_WINDOW_HEIGHT,
+                    WHITE,
+                    XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE,
+                    MAP,
+                    (int[]){ALL, WIFI_DROPDOWN_BORDER, BLACK}
+                );
+                _wifi_info_window.create_window(
+                    _wifi_dropdown_window,
+                    WIFI_INFO_WINDOW_X,
+                    WIFI_INFO_WINDOW_Y,
+                    WIFI_INFO_WINDOW_WIDTH,
+                    WIFI_INFO_WINDOW_HEIGHT,
+                    WHITE,
+                    XCB_EVENT_MASK_EXPOSURE,
+                    MAP,
+                    (int[]){ALL, WIFI_DROPDOWN_BORDER, BLACK}
+                );
+            }
+        }
+
+        void hide__(const uint32_t &__window)
+        {
+            if (__window == _wifi_dropdown_window)
+            {
+                _wifi_close_window.unmap();
+                _wifi_close_window.kill();
+                _wifi_info_window.unmap();
+                _wifi_info_window.kill();
+                _wifi_dropdown_window.unmap();
+                _wifi_dropdown_window.kill();
+            }
+        }
+
+        void setup_events__()
+        {
+            _time_date_window.on_expose_event(       [&]()-> void
+            {
+                _time_date_window.draw_text(
+                    get_time_and_date__().c_str(),
+                    WHITE,
+                    DARK_GREY,
+                    DEFAULT_FONT,
+                    4,
+                    14
+                );
+            });
+            _wifi_close_window.on_expose_event(      [&]()-> void
+            {
+                _wifi_close_window.draw_text(
+                    "close",
+                    BLACK,
+                    WHITE,
+                    DEFAULT_FONT,
+                    22,
+                    15
+                );
+            });
+            _wifi_close_window.on_button_press_event([&]()-> void
+            {
+                hide__(_wifi_dropdown_window);
+            });
+            _wifi_info_window.on_expose_event(       [&]()-> void
+            {
+                string local_ip("Local ip: " + network->get_local_ip_info(__network__::LOCAL_IP));
+                _wifi_info_window.draw_text(
+                    local_ip.c_str(),
+                    BLACK,
+                    WHITE,
+                    DEFAULT_FONT,
+                    4,
+                    16
+                );
+
+                string local_interface("interface: " + network->get_local_ip_info(__network__::INTERFACE_FOR_LOCAL_IP));
+                _wifi_info_window.draw_text(
+                    local_interface.c_str(),
+                    BLACK,
+                    WHITE,
+                    DEFAULT_FONT,
+                    4,
+                    30
+                );
+            });
+            _wifi_window.on_button_press_event(      [&]()-> void
+            {
+                if (_wifi_dropdown_window.is_mapped())
+                {
+                    hide__(_wifi_dropdown_window);
+                }
+                else
+                {
+                    show__(_wifi_dropdown_window);
+                }
+            });
+        }
+
+        void setup_thread__(const uint32_t &__window)
+        {
+            if (__window == _time_date_window)
+            {
+                function<void()> __time__ = [&]()-> void
+                {
+                    while (true)
+                    {
+                        this->_time_date_window.send_event(XCB_EVENT_MASK_EXPOSURE);
+                        this_thread::sleep_for(chrono::seconds(1));
+                    }
+                };
+
+                thread(__time__).detach();
+            }
+        }
+
+    public:
+        window(_bar_window), (_time_date_window), (_wifi_window), (_wifi_dropdown_window), (_wifi_close_window), (_wifi_info_window);
+
+        void init__()
+        {
+            create_windows__();
+            setup_events__();
+            setup_thread__(_time_date_window);
+        }
+
+        void expose(const uint32_t &__window)
+        {
+            if (__window == _time_date_window ) _time_date_window.send_event(XCB_EVENT_MASK_EXPOSURE);
+            if (__window == _wifi_close_window) _wifi_close_window.send_event(XCB_EVENT_MASK_EXPOSURE);
+            if (__window == _wifi_info_window ) _wifi_info_window.send_event(XCB_EVENT_MASK_EXPOSURE);
+        }
+
+    public:
+        __status_bar__() {}
+};
+static __status_bar__ *status_bar(nullptr);
+
 /**
  *
  * @class XCPPBAnimator
@@ -5267,7 +5709,8 @@ class Mwm_Animator
         }
     
     public: 
-        /**
+        void animate(int startX, int startY, int startWidth, int startHeight, int endX, int endY, int endWidth, int endHeight, int duration) /**
+         *
          * @brief Animates the position and size of an object from a starting point to an ending point.
          * 
          * @param startX The starting X coordinate.
@@ -5279,8 +5722,8 @@ class Mwm_Animator
          * @param endWidth The ending width.
          * @param endHeight The ending height.
          * @param duration The duration of the animation in milliseconds.
+         *
          */
-        void animate(int startX, int startY, int startWidth, int startHeight, int endX, int endY, int endWidth, int endHeight, int duration)
         {
             stopAnimations(); // ENSURE ANY EXISTING ANIMATION IS STOPPED
             
@@ -5683,6 +6126,13 @@ class Mwm_Animator
                 }
 
                 c->x_y_width_height(currentX, currentY, currentWidth, currentHeight);
+                status_bar->_time_date_window.send_event(XCB_EVENT_MASK_EXPOSURE);
+                if (status_bar->_wifi_dropdown_window.is_mapped())
+                {
+                    status_bar->_wifi_info_window.send_event(XCB_EVENT_MASK_EXPOSURE);
+                    status_bar->_wifi_close_window.send_event(XCB_EVENT_MASK_EXPOSURE);
+                }
+
                 thread_sleep(GAnimDuration);
             }
         }
@@ -8016,448 +8466,7 @@ class Dock
 };
 static Dock * dock;
 
-class __network__
-{
-    public:
-        enum
-        {
-            LOCAL_IP = 0,
-            INTERFACE_FOR_LOCAL_IP = 1
-        };
 
-        string get_local_ip_info(int type)
-        {
-            struct ifaddrs* ifAddrStruct = nullptr;
-            struct ifaddrs* ifa = nullptr;
-            void* tmpAddrPtr = nullptr;
-            string result;
-
-            getifaddrs(&ifAddrStruct);
-            for (ifa = ifAddrStruct; ifa != nullptr; ifa = ifa->ifa_next)
-            {
-                if (ifa->ifa_addr == nullptr) continue;
-
-                if (ifa->ifa_addr->sa_family == AF_INET) // check it is IP4
-                { 
-                    // is a valid IP4 Address
-                    tmpAddrPtr = &((struct sockaddr_in*)ifa->ifa_addr)->sin_addr;
-                    char addressBuffer[INET_ADDRSTRLEN];
-                    inet_ntop(AF_INET, tmpAddrPtr, addressBuffer, INET_ADDRSTRLEN);
-                    if (addressBuffer[0] == '1'
-                    &&  addressBuffer[1] == '9'
-                    &&  addressBuffer[2] == '2')
-                    {
-                        if (type == LOCAL_IP)
-                        {
-                            result = addressBuffer;
-                            break;
-                        }
-
-                        if (type == INTERFACE_FOR_LOCAL_IP)
-                        {
-                            result = ifa->ifa_name;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            if (ifAddrStruct != nullptr) freeifaddrs(ifAddrStruct);
-            return result;
-        }
-
-    public:
-        __network__() {}
-};
-static __network__ *network(nullptr);
-
-class __wifi__
-{
-    private:
-        void scan__(const char* interface)
-        {
-            wireless_scan_head head;
-            wireless_scan* result;
-            iwrange range;
-            int sock;
-
-            // Open a socket to the wireless driver
-            sock = iw_sockets_open();
-            if (sock < 0)
-            {
-                log_error("could not open socket");
-                return;
-            }
-
-            // Get the range of settings
-            if (iw_get_range_info(sock, interface, &range) < 0)
-            {
-                log_error("could not get range info");
-                iw_sockets_close(sock);
-                return;
-            }
-
-            // Perform the scan
-            if (iw_scan(sock, const_cast<char*>(interface), range.we_version_compiled, &head) < 0)
-            {
-                log_error("could not scan");
-                iw_sockets_close(sock);
-                return;
-            }
-
-            // Iterate through the scan results
-            result = head.result;
-            while (nullptr != result)
-            {
-                if (result->b.has_essid)
-                {
-                    string ssid(result->b.essid);
-                    log_info(
-                        "\nSSID: "    + ssid +
-                        "\nSTATUS: "  + to_string(result->stats.status) +
-                        "\nQUAL: "    + to_string(result->stats.qual.qual) +
-                        "\nLEVEL: "   + to_string(result->stats.qual.level) +
-                        "\nNOICE: "   + to_string(result->stats.qual.noise) +
-                        "\nBITRATE: " + to_string(result->maxbitrate.value)
-                    );
-                }
-
-                result = result->next;
-            }
-
-            // Close the socket to the wireless driver
-            iw_sockets_close(sock);
-        }
-
-        void check_network_interfaces__()
-        {
-            struct ifaddrs* ifAddrStruct = nullptr;
-            struct ifaddrs* ifa = nullptr;
-            void* tmpAddrPtr = nullptr;
-
-            getifaddrs(&ifAddrStruct);
-
-            for (ifa = ifAddrStruct; ifa != nullptr; ifa = ifa->ifa_next)
-            {
-                if (!ifa->ifa_addr) continue;
-
-                if (ifa->ifa_addr->sa_family == AF_INET) // check it is IP4
-                { 
-                    // is a valid IP4 Address
-                    tmpAddrPtr = &((struct sockaddr_in*)ifa->ifa_addr)->sin_addr;
-                    char addressBuffer[INET_ADDRSTRLEN];
-                    inet_ntop(AF_INET, tmpAddrPtr, addressBuffer, INET_ADDRSTRLEN);
-                    if (addressBuffer[0] == '1'
-                    &&  addressBuffer[1] == '9'
-                    &&  addressBuffer[2] == '2')
-                    {
-                        log_info("Interface: " + string(ifa->ifa_name) + " Address: " + addressBuffer);
-                    }
-                }
-                else if (ifa->ifa_addr->sa_family == AF_INET6) // check it is IP6
-                {
-                    // is a valid IP6 Address
-                    tmpAddrPtr = &((struct sockaddr_in6*)ifa->ifa_addr)->sin6_addr;
-                    char addressBuffer[INET6_ADDRSTRLEN];
-                    inet_ntop(AF_INET6, tmpAddrPtr, addressBuffer, INET6_ADDRSTRLEN);
-                    log_info("Interface: " + string(ifa->ifa_name) + " Address: " + addressBuffer);
-                } 
-                // Here, you could attempt to deduce the interface type (e.g., wlan for WiFi) by name or other means
-            }
-
-            if (ifAddrStruct != nullptr) freeifaddrs(ifAddrStruct);
-            return;
-        }
-    
-    public:
-        void init()
-        {
-            event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev)-> void
-            {
-                const auto *e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
-                if (e->detail == wm->key_codes.f)
-                {
-                    if (e->state == (ALT + SUPER))
-                    {
-                        scan__("wlo1");
-                    }
-                }
-            });
-
-            // check_network_interfaces__();
-        }
-
-    public:
-        __wifi__() {}
-};
-static __wifi__ *wifi(nullptr);
-
-namespace 
-{
-    #define BAR_WINDOW_X      0
-    #define BAR_WINDOW_Y      0
-    #define BAR_WINDOW_WIDTH  screen->width_in_pixels
-    #define BAR_WINDOW_HEIGHT 20 
-
-    #define TIME_DATE_WINDOW_X      screen->width_in_pixels - 140
-    #define TIME_DATE_WINDOW_Y      0
-    #define TIME_DATE_WINDOW_WIDTH  140
-    #define TIME_DATE_WINDOW_HEIGHT 20
-
-    #define WIFI_WINDOW_X      screen->width_in_pixels - 160
-    #define WIFI_WINDOW_Y      0
-    #define WIFI_WINDOW_WIDTH  20
-    #define WIFI_WINDOW_HEIGHT 20
-
-    #define WIFI_DROPDOWN_BORDER 2
-    #define WIFI_DROPDOWN_X      ((screen->width_in_pixels - 150) - 110)
-    #define WIFI_DROPDOWN_Y      20
-    #define WIFI_DROPDOWN_WIDTH  220
-    #define WIFI_DROPDOWN_HEIGHT 240
-
-    #define WIFI_CLOSE_WINDOW_X      20
-    #define WIFI_CLOSE_WINDOW_Y      WIFI_DROPDOWN_HEIGHT - 40
-    #define WIFI_CLOSE_WINDOW_WIDTH  80
-    #define WIFI_CLOSE_WINDOW_HEIGHT 20
-
-    #define WIFI_INFO_WINDOW_X      20
-    #define WIFI_INFO_WINDOW_Y      20
-    #define WIFI_INFO_WINDOW_WIDTH  WIFI_DROPDOWN_WIDTH - 40
-    #define WIFI_INFO_WINDOW_HEIGHT WIFI_CLOSE_WINDOW_HEIGHT - 120
-}
-
-class __status_bar__
-{
-    private:
-        string get_time_and_date__()
-        {
-            long now(time({}));
-            char buf[80];
-            strftime(
-                buf,
-                size(buf),
-                "%Y-%m-%d %H:%M:%S",
-                localtime(&now)
-            );
-
-            return string(buf);
-        }
-
-        void create_windows__()
-        {
-            _bar_window.create_window(
-                screen->root,
-                BAR_WINDOW_X,
-                BAR_WINDOW_Y,
-                BAR_WINDOW_WIDTH,
-                BAR_WINDOW_HEIGHT,
-                DARK_GREY,
-                NONE,
-                MAP,
-                nullptr
-            );
-            _time_date_window.create_window(
-                _bar_window,
-                TIME_DATE_WINDOW_X,
-                TIME_DATE_WINDOW_Y,
-                TIME_DATE_WINDOW_WIDTH,
-                TIME_DATE_WINDOW_HEIGHT,
-                DARK_GREY,
-                XCB_EVENT_MASK_EXPOSURE,
-                MAP,
-                nullptr
-            );
-            _wifi_window.create_window(
-                _bar_window,
-                WIFI_WINDOW_X,
-                WIFI_WINDOW_Y,
-                WIFI_WINDOW_WIDTH,
-                WIFI_WINDOW_HEIGHT,
-                DARK_GREY,
-                XCB_EVENT_MASK_BUTTON_PRESS,
-                MAP,
-                nullptr
-            );
-
-            Bitmap bitmap(20, 20);
-            
-            bitmap.modify(1, 6, 13, 1);
-            bitmap.modify(2, 4, 15, 1);
-            bitmap.modify(3, 3, 7, 1); bitmap.modify(3, 12, 16, 1);
-            bitmap.modify(4, 2, 5, 1); bitmap.modify(4, 14, 17, 1);
-            bitmap.modify(5, 1, 4, 1); bitmap.modify(5, 15, 18, 1);
-            
-            bitmap.modify(5, 7, 12, 1);
-            bitmap.modify(6, 6, 13, 1);
-            bitmap.modify(7, 5, 9, 1); bitmap.modify(7, 10, 14, 1);
-            bitmap.modify(8, 4, 7, 1); bitmap.modify(8, 12, 15, 1);
-            bitmap.modify(9, 3, 6, 1); bitmap.modify(9, 13, 16, 1);
-            
-            bitmap.modify(10, 9, 10, 1);
-            bitmap.modify(11, 8, 11, 1);
-            bitmap.modify(12, 7, 12, 1);
-            bitmap.modify(13, 8, 11, 1);
-            bitmap.modify(14, 9, 10, 1);
-
-            bitmap.exportToPng("/home/mellw/wifi.png");
-            _wifi_window.set_backround_png("/home/mellw/wifi.png");
-            _wifi_window.map();
-        }
-
-        void show__(const uint32_t &__window)
-        {
-            if (__window == _wifi_dropdown_window)
-            {
-                _wifi_dropdown_window.create_window(
-                    screen->root,
-                    WIFI_DROPDOWN_X,
-                    WIFI_DROPDOWN_Y,
-                    WIFI_DROPDOWN_WIDTH,
-                    WIFI_DROPDOWN_HEIGHT,
-                    DARK_GREY,
-                    NONE,
-                    MAP,
-                    (int[]){ALL, WIFI_DROPDOWN_BORDER, BLACK}
-                );
-                _wifi_close_window.create_window(
-                    _wifi_dropdown_window,
-                    WIFI_CLOSE_WINDOW_X,
-                    WIFI_CLOSE_WINDOW_Y,
-                    WIFI_CLOSE_WINDOW_WIDTH,
-                    WIFI_CLOSE_WINDOW_HEIGHT,
-                    WHITE,
-                    XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE,
-                    MAP,
-                    (int[]){ALL, WIFI_DROPDOWN_BORDER, BLACK}
-                );
-                _wifi_info_window.create_window(
-                    _wifi_dropdown_window,
-                    WIFI_INFO_WINDOW_X,
-                    WIFI_INFO_WINDOW_Y,
-                    WIFI_INFO_WINDOW_WIDTH,
-                    WIFI_INFO_WINDOW_HEIGHT,
-                    WHITE,
-                    XCB_EVENT_MASK_EXPOSURE,
-                    MAP,
-                    (int[]){ALL, WIFI_DROPDOWN_BORDER, BLACK}
-                );
-            }
-        }
-
-        void hide__(const uint32_t &__window)
-        {
-            if (__window == _wifi_dropdown_window)
-            {
-                _wifi_close_window.unmap();
-                _wifi_close_window.kill();
-                _wifi_info_window.unmap();
-                _wifi_info_window.kill();
-                _wifi_dropdown_window.unmap();
-                _wifi_dropdown_window.kill();
-            }
-        }
-
-        void setup_events__()
-        {
-            _time_date_window.on_expose_event(       [&]()-> void
-            {
-                _time_date_window.draw_text(
-                    get_time_and_date__().c_str(),
-                    WHITE,
-                    DARK_GREY,
-                    DEFAULT_FONT,
-                    4,
-                    14
-                );
-            });
-            _wifi_close_window.on_expose_event(      [&]()-> void
-            {
-                _wifi_close_window.draw_text(
-                    "close",
-                    BLACK,
-                    WHITE,
-                    DEFAULT_FONT,
-                    22,
-                    15
-                );
-            });
-            _wifi_close_window.on_button_press_event([&]()-> void
-            {
-                hide__(_wifi_dropdown_window);
-            });
-            _wifi_info_window.on_expose_event(       [&]()-> void
-            {
-                string local_ip("Local ip: " + network->get_local_ip_info(__network__::LOCAL_IP));
-                _wifi_info_window.draw_text(
-                    local_ip.c_str(),
-                    BLACK,
-                    WHITE,
-                    DEFAULT_FONT,
-                    4,
-                    16
-                );
-
-                string local_interface("interface: " + network->get_local_ip_info(__network__::INTERFACE_FOR_LOCAL_IP));
-                _wifi_info_window.draw_text(
-                    local_interface.c_str(),
-                    BLACK,
-                    WHITE,
-                    DEFAULT_FONT,
-                    4,
-                    30
-                );
-            });
-            _wifi_window.on_button_press_event(      [&]()-> void
-            {
-                if (_wifi_dropdown_window.is_mapped())
-                {
-                    hide__(_wifi_dropdown_window);
-                }
-                else
-                {
-                    show__(_wifi_dropdown_window);
-                }
-            });
-        }
-
-        void setup_thread(const uint32_t &__window)
-        {
-            if (__window == _time_date_window)
-            {
-                function<void()> __time__ = [&]()-> void
-                {
-                    while (true)
-                    {
-                        this->_time_date_window.send_event(XCB_EVENT_MASK_EXPOSURE);
-                        this_thread::sleep_for(chrono::seconds(1));
-                    }
-                };
-
-                thread(__time__).detach();
-            }
-        }
-
-    public:
-        window(_bar_window), (_time_date_window), (_wifi_window), (_wifi_dropdown_window), (_wifi_close_window), (_wifi_info_window);
-
-        void init__()
-        {
-            create_windows__();
-            setup_events__();
-            setup_thread(_time_date_window);
-        }
-
-        void expose(const uint32_t &__window)
-        {
-            if (__window == _time_date_window) _time_date_window.send_event(XCB_EVENT_MASK_EXPOSURE);
-            if (__window == _wifi_close_window) _wifi_close_window.send_event(XCB_EVENT_MASK_EXPOSURE);
-            if (__window == _wifi_info_window) _wifi_info_window.send_event(XCB_EVENT_MASK_EXPOSURE);
-        }
-
-    public:
-        __status_bar__() {}
-};
-static __status_bar__ *status_bar(nullptr);
 
 class mv_client
 {
