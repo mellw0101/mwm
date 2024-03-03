@@ -1119,6 +1119,22 @@ class Event_Handler
                 callbacks.end()
             );
         }
+
+        template<typename Callback>
+        void set_key_press_callback(const uint16_t &__state, const xcb_keycode_t &__detail, Callback &&callback)
+        {
+            setEventCallback(XCB_KEY_PRESS, [this, callback, __detail, __state](Ev ev)
+            {
+                auto e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
+                if (e->detail == __detail)
+                {
+                    if (e->state == __state)
+                    {
+                        callback();
+                    }
+                }
+            });
+        }
     
     private: // variables
         unordered_map<uint8_t, vector<pair<CallbackId, EventCallback>>>(eventCallbacks);
@@ -1488,32 +1504,6 @@ class window
                 }
             }
 
-            template<typename Callback>
-            void on_expose_event(Callback&& callback)
-            {
-                event_handler->setEventCallback(XCB_EXPOSE, [this, callback](Ev ev)
-                {
-                    auto e = reinterpret_cast<const xcb_expose_event_t *>(ev);
-                    if (e->window == _window)
-                    {
-                        callback();
-                    }
-                });
-            }
-            
-            template<typename Callback>
-            void on_button_press_event(Callback&& callback)
-            {
-                event_handler->setEventCallback(XCB_BUTTON_PRESS, [this, callback](Ev ev)
-                {
-                    auto e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
-                    if (e->event == _window)
-                    {
-                        callback();
-                    }
-                });
-            }
-
             void raise()
             {
                 xcb_configure_window(
@@ -1642,6 +1632,48 @@ class window
                     xcb_send_event(conn, false, _window, XCB_EVENT_MASK_EXPOSURE, (char *)&expose_event);
                     xcb_flush(conn);
                 }
+            }
+
+        // event methods
+            template<typename Callback>
+            void on_expose_event(Callback&& callback)
+            {
+                event_handler->setEventCallback(XCB_EXPOSE, [this, callback](Ev ev)
+                {
+                    auto e = reinterpret_cast<const xcb_expose_event_t *>(ev);
+                    if (e->window == _window)
+                    {
+                        callback();
+                    }
+                });
+            }
+            
+            template<typename Callback>
+            void on_button_press_event(Callback&& callback)
+            {
+                event_handler->setEventCallback(XCB_BUTTON_PRESS, [this, callback](Ev ev)
+                {
+                    auto e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
+                    if (e->event == _window)
+                    {
+                        callback();
+                    }
+                });
+            }
+
+            template<typename Callback>
+            void on_L_MOUSE_BUTTON_PRESS_event(Callback&& callback)
+            {
+                event_handler->setEventCallback(XCB_BUTTON_PRESS, [this, callback](Ev ev)
+                {
+                    auto e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
+                    if (e->event != L_MOUSE_BUTTON) return;
+                    
+                    if (e->event == _window)
+                    {
+                        callback();
+                    }
+                });
             }
 
         public: // check methods
@@ -2039,6 +2071,14 @@ class window
                     str
                 );
                 xcb_flush(conn);
+            }
+
+            void draw_on_expose_event(const char *str , const int &text_color, const int &backround_color, const char *font_name, const int16_t &x, const int16_t &y)
+            {
+                on_expose_event([this, str, text_color, backround_color, font_name, x, y]()
+                {
+                    draw_text(str, text_color, backround_color, font_name, x, y);
+                });
             }
 
             public: // size_pos configuration methods
@@ -7696,16 +7736,21 @@ class __system_settings__
                 }
             });
 
-            event_handler->setEventCallback(XCB_KEY_PRESS,        [this](Ev ev)->void
+            // event_handler->setEventCallback(XCB_KEY_PRESS,        [this](Ev ev)->void
+            // {
+            //     const auto e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
+            //     if (e->detail == wm->key_codes.s)
+            //     {
+            //         if (e->state == SUPER)
+            //         {
+            //             launch();
+            //         }
+            //     }
+            // });
+
+            event_handler->set_key_press_callback(SUPER, wm->key_codes.s, [this]()-> void
             {
-                const auto e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
-                if (e->detail == wm->key_codes.s)
-                {
-                    if (e->state == SUPER)
-                    {
-                        launch();
-                    }
-                }
+                launch();
             });
 
             event_handler->setEventCallback(XCB_CONFIGURE_NOTIFY, [this](Ev ev)->void
@@ -8302,7 +8347,6 @@ class __status_bar__
                     MAP,
                     (int[]){ALL, WIFI_DROPDOWN_BORDER, BLACK}
                 );
-                draw(_wifi_close_window);
 
                 _wifi_info_window.create_window(
                     _wifi_dropdown_window,
@@ -8315,7 +8359,6 @@ class __status_bar__
                     MAP,
                     (int[]){ALL, WIFI_DROPDOWN_BORDER, BLACK}
                 );
-                draw(_wifi_info_window);
             }
         }
 
@@ -8404,26 +8447,6 @@ class __status_bar__
                     show__(_wifi_dropdown_window);
                 }
             });
-            // event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev)-> void
-            // {
-            //     const auto *e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
-            //     if (e->event == _wifi_window)
-            //     {
-            //         if (_wifi_dropdown_window.is_mapped())
-            //         {
-            //             hide__(_wifi_dropdown_window);
-            //         }
-            //         else
-            //         {
-            //             show__(_wifi_dropdown_window);
-            //         }
-            //     }
-
-            //     if (e->event == _wifi_close_window)
-            //     {
-            //         hide__(_wifi_dropdown_window);
-            //     }
-            // });   
         }
 
     public:
@@ -8441,68 +8464,6 @@ class __status_bar__
             if (__window == _date_window) _date_window.send_event(XCB_EVENT_MASK_EXPOSURE);
             if (__window == _wifi_close_window) _wifi_close_window.send_event(XCB_EVENT_MASK_EXPOSURE);
             if (__window == _wifi_info_window) _wifi_info_window.send_event(XCB_EVENT_MASK_EXPOSURE);
-        }
-
-        void draw(const uint32_t &__window)
-        {
-            if (__window == _time_window)
-            {
-                _time_window.draw_text(
-                    get_time__().c_str(),
-                    WHITE,
-                    DARK_GREY,
-                    "7x14",
-                    2,
-                    14
-                );
-            }
-
-            if (__window == _date_window)
-            {
-                _date_window.draw_text(
-                    get_date__().c_str(),
-                    WHITE,
-                    DARK_GREY,
-                    DEFAULT_FONT,
-                    2,
-                    14
-                );
-            }
-
-            if (__window == _wifi_close_window)
-            {
-                _wifi_close_window.draw_text(
-                    "close",
-                    BLACK,
-                    WHITE,
-                    DEFAULT_FONT,
-                    22,
-                    15
-                );
-            }
-
-            if (__window == _wifi_info_window)
-            {
-                string local_ip("Local ip: " + network->get_local_ip_info(__network__::LOCAL_IP));
-                _wifi_info_window.draw_text(
-                    local_ip.c_str(),
-                    BLACK,
-                    WHITE,
-                    DEFAULT_FONT,
-                    4,
-                    16
-                );
-
-                string local_interface("interface: " + network->get_local_ip_info(__network__::INTERFACE_FOR_LOCAL_IP));
-                _wifi_info_window.draw_text(
-                    local_interface.c_str(),
-                    BLACK,
-                    WHITE,
-                    DEFAULT_FONT,
-                    4,
-                    30
-                );
-            }
         }
 
     public:
@@ -8679,7 +8640,6 @@ class mv_client
                     case XCB_EXPOSE:
                     {
                         const auto *e = reinterpret_cast<const xcb_expose_event_t *>(ev);
-                        // status_bar->draw(e->window);
                         status_bar->expose(e->window);
                         file_app->expose(e->window);
                         system_settings->expose(e->window);
@@ -9666,7 +9626,7 @@ class resize_client
                 {
                     case XCB_MOTION_NOTIFY:
                     {
-                        const auto *e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
+                        auto e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
                         if (isTimeToRender())
                         {
                             snap(e->root_x, e->root_y);
@@ -9685,8 +9645,8 @@ class resize_client
                     
                     case XCB_EXPOSE:
                     {
-                        const auto *e = reinterpret_cast<const xcb_expose_event_t *>(ev);
-                        status_bar->draw(e->window);
+                        auto e = reinterpret_cast<const xcb_expose_event_t *>(ev);
+                        status_bar->expose(e->window);
 
                         break;
                     }
