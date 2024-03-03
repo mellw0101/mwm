@@ -6126,13 +6126,6 @@ class Mwm_Animator
                 }
 
                 c->x_y_width_height(currentX, currentY, currentWidth, currentHeight);
-                status_bar->_time_date_window.send_event(XCB_EVENT_MASK_EXPOSURE);
-                if (status_bar->_wifi_dropdown_window.is_mapped())
-                {
-                    status_bar->_wifi_info_window.send_event(XCB_EVENT_MASK_EXPOSURE);
-                    status_bar->_wifi_close_window.send_event(XCB_EVENT_MASK_EXPOSURE);
-                }
-
                 thread_sleep(GAnimDuration);
             }
         }
@@ -8465,8 +8458,6 @@ class Dock
         }
 };
 static Dock * dock;
-
-
 
 class mv_client
 {
