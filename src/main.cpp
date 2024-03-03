@@ -7935,8 +7935,8 @@ class __system_settings__
                 MENU_WINDOW_WIDTH,
                 MENU_ENTRY_HEIGHT,
                 BLUE,
-                MAP,
                 XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE,
+                MAP,
                 (int[]){DOWN | RIGHT, 2, BLACK}
             );
 
@@ -7977,8 +7977,8 @@ class __system_settings__
                 MENU_WINDOW_WIDTH,
                 MENU_ENTRY_HEIGHT,
                 BLUE,
-                MAP,
                 XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE,
+                MAP,
                 (int[]){DOWN | RIGHT, 2, BLACK}
             );
 
@@ -7999,8 +7999,8 @@ class __system_settings__
                 MENU_WINDOW_WIDTH,
                 MENU_ENTRY_HEIGHT,
                 BLUE,
-                MAP,
                 XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE,
+                MAP,
                 (int[]){DOWN | RIGHT, 2, BLACK}
             );
 
