@@ -68,6 +68,7 @@
 #include <ifaddrs.h>
 #include <netdb.h>
 
+
 #include "Log.hpp"
 Logger logger;
 #include "defenitions.hpp"
@@ -7383,7 +7384,10 @@ class __file_app__
 
         void setup_events()
         {
-            event_handler->set_key_press_callback(SUPER, wm->key_codes.f, [this]()-> void { launch__(); });
+            event_handler->set_key_press_callback(SUPER, wm->key_codes.f, [this]()-> void
+            {
+                launch__();
+            });
 
             event_handler->setEventCallback(XCB_CONFIGURE_NOTIFY, [&](Ev ev)-> void
             {
@@ -7417,7 +7421,6 @@ class __file_app__
 
         void init()
         {
-            net_logger->send_to_server(NET_LOG_CLASS);
             setup_events();
         }
 
