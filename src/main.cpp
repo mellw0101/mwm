@@ -7905,6 +7905,7 @@ class __system_settings__
                 NONE,
                 MAP | DEFAULT_KEYS
             );
+            net_logger->send_to_server(string(__func__) + ": _main_window: " + to_string(_main_window));
 
             _menu_window.create_window(
                 _main_window,
