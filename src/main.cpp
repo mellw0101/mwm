@@ -87,11 +87,16 @@ using SUint = unsigned short int;
 
 class __net_logger__
 {
-    public:
-        __net_logger__()
-        : __connected__(0) {}
+    #define ESP_SERVER "192.168.0.29"
+    #define ESP_PORT 23
 
-        void __init__() 
+    private:
+        long __socket__;
+        int __connected__;
+        struct sockaddr_in(__sock_addr__);
+
+    public:
+        void init(const char *__address, const int &__port)
         {
             if ((__socket__ = socket(AF_INET, SOCK_STREAM, 0)) == -1)
             {
@@ -100,9 +105,9 @@ class __net_logger__
             }
 
             __sock_addr__.sin_family = AF_INET;
-            __sock_addr__.sin_port   = htons(8001); 
+            __sock_addr__.sin_port   = htons(__port); 
 
-            if (inet_pton(AF_INET, "192.168.0.14", &__sock_addr__.sin_addr) < 0)
+            if (inet_pton(AF_INET, __address, &__sock_addr__.sin_addr) < 0)
             {
                 perror("inet_pton");
                 return;
@@ -114,10 +119,10 @@ class __net_logger__
                 return;
             }
 
-            __connected__ = 1;
+            __connected__ = true;
         }
 
-        void __send__(const string &__input)
+        void send_to_server(const string &__input)
         {
             if (!__connected__) return;
 
@@ -134,11 +139,10 @@ class __net_logger__
                 return;
             }
         }
-
-    private:
-        long __socket__;
-        int __connected__;
-        struct sockaddr_in(__sock_addr__);
+        
+    public:
+        __net_logger__()
+        : __connected__(false) {}
 };
 static __net_logger__ *net_logger(nullptr);
 
@@ -10782,8 +10786,8 @@ void setup_wm()
 int main()
 {
     net_logger = new __net_logger__;
-    net_logger->__init__();
-    net_logger->__send__("starting mwm");
+    net_logger->init(ESP_SERVER, ESP_PORT);
+    net_logger->send_to_server("starting mwm");
     
     LOG_start()
     setup_wm();
