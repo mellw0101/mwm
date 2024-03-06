@@ -7384,10 +7384,7 @@ class __file_app__
 
         void setup_events()
         {
-            event_handler->set_key_press_callback(SUPER, wm->key_codes.f, [this]()-> void
-            {
-                launch__();
-            });
+            event_handler->set_key_press_callback(SUPER, wm->key_codes.f, [this]()-> void { launch__(); });
 
             event_handler->setEventCallback(XCB_CONFIGURE_NOTIFY, [&](Ev ev)-> void
             {
