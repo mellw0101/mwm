@@ -7418,6 +7418,7 @@ class __file_app__
 
         void init()
         {
+            net_logger->send_to_server(NET_LOG_CLASS);
             setup_events();
         }
 
