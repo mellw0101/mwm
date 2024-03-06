@@ -8403,7 +8403,6 @@ class Dock
     public:
         void init()
         {
-            net_logger->send_to_server(NET_LOG_CLASS);
             main_window.create_default(screen->root, 0, 0, width, height);
             setup_dock();
             configure_context_menu();
