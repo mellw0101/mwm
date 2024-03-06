@@ -92,6 +92,7 @@ class __net_logger__
     #define NET_LOG_WINDOW(name, window) "\033[35m(FUNCTION) " + string(__func__) + ":\033[34m (WINDOW_NAME) " + name + ":\033[32m (uint32_t) " + to_string(window) + "\033[0m"
     #define FUNC string(__func__)
     #define WINDOW(window) to_string(window)
+    #define NET_LOG_CLASS typeid(*this).name()
 
     private:
         long _socket;
@@ -8372,6 +8373,7 @@ class __system_settings__
 
         void init()
         {
+            net_logger->send_to_server(NET_LOG_CLASS);
             setup_events__();
         }
 
