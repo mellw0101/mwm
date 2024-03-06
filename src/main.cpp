@@ -89,54 +89,62 @@ class __net_logger__
 {
     #define ESP_SERVER "192.168.0.29"
     #define ESP_PORT 23
-    #define NET_LOG_WINDOW(name, window) string(__func__) + ": " + name + ": " + to_string(window)
+    #define NET_LOG_WINDOW(name, window) "(logger FUNCTION)" + string(__func__) + ": (window NAME)" + name + ": (window uint32_t)" + to_string(window)
     #define FUNC string(__func__)
     #define WINDOW(window) to_string(window)
 
     private:
-        long __socket__;
-        int __connected__;
-        struct sockaddr_in(__sock_addr__);
+        long _socket;
+        int _connected;
+        struct sockaddr_in(_sock_addr);
 
     public:
-        void init(const char *__address, const int &__port)
+        void init(const char *__address, const int &__port = 0)
         {
-            if ((__socket__ = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+            if ((_socket = socket(AF_INET, SOCK_STREAM, 0)) == -1)
             {
                 perror("socket");
                 return;
             }
 
-            __sock_addr__.sin_family = AF_INET;
-            __sock_addr__.sin_port   = htons(__port); 
+            _sock_addr.sin_family = AF_INET;
+            if (__address == string(ESP_SERVER))
+            {
+                _sock_addr.sin_port = htons(ESP_PORT);
+            }
+            else
+            {
+                _sock_addr.sin_port = htons(__port);
+            }
 
-            if (inet_pton(AF_INET, __address, &__sock_addr__.sin_addr) < 0)
+            if (inet_pton(AF_INET, __address, &_sock_addr.sin_addr) < 0)
             {
                 perror("inet_pton");
                 return;
             }
 
-            if (connect(__socket__, (struct sockaddr*)&__sock_addr__, sizeof(__sock_addr__)) < 0)
+            if (connect(_socket, (struct sockaddr*)&_sock_addr, sizeof(_sock_addr)) < 0)
             {
                 perror("connect");
                 return;
             }
 
-            __connected__ = true;
+            _connected = true;
         }
 
         void send_to_server(const string &__input)
         {
-            if (!__connected__) return;
+            if (!_connected) return;
 
-            if (send(__socket__, __input.c_str(), __input.length(), 0) < 0)
+            if (send(_socket, __input.c_str(), __input.length(), 0) < 0)
             {
                 perror("send");
+                _connected = false;
                 return;
             }
 
-            char __char__('\0');
-            if (send(__socket__, &__char__, 1, 0) < 0)
+            char s_char('\0');
+            if (send(_socket, &s_char, 1, 0) < 0)
             {
                 perror("send");
                 return;
@@ -145,7 +153,7 @@ class __net_logger__
         
     public:
         __net_logger__()
-        : __connected__(false) {}
+        : _connected(false) {}
 };
 static __net_logger__ *net_logger(nullptr);
 
@@ -7908,7 +7916,7 @@ class __system_settings__
                 NONE,
                 MAP | DEFAULT_KEYS
             );
-            net_logger->send_to_server(string(__func__) + ": _main_window: " + to_string(_main_window));
+            net_logger->send_to_server(NET_LOG_WINDOW("_main_window", _main_window));
             
             _menu_window.create_window(
                 _main_window,
@@ -7920,7 +7928,7 @@ class __system_settings__
                 XCB_EVENT_MASK_BUTTON_PRESS,
                 MAP
             );
-            net_logger->send_to_server(FUNC + "_menu_window: " + WINDOW(_menu_window));
+            net_logger->send_to_server(NET_LOG_WINDOW("_menu_window", _menu_window));
             
             _default_settings_window.create_window(
                 _main_window,
@@ -7945,6 +7953,7 @@ class __system_settings__
                 MAP,
                 (int[]){DOWN | RIGHT, 2, BLACK}
             );
+            net_logger->send_to_server(NET_LOG_WINDOW("_screen_menu_entry_window", _screen_menu_entry_window));
 
             _screen_settings_window.create_window(
                 _main_window,
@@ -7955,6 +7964,7 @@ class __system_settings__
                 WHITE,
                 XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS
             );
+            net_logger->send_to_server(NET_LOG_WINDOW("_screen_settings_window", _screen_settings_window));
 
             _screen_resolution_window.create_window(
                 _screen_settings_window,
@@ -7965,6 +7975,7 @@ class __system_settings__
                 DARK_GREY,
                 XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS
             );
+            net_logger->send_to_server(NET_LOG_WINDOW("_screen_resolution_window", _screen_resolution_window));
 
             _screen_resolution_button_window.create_window(
                 _screen_settings_window,
@@ -7975,7 +7986,8 @@ class __system_settings__
                 DARK_GREY,
                 XCB_EVENT_MASK_BUTTON_PRESS
             );
-            
+            net_logger->send_to_server(NET_LOG_WINDOW("_screen_resolution_button_window", _screen_resolution_button_window));
+
             _audio_menu_entry_window.create_window(
                 _menu_window,
                 0,
@@ -7987,6 +7999,7 @@ class __system_settings__
                 MAP,
                 (int[]){DOWN | RIGHT, 2, BLACK}
             );
+            net_logger->send_to_server(NET_LOG_WINDOW("_audio_menu_entry_window", _audio_menu_entry_window));
 
             _audio_settings_window.create_window(
                 _main_window,
@@ -7997,6 +8010,7 @@ class __system_settings__
                 PURPLE,
                 XCB_EVENT_MASK_BUTTON_PRESS
             );
+            net_logger->send_to_server(NET_LOG_WINDOW("_audio_settings_window", _audio_settings_window));
 
             _network_menu_entry_window.create_window(
                 _menu_window,
@@ -8009,6 +8023,7 @@ class __system_settings__
                 MAP,
                 (int[]){DOWN | RIGHT, 2, BLACK}
             );
+            net_logger->send_to_server(NET_LOG_WINDOW("_network_menu_entry_window", _network_menu_entry_window));
 
             _network_settings_window.create_window(
                 _main_window,
@@ -8018,6 +8033,7 @@ class __system_settings__
                 _main_window.height(),
                 MAGENTA
             );
+            net_logger->send_to_server(NET_LOG_WINDOW("_network_settings_window", _network_settings_window));
         }
 
         void make_internal_client__()
