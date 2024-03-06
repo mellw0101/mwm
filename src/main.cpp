@@ -89,6 +89,9 @@ class __net_logger__
 {
     #define ESP_SERVER "192.168.0.29"
     #define ESP_PORT 23
+    #define NET_LOG_WINDOW(name, window) string(__func__) + ": " + name + ": " + to_string(window)
+    #define FUNC string(__func__)
+    #define WINDOW(window) to_string(window)
 
     private:
         long __socket__;
@@ -7906,7 +7909,7 @@ class __system_settings__
                 MAP | DEFAULT_KEYS
             );
             net_logger->send_to_server(string(__func__) + ": _main_window: " + to_string(_main_window));
-
+            
             _menu_window.create_window(
                 _main_window,
                 0,
@@ -7917,6 +7920,7 @@ class __system_settings__
                 XCB_EVENT_MASK_BUTTON_PRESS,
                 MAP
             );
+            net_logger->send_to_server(FUNC + "_menu_window: " + WINDOW(_menu_window));
             
             _default_settings_window.create_window(
                 _main_window,
@@ -7928,6 +7932,7 @@ class __system_settings__
                 XCB_EVENT_MASK_BUTTON_PRESS,
                 MAP
             );
+            net_logger->send_to_server(NET_LOG_WINDOW("_default_settings_window", _default_settings_window));
 
             _screen_menu_entry_window.create_window(
                 _menu_window,
