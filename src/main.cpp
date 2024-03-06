@@ -89,7 +89,7 @@ class __net_logger__
 {
     #define ESP_SERVER "192.168.0.29"
     #define ESP_PORT 23
-    #define NET_LOG_WINDOW(name, window) "\033[35m( FUNCTION )" + string(__func__) + ":\033[34m ( WINDOW_NAME )" + name + ":\033[32m ( uint32_t )" + to_string(window) + "\033[0m"
+    #define NET_LOG_WINDOW(name, window) "\033[35m(FUNCTION) " + string(__func__) + ":\033[34m (WINDOW_NAME) " + name + ":\033[32m (uint32_t) " + to_string(window) + "\033[0m"
     #define FUNC string(__func__)
     #define WINDOW(window) to_string(window)
 
