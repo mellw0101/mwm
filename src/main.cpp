@@ -93,6 +93,7 @@ class __net_logger__
     #define FUNC string(__func__)
     #define WINDOW(window) to_string(window)
     #define NET_LOG_CLASS typeid(*this).name()
+    #define CLASS_INIT string(typeid(*this).name()).substr(string(typeid(*this).name()).find('_'))
     #define NET_LOG(__type) net_logger->send_to_server(__type)
 
     private:
@@ -5660,7 +5661,7 @@ class __status_bar__
         void init__()
         {
             // net_logger->send_to_server(NET_LOG_CLASS);
-            NET_LOG(NET_LOG_CLASS);
+            NET_LOG(CLASS_INIT);
             create_windows__();
             setup_events__();
             setup_thread__(_time_date_window);
