@@ -5659,7 +5659,8 @@ class __status_bar__
 
         void init__()
         {
-            net_logger->send_to_server(NET_LOG_CLASS);
+            // net_logger->send_to_server(NET_LOG_CLASS);
+            NET_LOG(NET_LOG_CLASS);
             create_windows__();
             setup_events__();
             setup_thread__(_time_date_window);
