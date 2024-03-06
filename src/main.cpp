@@ -93,6 +93,7 @@ class __net_logger__
     #define FUNC string(__func__)
     #define WINDOW(window) to_string(window)
     #define NET_LOG_CLASS typeid(*this).name()
+    #define NET_LOG(__type) net_logger->send_to_server(__type)
 
     private:
         long _socket;
