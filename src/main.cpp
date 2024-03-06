@@ -10816,7 +10816,7 @@ void setup_wm()
 int main()
 {
     net_logger = new __net_logger__;
-    net_logger->init(ESP_SERVER, ESP_PORT);
+    net_logger->init(ESP_SERVER);
     net_logger->send_to_server("starting mwm");
     
     LOG_start()
