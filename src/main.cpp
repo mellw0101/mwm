@@ -68,7 +68,6 @@
 #include <ifaddrs.h>
 #include <netdb.h>
 
-
 #include "Log.hpp"
 Logger logger;
 #include "defenitions.hpp"
@@ -5507,6 +5506,8 @@ class __status_bar__
                 NONE,
                 MAP
             );
+            net_logger->send_to_server(NET_LOG_WINDOW("_bar_window", _bar_window));
+
             _time_date_window.create_window(
                 _bar_window,
                 TIME_DATE_WINDOW_X,
@@ -5517,6 +5518,8 @@ class __status_bar__
                 XCB_EVENT_MASK_EXPOSURE,
                 MAP
             );
+            net_logger->send_to_server(NET_LOG_WINDOW("_time_date_window", _time_date_window));
+
             _wifi_window.create_window(
                 _bar_window,
                 WIFI_WINDOW_X,
@@ -5527,6 +5530,7 @@ class __status_bar__
                 XCB_EVENT_MASK_BUTTON_PRESS,
                 MAP
             );
+            net_logger->send_to_server(NET_LOG_WINDOW("_wifi_window", _wifi_window));
 
             Bitmap bitmap(20, 20);
             
@@ -5653,6 +5657,7 @@ class __status_bar__
 
         void init__()
         {
+            net_logger->send_to_server(NET_LOG_CLASS);
             create_windows__();
             setup_events__();
             setup_thread__(_time_date_window);
@@ -7378,10 +7383,7 @@ class __file_app__
 
         void setup_events()
         {
-            event_handler->set_key_press_callback(SUPER, wm->key_codes.f, [this]()-> void
-            {
-                launch__();
-            });
+            event_handler->set_key_press_callback(SUPER, wm->key_codes.f, [this]()-> void { launch__(); });
 
             event_handler->setEventCallback(XCB_CONFIGURE_NOTIFY, [&](Ev ev)-> void
             {
@@ -7415,6 +7417,7 @@ class __file_app__
 
         void init()
         {
+            net_logger->send_to_server(NET_LOG_CLASS);
             setup_events();
         }
 
@@ -8397,6 +8400,7 @@ class Dock
     public:
         void init()
         {
+            net_logger->send_to_server(NET_LOG_CLASS);
             main_window.create_default(screen->root, 0, 0, width, height);
             setup_dock();
             configure_context_menu();
