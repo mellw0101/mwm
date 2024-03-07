@@ -89,18 +89,20 @@ class __net_logger__
 {
     #define ESP_SERVER "192.168.0.29"
     #define ESP_PORT 23
-    #define NET_LOG_WINDOW(name, window) "\033[35m(FUNCTION) " + string(__func__) + ":\033[34m (WINDOW_NAME) " + name + ":\033[32m (uint32_t) " + to_string(window) + "\033[0m"
-    #define FUNC string(__func__)
+    
+    #define FUNC_NAME_STR string(__func__)
+    #define NET_LOG_WINDOW(window_name, window) "\033[35m(FUNCTION) " + FUNC_NAME_STR + ":\033[34m (WINDOW_NAME) " + window_name + ":\033[32m (uint32_t) " + to_string(window) + "\033[0m"
     #define WINDOW(window) to_string(window)
-    #define NET_LOG_CLASS typeid(*this).name()
+    #define CLASS_NAME_RAW typeid(*this).name()
+    #define CLASS_NAME_STR string(CLASS_NAME_RAW)
     /*
      *
      * @breif fetches the calling class's name and extracts a substr containing only the class name
      * 
-     * NOTE: this only works for class's with prefix '__' 
+     * NOTE: this only works for class's with prefix '__'
      *
      */
-    #define CLASS_NAME string(typeid(*this).name()).substr(string(typeid(*this).name()).find("__"))
+    #define CLASS_NAME CLASS_NAME_STR.substr(CLASS_NAME_STR.find("__"))
     #define NET_LOG(__type) net_logger->send_to_server(__type)
 
     private:
@@ -148,7 +150,6 @@ class __net_logger__
 
             if (send(_socket, __input.c_str(), __input.length(), 0) < 0)
             {
-                perror("send");
                 _connected = false;
                 return;
             }
@@ -156,7 +157,7 @@ class __net_logger__
             char s_char('\0');
             if (send(_socket, &s_char, 1, 0) < 0)
             {
-                perror("send");
+                _connected = false;
                 return;
             }
         }
