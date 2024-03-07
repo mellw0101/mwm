@@ -93,7 +93,14 @@ class __net_logger__
     #define FUNC string(__func__)
     #define WINDOW(window) to_string(window)
     #define NET_LOG_CLASS typeid(*this).name()
-    #define CLASS_INIT string(typeid(*this).name()).substr(string(typeid(*this).name()).find('_'))
+    /*
+     *
+     * @breif fetches the calling class's name and extracts a substr containing only the class name
+     * 
+     * NOTE: this only works for class's with prefix '__' 
+     *
+     */
+    #define CLASS_NAME string(typeid(*this).name()).substr(string(typeid(*this).name()).find("__"))
     #define NET_LOG(__type) net_logger->send_to_server(__type)
 
     private:
@@ -5427,19 +5434,8 @@ class __wifi__
     public:
         void init()
         {
-            event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev)-> void
-            {
-                const auto *e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
-                if (e->detail == wm->key_codes.f)
-                {
-                    if (e->state == (ALT + SUPER))
-                    {
-                        scan__("wlo1");
-                    }
-                }
-            });
-
-            // check_network_interfaces__();
+            NET_LOG(CLASS_NAME);
+            event_handler->set_key_press_callback((ALT + SUPER), wm->key_codes.f, [this]()-> void { scan__("wlo1"); });
         }
 
     public:
@@ -5660,8 +5656,7 @@ class __status_bar__
 
         void init__()
         {
-            // net_logger->send_to_server(NET_LOG_CLASS);
-            NET_LOG(CLASS_INIT);
+            NET_LOG(CLASS_NAME);
             create_windows__();
             setup_events__();
             setup_thread__(_time_date_window);
