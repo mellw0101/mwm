@@ -7416,7 +7416,7 @@ class __file_app__
 
         void init()
         {
-            net_logger->send_to_server(NET_LOG_CLASS);
+            NET_LOG(CLASS_NAME);
             setup_events();
         }
 
@@ -8375,7 +8375,7 @@ class __system_settings__
 
         void init()
         {
-            net_logger->send_to_server(NET_LOG_CLASS);
+            NET_LOG(CLASS_NAME);
             setup_events__();
         }
 
