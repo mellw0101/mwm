@@ -10688,7 +10688,6 @@ class Events
             if (c->win.y() != (TITLE_BAR_HEIGHT + BORDER_SIZE))
             {
                 c->win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
-                xcb_flush(conn);
             }
 
             xcb_flush(conn);
