@@ -2355,7 +2355,7 @@ class window
                     int width = imlib_image_get_width();
                     int height = imlib_image_get_height();
 
-                    DATA32 *data = imlib_image_get_data(); // Get the original image data
+                    DATA32 *data = imlib_image_get_data_for_reading_only(); // Get the original image data
 
                     // Create an XCB image from the original data
                     xcb_image_t *xcb_image = xcb_image_create_native( 
