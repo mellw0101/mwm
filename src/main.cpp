@@ -5003,7 +5003,8 @@ class Window_Manager
                 ; 
                 root.apply_event_mask(&mask);
                 root.clear();
-                root.set_background_png_no_scale("/home/mellw/mwm_png/galaxy21.png");
+                // root.set_background_png_no_scale("/home/mellw/mwm_png/galaxy21.png");
+                root.set_background_png_no_scale("/home/mellw/mwm_png/galaxy16-17-3840x1200.png");
                 root.set_pointer(CURSOR::arrow);
             }
         
