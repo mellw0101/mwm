@@ -10415,6 +10415,12 @@ class Events
                 {
                     case SUPER:
                     {
+                        client *c = wm->client_from_any_window(&e->event);
+                        if (c == nullptr) return;
+                        c->win.x(0);
+                        c->win.y(0);
+                        xcb_flush(conn);
+
                         return;
                     }
                 }
