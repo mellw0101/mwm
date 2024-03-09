@@ -3244,10 +3244,163 @@ class window
             }
 };
 
-class __aplication__
+class __window_decor__
 {
     public:
+        static void make_borders(window &__window, const int &__size, COLOR __color)
+        {
+            window left, right, up, down;
 
+            left.create_default(
+                __window,
+                0,
+                0,
+                __size,
+                __window.height()
+            );
+            left.set_backround_color(__color);
+            left.map();
+
+            right.create_default(
+                __window,
+                (__window.width() - __size),
+                0,
+                __size,
+                __window.height()
+            );
+            right.set_backround_color(__color);
+            right.map();
+
+            up.create_default(
+                __window,
+                __size,
+                0,
+                (__window.width() - __size),
+                __size
+            );
+            up.set_backround_color(__color);
+            up.map();
+
+            down.create_default(
+                __window,
+                __size,
+                (__window.height() - __size),
+                (__window.width() - __size),
+                __size
+            );
+            down.set_backround_color(__color);
+            down.map();
+        }
+
+        static void make_menu_borders(window &__window, const int &__size, COLOR __color)
+        {
+            window right, down;
+
+            right.create_default(
+                __window,
+                (__window.width() - __size),
+                0,
+                __size,
+                __window.height()
+            );
+            right.set_backround_color(__color);
+            right.map();
+
+            down.create_default(
+                __window,
+                0,
+                (__window.height() - __size),
+                __window.width(),
+                __size
+            );
+            down.set_backround_color(__color);
+            down.map();
+        }
+
+        static void make_file_app_menu_borders(window &__window, const int &__size, COLOR __color)
+        {
+            window down;
+
+            down.create_default(
+                __window,
+                0,
+                (__window.height() - __size),
+                __window.width(),
+                __size
+            );
+            down.set_backround_color(__color);
+            down.map();
+        }
+
+        static void make_right_side_button_borders(window &__window, const int &__size, COLOR __color)
+        {
+            window right, up, down;
+
+            right.create_default(
+                __window,
+                (__window.width() - __size),
+                0,
+                __size,
+                __window.height()
+            );
+            right.set_backround_color(__color);
+            right.map();
+
+            up.create_default(
+                __window,
+                0,
+                0,
+                (__window.width() - __size),
+                __size
+            );
+            up.set_backround_color(__color);
+            up.map();
+
+            down.create_default(
+                __window,
+                0,
+                (__window.height() - __size),
+                (__window.width() - __size),
+                __size
+            );
+            down.set_backround_color(__color);
+            down.map();
+        }
+
+        static void make_dropdown_menu_entry_borders(window &__window, const int &__size, COLOR __color)
+        {
+            window left, right, down;
+
+            left.create_default(
+                __window,
+                0,
+                0,
+                __size,
+                __window.height()
+            );
+            left.set_backround_color(__color);
+            left.map();
+
+            right.create_default(
+                __window,
+                (__window.width() - __size),
+                0,
+                __size,
+                __window.height()
+            );
+            right.set_backround_color(__color);
+            right.map();
+
+            down.create_default(
+                __window,
+                __size,
+                (__window.height() - __size),
+                (__window.width() - __size),
+                __size
+            );
+            down.set_backround_color(__color);
+            down.map();
+        }
 };
 
 class client
@@ -6431,7 +6584,8 @@ class button
                 "/usr/share/icons/hicolor/256x256/apps/",
                 "/usr/share/icons/gnome/48x48/apps/",
                 "/usr/share/icons/gnome/32x32/apps/",
-                "/usr/share/pixmaps"
+                "/usr/share/pixmaps",
+                "/usr/share/icons/bloom/apps/48/"
             }, name );
 
             if (icon_path == "")
@@ -7034,7 +7188,7 @@ class __menu_entry__
             _window.create_default(_parent_window, _x, _y, _width, _height);
             _window.apply_event_mask(&_mask);
             _window.set_backround_color(DARK_GREY);
-            _window.make_borders(DOWN, _border_size, BLACK);
+            __window_decor__::make_file_app_menu_borders(_window, _border_size, BLACK);
         }
 
         void draw()
@@ -7110,7 +7264,7 @@ class __file_app__
                         // _window.apply_event_mask(&mask);
                         _window.set_event_mask(XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE);
                         _window.set_backround_color(DARK_GREY);
-                        _window.make_borders(DOWN, FILE_APP_BORDER_SIZE, BLACK);
+                        __window_decor__::make_file_app_menu_borders(_window, FILE_APP_BORDER_SIZE, BLACK);
                         _window.map();
                         draw();
                     }
@@ -10641,7 +10795,7 @@ void setup_wm()
     dock = new Dock;
     dock->add_app("konsole");
     dock->add_app("alacritty");
-    // dock->add_app("google-chrome-beta");
+    dock->add_app("google-chrome-beta");
     dock->add_app("code");
     dock->add_app("falkon");
     dock->init();
