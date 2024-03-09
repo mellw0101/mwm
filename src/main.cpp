@@ -952,9 +952,9 @@ class File
         Directory_Lister directory_lister;
     
     public: // methods
-        std::string find_png_icon(std::vector<const char *> dirs, const char *app)
+        string find_png_icon(vector<const char *> dirs, const char *app)
         {
-            std::string name = app;
+            string name = app;
             name += ".png";
 
             for (const auto &dir : dirs)
@@ -6584,7 +6584,8 @@ class button
                 "/usr/share/icons/hicolor/256x256/apps/",
                 "/usr/share/icons/gnome/48x48/apps/",
                 "/usr/share/icons/gnome/32x32/apps/",
-                "/usr/share/pixmaps"
+                "/usr/share/pixmaps",
+                "/usr/share/icons/bloom/apps/48/"
             }, name );
 
             if (icon_path == "")
@@ -10794,7 +10795,7 @@ void setup_wm()
     dock = new Dock;
     dock->add_app("konsole");
     dock->add_app("alacritty");
-    dock->add_app("google-chrome-stable");
+    dock->add_app("google-chrome-beta");
     dock->add_app("code");
     dock->add_app("falkon");
     dock->init();
