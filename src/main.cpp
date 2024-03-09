@@ -975,16 +975,16 @@ class File
         {
             vector<string>(parts);
             string name(__name);
-            for (int i(0), start(0); i < name.length(); ++i)
-            {
-                if (name[i] == '-')
-                {
-                    string s(name.substr(start, i));
-                    parts.push_back(s);
-                    start = i + 1;
-                    log_info(s);
-                }
-            }
+            // for (int i(0), start(0); i < name.length(); ++i)
+            // {
+            //     if (name[i] == '-')
+            //     {
+            //         string s(name.substr(start, i));
+            //         parts.push_back(s);
+            //         start = i + 1;
+            //         log_info(s);
+            //     }
+            // }
 
             for (const auto &dir : __dirs)
             {
