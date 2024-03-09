@@ -3554,6 +3554,13 @@ class client
                 border.bottom_right.kill();
                 frame.kill();
             }
+
+            void align()
+            {
+                win.x(BORDER_SIZE);
+                win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
+                xcb_flush(conn);
+            }
         
         public: // config methods
             void x_y(const int32_t &x, const uint32_t &y)
@@ -10679,21 +10686,11 @@ class Events
             const auto * e = reinterpret_cast<const xcb_reparent_notify_event_t *>(ev);
             client *c = wm->client_from_any_window(&e->window);
             if (c == nullptr) return;
-            // if (c->win.x() != BORDER_SIZE)
-            // {
-            //     c->win.x(BORDER_SIZE);
-            //     xcb_flush(conn);
-            // }
-
-            // if (c->win.y() != (TITLE_BAR_HEIGHT + BORDER_SIZE))
-            // {
-            //     c->win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
-            //     xcb_flush(conn);
-            // }
-
-            c->win.x(BORDER_SIZE);
-            c->win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
-            xcb_flush(conn);
+            c->align();
+            
+            // c->win.x(BORDER_SIZE);
+            // c->win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
+            // xcb_flush(conn);
         }
 
         void enter_notify_handler(const xcb_generic_event_t *&ev)
