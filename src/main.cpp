@@ -10824,8 +10824,8 @@ void setup_wm()
 
 int main()
 {
-    net_logger = new __net_logger__;
-    net_logger->init(ESP_SERVER);
+    // net_logger = new __net_logger__;
+    // net_logger->init(ESP_SERVER);
 
     LOG_start()
     setup_wm();
