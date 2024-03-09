@@ -10690,7 +10690,7 @@ class Events
             
             // c->win.x(BORDER_SIZE);
             // c->win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
-            // xcb_flush(conn);
+            xcb_flush(conn);
         }
 
         void enter_notify_handler(const xcb_generic_event_t *&ev)
