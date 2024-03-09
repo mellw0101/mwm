@@ -104,6 +104,8 @@ class __net_logger__
      */
     #define CLASS_NAME CLASS_NAME_STR.substr(CLASS_NAME_STR.find("__"))
     #define NET_LOG(__type) net_logger->send_to_server(__type)
+    #define NET_LOG_CLASS_INIT_START() NET_LOG(CLASS_NAME + " Started init()")
+    #define NET_LOG_CLASS_INIT_DONE() NET_LOG(CLASS_NAME + " init() Successfull") 
 
     private:
         long _socket;
@@ -5441,8 +5443,10 @@ class __wifi__
     public:
         void init()
         {
-            NET_LOG(CLASS_NAME);
+            // NET_LOG(CLASS_NAME);
+            NET_LOG_CLASS_INIT_START();
             event_handler->set_key_press_callback((ALT + SUPER), wm->key_codes.f, [this]()-> void { scan__("wlo1"); });
+            NET_LOG_CLASS_INIT_DONE();
         }
 
     public:
