@@ -5157,6 +5157,11 @@ class Window_Manager
                     xcb_flush(conn);
                 }
 
+                if (c->win.y() != (TITLE_BAR_HEIGHT + BORDER_SIZE))
+                {
+                    c->win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
+                }
+
                 // if client if full_screen but 'y' is offset for some reason, make 'y' (0)
                 if (c->x == 0
                 &&  c->y != 0
