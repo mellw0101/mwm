@@ -4928,17 +4928,7 @@ class Window_Manager
                 ; 
                 root.apply_event_mask(&mask);
                 root.clear();
-
-                // if (root.width() == 3840 && root.height() == 1200)
-                // {
-                // }
-                // else
-                // {
-                //     root.set_backround_png("/home/mellw/mwm_png/galaxy17.png");
-                // }
-                // root.set_backround_png("/home/mellw/mwm_png/galaxy16-17-3840x1200.png");
-                root.set_backround_png("/home/mellw/mwm_png/galaxy16-17-3840x1200.png");
-
+                root.set_backround_png("/home/mellw/mwm_png/galaxy21.png");
                 root.set_pointer(CURSOR::arrow);
             }
         
