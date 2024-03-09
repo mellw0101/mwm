@@ -10422,9 +10422,6 @@ class Events
             if (c != nullptr)
             {
                 c->update();
-                c->win.x(0);
-                c->win.y(0);
-                xcb_flush(conn);
             } 
         }
 
@@ -10630,6 +10627,7 @@ class Events
         void reparent_notify_handler(const xcb_generic_event_t *&ev)
         {
             const auto * e = reinterpret_cast<const xcb_reparent_notify_event_t *>(ev);
+            NET_LOG(NET_LOG_WINDOW("e->window", e->window));
         }
 
         void enter_notify_handler(const xcb_generic_event_t *&ev)
