@@ -6584,7 +6584,7 @@ class button
             {
                 vector<string>(parts);
                 string name_str(name);
-                if (name_str.find('-') != string::npos)
+                if (name_str.find('-') != 0)
                 {
                     // for (int i(0), start(0); i < name_str.length(); ++i)
                     // {
