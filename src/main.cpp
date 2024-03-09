@@ -973,6 +973,19 @@ class File
         
         string findPngFile(const vector<const char *> &__dirs, const char *__name)
         {
+            vector<string>(parts);
+            string name(__name);
+            for (int i(0), start(0); i < name.length(); ++i)
+            {
+                if (name[i] == '-')
+                {
+                    string s(name.substr(start, i));
+                    parts.push_back(s);
+                    start = i + 1;
+                    log_info(s);
+                }
+            }
+
             for (const auto &dir : __dirs)
             {
                 if (filesystem::is_directory(dir))
@@ -985,16 +998,7 @@ class File
                             if (filename.find(__name) != string::npos && filename.find(".png") != string::npos)
                             {
                                 return entry.path().string();
-                            }
-
-                            string name = __name;
-                            for (int i(0); i < name.length(); ++i)
-                            {
-                                if (name[i] == '-')
-                                {
-                                    
-                                }
-                            }
+                            }                
                         }
                     }
                 }
