@@ -171,7 +171,7 @@ class __net_logger__
         __net_logger__()
         : _connected(false) {}
 };
-// static __net_logger__ *net_logger(nullptr);
+static __net_logger__ *net_logger(nullptr);
 
 struct size_pos
 {
@@ -973,19 +973,6 @@ class File
         
         string findPngFile(const vector<const char *> &__dirs, const char *__name)
         {
-            vector<string>(parts);
-            string name(__name);
-            // for (int i(0), start(0); i < name.length(); ++i)
-            // {
-            //     if (name[i] == '-')
-            //     {
-            //         string s(name.substr(start, i));
-            //         parts.push_back(s);
-            //         start = i + 1;
-            //         log_info(s);
-            //     }
-            // }
-
             for (const auto &dir : __dirs)
             {
                 if (filesystem::is_directory(dir))
@@ -10820,8 +10807,9 @@ void setup_wm()
 
 int main()
 {
-    // net_logger = new __net_logger__;
-    // net_logger->init(ESP_SERVER);
+    net_logger = new __net_logger__;
+    net_logger->init(ESP_SERVER);
+    NET_LOG("Starting mwm.");
 
     LOG_start()
     setup_wm();
