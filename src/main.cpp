@@ -90,13 +90,13 @@ class __net_logger__
     #define ESP_SERVER "192.168.0.29"
     #define ESP_PORT 23
     
-    #define NET_LOG_MSG(message) "\033[33m" + message 
-    #define FUNC_NAME_STR string(__func__)
-    #define NET_LOG_FUNCTION "\033[34m(FUNCTION) " + FUNC_NAME_STR
+    #define NET_LOG_MSG(message)                "\033[33m" + message + "\033[0m"
+    #define FUNC_NAME_STR                       string(__func__)
+    #define NET_LOG_FUNCTION                    "\033[34m(FUNCTION) " + FUNC_NAME_STR + "\033[0m"
     #define NET_LOG_WINDOW(window_name, window) "\033[35m(FUNCTION) " + FUNC_NAME_STR + ":\033[34m (WINDOW_NAME) " + window_name + ":\033[32m (uint32_t) " + to_string(window) + "\033[0m"
-    #define WINDOW(window) to_string(window)
-    #define CLASS_NAME_RAW typeid(*this).name()
-    #define CLASS_NAME_STR string(CLASS_NAME_RAW)
+    #define WINDOW(window)                      to_string(window)
+    #define CLASS_NAME_RAW                      typeid(*this).name()
+    #define CLASS_NAME_STR                      string(CLASS_NAME_RAW)
     /*
      *
      * @breif fetches the calling class's name and extracts a substr containing only the class name
@@ -104,11 +104,11 @@ class __net_logger__
      * NOTE: this only works for class's with prefix '__'
      *
      */
-    #define CLASS_NAME CLASS_NAME_STR.substr(CLASS_NAME_STR.find("__"))
-    #define NET_LOG_CLASS "\033[35m(CLASS) " + CLASS_NAME
-    #define NET_LOG(__type) net_logger->send_to_server(__type)
-    #define NET_LOG_CLASS_INIT_START() NET_LOG(NET_LOG_CLASS + "->" + NET_LOG_FUNCTION + "->" + NET_LOG_MSG("Starting"))
-    #define NET_LOG_CLASS_INIT_DONE() NET_LOG(CLASS_NAME + " init() Successfull")
+    #define CLASS_NAME                          CLASS_NAME_STR.substr(CLASS_NAME_STR.find("__"))
+    #define NET_LOG_CLASS                       "\033[35m(CLASS) " + CLASS_NAME + "\033[0m"
+    #define NET_LOG(__type)                     net_logger->send_to_server(__type)
+    #define NET_LOG_CLASS_INIT_START()          NET_LOG(NET_LOG_CLASS + " -> " + NET_LOG_FUNCTION + " -> " + NET_LOG_MSG("Starting"))
+    #define NET_LOG_CLASS_INIT_DONE()           NET_LOG(NET_LOG_CLASS + " -> " + NET_LOG_FUNCTION + " -> " + NET_LOG_MSG("Done!!!"))
 
     private:
         long _socket;
