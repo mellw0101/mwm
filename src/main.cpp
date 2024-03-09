@@ -3247,7 +3247,7 @@ class window
 class __aplication__
 {
     public:
-        
+
 };
 
 class client
@@ -6431,8 +6431,7 @@ class button
                 "/usr/share/icons/hicolor/256x256/apps/",
                 "/usr/share/icons/gnome/48x48/apps/",
                 "/usr/share/icons/gnome/32x32/apps/",
-                "/usr/share/pixmaps",
-                "/usr/share/icons/bloom/apps/48/"
+                "/usr/share/pixmaps"
             }, name );
 
             if (icon_path == "")
@@ -10642,7 +10641,7 @@ void setup_wm()
     dock = new Dock;
     dock->add_app("konsole");
     dock->add_app("alacritty");
-    dock->add_app("google-chrome-beta");
+    // dock->add_app("google-chrome-beta");
     dock->add_app("code");
     dock->add_app("falkon");
     dock->init();
