@@ -6584,19 +6584,22 @@ class button
             {
                 vector<string>(parts);
                 string name_str(name);
-                if (name_str.find('-') != 0)
+                if (!name_str.empty())
                 {
-                    // for (int i(0), start(0); i < name_str.length(); ++i)
-                    // {
-                    //     if (name_str[i] == '-')
-                    //     {
-                    //         string s(name_str.substr(start, i));
-                    //         parts.push_back(s);
-                    //         start = i + 1;
-                    //         // log_info(s);
-                    //         // NET_LOG(s);
-                    //     }
-                    // }
+                    if (name_str.find('-'))
+                    {
+                        // for (int i(0), start(0); i < name_str.length(); ++i)
+                        // {
+                        //     if (name_str[i] == '-')
+                        //     {
+                        //         string s(name_str.substr(start, i));
+                        //         parts.push_back(s);
+                        //         start = i + 1;
+                        //         // log_info(s);
+                        //         // NET_LOG(s);
+                        //     }
+                        // }
+                    }
                 }
 
                 log_info("could not find icon for button: " + string(name));
