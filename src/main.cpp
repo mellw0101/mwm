@@ -6584,8 +6584,7 @@ class button
                 "/usr/share/icons/hicolor/256x256/apps/",
                 "/usr/share/icons/gnome/48x48/apps/",
                 "/usr/share/icons/gnome/32x32/apps/",
-                "/usr/share/pixmaps",
-                "/usr/share/icons/bloom/apps/48/"
+                "/usr/share/pixmaps"
             }, name );
 
             if (icon_path == "")
