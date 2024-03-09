@@ -31,7 +31,7 @@ LIBS = 	-lxcb 			\
 
 LDFLAGS = 	${LIBS} 		\
 			-flto 			\
-			-O3 			\
+			-O2 			\
 			-march=native 	\
 			-std=c++20		
 
