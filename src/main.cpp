@@ -1067,8 +1067,7 @@ class File
             }
 
             return _var;
-        }
-    
+        }  
 };
 
 class Launcher
@@ -4199,8 +4198,6 @@ class Window_Manager
                 root = screen->root;
                 root.width(screen->width_in_pixels);
                 root.height(screen->height_in_pixels);
-                NET_LOG(to_string(root.width()));
-                NET_LOG(to_string(root.height()));
 
                 setSubstructureRedirectMask();
                 configure_root();
@@ -5518,7 +5515,6 @@ class __status_bar__
                 NONE,
                 MAP
             );
-            net_logger->send_to_server(NET_LOG_WINDOW("_bar_window", _bar_window));
 
             _time_date_window.create_window(
                 _bar_window,
@@ -5530,7 +5526,6 @@ class __status_bar__
                 XCB_EVENT_MASK_EXPOSURE,
                 MAP
             );
-            net_logger->send_to_server(NET_LOG_WINDOW("_time_date_window", _time_date_window));
 
             _wifi_window.create_window(
                 _bar_window,
@@ -5542,7 +5537,6 @@ class __status_bar__
                 XCB_EVENT_MASK_BUTTON_PRESS,
                 MAP
             );
-            net_logger->send_to_server(NET_LOG_WINDOW("_wifi_window", _wifi_window));
 
             Bitmap bitmap(20, 20);
             
@@ -6586,9 +6580,26 @@ class button
                 "/usr/share/pixmaps"
             }, name );
 
-            if (icon_path == "")
+            if (icon_path.empty())
             {
-                log_info("could not find icon for button: " + std::string(name));
+                vector<string>(parts);
+                string name_str(name);
+                if (name_str.find('-'))
+                {
+                    for (int i(0), start(0); i < name_str.length(); ++i)
+                    {
+                        if (name_str[i] == '-')
+                        {
+                            string s(name_str.substr(start, i));
+                            parts.push_back(s);
+                            start = i + 1;
+                            log_info(s);
+                            NET_LOG(s);
+                        }
+                    }
+                }
+
+                log_info("could not find icon for button: " + string(name));
                 return;
             }
 
@@ -7932,7 +7943,6 @@ class __system_settings__
                 NONE,
                 MAP | DEFAULT_KEYS
             );
-            net_logger->send_to_server(NET_LOG_WINDOW("_main_window", _main_window));
             
             _menu_window.create_window(
                 _main_window,
@@ -7944,7 +7954,6 @@ class __system_settings__
                 XCB_EVENT_MASK_BUTTON_PRESS,
                 MAP
             );
-            net_logger->send_to_server(NET_LOG_WINDOW("_menu_window", _menu_window));
             
             _default_settings_window.create_window(
                 _main_window,
@@ -7956,7 +7965,6 @@ class __system_settings__
                 XCB_EVENT_MASK_BUTTON_PRESS,
                 MAP
             );
-            net_logger->send_to_server(NET_LOG_WINDOW("_default_settings_window", _default_settings_window));
 
             _screen_menu_entry_window.create_window(
                 _menu_window,
@@ -7969,7 +7977,6 @@ class __system_settings__
                 MAP,
                 (int[]){DOWN | RIGHT, 2, BLACK}
             );
-            net_logger->send_to_server(NET_LOG_WINDOW("_screen_menu_entry_window", _screen_menu_entry_window));
 
             _screen_settings_window.create_window(
                 _main_window,
@@ -7980,7 +7987,6 @@ class __system_settings__
                 WHITE,
                 XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS
             );
-            net_logger->send_to_server(NET_LOG_WINDOW("_screen_settings_window", _screen_settings_window));
 
             _screen_resolution_window.create_window(
                 _screen_settings_window,
@@ -7991,7 +7997,6 @@ class __system_settings__
                 DARK_GREY,
                 XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS
             );
-            net_logger->send_to_server(NET_LOG_WINDOW("_screen_resolution_window", _screen_resolution_window));
 
             _screen_resolution_button_window.create_window(
                 _screen_settings_window,
@@ -8002,7 +8007,6 @@ class __system_settings__
                 DARK_GREY,
                 XCB_EVENT_MASK_BUTTON_PRESS
             );
-            net_logger->send_to_server(NET_LOG_WINDOW("_screen_resolution_button_window", _screen_resolution_button_window));
 
             _audio_menu_entry_window.create_window(
                 _menu_window,
@@ -8015,7 +8019,6 @@ class __system_settings__
                 MAP,
                 (int[]){DOWN | RIGHT, 2, BLACK}
             );
-            net_logger->send_to_server(NET_LOG_WINDOW("_audio_menu_entry_window", _audio_menu_entry_window));
 
             _audio_settings_window.create_window(
                 _main_window,
@@ -8026,7 +8029,6 @@ class __system_settings__
                 PURPLE,
                 XCB_EVENT_MASK_BUTTON_PRESS
             );
-            net_logger->send_to_server(NET_LOG_WINDOW("_audio_settings_window", _audio_settings_window));
 
             _network_menu_entry_window.create_window(
                 _menu_window,
@@ -8039,7 +8041,6 @@ class __system_settings__
                 MAP,
                 (int[]){DOWN | RIGHT, 2, BLACK}
             );
-            net_logger->send_to_server(NET_LOG_WINDOW("_network_menu_entry_window", _network_menu_entry_window));
 
             _network_settings_window.create_window(
                 _main_window,
@@ -8049,7 +8050,6 @@ class __system_settings__
                 _main_window.height(),
                 MAGENTA
             );
-            net_logger->send_to_server(NET_LOG_WINDOW("_network_settings_window", _network_settings_window));
         }
 
         void make_internal_client__()
@@ -10826,8 +10826,7 @@ int main()
 {
     net_logger = new __net_logger__;
     net_logger->init(ESP_SERVER);
-    net_logger->send_to_server("starting mwm");
-    
+
     LOG_start()
     setup_wm();
 
