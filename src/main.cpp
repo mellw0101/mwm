@@ -5153,7 +5153,7 @@ class Window_Manager
             {
                 if (c->win.x() != BORDER_SIZE)
                 {
-                    c->win.x(0);
+                    c->win.x(BORDER_SIZE);
                     xcb_flush(conn);
                 }
 
@@ -10628,6 +10628,10 @@ class Events
         {
             const auto * e = reinterpret_cast<const xcb_reparent_notify_event_t *>(ev);
             NET_LOG(NET_LOG_WINDOW("e->window", e->window));
+            client *c = wm->client_from_any_window(&e->window);
+            if (c == nullptr) return;
+
+            NET_LOG(NET_LOG_WINDOW("c->win", c->win));
         }
 
         void enter_notify_handler(const xcb_generic_event_t *&ev)
