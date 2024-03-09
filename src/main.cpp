@@ -6586,7 +6586,8 @@ class button
                 string name_str(name);
                 if (!name_str.empty())
                 {
-                    if (name_str.find('-'))
+                    size_t pos = name_str.find('-');
+                    if (pos > 0)
                     {
                         // for (int i(0), start(0); i < name_str.length(); ++i)
                         // {
