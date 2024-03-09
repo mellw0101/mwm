@@ -10455,8 +10455,8 @@ class Events
                     {
                         client *c = wm->client_from_any_window(&e->event);
                         if (c == nullptr) return;
-                        c->win.x(0);
-                        c->win.y(0);
+                        c->win.x(BORDER_SIZE);
+                        c->win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
                         xcb_flush(conn);
 
                         return;
