@@ -6593,8 +6593,8 @@ class button
                             string s(name_str.substr(start, i));
                             parts.push_back(s);
                             start = i + 1;
-                            log_info(s);
-                            NET_LOG(s);
+                            // log_info(s);
+                            // NET_LOG(s);
                         }
                     }
                 }
