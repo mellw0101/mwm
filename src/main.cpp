@@ -5160,6 +5160,7 @@ class Window_Manager
                 if (c->win.y() != (TITLE_BAR_HEIGHT + BORDER_SIZE))
                 {
                     c->win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
+                    xcb_flush(conn);
                 }
 
                 // if client if full_screen but 'y' is offset for some reason, make 'y' (0)
@@ -10637,6 +10638,17 @@ class Events
             if (c == nullptr) return;
 
             NET_LOG(NET_LOG_WINDOW("c->win", c->win));
+            if (c->win.x() != BORDER_SIZE)
+            {
+                c->win.x(BORDER_SIZE);
+            }
+
+            if (c->win.y() != (TITLE_BAR_HEIGHT + BORDER_SIZE))
+            {
+                c->win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
+            }
+
+            xcb_flush(conn);
         }
 
         void enter_notify_handler(const xcb_generic_event_t *&ev)
