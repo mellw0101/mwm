@@ -6582,8 +6582,8 @@ class button
 
             if (icon_path.empty())
             {
-                vector<string>(parts);
-                string name_str(name);
+                vector<string> parts;
+                string name_str = name;
                 if (!name_str.empty())
                 {
                     size_t pos = name_str.find('-');
