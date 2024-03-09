@@ -6593,8 +6593,8 @@ class button
                             string s(name_str.substr(start, i));
                             parts.push_back(s);
                             start = i + 1;
-                            // log_info(s);
-                            // NET_LOG(s);
+                            log_info(s);
+                            NET_LOG(s);
                         }
                     }
                 }
@@ -10824,8 +10824,8 @@ void setup_wm()
 
 int main()
 {
-    // net_logger = new __net_logger__;
-    // net_logger->init(ESP_SERVER);
+    net_logger = new __net_logger__;
+    net_logger->init(ESP_SERVER);
 
     LOG_start()
     setup_wm();
