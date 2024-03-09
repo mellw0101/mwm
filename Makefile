@@ -1,4 +1,4 @@
-FASTFLAGS = -O3	 			\
+FASTFLAGS = -O2	 			\
 			-march=native
 
 CFLAGS =	-std=c++20 						\
