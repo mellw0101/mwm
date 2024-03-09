@@ -5669,7 +5669,7 @@ class __status_bar__
 
         void init__()
         {
-            NET_LOG(CLASS_NAME);
+            // NET_LOG(CLASS_NAME);
             create_windows__();
             setup_events__();
             setup_thread__(_time_date_window);
@@ -7429,7 +7429,7 @@ class __file_app__
 
         void init()
         {
-            NET_LOG(CLASS_NAME);
+            // NET_LOG(CLASS_NAME);
             setup_events();
         }
 
@@ -8388,7 +8388,7 @@ class __system_settings__
 
         void init()
         {
-            NET_LOG(CLASS_NAME);
+            // NET_LOG(CLASS_NAME);
             setup_events__();
         }
 
