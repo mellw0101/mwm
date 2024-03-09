@@ -171,7 +171,7 @@ class __net_logger__
         __net_logger__()
         : _connected(false) {}
 };
-static __net_logger__ *net_logger(nullptr);
+// static __net_logger__ *net_logger(nullptr);
 
 struct size_pos
 {
