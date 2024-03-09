@@ -987,11 +987,12 @@ class File
                                 return entry.path().string();
                             }
 
-                            for (int i(0); i < filename.length(); ++i)
+                            string name = __name;
+                            for (int i(0); i < name.length(); ++i)
                             {
-                                if (filename[i] == '-')
+                                if (name[i] == '-')
                                 {
-                                    // NET_LOG("found");
+                                    
                                 }
                             }
                         }
@@ -10815,8 +10816,8 @@ void setup_wm()
 
 int main()
 {
-    net_logger = new __net_logger__;
-    net_logger->init(ESP_SERVER);
+    // net_logger = new __net_logger__;
+    // net_logger->init(ESP_SERVER);
 
     LOG_start()
     setup_wm();
