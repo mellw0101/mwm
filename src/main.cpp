@@ -4922,14 +4922,14 @@ class Window_Manager
                 root.apply_event_mask(&mask);
                 root.clear();
 
-                if (root.width() == 3840 && root.height() == 1200)
-                {
-                    root.set_backround_png("/home/mellw/mwm_png/galaxy16-17-3840x1200.png");
-                }
-                else
-                {
-                    root.set_backround_png("/home/mellw/mwm_png/galaxy17.png");
-                }
+                // if (root.width() == 3840 && root.height() == 1200)
+                // {
+                //     root.set_backround_png("/home/mellw/mwm_png/galaxy16-17-3840x1200.png");
+                // }
+                // else
+                // {
+                // }
+                root.set_backround_png("/home/mellw/mwm_png/galaxy17.png");
 
                 root.set_pointer(CURSOR::arrow);
             }
