@@ -1804,6 +1804,44 @@ class window
                 free(reply);
                 return isMapped;    
             }
+
+            bool should_be_decorated()
+            {
+                // Atom for the _MOTIF_WM_HINTS property, used to control window decorations
+                const char* MOTIF_WM_HINTS = "_MOTIF_WM_HINTS";
+                
+                // Get the atom for the _MOTIF_WM_HINTS property
+                xcb_intern_atom_cookie_t cookie = xcb_intern_atom(conn, 0, strlen(MOTIF_WM_HINTS), MOTIF_WM_HINTS);
+                xcb_intern_atom_reply_t* reply = xcb_intern_atom_reply(conn, cookie, NULL);
+                if (!reply)
+                {
+                    log_error("reply = nullptr");
+                    return true; // Default to decorating if we can't check
+                }
+                
+                xcb_atom_t motif_wm_hints_atom = reply->atom;
+                free(reply);
+
+                // Try to get the _MOTIF_WM_HINTS property from the window
+                xcb_get_property_cookie_t prop_cookie = xcb_get_property(conn, 0, _window, motif_wm_hints_atom, XCB_ATOM_ANY, 0, sizeof(uint32_t) * 5);
+                xcb_get_property_reply_t* prop_reply = xcb_get_property_reply(conn, prop_cookie, NULL);
+
+                if (prop_reply && xcb_get_property_value_length(prop_reply) >= sizeof(uint32_t) * 5)
+                {
+                    uint32_t* hints = (uint32_t*)xcb_get_property_value(prop_reply);
+                    
+                    // The second uint32_t in the hints indicates decoration status
+                    // flags are in the second uint32_t of the property
+                    bool decorate = !(hints[1] & (1 << 1)); // Check if decorations are disabled
+
+                    free(prop_reply);
+                    return decorate;
+                }
+
+                if (prop_reply) free(prop_reply);
+
+                return true; // Default to decorating if we can't find or interpret the hints
+            }
         
         public: // set methods
             void set_active_EWMH_window()
@@ -4745,7 +4783,11 @@ class Window_Manager
                 });
 
                 c->win.grab_default_keys();
-                c->make_decorations();
+                if (c->win.should_be_decorated())
+                {
+                    c->make_decorations();
+                }
+                
                 uint mask = XCB_EVENT_MASK_FOCUS_CHANGE |
                             XCB_EVENT_MASK_ENTER_WINDOW |
                             XCB_EVENT_MASK_LEAVE_WINDOW |
