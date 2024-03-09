@@ -991,7 +991,7 @@ class File
                             {
                                 if (filename[i] == '-')
                                 {
-                                    NET_LOG("found");
+                                    // NET_LOG("found");
                                 }
                             }
                         }
