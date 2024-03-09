@@ -2303,8 +2303,15 @@ class window
                     );
 
                     // Calculate position to center the image
-                    int x = (_width - newWidth) / 2;
-                    int y = (_height - newHeight) / 2;
+                    int x(0), y(0);
+                    if (newWidth != _width)
+                    {
+                        x = (_width - newWidth) / 2;
+                    }
+                    if (newHeight != _height)
+                    {
+                        y = (_height - newHeight) / 2;
+                    }
                     
                     xcb_image_put( // Put the scaled image onto the pixmap at the calculated position
                         conn, 
