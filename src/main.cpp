@@ -2257,6 +2257,59 @@ class window
                     int originalWidth = imlib_image_get_width();
                     int originalHeight = imlib_image_get_height();
 
+                    // Early return if the image dimensions match the desired dimensions exactly
+                    if (originalWidth == _width && originalHeight == _height)
+                    {
+                        // Create an XCB image directly from the original image data
+                        DATA32 *data = imlib_image_get_data_for_reading_only();
+                        xcb_image_t *xcb_image = xcb_image_create_native( 
+                            conn, 
+                            originalWidth, 
+                            originalHeight,
+                            XCB_IMAGE_FORMAT_Z_PIXMAP, 
+                            screen->root_depth, 
+                            NULL, 
+                            ~0, (uint8_t*)data
+                        );
+
+                        create_pixmap();
+                        create_graphics_exposure_gc();
+                        xcb_rectangle_t rect = {0, 0, _width, _height};
+                        xcb_poly_fill_rectangle(
+                            conn, 
+                            pixmap, 
+                            gc, 
+                            1, 
+                            &rect
+                        );
+
+                        // Put the image onto the pixmap without needing to calculate position
+                        xcb_image_put(
+                            conn, 
+                            pixmap, 
+                            gc, 
+                            xcb_image, 
+                            0, // No need to center since it matches the target dimensions
+                            0, 
+                            0
+                        );
+
+                        xcb_change_window_attributes(
+                            conn,
+                            _window,
+                            XCB_CW_BACK_PIXMAP,
+                            &pixmap
+                        );
+
+                        // Cleanup
+                        xcb_free_gc(conn, gc);
+                        xcb_image_destroy(xcb_image);
+                        imlib_free_image(); // Only free original image as we did not scale
+
+                        clear_window();
+                        return; // Return early since we've set the background with the original image
+                    }
+
                     // Calculate new size maintaining aspect ratio
                     double aspectRatio = (double)originalWidth / originalHeight;
                     int newHeight = _height;
@@ -2278,10 +2331,10 @@ class window
                     );
                     imlib_free_image(); // Free original image
                     imlib_context_set_image(scaledImage);
-                    
                     DATA32 *data = imlib_image_get_data(); // Get the scaled image data
-
-                    xcb_image_t *xcb_image = xcb_image_create_native( // Create an XCB image from the scaled data
+                    
+                    // Create an XCB image from the scaled data
+                    xcb_image_t *xcb_image = xcb_image_create_native( 
                         conn, 
                         newWidth, 
                         newHeight,
@@ -2305,9 +2358,8 @@ class window
                     // Calculate position to center the image
                     int x = (_width - newWidth) / 2;
                     int y = (_height - newHeight) / 2;
-
-                    // Put the scaled image onto the pixmap at the calculated position
-                    xcb_image_put( 
+                    
+                    xcb_image_put( // Put the scaled image onto the pixmap at the calculated position
                         conn, 
                         pixmap, 
                         gc, 
@@ -2317,8 +2369,7 @@ class window
                         0
                     );
 
-                    // Set the pixmap as the background of the window
-                    xcb_change_window_attributes(
+                    xcb_change_window_attributes( // Set the pixmap as the background of the window
                         conn,
                         _window,
                         XCB_CW_BACK_PIXMAP,
@@ -4932,7 +4983,7 @@ class Window_Manager
                 //     root.set_backround_png("/home/mellw/mwm_png/galaxy17.png");
                 // }
                 // root.set_backround_png("/home/mellw/mwm_png/galaxy16-17-3840x1200.png");
-                root.set_backround_png("/home/mellw/mwm_png/galaxy21.png");
+                root.set_backround_png("/home/mellw/mwm_png/galaxy16-17-3840x1200.png");
 
                 root.set_pointer(CURSOR::arrow);
             }
