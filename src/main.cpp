@@ -4931,7 +4931,8 @@ class Window_Manager
                 // {
                 //     root.set_backround_png("/home/mellw/mwm_png/galaxy17.png");
                 // }
-                root.set_backround_png("/home/mellw/mwm_png/galaxy16-17-3840x1200.png");
+                // root.set_backround_png("/home/mellw/mwm_png/galaxy16-17-3840x1200.png");
+                root.set_backround_png("/home/mellw/mwm_png/galaxy21.png");
 
                 root.set_pointer(CURSOR::arrow);
             }
