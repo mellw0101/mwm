@@ -6582,22 +6582,22 @@ class button
 
             if (icon_path.empty())
             {
-                vector<string>(parts);
-                string name_str(name);
-                if (name_str.find('-'))
-                {
-                    for (int i(0), start(0); i < name_str.length(); ++i)
-                    {
-                        if (name_str[i] == '-')
-                        {
-                            string s(name_str.substr(start, i));
-                            parts.push_back(s);
-                            start = i + 1;
-                            // log_info(s);
-                            // NET_LOG(s);
-                        }
-                    }
-                }
+                // vector<string>(parts);
+                // string name_str(name);
+                // if (name_str.find('-'))
+                // {
+                //     for (int i(0), start(0); i < name_str.length(); ++i)
+                //     {
+                //         if (name_str[i] == '-')
+                //         {
+                //             string s(name_str.substr(start, i));
+                //             parts.push_back(s);
+                //             start = i + 1;
+                //             // log_info(s);
+                //             // NET_LOG(s);
+                //         }
+                //     }
+                // }
 
                 log_info("could not find icon for button: " + string(name));
                 return;
