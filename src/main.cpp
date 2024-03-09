@@ -171,7 +171,7 @@ class __net_logger__
         __net_logger__()
         : _connected(false) {}
 };
-static __net_logger__ *net_logger(nullptr);
+// static __net_logger__ *net_logger(nullptr);
 
 struct size_pos
 {
@@ -10807,9 +10807,9 @@ void setup_wm()
 
 int main()
 {
-    net_logger = new __net_logger__;
-    net_logger->init(ESP_SERVER);
-    NET_LOG("Starting mwm.");
+    // net_logger = new __net_logger__;
+    // net_logger->init(ESP_SERVER);
+    // NET_LOG("Starting mwm.");
 
     LOG_start()
     setup_wm();
