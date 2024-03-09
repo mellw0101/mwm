@@ -971,9 +971,9 @@ class File
             return "";
         }
         
-        string findPngFile(const vector<const char *> &dirs, const char *name)
+        string findPngFile(const vector<const char *> &__dirs, const char *__name)
         {
-            for (const auto &dir : dirs)
+            for (const auto &dir : __dirs)
             {
                 if (filesystem::is_directory(dir))
                 {
@@ -981,10 +981,18 @@ class File
                     {
                         if (entry.is_regular_file())
                         {
-                            std::string filename = entry.path().filename().string();
-                            if (filename.find(name) != string::npos && filename.find(".png") != string::npos)
+                            string filename = entry.path().filename().string();
+                            if (filename.find(__name) != string::npos && filename.find(".png") != string::npos)
                             {
                                 return entry.path().string();
+                            }
+
+                            for (int i(0); i < filename.length(); ++i)
+                            {
+                                if (filename[i] == '-')
+                                {
+                                    log_info("found");
+                                }
                             }
                         }
                     }
