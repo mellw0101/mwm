@@ -10677,15 +10677,8 @@ class Events
         void reparent_notify_handler(const xcb_generic_event_t *&ev)
         {
             const auto * e = reinterpret_cast<const xcb_reparent_notify_event_t *>(ev);
-            NET_LOG(NET_LOG_WINDOW("e->window", e->window));
-            NET_LOG(NET_LOG_WINDOW("e->event", e->event));
-            NET_LOG(NET_LOG_WINDOW("e->parent", e->parent));
-
             client *c = wm->client_from_any_window(&e->window);
             if (c == nullptr) return;
-
-            NET_LOG(NET_LOG_WINDOW("c->win", c->win));
-            NET_LOG(NET_LOG_WINDOW("c->frame", c->frame));
             if (c->win.x() != BORDER_SIZE)
             {
                 c->win.x(BORDER_SIZE);
@@ -10695,6 +10688,7 @@ class Events
             if (c->win.y() != (TITLE_BAR_HEIGHT + BORDER_SIZE))
             {
                 c->win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
+                xcb_flush(conn);
             }
 
             xcb_flush(conn);
