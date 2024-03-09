@@ -4783,11 +4783,7 @@ class Window_Manager
                 });
 
                 c->win.grab_default_keys();
-                if (c->win.should_be_decorated())
-                {
-                    c->make_decorations();
-                }
-                
+                c->make_decorations();
                 uint mask = XCB_EVENT_MASK_FOCUS_CHANGE |
                             XCB_EVENT_MASK_ENTER_WINDOW |
                             XCB_EVENT_MASK_LEAVE_WINDOW |
