@@ -171,7 +171,7 @@ class __net_logger__
         __net_logger__()
         : _connected(false) {}
 };
-// static __net_logger__ *net_logger(nullptr);
+static __net_logger__ *net_logger(nullptr);
 
 struct size_pos
 {
@@ -5151,7 +5151,7 @@ class Window_Manager
         
             void check_client(client * c)
             {
-                if (c->win.x() != 0)
+                if (c->win.x() != BORDER_SIZE)
                 {
                     c->win.x(0);
                     xcb_flush(conn);
@@ -10419,7 +10419,13 @@ class Events
         {
             const xcb_map_notify_event_t *e = reinterpret_cast<const xcb_map_notify_event_t *>(ev);
             client *c = wm->client_from_window(&e->window);
-            if (c != nullptr) c->update();
+            if (c != nullptr)
+            {
+                c->update();
+                c->win.x(0);
+                c->win.y(0);
+                xcb_flush(conn);
+            } 
         }
 
         void map_req_handler(const xcb_generic_event_t *&ev)
@@ -10813,9 +10819,9 @@ void setup_wm()
 
 int main()
 {
-    // net_logger = new __net_logger__;
-    // net_logger->init(ESP_SERVER);
-    // NET_LOG("Starting mwm.");
+    net_logger = new __net_logger__;
+    net_logger->init(ESP_SERVER);
+    NET_LOG("Starting mwm.");
 
     LOG_start()
     setup_wm();
