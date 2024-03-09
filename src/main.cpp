@@ -5196,17 +5196,11 @@ class Window_Manager
         
             void check_client(client * c)
             {
-                if (c->win.x() != BORDER_SIZE)
-                {
-                    c->win.x(BORDER_SIZE);
-                    xcb_flush(conn);
-                }
+                c->win.x(BORDER_SIZE);
+                xcb_flush(conn);
 
-                if (c->win.y() != (TITLE_BAR_HEIGHT + BORDER_SIZE))
-                {
-                    c->win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
-                    xcb_flush(conn);
-                }
+                c->win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
+                xcb_flush(conn);
 
                 // if client if full_screen but 'y' is offset for some reason, make 'y' (0)
                 if (c->x == 0
