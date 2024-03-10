@@ -5329,12 +5329,12 @@ class Window_Manager
 
                 if (c->win.check_atom(ewmh->_NET_WM_STATE_MODAL))
                 {
-                    log_info("client is modal");
                     NET_LOG("client is modal");
                     c->atoms.is_modal = true;
                 }
                 
-                client_list.push_back(c); cur_d->current_clients.push_back(c);
+                client_list.push_back(c);
+                cur_d->current_clients.push_back(c);
                 return c;
             }
         
@@ -10723,6 +10723,8 @@ class Events
                         }
                     }
 
+                    if (wm->focused_client->atoms.is_modal) return;
+                    
                     c->raise();
                     c->focus();
                     wm->focused_client = c;
