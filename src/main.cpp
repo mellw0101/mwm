@@ -10614,14 +10614,13 @@ class Events
                 
                 if (e->event == c->close_button)
                 {
-                    // wm->send_sigterm_to_client(c);
                     c->win.kill();
                     return;
                 }
                 
                 if (e->event == c->max_button)
                 {
-                    client *c = wm->client_from_any_window(&e->event);
+                    // client *c = wm->client_from_any_window(&e->event);
                     max_win(c, max_win::BUTTON_MAXWIN);
                     return;
                 }

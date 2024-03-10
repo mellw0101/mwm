@@ -2,11 +2,13 @@
 #define PIDMANAGER_H
 
 
+#include <cstring>
+#include <limits>
 #include <unistd.h>
 #include <cstdlib>
 #include <dirent.h>
 #include <fstream>
-#include <future>
+// #include <future>
 #include <iostream>
 #include <spawn.h>
 #include <sys/types.h>
@@ -20,12 +22,12 @@
 #include <sstream>
 #include <vector>
 
+using namespace std;
 
 class PidManager 
 {
     public:
-        std::vector<std::string> 
-        pidInfo(pid_t pid) 
+        vector<string> pidInfo(pid_t pid) 
         {
             std::vector<std::string> subprocesses = getSubprocesses(pid);
             pid_t parentPid = getParentPid(pid);
@@ -37,8 +39,7 @@ class PidManager
             return subprocesses;
         }
 
-        std::vector<std::string> 
-        getPidByName(const std::string& procName) 
+        vector<string> getPidByName(const string &procName) 
         {
             DIR* dir;
             struct dirent* ent;
@@ -74,18 +75,18 @@ class PidManager
             return prosseses;
         }
 
-        pid_t 
-        getParentPid(pid_t pid) 
+        pid_t getParentPid(pid_t pid) 
         {
-            std::string path = "/proc/" + std::to_string(pid) + "/stat";
-            std::ifstream statFile(path.c_str());
-            std::string value;
+            string path = "/proc/" + to_string(pid) + "/stat";
+            ifstream statFile(path.c_str());
+            string value;
             pid_t ppid = -1;
 
-            if (statFile.good()) {
+            if (statFile.good())
+            {
                 // Skip PID and comm fields
                 statFile >> value; // PID
-                statFile.ignore(std::numeric_limits<std::streamsize>::max(), ')'); // Skip comm
+                statFile.ignore(numeric_limits<streamsize>::max(), ')'); // Skip comm
                 statFile >> value; // State
                 statFile >> ppid; // PPID
             }
@@ -93,25 +94,45 @@ class PidManager
             return ppid;
         }
 
-        std::string 
-        getCorrectProssesName(const std::string &launchName) 
+        string getCorrectProssesName(const string &__launchName)
         {
             DIR* dir;
             struct dirent* ent;
-            std::string path;
-            std::string line;
+            string path;
+            string line;
 
-            QStringList parts = launchName.split("-");
-            for (int i = 0; i <= parts.size() - 1; i += 1) {
-                if ((dir = opendir("/proc")) != NULL) {
-                    while ((ent = readdir(dir)) != NULL) {
-                        // Check if the directory is a PID
-                        if (ent->d_type == DT_DIR) {
+            vector<string> parts;
+            for (int i(0), start(0); i < __launchName.length(); ++i)
+            {
+                if (__launchName[i] == '-')
+                {
+                    string s = __launchName.substr(start, i - start);
+                    parts.push_back(s);
+                    start = i + 1;
+                }
+
+                if (i == (__launchName.length() - 1))
+                {
+                    string s = __launchName.substr(start, i - start);
+                    parts.push_back(s);
+                }
+            }
+
+            for (int i = 0; i < parts.size(); ++i)
+            {
+                if ((dir = opendir("/proc")) != NULL)
+                {
+                    while ((ent = readdir(dir)) != NULL)
+                    {
+                        if (ent->d_type == DT_DIR) // Check if the directory is a PID
+                        {
                             path = std::string("/proc/") + ent->d_name + "/comm";
                             std::ifstream comm(path.c_str());
-                            if (comm.good()) {
-                                std::getline(comm, line);
-                                if (line == parts[i].toStdString()) {
+                            if (comm.good())
+                            {
+                                getline(comm, line);
+                                if (line == parts[i])
+                                {
                                     return parts[i];
                                 }
                             }
@@ -120,16 +141,16 @@ class PidManager
                     closedir(dir);
                 }
             }
-            return QString();
+
+            return string();
         }
         
-        std::vector<std::string>
-        getSubprocesses(pid_t parent_pid) 
+        vector<string> getSubprocesses(pid_t parent_pid)
         {
-            std::vector<std::string> subprocesses;
+            vector<string> subprocesses;
             DIR* dir;
             struct dirent* entry;
-            std::string tasks_path = "/proc/" + std::to_string(parent_pid) + "/task/";
+            string tasks_path = "/proc/" + to_string(parent_pid) + "/task/";
 
             dir = opendir(tasks_path.c_str());
             if (!dir) 
@@ -142,10 +163,10 @@ class PidManager
             {
                 if (entry->d_type == DT_DIR) 
                 {
-                    pid_t pid = std::atoi(entry->d_name);
+                    pid_t pid = atoi(entry->d_name);
                     if (pid > 0 && pid != parent_pid) // Exclude the parent pid and '.' or '..' directories
                     {
-                        subprocesses.push_back(std::to_string(pid));
+                        subprocesses.push_back(to_string(pid));
                     }
                 }
             }
@@ -154,87 +175,107 @@ class PidManager
             return subprocesses;
         }
         
-        std::vector<std::string> 
-        findSubprocesses(int pid) 
+        vector<string> findSubprocesses(int pid) 
         {
-            std::vector<std::string> subprocesses;
+            vector<string> subprocesses;
             DIR* procDir = opendir("/proc");
-            if (procDir == nullptr) {
+            if (procDir == nullptr)
+            {
                 perror("opendir");
                 return subprocesses;
             }
 
             struct dirent* entry;
-            while ((entry = readdir(procDir)) != nullptr) {
+            while ((entry = readdir(procDir)) != nullptr)
+            {
                 int id = atoi(entry->d_name);
-                if (id > 0) {
-                    std::string statPath = std::string("/proc/") + entry->d_name + "/stat";
-                    std::ifstream statFile(statPath);
-                    std::string line;
-                    if (std::getline(statFile, line)) {
-                        std::istringstream iss(line);
-                        std::vector<std::string> tokens;
-                        std::string token;
-                        while (std::getline(iss, token, ' ')) {
+                if (id > 0)
+                {
+                    string statPath = std::string("/proc/") + entry->d_name + "/stat";
+                    ifstream statFile(statPath);
+                    string line;
+                    if (getline(statFile, line))
+                    {
+                        istringstream iss(line);
+                        vector<string> tokens;
+                        string token;
+                        while (getline(iss, token, ' '))
+                        {
                             tokens.push_back(token);
                         }
-                        if (tokens.size() > 3) {
-                            try {
+
+                        if (tokens.size() > 3)
+                        {
+                            try
+                            {
                                 // Check if the token is a valid number
-                                if (tokens[3].find_first_not_of("0123456789") == std::string::npos) {
+                                if (tokens[3].find_first_not_of("0123456789") == std::string::npos)
+                                {
                                     int ppid = std::stoi(tokens[3]);
-                                    if (ppid == pid) {
+                                    if (ppid == pid)
+                                    {
                                         subprocesses.push_back(std::to_string(id));
                                     }
-                                }
-                            } catch (const std::invalid_argument& e) {
-                                std::cerr << "Invalid argument: " << e.what() << '\n';
-                            } catch (const std::out_of_range& e) {
-                                std::cerr << "Out of range: " << e.what() << '\n';
+                                }  
+                            }
+                            catch (const invalid_argument &e)
+                            {
+                                cerr << "Invalid argument: " << e.what() << '\n';
+                            }
+                            catch (const out_of_range &e)
+                            {
+                                cerr << "Out of range: " << e.what() << '\n';
                             }
                         }
                     }
                 }
             }
+
             closedir(procDir);
             return subprocesses;
         }
         
-        std::vector<int> 
-        searchPIDsForTTY(const std::string& tty) 
+        vector<int> searchPIDsForTTY(const string &tty) 
         {
-            std::vector<int> matchingPIDs;
+            vector<int> matchingPIDs;
             DIR* procDir = opendir("/proc");
             struct dirent* entry;
 
-            if (procDir == nullptr) {
-                std::cerr << "Failed to open /proc directory" << std::endl;
+            if (procDir == nullptr)
+            {
+                cerr << "Failed to open /proc directory" << endl;
                 return matchingPIDs;
             }
 
-            while ((entry = readdir(procDir)) != nullptr) {
-                std::string pidDir = entry->d_name;
-                if (pidDir.find_first_not_of("0123456789") == std::string::npos) {
-                    std::string fdPath = "/proc/" + pidDir + "/fd/";
+            while ((entry = readdir(procDir)) != nullptr)
+            {
+                string pidDir = entry->d_name;
+                if (pidDir.find_first_not_of("0123456789") == std::string::npos)
+                {
+                    string fdPath = "/proc/" + pidDir + "/fd/";
                     DIR* fdDir = opendir(fdPath.c_str());
 
                     if (fdDir != nullptr) {
                         struct dirent* fdEntry;
-                        while ((fdEntry = readdir(fdDir)) != nullptr) {
-                            std::string fdLink = fdPath + fdEntry->d_name;
+                        while ((fdEntry = readdir(fdDir)) != nullptr)
+                        {
+                            string fdLink = fdPath + fdEntry->d_name;
                             char linkPath[1024];
                             ssize_t len = readlink(fdLink.c_str(), linkPath, sizeof(linkPath)-1);
-                            if (len != -1) {
+                            if (len != -1)
+                            {
                                 linkPath[len] = '\0';
-                                std::string linkPathStr = std::string(linkPath);
-                                if (linkPathStr.find(tty) != std::string::npos) {
+                                string linkPathStr = string(linkPath);
+                                if (linkPathStr.find(tty) != std::string::npos)
+                                {
                                     matchingPIDs.push_back(std::stoi(pidDir));
                                     int pid = std::stoi(pidDir);
-                                    debug(F, __func__, R, ": ", tty, ": ", V, "PID:", N, pidDir, VV, getProcessNameByPid(pid), R);
+                                    // debug(F, __func__, R, ": ", tty, ": ", V, "PID:", N, pidDir, VV, getProcessNameByPid(pid), R);
                                     break;
                                 }
                             }
                         }
+
                         closedir(fdDir);
                     }
                 }
@@ -244,46 +285,54 @@ class PidManager
             return matchingPIDs;
         }
         
-        std::vector<std::pair<int, std::string>> 
-        getPIDsWithTTYs() 
+        vector<pair<int, string>> getPIDsWithTTYs() 
         {
-            std::vector<std::pair<int, std::string>> pidTTYs;
+            vector<pair<int, string>> pidTTYs;
             DIR* procDir = opendir("/proc");
             struct dirent* entry;
 
-            if (procDir == nullptr) {
-                std::cerr << "Failed to open /proc directory" << std::endl;
+            if (procDir == nullptr)
+            {
+                cerr << "Failed to open /proc directory" << endl;
                 return pidTTYs;
             }
 
-            while ((entry = readdir(procDir)) != nullptr) {
-                std::string pidDir = entry->d_name;
-                if (pidDir.find_first_not_of("0123456789") == std::string::npos) {
-                    std::string fdPath = "/proc/" + pidDir + "/fd/";
+            while ((entry = readdir(procDir)) != nullptr)
+            {
+                string pidDir = entry->d_name;
+                if (pidDir.find_first_not_of("0123456789") == string::npos)
+                {
+                    string fdPath = "/proc/" + pidDir + "/fd/";
                     DIR* fdDir = opendir(fdPath.c_str());
                     int pid = std::stoi(pidDir);
 
-                    if (fdDir != nullptr) {
+                    if (fdDir != nullptr)
+                    {
                         struct dirent* fdEntry;
-                        while ((fdEntry = readdir(fdDir)) != nullptr) {
+                        while ((fdEntry = readdir(fdDir)) != nullptr)
+                        {
                             std::string fdLink = fdPath + fdEntry->d_name;
                             char linkPath[1024];
                             ssize_t len = readlink(fdLink.c_str(), linkPath, sizeof(linkPath)-1);
-                            if (len != -1) {
+                            if (len != -1)
+                            {
                                 linkPath[len] = '\0';
-                                if (strstr(linkPath, "/dev/pts/") != nullptr || strstr(linkPath, "/dev/tty") != nullptr) {
+                                if (strstr(linkPath, "/dev/pts/") != nullptr || strstr(linkPath, "/dev/tty") != nullptr)
+                                {
                                     pidTTYs.push_back({pid, std::string(linkPath)});
-                                    debug(F, __func__, ": ", V, "PID:", N, pid, " ",VV, getProcessNameByPid(pid), V, " tty:", VV, std::string(linkPath), R);
+                                    // debug(F, __func__, ": ", V, "PID:", N, pid, " ",VV, getProcessNameByPid(pid), V, " tty:", VV, std::string(linkPath), R);
                                     pidInfo(pid);
-                                    QStringList subprocesses = findSubprocesses(pid);
-                                    for (const QString &sub : subprocesses) {
-                                        pidInfo(sub.toInt());
+                                    vector<string> subprocesses = findSubprocesses(pid);
+                                    for (const string &sub : subprocesses)
+                                    {
+                                        pidInfo(stoi(sub));
                                     }
 
                                     break; // Assuming one TTY per PID, break here
                                 }
                             }
                         }
+
                         closedir(fdDir);
                     }
                 }
@@ -293,65 +342,78 @@ class PidManager
             return pidTTYs;
         }
         
-        std::string 
-        pidCmdLine(const pid_t& pid) 
+        string pidCmdLine(const pid_t& pid) 
         {
-            QString line = "/proc/" + QString::number(pid) + "/cmdline";
-            std::ifstream file;
-            file.open(line.toStdString());
-            std::string var;
-            std::stringstream buffer;
-            while (getline(file, var)) {
+            string line = "/proc/" + to_string(pid) + "/cmdline";
+            ifstream file;
+            file.open(line);
+            string var;
+            stringstream buffer;
+            while (getline(file, var))
+            {
                 buffer << var << '\n';
             }
-            std::string result;
+
+            string result;
             result = buffer.str();
-            debug("pidCmdLine: " + QString::fromStdString(result));
-            QString test = QString::fromStdString(result);
-            QStringList parts = test.split(" ");
-            if (parts.size() == 1) {
+            // debug("pidCmdLine: " + QString::fromStdString(result));
+            string test = result;
+            ifstream iss(test);
+            string token;
+            vector<string> parts;
+            while (getline(iss, token, ' '))
+            {
+                parts.push_back(token);
+            }
+            
+            if (parts.size() == 1)
+            {
                 file.close();
                 return "mainPid";
             }
+
             file.close();
-            return QString();
+            return string();
         }
         
-        std::string 
-        pidStatus(const pid_t& pid) 
+        string pidStatus(const pid_t& pid) 
         {
-            QString line = "/proc/" + QString::number(pid) + "/status";
+            string line = "/proc/" + to_string(pid) + "/status";
             std::ifstream file;
-            file.open(line.toStdString());
+            file.open(line);
             std::string var;
             std::stringstream buffer;
-            while (getline(file, var)) {
+            while (getline(file, var))
+            {
                 buffer << var << '\n';
             }
-            std::string result;
+
+            string result;
             result = buffer.str();
-            debug("pidStatus: ", result);
+            // debug("pidStatus: ", result);
             file.close();
-            return QString();
+            return string();
         }
         
-        std::string
-        pidFileDescriptors(pid_t pid) 
+        string pidFileDescriptors(pid_t pid) 
         {
-            QString result = QString();
+            string result = string();
             std::string path = "/proc/" + std::to_string(pid) + "/fd/";
 
             DIR *dir = opendir(path.c_str());
-            if (dir == nullptr) {
+            if (dir == nullptr)
+            {
                 perror("opendir failed");
-                return QString();
+                return string();
             }
 
             struct dirent *entry;
-            while ((entry = readdir(dir)) != nullptr) {
+            while ((entry = readdir(dir)) != nullptr)
+            {
                 // Skipping "." and ".." entries
-                if (entry->d_name[0] != '.') {
-                    result += QString::fromStdString(entry->d_name);
+                if (entry->d_name[0] != '.')
+                {
+                    result += entry->d_name;
                 }
             }
 
@@ -359,29 +421,31 @@ class PidManager
             return result;
         }
         
-        std::string
-        getProcessNameByPid(pid_t pid) 
+        std::string getProcessNameByPid(pid_t pid) 
         {
-            std::string path = "/proc/" + std::to_string(pid) + "/comm";
-            std::ifstream commFile(path);
-            std::string name;
+            string path = "/proc/" + std::to_string(pid) + "/comm";
+            ifstream commFile(path);
+            string name;
 
-            if (commFile.good()) {
-                std::getline(commFile, name);
-                return QString::fromStdString(name);
-            } else {
+            if (commFile.good())
+            {
+                getline(commFile, name);
+                return name;
+            }
+            else
+            {
                 return "Process not found";
             }
         }
         
-        std::string
-        getRunningProsseses(const std::string & Prossesname)
+        string getRunningProsseses(const string &Prossesname)
         {
-            QString name = getCorrectProssesName(Prossesname);
+            string name = getCorrectProssesName(Prossesname);
             // searchPIDsForTTY("pts");
             // searchPIDsForTTY("tty");
             // getPIDsWithTTYs();
-            return getPidByName(name);
+            // return getPidByName(stoi(name));
+            return "";
         }
         
     private:
