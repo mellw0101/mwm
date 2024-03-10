@@ -3713,6 +3713,18 @@ class client
                 win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
                 xcb_flush(conn);
             }
+
+            void draw_title()
+            {
+                titlebar.draw_text(
+                    win.get_net_wm_name().c_str(),
+                    WHITE,
+                    BLACK,
+                    DEFAULT_FONT,
+                    4,
+                    15
+                );
+            }
         
         public: // config methods
             void x_y(const int32_t &x, const uint32_t &y)
@@ -3936,23 +3948,16 @@ class client
             titlebar.set_backround_color(BLACK);
             titlebar.grab_button({ { L_MOUSE_BUTTON, NULL } });
             titlebar.map();
-            titlebar.draw_text(
-                win.get_net_wm_name().c_str(),
-                WHITE,
-                BLACK,
-                DEFAULT_FONT,
-                4,
-                15
-            );
+            draw_title();
 
-            titlebar.draw_on_expose_event(
-                win.get_net_wm_name().c_str(),
-                WHITE,
-                BLACK,
-                DEFAULT_FONT,
-                4,
-                15
-            );
+            event_handler->setEventCallback(XCB_EXPOSE, [this](Ev ev)-> void
+            {
+                auto e = reinterpret_cast<const xcb_expose_event_t *>(ev);
+                if (e->window == titlebar)
+                {
+                    draw_title();
+                }
+            });
         }
     
         void make_close_button()
