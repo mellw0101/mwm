@@ -8487,7 +8487,7 @@ class __system_settings__
         
         vector<window>(_screen_resolution_options_vector);
 
-        client(*c);
+        client *c = nullptr;
 
         void check_and_configure_mapped_window(window &__window, const uint32_t &__width, const uint32_t &__height)
         {
