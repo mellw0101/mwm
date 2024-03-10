@@ -3944,10 +3944,11 @@ class client
     
         void make_titlebar()
         {
-            titlebar.create_default(frame, BORDER_SIZE, BORDER_SIZE, width, TITLE_BAR_HEIGHT);
-            titlebar.set_backround_color(BLACK);
+            titlebar.create_window(frame, BORDER_SIZE, BORDER_SIZE, width, TITLE_BAR_HEIGHT, BLACK, XCB_EVENT_MASK_EXPOSURE, MAP);
+            // titlebar.create_default(frame, BORDER_SIZE, BORDER_SIZE, width, TITLE_BAR_HEIGHT);
+            // titlebar.set_backround_color(BLACK);
             titlebar.grab_button({ { L_MOUSE_BUTTON, NULL } });
-            titlebar.map();
+            // titlebar.map();
             draw_title();
 
             event_handler->setEventCallback(XCB_EXPOSE, [this](Ev ev)-> void
