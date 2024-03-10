@@ -1313,7 +1313,8 @@ namespace // window flag enums
 
     enum window_event_mask : uint32_t
     {
-        KILL_WINDOW = 1 << 25
+        KILL_WINDOW = 1 << 25,
+        TAKE_FOCUS  = 1 << 26
     };
 }
 
@@ -1743,6 +1744,10 @@ class window
                     xcb_send_event(conn, 0, _window, XCB_EVENT_MASK_NO_EVENT, (char *) &ev);
                     xcb_flush(conn);
                 }
+
+                if (__event_mask & TAKE_FOCUS)
+                {
+                }
             }
 
         // event methods
@@ -1788,6 +1793,28 @@ class window
             }
 
         public: // check methods
+            bool check_atom(xcb_atom_t __atom)
+            {
+                xcb_get_property_cookie_t cookie = xcb_ewmh_get_wm_state(ewmh, _window);
+                xcb_ewmh_get_atoms_reply_t reply;
+
+                if (xcb_ewmh_get_wm_state_reply(ewmh, cookie, &reply, NULL)) // Try to get the property
+                {
+                    for (unsigned int i = 0; i < reply.atoms_len; ++i) // Loop through the atoms in the reply to find if the specified atom is present
+                    {
+                        if (reply.atoms[i] == __atom) // 'true' if the specified atom is found
+                        {
+                            xcb_ewmh_get_atoms_reply_wipe(&reply);
+                            return true; // Indicate that the atom was found
+                        }
+                    }
+                    
+                    xcb_ewmh_get_atoms_reply_wipe(&reply); // Clean up
+                }
+
+                return false; // The atom was not found or the property could not be retrieved
+            }
+            
             bool is_EWMH_fullscreen()
             {
                 xcb_get_property_cookie_t cookie = xcb_ewmh_get_wm_state(ewmh, _window);
@@ -3528,6 +3555,11 @@ class client
                 window bottom_left;
                 window bottom_right;
         };
+
+        struct __atoms__
+        {
+            bool is_modal = false;
+        };
     
     public: // variabels
         window win;
@@ -3539,6 +3571,7 @@ class client
         window(icon);
 
         client_border_decor border;
+        __atoms__ atoms;
 
         int16_t x, y;     
         uint16_t width,height;
@@ -5292,6 +5325,13 @@ class Window_Manager
                     c->width  = screen->width_in_pixels;
                     c->height = screen->height_in_pixels;
                     c->win.set_EWMH_fullscreen_state();
+                }
+
+                if (c->win.check_atom(ewmh->_NET_WM_STATE_MODAL))
+                {
+                    log_info("client is modal");
+                    NET_LOG("client is modal");
+                    c->atoms.is_modal = true;
                 }
                 
                 client_list.push_back(c); cur_d->current_clients.push_back(c);
