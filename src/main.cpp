@@ -102,6 +102,8 @@ using SUint = unsigned short int;
 //     EnterWindowMask|\
 //     LeaveWindowMask
 
+#define RE_CAST(__type) reinterpret_cast<const __type *>(ev)
+
 class __net_logger__
 {
     #define ESP_SERVER "192.168.0.29"
@@ -1578,6 +1580,12 @@ class window
                 }
             }
 
+            void make_xcb_borders(const int &__color)
+            {
+                xcb_change_window_attributes(conn, _window, XCB_CW_BORDER_PIXEL, (uint32_t[1]){get_color(__color)});
+                xcb_flush(conn);
+            }
+
             void raise()
             {
                 xcb_configure_window(
@@ -2075,6 +2083,21 @@ class window
                 log_info("property(" + std::string(atom_name) + ") = " + std::string(propertyValue));
                 return propertyValue;
             }
+
+            xcb_rectangle_t get_xcb_rectangle_t_by_req()
+            {
+                xcb_get_geometry_reply_t *g = xcb_get_geometry_reply(conn, xcb_get_geometry(conn, _window), nullptr);
+                if (g == nullptr) return (xcb_rectangle_t) {0, 0, 0, 0};
+                
+                xcb_rectangle_t rect = (xcb_rectangle_t) {g->x, g->y, g->width, g->height};
+                free(g);
+                return rect;
+            }
+
+            xcb_rectangle_t get_xcb_rectangle_t() const
+            {
+                return (xcb_rectangle_t) {_x, _y, _width, _height};
+            }
         
             uint32_t root_window()
             {
@@ -2094,7 +2117,7 @@ class window
                 return root_window;
             }
         
-            uint32_t parent()
+            uint32_t parent_by_req()
             {
                 xcb_query_tree_cookie_t cookie;
                 xcb_query_tree_reply_t *reply;
@@ -2104,12 +2127,23 @@ class window
                 if (reply == nullptr)
                 {
                     log_error("Unable to query the window tree.");
-                    return (uint32_t) 0; // Invalid window ID
+                    return (uint32_t) 0; // return an invalid window ID.
                 }
 
                 uint32_t parent_window = reply->parent;
+                if (_parent != parent_window)
+                {
+                    logger.log(ERROR, __func__,  "internal parent: ", _parent, " does not match 'retrived_parent': ", parent_window);
+                    _parent = parent_window;
+                }
+
                 free(reply);
                 return parent_window;
+            }
+
+            uint32_t parent() const
+            {
+                return _parent;
             }
         
             uint32_t *children(uint32_t *child_count)
@@ -2555,19 +2589,22 @@ class window
                 });
             }
         
-            void grab_keys(std::initializer_list<std::pair<const uint32_t, const uint16_t>> bindings)
+            void grab_keys(initializer_list<pair<const uint32_t, const uint16_t>> bindings)
             {
                 xcb_key_symbols_t * keysyms = xcb_key_symbols_alloc(conn);
-            
-                if (!keysyms) {
+                if (!keysyms)
+                {
                     log_error("keysyms could not get initialized");
                     return;
                 }
 
-                for (const auto & binding : bindings) {
+                for (const auto & binding : bindings)
+                {
                     xcb_keycode_t * keycodes = xcb_key_symbols_get_keycode(keysyms, binding.first);
-                    if (keycodes) {
-                        for (auto * kc = keycodes; * kc; kc++) {
+                    if (keycodes)
+                    {
+                        for (auto * kc = keycodes; * kc; kc++)
+                        {
                             xcb_grab_key(
                                 conn,
                                 1,
@@ -2578,11 +2615,12 @@ class window
                                 XCB_GRAB_MODE_ASYNC  
                             );
                         }
+
                         free(keycodes);
                     }
                 }
-                xcb_key_symbols_free(keysyms);
 
+                xcb_key_symbols_free(keysyms);
                 xcb_flush(conn); 
             }
         
@@ -3944,19 +3982,36 @@ class client
     
         void make_titlebar()
         {
-            titlebar.create_window(frame, BORDER_SIZE, BORDER_SIZE, width, TITLE_BAR_HEIGHT, BLACK, XCB_EVENT_MASK_EXPOSURE, MAP);
-            // titlebar.create_default(frame, BORDER_SIZE, BORDER_SIZE, width, TITLE_BAR_HEIGHT);
-            // titlebar.set_backround_color(BLACK);
+            titlebar.create_window(
+                frame,
+                BORDER_SIZE,
+                BORDER_SIZE,
+                (width - (BUTTON_SIZE * 3)),
+                TITLE_BAR_HEIGHT,
+                BLACK,
+                XCB_EVENT_MASK_EXPOSURE,
+                MAP
+            );
             titlebar.grab_button({ { L_MOUSE_BUTTON, NULL } });
-            // titlebar.map();
             draw_title();
-
             event_handler->setEventCallback(XCB_EXPOSE, [this](Ev ev)-> void
             {
                 auto e = reinterpret_cast<const xcb_expose_event_t *>(ev);
                 if (e->window == titlebar)
                 {
                     draw_title();
+                }
+            });
+
+            event_handler->setEventCallback(XCB_PROPERTY_NOTIFY, [this](Ev ev)
+            {
+                auto e = RE_CAST(xcb_property_notify_event_t);
+                if (e->window == win)
+                {
+                    if (e->atom == ewmh->_NET_WM_NAME)
+                    {
+                        draw_title();
+                    }
                 }
             });
         }
@@ -4730,6 +4785,27 @@ class Window_Manager
                 }
 
                 return true;
+            }
+
+            void window_stack(const uint32_t &__window1, const uint32_t &__window2, const uint32_t &__mode)
+            {
+                if (__window2 == XCB_NONE) return;
+                
+                uint16_t mask = XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE;
+                uint32_t values[] = {__window2, __mode};
+                xcb_configure_window(conn, __window1, mask, values);
+            }
+
+            // stack '__window1' above '__window2'
+            void window_above(const uint32_t &__window1, const uint32_t &__window2)
+            {
+                window_stack(__window1, __window2, XCB_STACK_MODE_ABOVE);
+            }
+
+            // stack '__window1' below '__window2'
+            void window_below(const uint32_t &__window1, const uint32_t &__window2)
+            {
+                window_stack(__window1, __window2, XCB_STACK_MODE_BELOW);
             }
 
         // client methods.
