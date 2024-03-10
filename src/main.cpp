@@ -1727,7 +1727,6 @@ class window
                     ev.data.data32[1] = XCB_CURRENT_TIME;
 
                     xcb_send_event(conn, 0, _window, XCB_EVENT_MASK_NO_EVENT, (char *) &ev);
-                    xcb_flush(conn);
                 }
             }
 
