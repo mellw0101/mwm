@@ -1634,13 +1634,13 @@ class window
                     return;
                 }
 
-                send_event(make_client_message_event(
-                    32,
-                    protocols_reply->atom,
-                    delete_reply->atom
-                ));
+                // send_event(make_client_message_event(
+                //     32,
+                //     protocols_reply->atom,
+                //     delete_reply->atom
+                // ));
 
-                // send_event(XCB_EVENT_MASK_NO_EVENT, (uint32_t[]){32, protocols_reply->atom, delete_reply->atom});
+                send_event(XCB_EVENT_MASK_NO_EVENT, (uint32_t[]){32, protocols_reply->atom, delete_reply->atom});
 
                 free(protocols_reply);
                 free(delete_reply);
@@ -1717,7 +1717,7 @@ class window
                 {
                     uint32_t *value_list = reinterpret_cast<uint32_t *>(__value_list);
 
-                    xcb_client_message_event_t ev = { 0 };
+                    xcb_client_message_event_t ev;
                     ev.response_type  = XCB_CLIENT_MESSAGE;
                     ev.window         = _window;
                     ev.format         = value_list[0];
