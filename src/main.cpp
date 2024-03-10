@@ -4800,8 +4800,8 @@ class Window_Manager
                 }
 
                 c->win.x_y_width_height(
-                    c->x,
-                    c->y,
+                    0,
+                    0,
                     c->width,
                     c->height
                 );
