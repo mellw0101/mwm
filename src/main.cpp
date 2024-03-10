@@ -8400,7 +8400,6 @@ class __system_settings__
                 auto e = reinterpret_cast<const xcb_client_message_event_t *>(ev);
                 if (e->window == c->win)
                 {
-                    NET_LOG("win detected");
                     if (e->format == 32)
                     {
                         xcb_atom_t atom;
