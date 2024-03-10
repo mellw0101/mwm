@@ -4804,6 +4804,7 @@ class Window_Manager
                     c->width,
                     c->height
                 );
+                xcb_flush(conn);
                 c->win.map();
                 c->win.grab_button({
                     { L_MOUSE_BUTTON, ALT },
