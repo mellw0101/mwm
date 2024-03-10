@@ -10614,7 +10614,8 @@ class Events
                 
                 if (e->event == c->close_button)
                 {
-                    wm->send_sigterm_to_client(c);
+                    // wm->send_sigterm_to_client(c);
+                    c->win.kill();
                     return;
                 }
                 
