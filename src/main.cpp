@@ -1634,11 +1634,13 @@ class window
                     return;
                 }
 
-                send_event(make_client_message_event(
-                    32,
-                    protocols_reply->atom,
-                    delete_reply->atom
-                ));
+                // send_event(make_client_message_event(
+                //     32,
+                //     protocols_reply->atom,
+                //     delete_reply->atom
+                // ));
+
+                send_event(XCB_EVENT_MASK_NO_EVENT, (uint32_t[]){32, protocols_reply->atom, delete_reply->atom});
 
                 free(protocols_reply);
                 free(delete_reply);
@@ -1708,6 +1710,23 @@ class window
                     event.sequence          = 0;
 
                     xcb_send_event(conn, false, _window, XCB_EVENT_MASK_STRUCTURE_NOTIFY, (char *)&event);
+                    xcb_flush(conn);
+                }
+
+                if (__event_mask & XCB_EVENT_MASK_NO_EVENT)
+                {
+                    uint32_t *value_list = reinterpret_cast<uint32_t *>(__value_list);
+
+                    xcb_client_message_event_t ev = { 0 };
+                    ev.response_type  = XCB_CLIENT_MESSAGE;
+                    ev.window         = _window;
+                    ev.format         = value_list[0];
+                    ev.sequence       = 0;
+                    ev.type           = value_list[1];
+                    ev.data.data32[0] = value_list[2];
+                    ev.data.data32[1] = XCB_CURRENT_TIME;
+
+                    xcb_send_event(conn, 0, _window, XCB_EVENT_MASK_NO_EVENT, (char *) &ev);
                     xcb_flush(conn);
                 }
             }
@@ -10499,9 +10518,10 @@ class Events
                     {
                         client *c = wm->client_from_any_window(&e->event);
                         if (c == nullptr) return;
-                        c->win.x(BORDER_SIZE);
-                        c->win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
-                        xcb_flush(conn);
+                        c->win.kill();
+                        // c->win.x(BORDER_SIZE);
+                        // c->win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
+                        // xcb_flush(conn);
 
                         return;
                     }
