@@ -3532,7 +3532,7 @@ class client
                 y = frame.y();
                 width = frame.width();
                 height = frame.height();
-                win.send_event(XCB_EVENT_MASK_STRUCTURE_NOTIFY, (uint32_t[]){BORDER_SIZE, (TITLE_BAR_HEIGHT + BORDER_SIZE), win.x(), win.y()});
+                win.send_event(XCB_EVENT_MASK_STRUCTURE_NOTIFY, (uint32_t[]){BORDER_SIZE, (TITLE_BAR_HEIGHT + BORDER_SIZE), win.width(), win.height()});
             }
         
             void map()
