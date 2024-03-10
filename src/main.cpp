@@ -8562,7 +8562,7 @@ class __debug_menu__
         {
             dropdown_window.create_window(
                 screen->root,
-                (screen->width_in_pixels - 80),
+                ((screen->width_in_pixels / 2) - 80),
                 20,
                 160,
                 300,
