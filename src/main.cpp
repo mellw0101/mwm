@@ -3936,6 +3936,14 @@ class client
             titlebar.set_backround_color(BLACK);
             titlebar.grab_button({ { L_MOUSE_BUTTON, NULL } });
             titlebar.map();
+            titlebar.draw_text(
+                win.get_net_wm_name().c_str(),
+                WHITE,
+                BLACK,
+                DEFAULT_FONT,
+                4,
+                15
+            );
         }
     
         void make_close_button()
