@@ -498,7 +498,8 @@ class pointer
 
         void teleport(const int16_t &x, const int16_t &y)
         {
-            xcb_warp_pointer(conn, XCB_NONE, screen->root, 0, 0, 0, 0, x, y); xcb_flush(conn);
+            xcb_warp_pointer(conn, XCB_NONE, screen->root, 0, 0, 0, 0, x, y);
+            xcb_flush(conn);
         }
 
         void grab()
@@ -584,6 +585,17 @@ class pointer
                 default                          : return("left_ptr");
             }
         }
+
+        void center_pointer()
+        {
+            grab();
+            int16_t x = (screen->width_in_pixels / 2);
+            int16_t y = (screen->height_in_pixels / 2);
+            teleport(x, y);
+            // xcb_warp_pointer(conn, XCB_NONE, screen->root, 0, 0, 0, 0, x, y);
+            ungrab();
+        }
+
         
     private:
         Logger(log);
@@ -2468,9 +2480,10 @@ class window
                     {   D_ARROW,    SUPER                   },
                     {   TAB,        ALT                     },
                     {   K,          SUPER                   },
-                    {   R,          SUPER                   }, // key_binding for runner_window
-                    {   F,          SUPER                   }, // key_binding for file_app
-                    {   S,          SUPER                   }  // key_binding for system_settings
+                    {   R,          SUPER                   }, // key_binding for 'runner_window'
+                    {   F,          SUPER                   }, // key_binding for 'file_app'
+                    {   S,          SUPER                   }, // key_binding for 'system_settings'
+                    {   D,          SUPER                   }  // key_binding for 'debub menu'
                 });
             }
         
@@ -4590,6 +4603,22 @@ class Window_Manager
                 free(res_reply);
                 return mode_id;
             }
+
+        // window methods.
+            bool window_exists(const uint32_t &__window)
+            {
+                xcb_generic_error_t *err;
+                free(xcb_query_tree_reply(conn, xcb_query_tree(conn, __window), &err));
+
+                if (err != NULL)
+                {
+                    free(err);
+                    return false;
+                }
+
+                return true;
+            }
+
 
         // client methods.
             // focus methods.
@@ -8493,6 +8522,31 @@ class __system_settings__
 };
 static __system_settings__ *system_settings(nullptr);
 
+class __debug_menu__
+{
+    private:
+        window(dropdown_window);
+
+    public:
+        void init()
+        {
+            dropdown_window.create_window(
+                screen->root,
+                (screen->width_in_pixels - 80),
+                20,
+                160,
+                300,
+                BLACK
+            );
+
+            event_handler->set_key_press_callback(SUPER, wm->key_codes.d, [this]()-> void { dropdown_window.map(); });
+        }
+
+    public:
+        __debug_menu__() {}
+};
+static __debug_menu__ *debug_menu(nullptr);
+
 class Dock
 {
     public:
@@ -10932,6 +10986,9 @@ void setup_wm()
     
     system_settings = new __system_settings__;
     system_settings->init();
+
+    debug_menu = new __debug_menu__;
+    debug_menu->init();
 }
 
 int main()
