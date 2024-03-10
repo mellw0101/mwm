@@ -1634,13 +1634,13 @@ class window
                     return;
                 }
 
-                // send_event(make_client_message_event(
-                //     32,
-                //     protocols_reply->atom,
-                //     delete_reply->atom
-                // ));
+                send_event(make_client_message_event(
+                    32,
+                    protocols_reply->atom,
+                    delete_reply->atom
+                ));
 
-                send_event(XCB_EVENT_MASK_NO_EVENT, (uint32_t[]){32, protocols_reply->atom, delete_reply->atom});
+                // send_event(XCB_EVENT_MASK_NO_EVENT, (uint32_t[]){32, protocols_reply->atom, delete_reply->atom});
 
                 free(protocols_reply);
                 free(delete_reply);
