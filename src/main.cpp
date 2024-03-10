@@ -1845,7 +1845,7 @@ class window
                 return propertyValue;
             }
 
-            string get_net_wm_name()
+            string get_net_wm_name_by_req()
             {
                 xcb_ewmh_get_utf8_strings_reply_t wm_name;
                 string windowName = "";
@@ -1856,7 +1856,13 @@ class window
                     xcb_ewmh_get_utf8_strings_reply_wipe(&wm_name);
                 }
 
+                _name = windowName;
                 return windowName;
+            }
+
+            string get_net_wm_name() const
+            {
+                return _name;
             }
             
             bool is_EWMH_fullscreen()
@@ -2746,6 +2752,8 @@ class window
         xcb_gcontext_t font_gc;
         xcb_font_t     font;
         xcb_pixmap_t   pixmap;
+        string _name{};
+
         Logger log;
     
     private: // functions
@@ -3752,16 +3760,34 @@ class client
                 xcb_flush(conn);
             }
 
-            void draw_title()
+            #define TITLE_REQ_DRAW  (uint32_t)1 << 0
+            #define TITLE_INTR_DRAW (uint32_t)1 << 1
+
+            void draw_title(const uint32_t &__mode)
             {
-                titlebar.draw_text(
-                    win.get_net_wm_name().c_str(),
-                    WHITE,
-                    BLACK,
-                    DEFAULT_FONT,
-                    4,
-                    15
-                );
+                if (__mode & TITLE_REQ_DRAW)
+                {
+                    titlebar.draw_text(
+                        win.get_net_wm_name_by_req().c_str(),
+                        WHITE,
+                        BLACK,
+                        DEFAULT_FONT,
+                        4,
+                        15
+                    );
+                }
+
+                if (__mode & TITLE_INTR_DRAW)
+                {
+                    titlebar.draw_text(
+                        win.get_net_wm_name().c_str(),
+                        WHITE,
+                        BLACK,
+                        DEFAULT_FONT,
+                        4,
+                        15
+                    );
+                }
             }
         
         public: // config methods
@@ -3993,24 +4019,23 @@ class client
                 MAP
             );
             titlebar.grab_button({ { L_MOUSE_BUTTON, NULL } });
-            draw_title();
-            event_handler->setEventCallback(XCB_EXPOSE, [this](Ev ev)-> void
+            draw_title(TITLE_REQ_DRAW);
+            event_handler->setEventCallback(XCB_EXPOSE,          [this](Ev ev)-> void
             {
-                auto e = reinterpret_cast<const xcb_expose_event_t *>(ev);
+                auto e = RE_CAST(xcb_expose_event_t);
                 if (e->window == titlebar)
                 {
-                    draw_title();
+                    draw_title(TITLE_INTR_DRAW);
                 }
             });
-
-            event_handler->setEventCallback(XCB_PROPERTY_NOTIFY, [this](Ev ev)
+            event_handler->setEventCallback(XCB_PROPERTY_NOTIFY, [this](Ev ev)-> void
             {
                 auto e = RE_CAST(xcb_property_notify_event_t);
                 if (e->window == win)
                 {
                     if (e->atom == ewmh->_NET_WM_NAME)
                     {
-                        draw_title();
+                        draw_title(TITLE_REQ_DRAW);
                     }
                 }
             });
@@ -5469,17 +5494,7 @@ class Window_Manager
                     c->win.set_EWMH_fullscreen_state();
                 }
 
-                if (c->win.check_atom(ewmh->_NET_WM_STATE_MODAL))
-                {
-                    NET_LOG("client is modal.");
-                    c->atoms.is_modal = true;
-                }
-
-                string name;
-                if ((name = c->win.get_window_property(ewmh->_NET_WM_NAME)) != "") NET_LOG(name);
-
-                string name2;
-                if ((name2 = c->win.get_net_wm_name()) != "") NET_LOG(name2);
+                if (c->win.check_atom(ewmh->_NET_WM_STATE_MODAL)) c->atoms.is_modal = true;
                 
                 client_list.push_back(c);
                 cur_d->current_clients.push_back(c);
