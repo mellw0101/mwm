@@ -8395,7 +8395,7 @@ class __system_settings__
                 expose(e->window);
             });
 
-            event_handler->setEventCallback(XCB_CLIENT_MESSAGE, [this](Ev ev)-> void
+            event_handler->setEventCallback(XCB_EVENT_MASK_NO_EVENT, [this](Ev ev)-> void
             {
                 auto e = reinterpret_cast<const xcb_client_message_event_t *>(ev);
                 if (e->window == c->win)
