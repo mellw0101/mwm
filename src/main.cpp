@@ -8435,11 +8435,13 @@ class __system_settings__
                 expose(e->window);
             });
 
-            event_handler->setEventCallback(XCB_CLIENT_MESSAGE, [this](Ev ev)-> void
+            int cli_msg;
+            cli_msg = event_handler->setEventCallback(XCB_CLIENT_MESSAGE, [this, cli_msg](Ev ev)-> void
             {
                 auto e = reinterpret_cast<const xcb_client_message_event_t *>(ev);
                 if (e->window == c->win)
                 {
+                    NET_LOG("win detected");
                     if (e->format == 32)
                     {
                         xcb_atom_t atom;
@@ -8447,6 +8449,7 @@ class __system_settings__
                         if (e->data.data32[0] == atom)
                         {
                             c->kill();
+                            event_handler->removeEventCallback(XCB_CLIENT_MESSAGE, cli_msg);
                         }
                     }
                 }
