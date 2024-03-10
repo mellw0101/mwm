@@ -1855,15 +1855,20 @@ class window
             {
                 xcb_get_property_cookie_t cookie = xcb_ewmh_get_wm_state(ewmh, _window);
                 xcb_ewmh_get_atoms_reply_t wm_state;
-                if (xcb_ewmh_get_wm_state_reply(ewmh, cookie, &wm_state, NULL) == 1) {
-                    for (unsigned int i = 0; i < wm_state.atoms_len; i++) {
-                        if (wm_state.atoms[i] == ewmh->_NET_WM_STATE_FULLSCREEN) {
+                if (xcb_ewmh_get_wm_state_reply(ewmh, cookie, &wm_state, NULL) == 1)
+                {
+                    for (unsigned int i = 0; i < wm_state.atoms_len; i++)
+                    {
+                        if (wm_state.atoms[i] == ewmh->_NET_WM_STATE_FULLSCREEN)
+                        {
                             xcb_ewmh_get_atoms_reply_wipe(&wm_state);
                             return true;
                         }
                     }
+
                     xcb_ewmh_get_atoms_reply_wipe(&wm_state);
                 }
+
                 return false;
             }
             
@@ -5370,6 +5375,12 @@ class Window_Manager
                     NET_LOG("client is modal.");
                     c->atoms.is_modal = true;
                 }
+
+                if (c->win.check_atom(ewmh->_NET_WM_STATE_FULLSCREEN)) NET_LOG("client state is fullscreen.");
+                if (c->win.check_atom(ewmh->_NET_WM_STATE_STICKY)) NET_LOG("client state is sticky.");
+                if (c->win.check_atom(ewmh->_NET_WM_STATE_MAXIMIZED_VERT)) NET_LOG("client state is maximised vert.");
+                if (c->win.check_atom(ewmh->_NET_WM_STATE_MAXIMIZED_HORZ)) NET_LOG("client state is maximised horz.");
+                if (c->win.check_atom(ewmh->_NET_WM_STATE_SHADED)) NET_LOG("client state is shaded.");
 
                 string name;
                 if ((name = c->win.get_window_property(ewmh->_NET_WM_NAME)) != "") NET_LOG(name);
