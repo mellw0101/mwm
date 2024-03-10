@@ -1654,7 +1654,7 @@ class window
                 xcb_flush(conn);
             }
 
-            void send_event(const uint32_t &__event_mask)
+            void send_event(const uint32_t &__event_mask, void *__value_list = nullptr)
             {
                 if (__event_mask & XCB_EVENT_MASK_EXPOSURE)
                 {
@@ -1669,6 +1669,28 @@ class window
                     };
 
                     xcb_send_event(conn, false, _window, XCB_EVENT_MASK_EXPOSURE, (char *)&expose_event);
+                    xcb_flush(conn);
+                }
+
+                if (__event_mask & XCB_EVENT_MASK_STRUCTURE_NOTIFY)
+                {
+                    uint32_t *value_list =  reinterpret_cast<uint32_t *>(__value_list);
+
+                    xcb_configure_notify_event_t event;
+                    event.response_type     = XCB_CONFIGURE_NOTIFY;
+                    event.event             = _window;
+                    event.window            = _window;
+                    event.above_sibling     = XCB_NONE;
+                    event.x                 = value_list[0];
+                    event.y                 = value_list[1];
+                    event.width             = value_list[2];
+                    event.height            = value_list[3];
+                    event.border_width      = 0;
+                    event.override_redirect = false;
+                    event.pad0              = 0;
+                    event.sequence          = 0;
+
+                    xcb_send_event(conn, false, _window, XCB_EVENT_MASK_STRUCTURE_NOTIFY, (char *)&event);
                     xcb_flush(conn);
                 }
             }
@@ -4800,6 +4822,7 @@ class Window_Manager
                 c->focus();
                 focused_client = c;
                 check_client(c);
+                c->win.send_event(XCB_EVENT_MASK_STRUCTURE_NOTIFY, (uint32_t[]){0, 0, c->win.width(), c->win.height()});
             }
             
             client *make_internal_client(window window)
