@@ -4824,7 +4824,6 @@ class Window_Manager
                 c->focus();
                 focused_client = c;
                 check_client(c);
-                c->win.send_event(XCB_EVENT_MASK_STRUCTURE_NOTIFY, (uint32_t[]){BORDER_SIZE, (TITLE_BAR_HEIGHT + BORDER_SIZE), c->win.width(), c->win.height()});
             }
             
             client *make_internal_client(window window)
