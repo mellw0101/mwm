@@ -3936,7 +3936,7 @@ class client
             titlebar.set_backround_color(BLACK);
             titlebar.grab_button({ { L_MOUSE_BUTTON, NULL } });
             titlebar.map();
-            titlebar.draw_text(
+            titlebar.draw_on_expose_event(
                 win.get_net_wm_name().c_str(),
                 WHITE,
                 BLACK,
