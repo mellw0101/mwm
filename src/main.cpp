@@ -8405,7 +8405,7 @@ class __system_settings__
                     {
                         xcb_atom_t atom;
                         wm->get_atom((char *)"WM_DELETE_WINDOW", &atom);
-                        if (e->data.data32[1] == atom)
+                        if (e->data.data32[0] == atom)
                         {
                             c->kill();
                         }
