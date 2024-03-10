@@ -1814,6 +1814,20 @@ class window
 
                 return false; // The atom was not found or the property could not be retrieved
             }
+
+            string get_net_wm_name()
+            {
+                xcb_ewmh_get_utf8_strings_reply_t wm_name;
+                string windowName = "";
+
+                if (xcb_ewmh_get_wm_name_reply(ewmh, xcb_ewmh_get_wm_name(ewmh, _window), &wm_name, NULL))
+                {
+                    windowName.assign(wm_name.strings, wm_name.strings_len);
+                    xcb_ewmh_get_utf8_strings_reply_wipe(&wm_name);
+                }
+
+                return windowName;
+            }
             
             bool is_EWMH_fullscreen()
             {
@@ -3558,7 +3572,9 @@ class client
 
         struct __atoms__
         {
-            bool is_modal = false;
+            bool
+                is_modal           = false,
+                window_type_dialog = false;
         };
     
     public: // variabels
@@ -5329,9 +5345,14 @@ class Window_Manager
 
                 if (c->win.check_atom(ewmh->_NET_WM_STATE_MODAL))
                 {
-                    NET_LOG("client is modal");
+                    NET_LOG("client is modal.");
                     c->atoms.is_modal = true;
                 }
+
+                if (c->win.check_atom(ewmh->_NET_WM_WINDOW_TYPE_DIALOG)) NET_LOG("client is dialog_window.");
+                if (c->win.check_atom(ewmh->_NET_WM_FULL_PLACEMENT)) NET_LOG("client is FULL_PLACEMENT");
+                if (c->win.check_atom(ewmh->_NET_WM_PID)) NET_LOG("client has PID");
+                if (c->win.check_atom(ewmh->_NET_WM_NAME)) NET_LOG("client has a title NAME");
                 
                 client_list.push_back(c);
                 cur_d->current_clients.push_back(c);
@@ -10724,7 +10745,7 @@ class Events
                     }
 
                     if (wm->focused_client->atoms.is_modal) return;
-                    
+
                     c->raise();
                     c->focus();
                     wm->focused_client = c;
