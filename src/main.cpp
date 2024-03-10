@@ -1,6 +1,7 @@
 #include <cstdlib>
 #include <features.h>
 #include <iterator>
+#include <regex>
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -9078,6 +9079,7 @@ class mv_client
                     {
                         shouldContinue = false;
                         c->update();
+
                         break;
                     }
 
@@ -9087,6 +9089,31 @@ class mv_client
                         status_bar->expose(e->window);
                         file_app->expose(e->window);
                         system_settings->expose(e->window);
+                        
+                        client *c = wm->client_from_any_window(&e->window);
+                        if (c != nullptr)
+                        {
+                            if (e->window == c->titlebar)
+                            {
+                                c->draw_title(TITLE_INTR_DRAW);
+                            }
+                        }
+
+                        break;
+                    }
+
+                    case XCB_PROPERTY_NOTIFY:
+                    {
+                        auto e = RE_CAST(xcb_property_notify_event_t);
+                        client *c = wm->client_from_any_window(&e->window);
+                        if (c != nullptr)
+                        {
+                            if (e->atom   == ewmh->_NET_WM_NAME
+                            &&  e->window == c->win)
+                            {
+                                c->draw_title(TITLE_REQ_DRAW);
+                            }
+                        }
 
                         break;
                     }
@@ -9946,11 +9973,19 @@ class resize_client
 
                             case XCB_EXPOSE:
                             {
-                                const auto *e = reinterpret_cast<const xcb_expose_event_t *>(ev);
-                                // status_bar->draw(e->window);
+                                const auto *e = RE_CAST(xcb_expose_event_t);
                                 status_bar->expose(e->window);
                                 file_app->expose(e->window);
                                 system_settings->expose(e->window);
+
+                                client *c = wm->client_from_any_window(&e->window);
+                                if (c != nullptr)
+                                {
+                                    if (e->window == c->titlebar)
+                                    {
+                                        c->draw_title(TITLE_INTR_DRAW);
+                                    }
+                                }
 
                                 break;
                             }
@@ -9960,6 +9995,24 @@ class resize_client
                                 const auto e = reinterpret_cast<const xcb_configure_notify_event_t *>(ev);
                                 file_app->configure(e->window, e->width, e->height);
                                 system_settings->configure(e->window, e->width, e->height);
+
+                                break;
+                            }
+
+                            case XCB_PROPERTY_NOTIFY:
+                            {
+                                auto e = RE_CAST(xcb_property_notify_event_t);
+                                client *c = wm->client_from_any_window(&e->window);
+                                if (c != nullptr)
+                                {
+                                    if (e->atom   == ewmh->_NET_WM_NAME
+                                    &&  e->window == c->win)
+                                    {
+                                        c->draw_title(TITLE_REQ_DRAW);
+                                    }
+                                }
+
+                                break;
                             }
                         }
 
