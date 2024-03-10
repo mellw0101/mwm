@@ -1618,10 +1618,10 @@ class window
             void kill()
             {
                 xcb_intern_atom_cookie_t protocols_cookie = xcb_intern_atom(conn, 1, 12, "WM_PROTOCOLS");
-                xcb_intern_atom_reply_t *protocols_reply = xcb_intern_atom_reply(conn, protocols_cookie, NULL);
+                xcb_intern_atom_reply_t *protocols_reply = xcb_intern_atom_reply(conn, protocols_cookie, nullptr);
 
                 xcb_intern_atom_cookie_t delete_cookie = xcb_intern_atom(conn, 0, 16, "WM_DELETE_WINDOW");
-                xcb_intern_atom_reply_t *delete_reply = xcb_intern_atom_reply(conn, delete_cookie, NULL);
+                xcb_intern_atom_reply_t *delete_reply = xcb_intern_atom_reply(conn, delete_cookie, nullptr);
 
                 if (protocols_reply == nullptr)
                 {
@@ -1646,11 +1646,8 @@ class window
                 // ));
 
                 send_event(KILL_WINDOW, (uint32_t[]){32, protocols_reply->atom, delete_reply->atom});
-
                 free(protocols_reply);
                 free(delete_reply);
-
-                xcb_flush(conn);
             }
             
             void clear()
@@ -1724,14 +1721,15 @@ class window
 
                     xcb_client_message_event_t ev;
                     ev.response_type  = XCB_CLIENT_MESSAGE;
-                    ev.window         = _window;
                     ev.format         = value_list[0];
                     ev.sequence       = 0;
+                    ev.window         = _window;
                     ev.type           = value_list[1];
                     ev.data.data32[0] = value_list[2];
                     ev.data.data32[1] = XCB_CURRENT_TIME;
 
                     xcb_send_event(conn, 0, _window, XCB_EVENT_MASK_NO_EVENT, (char *) &ev);
+                    xcb_flush(conn);
                 }
             }
 
