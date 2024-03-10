@@ -1717,14 +1717,14 @@ class window
                 {
                     uint32_t *value_list = reinterpret_cast<uint32_t *>(__value_list);
 
-                    xcb_client_message_event_t ev;
-                    ev.response_type  = XCB_CLIENT_MESSAGE;
-                    ev.window         = _window;
-                    ev.format         = value_list[0];
-                    ev.sequence       = 0;
-                    ev.type           = value_list[1];
-                    ev.data.data32[0] = value_list[2];
-                    ev.data.data32[1] = XCB_CURRENT_TIME;
+                    xcb_client_message_event_t ev = make_client_message_event(value_list[0], value_list[1], value_list[2]);
+                    // ev.response_type  = XCB_CLIENT_MESSAGE;
+                    // ev.window         = _window;
+                    // ev.format         = value_list[0];
+                    // ev.sequence       = 0;
+                    // ev.type           = value_list[1];
+                    // ev.data.data32[0] = value_list[2];
+                    // ev.data.data32[1] = XCB_CURRENT_TIME;
 
                     xcb_send_event(conn, 0, _window, XCB_EVENT_MASK_NO_EVENT, (char *) &ev);
                 }
