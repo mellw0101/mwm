@@ -5220,11 +5220,11 @@ class Window_Manager
         
             void check_client(client * c)
             {
-                c->win.x(BORDER_SIZE);
-                xcb_flush(conn);
+                // c->win.x(BORDER_SIZE);
+                // xcb_flush(conn);
 
-                c->win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
-                xcb_flush(conn);
+                // c->win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
+                // xcb_flush(conn);
 
                 // if client if full_screen but 'y' is offset for some reason, make 'y' (0)
                 if (c->x == 0
@@ -10702,12 +10702,12 @@ class Events
         void reparent_notify_handler(const xcb_generic_event_t *&ev)
         {
             const auto * e = reinterpret_cast<const xcb_reparent_notify_event_t *>(ev);
-            client *c = wm->client_from_any_window(&e->window);
-            if (c == nullptr) return;
-            c->win.x(BORDER_SIZE);
-            c->win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
+            // client *c = wm->client_from_any_window(&e->window);
+            // if (c == nullptr) return;
+            // c->win.x(BORDER_SIZE);
+            // c->win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
 
-            xcb_flush(conn);
+            // xcb_flush(conn);
         }
 
         void enter_notify_handler(const xcb_generic_event_t *&ev)
