@@ -85,6 +85,23 @@ using namespace std;
 using Uint = unsigned int;
 using SUint = unsigned short int;
 
+#define FRAME_EVENT_MASK \
+    XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY   |\
+    XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT |\
+    XCB_EVENT_MASK_POINTER_MOTION        |\
+    XCB_EVENT_MASK_FOCUS_CHANGE          |\
+    XCB_EVENT_MASK_ENTER_WINDOW          |\
+    XCB_EVENT_MASK_PROPERTY_CHANGE
+
+#define CLIENT_EVENT_MASK \
+    XCB_EVENT_MASK_STRUCTURE_NOTIFY |\
+    XCB_EVENT_MASK_FOCUS_CHANGE     |\
+    XCB_EVENT_MASK_PROPERTY_CHANGE
+
+// #define BUTTON_EVENT_MASK \
+//     EnterWindowMask|\
+//     LeaveWindowMask
+
 class __net_logger__
 {
     #define ESP_SERVER "192.168.0.29"
@@ -3485,6 +3502,7 @@ class client
         window close_button;
         window max_button;
         window min_button;
+        window(icon);
 
         client_border_decor border;
 
@@ -3498,6 +3516,7 @@ class client
         size_pos max_button_ogsize;
 
         uint16_t desktop;
+        pid_t pid;
     
     public: // methods
         public: // main methods
