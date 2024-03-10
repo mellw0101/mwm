@@ -5386,7 +5386,7 @@ class Window_Manager
                 if ((name = c->win.get_window_property(ewmh->_NET_WM_NAME)) != "") NET_LOG(name);
 
                 string visible_name;
-                if ((name = c->win.get_window_property(ewmh->_NET_WM_VISIBLE_NAME)) != "") NET_LOG(visible_name);
+                if ((visible_name = c->win.get_window_property(ewmh->_NET_WM_VISIBLE_NAME)) != "") NET_LOG(visible_name);
                 
                 client_list.push_back(c);
                 cur_d->current_clients.push_back(c);
