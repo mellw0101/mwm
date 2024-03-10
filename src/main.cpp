@@ -5376,17 +5376,11 @@ class Window_Manager
                     c->atoms.is_modal = true;
                 }
 
-                if (c->win.check_atom(ewmh->_NET_WM_STATE_FULLSCREEN)) NET_LOG("client state is fullscreen.");
-                if (c->win.check_atom(ewmh->_NET_WM_STATE_STICKY)) NET_LOG("client state is sticky.");
-                if (c->win.check_atom(ewmh->_NET_WM_STATE_MAXIMIZED_VERT)) NET_LOG("client state is maximised vert.");
-                if (c->win.check_atom(ewmh->_NET_WM_STATE_MAXIMIZED_HORZ)) NET_LOG("client state is maximised horz.");
-                if (c->win.check_atom(ewmh->_NET_WM_STATE_SHADED)) NET_LOG("client state is shaded.");
-
                 string name;
                 if ((name = c->win.get_window_property(ewmh->_NET_WM_NAME)) != "") NET_LOG(name);
 
-                string visible_name;
-                if ((visible_name = c->win.get_window_property(ewmh->_NET_WM_VISIBLE_NAME)) != "") NET_LOG(visible_name);
+                string name2;
+                if ((name2 = c->win.get_net_wm_name()) != "") NET_LOG(name2);
                 
                 client_list.push_back(c);
                 cur_d->current_clients.push_back(c);
