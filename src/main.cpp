@@ -4604,6 +4604,20 @@ class Window_Manager
                 return mode_id;
             }
 
+            void get_atom(char *name, xcb_atom_t *atom)
+            {
+                xcb_intern_atom_reply_t *reply = xcb_intern_atom_reply(conn, xcb_intern_atom(conn, 0, strlen(name), name), NULL);
+                if (reply != NULL)
+                {
+                    *atom = reply->atom;
+                }
+                else
+                {
+                    *atom = XCB_NONE;
+                }
+                free(reply);
+            }
+
         // window methods.
             bool window_exists(const uint32_t &__window)
             {
@@ -4618,7 +4632,6 @@ class Window_Manager
 
                 return true;
             }
-
 
         // client methods.
             // focus methods.
@@ -8380,6 +8393,23 @@ class __system_settings__
             {
                 const auto e = reinterpret_cast<const xcb_expose_event_t *>(ev);
                 expose(e->window);
+            });
+
+            event_handler->setEventCallback(XCB_CLIENT_MESSAGE, [this](Ev ev)-> void
+            {
+                auto e = reinterpret_cast<const xcb_client_message_event_t *>(ev);
+                if (e->window == c->win)
+                {
+                    if (e->format == 32)
+                    {
+                        xcb_atom_t atom;
+                        wm->get_atom((char *)"WM_DELETE_WINDOW", &atom);
+                        if (e->data.data32[1] == atom)
+                        {
+                            c->kill();
+                        }
+                    }
+                }
             });
         }
 
