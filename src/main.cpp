@@ -1815,6 +1815,28 @@ class window
                 return false; // The atom was not found or the property could not be retrieved
             }
 
+            string get_window_property(xcb_atom_t __atom)
+            {
+                xcb_get_property_cookie_t cookie = xcb_get_property(ewmh->connection, 0, _window, __atom, XCB_GET_PROPERTY_TYPE_ANY, 0, 1024);
+                xcb_get_property_reply_t* reply = xcb_get_property_reply(ewmh->connection, cookie, NULL);
+                string propertyValue = "";
+
+                if (reply && (reply->type == XCB_ATOM_STRING || reply->type == ewmh->UTF8_STRING))
+                {
+                    // Assuming the property is a UTF-8 string, but you might check and convert depending on the actual type
+                    char* value = (char*)xcb_get_property_value(reply);
+                    int len = xcb_get_property_value_length(reply);
+
+                    if (value && len > 0)
+                    {
+                        propertyValue.assign(value, len);
+                    }
+                }
+
+                free(reply);
+                return propertyValue;
+            }
+
             string get_net_wm_name()
             {
                 xcb_ewmh_get_utf8_strings_reply_t wm_name;
@@ -5348,11 +5370,9 @@ class Window_Manager
                     NET_LOG("client is modal.");
                     c->atoms.is_modal = true;
                 }
-
-                if (c->win.check_atom(ewmh->_NET_WM_WINDOW_TYPE_DIALOG)) NET_LOG("client is dialog_window.");
-                if (c->win.check_atom(ewmh->_NET_WM_FULL_PLACEMENT)) NET_LOG("client is FULL_PLACEMENT");
-                if (c->win.check_atom(ewmh->_NET_WM_PID)) NET_LOG("client has PID");
-                if (c->win.check_atom(ewmh->_NET_WM_NAME)) NET_LOG("client has a title NAME");
+                
+                string name;
+                if ((name = c->win.get_window_property(ewmh->_NET_WM_NAME)) != "") NET_LOG(name);
                 
                 client_list.push_back(c);
                 cur_d->current_clients.push_back(c);
