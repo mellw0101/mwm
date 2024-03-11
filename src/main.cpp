@@ -5652,7 +5652,11 @@ class Window_Manager
                     c->win.set_EWMH_fullscreen_state();
                 }
 
-                if (c->win.check_atom(ewmh->_NET_WM_STATE_MODAL)) c->atoms.is_modal = true;
+                if (c->win.check_atom(ewmh->_NET_WM_STATE_MODAL))
+                {
+                    NET_LOG(NET_LOG_WINDOW("'modal client' c->win.parent()", c->win.parent_by_req()));
+                    c->atoms.is_modal = true;
+                }
 
                 c->win.print_icccm_wm_class();
                 c->win.print_icccm_wm_name();
