@@ -2000,6 +2000,21 @@ class window
             }
         
         // get.
+            uint32_t get_transient_for_window()
+            {
+                uint32_t transient_for = 0; // Default to 0 (no parent)
+                xcb_get_property_cookie_t cookie = xcb_get_property(conn, 0, _window, XCB_ATOM_WM_TRANSIENT_FOR, XCB_ATOM_WINDOW, 0, sizeof(uint32_t));
+                xcb_get_property_reply_t *reply = xcb_get_property_reply(conn, cookie, NULL);
+
+                if (reply && xcb_get_property_value_length(reply) == sizeof(uint32_t))
+                {
+                    transient_for = *(uint32_t *)xcb_get_property_value(reply);
+                }
+
+                free(reply); // Remember to free the reply
+                return transient_for;
+            }
+
             string get_window_property(xcb_atom_t __atom)
             {
                 xcb_get_property_cookie_t cookie = xcb_get_property(ewmh->connection, 0, _window, __atom, XCB_GET_PROPERTY_TYPE_ANY, 0, 1024);
@@ -5654,7 +5669,7 @@ class Window_Manager
 
                 if (c->win.check_atom(ewmh->_NET_WM_STATE_MODAL))
                 {
-                    NET_LOG(NET_LOG_WINDOW("'modal client' c->win.parent()", c->win.parent_by_req()));
+                    NET_LOG(NET_LOG_WINDOW("'modal client' c->win.parent()", c->win.get_transient_for_window()));
                     c->atoms.is_modal = true;
                 }
 
