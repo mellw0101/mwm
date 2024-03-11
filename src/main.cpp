@@ -125,7 +125,7 @@ using SUint = unsigned short int;
 #define RE_CAST_EV(__type) \
     auto e = RE_CAST(const __type *, ev)
 
-#define SET_INTR_CLI_KILL_CALLBACK \
+#define SET_INTR_CLI_KILL_CALLBACK() \
     event_handler->setEventCallback(XCB_CLIENT_MESSAGE, [this](Ev ev)-> void \
     {                                                                        \
         RE_CAST_EV(xcb_client_message_event_t);                              \
@@ -144,7 +144,7 @@ using SUint = unsigned short int;
                 }                                                            \
             }                                                                \
         }                                                                    \
-    });
+    })
 
 class __net_logger__
 {
@@ -8010,6 +8010,8 @@ class __file_app__
                 const auto *e = reinterpret_cast<const xcb_expose_event_t *>(ev);
                 expose(e->window);
             });
+
+            SET_INTR_CLI_KILL_CALLBACK();
         }
 
     public:
@@ -8848,7 +8850,7 @@ class __system_settings__
                 expose(e->window);
             });
 
-            SET_INTR_CLI_KILL_CALLBACK
+            SET_INTR_CLI_KILL_CALLBACK();
 
             // event_handler->setEventCallback(XCB_CLIENT_MESSAGE, [this](Ev ev)-> void
             // {
