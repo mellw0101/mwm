@@ -5671,12 +5671,8 @@ class Window_Manager
                 }
 
                 c->win     = window;
-                c->win.get_min_window_size_hints();
-                c->width   = c->win.get_min_width();
-                c->height  = c->win.get_min_height();
-                
-                // c->height  = (data.height < 300) ? 300 : data.height;
-                // c->width   = (data.width < 400)  ? 400 : data.width;
+                c->height  = (data.height < 300) ? 300 : data.height;
+                c->width   = (data.width < 400)  ? 400 : data.width;
                 c->x       = c->win.x_from_req();
                 c->y       = c->win.y_from_req();
                 c->depth   = 24;
@@ -5705,6 +5701,8 @@ class Window_Manager
                     c->atoms.is_modal = true;
                     c->modal_data.transient_for = c->win.get_transient_for_window();
                 }
+
+                c->win.get_min_window_size_hints();
                 
                 client_list.push_back(c);
                 cur_d->current_clients.push_back(c);
@@ -10092,6 +10090,9 @@ class resize_client
                     for (client *const &c : wm->cur_d->current_clients)
                     {
                         if (c == this->c) continue;
+
+                        if ((c->width + c->x - x ) <= c->win.get_min_width() ) return;
+                        if ((c->height + c->y - y) <= c->win.get_min_height()) return; 
 
                         left_border = c->x;
                         right_border = (c->x + c->width);
