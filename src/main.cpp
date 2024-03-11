@@ -5558,6 +5558,7 @@ class Window_Manager
                 if (c->win.check_atom(ewmh->_NET_WM_STATE_MODAL)) c->atoms.is_modal = true;
 
                 c->win.print_icccm_wm_class();
+                c->win.print_icccm_wm_name();
                 
                 client_list.push_back(c);
                 cur_d->current_clients.push_back(c);
