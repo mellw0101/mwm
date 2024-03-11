@@ -109,7 +109,7 @@ class __net_logger__
 {
     #define ESP_SERVER "192.168.0.29"
     #define ESP_PORT 23
-    
+
     #define NET_LOG_MSG(message)                "\033[33m" + message + "\033[0m"
     #define FUNC_NAME_STR                       string(__func__)
     #define NET_LOG_FUNCTION                    "\033[34m(FUNCTION) " + FUNC_NAME_STR + "\033[0m"
@@ -120,7 +120,7 @@ class __net_logger__
     /*
      *
      * @breif fetches the calling class's name and extracts a substr containing only the class name
-     * 
+     *
      * NOTE: this only works for class's with prefix '__'
      *
      */
@@ -186,7 +186,7 @@ class __net_logger__
                 return;
             }
         }
-        
+
     public:
         __net_logger__()
         : _connected(false) {}
@@ -1128,7 +1128,7 @@ class Event_Handler
 {
     public: // methods
         using EventCallback = std::function<void(Ev)>;
-        
+
         void run()
         {
             xcb_generic_event_t *ev;
@@ -1152,7 +1152,7 @@ class Event_Handler
                 free(ev);
             }
         }
-        
+
         void end()
         {
             shouldContinue = false;
@@ -1165,7 +1165,7 @@ class Event_Handler
             eventCallbacks[eventType].emplace_back(id, std::move(callback));
             return id;
         }
-        
+
         void removeEventCallback(uint8_t eventType, CallbackId id)
         {
             auto& callbacks = eventCallbacks[eventType];
@@ -1197,7 +1197,7 @@ class Event_Handler
                 }
             });
         }
-    
+
     private: // variables
         unordered_map<uint8_t, vector<pair<CallbackId, EventCallback>>>(eventCallbacks);
         bool shouldContinue = false;
