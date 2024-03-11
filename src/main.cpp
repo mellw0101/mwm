@@ -3826,6 +3826,8 @@ class client
 
             void draw_title(const uint32_t &__mode)
             {
+                titlebar.clear();
+
                 if (__mode & TITLE_REQ_DRAW)
                 {
                     titlebar.draw_text(
