@@ -8984,7 +8984,15 @@ class __debug_menu__
                 BLACK
             );
 
-            event_handler->set_key_press_callback(SUPER, wm->key_codes.d, [this]()-> void { dropdown_window.map(); });
+            event_handler->set_key_press_callback(SUPER, wm->key_codes.d, [this]()-> void {
+                if (dropdown_window.is_mapped())
+                {
+                    dropdown_window.unmap();
+                    return;
+                }
+
+                dropdown_window.map();
+            });
         }
 
     public:
