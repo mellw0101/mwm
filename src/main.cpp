@@ -8972,6 +8972,16 @@ class __debug_menu__
     private:
         window(dropdown_window);
 
+        void show__()
+        {
+            dropdown_window.map();
+        }
+
+        void hide__()
+        {
+            dropdown_window.unmap();
+        }
+
     public:
         void init()
         {
@@ -8981,17 +8991,21 @@ class __debug_menu__
                 20,
                 160,
                 300,
-                BLACK
+                BLACK,
+                NONE,
+                DEFAULT_KEYS
             );
 
-            event_handler->set_key_press_callback(SUPER, wm->key_codes.d, [this]()-> void {
+            event_handler->set_key_press_callback(SUPER, wm->key_codes.d, [this]()-> void
+            {
                 if (dropdown_window.is_mapped())
                 {
-                    dropdown_window.unmap();
-                    return;
+                    hide__();
                 }
-
-                dropdown_window.map();
+                else
+                {
+                    show__();
+                }
             });
         }
 
