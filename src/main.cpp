@@ -3939,6 +3939,7 @@ class client
             void focus()
             {
                 win.focus_input();
+                win.set_active_EWMH_window();
                 frame.raise();
             }
         
@@ -11146,7 +11147,7 @@ class Events
 
         void button_press_handler(const xcb_generic_event_t *&ev)
         {
-            const auto *e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
+            RE_CAST_EV(xcb_button_press_event_t);
             client *c;
             if (BORDER_SIZE == 0)
             {
