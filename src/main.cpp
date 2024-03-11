@@ -8742,7 +8742,7 @@ class __system_settings__
         {
             event_handler->setEventCallback(XCB_BUTTON_PRESS,     [this](Ev ev)-> void
             {
-                const auto e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
+                RE_CAST_EV(xcb_button_press_event_t);
                 if (e->detail == L_MOUSE_BUTTON)
                 {
                     if (wm->focused_client != this->c)
@@ -8817,19 +8817,19 @@ class __system_settings__
 
             event_handler->setEventCallback(XCB_CONFIGURE_NOTIFY, [this](Ev ev)->void
             {
-                const auto e = reinterpret_cast<const xcb_configure_notify_event_t *>(ev);
+                RE_CAST_EV(xcb_configure_notify_event_t); 
                 configure(e->window, e->width, e->height);
             });
 
             event_handler->setEventCallback(XCB_EXPOSE,           [this](Ev ev)->void
             {
-                const auto e = reinterpret_cast<const xcb_expose_event_t *>(ev);
+                RE_CAST_EV(xcb_expose_event_t);
                 expose(e->window);
             });
 
             event_handler->setEventCallback(XCB_CLIENT_MESSAGE, [this](Ev ev)-> void
             {
-                auto e = reinterpret_cast<const xcb_client_message_event_t *>(ev);
+                RE_CAST_EV(xcb_client_message_event_t);
                 if (c == nullptr) return;
                 if (e->window == c->win)
                 {
@@ -11139,7 +11139,7 @@ class Events
 
         void map_req_handler(const xcb_generic_event_t *&ev)
         {
-            const xcb_map_request_event_t *e = reinterpret_cast<const xcb_map_request_event_t *>(ev);
+            RE_CAST_EV(xcb_map_request_event_t);
             client *c = wm->client_from_window(&e->window); 
             if (c != nullptr) return;
             wm->manage_new_client(e->window);
@@ -11291,7 +11291,7 @@ class Events
         
         void configure_request_handler(const xcb_generic_event_t *&ev)
         {
-            const auto *e = reinterpret_cast<const xcb_configure_request_event_t *>(ev);
+            RE_CAST_EV(xcb_configure_request_event_t);
             wm->data.width  = e->width;
             wm->data.height = e->height;
             wm->data.x      = e->x;
@@ -11300,7 +11300,7 @@ class Events
 
         void focus_in_handler(const xcb_generic_event_t *&ev)
         {
-            const xcb_focus_in_event_t *e = reinterpret_cast<const xcb_focus_in_event_t *>(ev);
+            RE_CAST_EV(xcb_focus_in_event_t);
             client *c = wm->client_from_window( &e->event);
             if (c == nullptr) return;
 
@@ -11315,7 +11315,7 @@ class Events
 
         void focus_out_handler(const xcb_generic_event_t *&ev)
         {
-            const xcb_focus_out_event_t *e = reinterpret_cast<const xcb_focus_out_event_t *>(ev);
+            RE_CAST_EV(xcb_focus_out_event_t);
             client *c = wm->client_from_window(&e->event);
             if (c == nullptr) return;
             c->win.grab_button({
@@ -11325,7 +11325,7 @@ class Events
 
         void destroy_notify_handler(const xcb_generic_event_t *&ev)
         {
-            const auto *e = reinterpret_cast<const xcb_destroy_notify_event_t *>(ev);
+            RE_CAST_EV(xcb_destroy_notify_event_t);
             client *c = wm->client_from_window(&e->event);
             if (c == nullptr) return;
             wm->send_sigterm_to_client(c);
@@ -11333,14 +11333,14 @@ class Events
         
         void unmap_notify_handler(const xcb_generic_event_t *&ev)
         {
-            const auto *e = reinterpret_cast<const xcb_unmap_notify_event_t *>(ev);
+            RE_CAST_EV(xcb_unmap_notify_event_t);
             client *c = wm->client_from_window(&e->window);
             if (c == nullptr) return;
         }
         
         void reparent_notify_handler(const xcb_generic_event_t *&ev)
         {
-            const auto * e = reinterpret_cast<const xcb_reparent_notify_event_t *>(ev);
+            RE_CAST_EV(xcb_reparent_notify_event_t);
             client *c = wm->client_from_any_window(&e->window);
             if (c == nullptr) return;
             c->win.x(BORDER_SIZE);
@@ -11351,17 +11351,17 @@ class Events
 
         void enter_notify_handler(const xcb_generic_event_t *&ev)
         {
-            const auto * e = reinterpret_cast<const xcb_enter_notify_event_t *>(ev);  
+            RE_CAST_EV(xcb_enter_notify_event_t);
         }
 
         void leave_notify_handler(const xcb_generic_event_t *&ev)
         {
-            const auto * e = reinterpret_cast<const xcb_leave_notify_event_t *>(ev);
+            RE_CAST_EV(xcb_leave_notify_event_t);   
         }
 
         void motion_notify_handler(const xcb_generic_event_t *&ev)
         {
-            const auto * e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev); 
+            RE_CAST_EV(xcb_motion_notify_event_t);
         }
 };
 
