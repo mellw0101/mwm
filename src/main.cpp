@@ -5353,6 +5353,29 @@ class Window_Manager
                 remove_client(c);
             }
         
+            void set_internal_client_kill_callback(client *__c)
+            {
+                event_handler->setEventCallback(XCB_CLIENT_MESSAGE, [this, &__c](Ev ev)-> void
+                {
+                    RE_CAST_EV(xcb_client_message_event_t);
+                    if (__c == nullptr) return;
+                    if (e->window == __c->win)
+                    {
+                        if (e->format == 32)
+                        {
+                            xcb_atom_t atom;
+                            get_atom((char *)"WM_DELETE_WINDOW", &atom);
+                            if (e->data.data32[0] == atom)
+                            {
+                                __c->kill();
+                                delete __c;
+                                __c = nullptr;
+                            }
+                        }
+                    }
+                });
+            }
+
         // desktop methods
             void create_new_desktop(const uint16_t &n)
             {
@@ -5796,7 +5819,7 @@ class Window_Manager
                     xcb_flush(conn);
                 }
             }
-        
+
         private: // window functions
             void getWindowParameters(const uint32_t &window)
             {
@@ -8827,26 +8850,27 @@ class __system_settings__
                 expose(e->window);
             });
 
-            event_handler->setEventCallback(XCB_CLIENT_MESSAGE, [this](Ev ev)-> void
-            {
-                RE_CAST_EV(xcb_client_message_event_t);
-                if (c == nullptr) return;
-                if (e->window == c->win)
-                {
-                    NET_LOG("win detected");
-                    if (e->format == 32)
-                    {
-                        xcb_atom_t atom;
-                        wm->get_atom((char *)"WM_DELETE_WINDOW", &atom);
-                        if (e->data.data32[0] == atom)
-                        {
-                            c->kill();
-                            delete c;
-                            c = nullptr;
-                        }
-                    }
-                }
-            });
+            wm->set_internal_client_kill_callback(c);
+
+            // event_handler->setEventCallback(XCB_CLIENT_MESSAGE, [this](Ev ev)-> void
+            // {
+            //     RE_CAST_EV(xcb_client_message_event_t);
+            //     if (c == nullptr) return;
+            //     if (e->window == c->win)
+            //     {
+            //         if (e->format == 32)
+            //         {
+            //             xcb_atom_t atom;
+            //             wm->get_atom((char *)"WM_DELETE_WINDOW", &atom);
+            //             if (e->data.data32[0] == atom)
+            //             {
+            //                 c->kill();
+            //                 delete c;
+            //                 c = nullptr;
+            //             }
+            //         }
+            //     }
+            // });
         }
 
     public:
