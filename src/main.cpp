@@ -2070,14 +2070,35 @@ class window
                 cookie = xcb_icccm_get_wm_class(conn, _window); // Request WM_CLASS property
                 if (xcb_icccm_get_wm_class_reply(conn, cookie, &wm_class_reply, NULL)) // Retrieve the WM_CLASS property
                 {
-                    logger.log(INFO, __func__, "Instance Name: ", wm_class_reply.instance_name);
-                    logger.log(INFO, __func__, "Class Name: ", wm_class_reply.class_name);
+                    logger.log(INFO, __func__, "Instance Name", wm_class_reply.instance_name);
+                    logger.log(INFO, __func__, "Class Name", wm_class_reply.class_name);
 
                     xcb_icccm_get_wm_class_reply_wipe(&wm_class_reply);
                 }
                 else
                 {
                     logger.log(ERROR, __func__, "Failed to retrieve WM_CLASS for window");
+                }
+            }
+
+            void print_icccm_wm_name()
+            {
+                xcb_get_property_cookie_t cookie;
+                xcb_icccm_get_text_property_reply_t wm_name_reply;
+
+                // Request WM_NAME property
+                cookie = xcb_icccm_get_wm_name(conn, _window);
+
+                // Retrieve the WM_NAME property
+                if (xcb_icccm_get_wm_name_reply(conn, cookie, &wm_name_reply, NULL))
+                {
+                    logger.log(INFO, __func__, "Window Name", wm_name_reply.name);
+
+                    xcb_icccm_get_text_property_reply_wipe(&wm_name_reply);
+                }
+                else
+                {
+                    logger.log(ERROR, __func__, "Failed to retrieve WM_NAME for window");
                 }
             }
 
