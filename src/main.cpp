@@ -87,23 +87,43 @@ using Uint = unsigned int;
 using SUint = unsigned short int;
 
 #define FRAME_EVENT_MASK \
-    XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY   |\
-    XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT |\
-    XCB_EVENT_MASK_POINTER_MOTION        |\
-    XCB_EVENT_MASK_FOCUS_CHANGE          |\
-    XCB_EVENT_MASK_ENTER_WINDOW          |\
+    XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY   | \
+    XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT | \
+    XCB_EVENT_MASK_POINTER_MOTION        | \
+    XCB_EVENT_MASK_FOCUS_CHANGE          | \
+    XCB_EVENT_MASK_ENTER_WINDOW          | \
     XCB_EVENT_MASK_PROPERTY_CHANGE
 
 #define CLIENT_EVENT_MASK \
-    XCB_EVENT_MASK_STRUCTURE_NOTIFY |\
-    XCB_EVENT_MASK_FOCUS_CHANGE     |\
+    XCB_EVENT_MASK_STRUCTURE_NOTIFY | \
+    XCB_EVENT_MASK_FOCUS_CHANGE     | \
     XCB_EVENT_MASK_PROPERTY_CHANGE
 
-// #define BUTTON_EVENT_MASK \
-//     EnterWindowMask|\
-//     LeaveWindowMask
+/*
+#define BUTTON_EVENT_MASK \
+    EnterWindowMask | \
+    LeaveWindowMask
 
-#define RE_CAST(__type) reinterpret_cast<const __type *>(ev)
+#define ROOT_EVENT_MASK \
+    XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT | \
+    XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY   | \
+    XCB_EVENT_MASK_STRUCTURE_NOTIFY      | \
+    XCB_EVENT_MASK_BUTTON_PRESS          | \
+    XCB_EVENT_MASK_FOCUS_CHANGE 
+*/
+
+/**
+ * @brief General purpose definition to reinterpret cast.
+ */
+#define RE_CAST(__type, __from) \
+    reinterpret_cast<__type>(__from)
+
+/**
+ * @brief Specialized definition to reinterpret a const xcb_generic_event_t *
+ * into a const __type * (the event that 'e' should represent) with the name 'e' for use in event handling.
+ */
+#define RE_CAST_EV(__type) \
+    auto e = RE_CAST(const __type *, ev)
 
 class __net_logger__
 {
@@ -4224,7 +4244,7 @@ class client
             draw_title(TITLE_REQ_DRAW);
             event_handler->setEventCallback(XCB_EXPOSE,          [this](Ev ev)-> void
             {
-                auto e = RE_CAST(xcb_expose_event_t);
+                RE_CAST_EV(xcb_expose_event_t);
                 if (e->window == titlebar)
                 {
                     draw_title(TITLE_INTR_DRAW);
@@ -4232,7 +4252,7 @@ class client
             });
             event_handler->setEventCallback(XCB_PROPERTY_NOTIFY, [this](Ev ev)-> void
             {
-                auto e = RE_CAST(xcb_property_notify_event_t);
+                RE_CAST_EV(xcb_property_notify_event_t);
                 if (e->window == win)
                 {
                     if (e->atom == ewmh->_NET_WM_NAME)
@@ -9314,7 +9334,7 @@ class mv_client
 
                     case XCB_EXPOSE:
                     {
-                        const auto *e = reinterpret_cast<const xcb_expose_event_t *>(ev);
+                        RE_CAST_EV(xcb_expose_event_t);
                         status_bar->expose(e->window);
                         file_app->expose(e->window);
                         system_settings->expose(e->window);
@@ -9333,7 +9353,7 @@ class mv_client
 
                     case XCB_PROPERTY_NOTIFY:
                     {
-                        auto e = RE_CAST(xcb_property_notify_event_t);
+                        RE_CAST_EV(xcb_property_notify_event_t);
                         client *c = wm->client_from_any_window(&e->window);
                         if (c != nullptr)
                         {
@@ -10187,7 +10207,7 @@ class resize_client
                         {
                             case XCB_MOTION_NOTIFY:
                             {
-                                const auto *e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
+                                RE_CAST_EV(xcb_motion_notify_event_t);
                                 if (isTimeToRender())
                                 {
                                     snap(e->root_x, e->root_y, edge, 12); 
@@ -10206,7 +10226,7 @@ class resize_client
 
                             case XCB_EXPOSE:
                             {
-                                const auto *e = RE_CAST(xcb_expose_event_t);
+                                RE_CAST_EV(xcb_expose_event_t);
                                 status_bar->expose(e->window);
                                 file_app->expose(e->window);
                                 system_settings->expose(e->window);
@@ -10225,7 +10245,7 @@ class resize_client
 
                             case XCB_CONFIGURE_NOTIFY:
                             {
-                                const auto e = reinterpret_cast<const xcb_configure_notify_event_t *>(ev);
+                                RE_CAST_EV(xcb_configure_notify_event_t);
                                 file_app->configure(e->window, e->width, e->height);
                                 system_settings->configure(e->window, e->width, e->height);
 
@@ -10234,7 +10254,7 @@ class resize_client
 
                             case XCB_PROPERTY_NOTIFY:
                             {
-                                auto e = RE_CAST(xcb_property_notify_event_t);
+                                RE_CAST_EV(xcb_property_notify_event_t);
                                 client *c = wm->client_from_any_window(&e->window);
                                 if (c != nullptr)
                                 {
@@ -10898,7 +10918,7 @@ class Events
     private:
         void key_press_handler(const xcb_generic_event_t *&ev)
         {
-            const auto *e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
+            RE_CAST_EV(xcb_key_press_event_t);
             if (e->detail == wm->key_codes.t)
             {
                 switch (e->state)
@@ -11108,7 +11128,7 @@ class Events
 
         void map_notify_handler(const xcb_generic_event_t *&ev)
         {
-            const xcb_map_notify_event_t *e = reinterpret_cast<const xcb_map_notify_event_t *>(ev);
+            RE_CAST_EV(xcb_map_notify_event_t);
             client *c = wm->client_from_window(&e->window);
             if (c != nullptr)
             {
