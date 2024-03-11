@@ -2391,6 +2391,28 @@ class window
                 xcb_flush(conn);
             }
 
+            void draw_text_16(const char *str, const int &text_color, const int &background_color, const char *font_name, const int16_t &x, const int16_t &y)
+            {
+                get_font(font_name); // Your existing function to set the font
+                create_font_gc(text_color, background_color, font); // Your existing function to create a GC with the font
+
+                int len;
+                xcb_char2b_t *char2b_str = convert_to_char2b(str, &len);
+
+                xcb_image_text_16(
+                    conn,
+                    len,
+                    _window,
+                    font_gc,
+                    x,
+                    y,
+                    char2b_str
+                );
+
+                xcb_flush(conn);
+                free(char2b_str);
+            }
+
             void draw_on_expose_event(const char *str , const int &text_color, const int &backround_color, const char *font_name, const int16_t &x, const int16_t &y)
             {
                 on_expose_event([this, str, text_color, backround_color, font_name, x, y]()
@@ -3526,6 +3548,74 @@ class window
                     case NONE: break;
                 }
             }
+
+        // font functions.
+            /*
+             * Decodes a single UTF-8 encoded character from the input string
+             * and returns the Unicode code point.
+             * Also advances the input string by the number of bytes used for
+             * the decoded character. 
+             */
+            uint32_t decode_utf8_char(const char **input)
+            {
+                const unsigned char *str = (const unsigned char *)*input;
+                uint32_t codepoint = 0;
+                if (str[0] <= 0x7F)
+                {
+                    // 1-byte character
+                    codepoint = str[0];
+                    *input += 1;
+                }
+                else if ((str[0] & 0xE0) == 0xC0)
+                {
+                    // 2-byte character
+                    codepoint = ((str[0] & 0x1F) << 6) | (str[1] & 0x3F);
+                    *input += 2;
+                }
+                else if ((str[0] & 0xF0) == 0xE0)
+                {
+                    // 3-byte character
+                    codepoint = ((str[0] & 0x0F) << 12) | ((str[1] & 0x3F) << 6) | (str[2] & 0x3F);
+                    *input += 3;
+                }
+                else if ((str[0] & 0xF8) == 0xF0)
+                {
+                    // 4-byte character (will not be fully represented in UCS-2)
+                    codepoint = 0xFFFD; // Replacement character, as UCS-2 cannot represent this
+                    *input += 4;
+                }
+                else
+                {
+                    // Invalid UTF-8, return replacement character
+                    codepoint = 0xFFFD;
+                    *input += 1; // Advance past the invalid byte
+                }
+
+                return codepoint;
+            }
+
+            // Converts a UTF-8 string to an array of xcb_char2b_t for xcb_image_text_16
+            xcb_char2b_t *convert_to_char2b(const char *input, int *len)
+            {
+                size_t utf8_len = strlen(input);
+                size_t max_chars = utf8_len; // Maximum possible number of characters (all 1-byte)
+
+                xcb_char2b_t *char2b = (xcb_char2b_t *)malloc(max_chars * sizeof(xcb_char2b_t));
+                int count = 0;
+
+                while (*input != '\0' && count < max_chars)
+                {
+                    uint32_t codepoint = decode_utf8_char(&input);
+
+                    // Convert Unicode codepoint to xcb_char2b_t
+                    char2b[count].byte1 = (codepoint >> 8) & 0xFF;
+                    char2b[count].byte2 = codepoint & 0xFF;
+                    count++;
+                }
+
+                *len = count; // Actual number of characters converted
+                return char2b;
+            }
 };
 
 class __window_decor__
@@ -3830,7 +3920,7 @@ class client
 
                 if (__mode & TITLE_REQ_DRAW)
                 {
-                    titlebar.draw_text(
+                    titlebar.draw_text_16(
                         win.get_net_wm_name_by_req().c_str(),
                         WHITE,
                         BLACK,
@@ -3842,7 +3932,7 @@ class client
 
                 if (__mode & TITLE_INTR_DRAW)
                 {
-                    titlebar.draw_text(
+                    titlebar.draw_text_16(
                         win.get_net_wm_name().c_str(),
                         WHITE,
                         BLACK,
