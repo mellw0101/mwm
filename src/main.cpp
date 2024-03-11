@@ -1824,48 +1824,6 @@ class window
                 return false; // The atom was not found or the property could not be retrieved
             }
 
-            string get_window_property(xcb_atom_t __atom)
-            {
-                xcb_get_property_cookie_t cookie = xcb_get_property(ewmh->connection, 0, _window, __atom, XCB_GET_PROPERTY_TYPE_ANY, 0, 1024);
-                xcb_get_property_reply_t* reply = xcb_get_property_reply(ewmh->connection, cookie, NULL);
-                string propertyValue = "";
-
-                if (reply && (reply->type == XCB_ATOM_STRING || reply->type == ewmh->UTF8_STRING))
-                {
-                    // Assuming the property is a UTF-8 string, but you might check and convert depending on the actual type
-                    char* value = (char*)xcb_get_property_value(reply);
-                    int len = xcb_get_property_value_length(reply);
-
-                    if (value && len > 0)
-                    {
-                        propertyValue.assign(value, len);
-                    }
-                }
-
-                free(reply);
-                return propertyValue;
-            }
-
-            string get_net_wm_name_by_req()
-            {
-                xcb_ewmh_get_utf8_strings_reply_t wm_name;
-                string windowName = "";
-
-                if (xcb_ewmh_get_wm_name_reply(ewmh, xcb_ewmh_get_wm_name(ewmh, _window), &wm_name, NULL))
-                {
-                    windowName.assign(wm_name.strings, wm_name.strings_len);
-                    xcb_ewmh_get_utf8_strings_reply_wipe(&wm_name);
-                }
-
-                _name = windowName;
-                return windowName;
-            }
-
-            string get_net_wm_name() const
-            {
-                return _name;
-            }
-            
             bool is_EWMH_fullscreen()
             {
                 xcb_get_property_cookie_t cookie = xcb_ewmh_get_wm_state(ewmh, _window);
@@ -2042,6 +2000,87 @@ class window
             }
         
         public: // get methods
+            string get_window_property(xcb_atom_t __atom)
+            {
+                xcb_get_property_cookie_t cookie = xcb_get_property(ewmh->connection, 0, _window, __atom, XCB_GET_PROPERTY_TYPE_ANY, 0, 1024);
+                xcb_get_property_reply_t* reply = xcb_get_property_reply(ewmh->connection, cookie, NULL);
+                string propertyValue = "";
+
+                if (reply && (reply->type == XCB_ATOM_STRING || reply->type == ewmh->UTF8_STRING))
+                {
+                    // Assuming the property is a UTF-8 string, but you might check and convert depending on the actual type
+                    char* value = (char*)xcb_get_property_value(reply);
+                    int len = xcb_get_property_value_length(reply);
+
+                    if (value && len > 0)
+                    {
+                        propertyValue.assign(value, len);
+                    }
+                }
+
+                free(reply);
+                return propertyValue;
+            }
+
+            string get_net_wm_name_by_req()
+            {
+                xcb_ewmh_get_utf8_strings_reply_t wm_name;
+                string windowName = "";
+
+                if (xcb_ewmh_get_wm_name_reply(ewmh, xcb_ewmh_get_wm_name(ewmh, _window), &wm_name, NULL))
+                {
+                    windowName.assign(wm_name.strings, wm_name.strings_len);
+                    xcb_ewmh_get_utf8_strings_reply_wipe(&wm_name);
+                }
+
+                _name = windowName;
+                return windowName;
+            }
+
+            string get_net_wm_name() const
+            {
+                return _name;
+            }
+
+            void print_wm_class(xcb_connection_t* conn, xcb_window_t window)
+            {
+                xcb_get_property_cookie_t cookie;
+                xcb_get_property_reply_t* reply;
+
+                // Get the WM_CLASS property
+                cookie = xcb_get_property(conn, 0, window, XCB_ATOM_WM_CLASS, XCB_GET_PROPERTY_TYPE_ANY, 0, 1024);
+                reply = xcb_get_property_reply(conn, cookie, NULL);
+
+                if (reply && xcb_get_property_value_length(reply) > 0)
+                {
+                    // WM_CLASS property value is a null-separated string "instance\0class\0"
+                    char* value = (char *)xcb_get_property_value(reply);
+                    printf("WM_CLASS: %s\n", value); // Prints the instance name
+                    printf("WM_CLASS: %s\n", value + strlen(value) + 1); // Prints the class name
+                }
+
+                free(reply);
+            }
+
+            void print_icccm_wm_class()
+            {
+                xcb_get_property_cookie_t cookie;
+                xcb_icccm_get_wm_class_reply_t wm_class_reply;
+
+                cookie = xcb_icccm_get_wm_class(conn, _window); // Request WM_CLASS property
+                if (xcb_icccm_get_wm_class_reply(conn, cookie, &wm_class_reply, NULL)) // Retrieve the WM_CLASS property
+                {
+                    logger.log(INFO, __func__, "Instance Name: ", wm_class_reply.instance_name);
+                    logger.log(INFO, __func__, "Class Name: ", wm_class_reply.class_name);
+
+                    xcb_icccm_get_wm_class_reply_wipe(&wm_class_reply);
+                }
+                else
+                {
+                    logger.log(ERROR, __func__, "Failed to retrieve WM_CLASS for window");
+                }
+            }
+
             char * property(const char *atom_name)
             {
                 xcb_get_property_reply_t *reply;
@@ -5460,7 +5499,7 @@ class Window_Manager
             }
         
         private: // client functions
-            client * make_client(const uint32_t &window)
+            client *make_client(const uint32_t &window)
             {
                 client * c = new client;
                 if (c == nullptr)
@@ -5496,6 +5535,8 @@ class Window_Manager
                 }
 
                 if (c->win.check_atom(ewmh->_NET_WM_STATE_MODAL)) c->atoms.is_modal = true;
+
+                c->win.print_icccm_wm_class();
                 
                 client_list.push_back(c);
                 cur_d->current_clients.push_back(c);
