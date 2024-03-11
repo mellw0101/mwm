@@ -125,6 +125,27 @@ using SUint = unsigned short int;
 #define RE_CAST_EV(__type) \
     auto e = RE_CAST(const __type *, ev)
 
+#define SET_INTR_CLI_KILL_CALLBACK \
+    event_handler->setEventCallback(XCB_CLIENT_MESSAGE, [this](Ev ev)-> void \
+    {                                                                        \
+        RE_CAST_EV(xcb_client_message_event_t);                              \
+        if (c == nullptr) return;                                            \
+        if (e->window == c->win)                                             \
+        {                                                                    \
+            if (e->format == 32)                                             \
+            {                                                                \
+                xcb_atom_t atom;                                             \
+                wm->get_atom((char *)"WM_DELETE_WINDOW", &atom);             \
+                if (e->data.data32[0] == atom)                               \
+                {                                                            \
+                    c->kill();                                               \
+                    delete c;                                                \
+                    c = nullptr;                                             \
+                }                                                            \
+            }                                                                \
+        }                                                                    \
+    });
+
 class __net_logger__
 {
     #define ESP_SERVER "192.168.0.29"
@@ -8827,25 +8848,27 @@ class __system_settings__
                 expose(e->window);
             });
 
-            event_handler->setEventCallback(XCB_CLIENT_MESSAGE, [this](Ev ev)-> void
-            {
-                RE_CAST_EV(xcb_client_message_event_t);
-                if (c == nullptr) return;
-                if (e->window == c->win)
-                {
-                    if (e->format == 32)
-                    {
-                        xcb_atom_t atom;
-                        wm->get_atom((char *)"WM_DELETE_WINDOW", &atom);
-                        if (e->data.data32[0] == atom)
-                        {
-                            c->kill();
-                            delete c;
-                            c = nullptr;
-                        }
-                    }
-                }
-            });
+            SET_INTR_CLI_KILL_CALLBACK
+
+            // event_handler->setEventCallback(XCB_CLIENT_MESSAGE, [this](Ev ev)-> void
+            // {
+            //     RE_CAST_EV(xcb_client_message_event_t);
+            //     if (c == nullptr) return;
+            //     if (e->window == c->win)
+            //     {
+            //         if (e->format == 32)
+            //         {
+            //             xcb_atom_t atom;
+            //             wm->get_atom((char *)"WM_DELETE_WINDOW", &atom);
+            //             if (e->data.data32[0] == atom)
+            //             {
+            //                 c->kill();
+            //                 delete c;
+            //                 c = nullptr;
+            //             }
+            //         }
+            //     }
+            // });
         }
 
     public:
