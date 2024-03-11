@@ -2000,6 +2000,18 @@ class window
             }
         
         // get.
+            void get_min_window_size_hints()
+            {
+                xcb_size_hints_t hints;
+                xcb_icccm_get_wm_normal_hints_reply(conn, xcb_icccm_get_wm_normal_hints(conn, _window), &hints, NULL);
+
+                if (hints.flags & XCB_ICCCM_SIZE_HINT_P_MIN_SIZE)
+                {
+                    _min_width = hints.min_width;
+                    _min_height = hints.min_height;
+                }
+            }
+
             uint32_t get_transient_for_window()
             {
                 uint32_t transient_for = 0; // Default to 0 (no parent)
@@ -2253,6 +2265,16 @@ class window
                 memcpy(children, xcb_query_tree_children(reply), * child_count * sizeof(uint32_t));
                 free(reply);
                 return children;
+            }
+
+            uint32_t get_min_width() const
+            {
+                return _min_width;
+            }
+
+            uint32_t get_min_height() const
+            {
+                return _min_height;
             }
         
             int16_t x_from_req()
@@ -2877,6 +2899,9 @@ class window
         xcb_pixmap_t   pixmap;
         string _name{};
         int _color = 0;
+
+        uint32_t _min_width  = 200;
+        uint32_t _min_height = 100;
 
         Logger log;
     
@@ -3837,9 +3862,12 @@ class client
 
         struct __atoms__
         {
-            bool
-                is_modal           = false,
-                window_type_dialog = false;
+            bool is_modal = false;
+        };
+
+        struct __modal_data__
+        {
+            uint32_t transient_for = 0;
         };
     
     public: // variabels
@@ -3853,6 +3881,7 @@ class client
 
         client_border_decor border;
         __atoms__ atoms;
+        __modal_data__ modal_data;
 
         int16_t x, y;     
         uint16_t width,height;
@@ -5642,8 +5671,12 @@ class Window_Manager
                 }
 
                 c->win     = window;
-                c->height  = (data.height < 300) ? 300 : data.height;
-                c->width   = (data.width < 400)  ? 400 : data.width;
+                c->win.get_min_window_size_hints();
+                c->width   = c->win.get_min_width();
+                c->height  = c->win.get_min_height();
+                
+                // c->height  = (data.height < 300) ? 300 : data.height;
+                // c->width   = (data.width < 400)  ? 400 : data.width;
                 c->x       = c->win.x_from_req();
                 c->y       = c->win.y_from_req();
                 c->depth   = 24;
@@ -5669,12 +5702,9 @@ class Window_Manager
 
                 if (c->win.check_atom(ewmh->_NET_WM_STATE_MODAL))
                 {
-                    NET_LOG(NET_LOG_WINDOW("'modal client' c->win.parent()", c->win.get_transient_for_window()));
                     c->atoms.is_modal = true;
+                    c->modal_data.transient_for = c->win.get_transient_for_window();
                 }
-
-                c->win.print_icccm_wm_class();
-                c->win.print_icccm_wm_name();
                 
                 client_list.push_back(c);
                 cur_d->current_clients.push_back(c);
