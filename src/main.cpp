@@ -1338,7 +1338,7 @@ class window
         }
     
     public:  // methods
-        public: // main methods
+        // main.
             void create(const uint8_t  &depth,
                         const uint32_t &parent,
                         const int16_t  &x,
@@ -1759,7 +1759,7 @@ class window
                 }
             }
 
-        // event methods
+        // event.
             template<typename Callback>
             void on_expose_event(Callback&& callback)
             {
@@ -1801,7 +1801,7 @@ class window
                 });
             }
 
-        public: // check methods
+        // check.
             bool check_atom(xcb_atom_t __atom)
             {
                 xcb_get_property_cookie_t cookie = xcb_ewmh_get_wm_state(ewmh, _window);
@@ -1956,7 +1956,7 @@ class window
                 return true; // Default to decorating if we can't find or interpret the hints
             }
         
-        public: // set methods
+        // set.
             void set_active_EWMH_window()
             {
                 // 0 for the first (default) screen
@@ -1983,7 +1983,7 @@ class window
                 xcb_flush(conn);
             }
         
-        public: // unset methods
+        // unset.
             void unset_EWMH_fullscreen_state()
             {
                 xcb_change_property(
@@ -1999,7 +1999,7 @@ class window
                 xcb_flush(conn);
             }
         
-        public: // get methods
+        // get.
             string get_window_property(xcb_atom_t __atom)
             {
                 xcb_get_property_cookie_t cookie = xcb_get_property(ewmh->connection, 0, _window, __atom, XCB_GET_PROPERTY_TYPE_ANY, 0, 1024);
@@ -2311,7 +2311,7 @@ class window
                 return height;
             }
         
-        public: // configuration methods
+        // configuration.
             void apply_event_mask(const vector<uint32_t> &values)
             {
                 if (values.empty())
@@ -2406,6 +2406,30 @@ class window
                     font_gc,
                     x,
                     y,
+                    char2b_str
+                );
+
+                xcb_flush(conn);
+                free(char2b_str);
+            }
+
+            void draw_text_16_auto_color(const char *__str, const int16_t &__x, const int16_t &__y, const int &__text_color = WHITE, const int &__background_color = 0, const char *__font_name = DEFAULT_FONT)
+            {
+                get_font(__font_name); // Your existing function to set the font
+                int bg_color;
+                if (__background_color == 0) bg_color = _color;
+                create_font_gc(__text_color, bg_color, font); // Your existing function to create a GC with the font
+
+                int len;
+                xcb_char2b_t *char2b_str = convert_to_char2b(__str, &len);
+
+                xcb_image_text_16(
+                    conn,
+                    len,
+                    _window,
+                    font_gc,
+                    __x,
+                    __y,
                     char2b_str
                 );
 
@@ -2536,6 +2560,7 @@ class window
             public: // backround methods
                 void set_backround_color(COLOR color)
                 {
+                    _color = color;
                     change_back_pixel(get_color(color));
                 }
                 
@@ -2649,7 +2674,7 @@ class window
                     set_backround_png(file_name);
                 }
         
-        public: // keys
+        // keys.
             void grab_default_keys()
             {
                 grab_keys({
@@ -2779,7 +2804,7 @@ class window
                 });
             }
         
-        public: // buttons
+        // buttons.
             void grab_button(std::initializer_list<std::pair<const uint8_t, const uint16_t>> bindings)
             {
                 for (const auto & binding : bindings) {
@@ -2817,7 +2842,7 @@ class window
             }
         
     private: // variables
-        private: // main variables 
+        // main variables.
             uint8_t        _depth;
             uint32_t       _window;
             uint32_t       _parent;
@@ -2836,6 +2861,7 @@ class window
         xcb_font_t     font;
         xcb_pixmap_t   pixmap;
         string _name{};
+        int _color = 0;
 
         Logger log;
     
@@ -3826,7 +3852,7 @@ class client
         pid_t pid;
     
     public: // methods
-        public: // main methods
+        // main.
             void make_decorations()
             {
                 make_frame();
@@ -3918,32 +3944,11 @@ class client
             {
                 titlebar.clear();
 
-                if (__mode & TITLE_REQ_DRAW)
-                {
-                    titlebar.draw_text_16(
-                        win.get_net_wm_name_by_req().c_str(),
-                        WHITE,
-                        BLACK,
-                        DEFAULT_FONT,
-                        4,
-                        15
-                    );
-                }
-
-                if (__mode & TITLE_INTR_DRAW)
-                {
-                    titlebar.draw_text_16(
-                        win.get_net_wm_name().c_str(),
-                        WHITE,
-                        BLACK,
-                        DEFAULT_FONT,
-                        4,
-                        15
-                    );
-                }
+                if (__mode & TITLE_REQ_DRAW ) titlebar.draw_text_16_auto_color(win.get_net_wm_name_by_req().c_str(), 4, 15);
+                if (__mode & TITLE_INTR_DRAW) titlebar.draw_text_16_auto_color(win.get_net_wm_name().c_str(), 4, 15);
             }
         
-        public: // config methods
+        // config.
             void x_y(const int32_t &x, const uint32_t &y)
             {
                 frame.x_y(x, y);
@@ -4089,7 +4094,7 @@ class client
                 xcb_flush(conn);
             }
         
-        public: // size_pos methods
+        // size_pos.
             void save_ogsize()
             {
                 ogsize.save(x, y, width, height);
@@ -4110,7 +4115,7 @@ class client
                 max_button_ogsize.save(x, y, width, height);
             }
         
-        public: // check methods
+        // check.
             bool is_active_EWMH_window()
             {
                 return win.is_active_EWMH_window();
@@ -4132,7 +4137,7 @@ class client
                 return false;
             }
         
-        public: // set methods
+        // set.
             void set_active_EWMH_window()
             {
                 win.set_active_EWMH_window();
@@ -4143,7 +4148,7 @@ class client
                 win.set_EWMH_fullscreen_state();
             }
     
-        public: // unset methods
+        // unset.
             void unset_EWMH_fullscreen_state()
             {
                 win.unset_EWMH_fullscreen_state();
