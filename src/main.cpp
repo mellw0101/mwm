@@ -1232,7 +1232,7 @@ class Event_Handler
         {
             setEventCallback(XCB_KEY_PRESS, [this, callback, __key, __mask](Ev ev)
             {
-                auto e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
+                RE_CAST_EV(xcb_key_press_event_t);
                 if (e->detail == __key)
                 {
                     if (e->state == __mask)
