@@ -86,6 +86,8 @@ using namespace std;
 using Uint = unsigned int;
 using SUint = unsigned short int;
 
+#define NET_DEBUG false
+
 #define FRAME_EVENT_MASK \
     XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY   | \
     XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT | \
@@ -183,6 +185,8 @@ class __net_logger__
     public:
         void init(const char *__address, const int &__port = 0)
         {
+            if (NET_DEBUG == false) return;
+
             if ((_socket = socket(AF_INET, SOCK_STREAM, 0)) == -1)
             {
                 perror("socket");
@@ -216,6 +220,8 @@ class __net_logger__
 
         void send_to_server(const string &__input)
         {
+            if (NET_DEBUG == false) return;
+
             if (!_connected) return;
 
             if (send(_socket, __input.c_str(), __input.length(), 0) < 0)
@@ -3908,11 +3914,13 @@ class client
         struct __atoms__
         {
             bool is_modal = false;
+            bool has_modal = false;
         };
 
         struct __modal_data__
         {
             uint32_t transient_for = 0;
+            uint32_t modal_window = 0;
         };
     
     public: // variabels
@@ -6055,9 +6063,7 @@ class __wifi__
     public:
         void init()
         {
-            // NET_LOG_CLASS_FUNCTION_START();
             event_handler->set_key_press_callback((ALT + SUPER), wm->key_codes.f, [this]()-> void { scan__("wlo1"); });
-            // NET_LOG_CLASS_FUNCTION_DONE();
         }
 
     public:
@@ -6275,7 +6281,6 @@ class __status_bar__
 
         void init__()
         {
-            // NET_LOG(CLASS_NAME);
             create_windows__();
             setup_events__();
             setup_thread__(_time_date_window);
@@ -8037,7 +8042,6 @@ class __file_app__
 
         void init()
         {
-            // NET_LOG(CLASS_NAME);
             setup_events();
         }
 
@@ -8837,10 +8841,7 @@ class __system_settings__
                 }
             });
 
-            event_handler->set_key_press_callback(SUPER, wm->key_codes.s, [this]()-> void
-            {
-                launch();
-            });
+            event_handler->set_key_press_callback(SUPER, wm->key_codes.s, [this]()-> void { launch(); });
 
             event_handler->setEventCallback(XCB_CONFIGURE_NOTIFY, [this](Ev ev)->void
             {
@@ -8855,26 +8856,6 @@ class __system_settings__
             });
 
             SET_INTR_CLI_KILL_CALLBACK();
-
-            // event_handler->setEventCallback(XCB_CLIENT_MESSAGE, [this](Ev ev)-> void
-            // {
-            //     RE_CAST_EV(xcb_client_message_event_t);
-            //     if (c == nullptr) return;
-            //     if (e->window == c->win)
-            //     {
-            //         if (e->format == 32)
-            //         {
-            //             xcb_atom_t atom;
-            //             wm->get_atom((char *)"WM_DELETE_WINDOW", &atom);
-            //             if (e->data.data32[0] == atom)
-            //             {
-            //                 c->kill();
-            //                 delete c;
-            //                 c = nullptr;
-            //             }
-            //         }
-            //     }
-            // });
         }
 
     public:
@@ -9007,7 +8988,6 @@ class __system_settings__
 
         void init()
         {
-            // NET_LOG(CLASS_NAME);
             setup_events__();
         }
 
