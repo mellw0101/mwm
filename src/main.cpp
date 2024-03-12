@@ -8025,7 +8025,7 @@ class __file_app__
 
     public:
         window(main_window);
-        client(*c);
+        client *c = nullptr;
     
         void configure(const uint32_t &__window, const uint32_t &__width, const uint32_t &__height)
         {
