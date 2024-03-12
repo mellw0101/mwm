@@ -57,7 +57,7 @@ install_dependencies() {
                             libpolkit-agent-1-dev   \
                             wireless-tools          \
                             libiw-dev               \
-                            libxcb-xinput-dev   \
+                            libxcb-xinput-dev       \
                             fonts-hack-ttf
     elif [ -x "$(command -v dnf)" ]; then
         # Fedora/RHEL

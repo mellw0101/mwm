@@ -126,6 +126,7 @@ using SUint = unsigned short int;
  */
 #define RE_CAST_EV(__type) \
     auto e = RE_CAST(const __type *, ev)
+
 /*
  * @breif Defenition to set an event callback to the global event handler
  * from within the class that holds the internal client
@@ -145,45 +146,51 @@ using SUint = unsigned short int;
                 if (e->data.data32[0] == atom)                               \
                 {                                                            \
                     c->kill();                                               \
+                    wm->remove_client(c);                                    \
                     delete c;                                                \
                     c = nullptr;                                             \
-                    wm->remove_client(c);                                    \
                 }                                                            \
             }                                                                \
         }                                                                    \
     })
 
+#define RETURN_IF(__statement) \
+    if (__statement) return
+
 class __net_logger__
 {
-    #define ESP_SERVER "192.168.0.29"
-    #define ESP_PORT 23
+    // Defines.
+        #define ESP_SERVER "192.168.0.29"
+        #define ESP_PORT 23
 
-    #define NET_LOG_MSG(message)                "\033[33m" + message + "\033[0m"
-    #define FUNC_NAME_STR                       string(__func__)
-    #define NET_LOG_FUNCTION                    "\033[34m(FUNCTION) " + FUNC_NAME_STR + "\033[0m"
-    #define NET_LOG_WINDOW(window_name, window) "\033[35m(FUNCTION) " + FUNC_NAME_STR + ":\033[34m (WINDOW_NAME) " + window_name + ":\033[32m (uint32_t) " + to_string(window) + "\033[0m"
-    #define WINDOW(window)                      to_string(window)
-    #define CLASS_NAME_RAW                      typeid(*this).name()
-    #define CLASS_NAME_STR                      string(CLASS_NAME_RAW)
-    /*
-     *
-     * @breif fetches the calling class's name and extracts a substr containing only the class name
-     *
-     * NOTE: this only works for class's with prefix '__'
-     *
-     */
-    #define CLASS_NAME                          CLASS_NAME_STR.substr(CLASS_NAME_STR.find("__"))
-    #define NET_LOG_CLASS                       "\033[35m(CLASS) " + CLASS_NAME + "\033[0m"
-    #define NET_LOG(__type)                     net_logger->send_to_server(__type)
-    #define NET_LOG_CLASS_FUNCTION_START()      NET_LOG(NET_LOG_CLASS + " -> " + NET_LOG_FUNCTION + " -> " + NET_LOG_MSG("Starting"))
-    #define NET_LOG_CLASS_FUNCTION_DONE()       NET_LOG(NET_LOG_CLASS + " -> " + NET_LOG_FUNCTION + " -> " + NET_LOG_MSG("Done!!!"))
+        #define NET_LOG_MSG(message)                "\033[33m" + message + "\033[0m"
+        #define FUNC_NAME_STR                       string(__func__)
+        #define NET_LOG_FUNCTION                    "\033[34m(FUNCTION) " + FUNC_NAME_STR + "\033[0m"
+        #define NET_LOG_WINDOW(window_name, window) "\033[35m(FUNCTION) " + FUNC_NAME_STR + ":\033[34m (WINDOW_NAME) " + window_name + ":\033[32m (uint32_t) " + to_string(window) + "\033[0m"
+        #define WINDOW(window)                      to_string(window)
+        #define CLASS_NAME_RAW                      typeid(*this).name()
+        #define CLASS_NAME_STR                      string(CLASS_NAME_RAW)
+        /*
+        *
+        * @breif fetches the calling class's name and extracts a substr containing only the class name
+        *
+        * NOTE: this only works for class's with prefix '__'
+        *
+        */
+        #define CLASS_NAME                          CLASS_NAME_STR.substr(CLASS_NAME_STR.find("__"))
+        #define NET_LOG_CLASS                       "\033[35m(CLASS) " + CLASS_NAME + "\033[0m"
+        #define NET_LOG(__type)                     net_logger->send_to_server(__type)
+        #define NET_LOG_CLASS_FUNCTION_START()      NET_LOG(NET_LOG_CLASS + " -> " + NET_LOG_FUNCTION + " -> " + NET_LOG_MSG("Starting"))
+        #define NET_LOG_CLASS_FUNCTION_DONE()       NET_LOG(NET_LOG_CLASS + " -> " + NET_LOG_FUNCTION + " -> " + NET_LOG_MSG("Done!!!"))
 
     private:
+    // Variabels.
         long _socket;
         int _connected;
         struct sockaddr_in(_sock_addr);
 
     public:
+    // Methods.
         void init(const char *__address, const int &__port = 0)
         {
             if (NET_DEBUG == false) return;
@@ -239,7 +246,7 @@ class __net_logger__
             }
         }
 
-    public:
+    // Constructor.
         __net_logger__()
         : _connected(false) {}
 };
@@ -520,7 +527,8 @@ class mxb
 
 class pointer
 {
-    public: // methods
+    public:
+    // Methods.
         uint32_t x()
         {
             xcb_query_pointer_cookie_t cookie = xcb_query_pointer(conn, screen->root);
@@ -652,21 +660,17 @@ class pointer
         }
 
     private:
+    // Variabels.
         Logger(log);
 };
 
 class fast_vector
 {
     public:
+    // Operators.
         operator vector<const char*>() const
         {
             return data;
-        }
-
-        ~fast_vector()
-        {
-            for (auto str:data) 
-            delete[] str;
         }
 
         const char* operator[](size_t index) const
@@ -674,7 +678,14 @@ class fast_vector
             return data[index];
         }
 
-    // methods
+    // Destuctor.
+        ~fast_vector()
+        {
+            for (auto str:data) 
+            delete[] str;
+        }
+
+    // Methods.
         void push_back(const char* str)
         {
             char* copy = new char[strlen(str) + 1];
@@ -708,12 +719,14 @@ class fast_vector
         }
 
     private:
+    // Variabels.
         vector<const char*>(data);
 };
 
 class string_tokenizer
 {
-    public: // constructors and destructor
+    public:
+    // Constructors and Destructor.
         string_tokenizer() {}
 
         string_tokenizer(const char* input, const char* delimiter)
@@ -734,6 +747,7 @@ class string_tokenizer
             delete[] str;
         }
 
+    // Methods.
         const fast_vector & tokenize(const char* input, const char* delimiter)
         {
             tokens.clear();
@@ -759,7 +773,8 @@ class string_tokenizer
             tokens.clear();
         }
 
-    private: // variables
+    private:
+    // Variables.
         char* str;
         fast_vector tokens;
 };
@@ -767,6 +782,7 @@ class string_tokenizer
 class str
 {
     public:
+    // Constructors and Destructor.
         str(const char* str = "")
         {
             length = strlen(str);
@@ -793,6 +809,7 @@ class str
             delete[] data;
         }
 
+    // Operators.
         str& operator=(const str& other)
         {
             if (this != &other)
@@ -857,7 +874,8 @@ class str
             return false;
         }
 
-    private: // variables
+    private:
+    // Variables
         char* data;
         size_t length;
         bool is_null = false;
@@ -915,10 +933,11 @@ class fast_str_vector
 
 class Directory_Searcher
 {
-    public: // construtor
+    public:
+    // Construtor.
         Directory_Searcher() {}
     
-    public: // methods
+    // Methods.
         void search(const vector<const char *> &directories, const string &searchString)
         {
             results.clear();
@@ -965,7 +984,8 @@ class Directory_Searcher
             return results;
         }
     
-    private: // variabels
+    private:
+    // Variabels.
         vector<const char *>(searchDirectories);
         vector<string>(results);
         Logger log;
@@ -973,10 +993,11 @@ class Directory_Searcher
 
 class Directory_Lister
 {
-    public: // constructor
+    public:
+    // Constructor.
         Directory_Lister() {}
     
-    public: // methods
+    // Methods.
         vector<string> list(const string &Directory)
         {
             vector<string> results;
@@ -997,14 +1018,16 @@ class Directory_Lister
             closedir(d);
             return results;   
         }
-    
-    private: // variabels
+
+    private:
+    // Variabels.
         Logger log;
 };
 
 class File
 {
-    public: // subclasses
+    public:
+    // Sub Classes.
         class search
         {
             public: // construcers and operators
@@ -1020,14 +1043,14 @@ class File
                 ifstream file;
         };
     
-    public: // construcers
+    // Constructor.
         File() {}
     
-    public: // variabels
+    // Variabels.
         Directory_Lister directory_lister;
     
-    public: // methods
-        std::string find_png_icon(std::vector<const char *> dirs, const char *app)
+    // Methods.
+        string find_png_icon(vector<const char *> dirs, const char *app)
         {
             std::string name = app;
             name += ".png";
@@ -1087,12 +1110,13 @@ class File
             return get_env_var("PWD");
         }
     
-    private: // variables
+    private:
+    // Variables.
         Logger log;
         string_tokenizer st;
         Directory_Searcher ds;
     
-    private: // functions
+    // Methods.
         bool check_if_file_exists_in_DIRS(std::vector<const char *> dirs, const char *app)
         {
             string name = app;
@@ -1148,7 +1172,8 @@ class File
 
 class Launcher
 {
-    public: // methods
+    public:
+    // Methods.
         void program(char *program)
         {
             if (!file.check_if_binary_exists(program))
@@ -1163,7 +1188,8 @@ class Launcher
             }
         }
     
-    private: // variabels
+    private:
+    // Variabels.
         File file;
 };
 
@@ -1367,9 +1393,11 @@ namespace // window flag enums
 
 class window
 {
-    public:  // construcers and operators
+    public:  
+    // Constructor.
         window() {}
 
+    // Operators.
         operator uint32_t() const
         {
             return _window;
@@ -1381,8 +1409,8 @@ class window
             return *this;
         }
     
-    public:  // methods
-        // main.
+    // Methods.
+        // Main.
             void create(const uint8_t  &depth,
                         const uint32_t &parent,
                         const int16_t  &x,
@@ -1803,7 +1831,7 @@ class window
                 }
             }
 
-        // event.
+        // Event.
             template<typename Callback>
             void on_expose_event(Callback&& callback)
             {
@@ -1845,7 +1873,7 @@ class window
                 });
             }
 
-        // check.
+        // Check.
             bool check_atom(xcb_atom_t __atom)
             {
                 xcb_get_property_cookie_t cookie = xcb_ewmh_get_wm_state(ewmh, _window);
@@ -2000,7 +2028,7 @@ class window
                 return true; // Default to decorating if we can't find or interpret the hints
             }
         
-        // set.
+        // Set.
             void set_active_EWMH_window()
             {
                 // 0 for the first (default) screen
@@ -2027,7 +2055,7 @@ class window
                 xcb_flush(conn);
             }
         
-        // unset.
+        // Unset.
             void unset_EWMH_fullscreen_state()
             {
                 xcb_change_property(
@@ -2043,7 +2071,19 @@ class window
                 xcb_flush(conn);
             }
         
-        // get.
+        // Get.
+            void get_override_redirect()
+            {
+	            xcb_get_window_attributes_reply_t *wa = xcb_get_window_attributes_reply(conn, xcb_get_window_attributes(conn, _window), NULL);
+                RETURN_IF(wa == nullptr);
+
+                _override_redirect = wa->override_redirect;
+                free(wa);
+
+                if (_override_redirect == true ) log_info("overide_redirect = true");
+                if (_override_redirect == false) log_info("overide_redirect = false");
+            }
+
             void get_min_window_size_hints()
             {
                 xcb_size_hints_t hints;
@@ -2922,7 +2962,8 @@ class window
                 xcb_flush(conn); // Flush the request to the X server
             }
         
-    private: // variables
+    private:
+    // Variables.
         // main variables.
             uint8_t        _depth;
             uint32_t       _window;
@@ -2946,11 +2987,12 @@ class window
 
         uint32_t _min_width  = 200;
         uint32_t _min_height = 100;
+        uint8_t  _override_redirect = 0;
 
         Logger log;
     
-    private: // functions
-        private: // main functions 
+    // Methods.
+        // Main.
             void make_window()
             {
                 _window = xcb_generate_id(conn);
@@ -3058,7 +3100,7 @@ class window
             return ev;
         }
         
-        private: // pointer functions 
+        // Pointer.
             const char * pointer_from_enum(CURSOR CURSOR)
             {
                 switch (CURSOR)
@@ -3108,8 +3150,8 @@ class window
                 }
             }
         
-        private: // create functions 
-            private: // gc functions 
+        // Create.
+            // Gc.
                 void create_graphics_exposure_gc()
                 {
                     gc = xcb_generate_id(conn);
@@ -3147,7 +3189,7 @@ class window
                     );
                 }
             
-            private: // pixmap functions 
+            // Pixmap.
                 void create_pixmap()
                 {
                     pixmap = xcb_generate_id(conn);
@@ -3162,7 +3204,7 @@ class window
                     xcb_flush(conn);
                 }
             
-            private: // png functions
+            // Png.
                 void create_png_from_vector_bitmap(const char *file_name, const vector<vector<bool>> &bitmap)
                 {
                     int width = bitmap[0].size();
@@ -3222,7 +3264,7 @@ class window
                     png_destroy_write_struct(&png_ptr, &info_ptr);
                 }
         
-        private: // get functions 
+        // Get. 
             xcb_atom_t atom(const char *atom_name)
             {
                 xcb_intern_atom_cookie_t cookie = xcb_intern_atom(
@@ -3274,7 +3316,7 @@ class window
                 xcb_flush(conn);
             }
         
-        private: // backround functions 
+        // Background.
             void change_back_pixel(const uint32_t &pixel)
             {
                 xcb_change_window_attributes(
@@ -3465,7 +3507,7 @@ class window
                 return color;
             }
         
-        private: // borders
+        // Borders.
             void make_border_window(BORDER __border, const uint32_t &__size, const int &__color)
             {
                 switch (__border)
@@ -3659,7 +3701,7 @@ class window
                 }
             }
 
-        // font functions.
+        // Font.
             /*
              * Decodes a single UTF-8 encoded character from the input string
              * and returns the Unicode code point.
@@ -5336,6 +5378,7 @@ class Window_Manager
                     log_error("could not make client");
                     return;
                 }
+                c->win.get_override_redirect();
 
                 c->win.x_y_width_height(c->x, c->y, c->width, c->height);
                 xcb_flush(conn);
@@ -6112,6 +6155,7 @@ namespace
 class __status_bar__
 {
     private:
+    // Methods.
         string get_time_and_date__()
         {
             long now(time({}));
@@ -6285,7 +6329,7 @@ class __status_bar__
     // Variabels.
         window(_bar_window), (_time_date_window), (_wifi_window), (_wifi_dropdown_window), (_wifi_close_window), (_wifi_info_window);
 
- 
+    // Methods.
         void init__()
         {
             create_windows__();
@@ -6343,7 +6387,7 @@ class __status_bar__
             }
         }
 
-    public:
+    // Constructor.
         __status_bar__() {}
 };
 static __status_bar__ *status_bar(nullptr);
@@ -6357,6 +6401,7 @@ static __status_bar__ *status_bar(nullptr);
 class Mwm_Animator
 {
     public:
+    // Constructors And Destructor.
         Mwm_Animator(const uint32_t &window)
         : window(window) {}
 
@@ -6370,7 +6415,7 @@ class Mwm_Animator
             stopAnimations();
         }
     
-    public: 
+    // Methods.
         void animate(int startX, int startY, int startWidth, int startHeight, int endX, int endY, int endWidth, int endHeight, int duration) /**
          *
          * @brief Animates the position and size of an object from a starting point to an ending point.
@@ -6538,8 +6583,8 @@ class Mwm_Animator
             stopAnimations();
         }
     
-    private: // variabels
-        
+    private:
+    // variabels.
         xcb_window_t window;
         client * c;
         thread(GAnimationThread);
@@ -6572,7 +6617,7 @@ class Mwm_Animator
         const double frameRate = 120;
         const double frameDuration = 1000.0 / frameRate; 
     
-    private:// functions
+    // Methods.
         void XAnimation(const int & endX)/**
          *
          * @brief Performs animation on window 'x' position until the specified 'endX' is reached.
@@ -7159,14 +7204,15 @@ void animate_client(client * & c, const int & endX, const int & endY, const int 
 
 class button
 {
-    public: // constructor.
+    public:
+    // Constructor.
         button() {}
     
-    public: // public variables.
+    // Variables.
         window(window);
         const char *name;
     
-    public: // public methods.
+    // Methods.
         void create(const uint32_t & parent_window, const int16_t & x, const int16_t & y, const uint16_t & width, const uint16_t & height, COLOR color)
         {
             window.create_default(parent_window, x, y, width, height);
@@ -7213,7 +7259,8 @@ class button
             window.set_backround_png(icon_path.c_str());
         }
     
-    private: // private variables.
+    private: 
+    // Variables.
         function<void()> button_action;
         function<void(Ev ev)> ev_a;
         File file;
@@ -7223,13 +7270,14 @@ class button
 
 class buttons
 {
-    public: // constructors
+    public:
+    // Constructors.
         buttons() {}
 
-    public: // variables
+    // Variables.
         vector<button>(list);
     
-    public: // methods
+    // Methods.
         void add(const char *name, function<void()>(action))
         {
             button button;
@@ -7264,10 +7312,11 @@ class buttons
 class search_window
 {
     public:
+    // Variabels.
         window(main_window);
         string search_string = "";
     
-    public:
+    // Methods.
         void create(const uint32_t & parent_window, const uint32_t & x, const uint32_t & y, const uint32_t & width, const uint32_t & height)
         {
             main_window.create_default(parent_window, x, y, width, height);
@@ -7317,6 +7366,7 @@ class search_window
         }
     
     private:
+    // Methods.
         void setup_events()
         {
             event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev) -> void
@@ -7581,24 +7631,28 @@ class search_window
             });
         }
 
-        void draw_text() {
+        void draw_text()
+        {
             main_window.draw_text(search_string.c_str(), WHITE, BLACK, "7x14", 2, 14);
-            if(search_string.length() > 0) {
+            if (search_string.length() > 0)
+            {
                 results = file.search_for_binary(search_string.c_str());
                 int entry_list_size = results.size(); 
-                if(results.size() > 7) {
+                if (results.size() > 7)
+                {
                     entry_list_size = 7;
                 }
 
                 main_window.height(20 * entry_list_size);
                 xcb_flush(conn);
-                for(int i = 0; i < entry_list_size; ++i) {
+                for (int i = 0; i < entry_list_size; ++i)
+                {
                     entry_list[i].draw_text(results[i].c_str(), WHITE, BLACK, "7x14", 2, 14);
                 }
             }
         }
         
-    private:
+    // Variables.
         function<void()> enter_function;
         File file;
         vector<std::string> results;
@@ -7608,12 +7662,13 @@ class search_window
 class Mwm_Runner
 {
     public:
+    // Variabels.
         window main_window;
         search_window search_window;
         uint32_t BORDER = 2;
         Launcher launcher;
         
-    public:
+    // Methods.
         void init()
         {
             main_window.create_default(
@@ -7655,6 +7710,7 @@ class Mwm_Runner
         }
 
     private:
+    // Methods.
         void hide()
         {
             main_window.unmap();
@@ -7692,6 +7748,7 @@ static Mwm_Runner * mwm_runner;
 class add_app_dialog_window
 {
     public:
+    // Variables.
         window(main_window);
         search_window(search_window);
         client(*c);
@@ -7699,7 +7756,7 @@ class add_app_dialog_window
         pointer(pointer);
         Logger(log);
     
-    public:
+    // Methods.
         void init()
         {
             create();
@@ -7725,11 +7782,12 @@ class add_app_dialog_window
         }
     
     private:
+    // Methods.
         void hide()
         {
             wm->send_sigterm_to_client(c);
         }
-        
+
         void create()
         {
             main_window.create_default(screen->root, pointer.x(), pointer.y(), 300, 200);
@@ -7769,19 +7827,21 @@ class add_app_dialog_window
                 }
             });
         }
-    
-    private:
+
+    // Variabels.
         function<void()> enter_function;
 };
 
 class __menu_entry__
 {
     private:
+    // Variables.
         window(_window);
         string(_string);
         uint32_t(_parent_window), (_x), (_y), (_width), (_height), (_mask), (_border_size);
 
     public:
+    // Methods.
         void init(  const uint32_t &__parent_window,
                     const uint32_t &__x,
                     const uint32_t &__y,
@@ -7829,15 +7889,17 @@ class __menu_entry__
 class __menu__
 {
     public:
+    // Variabels.
         vector<__menu_entry__>(_entry_vector);
         uint32_t(_width), (_parent_window), (_mask);
 
+    // Methods.
         void add_entry()
         {
             __menu_entry__ menu_entry;
         }
 
-    public:
+    // Constructor.
         __menu__() {}
 };
 
@@ -7848,23 +7910,7 @@ class __menu__
 class __file_app__
 {
     private:
-        void create_main_window()
-        {
-            int width = (screen->width_in_pixels / 2), height = (screen->height_in_pixels / 2);
-            int x = ((screen->width_in_pixels / 2) - (width / 2)), y = ((screen->height_in_pixels / 2) - (height / 2));
-            main_window.create_window(
-                screen->root,
-                x,
-                y,
-                width,
-                height,
-                BLUE,
-                XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY | XCB_EVENT_MASK_PROPERTY_CHANGE,
-                MAP | DEFAULT_KEYS
-            );
-            main_window.grab_button({{ L_MOUSE_BUTTON, NULL }});
-        }
-
+    // Subclasses.
         class __left_menu__
         {
             private:
@@ -7985,6 +8031,24 @@ class __file_app__
         };
         __left_menu__(_left_menu);
 
+    // Methods.
+        void create_main_window()
+        {
+            int width = (screen->width_in_pixels / 2), height = (screen->height_in_pixels / 2);
+            int x = ((screen->width_in_pixels / 2) - (width / 2)), y = ((screen->height_in_pixels / 2) - (height / 2));
+            main_window.create_window(
+                screen->root,
+                x,
+                y,
+                width,
+                height,
+                BLUE,
+                XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY | XCB_EVENT_MASK_PROPERTY_CHANGE,
+                MAP | DEFAULT_KEYS
+            );
+            main_window.grab_button({{ L_MOUSE_BUTTON, NULL }});
+        }
+
         void make_internal_client()
         {
             c         = new client;
@@ -8031,9 +8095,11 @@ class __file_app__
         }
 
     public:
+    // Variabels.
         window(main_window);
         client *c = nullptr;
-    
+
+    // Methods.
         void configure(const uint32_t &__window, const uint32_t &__width, const uint32_t &__height)
         {
             if (__window == main_window)
@@ -8052,7 +8118,7 @@ class __file_app__
             setup_events();
         }
 
-    public:
+    // Constructor.
         __file_app__() {}
 };
 static __file_app__ *file_app;
@@ -8060,6 +8126,7 @@ static __file_app__ *file_app;
 class __screen_settings__
 {
     private:
+    // Methods.
         void change_refresh_rate(xcb_connection_t *conn, int desired_width, int desired_height, int desired_refresh)
         {
             // Initialize RandR and get screen resources
@@ -8412,10 +8479,12 @@ class __screen_settings__
         }
 
     public:
+    // Variabels.
         xcb_randr_mode_t(_current_resolution);
         string(_current_resoluton_string);
         vector<pair<xcb_randr_mode_t, string>>(_avalible_resolutions);
 
+    // Methods.
         void set_resolution(xcb_randr_mode_t __mode_id)
         {
             xcb_randr_get_screen_resources_current_cookie_t res_cookie;
@@ -8490,7 +8559,7 @@ class __screen_settings__
             _current_resoluton_string = get_current_resolution_string__();
         }
 
-    public:
+    // Constructor.
         __screen_settings__() {}
 };
 static __screen_settings__ *screen_settings(nullptr);
@@ -8503,6 +8572,7 @@ static __screen_settings__ *screen_settings(nullptr);
 class __system_settings__
 {
     private:
+    // Sub Classes.
         class __mouse_settings__
         {
             public:
@@ -8535,6 +8605,7 @@ class __system_settings__
         };
         __mouse_settings__ mouse_settings;
 
+    // Methods.
         void make_windows__()
         {
             uint32_t mask;
@@ -8866,6 +8937,7 @@ class __system_settings__
         }
 
     public:
+    // Variabels.
         window(_main_window),
             (_menu_window), (_default_settings_window),
             (_screen_menu_entry_window), (_screen_settings_window), (_screen_resolution_window), (_screen_resolution_button_window), (_screen_resolution_dropdown_window),
@@ -8873,9 +8945,9 @@ class __system_settings__
             (_network_menu_entry_window), (_network_settings_window);
         
         vector<window>(_screen_resolution_options_vector);
-
         client *c = nullptr;
 
+    // Methods.
         void check_and_configure_mapped_window(window &__window, const uint32_t &__width, const uint32_t &__height)
         {
             if (__window.is_mapped())
@@ -8998,7 +9070,7 @@ class __system_settings__
             setup_events__();
         }
 
-    public:
+    // Constructor.
         __system_settings__() {}
 };
 static __system_settings__ *system_settings(nullptr);
@@ -9006,8 +9078,10 @@ static __system_settings__ *system_settings(nullptr);
 class __debug_menu__
 {
     private:
+    // Variabels.
         window(dropdown_window);
 
+    // Methods.
         void show__()
         {
             dropdown_window.map();
@@ -9019,6 +9093,7 @@ class __debug_menu__
         }
 
     public:
+    // Methods.
         void init()
         {
             dropdown_window.create_window(
@@ -9045,7 +9120,7 @@ class __debug_menu__
             });
         }
 
-    public:
+    // Constructor.
         __debug_menu__() {}
 };
 static __debug_menu__ *debug_menu(nullptr);
@@ -9053,16 +9128,17 @@ static __debug_menu__ *debug_menu(nullptr);
 class Dock
 {
     public:
+    // Constructor.
         Dock() {}
         
-    public:
+    // Variabels.
         context_menu(context_menu);
         window(main_window);
         buttons(buttons);
         uint32_t x = 0, y = 0, width = 48, height = 48;
         add_app_dialog_window(add_app_dialog_window);
     
-    public:
+    // Methods.
         void init()
         {
             main_window.create_default(screen->root, 0, 0, width, height);
@@ -9086,12 +9162,13 @@ class Dock
         }
 
     private:
+    // Variables.
         vector<const char *>(apps);
         Launcher(launcher);
         Logger(log);
         File(file);
         
-    private:
+    // Methods.
         void calc_size_pos()
         {
             int num_of_buttons(buttons.size());
@@ -9183,10 +9260,12 @@ static Dock * dock;
 
 class mv_client
 {
-    #define RIGHT_  screen->width_in_pixels  - c->width
-    #define BOTTOM_ screen->height_in_pixels - c->height
+    // Defines.
+        #define RIGHT_  screen->width_in_pixels  - c->width
+        #define BOTTOM_ screen->height_in_pixels - c->height
    
     public:
+    // Constructor.
         mv_client(client * c, int start_x, int start_y)
         : c(c), start_x(start_x), start_y(start_y)
         {
@@ -9198,6 +9277,7 @@ class mv_client
         }
 
     private:
+    // Variabels.
         client(*c);
         pointer(pointer);
         int start_x, start_y;
@@ -9207,7 +9287,7 @@ class mv_client
         chrono::high_resolution_clock::time_point lastUpdateTime = chrono::high_resolution_clock::now();
         const double frameDuration = 1000.0 / frameRate;
     
-    private:
+    // Methods.
         void snap(int x, int y)
         {
             // WINDOW TO WINDOW SNAPPING 
@@ -9407,16 +9487,19 @@ mutex mtx;
 class change_desktop
 {
     public:
+    // Constructor.
         change_desktop(xcb_connection_t *connection) {}
+
+    // Variabels.
         int duration = 100;
-    
-    public:
+
         enum DIRECTION
         {
             NEXT,
             PREV
         };
 
+    // Methods.
         void change_to(const DIRECTION &direction)
         {
             switch (direction)
@@ -9579,6 +9662,7 @@ class change_desktop
         }
     
     private:
+    // Variabels.
         // xcb_connection_t(*connection);
         vector<client *>(show);
         vector<client *>(hide);
@@ -9588,8 +9672,8 @@ class change_desktop
         atomic<bool>(stop_hide_flag){false};
         atomic<bool>(reverse_animation_flag){false};
         vector<thread>(animation_threads);
-    
-    private:
+
+    // Methods.
         vector<client *> get_clients_on_desktop(const uint8_t &desktop)
         {
             vector<client *>(clients);
@@ -9713,6 +9797,7 @@ class change_desktop
 class resize_client
 {
     public:
+    // Constructor.
         resize_client(client * & c , int retard_int)/**
             
             THE REASON FOR THE 'retard_int' IS BECUSE WITHOUT IT 
@@ -9730,11 +9815,11 @@ class resize_client
             run();
             pointer.ungrab();
         }
-    
-    public:
+    // Subclasses.
         class no_border
         {
             public:
+            // Constructor.
                 no_border(client * & c, const uint32_t & x, const uint32_t & y)
                 : c(c)
                 {
@@ -9748,6 +9833,7 @@ class resize_client
                 }
             
             private:
+            // Variabels.
                 client *&c;
                 uint32_t x;
                 pointer pointer;
@@ -9756,7 +9842,7 @@ class resize_client
                 chrono::high_resolution_clock::time_point lastUpdateTime = chrono::high_resolution_clock::now();
                 const double frameDuration = 1000.0 / frameRate;
             
-            private:
+            // Methods.
                 constexpr void teleport_mouse(edge edge)
                 {
                     switch (edge)
@@ -9927,6 +10013,7 @@ class resize_client
         class border
         {
             public:
+            // Constructor.
                 border(client *&c, edge _edge)
                 : c(c)
                 {
@@ -9954,6 +10041,7 @@ class resize_client
                 }
 
             private:
+            // Variabels.
                 client(*&c);
                 client(*c2);
                 edge(c2_edge);
@@ -9963,7 +10051,7 @@ class resize_client
                 const double frameDuration = 1000.0 / frameRate;
                 private:
 
-            private:
+            // Methods.
                 void teleport_mouse(edge edge)
                 {
                     switch (edge)
@@ -10342,6 +10430,7 @@ class resize_client
         };
 
     private:
+    // Variabels.
         client * & c;
         uint32_t x;
         pointer pointer;
@@ -10350,7 +10439,7 @@ class resize_client
         chrono::high_resolution_clock::time_point lastUpdateTime = chrono::high_resolution_clock::now();
         const double frameDuration = 1000.0 / frameRate;
     
-    private:
+    // Methods.
         void snap(const uint16_t & x, const uint16_t & y)
         {
             // WINDOW TO WINDOW SNAPPING 
@@ -10439,8 +10528,10 @@ class resize_client
 class max_win
 {
     private:
+    // Variabels.
         client(*c);
 
+    // Methods.
         void max_win_animate(const int &endX, const int &endY, const int &endWidth, const int &endHeight)
         {
             animate_client(
@@ -10511,46 +10602,48 @@ class max_win
         }
 
     public:
+    // Variabels.
         enum max_win_type
         {
             BUTTON_MAXWIN,
             EWMH_MAXWIN 
         };
 
-    max_win(client *c, max_win_type type)
-    : c(c)
-    {
-        switch (type)
+    // Constructor.
+        max_win(client *c, max_win_type type)
+        : c(c)
         {
-            case EWMH_MAXWIN:
+            switch (type)
             {
-                if (c->is_EWMH_fullscreen())
+                case EWMH_MAXWIN:
                 {
-                    ewmh_unmax_win();
-                }
-                else
-                {
-                    ewmh_max_win();
-                }
+                    if (c->is_EWMH_fullscreen())
+                    {
+                        ewmh_unmax_win();
+                    }
+                    else
+                    {
+                        ewmh_max_win();
+                    }
 
-                break;
-            }
-            
-            case BUTTON_MAXWIN:
-            {
-                if (c->is_button_max_win())
+                    break;
+                }
+                
+                case BUTTON_MAXWIN:
                 {
-                    button_unmax_win();
-                }
-                else
-                { 
-                    button_max_win();
-                }
+                    if (c->is_button_max_win())
+                    {
+                        button_unmax_win();
+                    }
+                    else
+                    { 
+                        button_max_win();
+                    }
 
-                break; 
+                    break; 
+                }
             }
         }
-    }
 };
 
 /**
@@ -10566,8 +10659,10 @@ class max_win
 class tile
 {
     private:
+    // Variabels.
         client(*c);
 
+    // Methods.
         bool current_tile_pos(TILEPOS mode)/**
          *
          * @brief Checks if the current tile position of a window is the specified tile position.
@@ -10776,144 +10871,147 @@ class tile
         }
   
     public:
-    tile(client *&c, TILE tile)
-    : c(c)
-    {
-        if (c->is_EWMH_fullscreen()) return;
-        switch (tile)
+    // Constructor.
+        tile(client *&c, TILE tile)
+        : c(c)
         {
-            case TILE::LEFT:
+            if (c->is_EWMH_fullscreen()) return;
+            switch (tile)
             {
-                // IF 'CURRENTLT_TILED' TO 'LEFT'
-                if (current_tile_pos(TILEPOS::LEFT))
+                case TILE::LEFT:
                 {
-                    restore_og_tile_pos();
-                    return;
-                }
-                
-                // IF 'CURRENTLY_TILED' TO 'RIGHT', 'LEFT_DOWN' OR 'LEFT_UP'
-                if (current_tile_pos(TILEPOS::RIGHT)
-                ||  current_tile_pos(TILEPOS::LEFT_DOWN)
-                ||  current_tile_pos(TILEPOS::LEFT_UP))
-                {
+                    // IF 'CURRENTLT_TILED' TO 'LEFT'
+                    if (current_tile_pos(TILEPOS::LEFT))
+                    {
+                        restore_og_tile_pos();
+                        return;
+                    }
+                    
+                    // IF 'CURRENTLY_TILED' TO 'RIGHT', 'LEFT_DOWN' OR 'LEFT_UP'
+                    if (current_tile_pos(TILEPOS::RIGHT)
+                    ||  current_tile_pos(TILEPOS::LEFT_DOWN)
+                    ||  current_tile_pos(TILEPOS::LEFT_UP))
+                    {
+                        set_tile_sizepos(TILEPOS::LEFT);
+                        return;
+                    }
+                    
+                    // IF 'CURRENTLY_TILED' TO 'RIGHT_DOWN'
+                    if (current_tile_pos(TILEPOS::RIGHT_DOWN))
+                    {
+                        set_tile_sizepos(TILEPOS::LEFT_DOWN);
+                        return;
+                    }
+                    
+                    // IF 'CURRENTLY_TILED' TO 'RIGHT_UP'
+                    if (current_tile_pos(TILEPOS::RIGHT_UP))
+                    {
+                        set_tile_sizepos(TILEPOS::LEFT_UP);
+                        return;
+                    }
+
+                    c->save_tile_ogsize();
                     set_tile_sizepos(TILEPOS::LEFT);
-                    return;
+                    break;
                 }
-                
-                // IF 'CURRENTLY_TILED' TO 'RIGHT_DOWN'
-                if (current_tile_pos(TILEPOS::RIGHT_DOWN))
+                    
+                case TILE::RIGHT:
                 {
-                    set_tile_sizepos(TILEPOS::LEFT_DOWN);
-                    return;
-                }
-                
-                // IF 'CURRENTLY_TILED' TO 'RIGHT_UP'
-                if (current_tile_pos(TILEPOS::RIGHT_UP))
-                {
-                    set_tile_sizepos(TILEPOS::LEFT_UP);
-                    return;
-                }
+                    // IF 'CURRENTLY_TILED' TO 'RIGHT'
+                    if (current_tile_pos(TILEPOS::RIGHT))
+                    {
+                        restore_og_tile_pos();
+                        return;
+                    }
+                    
+                    // IF 'CURRENTLT_TILED' TO 'LEFT', 'RIGHT_DOWN' OR 'RIGHT_UP' 
+                    if (current_tile_pos(TILEPOS::LEFT)
+                    ||  current_tile_pos(TILEPOS::RIGHT_UP)
+                    ||  current_tile_pos(TILEPOS::RIGHT_DOWN))
+                    {
+                        set_tile_sizepos(TILEPOS::RIGHT);
+                        return;
+                    }
+                    
+                    // IF 'CURRENTLT_TILED' 'LEFT_DOWN'
+                    if (current_tile_pos(TILEPOS::LEFT_DOWN))
+                    {
+                        set_tile_sizepos(TILEPOS::RIGHT_DOWN);
+                        return;
+                    }
+                    
+                    // IF 'CURRENTLY_TILED' 'LEFT_UP'
+                    if (current_tile_pos(TILEPOS::LEFT_UP))
+                    {
+                        set_tile_sizepos(TILEPOS::RIGHT_UP);
+                        return;
+                    }
 
-                c->save_tile_ogsize();
-                set_tile_sizepos(TILEPOS::LEFT);
-                break;
-            }
-                
-            case TILE::RIGHT:
-            {
-                // IF 'CURRENTLY_TILED' TO 'RIGHT'
-                if (current_tile_pos(TILEPOS::RIGHT))
-                {
-                    restore_og_tile_pos();
-                    return;
-                }
-                
-                // IF 'CURRENTLT_TILED' TO 'LEFT', 'RIGHT_DOWN' OR 'RIGHT_UP' 
-                if (current_tile_pos(TILEPOS::LEFT)
-                ||  current_tile_pos(TILEPOS::RIGHT_UP)
-                ||  current_tile_pos(TILEPOS::RIGHT_DOWN))
-                {
+                    c->save_tile_ogsize();
                     set_tile_sizepos(TILEPOS::RIGHT);
-                    return;
+                    break;
                 }
                 
-                // IF 'CURRENTLT_TILED' 'LEFT_DOWN'
-                if (current_tile_pos(TILEPOS::LEFT_DOWN))
+                case TILE::DOWN:
                 {
-                    set_tile_sizepos(TILEPOS::RIGHT_DOWN);
-                    return;
-                }
-                
-                // IF 'CURRENTLY_TILED' 'LEFT_UP'
-                if (current_tile_pos(TILEPOS::LEFT_UP))
-                {
-                    set_tile_sizepos(TILEPOS::RIGHT_UP);
-                    return;
+                    // IF 'CURRENTLY_TILED' 'LEFT' OR 'LEFT_UP'
+                    if (current_tile_pos(TILEPOS::LEFT)
+                    ||  current_tile_pos(TILEPOS::LEFT_UP))
+                    {
+                        set_tile_sizepos(TILEPOS::LEFT_DOWN);
+                        return;
+                    }
+
+                    // IF 'CURRENTLY_TILED' 'RIGHT' OR 'RIGHT_UP'
+                    if (current_tile_pos(TILEPOS::RIGHT) 
+                    ||  current_tile_pos(TILEPOS::RIGHT_UP))
+                    {
+                        set_tile_sizepos(TILEPOS::RIGHT_DOWN);
+                        return;
+                    }
+                    
+                    // IF 'CURRENTLY_TILED' 'LEFT_DOWN' OR 'RIGHT_DOWN'
+                    if (current_tile_pos(TILEPOS::LEFT_DOWN)
+                    ||  current_tile_pos(TILEPOS::RIGHT_DOWN))
+                    {
+                        restore_og_tile_pos();
+                        return;
+                    }
+
+                    break;
                 }
 
-                c->save_tile_ogsize();
-                set_tile_sizepos(TILEPOS::RIGHT);
-                break;
-            }
-            
-            case TILE::DOWN:
-            {
-                // IF 'CURRENTLY_TILED' 'LEFT' OR 'LEFT_UP'
-                if (current_tile_pos(TILEPOS::LEFT)
-                ||  current_tile_pos(TILEPOS::LEFT_UP))
+                case TILE::UP:
                 {
-                    set_tile_sizepos(TILEPOS::LEFT_DOWN);
-                    return;
-                }
+                    // IF 'CURRENTLY_TILED' 'LEFT'
+                    if (current_tile_pos(TILEPOS::LEFT)
+                    ||  current_tile_pos(TILEPOS::LEFT_DOWN))
+                    {
+                        set_tile_sizepos(TILEPOS::LEFT_UP);
+                        return;
+                    }
 
-                // IF 'CURRENTLY_TILED' 'RIGHT' OR 'RIGHT_UP'
-                if (current_tile_pos(TILEPOS::RIGHT) 
-                ||  current_tile_pos(TILEPOS::RIGHT_UP))
-                {
-                    set_tile_sizepos(TILEPOS::RIGHT_DOWN);
-                    return;
-                }
-                
-                // IF 'CURRENTLY_TILED' 'LEFT_DOWN' OR 'RIGHT_DOWN'
-                if (current_tile_pos(TILEPOS::LEFT_DOWN)
-                ||  current_tile_pos(TILEPOS::RIGHT_DOWN))
-                {
-                    restore_og_tile_pos();
-                    return;
-                }
+                    // IF 'CURRENTLY_TILED' 'RIGHT' OR RIGHT_DOWN
+                    if (current_tile_pos(TILEPOS::RIGHT)
+                    ||  current_tile_pos(TILEPOS::RIGHT_DOWN))
+                    {
+                        set_tile_sizepos(TILEPOS::RIGHT_UP);
+                        return;
+                    }
 
-                break;
-            }
-
-            case TILE::UP:
-            {
-                // IF 'CURRENTLY_TILED' 'LEFT'
-                if (current_tile_pos(TILEPOS::LEFT)
-                ||  current_tile_pos(TILEPOS::LEFT_DOWN))
-                {
-                    set_tile_sizepos(TILEPOS::LEFT_UP);
-                    return;
+                    break;
                 }
-
-                // IF 'CURRENTLY_TILED' 'RIGHT' OR RIGHT_DOWN
-                if (current_tile_pos(TILEPOS::RIGHT)
-                ||  current_tile_pos(TILEPOS::RIGHT_DOWN))
-                {
-                    set_tile_sizepos(TILEPOS::RIGHT_UP);
-                    return;
-                }
-
-                break;
             }
         }
-    }
 };
 
 class Events
 {
     public:
+    // Constructor.
         Events() {}
     
+    // Methods.
         void setup()
         {
             event_handler->setEventCallback(XCB_KEY_PRESS,         [&](Ev ev)-> void { key_press_handler(ev); });
@@ -10932,6 +11030,7 @@ class Events
         }
 
     private:
+    // Methods.
         void key_press_handler(const xcb_generic_event_t *&ev)
         {
             RE_CAST_EV(xcb_key_press_event_t);
@@ -11383,6 +11482,7 @@ class Events
 class test
 {
     private:
+    // Methods.
         void setup_events()
         {
             event_handler->setEventCallback(XCB_KEY_PRESS, [this](Ev ev)-> void
@@ -11501,14 +11601,17 @@ class test
         }
 
     public:
+    // Variabels.
         int running = 1;
-    
-    test() {}
 
-    void init()
-    {
-        setup_events();
-    }
+    // Methods.
+        void init()
+        {
+            setup_events();
+        }
+
+    // Constructor.
+        test() {}
 };
 
 void setup_wm()
