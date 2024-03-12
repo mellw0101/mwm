@@ -147,6 +147,7 @@ using SUint = unsigned short int;
                     c->kill();                                               \
                     delete c;                                                \
                     c = nullptr;                                             \
+                    wm->remove_client(c);                                    \
                 }                                                            \
             }                                                                \
         }                                                                    \
@@ -5385,6 +5386,29 @@ class Window_Manager
                 c->kill();
                 remove_client(c);
             }
+     
+            void remove_client(client *c)
+            {
+                client_list.erase(
+                    remove(
+                        client_list.begin(),
+                        client_list.end(),
+                        c
+                    ), 
+                    client_list.end()
+                );
+
+                cur_d->current_clients.erase(
+                    remove(
+                        cur_d->current_clients.begin(),
+                        cur_d->current_clients.end(),
+                        c
+                    ),
+                    cur_d->current_clients.end()
+                );
+
+                delete c;
+            }
 
         // desktop methods
             void create_new_desktop(const uint16_t &n)
@@ -5674,30 +5698,7 @@ class Window_Manager
                 vec.clear();
                 vector<Type *>().swap(vec);
             }
-            
-            void remove_client(client *c)
-            {
-                client_list.erase(
-                    remove(
-                        client_list.begin(),
-                        client_list.end(),
-                        c
-                    ), 
-                    client_list.end()
-                );
-
-                cur_d->current_clients.erase(
-                    remove(
-                        cur_d->current_clients.begin(),
-                        cur_d->current_clients.end(),
-                        c
-                    ),
-                    cur_d->current_clients.end()
-                );
-
-                delete c;
-            }
-
+       
             void remove_client_from_vector(client * c, vector<client *> &vec)
             {
                 if (c == nullptr) log_error("client is nullptr.");
