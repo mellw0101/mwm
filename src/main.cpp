@@ -1248,7 +1248,7 @@ class Event_Handler
         bool shouldContinue = false;
         CallbackId nextCallbackId = 0;
 };
-static Event_Handler * event_handler;
+static Event_Handler *event_handler(nullptr);
 
 class Bitmap
 {
