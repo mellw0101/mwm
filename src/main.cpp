@@ -146,9 +146,9 @@ using SUint = unsigned short int;
                 if (e->data.data32[0] == atom)                               \
                 {                                                            \
                     c->kill();                                               \
-                    wm->remove_client(c);                                    \
                     delete c;                                                \
                     c = nullptr;                                             \
+                    wm->remove_client(c);                                    \
                 }                                                            \
             }                                                                \
         }                                                                    \
@@ -5392,11 +5392,6 @@ class Window_Manager
 
                 c->win.grab_default_keys();
                 c->make_decorations();
-                // uint mask = XCB_EVENT_MASK_FOCUS_CHANGE |
-                //             XCB_EVENT_MASK_ENTER_WINDOW |
-                //             XCB_EVENT_MASK_LEAVE_WINDOW |
-                //             XCB_EVENT_MASK_STRUCTURE_NOTIFY;
-                // c->win.apply_event_mask(&mask);
                 c->frame.set_event_mask(FRAME_EVENT_MASK);
                 c->win.set_event_mask(CLIENT_EVENT_MASK);
                 c->update();
