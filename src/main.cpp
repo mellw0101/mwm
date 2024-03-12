@@ -9461,6 +9461,7 @@ class mv_client
                 free(ev);
             }
         }
+        
 
         bool isTimeToRender()
         {
