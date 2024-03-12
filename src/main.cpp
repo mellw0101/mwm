@@ -5137,10 +5137,7 @@ class Window_Manager
                 {
                     if (focused_client == nullptr)
                     {
-                        if (cur_d->current_clients.size() == 0)
-                        {
-                            return;
-                        }
+                        if (cur_d->current_clients.size() == 0) return;
 
                         for (long i(0); i < cur_d->current_clients.size(); ++i)
                         {
@@ -5173,7 +5170,7 @@ class Window_Manager
                             return;
                         }
 
-                        if (i == (cur_d->current_clients.size() - 1)) continue;
+                        if (i == (cur_d->current_clients.size() - 1)) i = 0;
                     }
                 }
 
