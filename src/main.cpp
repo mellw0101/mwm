@@ -124,7 +124,11 @@ using SUint = unsigned short int;
  */
 #define RE_CAST_EV(__type) \
     auto e = RE_CAST(const __type *, ev)
-
+/*
+ * @breif Defenition to set an event callback to the global event handler
+ * from within the class that holds the internal client
+ * as this way it can be properly cleaned when killed
+ */
 #define SET_INTR_CLI_KILL_CALLBACK() \
     event_handler->setEventCallback(XCB_CLIENT_MESSAGE, [this](Ev ev)-> void \
     {                                                                        \
@@ -1168,7 +1172,7 @@ using Ev = const xcb_generic_event_t *;
 class Event_Handler
 {
     public: // methods
-        using EventCallback = std::function<void(Ev)>;
+        using EventCallback = function<void(Ev)>;
 
         void run()
         {
@@ -1184,7 +1188,7 @@ class Event_Handler
                 auto it = eventCallbacks.find(responseType);
                 if (it != eventCallbacks.end())
                 {
-                    for (const auto &callback : it->second)
+                    for (const pair<CallbackId, EventCallback> &callback : it->second)
                     {
                         callback.second(ev);
                     }
