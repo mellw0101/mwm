@@ -507,7 +507,7 @@ class mxb
         {
             string response = conn->sendMessage("BIG-REQUESTS");
             log_info(response);
-        } 
+        }
         catch (const exception &e)
         {
             log_error(e.what());
@@ -651,7 +651,6 @@ class pointer
             ungrab();
         }
 
-        
     private:
         Logger(log);
 };
@@ -669,12 +668,12 @@ class fast_vector
             for (auto str:data) 
             delete[] str;
         }
-    
+
         const char* operator[](size_t index) const
         {
             return data[index];
         }
-    
+
     // methods
         void push_back(const char* str)
         {
@@ -716,7 +715,7 @@ class string_tokenizer
 {
     public: // constructors and destructor
         string_tokenizer() {}
-        
+
         string_tokenizer(const char* input, const char* delimiter)
         {
             // Copy the input string
@@ -734,7 +733,7 @@ class string_tokenizer
         {
             delete[] str;
         }
-    
+
         const fast_vector & tokenize(const char* input, const char* delimiter)
         {
             tokens.clear();
@@ -759,7 +758,7 @@ class string_tokenizer
         {
             tokens.clear();
         }
-    
+
     private: // variables
         char* str;
         fast_vector tokens;
@@ -774,7 +773,7 @@ class str
             data = new char[length + 1];
             strcpy(data, str);
         }
-    
+
         str(const str& other)
         {
             length = other.length;
@@ -788,12 +787,12 @@ class str
             other.data = nullptr;
             other.length = 0;
         }
-    
+
         ~str()
         {
             delete[] data;
         }
-    
+
         str& operator=(const str& other)
         {
             if (this != &other)
@@ -806,7 +805,7 @@ class str
 
             return *this;
         }
-    
+
         str& operator=(str&& other) noexcept
         {
             if (this != &other)
@@ -820,7 +819,7 @@ class str
 
             return *this;
         }
-    
+
         str operator+(const str& other) const
         {
             str result;
@@ -830,26 +829,23 @@ class str
             strcat(result.data, other.data);
             return result;
         }
-    
+
     // methods
-        // Access to underlying C-string
-        const char * c_str() const
+        const char * c_str() const // Access to underlying C-string
         {
             return data;
         }        
-        
-        // Get the length of the string
-        size_t size() const
+
+        size_t size() const // Get the length of the string
         {
             return length;
         }
-        
-        // Method to check if the string is empty
-        bool isEmpty() const
+
+        bool isEmpty() const // Method to check if the string is empty
         {
             return length == 0;
         }
-        
+
         bool is_nullptr() const
         {
             if (data == nullptr)
@@ -860,7 +856,7 @@ class str
 
             return false;
         }
-    
+
     private: // variables
         char* data;
         size_t length;
@@ -869,39 +865,35 @@ class str
 
 class fast_str_vector
 {
-    public: // operators
+    public:
+    // operators.
         operator vector<str>() const
         {
             return data;
         }
-    
-    public: // [] operator Access an element in the vector
-        str operator[](size_t index) const
+
+        str operator[](size_t index) const // [] operator Access an element in the vector
         {
             return data[index];
         }
-    
-    public: // methods
-        // Add a string to the vector
-        void push_back(str str)
+
+    // methods.
+        void push_back(str str) // Add a string to the vector
         {
             data.push_back(str);
         }
-        
-        // Add a string to the vector
-        void append(str str)
+
+        void append(str str) // Add a string to the vector
         {
             data.push_back(str);
         }
-        
-        // Get the size of the vector
-        size_t size() const
+
+        size_t size() const // Get the size of the vector
         {
             return data.size();
         }
-        
-        // get the index of the last element in the vector
-        size_t index_size() const
+
+        size_t index_size() const // get the index of the last element in the vector
         {
             if (data.size() == 0)
             {
@@ -910,14 +902,14 @@ class fast_str_vector
 
             return data.size() - 1;
         }
-        
-        // Clear the vector
-        void clear()
+
+        void clear() // Clear the vector
         {
             data.clear();
         }
     
-    private: // variabels
+    private:
+    // variabels.
         vector<str>(data); // Internal vector to store const char* strings
 };
 
@@ -4451,7 +4443,8 @@ class desktop
 
 class Key_Codes
 {
-    public: // constructor and destructor
+    public:
+    // constructor and destructor.
         Key_Codes() 
         : keysyms(nullptr) {}
 
@@ -4459,8 +4452,7 @@ class Key_Codes
         {
             free(keysyms);
         }
-    
-    public: // methods
+    // methods.
         void init()
         {
             keysyms = xcb_key_symbols_alloc(conn);
@@ -4520,51 +4512,53 @@ class Key_Codes
                 }
             }
         }
-    
-    public: // variabels
+
+    // variabels.
         xcb_keycode_t
             a{}, b{}, c{}, d{}, e{}, f{}, g{}, h{}, i{}, j{}, k{}, l{}, m{},
-            n{}, o{}, p{}, q{}, r{}, s{}, t{}, u{}, v{}, w{}, x{}, y{}, z{}, 
+            n{}, o{}, p{}, q{}, r{}, s{}, t{}, u{}, v{}, w{}, x{}, y{}, z{},
             
             space_bar{}, enter{},
 
             f11{}, n_1{}, n_2{}, n_3{}, n_4{}, n_5{}, r_arrow{},
             l_arrow{}, u_arrow{}, d_arrow{}, tab{}, _delete{};
     
-    private: // variabels
+    private:
+    // variabels.
         xcb_key_symbols_t * keysyms;
 };
 
 class Entry
 {
-    public: // constructor
+    public:
+    // constructor.
         Entry() {}
-    
-    public: // variabels
+
+    // variabels.
         window window;
         bool menu = false;
-    
-    public: // public methods
+
+    // methods.
         void add_name(const char *name)
         {
             entryName = name;
         }
-    
+
         void add_action(function<void()> action)
         {
             entryAction = action;
         }
-    
+
         void activate() const
         {
             entryAction();
         }
-    
+
         const char * getName() const
         {
             return entryName;
         }
-    
+
         void make_window(const xcb_window_t & parent_window, const int16_t & x, const int16_t & y, const uint16_t & width, const uint16_t & height)
         {
             window.create_default(
@@ -4582,8 +4576,9 @@ class Entry
             window.grab_button({ { L_MOUSE_BUTTON, NULL } });
             window.map();
         }
-    
-    private: // vatiabels
+
+    private:
+    // vatiabels.
         const char * entryName;
         function<void()> entryAction;
 };
@@ -4591,6 +4586,7 @@ class Entry
 class context_menu
 {
     private:
+    // Variabels.
         window context_window;
         size_pos size_pos;
         window_borders border;
@@ -4599,7 +4595,8 @@ class context_menu
         vector<Entry>(entries);
         pointer pointer;
         Launcher launcher;
-    
+
+    // Methods.
         void create_dialog_win()
         {
             context_window.create_default(screen->root, 0, 0, size_pos.width, size_pos.height);
@@ -4672,7 +4669,8 @@ class context_menu
             }
         }
     
-    public: // public methods
+    public:
+    // Methods.
         void init()
         {
             configure_events();
@@ -4707,7 +4705,7 @@ class context_menu
             entries.push_back(entry);
         }
     
-    public: // consructor
+    // consructor.
         context_menu()
         {
             size_pos.x      = pointer.x();
@@ -4726,10 +4724,11 @@ class context_menu
 
 class Window_Manager
 {
-    public: // constructor.
+    public:
+    // Constructor.
         Window_Manager() {}
     
-    public: // variabels.
+    // Variabels.
         window(root);
         Launcher(launcher);
         Logger(log);
@@ -4743,8 +4742,8 @@ class Window_Manager
         client *focused_client = nullptr;
         desktop *cur_d = nullptr;
     
-    public: // methods.
-        // Main Methods.
+    // Methods.
+        // Main.
             void init()
             {
                 _conn(nullptr, nullptr);
@@ -5054,7 +5053,7 @@ class Window_Manager
                 free(reply);
             }
 
-        // window methods.
+        // Window.
             bool window_exists(const uint32_t &__window)
             {
                 xcb_generic_error_t *err;
@@ -5090,8 +5089,8 @@ class Window_Manager
                 window_stack(__window1, __window2, XCB_STACK_MODE_BELOW);
             }
 
-        // client methods.
-            // focus methods.
+        // Client.
+            // Focus.
                 void cycle_focus()
                 {
                     if (focused_client == nullptr)
@@ -5150,7 +5149,7 @@ class Window_Manager
                     tmp.kill();
                 }
 
-            // client fetch methods.
+            // client fetch.
                 client *client_from_window(const xcb_window_t *window)
                 {
                     for (const auto &c:client_list)
@@ -5410,7 +5409,7 @@ class Window_Manager
                 delete c;
             }
 
-        // desktop methods
+        // desktop.
             void create_new_desktop(const uint16_t &n)
             {
                 desktop *d = new desktop;
@@ -5423,7 +5422,7 @@ class Window_Manager
                 desktop_list.push_back(d);
             }
         
-        // experimental methods
+        // experimental.
             xcb_visualtype_t *find_argb_visual(xcb_connection_t *conn, xcb_screen_t *screen)
             {
                 xcb_depth_iterator_t depth_iter = xcb_screen_allowed_depths_iterator(screen);
@@ -5464,11 +5463,12 @@ class Window_Manager
                 xcb_flush(conn);
             }
 
-    private: // variables
+    private:
+    // Variables.
         window(start_window);
     
-    private: // functions
-        private: // init functions
+    // Functions.
+        // Init.
             void _conn(const char *displayname, int *screenp)
             {
                 conn = xcb_connect(displayname, screenp);
@@ -5563,7 +5563,7 @@ class Window_Manager
                 root.set_pointer(CURSOR::arrow);
             }
         
-        private: // check functions
+        // Check.
             void check_error(const int &code)
             {
                 switch (code)
@@ -5662,7 +5662,7 @@ class Window_Manager
             return 0;
         }
 
-        private: // delete functions
+        // Delete.
             void delete_client_vec(vector<client *> &vec)
             {
                 for (client *c : vec)
@@ -5715,7 +5715,7 @@ class Window_Manager
                 delete c;
             }
         
-        private: // client functions
+        // Client.
             client *make_client(const uint32_t &window)
             {
                 client * c = new client;
@@ -5831,7 +5831,7 @@ class Window_Manager
                 }
             }
 
-        private: // window functions
+        // Window.
             void getWindowParameters(const uint32_t &window)
             {
                 xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
@@ -5898,7 +5898,7 @@ class Window_Manager
                 return y;
             }
         
-        private: // status functions
+        // Status.
             void check_volt()
             {
                 log_info("running");
@@ -5911,6 +5911,7 @@ static Window_Manager *wm;
 class __network__
 {
     public:
+    // Methods.
         enum
         {
             LOCAL_IP = 0,
@@ -5959,6 +5960,7 @@ class __network__
         }
 
     public:
+    // Constructor.
         __network__() {}
 };
 static __network__ *network(nullptr);
@@ -5966,6 +5968,7 @@ static __network__ *network(nullptr);
 class __wifi__
 {
     private:
+    // Methods.
         void scan__(const char* interface)
         {
             wireless_scan_head head;
@@ -6062,12 +6065,13 @@ class __wifi__
         }
     
     public:
+    // Methods.
         void init()
         {
             event_handler->set_key_press_callback((ALT + SUPER), wm->key_codes.f, [this]()-> void { scan__("wlo1"); });
         }
 
-    public:
+    // Constructor.
         __wifi__() {}
 };
 static __wifi__ *wifi(nullptr);
@@ -6278,8 +6282,10 @@ class __status_bar__
         }
 
     public:
+    // Variabels.
         window(_bar_window), (_time_date_window), (_wifi_window), (_wifi_dropdown_window), (_wifi_close_window), (_wifi_info_window);
 
+ 
         void init__()
         {
             create_windows__();
