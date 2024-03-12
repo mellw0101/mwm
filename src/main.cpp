@@ -5172,6 +5172,8 @@ class Window_Manager
 
                             return;
                         }
+
+                        if (i == (cur_d->current_clients.size() - 1)) continue;
                     }
                 }
 
