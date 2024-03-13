@@ -8745,8 +8745,8 @@ class __system_settings__
             c->width  = _main_window.width();
             c->height = _main_window.height();
             c->make_decorations();
-            uint32_t mask = XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY;
-            c->frame.apply_event_mask(&mask);
+            c->frame.set_event_mask(FRAME_EVENT_MASK);
+            c->win.set_event_mask(CLIENT_EVENT_MASK);
             wm->client_list.push_back(c);
             wm->cur_d->current_clients.push_back(c);
             c->focus();
@@ -8971,11 +8971,8 @@ class __system_settings__
         {
             if (__window == _screen_menu_entry_window)
             {
-                _screen_menu_entry_window.draw_text(
+                _screen_menu_entry_window.draw_text_16_auto_color(
                     "Screen",
-                    WHITE,
-                    DARK_GREY,
-                    DEFAULT_FONT,
                     MENU_ENTRY_TEXT_X,
                     MENU_ENTRY_TEXT_Y
                 );
@@ -8983,26 +8980,19 @@ class __system_settings__
 
             if (__window == _screen_settings_window)
             {
-                _screen_settings_window.draw_text(
-                    "Resolution ",
-                    BLACK,
-                    WHITE,
-                    DEFAULT_FONT,
-                    24,
-                    35
+                _screen_settings_window.draw_text_16_auto_color(
+                    "Resolution",
+                    MENU_ENTRY_TEXT_X,
+                    MENU_ENTRY_TEXT_Y
                 );
             }
 
             if (__window == _screen_resolution_window)
             {
                 string resolution(screen_settings->_current_resoluton_string);
-                if (resolution.empty()) return;
-
-                _screen_resolution_window.draw_text(
+                RETURN_IF(resolution.empty())
+                _screen_resolution_window.draw_text_16_auto_color(
                     resolution.c_str(),
-                    WHITE,
-                    DARK_GREY,
-                    DEFAULT_FONT,
                     4,
                     15
                 );
@@ -9010,11 +9000,8 @@ class __system_settings__
 
             if (__window == _audio_menu_entry_window)
             {
-                _audio_menu_entry_window.draw_text(
+                _audio_menu_entry_window.draw_text_16_auto_color(
                     "Audio",
-                    WHITE,
-                    DARK_GREY,
-                    DEFAULT_FONT,
                     MENU_ENTRY_TEXT_X,
                     MENU_ENTRY_TEXT_Y
                 );
@@ -9022,11 +9009,8 @@ class __system_settings__
 
             if (__window == _network_menu_entry_window)
             {
-                _network_menu_entry_window.draw_text(
+                _network_menu_entry_window.draw_text_16_auto_color(
                     "Network",
-                    WHITE,
-                    DARK_GREY,
-                    DEFAULT_FONT,
                     MENU_ENTRY_TEXT_X,
                     MENU_ENTRY_TEXT_Y
                 );
