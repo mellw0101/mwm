@@ -95,7 +95,8 @@ install_dependencies() {
                                         xcb-util-xrm        \
                                         libpng              \
                                         imlib2              \
-                                        wireless_tools
+                                        wireless_tools      \
+                                        xorg-xinit
     else
         echo "Unsupported distribution. Please install dependencies manually."
         exit 1
