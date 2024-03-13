@@ -160,6 +160,10 @@ using SUint = unsigned short int;
 #define CONTINUE_IF(__statement) \
     if (__statement) continue
 
+#define GET_CLIENT_FROM_WINDOW(__window) \
+    client *c = wm->client_from_any_window(&__window); \
+    RETURN_IF(c == nullptr)
+
 class __net_logger__
 {
     // Defines.
@@ -11141,8 +11145,9 @@ class Events
             
             if (e->detail == wm->key_codes.f11)
             {
-                client *c = wm->client_from_window(&e->event);
-                if (c == nullptr) return;
+                // client *c = wm->client_from_window(&e->event);
+                // if (c == nullptr) return;
+                GET_CLIENT_FROM_WINDOW(e->event);
                 max_win(c, max_win::EWMH_MAXWIN);
                 return;
             }
