@@ -10090,7 +10090,7 @@ class resize_client
                                 RE_CAST_EV(xcb_motion_notify_event_t);
                                 if (isTimeToRender())
                                 {
-                                    snap(e->root_x, e->root_y, edge, 12); 
+                                    snap(e->root_x, e->root_y, edge, 12);
                                     xcb_flush(conn);
                                 }
 
@@ -11114,6 +11114,7 @@ class Events
                 
                 if (e->event == c->border.right)
                 {
+                    log_win("e->event", e->event);
                     resize_client::border border(c, edge::RIGHT);
                     return;
                 } 
