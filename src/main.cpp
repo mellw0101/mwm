@@ -9124,91 +9124,6 @@ class __system_settings__
 };
 static __system_settings__ *system_settings(nullptr);
 
-struct __menu_option__
-{
-    window(_window);
-    string(_name_str);
-};
-class __debug_menu__
-{
-    // Defines.
-        enum
-        {
-            WIDTH              = 200,
-            MENU_OPTION_HEIGHT = 20
-        };
-
-    private:        
-    // Variabels.
-        window(dropdown_window);
-        vector<__menu_option__>(_menu_option_vec);
-
-    // Methods.
-        void show__()
-        {
-            dropdown_window.raise();
-            dropdown_window.map();
-            for (__menu_option__ &menu_option : _menu_option_vec)
-            {
-                menu_option._window.map();
-                menu_option._window.draw_text_16_auto_color(menu_option._name_str.c_str(), 4, 15);
-            }
-        }
-
-        void hide__()
-        {
-            dropdown_window.unmap();
-        }
-
-        void create_menu_option__(const string &__name)
-        {
-            __menu_option__ menu_option;
-            menu_option._window.create_window(
-                dropdown_window,
-                0,
-                (MENU_OPTION_HEIGHT * _menu_option_vec.size()),
-                WIDTH,
-                MENU_OPTION_HEIGHT
-            );
-            menu_option._name_str = __name;
-            _menu_option_vec.push_back(menu_option);
-        }
-
-    public:
-    // Methods.
-        void init()
-        {
-            dropdown_window.create_window(
-                screen->root,
-                ((screen->width_in_pixels / 2) - (WIDTH / 2)),
-                20,
-                WIDTH,
-                300,
-                BLACK,
-                XCB_EVENT_MASK_FOCUS_CHANGE,
-                DEFAULT_KEYS | FOCUS_INPUT
-            );
-
-            create_menu_option__("center_win_inside_client");
-
-            event_handler->set_key_press_callback(SUPER, wm->key_codes.d, [this]()-> void
-            {
-                if (dropdown_window.is_mapped())
-                {
-                    hide__();
-                }
-                else
-                {
-                    show__();
-                }
-            });
-        }
-
-    // Constructor.
-        __debug_menu__() {}
-};
-static __debug_menu__ *debug_menu(nullptr);
-
 class Dock
 {
     public:
@@ -11145,8 +11060,6 @@ class Events
             
             if (e->detail == wm->key_codes.f11)
             {
-                // client *c = wm->client_from_window(&e->event);
-                // if (c == nullptr) return;
                 GET_CLIENT_FROM_WINDOW(e->event);
                 max_win(c, max_win::EWMH_MAXWIN);
                 return;
@@ -11736,9 +11649,6 @@ void setup_wm()
     
     system_settings = new __system_settings__;
     system_settings->init();
-
-    debug_menu = new __debug_menu__;
-    debug_menu->init();
 }
 
 int main()
