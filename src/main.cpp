@@ -1384,7 +1384,8 @@ namespace // window flag enums
     enum window_flags
     {
         MAP          = 1 << 0,
-        DEFAULT_KEYS = 1 << 1
+        DEFAULT_KEYS = 1 << 1,
+        FOCUS_INPUT  = 1 << 2
     };
 
     enum window_event_mask : uint32_t
@@ -1591,12 +1592,14 @@ class window
                 make_window();
                 set_backround_color(__color);
                 if (__flags & DEFAULT_KEYS) grab_default_keys();
-                if (__event_mask > 0) apply_event_mask(&__event_mask);
+                if (__flags & FOCUS_INPUT ) focus_input();
                 if (__flags & MAP)
                 {
                     map();
                     raise();
                 }
+
+                if (__event_mask > 0) apply_event_mask(&__event_mask);
 
                 if (__data != nullptr)
                 {
@@ -9139,7 +9142,7 @@ class __debug_menu__
                 300,
                 BLACK,
                 XCB_EVENT_MASK_FOCUS_CHANGE,
-                DEFAULT_KEYS
+                DEFAULT_KEYS | FOCUS_INPUT
             );
 
             create_menu_option__("center_win_inside_client");
