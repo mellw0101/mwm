@@ -94,7 +94,8 @@ install_dependencies() {
                                         xorg-fonts-misc     \
                                         xcb-util-xrm        \
                                         libpng              \
-                                        imlib2
+                                        imlib2              \
+                                        wireless-tools
     else
         echo "Unsupported distribution. Please install dependencies manually."
         exit 1
