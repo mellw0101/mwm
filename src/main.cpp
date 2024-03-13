@@ -1925,8 +1925,9 @@ class window
 
                 return false; // The atom was not found or the property could not be retrieved
             }
-            
-            bool check_frameless_window_hint() // Function to fetch and check the _MOTIF_WM_HINTS property
+
+            // Function to fetch and check the _MOTIF_WM_HINTS property
+            bool check_frameless_window_hint() 
             {
                 bool is_frameless = false;
                 xcb_atom_t property;
@@ -6360,6 +6361,7 @@ class __status_bar__
                     MAP,
                     (int[]){ALL, WIFI_DROPDOWN_BORDER, BLACK}
                 );
+                expose(_wifi_close_window);
                 _wifi_info_window.create_window(
                     _wifi_dropdown_window,
                     WIFI_INFO_WINDOW_X,
@@ -6371,6 +6373,7 @@ class __status_bar__
                     MAP,
                     (int[]){ALL, WIFI_DROPDOWN_BORDER, BLACK}
                 );
+                expose(_wifi_info_window);
             }
         }
 
@@ -6446,11 +6449,8 @@ class __status_bar__
         {
             if (__window == _time_date_window)
             {
-                _time_date_window.draw_text(
+                _time_date_window.draw_text_16_auto_color(
                     get_time_and_date__().c_str(),
-                    WHITE,
-                    DARK_GREY,
-                    DEFAULT_FONT,
                     4,
                     14
                 );
@@ -6458,11 +6458,8 @@ class __status_bar__
 
             if (__window == _wifi_close_window)
             {
-                _wifi_close_window.draw_text(
+                _wifi_close_window.draw_text_16_auto_color(
                     "close",
-                    BLACK,
-                    WHITE,
-                    DEFAULT_FONT,
                     22,
                     15
                 );
@@ -6471,21 +6468,15 @@ class __status_bar__
             if (__window == _wifi_info_window)
             {
                 string local_ip("Local ip: " + network->get_local_ip_info(__network__::LOCAL_IP));
-                _wifi_info_window.draw_text(
+                _wifi_info_window.draw_text_16_auto_color(
                     local_ip.c_str(),
-                    BLACK,
-                    WHITE,
-                    DEFAULT_FONT,
                     4,
                     16
                 );
 
                 string local_interface("interface: " + network->get_local_ip_info(__network__::INTERFACE_FOR_LOCAL_IP));
-                _wifi_info_window.draw_text(
+                _wifi_info_window.draw_text_16_auto_color(
                     local_interface.c_str(),
-                    BLACK,
-                    WHITE,
-                    DEFAULT_FONT,
                     4,
                     30
                 );
