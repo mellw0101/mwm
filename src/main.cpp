@@ -10009,8 +10009,8 @@ class resize_client
                 {
                     uint16_t left_border(0), right_border(0), top_border(0), bottom_border(0);
 
-                    if ((c->width + c->x - x ) <= c->win.get_min_width()  || (c->width + c->x - x ) > (screen->width_in_pixels * 2) ) return;
-                    if ((c->height + c->y - y) <= c->win.get_min_height() || (c->height + c->y - y) > (screen->height_in_pixels * 2)) return; 
+                    // if ((c->width + c->x - x ) <= c->win.get_min_width()  || (c->width + c->x - x ) > (screen->width_in_pixels * 2) ) return;
+                    // if ((c->height + c->y - y) <= c->win.get_min_height() || (c->height + c->y - y) > (screen->height_in_pixels * 2)) return; 
                     
                     for (client *const &c : wm->cur_d->current_clients)
                     {
@@ -11114,7 +11114,6 @@ class Events
                 
                 if (e->event == c->border.right)
                 {
-                    log_win("e->event", e->event);
                     resize_client::border border(c, edge::RIGHT);
                     return;
                 } 
