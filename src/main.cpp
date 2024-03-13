@@ -3840,164 +3840,164 @@ class window
             }
 };
 
-class __window_decor__
-{
-    public:
-        static void make_borders(window &__window, const int &__size, COLOR __color)
-        {
-            window left, right, up, down;
+// class __window_decor__
+// {
+//     public:
+//         static void make_borders(window &__window, const int &__size, COLOR __color)
+//         {
+//             window left, right, up, down;
 
-            left.create_default(
-                __window,
-                0,
-                0,
-                __size,
-                __window.height()
-            );
-            left.set_backround_color(__color);
-            left.map();
+//             left.create_default(
+//                 __window,
+//                 0,
+//                 0,
+//                 __size,
+//                 __window.height()
+//             );
+//             left.set_backround_color(__color);
+//             left.map();
 
-            right.create_default(
-                __window,
-                (__window.width() - __size),
-                0,
-                __size,
-                __window.height()
-            );
-            right.set_backround_color(__color);
-            right.map();
+//             right.create_default(
+//                 __window,
+//                 (__window.width() - __size),
+//                 0,
+//                 __size,
+//                 __window.height()
+//             );
+//             right.set_backround_color(__color);
+//             right.map();
 
-            up.create_default(
-                __window,
-                __size,
-                0,
-                (__window.width() - __size),
-                __size
-            );
-            up.set_backround_color(__color);
-            up.map();
+//             up.create_default(
+//                 __window,
+//                 __size,
+//                 0,
+//                 (__window.width() - __size),
+//                 __size
+//             );
+//             up.set_backround_color(__color);
+//             up.map();
 
-            down.create_default(
-                __window,
-                __size,
-                (__window.height() - __size),
-                (__window.width() - __size),
-                __size
-            );
-            down.set_backround_color(__color);
-            down.map();
-        }
+//             down.create_default(
+//                 __window,
+//                 __size,
+//                 (__window.height() - __size),
+//                 (__window.width() - __size),
+//                 __size
+//             );
+//             down.set_backround_color(__color);
+//             down.map();
+//         }
 
-        static void make_menu_borders(window &__window, const int &__size, COLOR __color)
-        {
-            window right, down;
+//         static void make_menu_borders(window &__window, const int &__size, COLOR __color)
+//         {
+//             window right, down;
 
-            right.create_default(
-                __window,
-                (__window.width() - __size),
-                0,
-                __size,
-                __window.height()
-            );
-            right.set_backround_color(__color);
-            right.map();
+//             right.create_default(
+//                 __window,
+//                 (__window.width() - __size),
+//                 0,
+//                 __size,
+//                 __window.height()
+//             );
+//             right.set_backround_color(__color);
+//             right.map();
 
-            down.create_default(
-                __window,
-                0,
-                (__window.height() - __size),
-                __window.width(),
-                __size
-            );
-            down.set_backround_color(__color);
-            down.map();
-        }
+//             down.create_default(
+//                 __window,
+//                 0,
+//                 (__window.height() - __size),
+//                 __window.width(),
+//                 __size
+//             );
+//             down.set_backround_color(__color);
+//             down.map();
+//         }
 
-        static void make_file_app_menu_borders(window &__window, const int &__size, COLOR __color)
-        {
-            window down;
+//         static void make_file_app_menu_borders(window &__window, const int &__size, COLOR __color)
+//         {
+//             window down;
 
-            down.create_default(
-                __window,
-                0,
-                (__window.height() - __size),
-                __window.width(),
-                __size
-            );
-            down.set_backround_color(__color);
-            down.map();
-        }
+//             down.create_default(
+//                 __window,
+//                 0,
+//                 (__window.height() - __size),
+//                 __window.width(),
+//                 __size
+//             );
+//             down.set_backround_color(__color);
+//             down.map();
+//         }
 
-        static void make_right_side_button_borders(window &__window, const int &__size, COLOR __color)
-        {
-            window right, up, down;
+//         static void make_right_side_button_borders(window &__window, const int &__size, COLOR __color)
+//         {
+//             window right, up, down;
 
-            right.create_default(
-                __window,
-                (__window.width() - __size),
-                0,
-                __size,
-                __window.height()
-            );
-            right.set_backround_color(__color);
-            right.map();
+//             right.create_default(
+//                 __window,
+//                 (__window.width() - __size),
+//                 0,
+//                 __size,
+//                 __window.height()
+//             );
+//             right.set_backround_color(__color);
+//             right.map();
 
-            up.create_default(
-                __window,
-                0,
-                0,
-                (__window.width() - __size),
-                __size
-            );
-            up.set_backround_color(__color);
-            up.map();
+//             up.create_default(
+//                 __window,
+//                 0,
+//                 0,
+//                 (__window.width() - __size),
+//                 __size
+//             );
+//             up.set_backround_color(__color);
+//             up.map();
 
-            down.create_default(
-                __window,
-                0,
-                (__window.height() - __size),
-                (__window.width() - __size),
-                __size
-            );
-            down.set_backround_color(__color);
-            down.map();
-        }
+//             down.create_default(
+//                 __window,
+//                 0,
+//                 (__window.height() - __size),
+//                 (__window.width() - __size),
+//                 __size
+//             );
+//             down.set_backround_color(__color);
+//             down.map();
+//         }
 
-        static void make_dropdown_menu_entry_borders(window &__window, const int &__size, COLOR __color)
-        {
-            window left, right, down;
+//         static void make_dropdown_menu_entry_borders(window &__window, const int &__size, COLOR __color)
+//         {
+//             window left, right, down;
 
-            left.create_default(
-                __window,
-                0,
-                0,
-                __size,
-                __window.height()
-            );
-            left.set_backround_color(__color);
-            left.map();
+//             left.create_default(
+//                 __window,
+//                 0,
+//                 0,
+//                 __size,
+//                 __window.height()
+//             );
+//             left.set_backround_color(__color);
+//             left.map();
 
-            right.create_default(
-                __window,
-                (__window.width() - __size),
-                0,
-                __size,
-                __window.height()
-            );
-            right.set_backround_color(__color);
-            right.map();
+//             right.create_default(
+//                 __window,
+//                 (__window.width() - __size),
+//                 0,
+//                 __size,
+//                 __window.height()
+//             );
+//             right.set_backround_color(__color);
+//             right.map();
 
-            down.create_default(
-                __window,
-                __size,
-                (__window.height() - __size),
-                (__window.width() - __size),
-                __size
-            );
-            down.set_backround_color(__color);
-            down.map();
-        }
-};
+//             down.create_default(
+//                 __window,
+//                 __size,
+//                 (__window.height() - __size),
+//                 (__window.width() - __size),
+//                 __size
+//             );
+//             down.set_backround_color(__color);
+//             down.map();
+//         }
+// };
 
 class client
 {
@@ -7783,7 +7783,7 @@ class Mwm_Runner
         {
             event_handler->setEventCallback(XCB_KEY_PRESS,    [&](Ev ev)-> void
             {
-                const auto *e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
+                RE_CAST_EV(xcb_button_press_event_t);
                 if (e->detail == wm->key_codes.r)
                 {
                     if (e->state == SUPER)
@@ -7795,7 +7795,7 @@ class Mwm_Runner
 
             event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev)-> void
             {
-                const auto *e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
+                RE_CAST_EV(xcb_button_press_event_t);
                 if (!main_window.is_mapped()) return;
 
                 if (e->event != main_window && e->event != search_window.main_window)
@@ -7894,83 +7894,13 @@ class add_app_dialog_window
         function<void()> enter_function;
 };
 
-class __menu_entry__
-{
-    private:
-    // Variables.
-        window(_window);
-        string(_string);
-        uint32_t(_parent_window), (_x), (_y), (_width), (_height), (_mask), (_border_size);
-
-    public:
-    // Methods.
-        void init(  const uint32_t &__parent_window,
-                    const uint32_t &__x,
-                    const uint32_t &__y,
-                    const uint32_t &__width,
-                    const uint32_t &__height,
-                    const uint32_t &__mask,
-                    const uint32_t &__border_size)
-        {
-            _parent_window = __parent_window;
-            _x = __x;
-            _y = __y;
-            _width = __width;
-            _height = __height;
-            _mask = __mask;
-            _border_size = __border_size;
-        }
-
-        void create()
-        {
-            _window.create_default(_parent_window, _x, _y, _width, _height);
-            _window.apply_event_mask(&_mask);
-            _window.set_backround_color(DARK_GREY);
-            __window_decor__::make_file_app_menu_borders(_window, _border_size, BLACK);
-        }
-
-        void draw()
-        {
-            _window.draw_text(
-                _string.c_str(),
-                WHITE,
-                DARK_GREY,
-                DEFAULT_FONT,
-                4,
-                14
-            );
-        }
-
-        void configure(const uint32_t &__width)
-        {
-            _window.width(__width);
-            xcb_flush(conn);
-        }
-};
-
-class __menu__
-{
-    public:
-    // Variabels.
-        vector<__menu_entry__>(_entry_vector);
-        uint32_t(_width), (_parent_window), (_mask);
-
-    // Methods.
-        void add_entry()
-        {
-            __menu_entry__ menu_entry;
-        }
-
-    // Constructor.
-        __menu__() {}
-};
-
-#define FILE_APP_LEFT_MENU_WIDTH 120
-#define FILE_APP_LEFT_MENU_ENTRY_HEIGHT 20
-#define FILE_APP_BORDER_SIZE 2
-
 class __file_app__
 {
+    // Defines.
+        #define FILE_APP_LEFT_MENU_WIDTH 120
+        #define FILE_APP_LEFT_MENU_ENTRY_HEIGHT 20
+        #define FILE_APP_BORDER_SIZE 2
+
     private:
     // Subclasses.
         class __left_menu__
@@ -7984,13 +7914,17 @@ class __file_app__
 
                     void create(const uint32_t &__parent_window, const uint32_t &__x, const uint32_t &__y, const uint32_t &__width, const uint32_t &__height)
                     {
-                        _window.create_default(__parent_window, __x, __y, __width, __height);
-                        // uint32_t mask = XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE;
-                        // _window.apply_event_mask(&mask);
-                        _window.set_event_mask(XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE);
-                        _window.set_backround_color(DARK_GREY);
-                        __window_decor__::make_file_app_menu_borders(_window, FILE_APP_BORDER_SIZE, BLACK);
-                        _window.map();
+                        _window.create_window(
+                            __parent_window,
+                            __x,
+                            __y,
+                            __width,
+                            __height,
+                            DARK_GREY,
+                            XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE,
+                            MAP,
+                            (int[]){DOWN, FILE_APP_BORDER_SIZE, BLACK}
+                        );
                         draw();
                     }
 
@@ -8629,13 +8563,14 @@ class __screen_settings__
 };
 static __screen_settings__ *screen_settings(nullptr);
 
-#define MENU_WINDOW_WIDTH 120
-#define MENU_ENTRY_HEIGHT 20
-#define MENU_ENTRY_TEXT_Y 14
-#define MENU_ENTRY_TEXT_X 4
-
 class __system_settings__
 {
+    // Defines.
+        #define MENU_WINDOW_WIDTH 120
+        #define MENU_ENTRY_HEIGHT 20
+        #define MENU_ENTRY_TEXT_Y 14
+        #define MENU_ENTRY_TEXT_X 4
+    
     private:
     // Sub Classes.
         class __mouse_settings__
@@ -11145,8 +11080,7 @@ class Events
 
                     case SUPER:
                     {
-                        client *c = wm->client_from_window(&e->event);
-                        if (c == nullptr) return;
+                        GET_CLIENT_FROM_WINDOW(e->event);
                         tile(c, TILE::RIGHT);
                         return;
                     }
@@ -11173,8 +11107,7 @@ class Events
                     
                     case SUPER:
                     {
-                        client *c = wm->client_from_window(&e->event);
-                        if (c == nullptr) return;
+                        GET_CLIENT_FROM_WINDOW(e->event);
                         tile(c, TILE::LEFT);
                         return;
                     }
@@ -11187,8 +11120,7 @@ class Events
                 {
                     case SUPER:
                     {
-                        client *c = wm->client_from_window(&e->event);
-                        if (c == nullptr) return;
+                        GET_CLIENT_FROM_WINDOW(e->event);
                         tile(c, TILE::DOWN);
                         return;
                     }
@@ -11201,8 +11133,7 @@ class Events
                 {
                     case SUPER:
                     {
-                        client *c = wm->client_from_window(&e->event);
-                        if (c == nullptr) return;
+                        GET_CLIENT_FROM_WINDOW(e->event);
                         tile(c, TILE::UP);
                         return;
                     }
@@ -11227,8 +11158,7 @@ class Events
                 {
                     case SUPER:
                     {
-                        client *c = wm->client_from_any_window(&e->event);
-                        if (c == nullptr) return;
+                        GET_CLIENT_FROM_WINDOW(e->event);
                         c->win.kill();
                         // c->win.x(BORDER_SIZE);
                         // c->win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
@@ -11414,8 +11344,7 @@ class Events
         void focus_in_handler(const xcb_generic_event_t *&ev)
         {
             RE_CAST_EV(xcb_focus_in_event_t);
-            client *c = wm->client_from_window( &e->event);
-            if (c == nullptr) return;
+            GET_CLIENT_FROM_WINDOW(e->event);
 
             c->win.ungrab_button({
                 { L_MOUSE_BUTTON, NULL }
@@ -11429,8 +11358,7 @@ class Events
         void focus_out_handler(const xcb_generic_event_t *&ev)
         {
             RE_CAST_EV(xcb_focus_out_event_t);
-            client *c = wm->client_from_window(&e->event);
-            if (c == nullptr) return;
+            GET_CLIENT_FROM_WINDOW(e->event);
             c->win.grab_button({
                 { L_MOUSE_BUTTON, NULL }
             });
@@ -11439,8 +11367,7 @@ class Events
         void destroy_notify_handler(const xcb_generic_event_t *&ev)
         {
             RE_CAST_EV(xcb_destroy_notify_event_t);
-            client *c = wm->client_from_window(&e->event);
-            if (c == nullptr) return;
+            GET_CLIENT_FROM_WINDOW(e->event);
             wm->send_sigterm_to_client(c);
         }
         
@@ -11454,11 +11381,10 @@ class Events
         void reparent_notify_handler(const xcb_generic_event_t *&ev)
         {
             RE_CAST_EV(xcb_reparent_notify_event_t);
-            client *c = wm->client_from_any_window(&e->window);
-            if (c == nullptr) return;
+            GET_CLIENT_FROM_WINDOW(e->window);
+
             c->win.x(BORDER_SIZE);
             c->win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
-
             xcb_flush(conn);
         }
 
