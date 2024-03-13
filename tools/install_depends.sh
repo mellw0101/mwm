@@ -93,7 +93,8 @@ install_dependencies() {
                                         xcb-util            \
                                         xorg-fonts-misc     \
                                         xcb-util-xrm        \
-                                        libpng
+                                        libpng              \
+                                        imlib2
     else
         echo "Unsupported distribution. Please install dependencies manually."
         exit 1
