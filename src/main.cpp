@@ -9869,7 +9869,7 @@ class resize_client
 
                         case edge::TOP_RIGHT:
                         {
-                            pointer.teleport(((c->x + c->width) - 1), (c->y + 1));
+                            pointer.teleport(((c->x + c->width) - 2), (c->y + 2));
                             break;
                         }
 
@@ -11102,7 +11102,6 @@ class Events
                 
                 if (e->event == c->max_button)
                 {
-                    // client *c = wm->client_from_any_window(&e->event);
                     max_win(c, max_win::BUTTON_MAXWIN);
                     return;
                 }
