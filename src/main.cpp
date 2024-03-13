@@ -6394,7 +6394,7 @@ class __status_bar__
         {
             event_handler->setEventCallback(XCB_EXPOSE,  [&](Ev ev)-> void
             {
-                auto e = reinterpret_cast<const xcb_expose_event_t *>(ev);
+                RE_CAST_EV(xcb_expose_event_t);
                 expose(e->window);
             });
             
@@ -6461,7 +6461,8 @@ class __status_bar__
                 _wifi_close_window.draw_text_16_auto_color(
                     "close",
                     22,
-                    15
+                    15,
+                    BLACK
                 );
             }
 
@@ -6471,14 +6472,16 @@ class __status_bar__
                 _wifi_info_window.draw_text_16_auto_color(
                     local_ip.c_str(),
                     4,
-                    16
+                    16,
+                    BLACK
                 );
 
                 string local_interface("interface: " + network->get_local_ip_info(__network__::INTERFACE_FOR_LOCAL_IP));
                 _wifi_info_window.draw_text_16_auto_color(
                     local_interface.c_str(),
                     4,
-                    30
+                    30,
+                    BLACK
                 );
             }
         }
