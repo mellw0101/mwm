@@ -92,7 +92,8 @@ install_dependencies() {
                                         libxi               \
                                         xcb-util            \
                                         xorg-fonts-misc     \
-                                        xcb-util-xrm
+                                        xcb-util-xrm        \
+                                        libpng
     else
         echo "Unsupported distribution. Please install dependencies manually."
         exit 1
