@@ -1408,6 +1408,7 @@ namespace // window flag enums
 
         free(reply);
     }
+
     // Struct representing the _MOTIF_WM_HINTS property format
     typedef struct {
         uint32_t flags;
@@ -1925,8 +1926,9 @@ class window
                 return false; // The atom was not found or the property could not be retrieved
             }
             
-            void check_frameless_window_hint() // Function to fetch and check the _MOTIF_WM_HINTS property
+            bool check_frameless_window_hint() // Function to fetch and check the _MOTIF_WM_HINTS property
             {
+                bool is_frameless = false;
                 xcb_atom_t property;
                 get_atom((char *)"_MOTIF_WM_HINTS", &property);
                 xcb_get_property_cookie_t cookie = xcb_get_property(conn, 0, _window, property, XCB_ATOM_ANY, 0, sizeof(motif_wm_hints) / 4);
@@ -1941,6 +1943,7 @@ class window
                         if (hints->decorations == 0)
                         {
                             log_info("Window is likely frameless");
+                            is_frameless = true;
                         }
                         else
                         {
@@ -1954,6 +1957,8 @@ class window
 
                     free(reply);
                 }
+
+                return is_frameless;
             }
 
             bool is_EWMH_fullscreen()
@@ -5495,13 +5500,16 @@ class Window_Manager
                 });
 
                 c->win.grab_default_keys();
-                c->make_decorations();
-                c->frame.set_event_mask(FRAME_EVENT_MASK);
-                c->win.set_event_mask(CLIENT_EVENT_MASK);
-                c->update();
-                c->focus();
-                focused_client = c;
-                check_client(c);
+                if (!c->win.check_frameless_window_hint())
+                {
+                    c->make_decorations();
+                    c->frame.set_event_mask(FRAME_EVENT_MASK);
+                    c->win.set_event_mask(CLIENT_EVENT_MASK);
+                    c->update();
+                    c->focus();
+                    focused_client = c;
+                    check_client(c);
+                }
             }
             
             client *make_internal_client(window window)
@@ -5900,7 +5908,6 @@ class Window_Manager
                 }
 
                 c->win.get_min_window_size_hints();
-                c->win.check_frameless_window_hint();
                 
                 client_list.push_back(c);
                 cur_d->current_clients.push_back(c);
