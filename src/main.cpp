@@ -1393,6 +1393,29 @@ namespace // window flag enums
         KILL_WINDOW = 1 << 25,
         TAKE_FOCUS  = 1 << 26
     };
+
+    void get_atom(char *name, xcb_atom_t *atom)
+    {
+        xcb_intern_atom_reply_t *reply = xcb_intern_atom_reply(conn, xcb_intern_atom(conn, 0, strlen(name), name), NULL);
+        if (reply != NULL)
+        {
+            *atom = reply->atom;
+        }
+        else
+        {
+            *atom = XCB_NONE;
+        }
+
+        free(reply);
+    }
+    // Struct representing the _MOTIF_WM_HINTS property format
+    typedef struct {
+        uint32_t flags;
+        uint32_t functions;
+        uint32_t decorations;
+        int32_t input_mode;
+        uint32_t status;
+    } motif_wm_hints;
 }
 
 class window
@@ -1900,6 +1923,37 @@ class window
                 }
 
                 return false; // The atom was not found or the property could not be retrieved
+            }
+            
+            void check_frameless_window_hint() // Function to fetch and check the _MOTIF_WM_HINTS property
+            {
+                xcb_atom_t property;
+                get_atom((char *)"_MOTIF_WM_HINTS", &property);
+                xcb_get_property_cookie_t cookie = xcb_get_property(conn, 0, _window, property, XCB_ATOM_ANY, 0, sizeof(motif_wm_hints) / 4);
+                xcb_get_property_reply_t* reply = xcb_get_property_reply(conn, cookie, NULL);
+
+                if (reply)
+                {
+                    if (reply->type != XCB_NONE && reply->format == 32 && reply->length >= 5)
+                    {
+                        motif_wm_hints* hints = (motif_wm_hints*)xcb_get_property_value(reply);
+
+                        if (hints->decorations == 0)
+                        {
+                            log_info("Window is likely frameless");
+                        }
+                        else
+                        {
+                            log_info("Window has decorations");
+                        }
+                    }
+                    else
+                    {
+                        log_info("No _MOTIF_WM_HINTS property found");
+                    }
+
+                    free(reply);
+                }
             }
 
             bool is_EWMH_fullscreen()
@@ -5846,7 +5900,7 @@ class Window_Manager
                 }
 
                 c->win.get_min_window_size_hints();
-                check_frameless_window_hint(c->win);
+                c->win.check_frameless_window_hint();
                 
                 client_list.push_back(c);
                 cur_d->current_clients.push_back(c);
