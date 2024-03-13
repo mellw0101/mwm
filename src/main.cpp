@@ -157,6 +157,9 @@ using SUint = unsigned short int;
 #define RETURN_IF(__statement) \
     if (__statement) return
 
+#define CONTINUE_IF(__statement) \
+    if (__statement) continue
+
 class __net_logger__
 {
     // Defines.
@@ -5969,8 +5972,7 @@ class __network__
             getifaddrs(&ifAddrStruct);
             for (ifa = ifAddrStruct; ifa != nullptr; ifa = ifa->ifa_next)
             {
-                if (ifa->ifa_addr == nullptr) continue;
-
+                CONTINUE_IF(ifa->ifa_addr == nullptr);
                 if (ifa->ifa_addr->sa_family == AF_INET) // check it is IP4
                 { 
                     // is a valid IP4 Address
@@ -6075,8 +6077,7 @@ class __wifi__
 
             for (ifa = ifAddrStruct; ifa != nullptr; ifa = ifa->ifa_next)
             {
-                if (!ifa->ifa_addr) continue;
-
+                CONTINUE_IF(!ifa->ifa_addr);
                 if (ifa->ifa_addr->sa_family == AF_INET) // check it is IP4
                 { 
                     // is a valid IP4 Address
@@ -6337,7 +6338,7 @@ class __status_bar__
 
         void expose(const uint32_t &__window)
         {
-            if (__window == _time_date_window )
+            if (__window == _time_date_window)
             {
                 _time_date_window.draw_text(
                     get_time_and_date__().c_str(),
@@ -6349,7 +6350,7 @@ class __status_bar__
                 );
             }
 
-            if (__window == _wifi_close_window) 
+            if (__window == _wifi_close_window)
             {
                 _wifi_close_window.draw_text(
                     "close",
@@ -6361,7 +6362,7 @@ class __status_bar__
                 );
             }
 
-            if (__window == _wifi_info_window ) 
+            if (__window == _wifi_info_window)
             {
                 string local_ip("Local ip: " + network->get_local_ip_info(__network__::LOCAL_IP));
                 _wifi_info_window.draw_text(
