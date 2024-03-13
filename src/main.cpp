@@ -2432,7 +2432,7 @@ class window
                 return height;
             }
         
-        // configuration.
+        // Configuration.
             void apply_event_mask(const vector<uint32_t> &values)
             {
                 if (values.empty())
@@ -2566,24 +2566,24 @@ class window
                 });
             }
 
-            public: // size_pos configuration methods
-                public: // fetch methods
-                    uint32_t x()
+            // Size_pos.
+                // Fetch.
+                    uint32_t x() const
                     {
                         return _x;
                     }
                 
-                    uint32_t y()
+                    uint32_t y() const
                     {
                         return _y;
                     }
                 
-                    uint32_t width()
+                    uint32_t width() const
                     {
                         return _width;
                     }
                 
-                    uint32_t height()
+                    uint32_t height() const
                     {
                         return _height;
                     }
@@ -2678,7 +2678,7 @@ class window
                     update(x, y, _width, height);
                 }
             
-            public: // backround methods
+            // Backround.
                 void set_backround_color(COLOR color)
                 {
                     _color = color;
@@ -2795,7 +2795,7 @@ class window
                     set_backround_png(file_name);
                 }
         
-        // keys.
+        // Keys.
             void grab_default_keys()
             {
                 grab_keys({
@@ -2925,7 +2925,7 @@ class window
                 });
             }
         
-        // buttons.
+        // Buttons.
             void grab_button(std::initializer_list<std::pair<const uint8_t, const uint16_t>> bindings)
             {
                 for (const auto & binding : bindings) {
@@ -3931,7 +3931,8 @@ class __window_decor__
 
 class client
 {
-    public: // subclasses
+    public:
+    // Sub Classes.
         class client_border_decor
         {
             public:
@@ -3957,8 +3958,8 @@ class client
             uint32_t transient_for = 0;
             uint32_t modal_window = 0;
         };
-    
-    public: // variabels
+
+    // Variabels.
         window win;
         window frame;
         window titlebar;
@@ -3982,9 +3983,9 @@ class client
 
         uint16_t desktop;
         pid_t pid;
-    
-    public: // methods
-        // main.
+
+    // Methods.
+        // Main.
             void make_decorations()
             {
                 make_frame();
@@ -4081,7 +4082,7 @@ class client
                 if (__mode & TITLE_INTR_DRAW) titlebar.draw_text_16_auto_color(win.get_net_wm_name().c_str(), 4, 15);
             }
         
-        // config.
+        // Config.
             void x_y(const int32_t &x, const uint32_t &y)
             {
                 frame.x_y(x, y);
@@ -4227,7 +4228,7 @@ class client
                 xcb_flush(conn);
             }
         
-        // size_pos.
+        // Size_pos.
             void save_ogsize()
             {
                 ogsize.save(x, y, width, height);
@@ -4248,7 +4249,7 @@ class client
                 max_button_ogsize.save(x, y, width, height);
             }
         
-        // check.
+        // Check.
             bool is_active_EWMH_window()
             {
                 return win.is_active_EWMH_window();
@@ -4270,7 +4271,7 @@ class client
                 return false;
             }
         
-        // set.
+        // Set.
             void set_active_EWMH_window()
             {
                 win.set_active_EWMH_window();
@@ -4281,13 +4282,14 @@ class client
                 win.set_EWMH_fullscreen_state();
             }
     
-        // unset.
+        // Unset.
             void unset_EWMH_fullscreen_state()
             {
                 win.unset_EWMH_fullscreen_state();
             }
         
-    private: // functions
+    private:
+    // Methods.
         void make_frame()
         {
             frame.create_default(screen->root, (x - BORDER_SIZE), (y - TITLE_BAR_HEIGHT - BORDER_SIZE), (width + (BORDER_SIZE * 2)), (height + TITLE_BAR_HEIGHT + (BORDER_SIZE * 2)));
@@ -4445,7 +4447,7 @@ class client
             border.bottom_right.map();
         }
     
-    private: // variables
+    // Variables.
         vector<vector<bool>> CLOSE_BUTTON_BITMAP = {
             {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
             {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
@@ -4473,7 +4475,8 @@ class client
 
 class desktop
 {
-    public: // variabels
+    public:
+    // Variabels
         vector<client *>(current_clients);
         client *focused_client = nullptr;
         uint16_t desktop;
@@ -4494,6 +4497,7 @@ class Key_Codes
         {
             free(keysyms);
         }
+
     // methods.
         void init()
         {
@@ -7713,7 +7717,7 @@ class Mwm_Runner
 
         void setup_events()
         {
-            event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev)-> void
+            event_handler->setEventCallback(XCB_KEY_PRESS,    [&](Ev ev)-> void
             {
                 const auto *e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
                 if (e->detail == wm->key_codes.r)
@@ -7812,8 +7816,8 @@ class add_app_dialog_window
 
         void configure_events()
         {
-            event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev)
-            -> void {
+            event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev)-> void
+            {
                 const xcb_button_press_event_t * e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
                 if (e->event == search_window.main_window)
                 {
@@ -7908,6 +7912,7 @@ class __file_app__
         class __left_menu__
         {
             private:
+            // Variabels.
                 struct __menu_entry__
                 {
                     window(_window);
@@ -7943,9 +7948,9 @@ class __file_app__
                         xcb_flush(conn);
                     }
                 };
-
                 vector<__menu_entry__>(_menu_entry_vector);
 
+            // Methods.
                 void create_menu_entry__(const string &__name)
                 {
                     __menu_entry__(menu_entry);
@@ -7961,8 +7966,10 @@ class __file_app__
                 }
 
             public:
+            // Variabels.
                 window(_window), (_border);
 
+            // Methods.
                 void create(window &__parent_window)
                 {
                     uint32_t mask;
@@ -9809,6 +9816,7 @@ class resize_client
             run();
             pointer.ungrab();
         }
+
     // Subclasses.
         class no_border
         {
