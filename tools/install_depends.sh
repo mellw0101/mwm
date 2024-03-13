@@ -91,7 +91,8 @@ install_dependencies() {
                                         libxxf86vm          \
                                         libxi               \
                                         xcb-util            \
-                                        xorg-fonts-misc
+                                        xorg-fonts-misc     \
+                                        xcb-util-xrm
     else
         echo "Unsupported distribution. Please install dependencies manually."
         exit 1
