@@ -9138,7 +9138,7 @@ class __debug_menu__
                 WIDTH,
                 300,
                 BLACK,
-                NONE,
+                XCB_EVENT_MASK_FOCUS_CHANGE,
                 DEFAULT_KEYS
             );
 
