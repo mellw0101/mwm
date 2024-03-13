@@ -9102,8 +9102,8 @@ class __debug_menu__
     // Methods.
         void show__()
         {
-            dropdown_window.map();
             dropdown_window.raise();
+            dropdown_window.map();
             for (__menu_option__ &menu_option : _menu_option_vec)
             {
                 menu_option._window.map();
