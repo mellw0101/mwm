@@ -9087,7 +9087,7 @@ class __debug_menu__
     // Defines.
         enum
         {
-            WIDTH              = 160,
+            WIDTH              = 200,
             MENU_OPTION_HEIGHT = 20
         };
 
@@ -9135,7 +9135,7 @@ class __debug_menu__
                 screen->root,
                 ((screen->width_in_pixels / 2) - 80),
                 20,
-                160,
+                WIDTH,
                 300,
                 BLACK,
                 NONE,
