@@ -33,8 +33,9 @@ LDFLAGS = 	${LIBS} 		\
 			-flto 			\
 			-O2 			\
 			-march=native 	\
-			-std=c++20		
+			-std=libc++					
 
+# -std=c++20
 
 cc = clang
 CXX = clang++
