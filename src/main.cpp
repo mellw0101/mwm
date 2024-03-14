@@ -8802,7 +8802,7 @@ class __system_settings__
             {
                 // string resolution(screen_settings->_current_resoluton_string);
                 string resolution("Balle");
-                // RETURN_IF(resolution.empty())
+                RETURN_IF(resolution.empty())
                 _screen_resolution_window.draw_text(
                     resolution.c_str(),
                     WHITE,
