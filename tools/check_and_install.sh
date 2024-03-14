@@ -56,7 +56,7 @@ install_package_apt() {
 
 install_package_pacman() {
     local PACKAGE=$1
-    ./check_if_installed_pacman $PACKAGE
+    ./tools/check_if_installed_pacman $PACKAGE
     local result=$?
     if [ $result -eq 2 ]; then
         overall_success=false
