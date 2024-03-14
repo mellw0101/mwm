@@ -1,7 +1,7 @@
 FASTFLAGS = -O2	 			\
 			-march=native
 
-CFLAGS =	-std=c++20 						\
+CFLAGS =	-stdlib=libc++					\
 			-pedantic 						\
 			-Wall 							\
 			-Wno-deprecated-declarations	\
@@ -33,7 +33,7 @@ LDFLAGS = 	${LIBS} 		\
 			-flto 			\
 			-O2 			\
 			-march=native 	\
-			-std=libc++					
+			-stdlib=libc++				
 
 # -std=c++20
 
