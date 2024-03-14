@@ -5681,12 +5681,9 @@ class Window_Manager
                 }
 
                 c->win     = window;
-                // c->height  = (data.height < 300) ? 300 : data.height;
-                // c->width   = (data.width < 400)  ? 400 : data.width;
-                // c->x       = c->win.x_from_req();
-                // c->y       = c->win.y_from_req();
-
                 get_window_parameters(c->win, &c->x, &c->y, &c->width, &c->height);
+                if (c->width < 20) c->width = 200;
+                if (c->height < 10) c->height = 100;
                 c->depth   = 24;
                 c->desktop = cur_d->desktop;
 
