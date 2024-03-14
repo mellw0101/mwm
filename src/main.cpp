@@ -161,7 +161,10 @@ using SUint = unsigned short int;
     }
 
 #define CONTINUE_IF(__statement) \
-    if (__statement) continue
+    if (__statement)             \
+    {                            \
+        continue;                \
+    }
 
 #define GET_CLIENT_FROM_WINDOW(__window) \
     client *c = wm->client_from_any_window(&__window); \
