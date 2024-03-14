@@ -1448,7 +1448,7 @@ class window
         }
     
     // Methods.
-        // Main.
+        // Create.
             void create(const uint8_t  &depth,
                         const uint32_t &parent,
                         const int16_t  &x,
@@ -1665,6 +1665,7 @@ class window
                 make_window();
             }
 
+        // Borders.
             void make_borders(int __border_mask, const uint32_t &__size, const int &__color)
             {
                 if (__border_mask & UP)
@@ -1698,7 +1699,8 @@ class window
                 xcb_change_window_attributes(conn, _window, XCB_CW_BORDER_PIXEL, (uint32_t[1]){get_color(__color)});
                 xcb_flush(conn);
             }
-
+        
+        // Main.
             void raise()
             {
                 xcb_configure_window(
@@ -1904,7 +1906,7 @@ class window
                 event_handler->setEventCallback(XCB_BUTTON_PRESS, [this, callback](Ev ev)
                 {
                     auto e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
-                    if (e->event != L_MOUSE_BUTTON) return;
+                    if (e->detail != L_MOUSE_BUTTON) return;
                     
                     if (e->event == _window)
                     {
@@ -1953,17 +1955,12 @@ class window
 
                         if (hints->decorations == 0)
                         {
-                            log_info("Window is likely frameless");
                             is_frameless = true;
-                        }
-                        else
-                        {
-                            log_info("Window has decorations");
                         }
                     }
                     else
                     {
-                        log_info("No _MOTIF_WM_HINTS property found");
+                        log_error("No _MOTIF_WM_HINTS property found.");
                     }
 
                     free(reply);
@@ -2530,7 +2527,7 @@ class window
             {
                 apply_event_mask(&__mask);
             }
-            
+
             void apply_event_mask(const uint32_t *mask)
             {
                 xcb_change_window_attributes(
@@ -2542,7 +2539,7 @@ class window
 
                 xcb_flush(conn);
             }
-            
+
             void set_pointer(CURSOR cursor_type)
             {
                 xcb_cursor_context_t *ctx;
@@ -2570,76 +2567,6 @@ class window
                 xcb_flush(conn);
                 xcb_cursor_context_free(ctx);
                 xcb_free_cursor(conn, cursor);
-            }
-            
-            void draw_text(const char *str , const int &text_color, const int &backround_color, const char *font_name, const int16_t &x, const int16_t &y)
-            {
-                get_font(font_name);
-                create_font_gc(text_color, backround_color, font);
-                xcb_image_text_8(
-                    conn, 
-                    strlen(str), 
-                    _window, 
-                    font_gc,
-                    x, 
-                    y, 
-                    str
-                );
-                xcb_flush(conn);
-            }
-
-            void draw_text_16(const char *str, const int &text_color, const int &background_color, const char *font_name, const int16_t &x, const int16_t &y)
-            {
-                get_font(font_name); // Your existing function to set the font
-                create_font_gc(text_color, background_color, font); // Your existing function to create a GC with the font
-
-                int len;
-                xcb_char2b_t *char2b_str = convert_to_char2b(str, &len);
-
-                xcb_image_text_16(
-                    conn,
-                    len,
-                    _window,
-                    font_gc,
-                    x,
-                    y,
-                    char2b_str
-                );
-
-                xcb_flush(conn);
-                free(char2b_str);
-            }
-
-            void draw_text_16_auto_color(const char *__str, const int16_t &__x, const int16_t &__y, const int &__text_color = WHITE, const int &__background_color = 0, const char *__font_name = DEFAULT_FONT)
-            {
-                get_font(__font_name); // Your existing function to set the font
-                int bg_color;
-                if (__background_color == 0) bg_color = _color;
-                create_font_gc(__text_color, bg_color, font); // Your existing function to create a GC with the font
-
-                int len;
-                xcb_char2b_t *char2b_str = convert_to_char2b(__str, &len);
-
-                xcb_image_text_16(
-                    conn,
-                    len,
-                    _window,
-                    font_gc,
-                    __x,
-                    __y,
-                    char2b_str
-                );
-
-                xcb_flush(conn);
-                free(char2b_str);
-            }
-
-            void draw_on_expose_event(const char *str , const int &text_color, const int &backround_color, const char *font_name, const int16_t &x, const int16_t &y)
-            {
-                on_expose_event([this, str, text_color, backround_color, font_name, x, y]()
-                {
-                    draw_text(str, text_color, backround_color, font_name, x, y);
-                });
             }
 
             // Size_pos.
@@ -2669,108 +2596,108 @@ class window
                     config_window(MWM_CONFIG_x, x);
                     update(x, _y, _width, _height);
                 }
-                
+
                 void y(const uint32_t &y)
                 {
                     config_window(XCB_CONFIG_WINDOW_Y, y);
                     update(_x, y, _width, _height);
                 }
-                
+
                 void width(const uint32_t &width)
                 {
                     config_window(MWM_CONFIG_width, width);
                     update(_x, _y, width, _height);
                 }
-                
+
                 void height(const uint32_t &height)
                 {
                     config_window(XCB_CONFIG_WINDOW_HEIGHT, height);
                     update(_x, _y, _width, height);
                 }
-                
+
                 void x_y(const uint32_t & x, const uint32_t & y)
                 {
                     config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, {x, y});
                     update(x, y, _width, _height);
                 }
-                
+
                 void width_height(const uint32_t & width, const uint32_t & height)
                 {
                     config_window(XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, {width, height});
                     update(_x, _y, width, height);
                 }
-                
+
                 void x_y_width_height(const uint32_t & x, const uint32_t & y, const uint32_t & width, const uint32_t & height)
                 {
                     config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, {x, y, width, height});
                     update(x, y, width, height);
                 }
-                
+
                 void x_width_height(const uint32_t & x, const uint32_t & width, const uint32_t & height)
                 {
                     config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, {x, width, height});
                     update(x, _y, width, height);
                 }
-                
+
                 void y_width_height(const uint32_t & y, const uint32_t & width, const uint32_t & height)
                 {
                     config_window(XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, {y, width, height});
                     update(_x, y, width, height);
                 }
-                
+
                 void x_width(const uint32_t & x, const uint32_t & width)
                 {
                     config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_WIDTH, {x, width});
                     update(x, _y, width, _height);
                 }
-                
+
                 void x_height(const uint32_t & x, const uint32_t & height)
                 {
                     config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_HEIGHT, {x, height});
                     update(x, _y, _width, height);
                 }
-                
+
                 void y_width(const uint32_t & y, const uint32_t & width)
                 {
                     config_window(XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH, {y, width});
                     update(_x, y, width, _height);
                 }
-                
+
                 void y_height(const uint32_t & y, const uint32_t & height)
                 {
                     config_window(XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT, {y, height});
                     update(_x, y, _width, height);
                 }
-                
+
                 void x_y_width(const uint32_t & x, const uint32_t & y, const uint32_t & width)
                 {
                     config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH, {x, y, width});
                     update(x, y, width, _height);
                 }
-                
+
                 void x_y_height(const uint32_t & x, const uint32_t & y, const uint32_t & height)
                 {
                     config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT, {x, y, height});
                     update(x, y, _width, height);
                 }
-            
+
             // Backround.
                 void set_backround_color(COLOR color)
                 {
                     _color = color;
                     change_back_pixel(get_color(color));
                 }
-                
+
                 void set_backround_color_8_bit(const uint8_t &red_value, const uint8_t &green_value, const uint8_t &blue_value)
                 {
                     change_back_pixel(get_color(red_value, green_value, blue_value));
                 }
-                
+
                 void set_backround_color_16_bit(const uint16_t & red_value, const uint16_t & green_value, const uint16_t & blue_value)
                 {
                     change_back_pixel(get_color(red_value, green_value, blue_value));
                 }
-                
+
                 void set_backround_png(const char * imagePath)
                 {
                     Imlib_Image image = imlib_load_image(imagePath);
@@ -2864,13 +2791,102 @@ class window
 
                     clear_window();
                 }
-                
+
                 void make_then_set_png(const char * file_name, const std::vector<std::vector<bool>> &bitmap)
                 {
                     create_png_from_vector_bitmap(file_name, bitmap);
                     set_backround_png(file_name);
                 }
-        
+
+        // Draw.
+            void draw_text(const char *str , const int &text_color, const int &backround_color, const char *font_name, const int16_t &x, const int16_t &y)
+            {
+                get_font(font_name);
+                create_font_gc(text_color, backround_color, font);
+                xcb_image_text_8(
+                    conn, 
+                    strlen(str), 
+                    _window, 
+                    font_gc,
+                    x, 
+                    y, 
+                    str
+                );
+                xcb_flush(conn);
+            }
+
+            void draw_text_auto_color(const char *__str, const int16_t &__x, const int16_t &__y, const int &__text_color = WHITE, const int &__backround_color = 0, const char *__font_name = DEFAULT_FONT)
+            {
+                get_font(__font_name);
+                int backround_color = __backround_color;
+                if (backround_color == 0) backround_color = _color;
+                create_font_gc(__text_color, backround_color, font);
+                xcb_image_text_8(
+                    conn,
+                    strlen(__str),
+                    _window,
+                    font_gc,
+                    __x,
+                    __y,
+                    __str
+                );
+                xcb_flush(conn);
+            }
+
+            void draw_text_16(const char *str, const int &text_color, const int &background_color, const char *font_name, const int16_t &x, const int16_t &y)
+            {
+                get_font(font_name); // Your existing function to set the font
+                create_font_gc(text_color, background_color, font); // Your existing function to create a GC with the font
+
+                int len;
+                xcb_char2b_t *char2b_str = convert_to_char2b(str, &len);
+
+                xcb_image_text_16(
+                    conn,
+                    len,
+                    _window,
+                    font_gc,
+                    x,
+                    y,
+                    char2b_str
+                );
+
+                xcb_flush(conn);
+                free(char2b_str);
+            }
+
+            void draw_text_16_auto_color(const char *__str, const int16_t &__x, const int16_t &__y, const int &__text_color = WHITE, const int &__background_color = 0, const char *__font_name = DEFAULT_FONT)
+            {
+                get_font(__font_name); // Your existing function to set the font
+                int bg_color;
+                if (__background_color == 0) bg_color = _color;
+                create_font_gc(__text_color, bg_color, font); // Your existing function to create a GC with the font
+
+                int len;
+                xcb_char2b_t *char2b_str = convert_to_char2b(__str, &len);
+
+                xcb_image_text_16(
+                    conn,
+                    len,
+                    _window,
+                    font_gc,
+                    __x,
+                    __y,
+                    char2b_str
+                );
+
+                xcb_flush(conn);
+                free(char2b_str);
+            }
+
+            void draw_on_expose_event(const char *str , const int &text_color, const int &backround_color, const char *font_name, const int16_t &x, const int16_t &y)
+            {
+                on_expose_event([this, str, text_color, backround_color, font_name, x, y]()
+                {
+                    draw_text(str, text_color, backround_color, font_name, x, y);
+                });
+            }
+
         // Keys.
             void grab_default_keys()
             {
@@ -8793,7 +8809,7 @@ class __system_settings__
 
             if (__window == _screen_settings_window)
             {
-                _screen_settings_window.draw_text_16_auto_color(
+                _screen_settings_window.draw_text_auto_color(
                     "Resolution",
                     4,
                     35,
@@ -8805,11 +8821,8 @@ class __system_settings__
             {
                 string resolution(screen_settings->_current_resoluton_string);
                 RETURN_IF(resolution.empty())
-                _screen_resolution_window.draw_text(
+                _screen_resolution_window.draw_text_auto_color(
                     resolution.c_str(),
-                    WHITE,
-                    DARK_GREY,
-                    DEFAULT_FONT,
                     4,
                     15
                 );
