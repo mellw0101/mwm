@@ -59,7 +59,8 @@ backup:
 
 depends:
 	sudo chmod u+x tools/install_depends.sh
-	./tools/install_depends.sh
+	sudo chmod u+x tools/check_and_install.sh
+	./tools/check_and_install.sh
 
 dist: clean
 
