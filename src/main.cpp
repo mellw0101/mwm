@@ -5681,10 +5681,12 @@ class Window_Manager
                 }
 
                 c->win     = window;
-                c->height  = (data.height < 300) ? 300 : data.height;
-                c->width   = (data.width < 400)  ? 400 : data.width;
-                c->x       = c->win.x_from_req();
-                c->y       = c->win.y_from_req();
+                // c->height  = (data.height < 300) ? 300 : data.height;
+                // c->width   = (data.width < 400)  ? 400 : data.width;
+                // c->x       = c->win.x_from_req();
+                // c->y       = c->win.y_from_req();
+
+                get_window_parameters(c->win, &c->x, &c->y, &c->width, &c->height);
                 c->depth   = 24;
                 c->desktop = cur_d->desktop;
 
@@ -5787,41 +5789,40 @@ class Window_Manager
             }
 
         // Window.
-            void getWindowParameters(const uint32_t &window)
+            void get_window_parameters(const uint32_t &__window, int16_t *__x, int16_t *__y, uint16_t *__width,  uint16_t *__height)
             {
-                xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
-                xcb_get_geometry_reply_t *geometry_reply = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
-                if (geometry_reply == nullptr)
-                {
-                    cerr << "Unable to get window geometry.\n";
-                    return;
-                }
-            
-                log_info("Window Parameters");
-                log_info(to_string(geometry_reply->x));
-                log_info(to_string(geometry_reply->y));
-                log_info(to_string(geometry_reply->width));
-                log_info(to_string(geometry_reply->height));
-
-                free(geometry_reply);
-            }
-            
-            void get_window_parameters(const uint32_t(&window), int16_t(*x), int16_t(*y), uint16_t(*width), uint16_t(*height))
-            {
-                xcb_get_geometry_cookie_t cookie = xcb_get_geometry(conn, window);
-                xcb_get_geometry_reply_t* reply = xcb_get_geometry_reply(conn, cookie, NULL);
+                xcb_get_geometry_cookie_t cookie = xcb_get_geometry(conn, __window);
+                xcb_get_geometry_reply_t *reply = xcb_get_geometry_reply(conn, cookie, nullptr);
                 if (reply == nullptr)
                 {
-                    log_error("unable to get window parameters for window: " + std::to_string(window));
+                    log_error("Unable to get window geometry.");
                     return;
                 }
+            
+                *__x      = reply->x;
+                *__y      = reply->y;
+                *__width  = reply->width;
+                *__height = reply->height;
 
-                x      = &reply->x;
-                y      = &reply->y;
-                width  = &reply->width;
-                height = &reply->height;
                 free(reply);
             }
+            
+            // void get_window_parameters(const uint32_t(&window), int16_t(*x), int16_t(*y), uint16_t(*width), uint16_t(*height))
+            // {
+            //     xcb_get_geometry_cookie_t cookie = xcb_get_geometry(conn, window);
+            //     xcb_get_geometry_reply_t* reply = xcb_get_geometry_reply(conn, cookie, NULL);
+            //     if (reply == nullptr)
+            //     {
+            //         log_error("unable to get window parameters for window: " + std::to_string(window));
+            //         return;
+            //     }
+
+            //     x      = &reply->x;
+            //     y      = &reply->y;
+            //     width  = &reply->width;
+            //     height = &reply->height;
+            //     free(reply);
+            // }
             
             int16_t get_window_x(const uint32_t &window)
             {
@@ -11161,7 +11162,6 @@ class Events
                 {
                     case ALT:
                     {
-                        log_error("ALT + R_MOUSE_BUTTON");
                         c->raise();
                         c->focus();
                         resize_client resize(c, 0);

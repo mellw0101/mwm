@@ -104,4 +104,5 @@ install_dependencies() {
     fi
 }
 
+# Main script starts here.
 install_dependencies
