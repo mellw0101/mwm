@@ -155,7 +155,10 @@ using SUint = unsigned short int;
     })
 
 #define RETURN_IF(__statement) \
-    if (__statement) return
+    if (__statement)           \
+    {                          \
+        return;                \
+    }
 
 #define CONTINUE_IF(__statement) \
     if (__statement) continue
