@@ -4192,7 +4192,26 @@ class client
             {
                 win.set_EWMH_fullscreen_state();
             }
-    
+
+        // Get.
+            void get_window_parameters()
+            {
+                xcb_get_geometry_cookie_t cookie = xcb_get_geometry(conn, win);
+                xcb_get_geometry_reply_t *reply = xcb_get_geometry_reply(conn, cookie, nullptr);
+                if (reply == nullptr)
+                {
+                    log_error("Unable to get window geometry.");
+                    return;
+                }
+            
+                x      = reply->x;
+                y      = reply->y;
+                width  = reply->width;
+                height = reply->height;
+
+                free(reply);
+            }
+
         // Unset.
             void unset_EWMH_fullscreen_state()
             {
@@ -5681,7 +5700,8 @@ class Window_Manager
                 }
 
                 c->win     = window;
-                get_window_parameters(c->win, &c->x, &c->y, &c->width, &c->height);
+                // get_window_parameters(c->win, &c->x, &c->y, &c->width, &c->height);
+                c->get_window_parameters();
                 if (c->width < 20) c->width = 200;
                 if (c->height < 10) c->height = 100;
                 c->depth   = 24;
@@ -5802,53 +5822,6 @@ class Window_Manager
                 *__height = reply->height;
 
                 free(reply);
-            }
-            
-            // void get_window_parameters(const uint32_t(&window), int16_t(*x), int16_t(*y), uint16_t(*width), uint16_t(*height))
-            // {
-            //     xcb_get_geometry_cookie_t cookie = xcb_get_geometry(conn, window);
-            //     xcb_get_geometry_reply_t* reply = xcb_get_geometry_reply(conn, cookie, NULL);
-            //     if (reply == nullptr)
-            //     {
-            //         log_error("unable to get window parameters for window: " + std::to_string(window));
-            //         return;
-            //     }
-
-            //     x      = &reply->x;
-            //     y      = &reply->y;
-            //     width  = &reply->width;
-            //     height = &reply->height;
-            //     free(reply);
-            // }
-            
-            int16_t get_window_x(const uint32_t &window)
-            {
-                xcb_get_geometry_cookie_t cookie = xcb_get_geometry(conn, window);
-                xcb_get_geometry_reply_t *reply = xcb_get_geometry_reply(conn, cookie, nullptr);
-                if (reply == nullptr)
-                {
-                    log_error("Unable to get window geometry.");
-                    return screen->width_in_pixels / 2;
-                } 
-            
-                int16_t x(reply->x);
-                free(reply);
-                return x;
-            }
-            
-            int16_t get_window_y(const uint32_t &window)
-            {
-                xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, window);
-                xcb_get_geometry_reply_t *geometry_reply = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
-                if (geometry_reply == nullptr)
-                {
-                    log_error("Unable to get window geometry.");
-                    return screen->height_in_pixels / 2;
-                } 
-            
-                int16_t y = geometry_reply->y;
-                free(geometry_reply);
-                return y;
             }
         
         // Status.
