@@ -123,6 +123,8 @@ install_dependencies() {
         install_package_apt libiw-dev
         install_package_apt libxcb-xinput-dev
         install_package_apt fonts-hack-ttf
+        install_package_apt libc++-dev
+        install_package_apt libc++abi-dev
     elif [ -x "$(command -v pacman)" ]; then
         # Arch Linux
         sudo pacman -Syyu --noconfirm   
@@ -159,7 +161,54 @@ install_dependencies() {
         install_package_pacman imlib2
         install_package_pacman wireless_tools
         install_package_pacman xorg-xinit
-        install_package_pacman xorg
+        install_package_pacman xf86-video-vesa
+        install_package_pacman xorg-bdftopcf
+        install_package_pacman xorg-docs
+        install_package_pacman xorg-font-util
+        install_package_pacman xorg-fonts-100dpi
+        install_package_pacman xorg-fonts-75dpi
+        install_package_pacman xorg-fonts-encodings
+        install_package_pacman xorg-iceauth
+        install_package_pacman xorg-mkfontscale
+        install_package_pacman xorg-server
+        install_package_pacman xorg-server-common
+        install_package_pacman xorg-server-devel
+        install_package_pacman xorg-server-xephyr
+        install_package_pacman xorg-server-xnest
+        install_package_pacman xorg-server-xvfb
+        install_package_pacman xorg-sessreg
+        install_package_pacman xorg-setxkbmap
+        install_package_pacman xorg-smproxy
+        install_package_pacman xorg-x11perf
+        install_package_pacman xorg-xauth
+        install_package_pacman xorg-xbacklight
+        install_package_pacman xorg-xcmsdb
+        install_package_pacman xorg-xcursorgen
+        install_package_pacman xorg-xdpyinfo
+        install_package_pacman xorg-xdriinfo
+        install_package_pacman xorg-xev
+        install_package_pacman xorg-xgamma
+        install_package_pacman xorg-xhost
+        install_package_pacman xorg-xinput
+        install_package_pacman xorg-xkbcomp
+        install_package_pacman xorg-xkbevd
+        install_package_pacman xorg-xkbutils
+        install_package_pacman xorg-xkill
+        install_package_pacman xorg-xlsatoms
+        install_package_pacman xorg-xlsclients
+        install_package_pacman xorg-xmodmap
+        install_package_pacman xorg-xpr
+        install_package_pacman xorg-xprop
+        install_package_pacman xorg-xrandr
+        install_package_pacman xorg-xrdb
+        install_package_pacman xorg-xrefresh
+        install_package_pacman xorg-xset
+        install_package_pacman xorg-xsetroot
+        install_package_pacman xorg-xvinfo
+        install_package_pacman xorg-xwayland
+        install_package_pacman xorg-xwd
+        install_package_pacman xorg-xwininfo
+        install_package_pacman xorg-xwud
         install_package_pacman libc++
     else
         echo "Unsupported distribution. Please install dependencies manually."
