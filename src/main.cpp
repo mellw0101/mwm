@@ -8803,8 +8803,7 @@ class __system_settings__
 
             if (__window == _screen_resolution_window)
             {
-                // string resolution(screen_settings->_current_resoluton_string);
-                string resolution("Balle");
+                string resolution(screen_settings->_current_resoluton_string);
                 RETURN_IF(resolution.empty())
                 _screen_resolution_window.draw_text(
                     resolution.c_str(),
