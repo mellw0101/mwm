@@ -8790,7 +8790,8 @@ class __system_settings__
                 _screen_settings_window.draw_text_16_auto_color(
                     "Resolution",
                     MENU_ENTRY_TEXT_X,
-                    MENU_ENTRY_TEXT_Y
+                    MENU_ENTRY_TEXT_Y,
+                    BLACK
                 );
             }
 
@@ -8801,7 +8802,8 @@ class __system_settings__
                 _screen_resolution_window.draw_text_16_auto_color(
                     resolution.c_str(),
                     4,
-                    15
+                    15,
+                    WHITE
                 );
             }
 
