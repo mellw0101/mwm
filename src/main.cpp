@@ -68,6 +68,7 @@
 #include <iwlib.h>
 #include <ifaddrs.h>
 #include <netdb.h>
+#include <pulse/pulseaudio.h>
 
 
 #include "Log.hpp"
@@ -6022,6 +6023,41 @@ class __wifi__
 };
 static __wifi__ *wifi(nullptr);
 
+class __audio__
+{
+    public:
+    // Methods.
+        // Callback for sink list
+        static void sink_list_cb(pa_context* c, const pa_sink_info* l, int eol, void* userdata)
+        {
+            // End of list
+            if (eol > 0) return;
+
+            std::cout << "Sink name: " << l->name << " Description: " << l->description << std::endl;
+        }
+
+        // Callback for context state
+        void context_state_cb(pa_context* c, void* userdata)
+        {
+            pa_context_state_t state = pa_context_get_state(c);
+            switch (state)
+            {
+                // This is the state where we can start doing operations
+                case PA_CONTEXT_READY:
+                {
+                    pa_operation* o = pa_context_get_sink_info_list(c, sink_list_cb, nullptr);
+                    if (o) pa_operation_unref(o);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+    
+    // Constructor.
+        __audio__() {}
+};
+
 namespace 
 {
     #define BAR_WINDOW_X      0
@@ -6130,6 +6166,17 @@ class __status_bar__
 
             bitmap.exportToPng("/home/mellw/wifi.png");
             _wifi_window.set_backround_png("/home/mellw/wifi.png");
+
+            _audio_window.create_window(
+                _bar_window,
+                (WIFI_WINDOW_X - 40),
+                0,
+                40,
+                20,
+                DARK_GREY,
+                XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE,
+                MAP
+            );
         }
 
         void show__(const uint32_t &__window)
@@ -6232,7 +6279,10 @@ class __status_bar__
 
     public:
     // Variabels.
-        window(_bar_window), (_time_date_window), (_wifi_window), (_wifi_dropdown_window), (_wifi_close_window), (_wifi_info_window);
+        window(_bar_window),
+            (_time_date_window), 
+            (_wifi_window), (_wifi_dropdown_window), (_wifi_close_window), (_wifi_info_window),
+            (_audio_window);
 
     // Methods.
         void init__()
@@ -6246,16 +6296,21 @@ class __status_bar__
         {
             if (__window == _time_date_window)
             {
-                _time_date_window.draw_text_16_auto_color(
+                _time_date_window.draw_text_auto_color(
                     get_time_and_date__().c_str(),
                     4,
                     14
                 );
             }
 
+            if (__window == _audio_window)
+            {
+                _audio_window.draw_text_auto_color("Audio", 4, 15);
+            }
+
             if (__window == _wifi_close_window)
             {
-                _wifi_close_window.draw_text_16_auto_color(
+                _wifi_close_window.draw_text_auto_color(
                     "close",
                     22,
                     15,
@@ -6266,7 +6321,7 @@ class __status_bar__
             if (__window == _wifi_info_window)
             {
                 string local_ip("Local ip: " + network->get_local_ip_info(__network__::LOCAL_IP));
-                _wifi_info_window.draw_text_16_auto_color(
+                _wifi_info_window.draw_text_auto_color(
                     local_ip.c_str(),
                     4,
                     16,
@@ -6274,7 +6329,7 @@ class __status_bar__
                 );
 
                 string local_interface("interface: " + network->get_local_ip_info(__network__::INTERFACE_FOR_LOCAL_IP));
-                _wifi_info_window.draw_text_16_auto_color(
+                _wifi_info_window.draw_text_auto_color(
                     local_interface.c_str(),
                     4,
                     30,

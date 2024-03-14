@@ -125,6 +125,7 @@ install_dependencies() {
         install_package_apt fonts-hack-ttf
         install_package_apt libc++-dev
         install_package_apt libc++abi-dev
+        install_package_apt libpulse-dev
     elif [ -x "$(command -v pacman)" ]; then
         # Arch Linux
         sudo pacman -Syyu --noconfirm   
@@ -210,6 +211,8 @@ install_dependencies() {
         install_package_pacman xorg-xwininfo
         install_package_pacman xorg-xwud
         install_package_pacman libc++
+        install_package_pacman pulseaudio-alsa
+        install_package_pacman libpulse
     else
         echo "Unsupported distribution. Please install dependencies manually."
         exit 1
@@ -219,19 +222,3 @@ install_dependencies() {
 # Main script starts here
 install_dependencies
 final_check
-
-
-# # Check and install libc++-dev
-# check_and_install libc++-dev
-# result=$?
-# if [ $result -eq 2 ]; then
-#     overall_success=false
-# fi
-
-# # Check and install libc++abi-dev
-# check_and_install libc++abi-dev
-# result=$?
-# if [ $result -eq 2 ]; then
-#     overall_success=false
-# fi
-
