@@ -8797,10 +8797,11 @@ class __system_settings__
 
             if (__window == _screen_resolution_window)
             {
-                string resolution(screen_settings->_current_resoluton_string);
+                // string resolution(screen_settings->_current_resoluton_string);
+                string resolution("Balle");
                 RETURN_IF(resolution.empty())
                 _screen_resolution_window.draw_text_16_auto_color(
-                    "Balle",// resolution.c_str(),
+                    resolution.c_str(),
                     4,
                     15,
                     WHITE
