@@ -8800,11 +8800,13 @@ class __system_settings__
                 // string resolution(screen_settings->_current_resoluton_string);
                 string resolution("Balle");
                 RETURN_IF(resolution.empty())
-                _screen_resolution_window.draw_text_16_auto_color(
+                _screen_resolution_window.draw_text(
                     resolution.c_str(),
+                    WHITE,
+                    DARK_GREY,
+                    DEFAULT_FONT,
                     4,
-                    15,
-                    WHITE
+                    15
                 );
             }
 
