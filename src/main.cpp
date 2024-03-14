@@ -6177,6 +6177,7 @@ class __status_bar__
                 XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE,
                 MAP
             );
+            expose(_audio_window);
         }
 
         void show__(const uint32_t &__window)
