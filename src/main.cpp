@@ -8795,8 +8795,8 @@ class __system_settings__
             {
                 _screen_settings_window.draw_text_16_auto_color(
                     "Resolution",
-                    MENU_ENTRY_TEXT_X,
-                    MENU_ENTRY_TEXT_Y,
+                    4,
+                    35,
                     BLACK
                 );
             }
