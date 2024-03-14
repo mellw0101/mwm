@@ -45,18 +45,9 @@ install_package_apt() {
     fi
 }
 
-# install_package_pacman() {
-#     local PACKAGE=$1
-#     check_and_install_pacman $PACKAGE
-#     local result=$?
-#     if [ $result -eq 2 ]; then
-#         overall_success=false
-#     fi
-# }
-
 install_package_pacman() {
     local PACKAGE=$1
-    ./tools/check_if_installed_pacman $PACKAGE
+    check_and_install_pacman $PACKAGE
     local result=$?
     if [ $result -eq 2 ]; then
         overall_success=false
