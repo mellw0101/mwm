@@ -6121,7 +6121,6 @@ class __status_bar__
                 NONE,
                 MAP
             );
-
             _time_date_window.create_window(
                 _bar_window,
                 TIME_DATE_WINDOW_X,
@@ -6132,7 +6131,6 @@ class __status_bar__
                 XCB_EVENT_MASK_EXPOSURE,
                 MAP
             );
-
             _wifi_window.create_window(
                 _bar_window,
                 WIFI_WINDOW_X,
@@ -6169,9 +6167,9 @@ class __status_bar__
 
             _audio_window.create_window(
                 _bar_window,
-                (WIFI_WINDOW_X - 40),
+                (WIFI_WINDOW_X - 50),
                 0,
-                40,
+                50,
                 20,
                 DARK_GREY,
                 XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE,
@@ -6220,6 +6218,20 @@ class __status_bar__
                 );
                 expose(_wifi_info_window);
             }
+            
+            if (__window == _audio_dropdown_window)
+            {
+                _audio_dropdown_window.create_window(
+                    screen->root,
+                    ((WIFI_WINDOW_X - (50 / 2) - (200 / 2))),
+                    20,
+                    200,
+                    100,
+                    DARK_GREY,
+                    NONE,
+                    MAP
+                );
+            }
         }
 
         void hide__(const uint32_t &__window)
@@ -6232,6 +6244,12 @@ class __status_bar__
                 _wifi_info_window.kill();
                 _wifi_dropdown_window.unmap();
                 _wifi_dropdown_window.kill();
+            }
+
+            if (__window == _audio_dropdown_window)
+            {
+                _audio_dropdown_window.unmap();
+                _audio_dropdown_window.kill();
             }
         }
 
@@ -6259,6 +6277,18 @@ class __status_bar__
                     show__(_wifi_dropdown_window);
                 }
             });
+
+            _audio_window.on_button_press_event([&]()-> void
+            {
+                if (_audio_dropdown_window.is_mapped())
+                {
+                    hide__(_audio_dropdown_window);
+                }
+                else
+                {
+                    show__(_audio_dropdown_window);
+                }
+            });
         }
 
         void setup_thread__(const uint32_t &__window)
@@ -6283,10 +6313,10 @@ class __status_bar__
         window(_bar_window),
             (_time_date_window), 
             (_wifi_window), (_wifi_dropdown_window), (_wifi_close_window), (_wifi_info_window),
-            (_audio_window);
+            (_audio_window), (_audio_dropdown_window);
 
     // Methods.
-        void init__()
+        void init()
         {
             create_windows__();
             setup_events__();
@@ -11452,7 +11482,7 @@ void setup_wm()
     file_app->init();
 
     status_bar = new __status_bar__;
-    status_bar->init__();
+    status_bar->init();
 
     wifi = new __wifi__;
     wifi->init();
