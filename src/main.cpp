@@ -6173,7 +6173,8 @@ class __status_bar__
                 20,
                 DARK_GREY,
                 XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE,
-                MAP
+                MAP,
+                (int[]){ALL, 2, BLACK}
             );
             expose(_audio_window);
         }
@@ -6229,7 +6230,8 @@ class __status_bar__
                     100,
                     DARK_GREY,
                     NONE,
-                    MAP
+                    MAP,
+                    (int[]){ALL, 2, BLACK}
                 );
             }
         }
@@ -6335,31 +6337,10 @@ class __status_bar__
 
         void expose(const uint32_t &__window)
         {
-            if (__window == _time_date_window)
-            {
-                _time_date_window.draw_text_auto_color(
-                    get_time_and_date__().c_str(),
-                    4,
-                    14
-                );
-            }
-
-            if (__window == _audio_window)
-            {
-                _audio_window.draw_text_auto_color("Audio", 4, 15);
-            }
-
-            if (__window == _wifi_close_window)
-            {
-                _wifi_close_window.draw_text_auto_color(
-                    "close",
-                    22,
-                    15,
-                    BLACK
-                );
-            }
-
-            if (__window == _wifi_info_window)
+            if (__window == _time_date_window ) _time_date_window.draw_text_auto_color(get_time_and_date__().c_str(), 4, 15);
+            if (__window == _audio_window     ) _audio_window.draw_text_auto_color("Audio", 4, 15);
+            if (__window == _wifi_close_window) _wifi_close_window.draw_text_auto_color("close", 22, 15,BLACK);
+            if (__window == _wifi_info_window )
             {
                 string local_ip("Local ip: " + network->get_local_ip_info(__network__::LOCAL_IP));
                 _wifi_info_window.draw_text_auto_color(
