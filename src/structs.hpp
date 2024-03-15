@@ -134,7 +134,8 @@ struct win_data {
     xcb_window_t win;
     uint16_t x, y, width, height;
 };
-enum class CURSOR {
+enum class CURSOR
+{
     arrow,
     hand1,
     hand2,

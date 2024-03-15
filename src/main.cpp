@@ -171,6 +171,51 @@ using SUint = unsigned short int;
     client *c = wm->client_from_any_window(&__window); \
     RETURN_IF(c == nullptr)
 
+map<CURSOR, const char *> cursor_str =
+{
+    {CURSOR::arrow,               "arrow"},
+    {CURSOR::hand1,               "hand1"},
+    {CURSOR::hand2,               "hand2"},
+    {CURSOR::watch,               "watch"},
+    {CURSOR::xterm,               "xterm"},
+    {CURSOR::cross,               "cross"},
+    {CURSOR::left_ptr,            "left_ptr"},
+    {CURSOR::right_ptr,           "right_ptr"},
+    {CURSOR::center_ptr,          "center_ptr"},
+    {CURSOR::sb_v_double_arrow,   "sb_v_double_arrow"},
+    {CURSOR::sb_h_double_arrow,   "sb_h_double_arrow"},
+    {CURSOR::fleur,               "fleur"},
+    {CURSOR::question_arrow,      "question_arrow"},
+    {CURSOR::pirate,              "pirate"},
+    {CURSOR::coffee_mug,          "coffee_mug"},
+    {CURSOR::umbrella,            "umbrella"},
+    {CURSOR::circle,              "circle"},
+    {CURSOR::xsb_left_arrow,      "xsb_left_arrow"},
+    {CURSOR::xsb_right_arrow,     "xsb_right_arrow"},
+    {CURSOR::xsb_up_arrow,        "xsb_up_arrow"},
+    {CURSOR::xsb_down_arrow,      "xsb_down_arrow"},
+    {CURSOR::top_left_corner,     "top_left_corner"},
+    {CURSOR::top_right_corner,    "top_right_corner"},
+    {CURSOR::bottom_left_corner,  "bottom_left_corner"},
+    {CURSOR::bottom_right_corner, "bottom_right_corner"},
+    {CURSOR::sb_left_arrow,       "sb_left_arrow"},
+    {CURSOR::sb_right_arrow,      "sb_right_arrow"},
+    {CURSOR::sb_up_arrow,         "sb_up_arrow"},
+    {CURSOR::sb_down_arrow,       "sb_down_arrow"},
+    {CURSOR::top_side,            "top_side"},
+    {CURSOR::bottom_side,         "bottom_side"},
+    {CURSOR::left_side,           "left_side"},
+    {CURSOR::right_side,          "right_side"},
+    {CURSOR::top_tee,             "top_tee"},
+    {CURSOR::bottom_tee,          "bottom_tee"},
+    {CURSOR::left_tee,            "left_tee"},
+    {CURSOR::right_tee,           "right_tee"},
+    {CURSOR::top_left_arrow,      "top_left_arrow"},
+    {CURSOR::top_right_arrow,     "top_right_arrow"},
+    {CURSOR::bottom_left_arrow,   "bottom_left_arrow"},
+    {CURSOR::bottom_right_arrow,  "bottom_right_arrow"}
+};
+
 class __net_logger__
 {
     // Defines.
@@ -1667,32 +1712,13 @@ class window
             }
 
         // Borders.
-            void make_borders(int __border_mask, const uint32_t &__size, const int &__color)
+            void make_borders(int __border_mask, const uint32_t __size, const int __color)
             {
-                if (__border_mask & UP)
-                {
-                    make_border_window(UP, __size, __color);
-                }
-
-                if (__border_mask & DOWN)
-                {
-                    make_border_window(DOWN, __size, __color);
-                }
-
-                if (__border_mask & LEFT)
-                {
-                    make_border_window(LEFT, __size, __color);
-                }
-
-                if (__border_mask & RIGHT)
-                {
-                    make_border_window(RIGHT, __size, __color);
-                }
-
-                if (__border_mask & ALL)
-                {
-                    make_border_window(ALL, __size, __color);
-                }
+                if (__border_mask & UP   ) make_border_window(UP,    __size, __color);
+                if (__border_mask & DOWN ) make_border_window(DOWN,  __size, __color);
+                if (__border_mask & LEFT ) make_border_window(LEFT,  __size, __color);
+                if (__border_mask & RIGHT) make_border_window(RIGHT, __size, __color);
+                if (__border_mask & ALL  ) make_border_window(ALL,   __size, __color);
             }
 
             void make_xcb_borders(const int &__color)
@@ -2550,7 +2576,7 @@ class window
                     return;
                 }
 
-                xcb_cursor_t cursor = xcb_cursor_load_cursor(ctx, pointer_from_enum(cursor_type));
+                xcb_cursor_t cursor = xcb_cursor_load_cursor(ctx, cursor_str[cursor_type]);
                 if (!cursor)
                 {
                     log_error("Unable to load cursor.");
@@ -3357,7 +3383,7 @@ class window
                     png_destroy_write_struct(&png_ptr, &info_ptr);
                 }
         
-        // Get. 
+        // Get.
             xcb_atom_t atom(const char *atom_name)
             {
                 xcb_intern_atom_cookie_t cookie = xcb_intern_atom(
