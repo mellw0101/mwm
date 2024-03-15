@@ -171,50 +171,54 @@ using SUint = unsigned short int;
     client *c = wm->client_from_any_window(&__window); \
     RETURN_IF(c == nullptr)
 
-map<CURSOR, const char *> cursor_str =
+constexpr const char * pointer_from_enum(CURSOR CURSOR)
 {
-    {CURSOR::arrow,               "arrow"},
-    {CURSOR::hand1,               "hand1"},
-    {CURSOR::hand2,               "hand2"},
-    {CURSOR::watch,               "watch"},
-    {CURSOR::xterm,               "xterm"},
-    {CURSOR::cross,               "cross"},
-    {CURSOR::left_ptr,            "left_ptr"},
-    {CURSOR::right_ptr,           "right_ptr"},
-    {CURSOR::center_ptr,          "center_ptr"},
-    {CURSOR::sb_v_double_arrow,   "sb_v_double_arrow"},
-    {CURSOR::sb_h_double_arrow,   "sb_h_double_arrow"},
-    {CURSOR::fleur,               "fleur"},
-    {CURSOR::question_arrow,      "question_arrow"},
-    {CURSOR::pirate,              "pirate"},
-    {CURSOR::coffee_mug,          "coffee_mug"},
-    {CURSOR::umbrella,            "umbrella"},
-    {CURSOR::circle,              "circle"},
-    {CURSOR::xsb_left_arrow,      "xsb_left_arrow"},
-    {CURSOR::xsb_right_arrow,     "xsb_right_arrow"},
-    {CURSOR::xsb_up_arrow,        "xsb_up_arrow"},
-    {CURSOR::xsb_down_arrow,      "xsb_down_arrow"},
-    {CURSOR::top_left_corner,     "top_left_corner"},
-    {CURSOR::top_right_corner,    "top_right_corner"},
-    {CURSOR::bottom_left_corner,  "bottom_left_corner"},
-    {CURSOR::bottom_right_corner, "bottom_right_corner"},
-    {CURSOR::sb_left_arrow,       "sb_left_arrow"},
-    {CURSOR::sb_right_arrow,      "sb_right_arrow"},
-    {CURSOR::sb_up_arrow,         "sb_up_arrow"},
-    {CURSOR::sb_down_arrow,       "sb_down_arrow"},
-    {CURSOR::top_side,            "top_side"},
-    {CURSOR::bottom_side,         "bottom_side"},
-    {CURSOR::left_side,           "left_side"},
-    {CURSOR::right_side,          "right_side"},
-    {CURSOR::top_tee,             "top_tee"},
-    {CURSOR::bottom_tee,          "bottom_tee"},
-    {CURSOR::left_tee,            "left_tee"},
-    {CURSOR::right_tee,           "right_tee"},
-    {CURSOR::top_left_arrow,      "top_left_arrow"},
-    {CURSOR::top_right_arrow,     "top_right_arrow"},
-    {CURSOR::bottom_left_arrow,   "bottom_left_arrow"},
-    {CURSOR::bottom_right_arrow,  "bottom_right_arrow"}
-};
+    switch (CURSOR)
+    {
+        case CURSOR::arrow: return "arrow";
+        case CURSOR::hand1: return "hand1";
+        case CURSOR::hand2: return "hand2";
+        case CURSOR::watch: return "watch";
+        case CURSOR::xterm: return "xterm";
+        case CURSOR::cross: return "cross";
+        case CURSOR::left_ptr: return "left_ptr";
+        case CURSOR::right_ptr: return "right_ptr";
+        case CURSOR::center_ptr: return "center_ptr";
+        case CURSOR::sb_v_double_arrow: return "sb_v_double_arrow";
+        case CURSOR::sb_h_double_arrow: return "sb_h_double_arrow";
+        case CURSOR::fleur: return "fleur";
+        case CURSOR::question_arrow: return "question_arrow";
+        case CURSOR::pirate: return "pirate";
+        case CURSOR::coffee_mug: return "coffee_mug";
+        case CURSOR::umbrella: return "umbrella";
+        case CURSOR::circle: return "circle";
+        case CURSOR::xsb_left_arrow: return "xsb_left_arrow";
+        case CURSOR::xsb_right_arrow: return "xsb_right_arrow";
+        case CURSOR::xsb_up_arrow: return "xsb_up_arrow";
+        case CURSOR::xsb_down_arrow: return "xsb_down_arrow";
+        case CURSOR::top_left_corner: return "top_left_corner";
+        case CURSOR::top_right_corner: return "top_right_corner";
+        case CURSOR::bottom_left_corner: return "bottom_left_corner";
+        case CURSOR::bottom_right_corner: return "bottom_right_corner";
+        case CURSOR::sb_left_arrow: return "sb_left_arrow";
+        case CURSOR::sb_right_arrow: return "sb_right_arrow";
+        case CURSOR::sb_up_arrow: return "sb_up_arrow";
+        case CURSOR::sb_down_arrow: return "sb_down_arrow";
+        case CURSOR::top_side: return "top_side";
+        case CURSOR::bottom_side: return "bottom_side";
+        case CURSOR::left_side: return "left_side";
+        case CURSOR::right_side: return "right_side";
+        case CURSOR::top_tee: return "top_tee";
+        case CURSOR::bottom_tee: return "bottom_tee";
+        case CURSOR::left_tee: return "left_tee";
+        case CURSOR::right_tee: return "right_tee";
+        case CURSOR::top_left_arrow: return "top_left_arrow";
+        case CURSOR::top_right_arrow: return "top_right_arrow";
+        case CURSOR::bottom_left_arrow: return "bottom_left_arrow";
+        case CURSOR::bottom_right_arrow: return "bottom_right_arrow";
+        default: return "left_ptr";
+    }
+}
 
 class __net_logger__
 {
@@ -2576,10 +2580,12 @@ class window
                     return;
                 }
 
-                xcb_cursor_t cursor = xcb_cursor_load_cursor(ctx, cursor_str[cursor_type]);
+                xcb_cursor_t cursor = xcb_cursor_load_cursor(ctx, pointer_from_enum(cursor_type));
                 if (!cursor)
                 {
                     log_error("Unable to load cursor.");
+                    xcb_cursor_context_free(ctx);
+                    xcb_free_cursor(conn, cursor);
                     return;
                 }
 
@@ -3204,7 +3210,7 @@ class window
                 (char *) &ev
             );
         }
-        
+
         xcb_client_message_event_t make_client_message_event(const uint32_t & format, const uint32_t & type, const uint32_t & data)
         {
             xcb_client_message_event_t ev = { 0 };
@@ -3218,57 +3224,7 @@ class window
 
             return ev;
         }
-        
-        // Pointer.
-            const char * pointer_from_enum(CURSOR CURSOR)
-            {
-                switch (CURSOR)
-                {
-                    case CURSOR::arrow: return "arrow";
-                    case CURSOR::hand1: return "hand1";
-                    case CURSOR::hand2: return "hand2";
-                    case CURSOR::watch: return "watch";
-                    case CURSOR::xterm: return "xterm";
-                    case CURSOR::cross: return "cross";
-                    case CURSOR::left_ptr: return "left_ptr";
-                    case CURSOR::right_ptr: return "right_ptr";
-                    case CURSOR::center_ptr: return "center_ptr";
-                    case CURSOR::sb_v_double_arrow: return "sb_v_double_arrow";
-                    case CURSOR::sb_h_double_arrow: return "sb_h_double_arrow";
-                    case CURSOR::fleur: return "fleur";
-                    case CURSOR::question_arrow: return "question_arrow";
-                    case CURSOR::pirate: return "pirate";
-                    case CURSOR::coffee_mug: return "coffee_mug";
-                    case CURSOR::umbrella: return "umbrella";
-                    case CURSOR::circle: return "circle";
-                    case CURSOR::xsb_left_arrow: return "xsb_left_arrow";
-                    case CURSOR::xsb_right_arrow: return "xsb_right_arrow";
-                    case CURSOR::xsb_up_arrow: return "xsb_up_arrow";
-                    case CURSOR::xsb_down_arrow: return "xsb_down_arrow";
-                    case CURSOR::top_left_corner: return "top_left_corner";
-                    case CURSOR::top_right_corner: return "top_right_corner";
-                    case CURSOR::bottom_left_corner: return "bottom_left_corner";
-                    case CURSOR::bottom_right_corner: return "bottom_right_corner";
-                    case CURSOR::sb_left_arrow: return "sb_left_arrow";
-                    case CURSOR::sb_right_arrow: return "sb_right_arrow";
-                    case CURSOR::sb_up_arrow: return "sb_up_arrow";
-                    case CURSOR::sb_down_arrow: return "sb_down_arrow";
-                    case CURSOR::top_side: return "top_side";
-                    case CURSOR::bottom_side: return "bottom_side";
-                    case CURSOR::left_side: return "left_side";
-                    case CURSOR::right_side: return "right_side";
-                    case CURSOR::top_tee: return "top_tee";
-                    case CURSOR::bottom_tee: return "bottom_tee";
-                    case CURSOR::left_tee: return "left_tee";
-                    case CURSOR::right_tee: return "right_tee";
-                    case CURSOR::top_left_arrow: return "top_left_arrow";
-                    case CURSOR::top_right_arrow: return "top_right_arrow";
-                    case CURSOR::bottom_left_arrow: return "bottom_left_arrow";
-                    case CURSOR::bottom_right_arrow: return "bottom_right_arrow";
-                    default: return "left_ptr";
-                }
-            }
-        
+
         // Create.
             // Gc.
                 void create_graphics_exposure_gc()
