@@ -6033,6 +6033,7 @@ class __status_bar__
                 MAP,
                 (int[]){ALL, 2, BLACK}
             );
+            _audio_window.set_pointer(CURSOR::hand1);
             expose(_audio_window);
         }
 
