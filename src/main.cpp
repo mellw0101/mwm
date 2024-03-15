@@ -6274,6 +6274,11 @@ class __status_bar__
                 }
                 else
                 {
+                    if (_audio_dropdown_window.is_mapped())
+                    {
+                        hide__(_audio_dropdown_window);
+                    }
+
                     show__(_wifi_dropdown_window);
                 }
             });
@@ -6286,6 +6291,11 @@ class __status_bar__
                 }
                 else
                 {
+                    if (_wifi_dropdown_window.is_mapped())
+                    {
+                        hide__(_wifi_dropdown_window);
+                    }
+
                     show__(_audio_dropdown_window);
                 }
             });
