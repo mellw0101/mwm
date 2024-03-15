@@ -3601,7 +3601,7 @@ class window
             }
         
         // Borders.
-            void create_border_window(const uint32_t &__color, const uint32_t &__x, const uint32_t &__y, const uint32_t &__width, const uint32_t &__height)
+            void create_border_window(const int __color, const uint32_t __x, const uint32_t __y, const uint32_t __width, const uint32_t __height)
             {
                 uint32_t window = xcb_generate_id(conn);
                 xcb_create_window(
@@ -3625,8 +3625,10 @@ class window
                 xcb_flush(conn);
             }
 
-            #define CREATE_UP_BORDER(__size, __color) \
-                create_border_window(__color, 0, 0, _width, __size)
+            #define CREATE_UP_BORDER(__size, __color)    create_border_window(__color, 0, 0, _width, __size)
+            #define CREATE_DOWN_BORDER(__size, __color)  create_border_window(__color, 0, (_height - __size), _width, __size)
+            #define CREATE_LEFT_BORDER(__size, __color)  create_border_window(__color, 0, 0, __size, _height)
+            #define CREATE_RIGHT_BORDER(__size, __color) create_border_window(__color, (_width - __size), 0, __size, _height)
 
             void make_border_window(BORDER __border, const uint32_t &__size, const int &__color)
             {
@@ -3634,197 +3636,36 @@ class window
                 {
                     case UP:
                     {
-                        // uint32_t window = xcb_generate_id(conn);
-                        // xcb_create_window(
-                        //     conn,
-                        //     _depth,
-                        //     window,
-                        //     _window,
-                        //     0,
-                        //     0,
-                        //     _width,
-                        //     __size,
-                        //     0,
-                        //     __class,
-                        //     _visual,
-                        //     _value_mask,
-                        //     _value_list
-                        // );
-                        // xcb_flush(conn);
-                        // change_back_pixel(get_color(__color), window);
-                        // xcb_map_window(conn, window);
-                        // xcb_flush(conn);
-
                         CREATE_UP_BORDER(__size, __color);
-
                         break;
                     }
-
                     case DOWN:
                     {
-                        uint32_t window = xcb_generate_id(conn);
-                        xcb_create_window(
-                            conn,
-                            _depth,
-                            window,
-                            _window,
-                            0,
-                            (_height - __size),
-                            _width,
-                            __size,
-                            0,
-                            __class,
-                            _visual,
-                            _value_mask,
-                            _value_list
-                        );
-                        xcb_flush(conn);
-                        change_back_pixel(get_color(__color), window);
-                        xcb_map_window(conn, window);
-                        xcb_flush(conn);
-
+                        CREATE_DOWN_BORDER(__size, __color);
                         break;
                     }
-
                     case LEFT:
                     {
-                        uint32_t window = xcb_generate_id(conn);
-                        xcb_create_window(
-                            conn,
-                            _depth,
-                            window,
-                            _window,
-                            0,
-                            0,
-                            __size,
-                            _height,
-                            0,
-                            __class,
-                            _visual,
-                            _value_mask,
-                            _value_list
-                        );
-                        xcb_flush(conn);
-                        change_back_pixel(get_color(__color), window);
-                        xcb_map_window(conn, window);
-                        xcb_flush(conn);
-
+                        CREATE_LEFT_BORDER(__size, __color);
                         break;
                     }
-
                     case RIGHT:
                     {
-                        uint32_t window = xcb_generate_id(conn);
-                        xcb_create_window(
-                            conn,
-                            _depth,
-                            window,
-                            _window,
-                            (_width - __size),
-                            0,
-                            __size,
-                            _height,
-                            0,
-                            __class,
-                            _visual,
-                            _value_mask,
-                            _value_list
-                        );
-                        xcb_flush(conn);
-                        change_back_pixel(get_color(__color), window);
-                        xcb_map_window(conn, window);
-                        xcb_flush(conn);
-
+                        CREATE_RIGHT_BORDER(__size, __color);
                         break;
                     }
-
                     case ALL:
                     {
-                        uint32_t up = xcb_generate_id(conn);
-                        xcb_create_window(
-                            conn,
-                            _depth,
-                            up,
-                            _window,
-                            0,
-                            0,
-                            _width,
-                            __size,
-                            0,
-                            __class,
-                            _visual,
-                            _value_mask,
-                            _value_list
-                        );
-                        xcb_flush(conn);
-                        change_back_pixel(get_color(__color), up);
-                        xcb_map_window(conn, up);
-
-                        uint32_t down = xcb_generate_id(conn);
-                        xcb_create_window(
-                            conn,
-                            _depth,
-                            down,
-                            _window,
-                            0,
-                            (_height - __size),
-                            _width,
-                            __size,
-                            0,
-                            __class,
-                            _visual,
-                            _value_mask,
-                            _value_list
-                        );
-                        xcb_flush(conn);
-                        change_back_pixel(get_color(__color), down);
-                        xcb_map_window(conn, down);
-
-                        uint32_t left = xcb_generate_id(conn);
-                        xcb_create_window(
-                            conn,
-                            _depth,
-                            left,
-                            _window,
-                            0,
-                            0,
-                            __size,
-                            _height,
-                            0,
-                            __class,
-                            _visual,
-                            _value_mask,
-                            _value_list
-                        );
-                        xcb_flush(conn);
-                        change_back_pixel(get_color(__color), left);
-                        xcb_map_window(conn, left);
-
-                        uint32_t right = xcb_generate_id(conn);
-                        xcb_create_window(
-                            conn,
-                            _depth,
-                            right,
-                            _window,
-                            (_width - __size),
-                            0,
-                            __size,
-                            _height,
-                            0,
-                            __class,
-                            _visual,
-                            _value_mask,
-                            _value_list
-                        );
-                        xcb_flush(conn);
-                        change_back_pixel(get_color(__color), right);
-                        xcb_map_window(conn, right);
-                        xcb_flush(conn);
-
+                        CREATE_UP_BORDER(__size, __color);
+                        CREATE_DOWN_BORDER(__size, __color);
+                        CREATE_LEFT_BORDER(__size, __color);
+                        CREATE_RIGHT_BORDER(__size, __color);
                         break;
                     }
-
-                    case NONE: break;
+                    case NONE:
+                    {
+                        break;
+                    }
                 }
             }
 
