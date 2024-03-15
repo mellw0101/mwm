@@ -6231,7 +6231,7 @@ class __status_bar__
                     DARK_GREY,
                     NONE,
                     MAP,
-                    (int[]){ALL, 2, BLACK}
+                    (int[]){LEFT | RIGHT | UP | DOWN, 2, BLACK}
                 );
             }
         }
