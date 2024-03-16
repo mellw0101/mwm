@@ -1651,14 +1651,14 @@ class window
                 make_borders(__border_info[0], __border_info[1], __border_info[2]);
             }
 
-            void create_window( const uint32_t &__parent,
-                                const int16_t  &__x,
-                                const int16_t  &__y,
-                                const uint16_t &__width,
-                                const uint16_t &__height,
-                                const COLOR    &__color = DEFAULT_COLOR,
-                                const uint32_t &__event_mask = 0,
-                                const int      &__flags = NONE,
+            void create_window( uint32_t __parent,
+                                int16_t  __x,
+                                int16_t  __y,
+                                uint16_t __width,
+                                uint16_t __height,
+                                COLOR    __color = DEFAULT_COLOR,
+                                uint32_t __event_mask = 0,
+                                int      __flags = NONE,
                                 void           *__data = nullptr)
             {
                 _depth        = 0L;
@@ -11035,9 +11035,8 @@ class Events
                 {
                     case SUPER:
                     {
-                        audio.list_sinks();
-                        // GET_CLIENT_FROM_WINDOW(e->event);
-                        // c->win.kill();
+                        GET_CLIENT_FROM_WINDOW(e->event);
+                        c->win.kill();
                         // c->win.x(BORDER_SIZE);
                         // c->win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
                         // xcb_flush(conn);
