@@ -8517,17 +8517,6 @@ class __system_settings__
                         pointer_device_info_t pointer_device;
                         pointer_device._device_name = device_name;
                         pointer_device._device_id   = device->deviceid;
-                        pointer_device._window.create_window(
-                            _input_device_dropdown_window,
-                            0,
-                            (pointer_vec.size() * 20),
-                            _input_device_dropdown_window.width(),
-                            20,
-                            WHITE,
-                            NONE,
-                            NONE,
-                            (int[]){RIGHT | DOWN | UP, 2, BLACK}
-                        );
                         pointer_vec.push_back(pointer_device);
 
                         log_info("Found pointing device:" + string(device_name));
@@ -8814,6 +8803,17 @@ class __system_settings__
 
                 for (int i = 0; i < pointer_vec.size(); ++i)
                 {
+                    pointer_vec[i]._window.create_window(
+                        _input_device_dropdown_window,
+                        0,
+                        (i * 20),
+                        _input_device_dropdown_window.width(),
+                        20,
+                        WHITE,
+                        NONE,
+                        NONE,
+                        (int[]){RIGHT | DOWN | UP, 2, BLACK}
+                    );
                     pointer_vec[i]._window.map();
                 }
             }
