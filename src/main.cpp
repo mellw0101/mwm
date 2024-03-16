@@ -8713,8 +8713,6 @@ class __system_settings__
                 WHITE,
                 XCB_EVENT_MASK_BUTTON_PRESS
             );
-
-            _device_menu.create(_input_settings_window, 100, 60);
         }
 
         void make_internal_client__()
@@ -8981,8 +8979,6 @@ class __system_settings__
             (_input_menu_entry_window), (_input_settings_window), (_input_device_window), (_input_device_button_window), (_input_device_dropdown_window);
         
         vector<window>(_screen_resolution_options_vector);
-
-        dropdown_menu_t _device_menu;
         client *c = nullptr;
 
     // Methods.
@@ -8995,11 +8991,11 @@ class __system_settings__
         void expose(uint32_t __window)
         {
             if (__window == _screen_menu_entry_window ) _screen_menu_entry_window.draw_text_auto_color("Screen", 4, 14);
-            if (__window == _screen_settings_window   ) _screen_settings_window.draw_text_auto_color("Resolution", 4, 35, BLACK);
+            if (__window == _screen_settings_window   ) _screen_settings_window.draw_text_auto_color("Resolution", (_screen_resolution_window.x() - (size("Resolution") * DEFAULT_FONT_WIDTH)), 35, BLACK);
             if (__window == _audio_menu_entry_window  ) _audio_menu_entry_window.draw_text_auto_color("Audio", 4, 14);
             if (__window == _network_menu_entry_window) _network_menu_entry_window.draw_text_auto_color("Network", 4, 14);
             if (__window == _input_menu_entry_window  ) _input_menu_entry_window.draw_text_auto_color("Input", 4, 14);
-            if (__window == _input_settings_window    ) _input_settings_window.draw_text_auto_color("Device", (_input_device_window.x() - ((size("Device") - 1) * DEFAULT_FONT_WIDTH)), 35);
+            if (__window == _input_settings_window    ) _input_settings_window.draw_text_auto_color("Device", (_input_device_window.x() - (size("Device") * DEFAULT_FONT_WIDTH)), 35);
             if (__window == _input_device_window      ) _input_device_window.draw_text_auto_color("Select Input Device.", 4, 15, BLACK);
             if (__window == _screen_resolution_window )
             {
