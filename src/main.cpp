@@ -8517,6 +8517,17 @@ class __system_settings__
                         pointer_device_info_t pointer_device;
                         pointer_device._device_name = device_name;
                         pointer_device._device_id   = device->deviceid;
+                        pointer_device._window.create_window(
+                            _input_device_dropdown_window,
+                            0,
+                            (pointer_vec.size() * 20),
+                            _input_device_dropdown_window.width(),
+                            20,
+                            WHITE,
+                            NONE,
+                            NONE,
+                            (int[]){RIGHT | DOWN | UP, 2, BLACK}
+                        );
                         pointer_vec.push_back(pointer_device);
 
                         log_info("Found pointing device:" + string(device_name));
@@ -8686,6 +8697,18 @@ class __system_settings__
                 NONE,
                 (int[]){ALL, 2, BLACK}
             );
+
+            _input_device_button_window.create_window(
+                _input_settings_window,
+                (_input_device_window.x() + _input_device_window.width()),
+                _input_device_window.y(),
+                20,
+                20,
+                WHITE,
+                XCB_EVENT_MASK_BUTTON_PRESS,
+                NONE,
+                (int[]){RIGHT | DOWN | UP, 2, BLACK}
+            );
         }
 
         void make_internal_client__()
@@ -8740,18 +8763,19 @@ class __system_settings__
         {
             if (__window == _screen_resolution_dropdown_window)
             {
-                _screen_resolution_dropdown_window.create_def_and_map_no_keys(
+                _screen_resolution_dropdown_window.create_window(
                     _screen_settings_window,
                     100,
                     40,
                     180,
                     (screen_settings->_avalible_resolutions.size() * MENU_ENTRY_HEIGHT),
                     DARK_GREY,
-                    0
+                    NONE,
+                    MAP
                 );
                 _screen_resolution_options_vector.clear();
 
-                for (int i(0), y_pos(0); i < screen_settings->_avalible_resolutions.size(); ++i)
+                for (int i = 0; i < screen_settings->_avalible_resolutions.size(); ++i)
                 {
                     window option;
                     option.create_window(
@@ -8767,13 +8791,30 @@ class __system_settings__
                     );
                     option.draw_text_auto_color(
                         screen_settings->_avalible_resolutions[i].second.c_str(),
-                        MENU_ENTRY_TEXT_X,
-                        MENU_ENTRY_TEXT_Y,
-                        WHITE
+                        4,
+                        14
                     );
-
                     _screen_resolution_options_vector.push_back(option);
-                }            
+                }
+            }
+
+            if (__window == _input_device_dropdown_window)
+            {
+                _input_device_dropdown_window.create_window(
+                    _input_settings_window,
+                    _input_device_window.x(),
+                    (_input_device_window.y() + _input_device_window.height()),
+                    _input_device_window.width(),
+                    pointer_vec.size() * 20,
+                    WHITE,
+                    NONE,
+                    MAP
+                );
+
+                for (int i = 0; i < pointer_vec.size(); ++i)
+                {
+                    pointer_vec[i]._window.map();
+                }
             }
         }
 
@@ -8851,6 +8892,18 @@ class __system_settings__
                         adjust_and_map_subwindow__(_input_settings_window);
                     }
 
+                    if (e->event == _input_device_button_window)
+                    {
+                        if (!_input_device_dropdown_window.is_mapped())
+                        {
+                            show__(_input_device_dropdown_window);
+                            return;
+                        }
+
+                        hide__(_input_device_dropdown_window);
+                        return;
+                    }
+
                     for (int i(0); i < _screen_resolution_options_vector.size(); ++i)
                     {
                         if (e->event == _screen_resolution_options_vector[i])
@@ -8887,9 +8940,9 @@ class __system_settings__
             (_screen_menu_entry_window), (_screen_settings_window), (_screen_resolution_window), (_screen_resolution_button_window), (_screen_resolution_dropdown_window),
             (_audio_menu_entry_window), (_audio_settings_window),
             (_network_menu_entry_window), (_network_settings_window),
-            (_input_menu_entry_window), (_input_settings_window), (_input_device_window);
+            (_input_menu_entry_window), (_input_settings_window), (_input_device_window), (_input_device_button_window), (_input_device_dropdown_window);
         
-        vector<window>(_screen_resolution_options_vector), (_inpup_devices_vector);
+        vector<window>(_screen_resolution_options_vector);
         client *c = nullptr;
 
     // Methods.
