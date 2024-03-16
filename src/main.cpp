@@ -8654,22 +8654,14 @@ class __system_settings__
             wm->focused_client = c;
         }
 
-        void check_and_unmap_window__(window &__window)
-        {
-            if (__window.is_mapped())
-            {
-                __window.unmap();
-            }
-        }
-
         void adjust_and_map_subwindow__(window &__window)
         {
             if (__window.is_mapped()) return;
 
-            check_and_unmap_window__(_default_settings_window);
-            check_and_unmap_window__(_screen_settings_window);
-            check_and_unmap_window__(_audio_settings_window);
-            check_and_unmap_window__(_network_settings_window);
+            if (_default_settings_window.is_mapped()) _default_settings_window.unmap();
+            if (_screen_settings_window.is_mapped() ) _screen_settings_window.unmap();
+            if (_audio_settings_window.is_mapped()  ) _audio_settings_window.unmap();
+            if (_network_settings_window.is_mapped()) _network_settings_window.unmap();
 
             __window.width_height((c->win.width() - MENU_WINDOW_WIDTH), c->win.height());
             xcb_flush(conn);
@@ -8678,10 +8670,10 @@ class __system_settings__
 
             if (__window == _screen_settings_window)
             {
-                draw(__window);
+                expose(__window);
                 _screen_resolution_window.map();
                 _screen_resolution_window.make_borders(UP | DOWN | LEFT | RIGHT, 2, BLACK);
-                draw(_screen_resolution_window);
+                expose(_screen_resolution_window);
                 _screen_resolution_button_window.map();
                 _screen_resolution_button_window.make_borders(UP | RIGHT | DOWN, 2, BLACK);
             }
@@ -8839,14 +8831,6 @@ class __system_settings__
         client *c = nullptr;
 
     // Methods.
-        void check_and_configure_mapped_window(window &__window, const uint32_t &__width, const uint32_t &__height)
-        {
-            if (__window.is_mapped())
-            {
-                __window.width_height(__width, __height);
-            }
-        }
-
         void launch()
         {
             make_windows__();
@@ -8854,64 +8838,18 @@ class __system_settings__
             query_input_devices__();
         }
 
-        void draw(window &__window)
-        {
-            if (__window == _screen_menu_entry_window)
-            {
-                _screen_menu_entry_window.draw_text_16_auto_color(
-                    "Screen",
-                    MENU_ENTRY_TEXT_X,
-                    MENU_ENTRY_TEXT_Y
-                );
-            }
-
-            if (__window == _screen_settings_window)
-            {
-                _screen_settings_window.draw_text_auto_color(
-                    "Resolution",
-                    4,
-                    35,
-                    BLACK
-                );
-            }
-
-            if (__window == _screen_resolution_window)
-            {
-                string resolution(screen_settings->_current_resoluton_string);
-                RETURN_IF(resolution.empty())
-                _screen_resolution_window.draw_text_auto_color(
-                    resolution.c_str(),
-                    4,
-                    15
-                );
-            }
-
-            if (__window == _audio_menu_entry_window)
-            {
-                _audio_menu_entry_window.draw_text_16_auto_color(
-                    "Audio",
-                    MENU_ENTRY_TEXT_X,
-                    MENU_ENTRY_TEXT_Y
-                );
-            }
-
-            if (__window == _network_menu_entry_window)
-            {
-                _network_menu_entry_window.draw_text_16_auto_color(
-                    "Network",
-                    MENU_ENTRY_TEXT_X,
-                    MENU_ENTRY_TEXT_Y
-                );
-            }
-        }
-
         void expose(const uint32_t &__window)
         {
-            if (__window == _screen_menu_entry_window ) draw(_screen_menu_entry_window);
-            if (__window == _screen_settings_window   ) draw(_screen_settings_window);
-            if (__window == _screen_resolution_window ) draw(_screen_resolution_window);
-            if (__window == _audio_menu_entry_window  ) draw(_audio_menu_entry_window);
-            if (__window == _network_menu_entry_window) draw(_network_menu_entry_window);
+            if (__window == _screen_menu_entry_window ) _screen_menu_entry_window.draw_text_auto_color("Screen", 4, 14);
+            if (__window == _screen_settings_window   ) _screen_settings_window.draw_text_auto_color("Resolution", 4, 35, BLACK);
+            if (__window == _audio_menu_entry_window  ) _audio_menu_entry_window.draw_text_auto_color("Audio", 4, 14);
+            if (__window == _network_menu_entry_window) _network_menu_entry_window.draw_text_auto_color("Network", 4, 14);
+            if (__window == _screen_resolution_window )
+            {
+                string resolution(screen_settings->_current_resoluton_string);
+                if (resolution.empty()) return;
+                _screen_resolution_window.draw_text_auto_color(resolution.c_str(), 4, 15);
+            }
 
             for (int i(0); i < _screen_resolution_options_vector.size(); ++i)
             {
@@ -8934,10 +8872,10 @@ class __system_settings__
             if (__window == _main_window)
             {
                 _menu_window.height(__height);
-                check_and_configure_mapped_window(_default_settings_window, (__width - MENU_WINDOW_WIDTH), __height);
-                check_and_configure_mapped_window(_screen_settings_window,  (__width - MENU_WINDOW_WIDTH), __height);
-                check_and_configure_mapped_window(_audio_settings_window,   (__width - MENU_WINDOW_WIDTH), __height);
-                check_and_configure_mapped_window(_network_settings_window, (__width - MENU_WINDOW_WIDTH), __height);
+                if (_default_settings_window.is_mapped()) _default_settings_window.width_height((__width - MENU_WINDOW_WIDTH), __height);
+                if (_screen_settings_window.is_mapped() ) _screen_settings_window.width_height((__width - MENU_WINDOW_WIDTH), __height);
+                if (_audio_settings_window.is_mapped()  ) _audio_settings_window.width_height((__width - MENU_WINDOW_WIDTH), __height);
+                if (_network_settings_window.is_mapped()) _network_settings_window.width_height((__width - MENU_WINDOW_WIDTH), __height);
                 xcb_flush(conn);
             }
         }
