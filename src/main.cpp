@@ -8520,7 +8520,7 @@ class __system_settings__
                         pointer_device->_enabled = device->enabled;
                         log_info("Found pointing device:" + string(device_name));
                         log_info("Device ID:" + to_string(device->deviceid));
-                        logger.log(INFO, __func__, bool(device->enabled));
+                        logger.log(INFO, __func__, device->enabled);
                         pointer_vec.push_back(pointer_device);
                     }
                 }
