@@ -8694,6 +8694,7 @@ class __system_settings__
                 _main_window.height()
             );
 
+            pointer_vec.clear();
             query_input_devices__();
             _input_device_window.create_window(
                 _input_settings_window,
