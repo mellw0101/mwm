@@ -5882,38 +5882,146 @@ static __wifi__ *wifi(nullptr);
 
 class __audio__
 {
+    private:
+    // Variabels
+        pa_mainloop* mainloop = nullptr;
+        pa_mainloop_api* mainloop_api = nullptr;
+        pa_context* context = nullptr;
+
     public:
     // Methods.
-        // Callback for sink list
         static void sink_list_cb(pa_context* c, const pa_sink_info* l, int eol, void* userdata)
         {
             // End of list
             if (eol > 0) return;
 
-            std::cout << "Sink name: " << l->name << " Description: " << l->description << std::endl;
+            log_info("Sink name: " + string(l->name) + " Description: " + string(l->description));
         }
 
-        // Callback for context state
-        void context_state_cb(pa_context* c, void* userdata)
+        static void success_cb(pa_context* c, int success, void* userdata)
         {
-            pa_context_state_t state = pa_context_get_state(c);
-            switch (state)
+            if (success)
             {
-                // This is the state where we can start doing operations
+                std::cout << "Default sink changed successfully." << std::endl;
+            }
+            else
+            {
+                std::cout << "Failed to change the default sink." << std::endl;
+            }
+            // Signal the main loop to quit after attempting to change the default sink
+            pa_mainloop_quit(reinterpret_cast<pa_mainloop*>(userdata), 0);
+        }
+
+        static void context_state_cb(pa_context* c, void* userdata)
+        {
+            switch (pa_context_get_state(c))
+            {
                 case PA_CONTEXT_READY:
                 {
-                    pa_operation* o = pa_context_get_sink_info_list(c, sink_list_cb, nullptr);
+                    const char* sink_name = reinterpret_cast<const char*>(userdata);
+                    // Set the default sink
+                    pa_operation* o = pa_context_set_default_sink(c, sink_name, success_cb, userdata);
                     if (o) pa_operation_unref(o);
                     break;
                 }
+                case PA_CONTEXT_FAILED:
+                case PA_CONTEXT_TERMINATED:
+                    pa_mainloop_quit(reinterpret_cast<pa_mainloop*>(userdata), 1);
+                    break;
                 default:
                     break;
             }
         }
+
+        static bool change_default_sink(const std::string& sink_name)
+        {
+            pa_mainloop* m = pa_mainloop_new();
+            pa_mainloop_api* mainloop_api = pa_mainloop_get_api(m);
+            pa_context* context = pa_context_new(mainloop_api, "Change Default Sink Example");
+
+            if (!context)
+            {
+                std::cerr << "Failed to create PA context." << std::endl;
+                pa_mainloop_free(m);
+                return false;
+            }
+
+            pa_context_set_state_callback(context, context_state_cb, m);
+            pa_context_connect(context, nullptr, PA_CONTEXT_NOFLAGS, nullptr);
+
+            int ret = 0;
+            pa_mainloop_run(m, &ret);
+
+            pa_context_disconnect(context);
+            pa_context_unref(context);
+            pa_mainloop_free(m);
+
+            return ret == 0;
+        }
+
+        // // Callback for context state
+        // void context_state_cb(pa_context* c, void* userdata)
+        // {
+        //     pa_context_state_t state = pa_context_get_state(c);
+        //     switch (state)
+        //     {
+        //         // This is the state where we can start doing operations
+        //         case PA_CONTEXT_READY:
+        //         {
+        //             pa_operation* o = pa_context_get_sink_info_list(c, sink_list_cb, nullptr);
+        //             if (o) pa_operation_unref(o);
+        //             break;
+        //         }
+        //         default:
+        //             break;
+        //     }
+        // }
     
-    // Constructor.
-        __audio__() {}
+        __audio__()
+        {
+            mainloop = pa_mainloop_new();
+            mainloop_api = pa_mainloop_get_api(mainloop);
+            context = pa_context_new(mainloop_api, "mwm");
+
+            pa_context_set_state_callback(context, context_state_cb, this);
+            pa_context_connect(context, nullptr, PA_CONTEXT_NOFLAGS, nullptr);
+        }
+
+        ~__audio__()
+        {
+            if (context)
+            {
+                pa_context_disconnect(context);
+                pa_context_unref(context);
+            }
+            if (mainloop)
+            {
+                pa_mainloop_free(mainloop);
+            }
+        }
+
+        void run()
+        {
+            int ret;
+            if (pa_mainloop_run(mainloop, &ret) < 0)
+            {
+                log_error("Failed to run mainloop.");
+            }
+        }
+
+        void list_sinks()
+        {
+            pa_operation* op = pa_context_get_sink_info_list(context, sink_list_cb, nullptr);
+            if (op) pa_operation_unref(op);
+        }
+
+        void set_default_sink(const std::string& sink_name)
+        {
+            pa_operation* op = pa_context_set_default_sink(context, sink_name.c_str(), success_cb, nullptr);
+            if (op) pa_operation_unref(op);
+        }
 };
+static __audio__ *audio(nullptr);
 
 namespace 
 {
@@ -6065,8 +6173,7 @@ class __status_bar__
                     (int[]){ALL, WIFI_DROPDOWN_BORDER, BLACK}
                 );
                 _wifi_close_window.set_pointer(CURSOR::hand2);
-                expose(_wifi_close_window);
-                
+                expose(_wifi_close_window);  
                 _wifi_info_window.create_window(
                     _wifi_dropdown_window,
                     WIFI_INFO_WINDOW_X,
@@ -6204,20 +6311,10 @@ class __status_bar__
             if (__window == _wifi_info_window )
             {
                 string local_ip("Local ip: " + network->get_local_ip_info(__network__::LOCAL_IP));
-                _wifi_info_window.draw_text_auto_color(
-                    local_ip.c_str(),
-                    4,
-                    16,
-                    BLACK
-                );
+                _wifi_info_window.draw_text_auto_color(local_ip.c_str(), 4, 16, BLACK);
 
                 string local_interface("interface: " + network->get_local_ip_info(__network__::INTERFACE_FOR_LOCAL_IP));
-                _wifi_info_window.draw_text_auto_color(
-                    local_interface.c_str(),
-                    4,
-                    30,
-                    BLACK
-                );
+                _wifi_info_window.draw_text_auto_color(local_interface.c_str(), 4, 30, BLACK);
             }
         }
 
@@ -11353,6 +11450,13 @@ int main()
     net_logger = new __net_logger__;
     net_logger->init(ESP_SERVER);
     NET_LOG("Starting mwm.");
+
+    function<void()> audio_thread = [&]()->void
+    {
+        audio = new __audio__;
+        audio->run();
+    };
+    thread(audio_thread).detach();
 
     LOG_start()
     setup_wm();
