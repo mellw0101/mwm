@@ -1461,6 +1461,7 @@ namespace // window namespace
         {
             *__atom = XCB_NONE;
             free(reply);
+            log_error("reply is nullptr.");
             return;
         }
 
