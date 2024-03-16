@@ -6200,7 +6200,7 @@ class __status_bar__
         {
             if (__window == _time_date_window ) _time_date_window.draw_text_auto_color(get_time_and_date__().c_str(), 4, 15);
             if (__window == _audio_window     ) _audio_window.draw_text_auto_color("Audio", 4, 15);
-            if (__window == _wifi_close_window) _wifi_close_window.draw_text_auto_color("close", 22, 15,BLACK);
+            if (__window == _wifi_close_window) _wifi_close_window.draw_text_auto_color("Close", 22, 15,BLACK);
             if (__window == _wifi_info_window )
             {
                 string local_ip("Local ip: " + network->get_local_ip_info(__network__::LOCAL_IP));
