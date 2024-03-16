@@ -8812,9 +8812,10 @@ class __system_settings__
                         WHITE,
                         NONE,
                         NONE,
-                        (int[]){RIGHT | DOWN | UP, 2, BLACK}
+                        (int[]){LEFT | RIGHT | DOWN, 2, BLACK}
                     );
                     pointer_vec[i]._window.map();
+                    pointer_vec[i]._window.draw_text_auto_color(pointer_vec[i]._device_name.c_str(), 4, 14, BLACK);
                 }
             }
         }
