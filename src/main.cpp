@@ -11469,6 +11469,8 @@ int main()
     LOG_start()
     setup_wm();
 
+    audio.list_sinks();
+
     test tester;
     tester.init();
 
