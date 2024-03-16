@@ -1758,26 +1758,26 @@ class window
                 xcb_flush(conn);
             }
             
-            void reparent(const uint32_t & new_parent, const int16_t & x, const int16_t & y)
+            void reparent(uint32_t __new_parent, int16_t __x, int16_t __y)
             {
                 xcb_reparent_window(
-                    conn, 
-                    _window, 
-                    new_parent, 
-                    x, 
-                    y
+                    conn,
+                    _window,
+                    __new_parent,
+                    __x,
+                    __y
                 );
                 xcb_flush(conn);
             }
             
-            void make_child(const uint32_t & window_to_make_child, const uint32_t & child_x, const uint32_t & child_y)
+            void make_child(uint32_t __window_to_make_child, uint32_t __child_x, uint32_t __child_y)
             {
                 xcb_reparent_window(
                     conn,
-                    window_to_make_child,
+                    __window_to_make_child,
                     _window,
-                    child_x,
-                    child_y
+                    __child_x,
+                    __child_y
                 );
                 xcb_flush(conn);
             }
@@ -1842,7 +1842,7 @@ class window
                 xcb_flush(conn);
             }
 
-            void send_event(const uint32_t &__event_mask, void *__value_list = nullptr)
+            void send_event(uint32_t __event_mask, void *__value_list = nullptr)
             {
                 if (__event_mask & XCB_EVENT_MASK_EXPOSURE)
                 {
@@ -2554,20 +2554,19 @@ class window
                 xcb_flush(conn);
             }
 
-            void set_event_mask(const uint32_t &__mask)
+            void set_event_mask(uint32_t __mask)
             {
                 apply_event_mask(&__mask);
             }
 
-            void apply_event_mask(const uint32_t *mask)
+            void apply_event_mask(const uint32_t *__mask)
             {
                 xcb_change_window_attributes(
                     conn,
                     _window,
                     XCB_CW_EVENT_MASK,
-                    mask
+                    __mask
                 );
-
                 xcb_flush(conn);
             }
 
@@ -2590,11 +2589,12 @@ class window
                 }
 
                 xcb_change_window_attributes(
-                    conn, 
-                    _window, 
-                    XCB_CW_CURSOR, 
-                    (uint32_t[1]) {
-                        cursor 
+                    conn,
+                    _window,
+                    XCB_CW_CURSOR,
+                    (uint32_t[1])
+                    {
+                        cursor
                     }
                 );
                 xcb_flush(conn);
@@ -2604,22 +2604,22 @@ class window
 
             // Size_pos.
                 // Fetch.
-                    uint32_t x() const
+                    int16_t x() const
                     {
                         return _x;
                     }
                 
-                    uint32_t y() const
+                    int16_t y() const
                     {
                         return _y;
                     }
                 
-                    uint32_t width() const
+                    uint16_t width() const
                     {
                         return _width;
                     }
                 
-                    uint32_t height() const
+                    uint16_t height() const
                     {
                         return _height;
                     }
