@@ -8685,9 +8685,7 @@ class __system_settings__
                 160,
                 20,
                 WHITE,
-                XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE,
-                NONE,
-                (int[]){ALL, 2, BLACK}
+                XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE
             );
 
             _input_device_button_window.create_window(
@@ -8697,9 +8695,7 @@ class __system_settings__
                 20,
                 20,
                 WHITE,
-                XCB_EVENT_MASK_BUTTON_PRESS,
-                NONE,
-                (int[]){RIGHT | DOWN | UP, 2, BLACK}
+                XCB_EVENT_MASK_BUTTON_PRESS
             );
         }
 
@@ -8758,7 +8754,9 @@ class __system_settings__
                 _input_device_window.width(window_width);
                 _input_device_button_window.x(_input_device_window.x() + _input_device_window.width());
 
+                _input_device_window.make_borders(ALL, 2, BLACK);
                 _input_device_window.map();
+                _input_device_button_window.make_borders(RIGHT | DOWN | UP, 2, BLACK);
                 _input_device_button_window.map();
             }
         }
