@@ -5976,8 +5976,8 @@ class __audio__
         //             break;
         //     }
         // }
-    
-        __audio__()
+
+        void init()
         {
             mainloop = pa_mainloop_new();
             mainloop_api = pa_mainloop_get_api(mainloop);
@@ -5987,7 +5987,7 @@ class __audio__
             pa_context_connect(context, nullptr, PA_CONTEXT_NOFLAGS, nullptr);
         }
 
-        ~__audio__()
+        void cleanup()
         {
             if (context)
             {
@@ -6020,6 +6020,9 @@ class __audio__
             pa_operation* op = pa_context_set_default_sink(context, sink_name.c_str(), success_cb, nullptr);
             if (op) pa_operation_unref(op);
         }
+        
+    // Constructor.
+        __audio__() {}
 };
 static __audio__ *audio(nullptr);
 
@@ -11454,6 +11457,7 @@ int main()
     function<void()> audio_thread = [&]()->void
     {
         audio = new __audio__;
+        audio->init();
         audio->run();
     };
     thread(audio_thread).detach();
