@@ -8672,12 +8672,14 @@ class __system_settings__
 
             _input_device_window.create_window(
                 _input_settings_window,
-                (MENU_WINDOW_WIDTH + 20),
+                20,
                 20,
                 80,
                 20,
                 WHITE,
-                XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE
+                XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE,
+                NONE,
+                (int[]){ALL, 2, BLACK}
             );
         }
 
