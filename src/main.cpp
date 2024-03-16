@@ -8485,6 +8485,7 @@ class __system_settings__
     private:
     // Structs.
         typedef struct {
+            window   _window;
             string   _device_name;
             uint16_t _device_id;
         } pointer_device_info_t;
@@ -8723,10 +8724,8 @@ class __system_settings__
             {
                 expose(__window);
                 _screen_resolution_window.map();
-                // _screen_resolution_window.make_borders(ALL, 2, BLACK);
                 expose(_screen_resolution_window);
                 _screen_resolution_button_window.map();
-                // _screen_resolution_button_window.make_borders(UP | RIGHT | DOWN, 2, BLACK);
             }
 
             if (__window == _input_settings_window)
@@ -8755,23 +8754,22 @@ class __system_settings__
                 for (int i(0), y_pos(0); i < screen_settings->_avalible_resolutions.size(); ++i)
                 {
                     window option;
-                    option.create_def_and_map_no_keys(
+                    option.create_window(
                         _screen_resolution_dropdown_window,
                         0,
                         (_screen_resolution_options_vector.size() * MENU_ENTRY_HEIGHT),
                         _screen_resolution_dropdown_window.width(),
                         MENU_ENTRY_HEIGHT,
                         DARK_GREY,
-                        XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE  
+                        XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE,
+                        MAP,
+                        (int[]){RIGHT | LEFT | DOWN, 2, BLACK}
                     );
-                    option.make_borders(RIGHT | LEFT | DOWN, 2, BLACK);
-                    option.draw_text(
+                    option.draw_text_auto_color(
                         screen_settings->_avalible_resolutions[i].second.c_str(),
-                        WHITE,
-                        DARK_GREY,
-                        DEFAULT_FONT,
                         MENU_ENTRY_TEXT_X,
-                        MENU_ENTRY_TEXT_Y
+                        MENU_ENTRY_TEXT_Y,
+                        WHITE
                     );
 
                     _screen_resolution_options_vector.push_back(option);
