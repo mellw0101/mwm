@@ -5893,7 +5893,11 @@ class __audio__
         static void sink_list_cb(pa_context* c, const pa_sink_info* l, int eol, void* userdata)
         {
             // End of list
-            if (eol > 0) return;
+            if (eol > 0)
+            {
+                log_error("end of list.");
+                return;
+            }
 
             log_info("Sink name: " + string(l->name) + " Description: " + string(l->description));
         }
