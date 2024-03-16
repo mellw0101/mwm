@@ -1451,8 +1451,7 @@ namespace // window namespace
 
     enum window_event_mask : uint32_t
     {
-        KILL_WINDOW = 1 << 25,
-        TAKE_FOCUS  = 1 << 26
+        KILL_WINDOW = 1 << 25
     };
 
     void get_atom(char *__name, xcb_atom_t *__atom)
@@ -1961,10 +1960,6 @@ class window
 
                     xcb_send_event(conn, 0, _window, XCB_EVENT_MASK_NO_EVENT, (char *) &ev);
                     xcb_flush(conn);
-                }
-
-                if (__event_mask & TAKE_FOCUS)
-                {
                 }
             }
 
@@ -3269,31 +3264,6 @@ class window
                     values.data()
                 );
             }
-        
-        void send_event(xcb_client_message_event_t ev)
-        {
-            xcb_send_event(
-                conn,
-                0,
-                _window,
-                XCB_EVENT_MASK_NO_EVENT,
-                (char *) &ev
-            );
-        }
-
-        xcb_client_message_event_t make_client_message_event(const uint32_t & format, const uint32_t & type, const uint32_t & data)
-        {
-            xcb_client_message_event_t ev = { 0 };
-            ev.response_type = XCB_CLIENT_MESSAGE;
-            ev.window = _window;
-            ev.format = format;
-            ev.sequence = 0;
-            ev.type = type;
-            ev.data.data32[0] = data;
-            ev.data.data32[1] = XCB_CURRENT_TIME;
-
-            return ev;
-        }
 
         // Create.
             // Gc.
