@@ -1869,12 +1869,6 @@ class window
                     return;
                 }
 
-                // send_event(make_client_message_event(
-                //     32,
-                //     protocols_reply->atom,
-                //     delete_reply->atom
-                // ));
-
                 send_event(KILL_WINDOW, (uint32_t[]){32, protocols_reply->atom, delete_reply->atom});
                 free(protocols_reply);
                 free(delete_reply);
@@ -6071,7 +6065,7 @@ class __audio__
 };
 __audio__ audio;
 
-namespace 
+namespace
 {
     #define BAR_WINDOW_X      0
     #define BAR_WINDOW_Y      0
@@ -8493,7 +8487,7 @@ class __system_settings__
         class __mouse_settings__
         {
             public:
-                void query_input_devices()
+                static void query_input_devices()
                 {
                     xcb_input_xi_query_device_cookie_t cookie = xcb_input_xi_query_device(conn, XCB_INPUT_DEVICE_ALL);
                     xcb_input_xi_query_device_reply_t* reply = xcb_input_xi_query_device_reply(conn, cookie, NULL);
@@ -8520,7 +8514,6 @@ class __system_settings__
                     free(reply);
                 }
         };
-        __mouse_settings__ mouse_settings;
 
     // Methods.
         void make_windows__()
@@ -8877,6 +8870,7 @@ class __system_settings__
         {
             make_windows__();
             make_internal_client__();
+            __mouse_settings__::query_input_devices();
         }
 
         void draw(window &__window)
