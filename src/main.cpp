@@ -11454,13 +11454,9 @@ int main()
     net_logger->init(ESP_SERVER);
     NET_LOG("Starting mwm.");
 
-    function<void()> audio_thread = [&]()->void
-    {
-        audio = new __audio__;
-        audio->init();
-        audio->run();
-    };
-    thread(audio_thread).detach();
+    audio = new __audio__;
+    audio->init();
+    audio->run();
 
     LOG_start()
     setup_wm();
