@@ -1498,7 +1498,7 @@ namespace // window namespace
 
     namespace // WINDOW_CONFIG.
     {
-        enum class WINDOW_CONFIG : uint32_t
+        enum class WINDOW_CONF : uint32_t
         {
             X      = 1 << 0,
             Y      = 1 << 1,
@@ -1506,34 +1506,34 @@ namespace // window namespace
             HEIGHT = 1 << 3
         };
 
-        inline WINDOW_CONFIG operator|(WINDOW_CONFIG a, WINDOW_CONFIG b)
+        inline WINDOW_CONF operator|(WINDOW_CONF a, WINDOW_CONF b)
         {
-            return static_cast<WINDOW_CONFIG>(
-                static_cast<std::underlying_type<WINDOW_CONFIG>::type>(a) |
-                static_cast<std::underlying_type<WINDOW_CONFIG>::type>(b));
+            return static_cast<WINDOW_CONF>(
+                static_cast<std::underlying_type<WINDOW_CONF>::type>(a) |
+                static_cast<std::underlying_type<WINDOW_CONF>::type>(b));
         }
 
-        inline WINDOW_CONFIG operator&(WINDOW_CONFIG a, WINDOW_CONFIG b)
+        inline WINDOW_CONF operator&(WINDOW_CONF a, WINDOW_CONF b)
         {
-            return static_cast<WINDOW_CONFIG>(
-                static_cast<std::underlying_type<WINDOW_CONFIG>::type>(a) &
-                static_cast<std::underlying_type<WINDOW_CONFIG>::type>(b));
+            return static_cast<WINDOW_CONF>(
+                static_cast<std::underlying_type<WINDOW_CONF>::type>(a) &
+                static_cast<std::underlying_type<WINDOW_CONF>::type>(b));
         }
 
-        inline WINDOW_CONFIG operator^(WINDOW_CONFIG a, WINDOW_CONFIG b)
+        inline WINDOW_CONF operator^(WINDOW_CONF a, WINDOW_CONF b)
         {
-            return static_cast<WINDOW_CONFIG>(
-                static_cast<std::underlying_type<WINDOW_CONFIG>::type>(a) ^
-                static_cast<std::underlying_type<WINDOW_CONFIG>::type>(b));
+            return static_cast<WINDOW_CONF>(
+                static_cast<std::underlying_type<WINDOW_CONF>::type>(a) ^
+                static_cast<std::underlying_type<WINDOW_CONF>::type>(b));
         }
 
-        inline WINDOW_CONFIG operator~(WINDOW_CONFIG a)
+        inline WINDOW_CONF operator~(WINDOW_CONF a)
         {
-            return static_cast<WINDOW_CONFIG>(
-                ~static_cast<std::underlying_type<WINDOW_CONFIG>::type>(a));
+            return static_cast<WINDOW_CONF>(
+                ~static_cast<std::underlying_type<WINDOW_CONF>::type>(a));
         }
 
-        DEFINE_BITWISE_ENUM(WINDOW_CONF, uint32_t)
+        DEFINE_BITWISE_ENUM(WINDOW_CONFIG, uint16_t)
         {
             X      = 1 << 0,
             Y      = 1 << 1,
@@ -2688,7 +2688,11 @@ class window
                         return _height;
                     }
 
-                
+                void configure(uint16_t __mask, const void *__value_list)
+                {
+                    xcb_configure_window(conn, _window, __mask, __value_list);
+                    xcb_flush(conn);
+                }
                   
                 void x(const uint32_t &x)
                 {
@@ -3940,9 +3944,10 @@ class client
             }
         
         // Config.
-            void x_y(const int32_t &x, const uint32_t &y)
+            void x_y(const uint32_t &x, const uint32_t &y)
             {
-                frame.x_y(x, y);
+                // frame.x_y(x, y);
+                frame.configure(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, (uint32_t[2]){x, y});
             }
         
             void _x(const int &x)
