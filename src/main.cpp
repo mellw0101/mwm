@@ -6064,7 +6064,9 @@ class __status_bar__
                     MAP,
                     (int[]){ALL, WIFI_DROPDOWN_BORDER, BLACK}
                 );
+                _wifi_close_window.set_pointer(CURSOR::hand2);
                 expose(_wifi_close_window);
+                
                 _wifi_info_window.create_window(
                     _wifi_dropdown_window,
                     WIFI_INFO_WINDOW_X,
