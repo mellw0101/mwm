@@ -8727,6 +8727,7 @@ class __system_settings__
 
             if (__window == _input_settings_window)
             {
+                expose(__window);
                 query_input_devices__();
                 _input_device_window.map();
             }
