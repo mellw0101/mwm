@@ -9007,13 +9007,22 @@ class __system_settings__
             {
                 if (__window == _screen_resolution_options_vector[i])
                 {
-                    _screen_resolution_options_vector[i].draw_text(
+                    _screen_resolution_options_vector[i].draw_text_auto_color(
                         screen_settings->_avalible_resolutions[i].second.c_str(),
-                        WHITE,
-                        DARK_GREY,
-                        DEFAULT_FONT,
-                        MENU_ENTRY_TEXT_X,
-                        MENU_ENTRY_TEXT_Y
+                        4,
+                        14
+                    );
+                }
+            }
+
+            for (int i = 0; i < pointer_vec.size(); ++i)
+            {
+                if (__window == pointer_vec[i]._window)
+                {
+                    pointer_vec[i]._window.draw_text_auto_color(
+                        pointer_vec[i]._device_name.c_str(),
+                        4,
+                        14
                     );
                 }
             }
