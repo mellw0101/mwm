@@ -8477,6 +8477,22 @@ class __screen_settings__
 };
 static __screen_settings__ *screen_settings(nullptr);
 
+typedef struct dropdown_menu_t
+{
+    window         _window;
+    window         _button_window;
+    window         _dropdown_window;
+    vector<window> _options_vec;
+    vector<string> _options_str_vec;
+    string         _name;
+
+    void create(uint32_t __parent, uint32_t __x, uint32_t __y)
+    {
+        _window.create_window(__parent, __x, __y, 100, 20, RED);
+    }
+}
+dropdown_menu_t;
+
 class __system_settings__
 {
     // Defines.
@@ -8697,6 +8713,8 @@ class __system_settings__
                 WHITE,
                 XCB_EVENT_MASK_BUTTON_PRESS
             );
+
+            _device_menu.create(_input_settings_window, 100, 60);
         }
 
         void make_internal_client__()
@@ -8963,6 +8981,8 @@ class __system_settings__
             (_input_menu_entry_window), (_input_settings_window), (_input_device_window), (_input_device_button_window), (_input_device_dropdown_window);
         
         vector<window>(_screen_resolution_options_vector);
+
+        dropdown_menu_t _device_menu;
         client *c = nullptr;
 
     // Methods.
@@ -8972,7 +8992,7 @@ class __system_settings__
             make_internal_client__();
         }
 
-        void expose(const uint32_t &__window)
+        void expose(uint32_t __window)
         {
             if (__window == _screen_menu_entry_window ) _screen_menu_entry_window.draw_text_auto_color("Screen", 4, 14);
             if (__window == _screen_settings_window   ) _screen_settings_window.draw_text_auto_color("Resolution", 4, 35, BLACK);
@@ -9004,7 +9024,7 @@ class __system_settings__
             }
         }
 
-        void configure(const uint32_t &__window, const uint32_t &__width, const uint32_t &__height)
+        void configure(uint32_t __window, uint32_t __width, uint32_t __height)
         {
             if (__window == _main_window)
             {
