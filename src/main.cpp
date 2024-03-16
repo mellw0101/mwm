@@ -3946,8 +3946,8 @@ class client
         // Config.
             void x_y(const uint32_t &x, const uint32_t &y)
             {
-                // frame.x_y(x, y);
-                frame.configure(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, (uint32_t[2]){x, y});
+                frame.x_y(x, y);
+                // frame.configure(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, (uint32_t[2]){x, y});
             }
         
             void _x(const int &x)
