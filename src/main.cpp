@@ -69,6 +69,7 @@
 #include <ifaddrs.h>
 #include <netdb.h>
 #include <pulse/pulseaudio.h>
+#include <type_traits>
 
 
 #include "Log.hpp"
@@ -1477,6 +1478,69 @@ namespace // window namespace
         int32_t input_mode;
         uint32_t status;
     } motif_wm_hints;
+
+    // Define macros to create the enum class and declare the bitwise operators
+    #define DEFINE_BITWISE_ENUM(EnumName, UnderlyingType) \
+        enum class EnumName : UnderlyingType; \
+        inline EnumName operator|(EnumName a, EnumName b) { \
+            return static_cast<EnumName>(static_cast<UnderlyingType>(a) | static_cast<UnderlyingType>(b)); \
+        } \
+        inline EnumName operator&(EnumName a, EnumName b) { \
+            return static_cast<EnumName>(static_cast<UnderlyingType>(a) & static_cast<UnderlyingType>(b)); \
+        } \
+        inline EnumName operator^(EnumName a, EnumName b) { \
+            return static_cast<EnumName>(static_cast<UnderlyingType>(a) ^ static_cast<UnderlyingType>(b)); \
+        } \
+        inline EnumName operator~(EnumName a) { \
+            return static_cast<EnumName>(~static_cast<UnderlyingType>(a)); \
+        } \
+        enum class EnumName : UnderlyingType
+
+    namespace // WINDOW_CONFIG.
+    {
+        enum class WINDOW_CONFIG : uint32_t
+        {
+            X      = 1 << 0,
+            Y      = 1 << 1,
+            WIDTH  = 1 << 2,
+            HEIGHT = 1 << 3
+        };
+
+        inline WINDOW_CONFIG operator|(WINDOW_CONFIG a, WINDOW_CONFIG b)
+        {
+            return static_cast<WINDOW_CONFIG>(
+                static_cast<std::underlying_type<WINDOW_CONFIG>::type>(a) |
+                static_cast<std::underlying_type<WINDOW_CONFIG>::type>(b));
+        }
+
+        inline WINDOW_CONFIG operator&(WINDOW_CONFIG a, WINDOW_CONFIG b)
+        {
+            return static_cast<WINDOW_CONFIG>(
+                static_cast<std::underlying_type<WINDOW_CONFIG>::type>(a) &
+                static_cast<std::underlying_type<WINDOW_CONFIG>::type>(b));
+        }
+
+        inline WINDOW_CONFIG operator^(WINDOW_CONFIG a, WINDOW_CONFIG b)
+        {
+            return static_cast<WINDOW_CONFIG>(
+                static_cast<std::underlying_type<WINDOW_CONFIG>::type>(a) ^
+                static_cast<std::underlying_type<WINDOW_CONFIG>::type>(b));
+        }
+
+        inline WINDOW_CONFIG operator~(WINDOW_CONFIG a)
+        {
+            return static_cast<WINDOW_CONFIG>(
+                ~static_cast<std::underlying_type<WINDOW_CONFIG>::type>(a));
+        }
+
+        DEFINE_BITWISE_ENUM(WINDOW_CONF, uint32_t)
+        {
+            X      = 1 << 0,
+            Y      = 1 << 1,
+            WIDTH  = 1 << 2,
+            HEIGHT = 1 << 3
+        };
+    }
 }
 
 class window
@@ -1659,7 +1723,7 @@ class window
                                 COLOR    __color = DEFAULT_COLOR,
                                 uint32_t __event_mask = 0,
                                 int      __flags = NONE,
-                                void           *__data = nullptr)
+                                void    *__border_data = nullptr)
             {
                 _depth        = 0L;
                 _parent       = __parent;
@@ -1685,10 +1749,10 @@ class window
 
                 if (__event_mask > 0) apply_event_mask(&__event_mask);
 
-                if (__data != nullptr)
+                if (__border_data != nullptr)
                 {
-                    int *__border_info = static_cast<int *>(__data);
-                    make_borders(__border_info[0], __border_info[1], __border_info[2]);
+                    int *border_data = static_cast<int *>(__border_data);
+                    make_borders(border_data[0], border_data[1], border_data[2]);
                 }
             }
             
@@ -2623,6 +2687,8 @@ class window
                     {
                         return _height;
                     }
+
+                
                   
                 void x(const uint32_t &x)
                 {
@@ -6166,7 +6232,7 @@ class __status_bar__
                     DARK_GREY,
                     NONE,
                     MAP,
-                    (int[]){ALL, WIFI_DROPDOWN_BORDER, BLACK}
+                    (int[3]){ALL, WIFI_DROPDOWN_BORDER, BLACK}
                 );
                 _wifi_close_window.create_window(
                     _wifi_dropdown_window,
@@ -6177,7 +6243,7 @@ class __status_bar__
                     WHITE,
                     XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE,
                     MAP,
-                    (int[]){ALL, WIFI_DROPDOWN_BORDER, BLACK}
+                    (int[3]){ALL, WIFI_DROPDOWN_BORDER, BLACK}
                 );
                 _wifi_close_window.set_pointer(CURSOR::hand2);
                 expose(_wifi_close_window);  
@@ -6190,7 +6256,7 @@ class __status_bar__
                     WHITE,
                     XCB_EVENT_MASK_EXPOSURE,
                     MAP,
-                    (int[]){ALL, WIFI_DROPDOWN_BORDER, BLACK}
+                    (int[3]){ALL, WIFI_DROPDOWN_BORDER, BLACK}
                 );
                 expose(_wifi_info_window);
             }
@@ -6206,7 +6272,7 @@ class __status_bar__
                     DARK_GREY,
                     NONE,
                     MAP,
-                    (int[]){LEFT | RIGHT | UP | DOWN, 2, BLACK}
+                    (int[3]){ALL, 2, BLACK}
                 );
             }
         }
