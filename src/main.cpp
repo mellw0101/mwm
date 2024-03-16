@@ -8837,7 +8837,7 @@ class __system_settings__
                         _input_device_dropdown_window.width(),
                         20,
                         WHITE,
-                        NONE,
+                        XCB_EVENT_MASK_EXPOSURE,
                         NONE,
                         (int[]){LEFT | RIGHT | DOWN, 2, BLACK}
                     );
