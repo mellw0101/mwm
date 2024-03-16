@@ -8672,8 +8672,8 @@ class __system_settings__
 
             _input_device_window.create_window(
                 _input_settings_window,
-                20,
                 100,
+                20,
                 80,
                 20,
                 WHITE,
