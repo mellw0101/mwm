@@ -1429,7 +1429,7 @@ class _scale
         }
 };
 
-namespace // window flag enums
+namespace // window namespace
 {
     enum BORDER
     {
@@ -1438,14 +1438,14 @@ namespace // window flag enums
         RIGHT = 1 << 1, // 2
         UP    = 1 << 2, // 4
         DOWN  = 1 << 3, // 8
-        ALL   = 1 << 4
+        ALL   = 1 << 4  // 16
     };
 
     enum window_flags
     {
-        MAP          = 1 << 0,
-        DEFAULT_KEYS = 1 << 1,
-        FOCUS_INPUT  = 1 << 2
+        MAP          = 1 << 0, // 1
+        DEFAULT_KEYS = 1 << 1, // 2
+        FOCUS_INPUT  = 1 << 2  // 4
     };
 
     enum window_event_mask : uint32_t
@@ -1454,18 +1454,17 @@ namespace // window flag enums
         TAKE_FOCUS  = 1 << 26
     };
 
-    void get_atom(char *name, xcb_atom_t *atom)
+    void get_atom(char *__name, xcb_atom_t *__atom)
     {
-        xcb_intern_atom_reply_t *reply = xcb_intern_atom_reply(conn, xcb_intern_atom(conn, 0, strlen(name), name), NULL);
-        if (reply != NULL)
+        xcb_intern_atom_reply_t *reply = xcb_intern_atom_reply(conn, xcb_intern_atom(conn, 0, strlen(__name), __name), NULL);
+        if (reply == nullptr)
         {
-            *atom = reply->atom;
-        }
-        else
-        {
-            *atom = XCB_NONE;
+            *__atom = XCB_NONE;
+            free(reply);
+            return;
         }
 
+        *__atom = reply->atom;
         free(reply);
     }
 
