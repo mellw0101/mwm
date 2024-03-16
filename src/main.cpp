@@ -84,6 +84,9 @@ static xcb_screen_iterator_t iter;
 static xcb_screen_t * screen;
 
 #define DEFAULT_FONT "7x14"
+#define DEFAULT_FONT_WIDTH 7
+#define DEFAULT_FONT_HEIGHT 14
+
 using namespace std;
 using Uint = unsigned int;
 using SUint = unsigned short int;
@@ -8744,6 +8747,17 @@ class __system_settings__
             {
                 expose(__window);
                 query_input_devices__();
+                
+                uint32_t window_width = 0;
+                for (int i = 0; i < pointer_vec.size(); ++i)
+                {
+                    uint32_t len = pointer_vec[i]._device_name.length() * DEFAULT_FONT_WIDTH;
+                    if (len > window_width) window_width = len;
+                }
+
+                _input_device_window.width(window_width);
+                _input_device_button_window.x(_input_device_window.x() + _input_device_window.width());
+
                 _input_device_window.map();
                 _input_device_button_window.map();
             }
@@ -8790,6 +8804,7 @@ class __system_settings__
 
             if (__window == _input_device_dropdown_window)
             {
+                
                 _input_device_dropdown_window.create_window(
                     _input_settings_window,
                     _input_device_window.x(),
