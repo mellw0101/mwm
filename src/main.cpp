@@ -8483,39 +8483,35 @@ class __system_settings__
         #define MENU_ENTRY_TEXT_X 4
     
     private:
-    // Sub Classes.
-        class __mouse_settings__
-        {
-            public:
-                static void query_input_devices()
-                {
-                    xcb_input_xi_query_device_cookie_t cookie = xcb_input_xi_query_device(conn, XCB_INPUT_DEVICE_ALL);
-                    xcb_input_xi_query_device_reply_t* reply = xcb_input_xi_query_device_reply(conn, cookie, NULL);
-
-                    if (reply == nullptr)
-                    {
-                        log_error("xcb_input_xi_query_device_reply_t == nullptr");
-                        return;
-                    }
-
-                    xcb_input_xi_device_info_iterator_t iter;
-                    for (iter = xcb_input_xi_query_device_infos_iterator(reply); iter.rem; xcb_input_xi_device_info_next(&iter))
-                    {
-                        xcb_input_xi_device_info_t* device = iter.data;
-
-                        char* device_name = (char*)(device + 1); // Device name is stored immediately after the device info structure.
-                        if (device->type == XCB_INPUT_DEVICE_TYPE_SLAVE_POINTER || device->type == XCB_INPUT_DEVICE_TYPE_FLOATING_SLAVE)
-                        {
-                            log_info("Found pointing device:" + string(device_name));
-                            log_info("Device ID:" + to_string(device->deviceid));
-                        }
-                    }
-
-                    free(reply);
-                }
-        };
-
     // Methods.
+        // Input Devices.
+            void query_input_devices__()
+            {
+                xcb_input_xi_query_device_cookie_t cookie = xcb_input_xi_query_device(conn, XCB_INPUT_DEVICE_ALL);
+                xcb_input_xi_query_device_reply_t* reply = xcb_input_xi_query_device_reply(conn, cookie, NULL);
+
+                if (reply == nullptr)
+                {
+                    log_error("xcb_input_xi_query_device_reply_t == nullptr");
+                    return;
+                }
+
+                xcb_input_xi_device_info_iterator_t iter;
+                for (iter = xcb_input_xi_query_device_infos_iterator(reply); iter.rem; xcb_input_xi_device_info_next(&iter))
+                {
+                    xcb_input_xi_device_info_t* device = iter.data;
+
+                    char* device_name = (char*)(device + 1); // Device name is stored immediately after the device info structure.
+                    if (device->type == XCB_INPUT_DEVICE_TYPE_SLAVE_POINTER || device->type == XCB_INPUT_DEVICE_TYPE_FLOATING_SLAVE)
+                    {
+                        log_info("Found pointing device:" + string(device_name));
+                        log_info("Device ID:" + to_string(device->deviceid));
+                    }
+                }
+
+                free(reply);
+            }
+
         void make_windows__()
         {
             uint32_t mask;
@@ -8691,69 +8687,54 @@ class __system_settings__
             }
         }
 
-        enum
+        void show__(uint32_t __window)
         {
-            RESOLUTION_DROPDOWN_WINDOW = 0
-        };
-
-        void show(const int &__type)
-        {
-            switch (__type)
+            if (__window == _screen_resolution_dropdown_window)
             {
-                case RESOLUTION_DROPDOWN_WINDOW:
+                _screen_resolution_dropdown_window.create_def_and_map_no_keys(
+                    _screen_settings_window,
+                    100,
+                    40,
+                    180,
+                    (screen_settings->_avalible_resolutions.size() * MENU_ENTRY_HEIGHT),
+                    DARK_GREY,
+                    0
+                );
+                _screen_resolution_options_vector.clear();
+
+                for (int i(0), y_pos(0); i < screen_settings->_avalible_resolutions.size(); ++i)
                 {
-                    _screen_resolution_dropdown_window.create_def_and_map_no_keys(
-                        _screen_settings_window,
-                        100,
-                        40,
-                        180,
-                        (screen_settings->_avalible_resolutions.size() * MENU_ENTRY_HEIGHT),
+                    window option;
+                    option.create_def_and_map_no_keys(
+                        _screen_resolution_dropdown_window,
+                        0,
+                        (_screen_resolution_options_vector.size() * MENU_ENTRY_HEIGHT),
+                        _screen_resolution_dropdown_window.width(),
+                        MENU_ENTRY_HEIGHT,
                         DARK_GREY,
-                        0
+                        XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE  
                     );
-                    _screen_resolution_options_vector.clear();
+                    option.make_borders(RIGHT | LEFT | DOWN, 2, BLACK);
+                    option.draw_text(
+                        screen_settings->_avalible_resolutions[i].second.c_str(),
+                        WHITE,
+                        DARK_GREY,
+                        DEFAULT_FONT,
+                        MENU_ENTRY_TEXT_X,
+                        MENU_ENTRY_TEXT_Y
+                    );
 
-                    for (int i(0), y_pos(0); i < screen_settings->_avalible_resolutions.size(); ++i)
-                    {
-                        window option;
-                        option.create_def_and_map_no_keys(
-                            _screen_resolution_dropdown_window,
-                            0,
-                            (_screen_resolution_options_vector.size() * MENU_ENTRY_HEIGHT),
-                            _screen_resolution_dropdown_window.width(),
-                            MENU_ENTRY_HEIGHT,
-                            DARK_GREY,
-                            XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE  
-                        );
-                        option.make_borders(RIGHT | LEFT | DOWN, 2, BLACK);
-                        option.draw_text(
-                            screen_settings->_avalible_resolutions[i].second.c_str(),
-                            WHITE,
-                            DARK_GREY,
-                            DEFAULT_FONT,
-                            MENU_ENTRY_TEXT_X,
-                            MENU_ENTRY_TEXT_Y
-                        );
-
-                        _screen_resolution_options_vector.push_back(option);
-                    }
-
-                    break;
-                }
+                    _screen_resolution_options_vector.push_back(option);
+                }            
             }
         }
 
-        void hide(const int &__type)
+        void hide__(uint32_t __window)
         {
-            switch (__type)
+            if (__window == _screen_resolution_dropdown_window)
             {
-                case RESOLUTION_DROPDOWN_WINDOW:
-                {
-                    _screen_resolution_dropdown_window.unmap();
-                    _screen_resolution_dropdown_window.kill();
-
-                    break;
-                }
+                _screen_resolution_dropdown_window.unmap();
+                _screen_resolution_dropdown_window.kill();
             }
         }
 
@@ -8797,11 +8778,11 @@ class __system_settings__
                     {
                         if (!_screen_resolution_dropdown_window.is_mapped())
                         {
-                            show(RESOLUTION_DROPDOWN_WINDOW);
+                            show__(_screen_resolution_dropdown_window);
                             return;
                         }
 
-                        hide(RESOLUTION_DROPDOWN_WINDOW);
+                        hide__(_screen_resolution_dropdown_window);
                         return;
                     }
 
@@ -8870,7 +8851,7 @@ class __system_settings__
         {
             make_windows__();
             make_internal_client__();
-            __mouse_settings__::query_input_devices();
+            query_input_devices__();
         }
 
         void draw(window &__window)
