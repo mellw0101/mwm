@@ -8483,6 +8483,16 @@ class __system_settings__
         #define MENU_ENTRY_TEXT_X 4
     
     private:
+    // Structs.
+        typedef struct {
+            string   _device_name;
+            uint16_t _device_id;
+            bool     _enabled;
+        } pointer_device_info_t;
+
+    // Variabels.
+        vector<pointer_device_info_t *> pointer_vec;
+
     // Methods.
         // Input Devices.
             void query_input_devices__()
@@ -8504,8 +8514,14 @@ class __system_settings__
                     char* device_name = (char*)(device + 1); // Device name is stored immediately after the device info structure.
                     if (device->type == XCB_INPUT_DEVICE_TYPE_SLAVE_POINTER || device->type == XCB_INPUT_DEVICE_TYPE_FLOATING_SLAVE)
                     {
+                        pointer_device_info_t *pointer_device = new pointer_device_info_t;
+                        pointer_device->_device_name = device_name;
+                        pointer_device->_device_id = device->deviceid;
+                        pointer_device->_enabled = device->enabled;
                         log_info("Found pointing device:" + string(device_name));
                         log_info("Device ID:" + to_string(device->deviceid));
+                        logger.log(INFO, __func__, bool(device->enabled));
+                        pointer_vec.push_back(pointer_device);
                     }
                 }
 
