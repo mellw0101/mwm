@@ -8794,7 +8794,7 @@ class __system_settings__
                     _input_settings_window,
                     _input_device_window.x(),
                     (_input_device_window.y() + _input_device_window.height()),
-                    _input_device_window.width(),
+                    (_input_device_window.width() + _input_device_button_window.width()),
                     pointer_vec.size() * 20,
                     WHITE,
                     NONE,
