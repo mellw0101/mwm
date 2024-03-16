@@ -8671,7 +8671,7 @@ class __system_settings__
             );
 
             _input_device_window.create_window(
-                _main_window,
+                _input_settings_window,
                 (MENU_WINDOW_WIDTH + 20),
                 20,
                 80,
