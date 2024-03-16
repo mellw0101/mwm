@@ -2973,7 +2973,7 @@ class window
 
             void draw_on_expose_event(const char *str , const int &text_color, const int &backround_color, const char *font_name, const int16_t &x, const int16_t &y)
             {
-                on_expose_event([this, str, text_color, backround_color, font_name, x, y]()
+                on_expose_event([this, str, text_color, backround_color, font_name, x, y]()-> void
                 {
                     draw_text(str, text_color, backround_color, font_name, x, y);
                 });
@@ -8673,7 +8673,7 @@ class __system_settings__
             _input_device_window.create_window(
                 _input_settings_window,
                 20,
-                20,
+                100,
                 80,
                 20,
                 WHITE,
@@ -8681,6 +8681,7 @@ class __system_settings__
                 NONE,
                 (int[]){ALL, 2, BLACK}
             );
+            _input_device_window.draw_on_expose_event("hello", BLACK, WHITE, DEFAULT_FONT, 4, 15);
         }
 
         void make_internal_client__()
