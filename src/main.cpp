@@ -9022,7 +9022,8 @@ class __system_settings__
                     pointer_vec[i]._window.draw_text_auto_color(
                         pointer_vec[i]._device_name.c_str(),
                         4,
-                        14
+                        14,
+                        BLACK
                     );
                 }
             }
