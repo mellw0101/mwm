@@ -6024,6 +6024,7 @@ class __audio__
     // Constructor.
         __audio__() {}
 };
+__audio__ audio;
 
 namespace 
 {
@@ -11453,9 +11454,12 @@ int main()
     net_logger->init(ESP_SERVER);
     NET_LOG("Starting mwm.");
 
-    __audio__ audio;
-    audio.init();
-    audio.run();
+    function<void()> audio_thread = [&]()-> void
+    {
+        audio.init();
+        audio.run();
+    };
+    thread(audio_thread).detach();
 
     LOG_start()
     setup_wm();
