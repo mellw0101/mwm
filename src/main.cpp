@@ -8756,6 +8756,7 @@ class __system_settings__
                 expose(__window);
                 query_input_devices__();
                 _input_device_window.map();
+                _input_device_button_window.map();
             }
         }
 
