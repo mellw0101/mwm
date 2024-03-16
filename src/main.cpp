@@ -6021,6 +6021,7 @@ class __status_bar__
 
             bitmap.exportToPng("/home/mellw/wifi.png");
             _wifi_window.set_backround_png("/home/mellw/wifi.png");
+            _wifi_window.set_pointer(CURSOR::hand2);
 
             _audio_window.create_window(
                 _bar_window,
@@ -6033,7 +6034,7 @@ class __status_bar__
                 MAP,
                 (int[]){ALL, 2, BLACK}
             );
-            _audio_window.set_pointer(CURSOR::hand1);
+            _audio_window.set_pointer(CURSOR::hand2);
             expose(_audio_window);
         }
 
