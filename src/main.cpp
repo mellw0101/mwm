@@ -8826,6 +8826,12 @@ class __system_settings__
                 _screen_resolution_dropdown_window.unmap();
                 _screen_resolution_dropdown_window.kill();
             }
+
+            if (__window == _input_device_dropdown_window)
+            {
+                _input_device_dropdown_window.unmap();
+                _input_device_dropdown_window.kill();
+            }
         }
 
         void setup_events__()
