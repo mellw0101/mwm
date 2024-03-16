@@ -8487,11 +8487,10 @@ class __system_settings__
         typedef struct {
             string   _device_name;
             uint16_t _device_id;
-            bool     _enabled;
         } pointer_device_info_t;
 
     // Variabels.
-        vector<pointer_device_info_t *> pointer_vec;
+        vector<pointer_device_info_t> pointer_vec;
 
     // Methods.
         // Input Devices.
@@ -8514,14 +8513,13 @@ class __system_settings__
                     char* device_name = (char*)(device + 1); // Device name is stored immediately after the device info structure.
                     if (device->type == XCB_INPUT_DEVICE_TYPE_SLAVE_POINTER || device->type == XCB_INPUT_DEVICE_TYPE_FLOATING_SLAVE)
                     {
-                        pointer_device_info_t *pointer_device = new pointer_device_info_t;
-                        pointer_device->_device_name = device_name;
-                        pointer_device->_device_id = device->deviceid;
-                        pointer_device->_enabled = device->enabled;
+                        pointer_device_info_t pointer_device;
+                        pointer_device._device_name = device_name;
+                        pointer_device._device_id   = device->deviceid;
+                        pointer_vec.push_back(pointer_device);
+
                         log_info("Found pointing device:" + string(device_name));
                         log_info("Device ID:" + to_string(device->deviceid));
-                        logger.log(INFO, __func__, device->enabled);
-                        pointer_vec.push_back(pointer_device);
                     }
                 }
 
@@ -8651,6 +8649,26 @@ class __system_settings__
                 _main_window.height(),
                 MAGENTA
             );
+
+            _input_menu_entry_window.create_window(
+                _menu_window,
+                0,
+                60,
+                MENU_WINDOW_WIDTH,
+                MENU_ENTRY_HEIGHT,
+                BLUE,
+                XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE,
+                MAP,
+                (int[]){DOWN | RIGHT, 2, BLACK}
+            );
+
+            _input_settings_window.create_window(
+                _main_window,
+                MENU_WINDOW_WIDTH,
+                0,
+                _main_window.width() - MENU_WINDOW_WIDTH,
+                _main_window.height()
+            );
         }
 
         void make_internal_client__()
@@ -8678,6 +8696,7 @@ class __system_settings__
             if (_screen_settings_window.is_mapped() ) _screen_settings_window.unmap();
             if (_audio_settings_window.is_mapped()  ) _audio_settings_window.unmap();
             if (_network_settings_window.is_mapped()) _network_settings_window.unmap();
+            if (_input_settings_window.is_mapped()  ) _input_settings_window.unmap();
 
             __window.width_height((c->win.width() - MENU_WINDOW_WIDTH), c->win.height());
             xcb_flush(conn);
@@ -8806,6 +8825,11 @@ class __system_settings__
                         return;
                     }
 
+                    if (e->event == _input_menu_entry_window)
+                    {
+                        adjust_and_map_subwindow__(_input_settings_window);
+                    }
+
                     for (int i(0); i < _screen_resolution_options_vector.size(); ++i)
                     {
                         if (e->event == _screen_resolution_options_vector[i])
@@ -8841,7 +8865,8 @@ class __system_settings__
             (_menu_window), (_default_settings_window),
             (_screen_menu_entry_window), (_screen_settings_window), (_screen_resolution_window), (_screen_resolution_button_window), (_screen_resolution_dropdown_window),
             (_audio_menu_entry_window), (_audio_settings_window),
-            (_network_menu_entry_window), (_network_settings_window);
+            (_network_menu_entry_window), (_network_settings_window),
+            (_input_menu_entry_window), (_input_settings_window);
         
         vector<window>(_screen_resolution_options_vector);
         client *c = nullptr;
@@ -8860,6 +8885,7 @@ class __system_settings__
             if (__window == _screen_settings_window   ) _screen_settings_window.draw_text_auto_color("Resolution", 4, 35, BLACK);
             if (__window == _audio_menu_entry_window  ) _audio_menu_entry_window.draw_text_auto_color("Audio", 4, 14);
             if (__window == _network_menu_entry_window) _network_menu_entry_window.draw_text_auto_color("Network", 4, 14);
+            if (__window == _input_menu_entry_window  ) _input_menu_entry_window.draw_text_auto_color("Input", 4, 14);
             if (__window == _screen_resolution_window )
             {
                 string resolution(screen_settings->_current_resoluton_string);
@@ -8892,6 +8918,7 @@ class __system_settings__
                 if (_screen_settings_window.is_mapped() ) _screen_settings_window.width_height((__width - MENU_WINDOW_WIDTH), __height);
                 if (_audio_settings_window.is_mapped()  ) _audio_settings_window.width_height((__width - MENU_WINDOW_WIDTH), __height);
                 if (_network_settings_window.is_mapped()) _network_settings_window.width_height((__width - MENU_WINDOW_WIDTH), __height);
+                if (_input_settings_window.is_mapped()  ) _input_settings_window.width_height((__width - MENU_WINDOW_WIDTH), __height);
                 xcb_flush(conn);
             }
         }
