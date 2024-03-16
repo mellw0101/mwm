@@ -8672,11 +8672,11 @@ class __system_settings__
 
             _input_device_window.create_window(
                 _main_window,
-                20,
+                (MENU_WINDOW_WIDTH + 20),
                 20,
                 80,
                 20,
-                DARK_GREY,
+                WHITE,
                 XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE
             );
         }
