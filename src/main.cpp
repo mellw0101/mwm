@@ -8694,6 +8694,7 @@ class __system_settings__
                 _main_window.height()
             );
 
+            query_input_devices__();
             _input_device_window.create_window(
                 _input_settings_window,
                 100,
@@ -8758,8 +8759,6 @@ class __system_settings__
             if (__window == _input_settings_window)
             {
                 expose(__window);
-                query_input_devices__();
-                
                 uint32_t window_width = 0;
                 for (int i = 0; i < pointer_vec.size(); ++i)
                 {
