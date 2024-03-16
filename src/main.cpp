@@ -11031,8 +11031,9 @@ class Events
                 {
                     case SUPER:
                     {
-                        GET_CLIENT_FROM_WINDOW(e->event);
-                        c->win.kill();
+                        audio.list_sinks();
+                        // GET_CLIENT_FROM_WINDOW(e->event);
+                        // c->win.kill();
                         // c->win.x(BORDER_SIZE);
                         // c->win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
                         // xcb_flush(conn);
