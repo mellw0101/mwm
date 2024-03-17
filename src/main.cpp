@@ -224,100 +224,99 @@ constexpr const char * pointer_from_enum(CURSOR CURSOR)
     }
 }
 
-class __net_logger__
-{
-    // Defines.
-        #define ESP_SERVER "192.168.0.29"
-        #define ESP_PORT 23
+class __net_logger__ {
+// Defines.
+    #define ESP_SERVER "192.168.0.29"
+    #define ESP_PORT 23
 
-        #define NET_LOG_MSG(message)                "\033[33m" + message + "\033[0m"
-        #define FUNC_NAME_STR                       string(__func__)
-        #define NET_LOG_FUNCTION                    "\033[34m(FUNCTION) " + FUNC_NAME_STR + "\033[0m"
-        #define NET_LOG_WINDOW(window_name, window) "\033[35m(FUNCTION) " + FUNC_NAME_STR + ":\033[34m (WINDOW_NAME) " + window_name + ":\033[32m (uint32_t) " + to_string(window) + "\033[0m"
-        #define WINDOW(window)                      to_string(window)
-        #define CLASS_NAME_RAW                      typeid(*this).name()
-        #define CLASS_NAME_STR                      string(CLASS_NAME_RAW)
-        /*
-        *
-        * @breif fetches the calling class's name and extracts a substr containing only the class name
-        *
-        * NOTE: this only works for class's with prefix '__'
-        *
-        */
-        #define CLASS_NAME                          CLASS_NAME_STR.substr(CLASS_NAME_STR.find("__"))
-        #define NET_LOG_CLASS                       "\033[35m(CLASS) " + CLASS_NAME + "\033[0m"
-        #define NET_LOG(__type)                     net_logger->send_to_server(__type)
-        #define NET_LOG_CLASS_FUNCTION_START()      NET_LOG(NET_LOG_CLASS + " -> " + NET_LOG_FUNCTION + " -> " + NET_LOG_MSG("Starting"))
-        #define NET_LOG_CLASS_FUNCTION_DONE()       NET_LOG(NET_LOG_CLASS + " -> " + NET_LOG_FUNCTION + " -> " + NET_LOG_MSG("Done!!!"))
+    #define NET_LOG_MSG(message)                "\033[33m" + message + "\033[0m"
+    #define FUNC_NAME_STR                       string(__func__)
+    #define NET_LOG_FUNCTION                    "\033[34m(FUNCTION) " + FUNC_NAME_STR + "\033[0m"
+    #define NET_LOG_WINDOW(window_name, window) "\033[35m(FUNCTION) " + FUNC_NAME_STR + ":\033[34m (WINDOW_NAME) " + window_name + ":\033[32m (uint32_t) " + to_string(window) + "\033[0m"
+    #define WINDOW(window)                      to_string(window)
+    #define CLASS_NAME_RAW                      typeid(*this).name()
+    #define CLASS_NAME_STR                      string(CLASS_NAME_RAW)
+    /*
+    *
+    * @breif fetches the calling class's name and extracts a substr containing only the class name
+    *
+    * NOTE: this only works for class's with prefix '__'
+    *
+    */
+    #define CLASS_NAME                          CLASS_NAME_STR.substr(CLASS_NAME_STR.find("__"))
+    #define NET_LOG_CLASS                       "\033[35m(CLASS) " + CLASS_NAME + "\033[0m"
+    #define NET_LOG(__type)                     net_logger->send_to_server(__type)
+    #define NET_LOG_CLASS_FUNCTION_START()      NET_LOG(NET_LOG_CLASS + " -> " + NET_LOG_FUNCTION + " -> " + NET_LOG_MSG("Starting"))
+    #define NET_LOG_CLASS_FUNCTION_DONE()       NET_LOG(NET_LOG_CLASS + " -> " + NET_LOG_FUNCTION + " -> " + NET_LOG_MSG("Done!!!"))
 
-    private:
+private:
     // Variabels.
-        long _socket;
-        int _connected;
-        struct sockaddr_in(_sock_addr);
+    long _socket;
+    int _connected;
+    struct sockaddr_in(_sock_addr);
 
-    public:
+public:
     // Methods.
-        void init(const char *__address, const int &__port = 0)
+    void init(const char *__address, const int &__port = 0)
+    {
+        if (NET_DEBUG == false) return;
+
+        if ((_socket = socket(AF_INET, SOCK_STREAM, 0)) == -1)
         {
-            if (NET_DEBUG == false) return;
-
-            if ((_socket = socket(AF_INET, SOCK_STREAM, 0)) == -1)
-            {
-                perror("socket");
-                return;
-            }
-
-            _sock_addr.sin_family = AF_INET;
-            if (__address == string(ESP_SERVER))
-            {
-                _sock_addr.sin_port = htons(ESP_PORT);
-            }
-            else
-            {
-                _sock_addr.sin_port = htons(__port);
-            }
-
-            if (inet_pton(AF_INET, __address, &_sock_addr.sin_addr) < 0)
-            {
-                perror("inet_pton");
-                return;
-            }
-
-            if (connect(_socket, (struct sockaddr*)&_sock_addr, sizeof(_sock_addr)) < 0)
-            {
-                perror("connect");
-                return;
-            }
-
-            _connected = true;
+            perror("socket");
+            return;
         }
 
-        void send_to_server(const string &__input)
+        _sock_addr.sin_family = AF_INET;
+        if (__address == string(ESP_SERVER))
         {
-            if (NET_DEBUG == false) return;
-
-            if (!_connected) return;
-
-            if (send(_socket, __input.c_str(), __input.length(), 0) < 0)
-            {
-                _connected = false;
-                return;
-            }
-
-            char s_char('\0');
-            if (send(_socket, &s_char, 1, 0) < 0)
-            {
-                _connected = false;
-                return;
-            }
+            _sock_addr.sin_port = htons(ESP_PORT);
         }
+        else
+        {
+            _sock_addr.sin_port = htons(__port);
+        }
+
+        if (inet_pton(AF_INET, __address, &_sock_addr.sin_addr) < 0)
+        {
+            perror("inet_pton");
+            return;
+        }
+
+        if (connect(_socket, (struct sockaddr*)&_sock_addr, sizeof(_sock_addr)) < 0)
+        {
+            perror("connect");
+            return;
+        }
+
+        _connected = true;
+    }
+
+    void send_to_server(const string &__input)
+    {
+        if (NET_DEBUG == false) return;
+
+        if (!_connected) return;
+
+        if (send(_socket, __input.c_str(), __input.length(), 0) < 0)
+        {
+            _connected = false;
+            return;
+        }
+
+        char s_char('\0');
+        if (send(_socket, &s_char, 1, 0) < 0)
+        {
+            _connected = false;
+            return;
+        }
+    }
 
     // Constructor.
-        __net_logger__()
-        : _connected(false) {}
-};
-static __net_logger__ *net_logger(nullptr);
+    __net_logger__()
+    : _connected(false) {}
+
+}; static __net_logger__ *net_logger(nullptr);
 
 struct size_pos
 {
@@ -1339,8 +1338,8 @@ class Event_Handler
         unordered_map<uint8_t, vector<pair<CallbackId, EventCallback>>>(eventCallbacks);
         bool shouldContinue = false;
         CallbackId nextCallbackId = 0;
-};
-static Event_Handler *event_handler(nullptr);
+
+}; static Event_Handler *event_handler(nullptr);
 
 class Bitmap
 {
@@ -3222,9 +3221,8 @@ class window
                 _width = width;
                 _height = height;
             }
-
-            void config_window(const uint16_t & mask, const uint16_t & value)/**
-             *
+            
+            /**
              * @brief Configures the window with the specified mask and value.
              * 
              * This function configures the window using the XCB library. It takes in a mask and a value
@@ -3234,6 +3232,7 @@ class window
              * @param value The value to set for the specified attributes.
              * 
              */
+            void config_window(const uint16_t & mask, const uint16_t & value) 
             {
                 xcb_configure_window(
                     conn,
@@ -4616,23 +4615,22 @@ class context_menu
         }
 };
 
-class Window_Manager
-{
+class Window_Manager {
     public:
     // Constructor.
         Window_Manager() {}
     
     // Variabels.
-        window(root);
-        Launcher(launcher);
-        Logger(log);
-        pointer(pointer);
-        win_data(data);
-        Key_Codes(key_codes);
+        window root;
+        Launcher launcher;
+        Logger log;
+        pointer pointer;
+        win_data data;
+        Key_Codes key_codes;
         
         context_menu *context_menu = nullptr;
-        vector<client *>(client_list);
-        vector<desktop *>(desktop_list);
+        vector<client *> client_list;
+        vector<desktop *> desktop_list;
         client *focused_client = nullptr;
         desktop *cur_d = nullptr;
     
@@ -5357,7 +5355,7 @@ class Window_Manager
 
     private:
     // Variables.
-        window(start_window);
+        window start_window;
     
     // Functions.
         // Init.
@@ -5749,324 +5747,320 @@ class Window_Manager
                 this_thread::sleep_for(chrono::minutes(1));
                 check_volt();
             }
-};
-static Window_Manager *wm;
 
-class __network__
-{
-    public:
+}; static Window_Manager *wm;
+
+class __network__ {
+public:
     // Methods.
-        enum
-        {
-            LOCAL_IP = 0,
-            INTERFACE_FOR_LOCAL_IP = 1
-        };
+    enum
+    {
+        LOCAL_IP = 0,
+        INTERFACE_FOR_LOCAL_IP = 1
+    };
 
-        string get_local_ip_info(int type)
-        {
-            struct ifaddrs* ifAddrStruct = nullptr;
-            struct ifaddrs* ifa = nullptr;
-            void* tmpAddrPtr = nullptr;
-            string result;
+    string get_local_ip_info(int type)
+    {
+        struct ifaddrs* ifAddrStruct = nullptr;
+        struct ifaddrs* ifa = nullptr;
+        void* tmpAddrPtr = nullptr;
+        string result;
 
-            getifaddrs(&ifAddrStruct);
-            for (ifa = ifAddrStruct; ifa != nullptr; ifa = ifa->ifa_next)
-            {
-                CONTINUE_IF(ifa->ifa_addr == nullptr);
-                if (ifa->ifa_addr->sa_family == AF_INET) // check it is IP4
-                { 
-                    // is a valid IP4 Address
-                    tmpAddrPtr = &((struct sockaddr_in*)ifa->ifa_addr)->sin_addr;
-                    char addressBuffer[INET_ADDRSTRLEN];
-                    inet_ntop(AF_INET, tmpAddrPtr, addressBuffer, INET_ADDRSTRLEN);
-                    if (addressBuffer[0] == '1'
-                    &&  addressBuffer[1] == '9'
-                    &&  addressBuffer[2] == '2')
+        getifaddrs(&ifAddrStruct);
+        for (ifa = ifAddrStruct; ifa != nullptr; ifa = ifa->ifa_next)
+        {
+            CONTINUE_IF(ifa->ifa_addr == nullptr);
+            if (ifa->ifa_addr->sa_family == AF_INET) // check it is IP4
+            { 
+                // is a valid IP4 Address
+                tmpAddrPtr = &((struct sockaddr_in*)ifa->ifa_addr)->sin_addr;
+                char addressBuffer[INET_ADDRSTRLEN];
+                inet_ntop(AF_INET, tmpAddrPtr, addressBuffer, INET_ADDRSTRLEN);
+                if (addressBuffer[0] == '1'
+                &&  addressBuffer[1] == '9'
+                &&  addressBuffer[2] == '2')
+                {
+                    if (type == LOCAL_IP)
                     {
-                        if (type == LOCAL_IP)
-                        {
-                            result = addressBuffer;
-                            break;
-                        }
+                        result = addressBuffer;
+                        break;
+                    }
 
-                        if (type == INTERFACE_FOR_LOCAL_IP)
-                        {
-                            result = ifa->ifa_name;
-                            break;
-                        }
+                    if (type == INTERFACE_FOR_LOCAL_IP)
+                    {
+                        result = ifa->ifa_name;
+                        break;
                     }
                 }
             }
-
-            if (ifAddrStruct != nullptr) freeifaddrs(ifAddrStruct);
-            return result;
         }
 
-    public:
+        if (ifAddrStruct != nullptr) freeifaddrs(ifAddrStruct);
+        return result;
+    }
+
     // Constructor.
-        __network__() {}
-};
-static __network__ *network(nullptr);
+    __network__() {}
 
-class __wifi__
-{
-    private:
+}; static __network__ *network(nullptr);
+
+class __wifi__ {
+private:
     // Methods.
-        void scan__(const char* interface)
+    void scan__(const char* interface)
+    {
+        wireless_scan_head head;
+        wireless_scan* result;
+        iwrange range;
+        int sock;
+
+        // Open a socket to the wireless driver
+        sock = iw_sockets_open();
+        if (sock < 0)
         {
-            wireless_scan_head head;
-            wireless_scan* result;
-            iwrange range;
-            int sock;
-
-            // Open a socket to the wireless driver
-            sock = iw_sockets_open();
-            if (sock < 0)
-            {
-                log_error("could not open socket");
-                return;
-            }
-
-            // Get the range of settings
-            if (iw_get_range_info(sock, interface, &range) < 0)
-            {
-                log_error("could not get range info");
-                iw_sockets_close(sock);
-                return;
-            }
-
-            // Perform the scan
-            if (iw_scan(sock, const_cast<char*>(interface), range.we_version_compiled, &head) < 0)
-            {
-                log_error("could not scan");
-                iw_sockets_close(sock);
-                return;
-            }
-
-            // Iterate through the scan results
-            result = head.result;
-            while (nullptr != result)
-            {
-                if (result->b.has_essid)
-                {
-                    string ssid(result->b.essid);
-                    log_info(
-                        "\nSSID: "    + ssid +
-                        "\nSTATUS: "  + to_string(result->stats.status) +
-                        "\nQUAL: "    + to_string(result->stats.qual.qual) +
-                        "\nLEVEL: "   + to_string(result->stats.qual.level) +
-                        "\nNOICE: "   + to_string(result->stats.qual.noise) +
-                        "\nBITRATE: " + to_string(result->maxbitrate.value)
-                    );
-                }
-
-                result = result->next;
-            }
-
-            // Close the socket to the wireless driver
-            iw_sockets_close(sock);
-        }
-
-        void check_network_interfaces__()
-        {
-            struct ifaddrs* ifAddrStruct = nullptr;
-            struct ifaddrs* ifa = nullptr;
-            void* tmpAddrPtr = nullptr;
-
-            getifaddrs(&ifAddrStruct);
-
-            for (ifa = ifAddrStruct; ifa != nullptr; ifa = ifa->ifa_next)
-            {
-                CONTINUE_IF(!ifa->ifa_addr);
-                if (ifa->ifa_addr->sa_family == AF_INET) // check it is IP4
-                { 
-                    // is a valid IP4 Address
-                    tmpAddrPtr = &((struct sockaddr_in*)ifa->ifa_addr)->sin_addr;
-                    char addressBuffer[INET_ADDRSTRLEN];
-                    inet_ntop(AF_INET, tmpAddrPtr, addressBuffer, INET_ADDRSTRLEN);
-                    if (addressBuffer[0] == '1'
-                    &&  addressBuffer[1] == '9'
-                    &&  addressBuffer[2] == '2')
-                    {
-                        log_info("Interface: " + string(ifa->ifa_name) + " Address: " + addressBuffer);
-                    }
-                }
-                else if (ifa->ifa_addr->sa_family == AF_INET6) // check it is IP6
-                {
-                    // is a valid IP6 Address
-                    tmpAddrPtr = &((struct sockaddr_in6*)ifa->ifa_addr)->sin6_addr;
-                    char addressBuffer[INET6_ADDRSTRLEN];
-                    inet_ntop(AF_INET6, tmpAddrPtr, addressBuffer, INET6_ADDRSTRLEN);
-                    log_info("Interface: " + string(ifa->ifa_name) + " Address: " + addressBuffer);
-                } 
-                // Here, you could attempt to deduce the interface type (e.g., wlan for WiFi) by name or other means
-            }
-
-            if (ifAddrStruct != nullptr) freeifaddrs(ifAddrStruct);
+            log_error("could not open socket");
             return;
         }
-    
-    public:
-    // Methods.
-        void init()
+
+        // Get the range of settings
+        if (iw_get_range_info(sock, interface, &range) < 0)
         {
-            event_handler->set_key_press_callback((ALT + SUPER), wm->key_codes.f, [this]()-> void { scan__("wlo1"); });
+            log_error("could not get range info");
+            iw_sockets_close(sock);
+            return;
         }
+
+        // Perform the scan
+        if (iw_scan(sock, const_cast<char*>(interface), range.we_version_compiled, &head) < 0)
+        {
+            log_error("could not scan");
+            iw_sockets_close(sock);
+            return;
+        }
+
+        // Iterate through the scan results
+        result = head.result;
+        while (nullptr != result)
+        {
+            if (result->b.has_essid)
+            {
+                string ssid(result->b.essid);
+                log_info(
+                    "\nSSID: "    + ssid +
+                    "\nSTATUS: "  + to_string(result->stats.status) +
+                    "\nQUAL: "    + to_string(result->stats.qual.qual) +
+                    "\nLEVEL: "   + to_string(result->stats.qual.level) +
+                    "\nNOICE: "   + to_string(result->stats.qual.noise) +
+                    "\nBITRATE: " + to_string(result->maxbitrate.value)
+                );
+            }
+
+            result = result->next;
+        }
+
+        // Close the socket to the wireless driver
+        iw_sockets_close(sock);
+    }
+
+    void check_network_interfaces__()
+    {
+        struct ifaddrs* ifAddrStruct = nullptr;
+        struct ifaddrs* ifa = nullptr;
+        void* tmpAddrPtr = nullptr;
+
+        getifaddrs(&ifAddrStruct);
+
+        for (ifa = ifAddrStruct; ifa != nullptr; ifa = ifa->ifa_next)
+        {
+            CONTINUE_IF(!ifa->ifa_addr);
+            if (ifa->ifa_addr->sa_family == AF_INET) // check it is IP4
+            { 
+                // is a valid IP4 Address
+                tmpAddrPtr = &((struct sockaddr_in*)ifa->ifa_addr)->sin_addr;
+                char addressBuffer[INET_ADDRSTRLEN];
+                inet_ntop(AF_INET, tmpAddrPtr, addressBuffer, INET_ADDRSTRLEN);
+                if (addressBuffer[0] == '1'
+                &&  addressBuffer[1] == '9'
+                &&  addressBuffer[2] == '2')
+                {
+                    log_info("Interface: " + string(ifa->ifa_name) + " Address: " + addressBuffer);
+                }
+            }
+            else if (ifa->ifa_addr->sa_family == AF_INET6) // check it is IP6
+            {
+                // is a valid IP6 Address
+                tmpAddrPtr = &((struct sockaddr_in6*)ifa->ifa_addr)->sin6_addr;
+                char addressBuffer[INET6_ADDRSTRLEN];
+                inet_ntop(AF_INET6, tmpAddrPtr, addressBuffer, INET6_ADDRSTRLEN);
+                log_info("Interface: " + string(ifa->ifa_name) + " Address: " + addressBuffer);
+            } 
+            // Here, you could attempt to deduce the interface type (e.g., wlan for WiFi) by name or other means
+        }
+
+        if (ifAddrStruct != nullptr) freeifaddrs(ifAddrStruct);
+        return;
+    }
+
+public:
+    // Methods.
+    void init()
+    {
+        event_handler->set_key_press_callback((ALT + SUPER), wm->key_codes.f, [this]()-> void { scan__("wlo1"); });
+    }
 
     // Constructor.
-        __wifi__() {}
-};
-static __wifi__ *wifi(nullptr);
+    __wifi__() {}
 
-class __audio__
-{
-    private:
+}; static __wifi__ *wifi(nullptr);
+
+class __audio__ {
+private:
     // Variabels
-        pa_mainloop* mainloop = nullptr;
-        pa_mainloop_api* mainloop_api = nullptr;
-        pa_context* context = nullptr;
+    pa_mainloop* mainloop = nullptr;
+    pa_mainloop_api* mainloop_api = nullptr;
+    pa_context* context = nullptr;
 
-    public:
+public:
     // Methods.
-        static void sink_list_cb(pa_context* c, const pa_sink_info* l, int eol, void* userdata)
+    static void sink_list_cb(pa_context* c, const pa_sink_info* l, int eol, void* userdata)
+    {
+        // End of list
+        if (eol > 0)
         {
-            // End of list
-            if (eol > 0)
-            {
-                log_error("end of list.");
-                return;
-            }
-
-            log_info("Sink name: " + string(l->name) + " Description: " + string(l->description));
+            log_error("end of list.");
+            return;
         }
 
-        static void success_cb(pa_context* c, int success, void* userdata)
+        log_info("Sink name: " + string(l->name) + " Description: " + string(l->description));
+    }
+
+    static void success_cb(pa_context* c, int success, void* userdata)
+    {
+        if (success)
         {
-            if (success)
+            std::cout << "Default sink changed successfully." << std::endl;
+        }
+        else
+        {
+            std::cout << "Failed to change the default sink." << std::endl;
+        }
+        // Signal the main loop to quit after attempting to change the default sink
+        pa_mainloop_quit(reinterpret_cast<pa_mainloop*>(userdata), 0);
+    }
+
+    static void context_state_cb(pa_context* c, void* userdata)
+    {
+        switch (pa_context_get_state(c))
+        {
+            case PA_CONTEXT_READY:
             {
-                std::cout << "Default sink changed successfully." << std::endl;
+                const char* sink_name = reinterpret_cast<const char*>(userdata);
+                // Set the default sink
+                pa_operation* o = pa_context_set_default_sink(c, sink_name, success_cb, userdata);
+                if (o) pa_operation_unref(o);
+                break;
             }
-            else
-            {
-                std::cout << "Failed to change the default sink." << std::endl;
-            }
-            // Signal the main loop to quit after attempting to change the default sink
-            pa_mainloop_quit(reinterpret_cast<pa_mainloop*>(userdata), 0);
+            case PA_CONTEXT_FAILED:
+            case PA_CONTEXT_TERMINATED:
+                pa_mainloop_quit(reinterpret_cast<pa_mainloop*>(userdata), 1);
+                break;
+            default:
+                break;
+        }
+    }
+
+    static bool change_default_sink(const std::string& sink_name)
+    {
+        pa_mainloop* m = pa_mainloop_new();
+        pa_mainloop_api* mainloop_api = pa_mainloop_get_api(m);
+        pa_context* context = pa_context_new(mainloop_api, "Change Default Sink Example");
+
+        if (!context)
+        {
+            std::cerr << "Failed to create PA context." << std::endl;
+            pa_mainloop_free(m);
+            return false;
         }
 
-        static void context_state_cb(pa_context* c, void* userdata)
+        pa_context_set_state_callback(context, context_state_cb, m);
+        pa_context_connect(context, nullptr, PA_CONTEXT_NOFLAGS, nullptr);
+
+        int ret = 0;
+        pa_mainloop_run(m, &ret);
+
+        pa_context_disconnect(context);
+        pa_context_unref(context);
+        pa_mainloop_free(m);
+
+        return ret == 0;
+    }
+
+    // // Callback for context state
+    // void context_state_cb(pa_context* c, void* userdata)
+    // {
+    //     pa_context_state_t state = pa_context_get_state(c);
+    //     switch (state)
+    //     {
+    //         // This is the state where we can start doing operations
+    //         case PA_CONTEXT_READY:
+    //         {
+    //             pa_operation* o = pa_context_get_sink_info_list(c, sink_list_cb, nullptr);
+    //             if (o) pa_operation_unref(o);
+    //             break;
+    //         }
+    //         default:
+    //             break;
+    //     }
+    // }
+
+    void init()
+    {
+        mainloop = pa_mainloop_new();
+        mainloop_api = pa_mainloop_get_api(mainloop);
+        context = pa_context_new(mainloop_api, "mwm");
+
+        pa_context_set_state_callback(context, context_state_cb, this);
+        pa_context_connect(context, nullptr, PA_CONTEXT_NOFLAGS, nullptr);
+    }
+
+    void cleanup()
+    {
+        if (context)
         {
-            switch (pa_context_get_state(c))
-            {
-                case PA_CONTEXT_READY:
-                {
-                    const char* sink_name = reinterpret_cast<const char*>(userdata);
-                    // Set the default sink
-                    pa_operation* o = pa_context_set_default_sink(c, sink_name, success_cb, userdata);
-                    if (o) pa_operation_unref(o);
-                    break;
-                }
-                case PA_CONTEXT_FAILED:
-                case PA_CONTEXT_TERMINATED:
-                    pa_mainloop_quit(reinterpret_cast<pa_mainloop*>(userdata), 1);
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        static bool change_default_sink(const std::string& sink_name)
-        {
-            pa_mainloop* m = pa_mainloop_new();
-            pa_mainloop_api* mainloop_api = pa_mainloop_get_api(m);
-            pa_context* context = pa_context_new(mainloop_api, "Change Default Sink Example");
-
-            if (!context)
-            {
-                std::cerr << "Failed to create PA context." << std::endl;
-                pa_mainloop_free(m);
-                return false;
-            }
-
-            pa_context_set_state_callback(context, context_state_cb, m);
-            pa_context_connect(context, nullptr, PA_CONTEXT_NOFLAGS, nullptr);
-
-            int ret = 0;
-            pa_mainloop_run(m, &ret);
-
             pa_context_disconnect(context);
             pa_context_unref(context);
-            pa_mainloop_free(m);
-
-            return ret == 0;
         }
-
-        // // Callback for context state
-        // void context_state_cb(pa_context* c, void* userdata)
-        // {
-        //     pa_context_state_t state = pa_context_get_state(c);
-        //     switch (state)
-        //     {
-        //         // This is the state where we can start doing operations
-        //         case PA_CONTEXT_READY:
-        //         {
-        //             pa_operation* o = pa_context_get_sink_info_list(c, sink_list_cb, nullptr);
-        //             if (o) pa_operation_unref(o);
-        //             break;
-        //         }
-        //         default:
-        //             break;
-        //     }
-        // }
-
-        void init()
+        if (mainloop)
         {
-            mainloop = pa_mainloop_new();
-            mainloop_api = pa_mainloop_get_api(mainloop);
-            context = pa_context_new(mainloop_api, "mwm");
-
-            pa_context_set_state_callback(context, context_state_cb, this);
-            pa_context_connect(context, nullptr, PA_CONTEXT_NOFLAGS, nullptr);
+            pa_mainloop_free(mainloop);
         }
+    }
 
-        void cleanup()
+    void run()
+    {
+        int ret;
+        if (pa_mainloop_run(mainloop, &ret) < 0)
         {
-            if (context)
-            {
-                pa_context_disconnect(context);
-                pa_context_unref(context);
-            }
-            if (mainloop)
-            {
-                pa_mainloop_free(mainloop);
-            }
+            log_error("Failed to run mainloop.");
         }
+    }
 
-        void run()
-        {
-            int ret;
-            if (pa_mainloop_run(mainloop, &ret) < 0)
-            {
-                log_error("Failed to run mainloop.");
-            }
-        }
+    void list_sinks()
+    {
+        pa_operation* op = pa_context_get_sink_info_list(context, sink_list_cb, nullptr);
+        if (op) pa_operation_unref(op);
+    }
 
-        void list_sinks()
-        {
-            pa_operation* op = pa_context_get_sink_info_list(context, sink_list_cb, nullptr);
-            if (op) pa_operation_unref(op);
-        }
-
-        void set_default_sink(const std::string& sink_name)
-        {
-            pa_operation* op = pa_context_set_default_sink(context, sink_name.c_str(), success_cb, nullptr);
-            if (op) pa_operation_unref(op);
-        }
-        
+    void set_default_sink(const std::string& sink_name)
+    {
+        pa_operation* op = pa_context_set_default_sink(context, sink_name.c_str(), success_cb, nullptr);
+        if (op) pa_operation_unref(op);
+    }
+    
     // Constructor.
-        __audio__() {}
-};
-__audio__ audio;
+    __audio__() {}
+
+}; __audio__ audio;
 
 namespace
 {
@@ -6101,276 +6095,275 @@ namespace
     #define WIFI_INFO_WINDOW_WIDTH  WIFI_DROPDOWN_WIDTH - 40
     #define WIFI_INFO_WINDOW_HEIGHT WIFI_DROPDOWN_HEIGHT - 120
 }
-class __status_bar__
-{
-    private:
+class __status_bar__ {
+private:
     // Methods.
-        string get_time_and_date__()
-        {
-            long now(time({}));
-            char buf[80];
-            strftime(
-                buf,
-                size(buf),
-                "%Y-%m-%d %H:%M:%S",
-                localtime(&now)
-            );
+    string get_time_and_date__()
+    {
+        long now(time({}));
+        char buf[80];
+        strftime(
+            buf,
+            size(buf),
+            "%Y-%m-%d %H:%M:%S",
+            localtime(&now)
+        );
 
-            return string(buf);
-        }
+        return string(buf);
+    }
 
-        void create_windows__()
+    void create_windows__()
+    {
+        _bar_window.create_window(
+            screen->root,
+            BAR_WINDOW_X,
+            BAR_WINDOW_Y,
+            BAR_WINDOW_WIDTH,
+            BAR_WINDOW_HEIGHT,
+            DARK_GREY,
+            NONE,
+            MAP
+        );
+        _time_date_window.create_window(
+            _bar_window,
+            TIME_DATE_WINDOW_X,
+            TIME_DATE_WINDOW_Y,
+            TIME_DATE_WINDOW_WIDTH,
+            TIME_DATE_WINDOW_HEIGHT,
+            DARK_GREY,
+            XCB_EVENT_MASK_EXPOSURE,
+            MAP
+        );
+        _wifi_window.create_window(
+            _bar_window,
+            WIFI_WINDOW_X,
+            WIFI_WINDOW_Y,
+            WIFI_WINDOW_WIDTH,
+            WIFI_WINDOW_HEIGHT,
+            DARK_GREY,
+            XCB_EVENT_MASK_BUTTON_PRESS,
+            MAP
+        );
+
+        Bitmap bitmap(20, 20);
+        
+        bitmap.modify(1, 6, 13, 1);
+        bitmap.modify(2, 4, 15, 1);
+        bitmap.modify(3, 3, 7, 1); bitmap.modify(3, 12, 16, 1);
+        bitmap.modify(4, 2, 5, 1); bitmap.modify(4, 14, 17, 1);
+        bitmap.modify(5, 1, 4, 1); bitmap.modify(5, 15, 18, 1);
+        
+        bitmap.modify(5, 7, 12, 1);
+        bitmap.modify(6, 6, 13, 1);
+        bitmap.modify(7, 5, 9, 1); bitmap.modify(7, 10, 14, 1);
+        bitmap.modify(8, 4, 7, 1); bitmap.modify(8, 12, 15, 1);
+        bitmap.modify(9, 3, 6, 1); bitmap.modify(9, 13, 16, 1);
+        
+        bitmap.modify(10, 9, 10, 1);
+        bitmap.modify(11, 8, 11, 1);
+        bitmap.modify(12, 7, 12, 1);
+        bitmap.modify(13, 8, 11, 1);
+        bitmap.modify(14, 9, 10, 1);
+
+        bitmap.exportToPng("/home/mellw/wifi.png");
+        _wifi_window.set_backround_png("/home/mellw/wifi.png");
+        _wifi_window.set_pointer(CURSOR::hand2);
+
+        _audio_window.create_window(
+            _bar_window,
+            (WIFI_WINDOW_X - 50),
+            0,
+            50,
+            20,
+            DARK_GREY,
+            XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE,
+            MAP,
+            (int[]){ALL, 2, BLACK}
+        );
+        _audio_window.set_pointer(CURSOR::hand2);
+        expose(_audio_window);
+    }
+
+    void show__(const uint32_t &__window)
+    {
+        if (__window == _wifi_dropdown_window)
         {
-            _bar_window.create_window(
+            _wifi_dropdown_window.create_window(
                 screen->root,
-                BAR_WINDOW_X,
-                BAR_WINDOW_Y,
-                BAR_WINDOW_WIDTH,
-                BAR_WINDOW_HEIGHT,
+                WIFI_DROPDOWN_X,
+                WIFI_DROPDOWN_Y,
+                WIFI_DROPDOWN_WIDTH,
+                WIFI_DROPDOWN_HEIGHT,
                 DARK_GREY,
                 NONE,
-                MAP
+                MAP,
+                (int[3]){ALL, WIFI_DROPDOWN_BORDER, BLACK}
             );
-            _time_date_window.create_window(
-                _bar_window,
-                TIME_DATE_WINDOW_X,
-                TIME_DATE_WINDOW_Y,
-                TIME_DATE_WINDOW_WIDTH,
-                TIME_DATE_WINDOW_HEIGHT,
-                DARK_GREY,
-                XCB_EVENT_MASK_EXPOSURE,
-                MAP
-            );
-            _wifi_window.create_window(
-                _bar_window,
-                WIFI_WINDOW_X,
-                WIFI_WINDOW_Y,
-                WIFI_WINDOW_WIDTH,
-                WIFI_WINDOW_HEIGHT,
-                DARK_GREY,
-                XCB_EVENT_MASK_BUTTON_PRESS,
-                MAP
-            );
-
-            Bitmap bitmap(20, 20);
-            
-            bitmap.modify(1, 6, 13, 1);
-            bitmap.modify(2, 4, 15, 1);
-            bitmap.modify(3, 3, 7, 1); bitmap.modify(3, 12, 16, 1);
-            bitmap.modify(4, 2, 5, 1); bitmap.modify(4, 14, 17, 1);
-            bitmap.modify(5, 1, 4, 1); bitmap.modify(5, 15, 18, 1);
-            
-            bitmap.modify(5, 7, 12, 1);
-            bitmap.modify(6, 6, 13, 1);
-            bitmap.modify(7, 5, 9, 1); bitmap.modify(7, 10, 14, 1);
-            bitmap.modify(8, 4, 7, 1); bitmap.modify(8, 12, 15, 1);
-            bitmap.modify(9, 3, 6, 1); bitmap.modify(9, 13, 16, 1);
-            
-            bitmap.modify(10, 9, 10, 1);
-            bitmap.modify(11, 8, 11, 1);
-            bitmap.modify(12, 7, 12, 1);
-            bitmap.modify(13, 8, 11, 1);
-            bitmap.modify(14, 9, 10, 1);
-
-            bitmap.exportToPng("/home/mellw/wifi.png");
-            _wifi_window.set_backround_png("/home/mellw/wifi.png");
-            _wifi_window.set_pointer(CURSOR::hand2);
-
-            _audio_window.create_window(
-                _bar_window,
-                (WIFI_WINDOW_X - 50),
-                0,
-                50,
-                20,
-                DARK_GREY,
+            _wifi_close_window.create_window(
+                _wifi_dropdown_window,
+                WIFI_CLOSE_WINDOW_X,
+                WIFI_CLOSE_WINDOW_Y,
+                WIFI_CLOSE_WINDOW_WIDTH,
+                WIFI_CLOSE_WINDOW_HEIGHT,
+                WHITE,
                 XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE,
                 MAP,
-                (int[]){ALL, 2, BLACK}
+                (int[3]){ALL, WIFI_DROPDOWN_BORDER, BLACK}
             );
-            _audio_window.set_pointer(CURSOR::hand2);
-            expose(_audio_window);
+            _wifi_close_window.set_pointer(CURSOR::hand2);
+            expose(_wifi_close_window);  
+            _wifi_info_window.create_window(
+                _wifi_dropdown_window,
+                WIFI_INFO_WINDOW_X,
+                WIFI_INFO_WINDOW_Y,
+                WIFI_INFO_WINDOW_WIDTH,
+                WIFI_INFO_WINDOW_HEIGHT,
+                WHITE,
+                XCB_EVENT_MASK_EXPOSURE,
+                MAP,
+                (int[3]){ALL, WIFI_DROPDOWN_BORDER, BLACK}
+            );
+            expose(_wifi_info_window);
+        }
+        
+        if (__window == _audio_dropdown_window)
+        {
+            _audio_dropdown_window.create_window(
+                screen->root,
+                ((WIFI_WINDOW_X - (50 / 2) - (200 / 2))),
+                20,
+                200,
+                100,
+                DARK_GREY,
+                NONE,
+                MAP,
+                (int[3]){ALL, 2, BLACK}
+            );
+        }
+    }
+
+    void hide__(const uint32_t &__window)
+    {
+        if (__window == _wifi_dropdown_window)
+        {
+            _wifi_close_window.unmap();
+            _wifi_close_window.kill();
+            _wifi_info_window.unmap();
+            _wifi_info_window.kill();
+            _wifi_dropdown_window.unmap();
+            _wifi_dropdown_window.kill();
         }
 
-        void show__(const uint32_t &__window)
+        if (__window == _audio_dropdown_window)
         {
-            if (__window == _wifi_dropdown_window)
-            {
-                _wifi_dropdown_window.create_window(
-                    screen->root,
-                    WIFI_DROPDOWN_X,
-                    WIFI_DROPDOWN_Y,
-                    WIFI_DROPDOWN_WIDTH,
-                    WIFI_DROPDOWN_HEIGHT,
-                    DARK_GREY,
-                    NONE,
-                    MAP,
-                    (int[3]){ALL, WIFI_DROPDOWN_BORDER, BLACK}
-                );
-                _wifi_close_window.create_window(
-                    _wifi_dropdown_window,
-                    WIFI_CLOSE_WINDOW_X,
-                    WIFI_CLOSE_WINDOW_Y,
-                    WIFI_CLOSE_WINDOW_WIDTH,
-                    WIFI_CLOSE_WINDOW_HEIGHT,
-                    WHITE,
-                    XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE,
-                    MAP,
-                    (int[3]){ALL, WIFI_DROPDOWN_BORDER, BLACK}
-                );
-                _wifi_close_window.set_pointer(CURSOR::hand2);
-                expose(_wifi_close_window);  
-                _wifi_info_window.create_window(
-                    _wifi_dropdown_window,
-                    WIFI_INFO_WINDOW_X,
-                    WIFI_INFO_WINDOW_Y,
-                    WIFI_INFO_WINDOW_WIDTH,
-                    WIFI_INFO_WINDOW_HEIGHT,
-                    WHITE,
-                    XCB_EVENT_MASK_EXPOSURE,
-                    MAP,
-                    (int[3]){ALL, WIFI_DROPDOWN_BORDER, BLACK}
-                );
-                expose(_wifi_info_window);
-            }
-            
-            if (__window == _audio_dropdown_window)
-            {
-                _audio_dropdown_window.create_window(
-                    screen->root,
-                    ((WIFI_WINDOW_X - (50 / 2) - (200 / 2))),
-                    20,
-                    200,
-                    100,
-                    DARK_GREY,
-                    NONE,
-                    MAP,
-                    (int[3]){ALL, 2, BLACK}
-                );
-            }
+            _audio_dropdown_window.unmap();
+            _audio_dropdown_window.kill();
         }
+    }
 
-        void hide__(const uint32_t &__window)
+    void setup_events__()
+    {
+        event_handler->setEventCallback(XCB_EXPOSE,  [&](Ev ev)-> void
         {
-            if (__window == _wifi_dropdown_window)
-            {
-                _wifi_close_window.unmap();
-                _wifi_close_window.kill();
-                _wifi_info_window.unmap();
-                _wifi_info_window.kill();
-                _wifi_dropdown_window.unmap();
-                _wifi_dropdown_window.kill();
-            }
-
-            if (__window == _audio_dropdown_window)
-            {
-                _audio_dropdown_window.unmap();
-                _audio_dropdown_window.kill();
-            }
-        }
-
-        void setup_events__()
+            RE_CAST_EV(xcb_expose_event_t);
+            expose(e->window);
+        });
+        
+        _wifi_close_window.on_button_press_event([&]()-> void
         {
-            event_handler->setEventCallback(XCB_EXPOSE,  [&](Ev ev)-> void
-            {
-                RE_CAST_EV(xcb_expose_event_t);
-                expose(e->window);
-            });
-            
-            _wifi_close_window.on_button_press_event([&]()-> void
+            hide__(_wifi_dropdown_window);
+        });
+
+        _wifi_window.on_button_press_event([&]()-> void
+        {
+            if (_wifi_dropdown_window.is_mapped())
             {
                 hide__(_wifi_dropdown_window);
-            });
-
-            _wifi_window.on_button_press_event([&]()-> void
-            {
-                if (_wifi_dropdown_window.is_mapped())
-                {
-                    hide__(_wifi_dropdown_window);
-                }
-                else
-                {
-                    if (_audio_dropdown_window.is_mapped())
-                    {
-                        hide__(_audio_dropdown_window);
-                    }
-
-                    show__(_wifi_dropdown_window);
-                }
-            });
-
-            _audio_window.on_button_press_event([&]()-> void
+            }
+            else
             {
                 if (_audio_dropdown_window.is_mapped())
                 {
                     hide__(_audio_dropdown_window);
                 }
-                else
-                {
-                    if (_wifi_dropdown_window.is_mapped())
-                    {
-                        hide__(_wifi_dropdown_window);
-                    }
 
-                    show__(_audio_dropdown_window);
-                }
-            });
-        }
-
-        void setup_thread__(const uint32_t &__window)
-        {
-            if (__window == _time_date_window)
-            {
-                function<void()> __time__ = [&]()-> void
-                {
-                    while (true)
-                    {
-                        this->_time_date_window.send_event(XCB_EVENT_MASK_EXPOSURE);
-                        this_thread::sleep_for(chrono::seconds(1));
-                    }
-                };
-
-                thread(__time__).detach();
+                show__(_wifi_dropdown_window);
             }
-        }
+        });
 
-    public:
+        _audio_window.on_button_press_event([&]()-> void
+        {
+            if (_audio_dropdown_window.is_mapped())
+            {
+                hide__(_audio_dropdown_window);
+            }
+            else
+            {
+                if (_wifi_dropdown_window.is_mapped())
+                {
+                    hide__(_wifi_dropdown_window);
+                }
+
+                show__(_audio_dropdown_window);
+            }
+        });
+    }
+
+    void setup_thread__(const uint32_t &__window)
+    {
+        if (__window == _time_date_window)
+        {
+            function<void()> __time__ = [&]()-> void
+            {
+                while (true)
+                {
+                    this->_time_date_window.send_event(XCB_EVENT_MASK_EXPOSURE);
+                    this_thread::sleep_for(chrono::seconds(1));
+                }
+            };
+
+            thread(__time__).detach();
+        }
+    }
+
+public:
     // Variabels.
-        window(_bar_window),
-            (_time_date_window), 
-            (_wifi_window), (_wifi_dropdown_window), (_wifi_close_window), (_wifi_info_window),
-            (_audio_window), (_audio_dropdown_window);
+    window(_bar_window),
+        (_time_date_window), 
+        (_wifi_window), (_wifi_dropdown_window), (_wifi_close_window), (_wifi_info_window),
+        (_audio_window), (_audio_dropdown_window);
 
     // Methods.
-        void init()
-        {
-            create_windows__();
-            setup_events__();
-            setup_thread__(_time_date_window);
-        }
+    void init()
+    {
+        create_windows__();
+        setup_events__();
+        setup_thread__(_time_date_window);
+    }
 
-        void expose(const uint32_t &__window)
+    void expose(const uint32_t &__window)
+    {
+        if (__window == _time_date_window ) _time_date_window.draw_text_auto_color(get_time_and_date__().c_str(), 4, 15);
+        if (__window == _audio_window     ) _audio_window.draw_text_auto_color("Audio", 4, 15);
+        if (__window == _wifi_close_window) _wifi_close_window.draw_text_auto_color("Close", 22, 15,BLACK);
+        if (__window == _wifi_info_window )
         {
-            if (__window == _time_date_window ) _time_date_window.draw_text_auto_color(get_time_and_date__().c_str(), 4, 15);
-            if (__window == _audio_window     ) _audio_window.draw_text_auto_color("Audio", 4, 15);
-            if (__window == _wifi_close_window) _wifi_close_window.draw_text_auto_color("Close", 22, 15,BLACK);
-            if (__window == _wifi_info_window )
-            {
-                string local_ip("Local ip: " + network->get_local_ip_info(__network__::LOCAL_IP));
-                _wifi_info_window.draw_text_auto_color(local_ip.c_str(), 4, 16, BLACK);
+            string local_ip("Local ip: " + network->get_local_ip_info(__network__::LOCAL_IP));
+            _wifi_info_window.draw_text_auto_color(local_ip.c_str(), 4, 16, BLACK);
 
-                string local_interface("interface: " + network->get_local_ip_info(__network__::INTERFACE_FOR_LOCAL_IP));
-                _wifi_info_window.draw_text_auto_color(local_interface.c_str(), 4, 30, BLACK);
-            }
+            string local_interface("interface: " + network->get_local_ip_info(__network__::INTERFACE_FOR_LOCAL_IP));
+            _wifi_info_window.draw_text_auto_color(local_interface.c_str(), 4, 30, BLACK);
         }
+    }
 
     // Constructor.
-        __status_bar__() {}
-};
-static __status_bar__ *status_bar(nullptr);
+    __status_bar__() {}
+
+}; static __status_bar__ *status_bar(nullptr);
 
 /**
  *
- * @class XCPPBAnimator
+ * @class Mwm_Animator
  * @brief Class for animating the position and size of an XCB window.
  *
  */
@@ -8477,8 +8470,7 @@ class __screen_settings__
 };
 static __screen_settings__ *screen_settings(nullptr);
 
-typedef struct dropdown_menu_t
-{
+typedef struct dropdown_menu_t {
     window         _window;
     window         _button_window;
     window         _dropdown_window;
@@ -8490,569 +8482,566 @@ typedef struct dropdown_menu_t
     {
         _window.create_window(__parent, __x, __y, 100, 20, RED);
     }
-}
-dropdown_menu_t;
+} dropdown_menu_t;
 
-class __system_settings__
-{
+class __system_settings__ {
     // Defines.
-        #define MENU_WINDOW_WIDTH 120
-        #define MENU_ENTRY_HEIGHT 20
-        #define MENU_ENTRY_TEXT_Y 14
-        #define MENU_ENTRY_TEXT_X 4
+    #define MENU_WINDOW_WIDTH 120
+    #define MENU_ENTRY_HEIGHT 20
+    #define MENU_ENTRY_TEXT_Y 14
+    #define MENU_ENTRY_TEXT_X 4
     
-    private:
+private:
     // Structs.
-        typedef struct {
-            window   _window;
-            string   _device_name;
-            uint16_t _device_id;
-        } pointer_device_info_t;
+    typedef struct {
+        window   _window;
+        string   _device_name;
+        uint16_t _device_id;
+    } pointer_device_info_t;
 
     // Variabels.
-        vector<pointer_device_info_t> pointer_vec;
+    vector<pointer_device_info_t> pointer_vec;
 
     // Methods.
-        // Input Devices.
-            void query_input_devices__()
+    void query_input_devices__()
+        {
+            xcb_input_xi_query_device_cookie_t cookie = xcb_input_xi_query_device(conn, XCB_INPUT_DEVICE_ALL);
+            xcb_input_xi_query_device_reply_t* reply = xcb_input_xi_query_device_reply(conn, cookie, NULL);
+
+            if (reply == nullptr)
             {
-                xcb_input_xi_query_device_cookie_t cookie = xcb_input_xi_query_device(conn, XCB_INPUT_DEVICE_ALL);
-                xcb_input_xi_query_device_reply_t* reply = xcb_input_xi_query_device_reply(conn, cookie, NULL);
-
-                if (reply == nullptr)
-                {
-                    log_error("xcb_input_xi_query_device_reply_t == nullptr");
-                    return;
-                }
-
-                xcb_input_xi_device_info_iterator_t iter;
-                for (iter = xcb_input_xi_query_device_infos_iterator(reply); iter.rem; xcb_input_xi_device_info_next(&iter))
-                {
-                    xcb_input_xi_device_info_t* device = iter.data;
-
-                    char* device_name = (char*)(device + 1); // Device name is stored immediately after the device info structure.
-                    if (device->type == XCB_INPUT_DEVICE_TYPE_SLAVE_POINTER || device->type == XCB_INPUT_DEVICE_TYPE_FLOATING_SLAVE)
-                    {
-                        pointer_device_info_t pointer_device;
-                        pointer_device._device_name = device_name;
-                        pointer_device._device_id   = device->deviceid;
-                        pointer_vec.push_back(pointer_device);
-
-                        log_info("Found pointing device:" + string(device_name));
-                        log_info("Device ID:" + to_string(device->deviceid));
-                    }
-                }
-
-                free(reply);
+                log_error("xcb_input_xi_query_device_reply_t == nullptr");
+                return;
             }
 
-        void make_windows__()
-        {
-            uint32_t mask;
-            int width = (screen->width_in_pixels / 2), height = (screen->height_in_pixels / 2);
-            int x = ((screen->width_in_pixels / 2) - (width / 2)), y = ((screen->height_in_pixels / 2) - (height / 2));
-
-            _main_window.create_window(
-                screen->root,
-                x,
-                y,
-                width,
-                height,
-                DARK_GREY,
-                NONE,
-                MAP | DEFAULT_KEYS
-            );
-            
-            _menu_window.create_window(
-                _main_window,
-                0,
-                0,
-                MENU_WINDOW_WIDTH,
-                _main_window.height(),
-                RED,
-                XCB_EVENT_MASK_BUTTON_PRESS,
-                MAP
-            );
-            
-            _default_settings_window.create_window(
-                _main_window,
-                MENU_WINDOW_WIDTH,
-                0,
-                (_main_window.width() - MENU_WINDOW_WIDTH),
-                _main_window.height(),
-                ORANGE,
-                XCB_EVENT_MASK_BUTTON_PRESS,
-                MAP
-            );
-
-            _screen_menu_entry_window.create_window(
-                _menu_window,
-                0,
-                0,
-                MENU_WINDOW_WIDTH,
-                MENU_ENTRY_HEIGHT,
-                BLUE,
-                XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE,
-                MAP,
-                (int[]){DOWN | RIGHT, 2, BLACK}
-            );
-
-            _screen_settings_window.create_window(
-                _main_window,
-                MENU_WINDOW_WIDTH,
-                0,
-                (_main_window.width() - MENU_WINDOW_WIDTH),
-                _main_window.height(),
-                WHITE,
-                XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS
-            );
-
-            _screen_resolution_window.create_window(
-                _screen_settings_window,
-                100,
-                20,
-                160,
-                20,
-                DARK_GREY,
-                XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS,
-                NONE,
-                (int[]){ALL, 2, BLACK}
-            );
-
-            _screen_resolution_button_window.create_window(
-                _screen_settings_window,
-                260,
-                20,
-                20,
-                20,
-                DARK_GREY,
-                XCB_EVENT_MASK_BUTTON_PRESS,
-                NONE,
-                (int[]){RIGHT | DOWN | UP, 2, BLACK}
-            );
-
-            _audio_menu_entry_window.create_window(
-                _menu_window,
-                0,
-                20,
-                MENU_WINDOW_WIDTH,
-                MENU_ENTRY_HEIGHT,
-                BLUE,
-                XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE,
-                MAP,
-                (int[]){DOWN | RIGHT, 2, BLACK}
-            );
-
-            _audio_settings_window.create_window(
-                _main_window,
-                MENU_WINDOW_WIDTH,
-                0,
-                (_main_window.width() - MENU_WINDOW_WIDTH),
-                _main_window.height(),
-                PURPLE,
-                XCB_EVENT_MASK_BUTTON_PRESS
-            );
-
-            _network_menu_entry_window.create_window(
-                _menu_window,
-                0,
-                40,
-                MENU_WINDOW_WIDTH,
-                MENU_ENTRY_HEIGHT,
-                BLUE,
-                XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE,
-                MAP,
-                (int[]){DOWN | RIGHT, 2, BLACK}
-            );
-
-            _network_settings_window.create_window(
-                _main_window,
-                MENU_WINDOW_WIDTH,
-                0,
-                (_main_window.width() - MENU_WINDOW_WIDTH),
-                _main_window.height(),
-                MAGENTA
-            );
-
-            _input_menu_entry_window.create_window(
-                _menu_window,
-                0,
-                60,
-                MENU_WINDOW_WIDTH,
-                MENU_ENTRY_HEIGHT,
-                BLUE,
-                XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE,
-                MAP,
-                (int[]){DOWN | RIGHT, 2, BLACK}
-            );
-
-            _input_settings_window.create_window(
-                _main_window,
-                MENU_WINDOW_WIDTH,
-                0,
-                _main_window.width() - MENU_WINDOW_WIDTH,
-                _main_window.height()
-            );
-
-            pointer_vec.clear();
-            query_input_devices__();
-            _input_device_window.create_window(
-                _input_settings_window,
-                100,
-                20,
-                160,
-                20,
-                WHITE,
-                XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE
-            );
-
-            _input_device_button_window.create_window(
-                _input_settings_window,
-                (_input_device_window.x() + _input_device_window.width()),
-                _input_device_window.y(),
-                20,
-                20,
-                WHITE,
-                XCB_EVENT_MASK_BUTTON_PRESS
-            );
-        }
-
-        void make_internal_client__()
-        {
-            c         = new client;
-            c->win    = _main_window;
-            c->x      = _main_window.x();
-            c->y      = _main_window.y();
-            c->width  = _main_window.width();
-            c->height = _main_window.height();
-            c->make_decorations();
-            c->frame.set_event_mask(FRAME_EVENT_MASK);
-            c->win.set_event_mask(CLIENT_EVENT_MASK);
-            wm->client_list.push_back(c);
-            wm->cur_d->current_clients.push_back(c);
-            c->focus();
-            wm->focused_client = c;
-        }
-
-        void adjust_and_map_subwindow__(window &__window)
-        {
-            if (__window.is_mapped()) return;
-
-            if (_default_settings_window.is_mapped()) _default_settings_window.unmap();
-            if (_screen_settings_window.is_mapped() ) _screen_settings_window.unmap();
-            if (_audio_settings_window.is_mapped()  ) _audio_settings_window.unmap();
-            if (_network_settings_window.is_mapped()) _network_settings_window.unmap();
-            if (_input_settings_window.is_mapped()  ) _input_settings_window.unmap();
-
-            __window.width_height((c->win.width() - MENU_WINDOW_WIDTH), c->win.height());
-            xcb_flush(conn);
-            __window.map();
-            __window.raise();
-
-            if (__window == _screen_settings_window)
+            xcb_input_xi_device_info_iterator_t iter;
+            for (iter = xcb_input_xi_query_device_infos_iterator(reply); iter.rem; xcb_input_xi_device_info_next(&iter))
             {
-                expose(__window);
-                _screen_resolution_window.map();
-                expose(_screen_resolution_window);
-                _screen_resolution_button_window.map();
-            }
+                xcb_input_xi_device_info_t* device = iter.data;
 
-            if (__window == _input_settings_window)
-            {
-                expose(__window);
-                uint32_t window_width = 0;
-                for (int i = 0; i < pointer_vec.size(); ++i)
+                char* device_name = (char*)(device + 1); // Device name is stored immediately after the device info structure.
+                if (device->type == XCB_INPUT_DEVICE_TYPE_SLAVE_POINTER || device->type == XCB_INPUT_DEVICE_TYPE_FLOATING_SLAVE)
                 {
-                    uint32_t len = pointer_vec[i]._device_name.length() * DEFAULT_FONT_WIDTH;
-                    if (len > window_width) window_width = len;
-                }
+                    pointer_device_info_t pointer_device;
+                    pointer_device._device_name = device_name;
+                    pointer_device._device_id   = device->deviceid;
+                    pointer_vec.push_back(pointer_device);
 
-                _input_device_window.width(window_width);
-                _input_device_button_window.x(_input_device_window.x() + _input_device_window.width());
-
-                _input_device_window.make_borders(ALL, 2, BLACK);
-                _input_device_window.map();
-                _input_device_button_window.make_borders(RIGHT | DOWN | UP, 2, BLACK);
-                _input_device_button_window.map();
-            }
-        }
-
-        void show__(uint32_t __window)
-        {
-            if (__window == _screen_resolution_dropdown_window)
-            {
-                _screen_resolution_dropdown_window.create_window(
-                    _screen_settings_window,
-                    100,
-                    40,
-                    180,
-                    (screen_settings->_avalible_resolutions.size() * MENU_ENTRY_HEIGHT),
-                    DARK_GREY,
-                    NONE,
-                    MAP
-                );
-                _screen_resolution_options_vector.clear();
-
-                for (int i = 0; i < screen_settings->_avalible_resolutions.size(); ++i)
-                {
-                    window option;
-                    option.create_window(
-                        _screen_resolution_dropdown_window,
-                        0,
-                        (_screen_resolution_options_vector.size() * MENU_ENTRY_HEIGHT),
-                        _screen_resolution_dropdown_window.width(),
-                        MENU_ENTRY_HEIGHT,
-                        DARK_GREY,
-                        XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE,
-                        MAP,
-                        (int[]){RIGHT | LEFT | DOWN, 2, BLACK}
-                    );
-                    option.draw_text_auto_color(
-                        screen_settings->_avalible_resolutions[i].second.c_str(),
-                        4,
-                        14
-                    );
-                    _screen_resolution_options_vector.push_back(option);
+                    log_info("Found pointing device:" + string(device_name));
+                    log_info("Device ID:" + to_string(device->deviceid));
                 }
             }
 
-            if (__window == _input_device_dropdown_window)
-            {
-                _input_device_dropdown_window.create_window(
-                    _input_settings_window,
-                    _input_device_window.x(),
-                    (_input_device_window.y() + _input_device_window.height()),
-                    (_input_device_window.width() + _input_device_button_window.width()),
-                    pointer_vec.size() * 20,
-                    WHITE,
-                    NONE,
-                    MAP
-                );
-
-                for (int i = 0; i < pointer_vec.size(); ++i)
-                {
-                    pointer_vec[i]._window.create_window(
-                        _input_device_dropdown_window,
-                        0,
-                        (i * 20),
-                        _input_device_dropdown_window.width(),
-                        20,
-                        WHITE,
-                        XCB_EVENT_MASK_EXPOSURE,
-                        NONE,
-                        (int[]){LEFT | RIGHT | DOWN, 2, BLACK}
-                    );
-                    pointer_vec[i]._window.map();
-                    pointer_vec[i]._window.draw_text_auto_color(pointer_vec[i]._device_name.c_str(), 4, 14, BLACK);
-                }
-            }
+            free(reply);
         }
 
-        void hide__(uint32_t __window)
-        {
-            if (__window == _screen_resolution_dropdown_window)
-            {
-                _screen_resolution_dropdown_window.unmap();
-                _screen_resolution_dropdown_window.kill();
-            }
+    void make_windows__()
+    {
+        uint32_t mask;
+        int width = (screen->width_in_pixels / 2), height = (screen->height_in_pixels / 2);
+        int x = ((screen->width_in_pixels / 2) - (width / 2)), y = ((screen->height_in_pixels / 2) - (height / 2));
 
-            if (__window == _input_device_dropdown_window)
-            {
-                _input_device_dropdown_window.unmap();
-                _input_device_dropdown_window.kill();
-            }
-        }
-
-        void setup_events__()
-        {
-            event_handler->setEventCallback(XCB_BUTTON_PRESS,     [this](Ev ev)-> void
-            {
-                RE_CAST_EV(xcb_button_press_event_t);
-                if (e->detail == L_MOUSE_BUTTON)
-                {
-                    if (wm->focused_client != this->c)
-                    {
-                        if (e->event == _main_window
-                        ||  e->event == _menu_window
-                        ||  e->event == _default_settings_window
-                        ||  e->event == _screen_menu_entry_window
-                        ||  e->event == _screen_settings_window
-                        ||  e->event == _audio_menu_entry_window
-                        ||  e->event == _audio_settings_window
-                        ||  e->event == _network_menu_entry_window
-                        ||  e->event == _network_settings_window)
-                        {
-                            this->c->focus();
-                            wm->focused_client = this->c;
-                        }
-                    }
-
-                    if (e->event == _menu_window)
-                    {
-                        adjust_and_map_subwindow__(_default_settings_window);
-                        return;
-                    }
-
-                    if (e->event == _screen_menu_entry_window)
-                    {
-                        adjust_and_map_subwindow__(_screen_settings_window);
-                        return;
-                    }
-
-                    if (e->event == _screen_resolution_button_window)
-                    {
-                        if (!_screen_resolution_dropdown_window.is_mapped())
-                        {
-                            show__(_screen_resolution_dropdown_window);
-                            return;
-                        }
-
-                        hide__(_screen_resolution_dropdown_window);
-                        return;
-                    }
-
-                    if (e->event == _audio_menu_entry_window)
-                    {
-                        adjust_and_map_subwindow__(_audio_settings_window);
-                        return;
-                    }
-
-                    if (e->event == _network_menu_entry_window)
-                    {
-                        adjust_and_map_subwindow__(_network_settings_window);
-                        return;
-                    }
-
-                    if (e->event == _input_menu_entry_window)
-                    {
-                        adjust_and_map_subwindow__(_input_settings_window);
-                    }
-
-                    if (e->event == _input_device_button_window)
-                    {
-                        if (!_input_device_dropdown_window.is_mapped())
-                        {
-                            show__(_input_device_dropdown_window);
-                            return;
-                        }
-
-                        hide__(_input_device_dropdown_window);
-                        return;
-                    }
-
-                    for (int i(0); i < _screen_resolution_options_vector.size(); ++i)
-                    {
-                        if (e->event == _screen_resolution_options_vector[i])
-                        {
-                            screen_settings->set_resolution(screen_settings->_avalible_resolutions[i].first);
-                            log_info("screen->width_in_pixels: " + to_string(screen->width_in_pixels));
-                            log_info("screen->height_in_pixels: " + to_string(screen->height_in_pixels));
-                        }
-                    }
-                }
-            });
-
-            event_handler->set_key_press_callback(SUPER, wm->key_codes.s, [this]()-> void { launch(); });
-
-            event_handler->setEventCallback(XCB_CONFIGURE_NOTIFY, [this](Ev ev)->void
-            {
-                RE_CAST_EV(xcb_configure_notify_event_t); 
-                configure(e->window, e->width, e->height);
-            });
-
-            event_handler->setEventCallback(XCB_EXPOSE,           [this](Ev ev)->void
-            {
-                RE_CAST_EV(xcb_expose_event_t);
-                expose(e->window);
-            });
-
-            SET_INTR_CLI_KILL_CALLBACK();
-        }
-
-    public:
-    // Variabels.
-        window(_main_window),
-            (_menu_window), (_default_settings_window),
-            (_screen_menu_entry_window), (_screen_settings_window), (_screen_resolution_window), (_screen_resolution_button_window), (_screen_resolution_dropdown_window),
-            (_audio_menu_entry_window), (_audio_settings_window),
-            (_network_menu_entry_window), (_network_settings_window),
-            (_input_menu_entry_window), (_input_settings_window), (_input_device_window), (_input_device_button_window), (_input_device_dropdown_window);
+        _main_window.create_window(
+            screen->root,
+            x,
+            y,
+            width,
+            height,
+            DARK_GREY,
+            NONE,
+            MAP | DEFAULT_KEYS
+        );
         
-        vector<window>(_screen_resolution_options_vector);
-        client *c = nullptr;
+        _menu_window.create_window(
+            _main_window,
+            0,
+            0,
+            MENU_WINDOW_WIDTH,
+            _main_window.height(),
+            RED,
+            XCB_EVENT_MASK_BUTTON_PRESS,
+            MAP
+        );
+        
+        _default_settings_window.create_window(
+            _main_window,
+            MENU_WINDOW_WIDTH,
+            0,
+            (_main_window.width() - MENU_WINDOW_WIDTH),
+            _main_window.height(),
+            ORANGE,
+            XCB_EVENT_MASK_BUTTON_PRESS,
+            MAP
+        );
 
-    // Methods.
-        void launch()
+        _screen_menu_entry_window.create_window(
+            _menu_window,
+            0,
+            0,
+            MENU_WINDOW_WIDTH,
+            MENU_ENTRY_HEIGHT,
+            BLUE,
+            XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE,
+            MAP,
+            (int[]){DOWN | RIGHT, 2, BLACK}
+        );
+
+        _screen_settings_window.create_window(
+            _main_window,
+            MENU_WINDOW_WIDTH,
+            0,
+            (_main_window.width() - MENU_WINDOW_WIDTH),
+            _main_window.height(),
+            WHITE,
+            XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS
+        );
+
+        _screen_resolution_window.create_window(
+            _screen_settings_window,
+            100,
+            20,
+            160,
+            20,
+            DARK_GREY,
+            XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS,
+            NONE,
+            (int[]){ALL, 2, BLACK}
+        );
+
+        _screen_resolution_button_window.create_window(
+            _screen_settings_window,
+            260,
+            20,
+            20,
+            20,
+            DARK_GREY,
+            XCB_EVENT_MASK_BUTTON_PRESS,
+            NONE,
+            (int[]){RIGHT | DOWN | UP, 2, BLACK}
+        );
+
+        _audio_menu_entry_window.create_window(
+            _menu_window,
+            0,
+            20,
+            MENU_WINDOW_WIDTH,
+            MENU_ENTRY_HEIGHT,
+            BLUE,
+            XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE,
+            MAP,
+            (int[]){DOWN | RIGHT, 2, BLACK}
+        );
+
+        _audio_settings_window.create_window(
+            _main_window,
+            MENU_WINDOW_WIDTH,
+            0,
+            (_main_window.width() - MENU_WINDOW_WIDTH),
+            _main_window.height(),
+            PURPLE,
+            XCB_EVENT_MASK_BUTTON_PRESS
+        );
+
+        _network_menu_entry_window.create_window(
+            _menu_window,
+            0,
+            40,
+            MENU_WINDOW_WIDTH,
+            MENU_ENTRY_HEIGHT,
+            BLUE,
+            XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE,
+            MAP,
+            (int[]){DOWN | RIGHT, 2, BLACK}
+        );
+
+        _network_settings_window.create_window(
+            _main_window,
+            MENU_WINDOW_WIDTH,
+            0,
+            (_main_window.width() - MENU_WINDOW_WIDTH),
+            _main_window.height(),
+            MAGENTA
+        );
+
+        _input_menu_entry_window.create_window(
+            _menu_window,
+            0,
+            60,
+            MENU_WINDOW_WIDTH,
+            MENU_ENTRY_HEIGHT,
+            BLUE,
+            XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE,
+            MAP,
+            (int[]){DOWN | RIGHT, 2, BLACK}
+        );
+
+        _input_settings_window.create_window(
+            _main_window,
+            MENU_WINDOW_WIDTH,
+            0,
+            _main_window.width() - MENU_WINDOW_WIDTH,
+            _main_window.height()
+        );
+
+        pointer_vec.clear();
+        query_input_devices__();
+        _input_device_window.create_window(
+            _input_settings_window,
+            100,
+            20,
+            160,
+            20,
+            WHITE,
+            XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE
+        );
+
+        _input_device_button_window.create_window(
+            _input_settings_window,
+            (_input_device_window.x() + _input_device_window.width()),
+            _input_device_window.y(),
+            20,
+            20,
+            WHITE,
+            XCB_EVENT_MASK_BUTTON_PRESS
+        );
+    }
+
+    void make_internal_client__()
+    {
+        c         = new client;
+        c->win    = _main_window;
+        c->x      = _main_window.x();
+        c->y      = _main_window.y();
+        c->width  = _main_window.width();
+        c->height = _main_window.height();
+        c->make_decorations();
+        c->frame.set_event_mask(FRAME_EVENT_MASK);
+        c->win.set_event_mask(CLIENT_EVENT_MASK);
+        wm->client_list.push_back(c);
+        wm->cur_d->current_clients.push_back(c);
+        c->focus();
+        wm->focused_client = c;
+    }
+
+    void adjust_and_map_subwindow__(window &__window)
+    {
+        if (__window.is_mapped()) return;
+
+        if (_default_settings_window.is_mapped()) _default_settings_window.unmap();
+        if (_screen_settings_window.is_mapped() ) _screen_settings_window.unmap();
+        if (_audio_settings_window.is_mapped()  ) _audio_settings_window.unmap();
+        if (_network_settings_window.is_mapped()) _network_settings_window.unmap();
+        if (_input_settings_window.is_mapped()  ) _input_settings_window.unmap();
+
+        __window.width_height((c->win.width() - MENU_WINDOW_WIDTH), c->win.height());
+        xcb_flush(conn);
+        __window.map();
+        __window.raise();
+
+        if (__window == _screen_settings_window)
         {
-            make_windows__();
-            make_internal_client__();
+            expose(__window);
+            _screen_resolution_window.map();
+            expose(_screen_resolution_window);
+            _screen_resolution_button_window.map();
         }
 
-        void expose(uint32_t __window)
+        if (__window == _input_settings_window)
         {
-            if (__window == _screen_menu_entry_window ) _screen_menu_entry_window.draw_text_auto_color("Screen", 4, 14);
-            if (__window == _screen_settings_window   ) _screen_settings_window.draw_text_auto_color("Resolution", (_screen_resolution_window.x() - (size("Resolution") * DEFAULT_FONT_WIDTH)), 35, BLACK);
-            if (__window == _audio_menu_entry_window  ) _audio_menu_entry_window.draw_text_auto_color("Audio", 4, 14);
-            if (__window == _network_menu_entry_window) _network_menu_entry_window.draw_text_auto_color("Network", 4, 14);
-            if (__window == _input_menu_entry_window  ) _input_menu_entry_window.draw_text_auto_color("Input", 4, 14);
-            if (__window == _input_settings_window    ) _input_settings_window.draw_text_auto_color("Device", (_input_device_window.x() - (size("Device") * DEFAULT_FONT_WIDTH)), 35);
-            if (__window == _input_device_window      ) _input_device_window.draw_text_auto_color("Select Input Device.", 4, 15, BLACK);
-            if (__window == _screen_resolution_window )
+            expose(__window);
+            uint32_t window_width = 0;
+            for (int i = 0; i < pointer_vec.size(); ++i)
             {
-                string resolution(screen_settings->_current_resoluton_string);
-                if (resolution.empty()) return;
-                _screen_resolution_window.draw_text_auto_color(resolution.c_str(), 4, 15);
+                uint32_t len = pointer_vec[i]._device_name.length() * DEFAULT_FONT_WIDTH;
+                if (len > window_width) window_width = len;
             }
 
-            for (int i(0); i < _screen_resolution_options_vector.size(); ++i)
+            _input_device_window.width(window_width);
+            _input_device_button_window.x(_input_device_window.x() + _input_device_window.width());
+
+            _input_device_window.make_borders(ALL, 2, BLACK);
+            _input_device_window.map();
+            _input_device_button_window.make_borders(RIGHT | DOWN | UP, 2, BLACK);
+            _input_device_button_window.map();
+        }
+    }
+
+    void show__(uint32_t __window)
+    {
+        if (__window == _screen_resolution_dropdown_window)
+        {
+            _screen_resolution_dropdown_window.create_window(
+                _screen_settings_window,
+                100,
+                40,
+                180,
+                (screen_settings->_avalible_resolutions.size() * MENU_ENTRY_HEIGHT),
+                DARK_GREY,
+                NONE,
+                MAP
+            );
+            _screen_resolution_options_vector.clear();
+
+            for (int i = 0; i < screen_settings->_avalible_resolutions.size(); ++i)
             {
-                if (__window == _screen_resolution_options_vector[i])
-                {
-                    _screen_resolution_options_vector[i].draw_text_auto_color(
-                        screen_settings->_avalible_resolutions[i].second.c_str(),
-                        4,
-                        14
-                    );
-                }
+                window option;
+                option.create_window(
+                    _screen_resolution_dropdown_window,
+                    0,
+                    (_screen_resolution_options_vector.size() * MENU_ENTRY_HEIGHT),
+                    _screen_resolution_dropdown_window.width(),
+                    MENU_ENTRY_HEIGHT,
+                    DARK_GREY,
+                    XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE,
+                    MAP,
+                    (int[]){RIGHT | LEFT | DOWN, 2, BLACK}
+                );
+                option.draw_text_auto_color(
+                    screen_settings->_avalible_resolutions[i].second.c_str(),
+                    4,
+                    14
+                );
+                _screen_resolution_options_vector.push_back(option);
             }
+        }
+
+        if (__window == _input_device_dropdown_window)
+        {
+            _input_device_dropdown_window.create_window(
+                _input_settings_window,
+                _input_device_window.x(),
+                (_input_device_window.y() + _input_device_window.height()),
+                (_input_device_window.width() + _input_device_button_window.width()),
+                pointer_vec.size() * 20,
+                WHITE,
+                NONE,
+                MAP
+            );
 
             for (int i = 0; i < pointer_vec.size(); ++i)
             {
-                if (__window == pointer_vec[i]._window)
+                pointer_vec[i]._window.create_window(
+                    _input_device_dropdown_window,
+                    0,
+                    (i * 20),
+                    _input_device_dropdown_window.width(),
+                    20,
+                    WHITE,
+                    XCB_EVENT_MASK_EXPOSURE,
+                    NONE,
+                    (int[]){LEFT | RIGHT | DOWN, 2, BLACK}
+                );
+                pointer_vec[i]._window.map();
+                pointer_vec[i]._window.draw_text_auto_color(pointer_vec[i]._device_name.c_str(), 4, 14, BLACK);
+            }
+        }
+    }
+
+    void hide__(uint32_t __window)
+    {
+        if (__window == _screen_resolution_dropdown_window)
+        {
+            _screen_resolution_dropdown_window.unmap();
+            _screen_resolution_dropdown_window.kill();
+        }
+
+        if (__window == _input_device_dropdown_window)
+        {
+            _input_device_dropdown_window.unmap();
+            _input_device_dropdown_window.kill();
+        }
+    }
+
+    void setup_events__()
+    {
+        event_handler->setEventCallback(XCB_BUTTON_PRESS,     [this](Ev ev)-> void
+        {
+            RE_CAST_EV(xcb_button_press_event_t);
+            if (e->detail == L_MOUSE_BUTTON)
+            {
+                if (wm->focused_client != this->c)
                 {
-                    pointer_vec[i]._window.draw_text_auto_color(
-                        pointer_vec[i]._device_name.c_str(),
-                        4,
-                        14,
-                        BLACK
-                    );
+                    if (e->event == _main_window
+                    ||  e->event == _menu_window
+                    ||  e->event == _default_settings_window
+                    ||  e->event == _screen_menu_entry_window
+                    ||  e->event == _screen_settings_window
+                    ||  e->event == _audio_menu_entry_window
+                    ||  e->event == _audio_settings_window
+                    ||  e->event == _network_menu_entry_window
+                    ||  e->event == _network_settings_window)
+                    {
+                        this->c->focus();
+                        wm->focused_client = this->c;
+                    }
+                }
+
+                if (e->event == _menu_window)
+                {
+                    adjust_and_map_subwindow__(_default_settings_window);
+                    return;
+                }
+
+                if (e->event == _screen_menu_entry_window)
+                {
+                    adjust_and_map_subwindow__(_screen_settings_window);
+                    return;
+                }
+
+                if (e->event == _screen_resolution_button_window)
+                {
+                    if (!_screen_resolution_dropdown_window.is_mapped())
+                    {
+                        show__(_screen_resolution_dropdown_window);
+                        return;
+                    }
+
+                    hide__(_screen_resolution_dropdown_window);
+                    return;
+                }
+
+                if (e->event == _audio_menu_entry_window)
+                {
+                    adjust_and_map_subwindow__(_audio_settings_window);
+                    return;
+                }
+
+                if (e->event == _network_menu_entry_window)
+                {
+                    adjust_and_map_subwindow__(_network_settings_window);
+                    return;
+                }
+
+                if (e->event == _input_menu_entry_window)
+                {
+                    adjust_and_map_subwindow__(_input_settings_window);
+                }
+
+                if (e->event == _input_device_button_window)
+                {
+                    if (!_input_device_dropdown_window.is_mapped())
+                    {
+                        show__(_input_device_dropdown_window);
+                        return;
+                    }
+
+                    hide__(_input_device_dropdown_window);
+                    return;
+                }
+
+                for (int i(0); i < _screen_resolution_options_vector.size(); ++i)
+                {
+                    if (e->event == _screen_resolution_options_vector[i])
+                    {
+                        screen_settings->set_resolution(screen_settings->_avalible_resolutions[i].first);
+                        log_info("screen->width_in_pixels: " + to_string(screen->width_in_pixels));
+                        log_info("screen->height_in_pixels: " + to_string(screen->height_in_pixels));
+                    }
                 }
             }
+        });
+
+        event_handler->set_key_press_callback(SUPER, wm->key_codes.s, [this]()-> void { launch(); });
+
+        event_handler->setEventCallback(XCB_CONFIGURE_NOTIFY, [this](Ev ev)->void
+        {
+            RE_CAST_EV(xcb_configure_notify_event_t); 
+            configure(e->window, e->width, e->height);
+        });
+
+        event_handler->setEventCallback(XCB_EXPOSE,           [this](Ev ev)->void
+        {
+            RE_CAST_EV(xcb_expose_event_t);
+            expose(e->window);
+        });
+
+        SET_INTR_CLI_KILL_CALLBACK();
+    }
+
+public:
+    // Variabels.
+    window(_main_window),
+        (_menu_window), (_default_settings_window),
+        (_screen_menu_entry_window), (_screen_settings_window), (_screen_resolution_window), (_screen_resolution_button_window), (_screen_resolution_dropdown_window),
+        (_audio_menu_entry_window), (_audio_settings_window),
+        (_network_menu_entry_window), (_network_settings_window),
+        (_input_menu_entry_window), (_input_settings_window), (_input_device_window), (_input_device_button_window), (_input_device_dropdown_window);
+    
+    vector<window> _screen_resolution_options_vector;
+    client *c = nullptr;
+
+    // Methods.
+    void launch()
+    {
+        make_windows__();
+        make_internal_client__();
+    }
+
+    void expose(uint32_t __window)
+    {
+        if (__window == _screen_menu_entry_window ) _screen_menu_entry_window.draw_text_auto_color("Screen", 4, 14);
+        if (__window == _screen_settings_window   ) _screen_settings_window.draw_text_auto_color("Resolution", (_screen_resolution_window.x() - (size("Resolution") * DEFAULT_FONT_WIDTH)), 35, BLACK);
+        if (__window == _audio_menu_entry_window  ) _audio_menu_entry_window.draw_text_auto_color("Audio", 4, 14);
+        if (__window == _network_menu_entry_window) _network_menu_entry_window.draw_text_auto_color("Network", 4, 14);
+        if (__window == _input_menu_entry_window  ) _input_menu_entry_window.draw_text_auto_color("Input", 4, 14);
+        if (__window == _input_settings_window    ) _input_settings_window.draw_text_auto_color("Device", (_input_device_window.x() - (size("Device") * DEFAULT_FONT_WIDTH)), 35);
+        if (__window == _input_device_window      ) _input_device_window.draw_text_auto_color("Select Input Device.", 4, 15, BLACK);
+        if (__window == _screen_resolution_window )
+        {
+            string resolution(screen_settings->_current_resoluton_string);
+            if (resolution.empty()) return;
+            _screen_resolution_window.draw_text_auto_color(resolution.c_str(), 4, 15);
         }
 
-        void configure(uint32_t __window, uint32_t __width, uint32_t __height)
+        for (int i(0); i < _screen_resolution_options_vector.size(); ++i)
         {
-            if (__window == _main_window)
+            if (__window == _screen_resolution_options_vector[i])
             {
-                _menu_window.height(__height);
-                if (_default_settings_window.is_mapped()) _default_settings_window.width_height((__width - MENU_WINDOW_WIDTH), __height);
-                if (_screen_settings_window.is_mapped() ) _screen_settings_window.width_height((__width - MENU_WINDOW_WIDTH), __height);
-                if (_audio_settings_window.is_mapped()  ) _audio_settings_window.width_height((__width - MENU_WINDOW_WIDTH), __height);
-                if (_network_settings_window.is_mapped()) _network_settings_window.width_height((__width - MENU_WINDOW_WIDTH), __height);
-                if (_input_settings_window.is_mapped()  ) _input_settings_window.width_height((__width - MENU_WINDOW_WIDTH), __height);
-                xcb_flush(conn);
+                _screen_resolution_options_vector[i].draw_text_auto_color(
+                    screen_settings->_avalible_resolutions[i].second.c_str(),
+                    4,
+                    14
+                );
             }
         }
 
-        void init()
+        for (int i = 0; i < pointer_vec.size(); ++i)
         {
-            setup_events__();
+            if (__window == pointer_vec[i]._window)
+            {
+                pointer_vec[i]._window.draw_text_auto_color(
+                    pointer_vec[i]._device_name.c_str(),
+                    4,
+                    14,
+                    BLACK
+                );
+            }
         }
+    }
+
+    void configure(uint32_t __window, uint32_t __width, uint32_t __height)
+    {
+        if (__window == _main_window)
+        {
+            _menu_window.height(__height);
+            if (_default_settings_window.is_mapped()) _default_settings_window.width_height((__width - MENU_WINDOW_WIDTH), __height);
+            if (_screen_settings_window.is_mapped() ) _screen_settings_window.width_height((__width - MENU_WINDOW_WIDTH), __height);
+            if (_audio_settings_window.is_mapped()  ) _audio_settings_window.width_height((__width - MENU_WINDOW_WIDTH), __height);
+            if (_network_settings_window.is_mapped()) _network_settings_window.width_height((__width - MENU_WINDOW_WIDTH), __height);
+            if (_input_settings_window.is_mapped()  ) _input_settings_window.width_height((__width - MENU_WINDOW_WIDTH), __height);
+            xcb_flush(conn);
+        }
+    }
+
+    void init()
+    {
+        setup_events__();
+    }
 
     // Constructor.
-        __system_settings__() {}
-};
-static __system_settings__ *system_settings(nullptr);
+    __system_settings__() {}
+
+}; static __system_settings__ *system_settings(nullptr);
 
 class Dock
 {
