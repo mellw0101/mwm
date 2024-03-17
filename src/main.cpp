@@ -4090,12 +4090,14 @@ class client
         
             bool is_button_max_win()
             {
-                if (x      == 0
-                 && y      == 0
-                 && width  == screen->width_in_pixels
-                 && height == screen->height_in_pixels) {
+                if (x      == -BORDER_SIZE
+                &&  y      == -BORDER_SIZE
+                &&  width  == (screen->width_in_pixels  + (BORDER_SIZE * 2))
+                &&  height == (screen->height_in_pixels + (BORDER_SIZE * 2)))
+                {
                     return true;
                 }
+
                 return false;
             }
         
