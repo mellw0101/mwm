@@ -3905,8 +3905,8 @@ class client
             {
                 titlebar.clear();
 
-                if (__mode & TITLE_REQ_DRAW ) titlebar.draw_text_16_auto_color(win.get_net_wm_name_by_req().c_str(), 4, 15);
-                if (__mode & TITLE_INTR_DRAW) titlebar.draw_text_16_auto_color(win.get_net_wm_name().c_str(), 4, 15);
+                if (__mode & TITLE_REQ_DRAW ) titlebar.draw_text_16_auto_color(win.get_net_wm_name_by_req().c_str(), ((width / 2) - ((win.get_net_wm_name_by_req().length() * DEFAULT_FONT_WIDTH) / 2)), 15);
+                if (__mode & TITLE_INTR_DRAW) titlebar.draw_text_16_auto_color(win.get_net_wm_name().c_str(), ((width / 2) - ((win.get_net_wm_name().length() * DEFAULT_FONT_WIDTH) / 2)), 15);
             }
         
         // Config.
@@ -4137,7 +4137,7 @@ class client
                 win.unset_EWMH_fullscreen_state();
             }
         
-    private:
+private:
     // Methods.
         void make_frame()
         {
