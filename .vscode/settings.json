@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "cstdint": "cpp"
+        "*.cpp": "cpp",
+        "cstdint": "cpp",
+        "ios": "cpp"
     }
 }
