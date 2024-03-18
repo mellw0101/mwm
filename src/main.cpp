@@ -9480,14 +9480,15 @@ class resize_client
 {
     public:
     // Constructor.
-        resize_client(client * & c , int retard_int)/**
-            
-            THE REASON FOR THE 'retard_int' IS BECUSE WITHOUT IT 
-            I CANNOT CALL THIS CLASS LIKE THIS 'resize_client(c)' 
-            INSTEAD I WOULD HAVE TO CALL IT LIKE THIS 'resize_client rc(c)'
-            AND NOW WITH THE 'retard_int' I CAN CALL IT LIKE THIS 'resize_client(c, 0)'
-            
+        /**
+         *
+         * THE REASON FOR THE 'retard_int' IS BECUSE WITHOUT IT 
+         * I CANNOT CALL THIS CLASS LIKE THIS 'resize_client(c)' 
+         * INSTEAD I WOULD HAVE TO CALL IT LIKE THIS 'resize_client rc(c)'
+         * AND NOW WITH THE 'retard_int' I CAN CALL IT LIKE THIS 'resize_client(c, 0)'
+         * 
          */
+        resize_client(client * & c , int retard_int)
         : c(c)
         {
             if (c->win.is_EWMH_fullscreen()) return;
@@ -9998,6 +9999,7 @@ class resize_client
                                 if (isTimeToRender())
                                 {
                                     snap(e->root_x, e->root_y, edge, 12);
+                                    c->update();
                                     xcb_flush(conn);
                                 }
 
