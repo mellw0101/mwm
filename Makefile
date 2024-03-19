@@ -1,3 +1,21 @@
+ARMV8_FASTFLAGS = -O2               \
+                  -march=armv8-a     \
+                  -mtune=native      # Optional, use if you know the specific variant
+
+ARMV8_CFLAGS =   -std=c++20                     \
+                 -pedantic                      \
+                 -Wall                          \
+                 -Wno-deprecated-declarations   \
+                 ${ARMV8_FASTFLAGS}
+
+ARMV8_CXXFLAGS = ${ARMV8_CFLAGS}
+
+ARMV8_LDFLAGS =  ${LIBS}            \
+                 -flto               \
+                 -O2                 \
+                 -march=armv8-a      \
+                 -std=c++20
+
 FASTFLAGS = -O2	 			\
 			-march=native
 
@@ -70,7 +88,16 @@ install: all
 	mkdir	-p 							/bin
 	cp		-f 	test 					/bin/mwm
 	chmod	755 						/bin/mwm
-	
+
+install-armv8: ARMV8
+	mkdir -p /bin
+	cp -f test /bin/mwm
+	chmod 755 /bin/mwm
+
+ARMV8: CXXFLAGS = ${ARMV8_CXXFLAGS}
+ARMV8: LDFLAGS = ${ARMV8_LDFLAGS}
+ARMV8: test
+
 uninstall:
 
 .PHONY: all depends clean dist install uninstall
