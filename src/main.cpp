@@ -3041,6 +3041,10 @@ class window {
                     set_backround_png(__file_name);
                 }
 
+                int get_current_backround_color() const
+                {
+                    return _color;
+                }
 
         // Draw.
             void draw_text(const char *str , const int &text_color, const int &backround_color, const char *font_name, const int16_t &x, const int16_t &y)
@@ -6235,6 +6239,19 @@ class __status_bar__ {
                     this->_audio_window.set_backround_color(WHITE);
                     this->_audio_window.clear();
                     xcb_flush(conn);
+                    this->_audio_window.send_event(XCB_EVENT_MASK_EXPOSURE);
+                }
+            });
+
+            event_handler->setEventCallback(EV_CALL(XCB_LEAVE_NOTIFY)
+            {
+                RE_CAST_EV(xcb_leave_notify_event_t);
+                if (e->event == this->_audio_window)
+                {
+                    this->_audio_window.set_backround_color(DARK_GREY);
+                    this->_audio_window.clear();
+                    xcb_flush(conn);
+                    this->_audio_window.send_event(XCB_EVENT_MASK_EXPOSURE);
                 }
             });
         }
@@ -6274,7 +6291,18 @@ class __status_bar__ {
         void expose(const uint32_t &__window)
         {
             if (__window == _time_date_window ) _time_date_window.draw_text_auto_color(get_time_and_date__().c_str(), 4, 15);
-            if (__window == _audio_window     ) _audio_window.draw_text_auto_color("Audio", CENTER_TEXT(_audio_window.width(), TEXT_LEN("Audio")), 15);
+            if (__window == _audio_window     )
+            {
+                if (_audio_window.get_current_backround_color() == WHITE)
+                {
+                    _audio_window.draw_text_auto_color("Audio", CENTER_TEXT(_audio_window.width(), TEXT_LEN("Audio")), 15, BLACK);
+                }
+                else
+                {
+                    _audio_window.draw_text_auto_color("Audio", CENTER_TEXT(_audio_window.width(), TEXT_LEN("Audio")), 15);
+                }
+            }
+
             if (__window == _wifi_close_window) _wifi_close_window.draw_text_auto_color("Close", 22, 15,BLACK);
             if (__window == _wifi_info_window )
             {
