@@ -5362,7 +5362,7 @@ class Window_Manager {
                 root.set_event_mask(ROOT_EVENT_MASK);
                 root.grab_keys({
                     { Q, SHIFT | ALT },
-                    { T, SHIFT | ALT }
+                    { T, CTRL  | ALT }
                 });
                 root.clear();
                 root.set_backround_png(USER_PATH_PREFIX("/mwm_png/galaxy21.png"));
