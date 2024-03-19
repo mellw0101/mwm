@@ -5361,8 +5361,10 @@ class Window_Manager {
                 root.set_backround_color(DARK_GREY);
                 root.set_event_mask(ROOT_EVENT_MASK);
                 root.grab_keys({
-                    { Q, SHIFT | ALT },
-                    { T, CTRL  | ALT }
+                    { Q,       SHIFT  | ALT   },
+                    { T,       CTRL   | ALT   },
+                    { L_ARROW, CTRL   | SUPER },
+                    { R_ARROW, CTRL   | SUPER }
                 });
                 root.clear();
                 root.set_backround_png(USER_PATH_PREFIX("/mwm_png/galaxy21.png"));
