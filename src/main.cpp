@@ -2347,48 +2347,12 @@ class window {
                         log_num("min_height: ", hints.min_height);
                         log_num("width", hints.width);
                         log_num("height", hints.height);
-                        log_num("base_width: ", hints.base_width);
-                        log_num("base_height: ", hints.base_height);
-                        log_num("min_aspect_num", hints.min_aspect_num);
-                        log_num("min_aspect_den", hints.min_aspect_den);
-                        log_num("max_aspect_num", hints.max_aspect_num);
-                        log_num("max_aspect_den", hints.max_aspect_den);
+                        log_num("x", hints.x);
+                        log_num("y", hints.y);
                     }
                     else
                     {
                         log_info("No minimum size hints available.");
-                    }
-
-                    if (hints.flags & XCB_ICCCM_SIZE_HINT_BASE_SIZE)
-                    {
-                        log_num("base_width: ", hints.base_width);
-                        log_num("base_height: ", hints.base_height);
-                    }
-                    else
-                    {
-                        log_info("No base size hints available.");
-                    }
-
-                    if (hints.flags & XCB_ICCCM_SIZE_HINT_P_ASPECT)
-                    {
-                        log_num("min_aspect_num", hints.min_aspect_num);
-                        log_num("min_aspect_den", hints.min_aspect_den);
-                        log_num("max_aspect_num", hints.max_aspect_num);
-                        log_num("max_aspect_den", hints.max_aspect_den);
-                    }
-                    else
-                    {
-                        log_info("No aspect ratio hints available.");
-                    }
-
-                    if (hints.flags & XCB_ICCCM_SIZE_HINT_P_SIZE)
-                    {
-                        log_num("width", hints.width);
-                        log_num("height", hints.height);
-                    }
-                    else
-                    {
-                        log_info("No size hints available.");
                     }
                 }
 
