@@ -2280,108 +2280,117 @@ class window {
             }
         
         // Get.
-            void get_override_redirect()
-            {
-	            xcb_get_window_attributes_reply_t *wa = xcb_get_window_attributes_reply(conn, xcb_get_window_attributes(conn, _window), NULL);
-                if (wa == nullptr)
+            // icccm.
+                void get_override_redirect()
                 {
-                    log_error("wa == nullptr");
-                    free(wa);
-                    return;
-                }
-
-                _override_redirect = wa->override_redirect;
-                free(wa);
-
-                if (_override_redirect == true ) log_info("overide_redirect = true");
-                if (_override_redirect == false) log_info("overide_redirect = false");
-            }
-
-            void get_min_window_size_hints()
-            {
-                xcb_size_hints_t hints;
-                xcb_icccm_get_wm_normal_hints_reply(conn, xcb_icccm_get_wm_normal_hints(conn, _window), &hints, NULL);
-
-                if (hints.flags & XCB_ICCCM_SIZE_HINT_P_MIN_SIZE)
-                {
-                    _min_width = hints.min_width;
-                    _min_height = hints.min_height;
-                    log_num("min_width", hints.min_width);
-                    log_num("min_height", hints.min_height);
-                }
-
-                if (hints.flags & XCB_ICCCM_SIZE_HINT_BASE_SIZE)
-                {
-                    logger.log(INFO, __func__, "base_width: ", hints.base_width);
-                    logger.log(INFO, __func__, "base_height: ", hints.base_height);
-                }
-            }
-
-            void get_window_size_hints()
-            {
-                xcb_size_hints_t hints;
-                memset(&hints, 0, sizeof(xcb_size_hints_t)); // Initialize hints structure
-
-                xcb_get_property_cookie_t cookie = xcb_icccm_get_wm_normal_hints(conn, _window);
-                xcb_generic_error_t* error = NULL; // To capture any error
-                bool result = xcb_icccm_get_wm_normal_hints_reply(conn, cookie, &hints, &error);
-
-                if (!result || error)
-                {
-                    if (error)
+                    xcb_get_window_attributes_reply_t *wa = xcb_get_window_attributes_reply(conn, xcb_get_window_attributes(conn, _window), NULL);
+                    if (wa == nullptr)
                     {
-                        log_error("Error retrieving window hints.");
-                        free(error);
+                        log_error("wa == nullptr");
+                        free(wa);
+                        return;
                     }
 
-                    return;
+                    _override_redirect = wa->override_redirect;
+                    free(wa);
+
+                    if (_override_redirect == true ) log_info("overide_redirect = true");
+                    if (_override_redirect == false) log_info("overide_redirect = false");
                 }
 
-                // Now, check and use the hints as needed
-                if (hints.flags & XCB_ICCCM_SIZE_HINT_P_MIN_SIZE)
+                void get_min_window_size_hints()
                 {
-                    _min_width = hints.min_width;
-                    _min_height = hints.min_height;
-                    log_num("min_width: ", hints.min_width);
-                    log_num("min_height: ", hints.min_height);
-                }
-                else
-                {
-                    log_info("No minimum size hints available.");
+                    xcb_size_hints_t hints;
+                    xcb_icccm_get_wm_normal_hints_reply(conn, xcb_icccm_get_wm_normal_hints(conn, _window), &hints, NULL);
+
+                    if (hints.flags & XCB_ICCCM_SIZE_HINT_P_MIN_SIZE)
+                    {
+                        _min_width = hints.min_width;
+                        _min_height = hints.min_height;
+                        log_num("min_width", hints.min_width);
+                        log_num("min_height", hints.min_height);
+                    }
+
+                    if (hints.flags & XCB_ICCCM_SIZE_HINT_BASE_SIZE)
+                    {
+                        logger.log(INFO, __func__, "base_width: ", hints.base_width);
+                        logger.log(INFO, __func__, "base_height: ", hints.base_height);
+                    }
                 }
 
-                if (hints.flags & XCB_ICCCM_SIZE_HINT_BASE_SIZE)
+                void get_window_size_hints()
                 {
-                    log_num("base_width: ", hints.base_width);
-                    log_num("base_height: ", hints.base_height);
-                }
-                else
-                {
-                    log_info("No base size hints available.");
-                }
+                    xcb_size_hints_t hints;
+                    memset(&hints, 0, sizeof(xcb_size_hints_t)); // Initialize hints structure
 
-                if (hints.flags & XCB_ICCCM_SIZE_HINT_P_ASPECT)
-                {
-                    log_num("min_aspect_num", hints.min_aspect_num);
-                    log_num("min_aspect_den", hints.min_aspect_den);
-                    log_num("max_aspect_num", hints.max_aspect_num);
-                    log_num("max_aspect_den", hints.max_aspect_den);
-                }
-                else
-                {
-                    log_info("No aspect ratio hints available.");
-                }
+                    xcb_get_property_cookie_t cookie = xcb_icccm_get_wm_normal_hints(conn, _window);
+                    xcb_generic_error_t* error = NULL; // To capture any error
+                    bool result = xcb_icccm_get_wm_normal_hints_reply(conn, cookie, &hints, &error);
 
-                if (hints.flags & XCB_ICCCM_SIZE_HINT_P_SIZE)
-                {
-                    log_num("width", hints.width);
-                    log_num("height", hints.height);
+                    if (!result || error)
+                    {
+                        if (error)
+                        {
+                            log_error("Error retrieving window hints.");
+                            free(error);
+                        }
+
+                        return;
+                    }
+
+                    // Now, check and use the hints as needed
+                    if (hints.flags & XCB_ICCCM_SIZE_HINT_P_MIN_SIZE)
+                    {
+                        _min_width = hints.min_width;
+                        _min_height = hints.min_height;
+                        log_num("min_width: ", hints.min_width);
+                        log_num("min_height: ", hints.min_height);
+                        log_num("width", hints.width);
+                        log_num("height", hints.height);
+                        log_num("base_width: ", hints.base_width);
+                        log_num("base_height: ", hints.base_height);
+                        log_num("min_aspect_num", hints.min_aspect_num);
+                        log_num("min_aspect_den", hints.min_aspect_den);
+                        log_num("max_aspect_num", hints.max_aspect_num);
+                        log_num("max_aspect_den", hints.max_aspect_den);
+                    }
+                    else
+                    {
+                        log_info("No minimum size hints available.");
+                    }
+
+                    if (hints.flags & XCB_ICCCM_SIZE_HINT_BASE_SIZE)
+                    {
+                        log_num("base_width: ", hints.base_width);
+                        log_num("base_height: ", hints.base_height);
+                    }
+                    else
+                    {
+                        log_info("No base size hints available.");
+                    }
+
+                    if (hints.flags & XCB_ICCCM_SIZE_HINT_P_ASPECT)
+                    {
+                        log_num("min_aspect_num", hints.min_aspect_num);
+                        log_num("min_aspect_den", hints.min_aspect_den);
+                        log_num("max_aspect_num", hints.max_aspect_num);
+                        log_num("max_aspect_den", hints.max_aspect_den);
+                    }
+                    else
+                    {
+                        log_info("No aspect ratio hints available.");
+                    }
+
+                    if (hints.flags & XCB_ICCCM_SIZE_HINT_P_SIZE)
+                    {
+                        log_num("width", hints.width);
+                        log_num("height", hints.height);
+                    }
+                    else
+                    {
+                        log_info("No size hints available.");
+                    }
                 }
-                else
-                {
-                    log_info("No size hints available.");
-                }
-            }
 
             uint32_t get_transient_for_window()
             {
