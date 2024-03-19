@@ -4400,6 +4400,11 @@ class client {
             void set_client_params()
             {
                 win.set_client_size_as_hints(&x, &y, &width, &height);
+                if (win.get_min_width()  > width
+                &&  win.get_min_height() > height)
+                {
+                    get_window_parameters();
+                }
             }
 
         // Get.
