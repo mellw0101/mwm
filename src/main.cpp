@@ -2386,6 +2386,10 @@ class window {
                         *__width    = hints.width;
                         *__height   = hints.height;
                     }
+                    else
+                    {
+                        log_error("Could not get size hints.");
+                    }
                 }
 
                 /**
