@@ -168,10 +168,10 @@ using SUint = unsigned short int;
         }                                                                    \
     })
 
-#define RETURN_IF(__statement) \
-    if (__statement)           \
-    {                          \
-        return;                \
+#define RETURN_IF(__statement)  \
+    if (__statement)            \
+    {                           \
+        return;                 \
     }
 
 #define CONTINUE_IF(__statement) \
@@ -2283,7 +2283,12 @@ class window {
             void get_override_redirect()
             {
 	            xcb_get_window_attributes_reply_t *wa = xcb_get_window_attributes_reply(conn, xcb_get_window_attributes(conn, _window), NULL);
-                RETURN_IF(wa == nullptr);
+                if (wa == nullptr)
+                {
+                    log_error("wa == nullptr");
+                    free(wa);
+                    return;
+                }
 
                 _override_redirect = wa->override_redirect;
                 free(wa);
@@ -2301,14 +2306,60 @@ class window {
                 {
                     _min_width = hints.min_width;
                     _min_height = hints.min_height;
-                    logger.log(INFO, __func__, "min_width: ", hints.min_width);
-                    logger.log(INFO, __func__, "min_height: ", hints.min_height);
+                    log_num("min_width", hints.min_width);
+                    log_num("min_height", hints.min_height);
                 }
 
                 if (hints.flags & XCB_ICCCM_SIZE_HINT_BASE_SIZE)
                 {
                     logger.log(INFO, __func__, "base_width: ", hints.base_width);
                     logger.log(INFO, __func__, "base_height: ", hints.base_height);
+                }
+            }
+
+            void get_window_size_hints()
+            {
+                xcb_size_hints_t hints;
+                memset(&hints, 0, sizeof(xcb_size_hints_t)); // Initialize hints structure
+
+                xcb_get_property_cookie_t cookie = xcb_icccm_get_wm_normal_hints(conn, _window);
+                xcb_generic_error_t* error = NULL; // To capture any error
+                bool result = xcb_icccm_get_wm_normal_hints_reply(conn, cookie, &hints, &error);
+
+                // Check if the reply was successful and no error occurred
+                if (!result || error)
+                {
+                    // Handle error scenario (log it, free error if not NULL, etc.)
+                    if (error)
+                    {
+                        logger.log(ERROR, __func__, "Error retrieving window hints.");
+                        free(error); // Important to free the error to avoid memory leaks
+                    }
+
+                    return;
+                }
+
+                // Now, check and use the hints as needed
+                if (hints.flags & XCB_ICCCM_SIZE_HINT_P_MIN_SIZE)
+                {
+                    _min_width = hints.min_width;
+                    _min_height = hints.min_height;
+                    log_num("min_width: ", hints.min_width);
+                    log_num("min_height: ", hints.min_height);
+                }
+                else
+                {
+                    log_info("No minimum size hints available.");
+                }
+
+                if (hints.flags & XCB_ICCCM_SIZE_HINT_BASE_SIZE)
+                {
+                    log_num("base_width: ", hints.base_width);
+                    log_num("base_height: ", hints.base_height);
+                }
+                else
+                {
+                    log_info("No base size hints available.");
                 }
             }
 
@@ -5547,7 +5598,8 @@ class Window_Manager {
                 }
 
                 c->win = window;
-                c->win.get_min_window_size_hints();
+                // c->win.get_min_window_size_hints();
+                c->win.get_window_size_hints();
                 c->get_window_parameters();
 
                 if (c->width  < c->win.get_min_width() ) c->width  = 200;
