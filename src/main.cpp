@@ -93,8 +93,14 @@ using SUint = unsigned short int;
 
 #define NET_DEBUG false
 
+#define EV_CALL(__type) \
+    __type, [&](Ev ev)-> void
+
 #define CENTER_TEXT(__width, __str_len) \
     ((__width / 2) - ((__str_len * DEFAULT_FONT_WIDTH) / 2))
+
+#define TEXT_LEN(__str) \
+    (size(__str) - 1)
 
 #define FRAME_EVENT_MASK \
     XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY   | \
@@ -266,7 +272,6 @@ namespace { // Tools
         return username;
     }
 }
-
 
 class __net_logger__ {
 // Defines.
@@ -6213,6 +6218,17 @@ class __status_bar__ {
                     show__(_audio_dropdown_window);
                 }
             });
+
+            event_handler->setEventCallback(EV_CALL(XCB_ENTER_NOTIFY)
+            {
+                RE_CAST_EV(xcb_enter_notify_event_t);
+                if (e->event == this->_audio_window)
+                {
+                    this->_audio_window.set_backround_color(WHITE);
+                    this->_audio_window.clear();
+                    xcb_flush(conn);
+                }
+            });
         }
 
         void setup_thread__(const uint32_t &__window)
@@ -6250,7 +6266,7 @@ class __status_bar__ {
         void expose(const uint32_t &__window)
         {
             if (__window == _time_date_window ) _time_date_window.draw_text_auto_color(get_time_and_date__().c_str(), 4, 15);
-            if (__window == _audio_window     ) _audio_window.draw_text_auto_color("Audio", 4, 15);
+            if (__window == _audio_window     ) _audio_window.draw_text_auto_color("Audio", CENTER_TEXT(_audio_window.width(), TEXT_LEN("Audio")), 15);
             if (__window == _wifi_close_window) _wifi_close_window.draw_text_auto_color("Close", 22, 15,BLACK);
             if (__window == _wifi_info_window )
             {
@@ -7043,7 +7059,8 @@ class Mwm_Animator
         }
 };
 
-void animate(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight, const int & duration) {
+void animate(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight, const int & duration)
+{
     Mwm_Animator anim(c->frame);
     anim.animate(
         c->x,
@@ -7059,7 +7076,8 @@ void animate(client * & c, const int & endX, const int & endY, const int & endWi
     c->update();
 }
 
-void animate_client(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight, const int & duration) {
+void animate_client(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight, const int & duration)
+{
     Mwm_Animator client_anim(c);
     client_anim.animate_client(
         c->x,
