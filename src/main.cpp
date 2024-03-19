@@ -2356,6 +2356,38 @@ class window {
                     }
                 }
 
+                void set_client_size_as_hints(int16_t *__x, int16_t *__y, uint16_t *__width, uint16_t *__height)
+                {
+                    xcb_size_hints_t hints;
+                    memset(&hints, 0, sizeof(xcb_size_hints_t)); // Initialize hints structure
+
+                    xcb_get_property_cookie_t cookie = xcb_icccm_get_wm_normal_hints(conn, _window);
+                    xcb_generic_error_t* error = NULL; // To capture any error
+                    bool result = xcb_icccm_get_wm_normal_hints_reply(conn, cookie, &hints, &error);
+
+                    if (!result || error)
+                    {
+                        if (error)
+                        {
+                            log_error("Error retrieving window hints.");
+                            free(error);
+                        }
+
+                        return;
+                    }
+
+                    // Now, check and use the hints as needed
+                    if (hints.flags & XCB_ICCCM_SIZE_HINT_P_MIN_SIZE)
+                    {
+                        _min_width  = hints.min_width;
+                        _min_height = hints.min_height;
+                        *__x        = hints.x;
+                        *__y        = hints.y;
+                        *__width    = hints.width;
+                        *__height   = hints.height;
+                    }
+                }
+
                 /**
                  *
                  * @brief Retrieve the icon name of a window.
@@ -4355,6 +4387,11 @@ class client {
                 win.set_EWMH_fullscreen_state();
             }
 
+            void set_client_params()
+            {
+                win.set_client_size_as_hints(&x, &y, &width, &height);
+            }
+
         // Get.
             void get_window_parameters()
             {
@@ -5624,7 +5661,8 @@ class Window_Manager {
 
                 c->win = window;
                 // c->win.get_min_window_size_hints();
-                c->win.get_window_size_hints();
+                // c->win.get_window_size_hints();
+                c->set_client_params();
                 c->win.get_window_icon_name();
                 c->get_window_parameters();
 
