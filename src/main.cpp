@@ -2303,6 +2303,10 @@ class window {
                     _min_height = hints.min_height;
                     logger.log(INFO, __func__, "min_width: ", hints.min_width);
                     logger.log(INFO, __func__, "min_height: ", hints.min_height);
+                }
+
+                if (hints.flags & XCB_ICCCM_SIZE_HINT_BASE_SIZE)
+                {
                     logger.log(INFO, __func__, "base_width: ", hints.base_width);
                     logger.log(INFO, __func__, "base_height: ", hints.base_height);
                 }
