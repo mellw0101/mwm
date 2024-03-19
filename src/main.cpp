@@ -5664,7 +5664,7 @@ class Window_Manager {
                 // c->win.get_window_size_hints();
                 c->set_client_params();
                 c->win.get_window_icon_name();
-                c->get_window_parameters();
+                // c->get_window_parameters();
 
                 if (c->width  < c->win.get_min_width() ) c->width  = 200;
                 if (c->height < c->win.get_min_height()) c->height = 100;
