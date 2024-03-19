@@ -5264,6 +5264,7 @@ class Window_Manager {
                 // ; 
                 // root.apply_event_mask(&mask);
                 root.set_event_mask(ROOT_EVENT_MASK);
+                root.grab_default_keys();
                 root.clear();
                 root.set_backround_png(USER_PATH_PREFIX_C_STR("/mwm_png/galaxy21.png"));
                 root.set_pointer(CURSOR::arrow);
