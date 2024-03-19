@@ -178,8 +178,15 @@ using SUint = unsigned short int;
     client *c = wm->client_from_any_window(&__window); \
     RETURN_IF(c == nullptr)
 
+static string user;
+#define USER \
+    user
+
 #define USER_PATH_PREFIX(__address) \
     string("/home/" + user + __address)
+
+#define USER_PATH_PREFIX_C_STR(__address) \
+    string("/home/" + user + __address).c_str()
 
 namespace { // Tools
     constexpr const char * pointer_from_enum(CURSOR CURSOR)
@@ -261,7 +268,6 @@ namespace { // Tools
     }
 }
 
-static string user;
 
 class __net_logger__ {
 // Defines.
@@ -5259,9 +5265,7 @@ class Window_Manager {
                 ; 
                 root.apply_event_mask(&mask);
                 root.clear();
-                // string s = "/home/" + user + "/mwm_png/galaxy21.png";
-                // "/home/mellw/mwm_png/galaxy21.png"
-                root.set_backround_png(USER_PATH_PREFIX("/mwm_png/galaxy21.png").c_str());
+                root.set_backround_png(USER_PATH_PREFIX_C_STR("/mwm_png/galaxy21.png"));
                 root.set_pointer(CURSOR::arrow);
             }
 
