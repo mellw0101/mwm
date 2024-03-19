@@ -5539,10 +5539,11 @@ class Window_Manager {
                 }
 
                 c->win = window;
+                c->win.get_min_window_size_hints();
                 c->get_window_parameters();
 
-                if (c->width < 20 ) c->width  = 200;
-                if (c->height < 10) c->height = 100;
+                if (c->width  < c->win.get_min_width() ) c->width  = 200;
+                if (c->height < c->win.get_min_height()) c->height = 100;
                 
                 c->depth   = 24;
                 c->desktop = cur_d->desktop;
@@ -5571,8 +5572,6 @@ class Window_Manager {
                     c->modal_data.transient_for = c->win.get_transient_for_window();
                 }
 
-                c->win.get_min_window_size_hints();
-                
                 client_list.push_back(c);
                 cur_d->current_clients.push_back(c);
                 return c;
