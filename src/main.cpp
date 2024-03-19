@@ -4371,6 +4371,11 @@ class client {
                 width  = reply->width;
                 height = reply->height;
 
+                log_num("", reply->x);
+                log_num("", reply->y);
+                log_num("", reply->width);
+                log_num("", reply->height);
+
                 free(reply);
             }
 
