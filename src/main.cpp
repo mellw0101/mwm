@@ -5162,7 +5162,6 @@ class Window_Manager {
                     { L_MOUSE_BUTTON, 0   }
                 });
 
-                c->win.grab_default_keys();
                 if (!c->win.check_frameless_window_hint())
                 {
                     c->make_decorations();
@@ -5173,6 +5172,8 @@ class Window_Manager {
                     focused_client = c;
                     check_client(c);
                 }
+                
+                c->win.grab_default_keys();
             }
 
             client *make_internal_client(window window)
@@ -10827,8 +10828,7 @@ public:
     }
 };
 
-class Events
-{
+class Events {
     public:
     // Constructor.
         Events() {}
