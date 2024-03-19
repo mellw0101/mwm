@@ -5171,8 +5171,9 @@ class Window_Manager {
                     c->focus();
                     focused_client = c;
                     check_client(c);
+                    c->frame.grab_default_keys();
                 }
-                
+
                 c->win.grab_default_keys();
             }
 
