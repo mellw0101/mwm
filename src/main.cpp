@@ -109,18 +109,17 @@ using SUint = unsigned short int;
     XCB_EVENT_MASK_FOCUS_CHANGE     | \
     XCB_EVENT_MASK_PROPERTY_CHANGE
 
-/*
+/* 
 #define BUTTON_EVENT_MASK \
     EnterWindowMask | \
     LeaveWindowMask
-
+ */
 #define ROOT_EVENT_MASK \
     XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT | \
     XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY   | \
     XCB_EVENT_MASK_STRUCTURE_NOTIFY      | \
     XCB_EVENT_MASK_BUTTON_PRESS          | \
     XCB_EVENT_MASK_FOCUS_CHANGE 
-*/
 
 /**
  * @brief General purpose definition to reinterpret cast.
@@ -5250,20 +5249,21 @@ class Window_Manager {
             void configure_root()
             {
                 root.set_backround_color(DARK_GREY);
-                uint32_t mask =
-                    XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT |
-                    XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY   |
-                    XCB_EVENT_MASK_ENTER_WINDOW          |
-                    XCB_EVENT_MASK_LEAVE_WINDOW          |
-                    XCB_EVENT_MASK_STRUCTURE_NOTIFY      |
-                    XCB_EVENT_MASK_BUTTON_PRESS          |
-                    XCB_EVENT_MASK_BUTTON_RELEASE        |
-                    XCB_EVENT_MASK_KEY_PRESS             |
-                    XCB_EVENT_MASK_KEY_RELEASE           |
-                    XCB_EVENT_MASK_FOCUS_CHANGE          |
-                    XCB_EVENT_MASK_POINTER_MOTION
-                ; 
-                root.apply_event_mask(&mask);
+                // uint32_t mask =
+                //     XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT |
+                //     XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY   |
+                //     XCB_EVENT_MASK_ENTER_WINDOW          |
+                //     XCB_EVENT_MASK_LEAVE_WINDOW          |
+                //     XCB_EVENT_MASK_STRUCTURE_NOTIFY      |
+                //     XCB_EVENT_MASK_BUTTON_PRESS          |
+                //     XCB_EVENT_MASK_BUTTON_RELEASE        |
+                //     XCB_EVENT_MASK_KEY_PRESS             |
+                //     XCB_EVENT_MASK_KEY_RELEASE           |
+                //     XCB_EVENT_MASK_FOCUS_CHANGE          |
+                //     XCB_EVENT_MASK_POINTER_MOTION
+                // ; 
+                // root.apply_event_mask(&mask);
+                root.set_event_mask(ROOT_EVENT_MASK);
                 root.clear();
                 root.set_backround_png(USER_PATH_PREFIX_C_STR("/mwm_png/galaxy21.png"));
                 root.set_pointer(CURSOR::arrow);
