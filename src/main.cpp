@@ -2326,14 +2326,12 @@ class window {
                 xcb_generic_error_t* error = NULL; // To capture any error
                 bool result = xcb_icccm_get_wm_normal_hints_reply(conn, cookie, &hints, &error);
 
-                // Check if the reply was successful and no error occurred
                 if (!result || error)
                 {
-                    // Handle error scenario (log it, free error if not NULL, etc.)
                     if (error)
                     {
-                        logger.log(ERROR, __func__, "Error retrieving window hints.");
-                        free(error); // Important to free the error to avoid memory leaks
+                        log_error("Error retrieving window hints.");
+                        free(error);
                     }
 
                     return;
@@ -2360,6 +2358,28 @@ class window {
                 else
                 {
                     log_info("No base size hints available.");
+                }
+
+                if (hints.flags & XCB_ICCCM_SIZE_HINT_P_ASPECT)
+                {
+                    log_num("min_aspect_num", hints.min_aspect_num);
+                    log_num("min_aspect_den", hints.min_aspect_den);
+                    log_num("max_aspect_num", hints.max_aspect_num);
+                    log_num("max_aspect_den", hints.max_aspect_den);
+                }
+                else
+                {
+                    log_info("No aspect ratio hints available.");
+                }
+
+                if (hints.flags & XCB_ICCCM_SIZE_HINT_P_SIZE)
+                {
+                    log_num("width", hints.width);
+                    log_num("height", hints.height);
+                }
+                else
+                {
+                    log_info("No size hints available.");
                 }
             }
 
