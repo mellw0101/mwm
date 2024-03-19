@@ -2376,6 +2376,10 @@ class window {
                             uint32_t height = data[i++];
                             uint32_t size = width * height;
 
+                            log_num("width", width);
+                            log_num("height", height);
+                            log_num("size", size);
+
                             if (i + size > len) break; // Sanity check
 
                             // Assuming we want the first icon for simplicity
