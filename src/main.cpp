@@ -2392,6 +2392,33 @@ class window {
                     }
                 }
 
+                /**
+                 *
+                 * @brief Retrieve the icon name of a window.
+                 *
+                 * @return The icon name of the window if available, an empty string otherwise.
+                 *
+                 */
+                string get_window_icon_name()
+                {
+                    xcb_get_property_cookie_t cookie = xcb_icccm_get_wm_icon_name(conn, _window);
+
+                    xcb_icccm_get_text_property_reply_t reply;
+                    string icon_name;
+                    if (xcb_icccm_get_wm_icon_name_reply(conn, cookie, &reply, NULL))
+                    {
+                        icon_name = string(reply.name, reply.name_len);
+                        xcb_icccm_get_text_property_reply_wipe(&reply);
+                        logger.log(INFO, __func__, "icon_name: ", icon_name);
+                    }
+                    else
+                    {
+                        log_error("Failed to retrieve the window icon name.");
+                    }
+
+                    return icon_name;
+                }
+
             uint32_t get_transient_for_window()
             {
                 uint32_t transient_for = 0; // Default to 0 (no parent)
@@ -5629,6 +5656,7 @@ class Window_Manager {
                 c->win = window;
                 // c->win.get_min_window_size_hints();
                 c->win.get_window_size_hints();
+                c->win.get_window_icon_name();
                 c->get_window_parameters();
 
                 if (c->width  < c->win.get_min_width() ) c->width  = 200;
