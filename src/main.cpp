@@ -5360,7 +5360,10 @@ class Window_Manager {
             {
                 root.set_backround_color(DARK_GREY);
                 root.set_event_mask(ROOT_EVENT_MASK);
-                root.grab_default_keys();
+                root.grab_keys({
+                    { Q, SHIFT | ALT },
+                    { T, SHIFT | ALT }
+                });
                 root.clear();
                 root.set_backround_png(USER_PATH_PREFIX("/mwm_png/galaxy21.png"));
                 root.set_pointer(CURSOR::arrow);
