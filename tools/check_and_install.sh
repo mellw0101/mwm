@@ -126,6 +126,7 @@ install_dependencies() {
         install_package_apt libc++-dev
         install_package_apt libc++abi-dev
         install_package_apt libpulse-dev
+        install_package_apt libdbus-c++-dev
     elif [ -x "$(command -v pacman)" ]; then
         # Arch Linux
         sudo pacman -Syyu --noconfirm   

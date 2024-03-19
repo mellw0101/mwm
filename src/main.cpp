@@ -178,54 +178,90 @@ using SUint = unsigned short int;
     client *c = wm->client_from_any_window(&__window); \
     RETURN_IF(c == nullptr)
 
-constexpr const char * pointer_from_enum(CURSOR CURSOR)
-{
-    switch (CURSOR)
+#define USER_PATH_PREFIX(__address) \
+    string("/home/" + user + __address)
+
+namespace { // Tools
+    constexpr const char * pointer_from_enum(CURSOR CURSOR)
     {
-        case CURSOR::arrow: return "arrow";
-        case CURSOR::hand1: return "hand1";
-        case CURSOR::hand2: return "hand2";
-        case CURSOR::watch: return "watch";
-        case CURSOR::xterm: return "xterm";
-        case CURSOR::cross: return "cross";
-        case CURSOR::left_ptr: return "left_ptr";
-        case CURSOR::right_ptr: return "right_ptr";
-        case CURSOR::center_ptr: return "center_ptr";
-        case CURSOR::sb_v_double_arrow: return "sb_v_double_arrow";
-        case CURSOR::sb_h_double_arrow: return "sb_h_double_arrow";
-        case CURSOR::fleur: return "fleur";
-        case CURSOR::question_arrow: return "question_arrow";
-        case CURSOR::pirate: return "pirate";
-        case CURSOR::coffee_mug: return "coffee_mug";
-        case CURSOR::umbrella: return "umbrella";
-        case CURSOR::circle: return "circle";
-        case CURSOR::xsb_left_arrow: return "xsb_left_arrow";
-        case CURSOR::xsb_right_arrow: return "xsb_right_arrow";
-        case CURSOR::xsb_up_arrow: return "xsb_up_arrow";
-        case CURSOR::xsb_down_arrow: return "xsb_down_arrow";
-        case CURSOR::top_left_corner: return "top_left_corner";
-        case CURSOR::top_right_corner: return "top_right_corner";
-        case CURSOR::bottom_left_corner: return "bottom_left_corner";
-        case CURSOR::bottom_right_corner: return "bottom_right_corner";
-        case CURSOR::sb_left_arrow: return "sb_left_arrow";
-        case CURSOR::sb_right_arrow: return "sb_right_arrow";
-        case CURSOR::sb_up_arrow: return "sb_up_arrow";
-        case CURSOR::sb_down_arrow: return "sb_down_arrow";
-        case CURSOR::top_side: return "top_side";
-        case CURSOR::bottom_side: return "bottom_side";
-        case CURSOR::left_side: return "left_side";
-        case CURSOR::right_side: return "right_side";
-        case CURSOR::top_tee: return "top_tee";
-        case CURSOR::bottom_tee: return "bottom_tee";
-        case CURSOR::left_tee: return "left_tee";
-        case CURSOR::right_tee: return "right_tee";
-        case CURSOR::top_left_arrow: return "top_left_arrow";
-        case CURSOR::top_right_arrow: return "top_right_arrow";
-        case CURSOR::bottom_left_arrow: return "bottom_left_arrow";
-        case CURSOR::bottom_right_arrow: return "bottom_right_arrow";
-        default: return "left_ptr";
+        switch (CURSOR)
+        {
+            case CURSOR::arrow: return "arrow";
+            case CURSOR::hand1: return "hand1";
+            case CURSOR::hand2: return "hand2";
+            case CURSOR::watch: return "watch";
+            case CURSOR::xterm: return "xterm";
+            case CURSOR::cross: return "cross";
+            case CURSOR::left_ptr: return "left_ptr";
+            case CURSOR::right_ptr: return "right_ptr";
+            case CURSOR::center_ptr: return "center_ptr";
+            case CURSOR::sb_v_double_arrow: return "sb_v_double_arrow";
+            case CURSOR::sb_h_double_arrow: return "sb_h_double_arrow";
+            case CURSOR::fleur: return "fleur";
+            case CURSOR::question_arrow: return "question_arrow";
+            case CURSOR::pirate: return "pirate";
+            case CURSOR::coffee_mug: return "coffee_mug";
+            case CURSOR::umbrella: return "umbrella";
+            case CURSOR::circle: return "circle";
+            case CURSOR::xsb_left_arrow: return "xsb_left_arrow";
+            case CURSOR::xsb_right_arrow: return "xsb_right_arrow";
+            case CURSOR::xsb_up_arrow: return "xsb_up_arrow";
+            case CURSOR::xsb_down_arrow: return "xsb_down_arrow";
+            case CURSOR::top_left_corner: return "top_left_corner";
+            case CURSOR::top_right_corner: return "top_right_corner";
+            case CURSOR::bottom_left_corner: return "bottom_left_corner";
+            case CURSOR::bottom_right_corner: return "bottom_right_corner";
+            case CURSOR::sb_left_arrow: return "sb_left_arrow";
+            case CURSOR::sb_right_arrow: return "sb_right_arrow";
+            case CURSOR::sb_up_arrow: return "sb_up_arrow";
+            case CURSOR::sb_down_arrow: return "sb_down_arrow";
+            case CURSOR::top_side: return "top_side";
+            case CURSOR::bottom_side: return "bottom_side";
+            case CURSOR::left_side: return "left_side";
+            case CURSOR::right_side: return "right_side";
+            case CURSOR::top_tee: return "top_tee";
+            case CURSOR::bottom_tee: return "bottom_tee";
+            case CURSOR::left_tee: return "left_tee";
+            case CURSOR::right_tee: return "right_tee";
+            case CURSOR::top_left_arrow: return "top_left_arrow";
+            case CURSOR::top_right_arrow: return "top_right_arrow";
+            case CURSOR::bottom_left_arrow: return "bottom_left_arrow";
+            case CURSOR::bottom_right_arrow: return "bottom_right_arrow";
+            default: return "left_ptr";
+        }
+    }
+
+    /**
+     * @brief Function to return username and store it globally
+     *        first tries to get username from env var 'USER'.
+     *        If 'USER' is not set, then as a fallback, try to get user name
+     *        from env var 'LOGNAME'.
+     *
+     * NOTE: This function should be used once to retrieve the username
+     *       and then cached for later use to avoid making unnecessary calls.
+     * 
+     * NOTE: This function will return "unknown" upon error.
+     *
+     * @return The username as a const reference to std::string.
+     */
+    const string& get_user_name()
+    {
+        static const string username = []() -> string
+        {
+            const char* name = getenv("USER");
+            if (!name)
+            {
+                name = getenv("LOGNAME");
+            }
+        
+            return name ? name : "unknown";
+        }();
+
+        return username;
     }
 }
+
+static string user;
 
 class __net_logger__ {
 // Defines.
@@ -1547,8 +1583,7 @@ namespace // window namespace
     }
 }
 
-class window
-{
+class window {
     public:  
     // Constructor.
         window() {}
@@ -3759,8 +3794,7 @@ class window
             }
 };
 
-class client
-{
+class client {
     public:
     // Sub Classes.
         class client_border_decor
@@ -3816,16 +3850,14 @@ class client
 
     // Methods.
         // Main.
-            void make_decorations()
-            {
+            void make_decorations() {
                 make_frame();
                 make_titlebar();
                 make_close_button();
                 make_max_button();
                 make_min_button();
                 
-                if (BORDER_SIZE > 0)
-                {
+                if (BORDER_SIZE > 0) {
                     make_borders();
                 }
             }
@@ -3904,15 +3936,12 @@ class client
             #define TITLE_REQ_DRAW  (uint32_t)1 << 0
             #define TITLE_INTR_DRAW (uint32_t)1 << 1
 
-            void draw_title(const uint32_t &__mode)
-            {
+            void draw_title(const uint32_t &__mode) {
                 titlebar.clear();
 
-                if (__mode & TITLE_REQ_DRAW )
-                {
+                if (__mode & TITLE_REQ_DRAW ) {
                     titlebar.draw_text_16_auto_color(
                         win.get_net_wm_name_by_req().c_str(),
-                        // ((width / 2) - ((win.get_net_wm_name_by_req().length() * DEFAULT_FONT_WIDTH) / 2)),
                         CENTER_TEXT(width, win.get_net_wm_name_by_req().length()),
                         15
                     );
@@ -3922,7 +3951,6 @@ class client
                 {
                     titlebar.draw_text_16_auto_color(
                         win.get_net_wm_name().c_str(),
-                        // ((width / 2) - ((win.get_net_wm_name().length() * DEFAULT_FONT_WIDTH) / 2)),
                         CENTER_TEXT(width, win.get_net_wm_name().length()),
                         15
                     );
@@ -4638,1216 +4666,1215 @@ class context_menu
 };
 
 class Window_Manager {
-public:
+    public:
     // Constructor.
-    Window_Manager() {}
+        Window_Manager() {}
     
     // Variabels.
-    window root;
-    Launcher launcher;
-    Logger log;
-    pointer pointer;
-    win_data data;
-    Key_Codes key_codes;
-    
-    context_menu *context_menu = nullptr;
-    vector<client *> client_list;
-    vector<desktop *> desktop_list;
-    client *focused_client = nullptr;
-    desktop *cur_d = nullptr;
+        window root;
+        Launcher launcher;
+        Logger log;
+        pointer pointer;
+        win_data data;
+        Key_Codes key_codes;
+        
+        context_menu *context_menu = nullptr;
+        vector<client *> client_list;
+        vector<desktop *> desktop_list;
+        client *focused_client = nullptr;
+        desktop *cur_d = nullptr;
     
     // Methods.
-    // Main.
-    void init()
-    {
-        _conn(nullptr, nullptr);
-        _setup();
-        _iter();
-        _screen();
-        
-        root = screen->root;
-        root.width(screen->width_in_pixels);
-        root.height(screen->height_in_pixels);
-
-        setSubstructureRedirectMask();
-        configure_root();
-        _ewmh();
-        
-        key_codes.init();
-        event_handler = new Event_Handler();
-        
-        create_new_desktop(1);
-        create_new_desktop(2);
-        create_new_desktop(3);
-        create_new_desktop(4);
-        create_new_desktop(5);
-
-        context_menu = new class context_menu();
-        context_menu->add_entry("konsole", [this]()-> void
-        {
-            launcher.program((char *) "konsole");
-        });
-
-        context_menu->init();
-
-        // std::thread(check_volt()); // dosent work 
-    }
-
-    void launch_program(char *program)
-    {
-        if (fork() == 0)
-        {
-            setsid();
-            execvp(program, (char *[]) { program, nullptr });
-        }
-    }
-
-    void quit(const int &__status)
-    {
-        xcb_flush(conn);
-        delete_client_vec(client_list);
-        delete_desktop_vec(desktop_list);
-        xcb_ewmh_connection_wipe(ewmh);
-        xcb_disconnect(conn);
-        exit(__status);
-    }
-
-    void get_atom(char *name, xcb_atom_t *atom)
-    {
-        xcb_intern_atom_reply_t *reply = xcb_intern_atom_reply(conn, xcb_intern_atom(conn, 0, strlen(name), name), NULL);
-        if (reply != NULL)
-        {
-            *atom = reply->atom;
-        }
-        else
-        {
-            *atom = XCB_NONE;
-        }
-        free(reply);
-    }
-
-    // Window.
-    bool window_exists(const uint32_t &__window)
-    {
-        xcb_generic_error_t *err;
-        free(xcb_query_tree_reply(conn, xcb_query_tree(conn, __window), &err));
-
-        if (err != NULL)
-        {
-            free(err);
-            return false;
-        }
-
-        return true;
-    }
-
-    void window_stack(const uint32_t &__window1, const uint32_t &__window2, const uint32_t &__mode)
-    {
-        if (__window2 == XCB_NONE) return;
-        
-        uint16_t mask = XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE;
-        uint32_t values[] = {__window2, __mode};
-        xcb_configure_window(conn, __window1, mask, values);
-    }
-
-    // stack '__window1' above '__window2'
-    void window_above(const uint32_t &__window1, const uint32_t &__window2)
-    {
-        window_stack(__window1, __window2, XCB_STACK_MODE_ABOVE);
-    }
-
-    // stack '__window1' below '__window2'
-    void window_below(const uint32_t &__window1, const uint32_t &__window2)
-    {
-        window_stack(__window1, __window2, XCB_STACK_MODE_BELOW);
-    }
-
-    // Client.
-
-    // Focus.
-    void cycle_focus()
-    {
-        if (focused_client == nullptr)
-        {
-            if (cur_d->current_clients.size() == 0) return;
-
-            for (long i(0); i < cur_d->current_clients.size(); ++i)
+        // Main.
+            void init()
             {
-                if (cur_d->current_clients[i] == nullptr) continue;
+                _conn(nullptr, nullptr);
+                _setup();
+                _iter();
+                _screen();
                 
-                cur_d->current_clients[i]->focus();
-                focused_client = cur_d->current_clients[i];
+                root = screen->root;
+                root.width(screen->width_in_pixels);
+                root.height(screen->height_in_pixels);
+
+                setSubstructureRedirectMask();
+                configure_root();
+                _ewmh();
                 
-                return;
-            }
-        }
+                key_codes.init();
+                event_handler = new Event_Handler();
+                
+                create_new_desktop(1);
+                create_new_desktop(2);
+                create_new_desktop(3);
+                create_new_desktop(4);
+                create_new_desktop(5);
 
-        for (int i(0); i < cur_d->current_clients.size(); ++i)
-        {
-            if (cur_d->current_clients[i] == nullptr) continue;
-
-            if (cur_d->current_clients[i] == focused_client)
-            {
-                if (i == (cur_d->current_clients.size() - 1))
+                context_menu = new class context_menu();
+                context_menu->add_entry("konsole", [this]()-> void
                 {
-                    cur_d->current_clients[0]->focus();
-                    focused_client = cur_d->current_clients[0];
+                    launcher.program((char *) "konsole");
+                });
+
+                context_menu->init();
+
+                // std::thread(check_volt()); // dosent work 
+            }
+
+            void launch_program(char *program)
+            {
+                if (fork() == 0)
+                {
+                    setsid();
+                    execvp(program, (char *[]) { program, nullptr });
+                }
+            }
+
+            void quit(const int &__status)
+            {
+                xcb_flush(conn);
+                delete_client_vec(client_list);
+                delete_desktop_vec(desktop_list);
+                xcb_ewmh_connection_wipe(ewmh);
+                xcb_disconnect(conn);
+                exit(__status);
+            }
+
+            void get_atom(char *name, xcb_atom_t *atom)
+            {
+                xcb_intern_atom_reply_t *reply = xcb_intern_atom_reply(conn, xcb_intern_atom(conn, 0, strlen(name), name), NULL);
+                if (reply != NULL)
+                {
+                    *atom = reply->atom;
+                }
+                else
+                {
+                    *atom = XCB_NONE;
+                }
                 
+                free(reply);
+            }
+
+        // Window.
+            bool window_exists(const uint32_t &__window)
+            {
+                xcb_generic_error_t *err;
+                free(xcb_query_tree_reply(conn, xcb_query_tree(conn, __window), &err));
+
+                if (err != NULL)
+                {
+                    free(err);
+                    return false;
+                }
+
+                return true;
+            }
+
+            void window_stack(const uint32_t &__window1, const uint32_t &__window2, const uint32_t &__mode)
+            {
+                if (__window2 == XCB_NONE) return;
+                
+                uint16_t mask = XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE;
+                uint32_t values[] = {__window2, __mode};
+                xcb_configure_window(conn, __window1, mask, values);
+            }
+
+            // stack '__window1' above '__window2'
+            void window_above(const uint32_t &__window1, const uint32_t &__window2)
+            {
+                window_stack(__window1, __window2, XCB_STACK_MODE_ABOVE);
+            }
+
+            // stack '__window1' below '__window2'
+            void window_below(const uint32_t &__window1, const uint32_t &__window2)
+            {
+                window_stack(__window1, __window2, XCB_STACK_MODE_BELOW);
+            }
+
+        // Client.
+            // Focus.
+                void cycle_focus()
+                {
+                    if (focused_client == nullptr)
+                    {
+                        if (cur_d->current_clients.size() == 0) return;
+
+                        for (long i(0); i < cur_d->current_clients.size(); ++i)
+                        {
+                            if (cur_d->current_clients[i] == nullptr) continue;
+                            
+                            cur_d->current_clients[i]->focus();
+                            focused_client = cur_d->current_clients[i];
+                            
+                            return;
+                        }
+                    }
+
+                    for (int i(0); i < cur_d->current_clients.size(); ++i)
+                    {
+                        if (cur_d->current_clients[i] == nullptr) continue;
+
+                        if (cur_d->current_clients[i] == focused_client)
+                        {
+                            if (i == (cur_d->current_clients.size() - 1))
+                            {
+                                cur_d->current_clients[0]->focus();
+                                focused_client = cur_d->current_clients[0];
+                            
+                                return;
+                            }
+
+                            cur_d->current_clients[i + 1]->focus();
+                            focused_client = cur_d->current_clients[i + 1];
+
+                            return;
+                        }
+
+                        if (i == (cur_d->current_clients.size() - 1)) i = 0;
+                    }
+                }
+
+                void unfocus()
+                {
+                    window(tmp);
+                    tmp.create_default(
+                        screen->root,
+                        -20,
+                        -20,
+                        20,
+                        20
+                    );
+                    tmp.map();
+                    tmp.focus_input();
+                    tmp.unmap();
+                    tmp.kill();
+                }
+
+            // Fetch.
+                client *client_from_window(const xcb_window_t *window)
+                {
+                    for (const auto &c:client_list)
+                    {
+                        if (*window == c->win)
+                        {
+                            return c;
+                        }
+                    }
+
+                    return nullptr;
+                }
+
+                client *client_from_any_window(const xcb_window_t *window)
+                {
+                    for (const auto &c:client_list)
+                    {
+                        if (*window == c->win 
+                        ||  *window == c->frame 
+                        ||  *window == c->titlebar 
+                        ||  *window == c->close_button 
+                        ||  *window == c->max_button 
+                        ||  *window == c->min_button 
+                        ||  *window == c->border.left 
+                        ||  *window == c->border.right 
+                        ||  *window == c->border.top 
+                        ||  *window == c->border.bottom
+                        ||  *window == c->border.top_left
+                        ||  *window == c->border.top_right
+                        ||  *window == c->border.bottom_left
+                        ||  *window == c->border.bottom_right)
+                        {
+                            return c;
+                        }
+                    }
+
+                    return nullptr;
+                }
+
+                client *client_from_pointer(const int &prox)
+                {
+                    const uint32_t &x = pointer.x();
+                    const uint32_t &y = pointer.y();
+                    for (const auto &c : cur_d->current_clients)
+                    {
+                        // LEFT EDGE OF CLIENT
+                        if (x > c->x - prox && x <= c->x) return c;
+                        
+                        // RIGHT EDGE OF CLIENT
+                        if (x >= c->x + c->width && x < c->x + c->width + prox) return c;
+                        
+                        // TOP EDGE OF CLIENT
+                        if (y > c->y - prox && y <= c->y) return c;
+                        
+                        // BOTTOM EDGE OF CLIENT
+                        if (y >= c->y + c->height && y < c->y + c->height + prox) return c;
+                    }
+                    
+                    return nullptr;
+                }
+
+                map<client *, edge> get_client_next_to_client(client *c, edge c_edge)
+                {
+                    map<client *, edge> map;
+                    for (client *c2:cur_d->current_clients)
+                    {
+                        if (c == c2) continue;
+
+                        if (c_edge == edge::LEFT)
+                        {
+                            if(c->x == c2->x + c2->width)
+                            {
+                                map[c2] = edge::RIGHT;
+                                return map;
+                            }
+                        }
+
+                        if (c_edge == edge::RIGHT)
+                        {
+                            if (c->x + c->width == c2->x)
+                            {
+                                map[c2] = edge::LEFT;
+                                return map;
+                            }
+                        }
+
+                        if (c_edge == edge::TOP)
+                        {
+                            if (c->y == c2->y + c2->height)
+                            {
+                                map[c2] = edge::BOTTOM_edge;
+                                return map;
+                            }
+                        }
+
+                        if (c_edge == edge::BOTTOM_edge)
+                        {
+                            if (c->y + c->height == c2->y)
+                            {
+                                map[c2] = edge::TOP;
+                                return map;
+                            }
+                        }
+                    }
+
+                    map[nullptr] = edge::NONE;
+                    return map;
+                }
+
+                edge get_client_edge_from_pointer(client *c, const int &prox)
+                {
+                    const uint32_t &x = pointer.x();
+                    const uint32_t &y = pointer.y();
+
+                    const uint32_t &top_border    = c->y;
+                    const uint32_t &bottom_border = (c->y + c->height);
+                    const uint32_t &left_border   = c->x;
+                    const uint32_t &right_border  = (c->x + c->width);
+
+                    // TOP EDGE OF CLIENT
+                    if (((y > top_border - prox) && (y <= top_border))
+                    && ((x > left_border + prox) && (x < right_border - prox)))
+                    {
+                        return edge::TOP;
+                    }
+                    
+                    // BOTTOM EDGE OF CLIENT
+                    if (((y >= bottom_border) && (y < bottom_border + prox))
+                    && ((x > left_border + prox) && (x < right_border - prox)))
+                    {
+                        return edge::BOTTOM_edge;
+                    }
+                    
+                    // LEFT EDGE OF CLIENT
+                    if (((x > left_border) - prox && (x <= left_border))
+                    && ((y > top_border + prox) && (y < bottom_border - prox)))
+                    {
+                        return edge::LEFT;
+                    }
+                    
+                    // RIGHT EDGE OF CLIENT
+                    if (((x >= right_border) && (x < right_border + prox))
+                    && ((y > top_border + prox) && (y < bottom_border - prox)))
+                    {
+                        return edge::RIGHT;
+                    }
+                    
+                    // TOP LEFT CORNER OF CLIENT
+                    if (((x > left_border - prox) && x < left_border + prox)
+                    && ((y > top_border - prox) && y < top_border + prox))
+                    {
+                        return edge::TOP_LEFT;
+                    }
+
+                    // TOP RIGHT CORNER OF CLIENT
+                    if (((x > right_border - prox) && x < right_border + prox)
+                    && ((y > top_border - prox) && y < top_border + prox))
+                    {
+                        return edge::TOP_RIGHT;
+                    }
+
+                    // BOTTOM LEFT CORNER OF CLIENT
+                    if (((x > left_border - prox) && x < left_border + prox) 
+                    && ((y > bottom_border - prox) && y < bottom_border + prox))
+                    {
+                        return edge::BOTTOM_LEFT;
+                    }
+
+                    // BOTTOM RIGHT CORNER OF CLIENT
+                    if (((x > right_border - prox) && x < right_border + prox)
+                    && ((y > bottom_border - prox) && y < bottom_border + prox))
+                    {
+                        return edge::BOTTOM_RIGHT;
+                    }
+
+                    return edge::NONE;
+                }
+
+            void manage_new_client(const uint32_t &__window)
+            {
+                client *c = make_client(__window);
+                if (c == nullptr)
+                {
+                    log_error("could not make client");
                     return;
                 }
 
-                cur_d->current_clients[i + 1]->focus();
-                focused_client = cur_d->current_clients[i + 1];
+                c->win.get_override_redirect();
+                c->win.x_y_width_height(c->x, c->y, c->width, c->height);
+                xcb_flush(conn);
 
-                return;
-            }
+                c->win.map();
+                c->win.grab_button({
+                    { L_MOUSE_BUTTON, ALT },
+                    { R_MOUSE_BUTTON, ALT },
+                    { L_MOUSE_BUTTON, 0   }
+                });
 
-            if (i == (cur_d->current_clients.size() - 1)) i = 0;
-        }
-    }
-
-    void unfocus()
-    {
-        window(tmp);
-        tmp.create_default(
-            screen->root,
-            -20,
-            -20,
-            20,
-            20
-        );
-        tmp.map();
-        tmp.focus_input();
-        tmp.unmap();
-        tmp.kill();
-    }
-
-    // Fetch.
-    client *client_from_window(const xcb_window_t *window)
-    {
-        for (const auto &c:client_list)
-        {
-            if (*window == c->win)
-            {
-                return c;
-            }
-        }
-
-        return nullptr;
-    }
-
-    client *client_from_any_window(const xcb_window_t *window)
-    {
-        for (const auto &c:client_list)
-        {
-            if (*window == c->win 
-            ||  *window == c->frame 
-            ||  *window == c->titlebar 
-            ||  *window == c->close_button 
-            ||  *window == c->max_button 
-            ||  *window == c->min_button 
-            ||  *window == c->border.left 
-            ||  *window == c->border.right 
-            ||  *window == c->border.top 
-            ||  *window == c->border.bottom
-            ||  *window == c->border.top_left
-            ||  *window == c->border.top_right
-            ||  *window == c->border.bottom_left
-            ||  *window == c->border.bottom_right)
-            {
-                return c;
-            }
-        }
-
-        return nullptr;
-    }
-
-    client *client_from_pointer(const int &prox)
-    {
-        const uint32_t &x = pointer.x();
-        const uint32_t &y = pointer.y();
-        for (const auto &c : cur_d->current_clients)
-        {
-            // LEFT EDGE OF CLIENT
-            if (x > c->x - prox && x <= c->x) return c;
-            
-            // RIGHT EDGE OF CLIENT
-            if (x >= c->x + c->width && x < c->x + c->width + prox) return c;
-            
-            // TOP EDGE OF CLIENT
-            if (y > c->y - prox && y <= c->y) return c;
-            
-            // BOTTOM EDGE OF CLIENT
-            if (y >= c->y + c->height && y < c->y + c->height + prox) return c;
-        }
-        
-        return nullptr;
-    }
-
-    map<client *, edge> get_client_next_to_client(client *c, edge c_edge)
-    {
-        map<client *, edge> map;
-        for (client *c2:cur_d->current_clients)
-        {
-            if (c == c2) continue;
-
-            if (c_edge == edge::LEFT)
-            {
-                if(c->x == c2->x + c2->width)
+                c->win.grab_default_keys();
+                if (!c->win.check_frameless_window_hint())
                 {
-                    map[c2] = edge::RIGHT;
-                    return map;
+                    c->make_decorations();
+                    c->frame.set_event_mask(FRAME_EVENT_MASK);
+                    c->win.set_event_mask(CLIENT_EVENT_MASK);
+                    c->update();
+                    c->focus();
+                    focused_client = c;
+                    check_client(c);
                 }
             }
 
-            if (c_edge == edge::RIGHT)
+            client *make_internal_client(window window)
             {
-                if (c->x + c->width == c2->x)
-                {
-                    map[c2] = edge::LEFT;
-                    return map;
-                }
-            }
+            client *c = new client;
 
-            if (c_edge == edge::TOP)
-            {
-                if (c->y == c2->y + c2->height)
-                {
-                    map[c2] = edge::BOTTOM_edge;
-                    return map;
-                }
-            }
+            c->win    = window;
+            c->x      = window.x();
+            c->y      = window.y();
+            c->width  = window.width();
+            c->height = window.height();
 
-            if (c_edge == edge::BOTTOM_edge)
-            {
-                if (c->y + c->height == c2->y)
-                {
-                    map[c2] = edge::TOP;
-                    return map;
-                }
-            }
-        }
-
-        map[nullptr] = edge::NONE;
-        return map;
-    }
-
-    edge get_client_edge_from_pointer(client *c, const int &prox)
-    {
-        const uint32_t &x = pointer.x();
-        const uint32_t &y = pointer.y();
-
-        const uint32_t &top_border    = c->y;
-        const uint32_t &bottom_border = (c->y + c->height);
-        const uint32_t &left_border   = c->x;
-        const uint32_t &right_border  = (c->x + c->width);
-
-        // TOP EDGE OF CLIENT
-        if (((y > top_border - prox) && (y <= top_border))
-        && ((x > left_border + prox) && (x < right_border - prox)))
-        {
-            return edge::TOP;
-        }
-        
-        // BOTTOM EDGE OF CLIENT
-        if (((y >= bottom_border) && (y < bottom_border + prox))
-        && ((x > left_border + prox) && (x < right_border - prox)))
-        {
-            return edge::BOTTOM_edge;
-        }
-        
-        // LEFT EDGE OF CLIENT
-        if (((x > left_border) - prox && (x <= left_border))
-        && ((y > top_border + prox) && (y < bottom_border - prox)))
-        {
-            return edge::LEFT;
-        }
-        
-        // RIGHT EDGE OF CLIENT
-        if (((x >= right_border) && (x < right_border + prox))
-        && ((y > top_border + prox) && (y < bottom_border - prox)))
-        {
-            return edge::RIGHT;
-        }
-        
-        // TOP LEFT CORNER OF CLIENT
-        if (((x > left_border - prox) && x < left_border + prox)
-        && ((y > top_border - prox) && y < top_border + prox))
-        {
-            return edge::TOP_LEFT;
-        }
-
-        // TOP RIGHT CORNER OF CLIENT
-        if (((x > right_border - prox) && x < right_border + prox)
-        && ((y > top_border - prox) && y < top_border + prox))
-        {
-            return edge::TOP_RIGHT;
-        }
-
-        // BOTTOM LEFT CORNER OF CLIENT
-        if (((x > left_border - prox) && x < left_border + prox) 
-        && ((y > bottom_border - prox) && y < bottom_border + prox))
-        {
-            return edge::BOTTOM_LEFT;
-        }
-
-        // BOTTOM RIGHT CORNER OF CLIENT
-        if (((x > right_border - prox) && x < right_border + prox)
-        && ((y > bottom_border - prox) && y < bottom_border + prox))
-        {
-            return edge::BOTTOM_RIGHT;
-        }
-
-        return edge::NONE;
-    }
-
-    void manage_new_client(const uint32_t &__window)
-    {
-        client *c = make_client(__window);
-        if (c == nullptr)
-        {
-            log_error("could not make client");
-            return;
-        }
-
-        c->win.get_override_redirect();
-        c->win.x_y_width_height(c->x, c->y, c->width, c->height);
-        xcb_flush(conn);
-
-        c->win.map();
-        c->win.grab_button({
-            { L_MOUSE_BUTTON, ALT },
-            { R_MOUSE_BUTTON, ALT },
-            { L_MOUSE_BUTTON, 0   }
-        });
-
-        c->win.grab_default_keys();
-        if (!c->win.check_frameless_window_hint())
-        {
             c->make_decorations();
-            c->frame.set_event_mask(FRAME_EVENT_MASK);
-            c->win.set_event_mask(CLIENT_EVENT_MASK);
-            c->update();
+            client_list.push_back(c);
+            cur_d->current_clients.push_back(c);
             c->focus();
-            focused_client = c;
-            check_client(c);
-        }
-    }
 
-    client *make_internal_client(window window)
-    {
-    client *c = new client;
-
-    c->win    = window;
-    c->x      = window.x();
-    c->y      = window.y();
-    c->width  = window.width();
-    c->height = window.height();
-
-    c->make_decorations();
-    client_list.push_back(c);
-    cur_d->current_clients.push_back(c);
-    c->focus();
-
-    return c;
-    }
-
-    void send_sigterm_to_client(client *c)
-    {
-    c->kill();
-    remove_client(c);
-    }
-
-    void remove_client(client *c)
-    {
-    client_list.erase(
-        remove(
-            client_list.begin(),
-            client_list.end(),
-            c
-        ), 
-        client_list.end()
-    );
-
-    cur_d->current_clients.erase(
-        remove(
-            cur_d->current_clients.begin(),
-            cur_d->current_clients.end(),
-            c
-        ),
-        cur_d->current_clients.end()
-    );
-
-    delete c;
-    }
-
-    // desktop.
-    void create_new_desktop(const uint16_t &n)
-    {
-        desktop *d = new desktop;
-        
-        d->desktop = n;
-        d->width   = screen->width_in_pixels;
-        d->height  = screen->height_in_pixels;
-        cur_d      = d;
-
-        desktop_list.push_back(d);
-    }
-
-    // experimental.
-    xcb_visualtype_t *find_argb_visual(xcb_connection_t *conn, xcb_screen_t *screen)
-    {
-        xcb_depth_iterator_t depth_iter = xcb_screen_allowed_depths_iterator(screen);
-        for (; depth_iter.rem; xcb_depth_next(&depth_iter))
-        {
-            xcb_visualtype_iterator_t visual_iter = xcb_depth_visuals_iterator(depth_iter.data);
-            for (; visual_iter.rem; xcb_visualtype_next(&visual_iter))
-            {
-                if (depth_iter.data->depth == 32)
-                {
-                    return visual_iter.data;
-                }
+            return c;
             }
-        }
 
-        return nullptr;
-    }
+            void send_sigterm_to_client(client *c)
+            {
+            c->kill();
+            remove_client(c);
+            }
 
-    void synchronize_xcb()
-    {
-        free(xcb_get_input_focus_reply(conn, xcb_get_input_focus(conn), NULL));
-    }
+            void remove_client(client *c)
+            {
+            client_list.erase(
+                remove(
+                    client_list.begin(),
+                    client_list.end(),
+                    c
+                ), 
+                client_list.end()
+            );
 
-    // xcb.
-    void send_expose_event(window &__window)
-    {
-        xcb_expose_event_t expose_event = {
-            .response_type = XCB_EXPOSE,
-            .window = __window,
-            .x      = 0,                                        /* < Top-left x coordinate of the area to be redrawn                 */
-            .y      = 0,                                        /* < Top-left y coordinate of the area to be redrawn                 */
-            .width  = static_cast<uint16_t>(__window.width()),  /* < Width of the area to be redrawn                                 */
-            .height = static_cast<uint16_t>(__window.height()), /* < Height of the area to be redrawn                                */
-            .count  = 0                                         /* < Number of expose events to follow if this is part of a sequence */
-        };
+            cur_d->current_clients.erase(
+                remove(
+                    cur_d->current_clients.begin(),
+                    cur_d->current_clients.end(),
+                    c
+                ),
+                cur_d->current_clients.end()
+            );
 
-        xcb_send_event(conn, false, __window, XCB_EVENT_MASK_EXPOSURE, (char *)&expose_event);
-        xcb_flush(conn);
-    }
+            delete c;
+            }
 
-private:
+        // desktop.
+            void create_new_desktop(const uint16_t &n)
+            {
+                desktop *d = new desktop;
+                
+                d->desktop = n;
+                d->width   = screen->width_in_pixels;
+                d->height  = screen->height_in_pixels;
+                cur_d      = d;
+
+                desktop_list.push_back(d);
+            }
+
+        // experimental.
+            xcb_visualtype_t *find_argb_visual(xcb_connection_t *conn, xcb_screen_t *screen)
+            {
+                xcb_depth_iterator_t depth_iter = xcb_screen_allowed_depths_iterator(screen);
+                for (; depth_iter.rem; xcb_depth_next(&depth_iter))
+                {
+                    xcb_visualtype_iterator_t visual_iter = xcb_depth_visuals_iterator(depth_iter.data);
+                    for (; visual_iter.rem; xcb_visualtype_next(&visual_iter))
+                    {
+                        if (depth_iter.data->depth == 32)
+                        {
+                            return visual_iter.data;
+                        }
+                    }
+                }
+
+                return nullptr;
+            }
+
+            void synchronize_xcb()
+            {
+                free(xcb_get_input_focus_reply(conn, xcb_get_input_focus(conn), NULL));
+            }
+
+        // xcb.
+            void send_expose_event(window &__window)
+            {
+                xcb_expose_event_t expose_event = {
+                    .response_type = XCB_EXPOSE,
+                    .window = __window,
+                    .x      = 0,                                        /* < Top-left x coordinate of the area to be redrawn                 */
+                    .y      = 0,                                        /* < Top-left y coordinate of the area to be redrawn                 */
+                    .width  = static_cast<uint16_t>(__window.width()),  /* < Width of the area to be redrawn                                 */
+                    .height = static_cast<uint16_t>(__window.height()), /* < Height of the area to be redrawn                                */
+                    .count  = 0                                         /* < Number of expose events to follow if this is part of a sequence */
+                };
+
+                xcb_send_event(conn, false, __window, XCB_EVENT_MASK_EXPOSURE, (char *)&expose_event);
+                xcb_flush(conn);
+            }
+
+    private:
     // Variables.
-    window start_window;
+        window start_window;
 
     // Functions.
-
-    // Init.
-    void _conn(const char *displayname, int *screenp)
-    {
-        conn = xcb_connect(displayname, screenp);
-        check_conn();
-    }
-
-    void _ewmh()
-    {
-        if (!(ewmh = static_cast<xcb_ewmh_connection_t *>(calloc(1, sizeof(xcb_ewmh_connection_t)))))
-        {
-            log_error("ewmh faild to initialize");
-            quit(1);
-        }    
-        
-        xcb_intern_atom_cookie_t * cookie = xcb_ewmh_init_atoms(conn, ewmh);
-        if (!(xcb_ewmh_init_atoms_replies(ewmh, cookie, 0)))
-        {
-            log_error("xcb_ewmh_init_atoms_replies:faild");
-            quit(1);
-        }
-
-        const char * str = "mwm";
-        check_error(
-            xcb_ewmh_set_wm_name(
-                ewmh,
-                screen->root,
-                strlen(str),
-                str
-            ), 
-            __func__,
-            "xcb_ewmh_set_wm_name"
-        );
-    }
-
-    void _setup()
-    {
-        setup = xcb_get_setup(conn);
-    }
-
-    void _iter()
-    {
-        iter = xcb_setup_roots_iterator(setup);
-    }
-
-    void _screen()
-    {
-        screen = iter.data;
-    }
-
-    bool setSubstructureRedirectMask()
-    {
-        xcb_void_cookie_t cookie = xcb_change_window_attributes_checked(
-            conn,
-            root,
-            XCB_CW_EVENT_MASK,
-            (const uint32_t[1])
+        // Init.
+            void _conn(const char *displayname, int *screenp)
             {
-                XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY
-            }
-        );
-
-        xcb_generic_error_t * error = xcb_request_check(conn, cookie);
-        if (error)
-        {
-            log_error("Error: Another window manager is already running or failed to set SubstructureRedirect mask."); 
-            free(error);
-            return false;
-        }
-
-        return true;
-    }
-
-    void configure_root()
-    {
-        root.set_backround_color(DARK_GREY);
-        uint32_t mask =
-            XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT |
-            XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY   |
-            XCB_EVENT_MASK_ENTER_WINDOW          |
-            XCB_EVENT_MASK_LEAVE_WINDOW          |
-            XCB_EVENT_MASK_STRUCTURE_NOTIFY      |
-            XCB_EVENT_MASK_BUTTON_PRESS          |
-            XCB_EVENT_MASK_BUTTON_RELEASE        |
-            XCB_EVENT_MASK_KEY_PRESS             |
-            XCB_EVENT_MASK_KEY_RELEASE           |
-            XCB_EVENT_MASK_FOCUS_CHANGE          |
-            XCB_EVENT_MASK_POINTER_MOTION
-        ; 
-        root.apply_event_mask(&mask);
-        root.clear();
-        root.set_backround_png("/home/mellw/mwm_png/galaxy21.png");
-        root.set_pointer(CURSOR::arrow);
-    }
-
-    // Check.
-    void check_error(const int &code)
-    {
-        switch (code)
-        {
-            case CONN_ERR:
-            {
-                log_error("Connection error.");
-                quit(CONN_ERR);
-                break;
+                conn = xcb_connect(displayname, screenp);
+                check_conn();
             }
 
-            case EXTENTION_NOT_SUPPORTED_ERR:
+            void _ewmh()
             {
-                log_error("Extension not supported.");
-                quit(EXTENTION_NOT_SUPPORTED_ERR);
-                break;
-            }
+                if (!(ewmh = static_cast<xcb_ewmh_connection_t *>(calloc(1, sizeof(xcb_ewmh_connection_t)))))
+                {
+                    log_error("ewmh faild to initialize");
+                    quit(1);
+                }    
                 
-            case MEMORY_INSUFFICIENT_ERR:
-            {
-                log_error("Insufficient memory.");
-                quit(MEMORY_INSUFFICIENT_ERR);
-                break;
+                xcb_intern_atom_cookie_t * cookie = xcb_ewmh_init_atoms(conn, ewmh);
+                if (!(xcb_ewmh_init_atoms_replies(ewmh, cookie, 0)))
+                {
+                    log_error("xcb_ewmh_init_atoms_replies:faild");
+                    quit(1);
+                }
+
+                const char * str = "mwm";
+                check_error(
+                    xcb_ewmh_set_wm_name(
+                        ewmh,
+                        screen->root,
+                        strlen(str),
+                        str
+                    ), 
+                    __func__,
+                    "xcb_ewmh_set_wm_name"
+                );
             }
+
+            void _setup()
+            {
+                setup = xcb_get_setup(conn);
+            }
+
+            void _iter()
+            {
+                iter = xcb_setup_roots_iterator(setup);
+            }
+
+            void _screen()
+            {
+                screen = iter.data;
+            }
+
+            bool setSubstructureRedirectMask()
+            {
+                xcb_void_cookie_t cookie = xcb_change_window_attributes_checked(
+                    conn,
+                    root,
+                    XCB_CW_EVENT_MASK,
+                    (const uint32_t[1])
+                    {
+                        XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY
+                    }
+                );
+
+                xcb_generic_error_t * error = xcb_request_check(conn, cookie);
+                if (error)
+                {
+                    log_error("Error: Another window manager is already running or failed to set SubstructureRedirect mask."); 
+                    free(error);
+                    return false;
+                }
+
+                return true;
+            }
+
+            void configure_root()
+            {
+                root.set_backround_color(DARK_GREY);
+                uint32_t mask =
+                    XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT |
+                    XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY   |
+                    XCB_EVENT_MASK_ENTER_WINDOW          |
+                    XCB_EVENT_MASK_LEAVE_WINDOW          |
+                    XCB_EVENT_MASK_STRUCTURE_NOTIFY      |
+                    XCB_EVENT_MASK_BUTTON_PRESS          |
+                    XCB_EVENT_MASK_BUTTON_RELEASE        |
+                    XCB_EVENT_MASK_KEY_PRESS             |
+                    XCB_EVENT_MASK_KEY_RELEASE           |
+                    XCB_EVENT_MASK_FOCUS_CHANGE          |
+                    XCB_EVENT_MASK_POINTER_MOTION
+                ; 
+                root.apply_event_mask(&mask);
+                root.clear();
+                // string s = "/home/" + user + "/mwm_png/galaxy21.png";
+                // "/home/mellw/mwm_png/galaxy21.png"
+                root.set_backround_png(USER_PATH_PREFIX("/mwm_png/galaxy21.png").c_str());
+                root.set_pointer(CURSOR::arrow);
+            }
+
+        // Check.
+            void check_error(const int &code)
+            {
+                switch (code)
+                {
+                    case CONN_ERR:
+                    {
+                        log_error("Connection error.");
+                        quit(CONN_ERR);
+                        break;
+                    }
+
+                    case EXTENTION_NOT_SUPPORTED_ERR:
+                    {
+                        log_error("Extension not supported.");
+                        quit(EXTENTION_NOT_SUPPORTED_ERR);
+                        break;
+                    }
+                        
+                    case MEMORY_INSUFFICIENT_ERR:
+                    {
+                        log_error("Insufficient memory.");
+                        quit(MEMORY_INSUFFICIENT_ERR);
+                        break;
+                    }
+                        
+                    case REQUEST_TO_LONG_ERR:
+                    {
+                        log_error("Request to long.");
+                        quit(REQUEST_TO_LONG_ERR);
+                        break;
+                    }
+
+                    case PARSE_ERR:
+                    {
+                        log_error("Parse error.");
+                        quit(PARSE_ERR);
+                        break;
+                    }
+
+                    case SCREEN_NOT_FOUND_ERR:
+                    {
+                        log_error("Screen not found.");
+                        quit(SCREEN_NOT_FOUND_ERR);
+                        break;
+                    }
+
+                    case FD_ERR:
+                    {
+                        log_error("File descriptor error.");
+                        quit(FD_ERR);
+                        break;
+                    }
+                }
+            }
+
+            void check_conn()
+            {
+                int status = xcb_connection_has_error(conn);
+                check_error(status);
+            }
+
+            int cookie_error(xcb_void_cookie_t cookie , const char *sender_function)
+            {
+                xcb_generic_error_t *err = xcb_request_check(conn, cookie);
+                if (err)
+                {
+                    log_error(err->error_code);
+                    free(err);
+                    return err->error_code;
+                }
+
+                return 0;
+            }
+
+            void check_error(xcb_void_cookie_t cookie , const char *sender_function, const char *err_msg)
+            {
+                xcb_generic_error_t * err = xcb_request_check(conn, cookie);
+                if (err)
+                {
+                    log_error_code(err_msg, err->error_code);
+                    free(err);
+                }
+            }
+
+            int start_screen_window()
+            {
+                start_window.create_default(
+                    root,
+                    0,
+                    0,
+                    0,
+                    0
+                );
+                start_window.set_backround_color(DARK_GREY);
+                start_window.map();
+                return 0;
+            }
+
+        // Delete.
+            void delete_client_vec(vector<client *> &vec)
+            {
+                for (client *c : vec)
+                {
+                    send_sigterm_to_client(c);
+                    xcb_flush(conn);                    
+                }
+
+                vec.clear();
+                vector<client *>().swap(vec);
+            }
+
+            void delete_desktop_vec(vector<desktop *> &vec)
+            {
+                for (desktop *d : vec)
+                {
+                    delete_client_vec(d->current_clients);
+                    delete d;
+                }
+
+                vec.clear();
+                vector<desktop *>().swap(vec);
+            }
+
+            template <typename Type> 
+            static void delete_ptr_vector(vector<Type *>& vec)
+            {
+                for (Type *ptr : vec)
+                {
+                    delete ptr;
+                }
+
+                vec.clear();
+                vector<Type *>().swap(vec);
+            }
+
+            void remove_client_from_vector(client * c, vector<client *> &vec)
+            {
+                if (c == nullptr) log_error("client is nullptr.");
+
+                vec.erase(
+                    std::remove(
+                        vec.begin(),
+                        vec.end(),
+                        c
+                    ),
+                    vec.end()
+                );
+
+                delete c;
+            }
+
+        // Client.
+            client *make_client(const uint32_t &window)
+            {
+                client * c = new client;
+                if (c == nullptr)
+                {
+                    log_error("Could not allocate memory for client");
+                    return nullptr;
+                }
+
+                c->win = window;
+                c->get_window_parameters();
+
+                if (c->width < 20 ) c->width  = 200;
+                if (c->height < 10) c->height = 100;
                 
-            case REQUEST_TO_LONG_ERR:
-            {
-                log_error("Request to long.");
-                quit(REQUEST_TO_LONG_ERR);
-                break;
+                c->depth   = 24;
+                c->desktop = cur_d->desktop;
+
+                if (c->x <= 0 && c->y <= 0 && c->width != screen->width_in_pixels && c->height != screen->height_in_pixels)
+                {
+                    c->x = ((screen->width_in_pixels - c->width) / 2);
+                    c->y = (((screen->height_in_pixels - c->height) / 2) + (BORDER_SIZE * 2));
+                }
+
+                if (c->height > screen->height_in_pixels) c->height = screen->height_in_pixels;
+                if (c->width  > screen->width_in_pixels ) c->width  = screen->width_in_pixels;
+
+                if (c->win.is_EWMH_fullscreen())
+                {
+                    c->x      = 0;
+                    c->y      = 0;
+                    c->width  = screen->width_in_pixels;
+                    c->height = screen->height_in_pixels;
+                    c->win.set_EWMH_fullscreen_state();
+                }
+
+                if (c->win.check_atom(ewmh->_NET_WM_STATE_MODAL))
+                {
+                    c->atoms.is_modal = true;
+                    c->modal_data.transient_for = c->win.get_transient_for_window();
+                }
+
+                c->win.get_min_window_size_hints();
+                
+                client_list.push_back(c);
+                cur_d->current_clients.push_back(c);
+                return c;
             }
 
-            case PARSE_ERR:
+            void check_client(client * c)
             {
-                log_error("Parse error.");
-                quit(PARSE_ERR);
-                break;
+                c->win.x(BORDER_SIZE);
+                xcb_flush(conn);
+
+                c->win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
+                xcb_flush(conn);
+
+                // if client if full_screen but 'y' is offset for some reason, make 'y' (0)
+                if (c->x == 0
+                &&  c->y != 0
+                &&  c->width == screen->width_in_pixels
+                &&  c->height == screen->height_in_pixels)
+                {
+                    c->_y(0);
+                    xcb_flush(conn);
+                    return;
+                }
+
+                // if client is full_screen 'width' and 'height' but position is offset from (0, 0) then make pos (0, 0)
+                if (c->x != 0
+                &&  c->y != 0
+                &&  c->width == screen->width_in_pixels
+                &&  c->height == screen->height_in_pixels)
+                {
+                    c->x_y(0,0);
+                    xcb_flush(conn);
+                    return;
+                }
+
+                if (c->x < 0)
+                {
+                    c->_x(0);
+                    xcb_flush(conn);
+                }
+
+                if (c->y < 0)
+                {
+                    c->_y(0);
+                    xcb_flush(conn);
+                }
+
+                if (c->width > screen->width_in_pixels)
+                {
+                    c->_width(screen->width_in_pixels);
+                    xcb_flush(conn);
+                }
+
+                if (c->height > screen->height_in_pixels)
+                {
+                    c->_height(screen->height_in_pixels);
+                    xcb_flush(conn);
+                }
+                
+                if ((c->x + c->width) > screen->width_in_pixels)
+                {
+                    c->_width(screen->width_in_pixels - c->x);
+                    xcb_flush(conn);
+                }
+                
+                if ((c->y + c->height) > screen->height_in_pixels)
+                {
+                    c->_height(screen->height_in_pixels - c->y);
+                    xcb_flush(conn);
+                }
             }
 
-            case SCREEN_NOT_FOUND_ERR:
+        // Window.
+            void get_window_parameters(const uint32_t &__window, int16_t *__x, int16_t *__y, uint16_t *__width,  uint16_t *__height)
             {
-                log_error("Screen not found.");
-                quit(SCREEN_NOT_FOUND_ERR);
-                break;
+                xcb_get_geometry_cookie_t cookie = xcb_get_geometry(conn, __window);
+                xcb_get_geometry_reply_t *reply = xcb_get_geometry_reply(conn, cookie, nullptr);
+                if (reply == nullptr)
+                {
+                    log_error("Unable to get window geometry.");
+                    return;
+                }
+
+                *__x      = reply->x;
+                *__y      = reply->y;
+                *__width  = reply->width;
+                *__height = reply->height;
+
+                free(reply);
             }
 
-            case FD_ERR:
+        // Status.
+            void check_volt()
             {
-                log_error("File descriptor error.");
-                quit(FD_ERR);
-                break;
+                log_info("running");
+                this_thread::sleep_for(chrono::minutes(1));
+                check_volt();
             }
-        }
-    }
-
-    void check_conn()
-    {
-        int status = xcb_connection_has_error(conn);
-        check_error(status);
-    }
-
-    int cookie_error(xcb_void_cookie_t cookie , const char *sender_function)
-    {
-        xcb_generic_error_t *err = xcb_request_check(conn, cookie);
-        if (err)
-        {
-            log_error(err->error_code);
-            free(err);
-            return err->error_code;
-        }
-
-        return 0;
-    }
-
-    void check_error(xcb_void_cookie_t cookie , const char *sender_function, const char *err_msg)
-    {
-        xcb_generic_error_t * err = xcb_request_check(conn, cookie);
-        if (err)
-        {
-            log_error_code(err_msg, err->error_code);
-            free(err);
-        }
-    }
-
-    int start_screen_window()
-    {
-        start_window.create_default(
-            root,
-            0,
-            0,
-            0,
-            0
-        );
-        start_window.set_backround_color(DARK_GREY);
-        start_window.map();
-        return 0;
-    }
-
-    // Delete.
-    void delete_client_vec(vector<client *> &vec)
-    {
-        for (client *c : vec)
-        {
-            send_sigterm_to_client(c);
-            xcb_flush(conn);                    
-        }
-
-        vec.clear();
-        vector<client *>().swap(vec);
-    }
-
-    void delete_desktop_vec(vector<desktop *> &vec)
-    {
-        for (desktop *d : vec)
-        {
-            delete_client_vec(d->current_clients);
-            delete d;
-        }
-
-        vec.clear();
-        vector<desktop *>().swap(vec);
-    }
-
-    template <typename Type> 
-    static void delete_ptr_vector(vector<Type *>& vec)
-    {
-        for (Type *ptr : vec)
-        {
-            delete ptr;
-        }
-
-        vec.clear();
-        vector<Type *>().swap(vec);
-    }
-
-    void remove_client_from_vector(client * c, vector<client *> &vec)
-    {
-        if (c == nullptr) log_error("client is nullptr.");
-
-        vec.erase(
-            std::remove(
-                vec.begin(),
-                vec.end(),
-                c
-            ),
-            vec.end()
-        );
-
-        delete c;
-    }
-
-    // Client.
-    client *make_client(const uint32_t &window)
-    {
-        client * c = new client;
-        if (c == nullptr)
-        {
-            log_error("Could not allocate memory for client");
-            return nullptr;
-        }
-
-        c->win = window;
-        c->get_window_parameters();
-
-        if (c->width < 20 ) c->width  = 200;
-        if (c->height < 10) c->height = 100;
-        
-        c->depth   = 24;
-        c->desktop = cur_d->desktop;
-
-        if (c->x <= 0 && c->y <= 0 && c->width != screen->width_in_pixels && c->height != screen->height_in_pixels)
-        {
-            c->x = ((screen->width_in_pixels - c->width) / 2);
-            c->y = (((screen->height_in_pixels - c->height) / 2) + (BORDER_SIZE * 2));
-        }
-
-        if (c->height > screen->height_in_pixels) c->height = screen->height_in_pixels;
-        if (c->width  > screen->width_in_pixels ) c->width  = screen->width_in_pixels;
-
-        if (c->win.is_EWMH_fullscreen())
-        {
-            c->x      = 0;
-            c->y      = 0;
-            c->width  = screen->width_in_pixels;
-            c->height = screen->height_in_pixels;
-            c->win.set_EWMH_fullscreen_state();
-        }
-
-        if (c->win.check_atom(ewmh->_NET_WM_STATE_MODAL))
-        {
-            c->atoms.is_modal = true;
-            c->modal_data.transient_for = c->win.get_transient_for_window();
-        }
-
-        c->win.get_min_window_size_hints();
-        
-        client_list.push_back(c);
-        cur_d->current_clients.push_back(c);
-        return c;
-    }
-
-    void check_client(client * c)
-    {
-        c->win.x(BORDER_SIZE);
-        xcb_flush(conn);
-
-        c->win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
-        xcb_flush(conn);
-
-        // if client if full_screen but 'y' is offset for some reason, make 'y' (0)
-        if (c->x == 0
-        &&  c->y != 0
-        &&  c->width == screen->width_in_pixels
-        &&  c->height == screen->height_in_pixels)
-        {
-            c->_y(0);
-            xcb_flush(conn);
-            return;
-        }
-
-        // if client is full_screen 'width' and 'height' but position is offset from (0, 0) then make pos (0, 0)
-        if (c->x != 0
-        &&  c->y != 0
-        &&  c->width == screen->width_in_pixels
-        &&  c->height == screen->height_in_pixels)
-        {
-            c->x_y(0,0);
-            xcb_flush(conn);
-            return;
-        }
-
-        if (c->x < 0)
-        {
-            c->_x(0);
-            xcb_flush(conn);
-        }
-
-        if (c->y < 0)
-        {
-            c->_y(0);
-            xcb_flush(conn);
-        }
-
-        if (c->width > screen->width_in_pixels)
-        {
-            c->_width(screen->width_in_pixels);
-            xcb_flush(conn);
-        }
-
-        if (c->height > screen->height_in_pixels)
-        {
-            c->_height(screen->height_in_pixels);
-            xcb_flush(conn);
-        }
-        
-        if ((c->x + c->width) > screen->width_in_pixels)
-        {
-            c->_width(screen->width_in_pixels - c->x);
-            xcb_flush(conn);
-        }
-        
-        if ((c->y + c->height) > screen->height_in_pixels)
-        {
-            c->_height(screen->height_in_pixels - c->y);
-            xcb_flush(conn);
-        }
-    }
-
-    // Window.
-    void get_window_parameters(const uint32_t &__window, int16_t *__x, int16_t *__y, uint16_t *__width,  uint16_t *__height)
-    {
-        xcb_get_geometry_cookie_t cookie = xcb_get_geometry(conn, __window);
-        xcb_get_geometry_reply_t *reply = xcb_get_geometry_reply(conn, cookie, nullptr);
-        if (reply == nullptr)
-        {
-            log_error("Unable to get window geometry.");
-            return;
-        }
-
-        *__x      = reply->x;
-        *__y      = reply->y;
-        *__width  = reply->width;
-        *__height = reply->height;
-
-        free(reply);
-    }
-
-    // Status.
-    void check_volt()
-    {
-        log_info("running");
-        this_thread::sleep_for(chrono::minutes(1));
-        check_volt();
-    }
 
 }; static Window_Manager *wm;
 
 class __network__ {
-public:
+    public:
     // Methods.
-    enum
-    {
-        LOCAL_IP = 0,
-        INTERFACE_FOR_LOCAL_IP = 1
-    };
+        enum {
+            LOCAL_IP = 0,
+            INTERFACE_FOR_LOCAL_IP = 1
+        };
 
-    string get_local_ip_info(int type)
-    {
-        struct ifaddrs* ifAddrStruct = nullptr;
-        struct ifaddrs* ifa = nullptr;
-        void* tmpAddrPtr = nullptr;
-        string result;
-
-        getifaddrs(&ifAddrStruct);
-        for (ifa = ifAddrStruct; ifa != nullptr; ifa = ifa->ifa_next)
+        string get_local_ip_info(int type)
         {
-            CONTINUE_IF(ifa->ifa_addr == nullptr);
-            if (ifa->ifa_addr->sa_family == AF_INET) // check it is IP4
-            { 
-                // is a valid IP4 Address
-                tmpAddrPtr = &((struct sockaddr_in*)ifa->ifa_addr)->sin_addr;
-                char addressBuffer[INET_ADDRSTRLEN];
-                inet_ntop(AF_INET, tmpAddrPtr, addressBuffer, INET_ADDRSTRLEN);
-                if (addressBuffer[0] == '1'
-                &&  addressBuffer[1] == '9'
-                &&  addressBuffer[2] == '2')
-                {
-                    if (type == LOCAL_IP)
-                    {
-                        result = addressBuffer;
-                        break;
-                    }
+            struct ifaddrs* ifAddrStruct = nullptr;
+            struct ifaddrs* ifa = nullptr;
+            void* tmpAddrPtr = nullptr;
+            string result;
 
-                    if (type == INTERFACE_FOR_LOCAL_IP)
+            getifaddrs(&ifAddrStruct);
+            for (ifa = ifAddrStruct; ifa != nullptr; ifa = ifa->ifa_next)
+            {
+                CONTINUE_IF(ifa->ifa_addr == nullptr);
+                if (ifa->ifa_addr->sa_family == AF_INET) // check it is IP4
+                { 
+                    // is a valid IP4 Address
+                    tmpAddrPtr = &((struct sockaddr_in*)ifa->ifa_addr)->sin_addr;
+                    char addressBuffer[INET_ADDRSTRLEN];
+                    inet_ntop(AF_INET, tmpAddrPtr, addressBuffer, INET_ADDRSTRLEN);
+                    if (addressBuffer[0] == '1'
+                    &&  addressBuffer[1] == '9'
+                    &&  addressBuffer[2] == '2')
                     {
-                        result = ifa->ifa_name;
-                        break;
+                        if (type == LOCAL_IP)
+                        {
+                            result = addressBuffer;
+                            break;
+                        }
+
+                        if (type == INTERFACE_FOR_LOCAL_IP)
+                        {
+                            result = ifa->ifa_name;
+                            break;
+                        }
                     }
                 }
             }
+
+            if (ifAddrStruct != nullptr) freeifaddrs(ifAddrStruct);
+            return result;
         }
 
-        if (ifAddrStruct != nullptr) freeifaddrs(ifAddrStruct);
-        return result;
-    }
-
     // Constructor.
-    __network__() {}
+        __network__() {}
 
 }; static __network__ *network(nullptr);
 
 class __wifi__ {
-private:
+    private:
     // Methods.
-    void scan__(const char* interface)
-    {
-        wireless_scan_head head;
-        wireless_scan* result;
-        iwrange range;
-        int sock;
-
-        // Open a socket to the wireless driver
-        sock = iw_sockets_open();
-        if (sock < 0)
+        void scan__(const char* interface)
         {
-            log_error("could not open socket");
-            return;
-        }
+            wireless_scan_head head;
+            wireless_scan* result;
+            iwrange range;
+            int sock;
 
-        // Get the range of settings
-        if (iw_get_range_info(sock, interface, &range) < 0)
-        {
-            log_error("could not get range info");
-            iw_sockets_close(sock);
-            return;
-        }
-
-        // Perform the scan
-        if (iw_scan(sock, const_cast<char*>(interface), range.we_version_compiled, &head) < 0)
-        {
-            log_error("could not scan");
-            iw_sockets_close(sock);
-            return;
-        }
-
-        // Iterate through the scan results
-        result = head.result;
-        while (nullptr != result)
-        {
-            if (result->b.has_essid)
+            // Open a socket to the wireless driver
+            sock = iw_sockets_open();
+            if (sock < 0)
             {
-                string ssid(result->b.essid);
-                log_info(
-                    "\nSSID: "    + ssid +
-                    "\nSTATUS: "  + to_string(result->stats.status) +
-                    "\nQUAL: "    + to_string(result->stats.qual.qual) +
-                    "\nLEVEL: "   + to_string(result->stats.qual.level) +
-                    "\nNOICE: "   + to_string(result->stats.qual.noise) +
-                    "\nBITRATE: " + to_string(result->maxbitrate.value)
-                );
+                log_error("could not open socket");
+                return;
             }
 
-            result = result->next;
-        }
+            // Get the range of settings
+            if (iw_get_range_info(sock, interface, &range) < 0)
+            {
+                log_error("could not get range info");
+                iw_sockets_close(sock);
+                return;
+            }
 
-        // Close the socket to the wireless driver
-        iw_sockets_close(sock);
-    }
+            // Perform the scan
+            if (iw_scan(sock, const_cast<char*>(interface), range.we_version_compiled, &head) < 0)
+            {
+                log_error("could not scan");
+                iw_sockets_close(sock);
+                return;
+            }
 
-    void check_network_interfaces__()
-    {
-        struct ifaddrs* ifAddrStruct = nullptr;
-        struct ifaddrs* ifa = nullptr;
-        void* tmpAddrPtr = nullptr;
-
-        getifaddrs(&ifAddrStruct);
-
-        for (ifa = ifAddrStruct; ifa != nullptr; ifa = ifa->ifa_next)
-        {
-            CONTINUE_IF(!ifa->ifa_addr);
-            if (ifa->ifa_addr->sa_family == AF_INET) // check it is IP4
-            { 
-                // is a valid IP4 Address
-                tmpAddrPtr = &((struct sockaddr_in*)ifa->ifa_addr)->sin_addr;
-                char addressBuffer[INET_ADDRSTRLEN];
-                inet_ntop(AF_INET, tmpAddrPtr, addressBuffer, INET_ADDRSTRLEN);
-                if (addressBuffer[0] == '1'
-                &&  addressBuffer[1] == '9'
-                &&  addressBuffer[2] == '2')
+            // Iterate through the scan results
+            result = head.result;
+            while (nullptr != result)
+            {
+                if (result->b.has_essid)
                 {
-                    log_info("Interface: " + string(ifa->ifa_name) + " Address: " + addressBuffer);
+                    string ssid(result->b.essid);
+                    log_info(
+                        "\nSSID: "    + ssid +
+                        "\nSTATUS: "  + to_string(result->stats.status) +
+                        "\nQUAL: "    + to_string(result->stats.qual.qual) +
+                        "\nLEVEL: "   + to_string(result->stats.qual.level) +
+                        "\nNOICE: "   + to_string(result->stats.qual.noise) +
+                        "\nBITRATE: " + to_string(result->maxbitrate.value)
+                    );
                 }
+
+                result = result->next;
             }
-            else if (ifa->ifa_addr->sa_family == AF_INET6) // check it is IP6
-            {
-                // is a valid IP6 Address
-                tmpAddrPtr = &((struct sockaddr_in6*)ifa->ifa_addr)->sin6_addr;
-                char addressBuffer[INET6_ADDRSTRLEN];
-                inet_ntop(AF_INET6, tmpAddrPtr, addressBuffer, INET6_ADDRSTRLEN);
-                log_info("Interface: " + string(ifa->ifa_name) + " Address: " + addressBuffer);
-            } 
-            // Here, you could attempt to deduce the interface type (e.g., wlan for WiFi) by name or other means
+
+            // Close the socket to the wireless driver
+            iw_sockets_close(sock);
         }
 
-        if (ifAddrStruct != nullptr) freeifaddrs(ifAddrStruct);
-        return;
-    }
+        void check_network_interfaces__()
+        {
+            struct ifaddrs* ifAddrStruct = nullptr;
+            struct ifaddrs* ifa = nullptr;
+            void* tmpAddrPtr = nullptr;
 
-public:
+            getifaddrs(&ifAddrStruct);
+
+            for (ifa = ifAddrStruct; ifa != nullptr; ifa = ifa->ifa_next)
+            {
+                CONTINUE_IF(!ifa->ifa_addr);
+                if (ifa->ifa_addr->sa_family == AF_INET) // check it is IP4
+                { 
+                    // is a valid IP4 Address
+                    tmpAddrPtr = &((struct sockaddr_in*)ifa->ifa_addr)->sin_addr;
+                    char addressBuffer[INET_ADDRSTRLEN];
+                    inet_ntop(AF_INET, tmpAddrPtr, addressBuffer, INET_ADDRSTRLEN);
+                    if (addressBuffer[0] == '1'
+                    &&  addressBuffer[1] == '9'
+                    &&  addressBuffer[2] == '2')
+                    {
+                        log_info("Interface: " + string(ifa->ifa_name) + " Address: " + addressBuffer);
+                    }
+                }
+                else if (ifa->ifa_addr->sa_family == AF_INET6) // check it is IP6
+                {
+                    // is a valid IP6 Address
+                    tmpAddrPtr = &((struct sockaddr_in6*)ifa->ifa_addr)->sin6_addr;
+                    char addressBuffer[INET6_ADDRSTRLEN];
+                    inet_ntop(AF_INET6, tmpAddrPtr, addressBuffer, INET6_ADDRSTRLEN);
+                    log_info("Interface: " + string(ifa->ifa_name) + " Address: " + addressBuffer);
+                } 
+                // Here, you could attempt to deduce the interface type (e.g., wlan for WiFi) by name or other means
+            }
+
+            if (ifAddrStruct != nullptr) freeifaddrs(ifAddrStruct);
+            return;
+        }
+
+    public:
     // Methods.
-    void init()
-    {
-        event_handler->set_key_press_callback((ALT + SUPER), wm->key_codes.f, [this]()-> void { scan__("wlo1"); });
-    }
+        void init()
+        {
+            event_handler->set_key_press_callback((ALT + SUPER), wm->key_codes.f, [this]()-> void { scan__("wlo1"); });
+        }
 
     // Constructor.
-    __wifi__() {}
+        __wifi__() {}
 
 }; static __wifi__ *wifi(nullptr);
 
 class __audio__ {
-private:
+    private:
     // Variabels
-    pa_mainloop* mainloop = nullptr;
-    pa_mainloop_api* mainloop_api = nullptr;
-    pa_context* context = nullptr;
+        pa_mainloop* mainloop = nullptr;
+        pa_mainloop_api* mainloop_api = nullptr;
+        pa_context* context = nullptr;
 
-public:
+    public:
     // Methods.
-    static void sink_list_cb(pa_context* c, const pa_sink_info* l, int eol, void* userdata)
-    {
-        // End of list
-        if (eol > 0)
+        static void sink_list_cb(pa_context* c, const pa_sink_info* l, int eol, void* userdata)
         {
-            log_error("end of list.");
-            return;
-        }
-
-        log_info("Sink name: " + string(l->name) + " Description: " + string(l->description));
-    }
-
-    static void success_cb(pa_context* c, int success, void* userdata)
-    {
-        if (success)
-        {
-            std::cout << "Default sink changed successfully." << std::endl;
-        }
-        else
-        {
-            std::cout << "Failed to change the default sink." << std::endl;
-        }
-        // Signal the main loop to quit after attempting to change the default sink
-        pa_mainloop_quit(reinterpret_cast<pa_mainloop*>(userdata), 0);
-    }
-
-    static void context_state_cb(pa_context* c, void* userdata)
-    {
-        switch (pa_context_get_state(c))
-        {
-            case PA_CONTEXT_READY:
+            // End of list
+            if (eol > 0)
             {
-                const char* sink_name = reinterpret_cast<const char*>(userdata);
-                // Set the default sink
-                pa_operation* o = pa_context_set_default_sink(c, sink_name, success_cb, userdata);
-                if (o) pa_operation_unref(o);
-                break;
+                log_error("end of list.");
+                return;
             }
-            case PA_CONTEXT_FAILED:
-            case PA_CONTEXT_TERMINATED:
-                pa_mainloop_quit(reinterpret_cast<pa_mainloop*>(userdata), 1);
-                break;
-            default:
-                break;
-        }
-    }
 
-    static bool change_default_sink(const std::string& sink_name)
-    {
-        pa_mainloop* m = pa_mainloop_new();
-        pa_mainloop_api* mainloop_api = pa_mainloop_get_api(m);
-        pa_context* context = pa_context_new(mainloop_api, "Change Default Sink Example");
-
-        if (!context)
-        {
-            std::cerr << "Failed to create PA context." << std::endl;
-            pa_mainloop_free(m);
-            return false;
+            log_info("Sink name: " + string(l->name) + " Description: " + string(l->description));
         }
 
-        pa_context_set_state_callback(context, context_state_cb, m);
-        pa_context_connect(context, nullptr, PA_CONTEXT_NOFLAGS, nullptr);
-
-        int ret = 0;
-        pa_mainloop_run(m, &ret);
-
-        pa_context_disconnect(context);
-        pa_context_unref(context);
-        pa_mainloop_free(m);
-
-        return ret == 0;
-    }
-
-    // // Callback for context state
-    // void context_state_cb(pa_context* c, void* userdata)
-    // {
-    //     pa_context_state_t state = pa_context_get_state(c);
-    //     switch (state)
-    //     {
-    //         // This is the state where we can start doing operations
-    //         case PA_CONTEXT_READY:
-    //         {
-    //             pa_operation* o = pa_context_get_sink_info_list(c, sink_list_cb, nullptr);
-    //             if (o) pa_operation_unref(o);
-    //             break;
-    //         }
-    //         default:
-    //             break;
-    //     }
-    // }
-
-    void init()
-    {
-        mainloop = pa_mainloop_new();
-        mainloop_api = pa_mainloop_get_api(mainloop);
-        context = pa_context_new(mainloop_api, "mwm");
-
-        pa_context_set_state_callback(context, context_state_cb, this);
-        pa_context_connect(context, nullptr, PA_CONTEXT_NOFLAGS, nullptr);
-    }
-
-    void cleanup()
-    {
-        if (context)
+        static void success_cb(pa_context* c, int success, void* userdata)
         {
+            if (success)
+            {
+                std::cout << "Default sink changed successfully." << std::endl;
+            }
+            else
+            {
+                std::cout << "Failed to change the default sink." << std::endl;
+            }
+            // Signal the main loop to quit after attempting to change the default sink
+            pa_mainloop_quit(reinterpret_cast<pa_mainloop*>(userdata), 0);
+        }
+
+        static void context_state_cb(pa_context* c, void* userdata)
+        {
+            switch (pa_context_get_state(c))
+            {
+                case PA_CONTEXT_READY:
+                {
+                    const char* sink_name = reinterpret_cast<const char*>(userdata);
+                    // Set the default sink
+                    pa_operation* o = pa_context_set_default_sink(c, sink_name, success_cb, userdata);
+                    if (o) pa_operation_unref(o);
+                    break;
+                }
+                case PA_CONTEXT_FAILED:
+                case PA_CONTEXT_TERMINATED:
+                    pa_mainloop_quit(reinterpret_cast<pa_mainloop*>(userdata), 1);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        static bool change_default_sink(const std::string& sink_name)
+        {
+            pa_mainloop* m = pa_mainloop_new();
+            pa_mainloop_api* mainloop_api = pa_mainloop_get_api(m);
+            pa_context* context = pa_context_new(mainloop_api, "Change Default Sink Example");
+
+            if (!context)
+            {
+                std::cerr << "Failed to create PA context." << std::endl;
+                pa_mainloop_free(m);
+                return false;
+            }
+
+            pa_context_set_state_callback(context, context_state_cb, m);
+            pa_context_connect(context, nullptr, PA_CONTEXT_NOFLAGS, nullptr);
+
+            int ret = 0;
+            pa_mainloop_run(m, &ret);
+
             pa_context_disconnect(context);
             pa_context_unref(context);
+            pa_mainloop_free(m);
+
+            return ret == 0;
         }
-        if (mainloop)
+
+        // // Callback for context state
+        // void context_state_cb(pa_context* c, void* userdata)
+        // {
+        //     pa_context_state_t state = pa_context_get_state(c);
+        //     switch (state)
+        //     {
+        //         // This is the state where we can start doing operations
+        //         case PA_CONTEXT_READY:
+        //         {
+        //             pa_operation* o = pa_context_get_sink_info_list(c, sink_list_cb, nullptr);
+        //             if (o) pa_operation_unref(o);
+        //             break;
+        //         }
+        //         default:
+        //             break;
+        //     }
+        // }
+
+        void init()
         {
-            pa_mainloop_free(mainloop);
-        }
-    }
+            mainloop = pa_mainloop_new();
+            mainloop_api = pa_mainloop_get_api(mainloop);
+            context = pa_context_new(mainloop_api, "mwm");
 
-    void run()
-    {
-        int ret;
-        if (pa_mainloop_run(mainloop, &ret) < 0)
+            pa_context_set_state_callback(context, context_state_cb, this);
+            pa_context_connect(context, nullptr, PA_CONTEXT_NOFLAGS, nullptr);
+        }
+
+        void cleanup()
         {
-            log_error("Failed to run mainloop.");
+            if (context)
+            {
+                pa_context_disconnect(context);
+                pa_context_unref(context);
+            }
+            if (mainloop)
+            {
+                pa_mainloop_free(mainloop);
+            }
         }
-    }
 
-    void list_sinks()
-    {
-        pa_operation* op = pa_context_get_sink_info_list(context, sink_list_cb, nullptr);
-        if (op) pa_operation_unref(op);
-    }
+        void run()
+        {
+            int ret;
+            if (pa_mainloop_run(mainloop, &ret) < 0)
+            {
+                log_error("Failed to run mainloop.");
+            }
+        }
 
-    void set_default_sink(const std::string& sink_name)
-    {
-        pa_operation* op = pa_context_set_default_sink(context, sink_name.c_str(), success_cb, nullptr);
-        if (op) pa_operation_unref(op);
-    }
-    
+        void list_sinks()
+        {
+            pa_operation* op = pa_context_get_sink_info_list(context, sink_list_cb, nullptr);
+            if (op) pa_operation_unref(op);
+        }
+
+        void set_default_sink(const std::string& sink_name)
+        {
+            pa_operation* op = pa_context_set_default_sink(context, sink_name.c_str(), success_cb, nullptr);
+            if (op) pa_operation_unref(op);
+        }
+        
     // Constructor.
-    __audio__() {}
+        __audio__() {}
 
 }; __audio__ audio;
 
-namespace
-{
+namespace {
     #define BAR_WINDOW_X      0
     #define BAR_WINDOW_Y      0
     #define BAR_WINDOW_WIDTH  screen->width_in_pixels
@@ -6921,8 +6948,7 @@ class Mwm_Animator
         }
 };
 
-void animate(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight, const int & duration)
-{
+void animate(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight, const int & duration) {
     Mwm_Animator anim(c->frame);
     anim.animate(
         c->x,
@@ -6938,8 +6964,7 @@ void animate(client * & c, const int & endX, const int & endY, const int & endWi
     c->update();
 }
 
-void animate_client(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight, const int & duration)
-{
+void animate_client(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight, const int & duration) {
     Mwm_Animator client_anim(c);
     client_anim.animate_client(
         c->x,
@@ -7813,8 +7838,7 @@ class __file_app__
 };
 static __file_app__ *file_app;
 
-class __screen_settings__
-{
+class __screen_settings__ {
     private:
     // Methods.
         void change_refresh_rate(xcb_connection_t *conn, int desired_width, int desired_height, int desired_refresh)
@@ -7867,12 +7891,13 @@ class __screen_settings__
 
             return mode_vec;
         }
-
-        static float calculate_refresh_rate(const xcb_randr_mode_info_t *mode_info) /**
+        
+        /**
          *
-         * Function to calculate the refresh rate from mode info
+         * @brief Function to calculate the refresh rate from mode info
          *
          */
+        static float calculate_refresh_rate(const xcb_randr_mode_info_t *mode_info)
         {
             if (mode_info->htotal && mode_info->vtotal)
             {
@@ -9496,8 +9521,7 @@ class change_desktop
         }
 };
 
-class resize_client
-{
+class resize_client {
     public:
     // Constructor.
         /**
@@ -9509,8 +9533,7 @@ class resize_client
          * 
          */
         resize_client(client * & c , int retard_int)
-        : c(c)
-        {
+        : c(c) {
             if (c->win.is_EWMH_fullscreen()) return;
 
             pointer.grab();
@@ -9520,8 +9543,7 @@ class resize_client
         }
 
     // Subclasses.
-        class no_border
-        {
+        class no_border {
             public:
             // Constructor.
                 no_border(client * & c, const uint32_t & x, const uint32_t & y)
@@ -9547,8 +9569,7 @@ class resize_client
                 const double frameDuration = 1000.0 / frameRate;
             
             // Methods.
-                constexpr void teleport_mouse(edge edge)
-                {
+                constexpr void teleport_mouse(edge edge) {
                     switch (edge)
                     {
                         case edge::TOP:
@@ -9606,8 +9627,7 @@ class resize_client
                     }
                 }
 
-                void resize_client(const uint32_t x, const uint32_t y, edge edge)
-                {
+                void resize_client(const uint32_t x, const uint32_t y, edge edge) {
                     switch(edge)
                     {
                         case edge::LEFT:
@@ -9664,8 +9684,7 @@ class resize_client
                     }
                 }
 
-                void run(edge edge)
-                {
+                void run(edge edge) {
                     xcb_generic_event_t *ev;
                     bool shouldContinue = true;
                     while (shouldContinue)
@@ -9699,13 +9718,11 @@ class resize_client
                     }
                 }
 
-                bool isTimeToRender()
-                {
+                bool isTimeToRender() {
                     const auto &currentTime = chrono::high_resolution_clock::now();
                     const chrono::duration<double, milli> &elapsedTime = currentTime - lastUpdateTime;
 
-                    if (elapsedTime.count() >= frameDuration)
-                    {
+                    if (elapsedTime.count() >= frameDuration) {
                         lastUpdateTime = currentTime;
                         return true;
                     }
@@ -9714,20 +9731,16 @@ class resize_client
                 }
         };
 
-        class border
-        {
+        class border {
             public:
             // Constructor.
-                border(client *&c, edge _edge)
-                : c(c)
-                {
+                border(client *&c, edge _edge) 
+                : c(c) {
                     if (c->win.is_EWMH_fullscreen()) return;
 
                     map<client *, edge> map = wm->get_client_next_to_client(c, _edge);
-                    for (const auto &pair : map)
-                    {
-                        if (pair.first != nullptr)
-                        {
+                    for (const auto &pair : map) {
+                        if (pair.first != nullptr) {
                             c2 = pair.first;
                             c2_edge = pair.second;
                             pointer.grab();
@@ -9758,57 +9771,47 @@ class resize_client
             // Methods.
                 void teleport_mouse(edge edge)
                 {
-                    switch (edge)
-                    {
-                        case edge::TOP:
-                        {
+                    switch (edge) {
+                        case edge::TOP: {
                             pointer.teleport(pointer.x(), (c->y + 1));
                             break;
                         }
 
-                        case edge::BOTTOM_edge:
-                        {
+                        case edge::BOTTOM_edge: {
                             pointer.teleport(pointer.x(), ((c->y + c->height) - 1));
                             break;
                         }
 
-                        case edge::LEFT:
-                        {
+                        case edge::LEFT: {
                             pointer.teleport((c->x + 1), pointer.y());
                             break;
                         }
 
-                        case edge::RIGHT:
-                        {
+                        case edge::RIGHT: {
                             pointer.teleport(((c->x + c->width) - 1), pointer.y());
                             break;
                         }
 
-                        case edge::NONE:
-                        {
+                        case edge::NONE: {
                             break;
                         }
 
-                        case edge::TOP_LEFT:
-                        {
+                        case edge::TOP_LEFT: {
                             pointer.teleport((c->x + 1), (c->y + 1));
                             break;
                         }
 
-                        case edge::TOP_RIGHT:
-                        {
+                        case edge::TOP_RIGHT: {
                             pointer.teleport(((c->x + c->width) - 2), (c->y + 2));
                             break;
                         }
 
-                        case edge::BOTTOM_LEFT:
-                        {
+                        case edge::BOTTOM_LEFT: {
                             pointer.teleport((c->x + 1), ((c->y + c->height) - 1));
                             break;
                         }
 
-                        case edge::BOTTOM_RIGHT:
-                        {
+                        case edge::BOTTOM_RIGHT: {
                             pointer.teleport(((c->x + c->width) - 1), ((c->y + c->height) - 1));
                             break;
                         }
@@ -9943,7 +9946,6 @@ class resize_client
                     for (client *const &c : wm->cur_d->current_clients)
                     {
                         if (c == this->c) continue;
-
 
                         left_border = c->x;
                         right_border = (c->x + c->width);
@@ -11311,6 +11313,8 @@ class test
 
 void setup_wm()
 {
+    user = get_user_name();
+
     wm = new Window_Manager;
     wm->init();
     
