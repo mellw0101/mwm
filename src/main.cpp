@@ -1391,13 +1391,15 @@ class Event_Handler
 
 }; static Event_Handler *event_handler(nullptr);
 
-class Bitmap
-{
-    public: // constructor
-        Bitmap(int width, int height) 
-        : width(width), height(height), bitmap(height, std::vector<bool>(width, false)) {}
-    
-    public: // methods
+class Bitmap {
+    private:
+    // variables
+        int width, height;
+        vector<vector<bool>>(bitmap);
+        Logger log;
+        
+    public:
+    // methods
         void modify(int row, int startCol, int endCol, bool value)
         {
             if (row < 0 || row >= height || startCol < 0 || endCol > width)
@@ -1465,12 +1467,78 @@ class Bitmap
             fclose(fp);
             png_destroy_write_struct(&png_ptr, &info_ptr);
         }
+
+    // constructor
+        Bitmap(int width, int height) 
+        : width(width), height(height), bitmap(height, std::vector<bool>(width, false)) {}
     
-    private: // variables
+};
+
+class __color_bitmap__ {
+    private:
+    // Variabels.
         int width, height;
-        vector<vector<bool>>(bitmap);
-        Logger log;
-    
+        std::vector<uint32_t> pixels; // Pixel data in ARGB format
+
+    public:
+    // Constructor.
+        __color_bitmap__(int width, int height, const vector<uint32_t>& pixels)
+        : width(width), height(height), pixels(pixels) {}
+
+    // Methods.
+        void exportToPng(const char *fileName) const
+        {
+            FILE *fp = fopen(fileName, "wb");
+            if (!fp)
+            {
+                // Handle error
+                return;
+            }
+
+            png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
+            if (!png_ptr)
+            {
+                fclose(fp);
+                // Handle error
+                return;
+            }
+
+            png_infop info_ptr = png_create_info_struct(png_ptr);
+            if (!info_ptr)
+            {
+                fclose(fp);
+                png_destroy_write_struct(&png_ptr, nullptr);
+                // Handle error
+                return;
+            }
+
+            if (setjmp(png_jmpbuf(png_ptr)))
+            {
+                fclose(fp);
+                png_destroy_write_struct(&png_ptr, &info_ptr);
+                // Handle error
+                return;
+            }
+
+            png_init_io(png_ptr, fp);
+            // Note: Using PNG_COLOR_TYPE_RGB_ALPHA to include alpha channel
+            png_set_IHDR(png_ptr, info_ptr, width, height, 8, PNG_COLOR_TYPE_RGB_ALPHA, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
+            png_write_info(png_ptr, info_ptr);
+
+            // Prepare row pointers
+            png_bytep row_pointers[height];
+            for (int y = 0; y < height; y++)
+            {
+                row_pointers[y] = (png_bytep)&pixels[y * width];
+            }
+
+            png_write_image(png_ptr, row_pointers);
+            png_write_end(png_ptr, nullptr);
+            
+            fclose(fp);
+            png_destroy_write_struct(&png_ptr, &info_ptr);
+        }
+
 };
 
 class _scale
@@ -2280,6 +2348,45 @@ class window {
             }
         
         // Get.
+            // ewmh.
+                vector<uint32_t> get_window_icon()
+                {
+                    xcb_intern_atom_cookie_t* cookie = xcb_ewmh_init_atoms(conn, ewmh);
+                    if (!xcb_ewmh_init_atoms_replies(ewmh, cookie, nullptr))
+                    {
+                        log_error("Failed to initialize EWMH atoms.");
+                        return {};
+                    }
+
+                    // Request the _NET_WM_ICON property
+                    xcb_get_property_cookie_t prop_cookie = xcb_get_property(conn, 0, _window, ewmh->_NET_WM_ICON, XCB_GET_PROPERTY_TYPE_ANY, 0, UINT32_MAX);
+                    xcb_get_property_reply_t* prop_reply = xcb_get_property_reply(conn, prop_cookie, nullptr);
+
+                    std::vector<uint32_t> icon_data;
+                    if (prop_reply && prop_reply->value_len > 0)
+                    {
+                        // The value is an array of 32-bit items, so cast the reply's value to a uint32_t pointer
+                        uint32_t* data = (uint32_t*)xcb_get_property_value(prop_reply);
+                        uint32_t len = xcb_get_property_value_length(prop_reply) / sizeof(uint32_t);
+
+                        // Parse icon data (width, height, and ARGB data)
+                        for (uint32_t i = 0; i < len; )
+                        {
+                            uint32_t width = data[i++];
+                            uint32_t height = data[i++];
+                            uint32_t size = width * height;
+
+                            if (i + size > len) break; // Sanity check
+
+                            // Assuming we want the first icon for simplicity
+                            icon_data.assign(data + i, data + i + size);
+                            break; // This example only processes the first icon
+                        }
+                    }
+                    free(prop_reply);
+                    return icon_data;
+                }
+
             // icccm.
                 void get_override_redirect()
                 {
@@ -4405,6 +4512,8 @@ class client {
                 {
                     get_window_parameters();
                 }
+
+                win.get_window_icon();
             }
 
         // Get.

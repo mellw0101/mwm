@@ -10,10 +10,10 @@ ARMV8_CFLAGS =   -std=c++20                     \
 
 ARMV8_CXXFLAGS = ${ARMV8_CFLAGS}
 
-ARMV8_LDFLAGS =  ${LIBS}            \
-                 -flto               \
-                 -O2                 \
-                 -march=armv8-a      \
+ARMV8_LDFLAGS =  ${LIBS}       	\
+                 -flto         	\
+                 -O2           	\
+                 -march=armv8-a	\
                  -std=c++20
 
 FASTFLAGS = -O2	 			\
