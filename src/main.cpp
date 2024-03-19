@@ -182,7 +182,7 @@ static string user;
     user
 
 #define USER_PATH_PREFIX(__address) \
-    string("/home/" + user + __address)
+    "/home/" + user + __address
 
 #define USER_PATH_PREFIX_C_STR(__address) \
     string("/home/" + user + __address).c_str()
@@ -2929,11 +2929,112 @@ class window {
                     clear_window();
                 }
 
+                void set_backround_png(const string &__imagePath)
+                {
+                    Imlib_Image image = imlib_load_image(__imagePath.c_str());
+                    if (!image)
+                    {
+                        log_error("Failed to load image: " + __imagePath);
+                        return;
+                    }
+
+                    imlib_context_set_image(image);
+                    int originalWidth = imlib_image_get_width();
+                    int originalHeight = imlib_image_get_height();
+
+                    // Calculate new size maintaining aspect ratio
+                    double aspectRatio = (double)originalWidth / originalHeight;
+                    int newHeight = _height;
+                    int newWidth = (int)(newHeight * aspectRatio);
+
+                    if (newWidth > _width)
+                    {
+                        newWidth = _width;
+                        newHeight = (int)(newWidth / aspectRatio);
+                    }
+
+                    Imlib_Image scaledImage = imlib_create_cropped_scaled_image(
+                        0, 
+                        0, 
+                        originalWidth, 
+                        originalHeight, 
+                        newWidth, 
+                        newHeight
+                    );
+                    imlib_free_image(); // Free original image
+                    imlib_context_set_image(scaledImage);
+                    DATA32 *data = imlib_image_get_data(); // Get the scaled image data
+                    
+                    // Create an XCB image from the scaled data
+                    xcb_image_t *xcb_image = xcb_image_create_native( 
+                        conn, 
+                        newWidth, 
+                        newHeight,
+                        XCB_IMAGE_FORMAT_Z_PIXMAP, 
+                        screen->root_depth, 
+                        NULL, 
+                        ~0, (uint8_t*)data
+                    );
+
+                    create_pixmap();
+                    create_graphics_exposure_gc();
+                    xcb_rectangle_t rect = {0, 0, _width, _height};
+                    xcb_poly_fill_rectangle(
+                        conn, 
+                        pixmap, 
+                        gc, 
+                        1, 
+                        &rect
+                    );
+
+                    // Calculate position to center the image
+                    int x(0), y(0);
+                    if (newWidth != _width)
+                    {
+                        x = (_width - newWidth) / 2;
+                    }
+                    if (newHeight != _height)
+                    {
+                        y = (_height - newHeight) / 2;
+                    }
+                    
+                    xcb_image_put( // Put the scaled image onto the pixmap at the calculated position
+                        conn, 
+                        pixmap, 
+                        gc, 
+                        xcb_image, 
+                        x,
+                        y, 
+                        0
+                    );
+
+                    xcb_change_window_attributes( // Set the pixmap as the background of the window
+                        conn,
+                        _window,
+                        XCB_CW_BACK_PIXMAP,
+                        &pixmap
+                    );
+
+                    // Cleanup
+                    xcb_free_gc(conn, gc); // Free the GC
+                    xcb_image_destroy(xcb_image);
+                    imlib_free_image(); // Free scaled image
+
+                    clear_window();
+                }
+
                 void make_then_set_png(const char * file_name, const std::vector<std::vector<bool>> &bitmap)
                 {
                     create_png_from_vector_bitmap(file_name, bitmap);
                     set_backround_png(file_name);
                 }
+
+                void make_then_set_png(const string &__file_name, const std::vector<std::vector<bool>> &bitmap)
+                {
+                    create_png_from_vector_bitmap(__file_name.c_str(), bitmap);
+                    set_backround_png(__file_name);
+                }
+
 
         // Draw.
             void draw_text(const char *str , const int &text_color, const int &backround_color, const char *font_name, const int16_t &x, const int16_t &y)
@@ -4243,7 +4344,7 @@ class client {
             close_button.set_backround_color(BLUE);
             close_button.grab_button({ { L_MOUSE_BUTTON, NULL } });
             close_button.map();
-            close_button.make_then_set_png("/home/mellw/close.png", CLOSE_BUTTON_BITMAP);
+            close_button.make_then_set_png(USER_PATH_PREFIX("/close.png"), CLOSE_BUTTON_BITMAP);
         }
     
         void make_max_button()
@@ -4277,9 +4378,10 @@ class client {
             bitmap.modify(14, 4, 5, true);
             bitmap.modify(14, 15, 16, true);
             bitmap.modify(15, 4, 16, true);
-            bitmap.exportToPng("/home/mellw/max.png");
+            string s = USER_PATH_PREFIX("/max.png");
+            bitmap.exportToPng(s.c_str());
 
-            max_button.set_backround_png("/home/mellw/max.png");
+            max_button.set_backround_png(USER_PATH_PREFIX("/max.png"));
         }
     
         void make_min_button()
@@ -4293,9 +4395,10 @@ class client {
             Bitmap bitmap(20, 20);            
             bitmap.modify(9, 4, 16, true);
             bitmap.modify(10, 4, 16, true);
-            bitmap.exportToPng("/home/mellw/min.png");
+            string s = USER_PATH_PREFIX("/min.png");
+            bitmap.exportToPng(s.c_str());
 
-            min_button.set_backround_png("/home/mellw/min.png");
+            min_button.set_backround_png(USER_PATH_PREFIX("/min.png"));
         }
     
         void make_borders()
@@ -5249,24 +5352,10 @@ class Window_Manager {
             void configure_root()
             {
                 root.set_backround_color(DARK_GREY);
-                // uint32_t mask =
-                //     XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT |
-                //     XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY   |
-                //     XCB_EVENT_MASK_ENTER_WINDOW          |
-                //     XCB_EVENT_MASK_LEAVE_WINDOW          |
-                //     XCB_EVENT_MASK_STRUCTURE_NOTIFY      |
-                //     XCB_EVENT_MASK_BUTTON_PRESS          |
-                //     XCB_EVENT_MASK_BUTTON_RELEASE        |
-                //     XCB_EVENT_MASK_KEY_PRESS             |
-                //     XCB_EVENT_MASK_KEY_RELEASE           |
-                //     XCB_EVENT_MASK_FOCUS_CHANGE          |
-                //     XCB_EVENT_MASK_POINTER_MOTION
-                // ; 
-                // root.apply_event_mask(&mask);
                 root.set_event_mask(ROOT_EVENT_MASK);
                 root.grab_default_keys();
                 root.clear();
-                root.set_backround_png(USER_PATH_PREFIX_C_STR("/mwm_png/galaxy21.png"));
+                root.set_backround_png(USER_PATH_PREFIX("/mwm_png/galaxy21.png"));
                 root.set_pointer(CURSOR::arrow);
             }
 
@@ -5912,268 +6001,269 @@ namespace {
     #define WIFI_INFO_WINDOW_HEIGHT WIFI_DROPDOWN_HEIGHT - 120
 }
 class __status_bar__ {
-private:
+    private:
     // Methods.
-    string get_time_and_date__()
-    {
-        long now(time({}));
-        char buf[80];
-        strftime(
-            buf,
-            size(buf),
-            "%Y-%m-%d %H:%M:%S",
-            localtime(&now)
-        );
-
-        return string(buf);
-    }
-
-    void create_windows__()
-    {
-        _bar_window.create_window(
-            screen->root,
-            BAR_WINDOW_X,
-            BAR_WINDOW_Y,
-            BAR_WINDOW_WIDTH,
-            BAR_WINDOW_HEIGHT,
-            DARK_GREY,
-            NONE,
-            MAP
-        );
-        _time_date_window.create_window(
-            _bar_window,
-            TIME_DATE_WINDOW_X,
-            TIME_DATE_WINDOW_Y,
-            TIME_DATE_WINDOW_WIDTH,
-            TIME_DATE_WINDOW_HEIGHT,
-            DARK_GREY,
-            XCB_EVENT_MASK_EXPOSURE,
-            MAP
-        );
-        _wifi_window.create_window(
-            _bar_window,
-            WIFI_WINDOW_X,
-            WIFI_WINDOW_Y,
-            WIFI_WINDOW_WIDTH,
-            WIFI_WINDOW_HEIGHT,
-            DARK_GREY,
-            XCB_EVENT_MASK_BUTTON_PRESS,
-            MAP
-        );
-
-        Bitmap bitmap(20, 20);
-        
-        bitmap.modify(1, 6, 13, 1);
-        bitmap.modify(2, 4, 15, 1);
-        bitmap.modify(3, 3, 7, 1); bitmap.modify(3, 12, 16, 1);
-        bitmap.modify(4, 2, 5, 1); bitmap.modify(4, 14, 17, 1);
-        bitmap.modify(5, 1, 4, 1); bitmap.modify(5, 15, 18, 1);
-        
-        bitmap.modify(5, 7, 12, 1);
-        bitmap.modify(6, 6, 13, 1);
-        bitmap.modify(7, 5, 9, 1); bitmap.modify(7, 10, 14, 1);
-        bitmap.modify(8, 4, 7, 1); bitmap.modify(8, 12, 15, 1);
-        bitmap.modify(9, 3, 6, 1); bitmap.modify(9, 13, 16, 1);
-        
-        bitmap.modify(10, 9, 10, 1);
-        bitmap.modify(11, 8, 11, 1);
-        bitmap.modify(12, 7, 12, 1);
-        bitmap.modify(13, 8, 11, 1);
-        bitmap.modify(14, 9, 10, 1);
-
-        bitmap.exportToPng("/home/mellw/wifi.png");
-        _wifi_window.set_backround_png("/home/mellw/wifi.png");
-        _wifi_window.set_pointer(CURSOR::hand2);
-
-        _audio_window.create_window(
-            _bar_window,
-            (WIFI_WINDOW_X - 50),
-            0,
-            50,
-            20,
-            DARK_GREY,
-            XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE,
-            MAP,
-            (int[]){ALL, 2, BLACK}
-        );
-        _audio_window.set_pointer(CURSOR::hand2);
-        expose(_audio_window);
-    }
-
-    void show__(const uint32_t &__window)
-    {
-        if (__window == _wifi_dropdown_window)
+        string get_time_and_date__()
         {
-            _wifi_dropdown_window.create_window(
+            long now(time({}));
+            char buf[80];
+            strftime(
+                buf,
+                size(buf),
+                "%Y-%m-%d %H:%M:%S",
+                localtime(&now)
+            );
+
+            return string(buf);
+        }
+
+        void create_windows__()
+        {
+            _bar_window.create_window(
                 screen->root,
-                WIFI_DROPDOWN_X,
-                WIFI_DROPDOWN_Y,
-                WIFI_DROPDOWN_WIDTH,
-                WIFI_DROPDOWN_HEIGHT,
+                BAR_WINDOW_X,
+                BAR_WINDOW_Y,
+                BAR_WINDOW_WIDTH,
+                BAR_WINDOW_HEIGHT,
                 DARK_GREY,
                 NONE,
-                MAP,
-                (int[3]){ALL, WIFI_DROPDOWN_BORDER, BLACK}
+                MAP
             );
-            _wifi_close_window.create_window(
-                _wifi_dropdown_window,
-                WIFI_CLOSE_WINDOW_X,
-                WIFI_CLOSE_WINDOW_Y,
-                WIFI_CLOSE_WINDOW_WIDTH,
-                WIFI_CLOSE_WINDOW_HEIGHT,
-                WHITE,
+            _time_date_window.create_window(
+                _bar_window,
+                TIME_DATE_WINDOW_X,
+                TIME_DATE_WINDOW_Y,
+                TIME_DATE_WINDOW_WIDTH,
+                TIME_DATE_WINDOW_HEIGHT,
+                DARK_GREY,
+                XCB_EVENT_MASK_EXPOSURE,
+                MAP
+            );
+            _wifi_window.create_window(
+                _bar_window,
+                WIFI_WINDOW_X,
+                WIFI_WINDOW_Y,
+                WIFI_WINDOW_WIDTH,
+                WIFI_WINDOW_HEIGHT,
+                DARK_GREY,
+                XCB_EVENT_MASK_BUTTON_PRESS,
+                MAP
+            );
+
+            Bitmap bitmap(20, 20);
+            
+            bitmap.modify(1, 6, 13, 1);
+            bitmap.modify(2, 4, 15, 1);
+            bitmap.modify(3, 3, 7, 1); bitmap.modify(3, 12, 16, 1);
+            bitmap.modify(4, 2, 5, 1); bitmap.modify(4, 14, 17, 1);
+            bitmap.modify(5, 1, 4, 1); bitmap.modify(5, 15, 18, 1);
+            
+            bitmap.modify(5, 7, 12, 1);
+            bitmap.modify(6, 6, 13, 1);
+            bitmap.modify(7, 5, 9, 1); bitmap.modify(7, 10, 14, 1);
+            bitmap.modify(8, 4, 7, 1); bitmap.modify(8, 12, 15, 1);
+            bitmap.modify(9, 3, 6, 1); bitmap.modify(9, 13, 16, 1);
+            
+            bitmap.modify(10, 9, 10, 1);
+            bitmap.modify(11, 8, 11, 1);
+            bitmap.modify(12, 7, 12, 1);
+            bitmap.modify(13, 8, 11, 1);
+            bitmap.modify(14, 9, 10, 1);
+
+            string s = USER_PATH_PREFIX("/wifi.png");
+            bitmap.exportToPng(s.c_str());
+            _wifi_window.set_backround_png(USER_PATH_PREFIX("/wifi.png"));
+            _wifi_window.set_pointer(CURSOR::hand2);
+
+            _audio_window.create_window(
+                _bar_window,
+                (WIFI_WINDOW_X - 50),
+                0,
+                50,
+                20,
+                DARK_GREY,
                 XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE,
                 MAP,
-                (int[3]){ALL, WIFI_DROPDOWN_BORDER, BLACK}
+                (int[]){ALL, 2, BLACK}
             );
-            _wifi_close_window.set_pointer(CURSOR::hand2);
-            expose(_wifi_close_window);  
-            _wifi_info_window.create_window(
-                _wifi_dropdown_window,
-                WIFI_INFO_WINDOW_X,
-                WIFI_INFO_WINDOW_Y,
-                WIFI_INFO_WINDOW_WIDTH,
-                WIFI_INFO_WINDOW_HEIGHT,
-                WHITE,
-                XCB_EVENT_MASK_EXPOSURE,
-                MAP,
-                (int[3]){ALL, WIFI_DROPDOWN_BORDER, BLACK}
-            );
-            expose(_wifi_info_window);
-        }
-        
-        if (__window == _audio_dropdown_window)
-        {
-            _audio_dropdown_window.create_window(
-                screen->root,
-                ((WIFI_WINDOW_X - (50 / 2) - (200 / 2))),
-                20,
-                200,
-                100,
-                DARK_GREY,
-                NONE,
-                MAP,
-                (int[3]){ALL, 2, BLACK}
-            );
-        }
-    }
-
-    void hide__(const uint32_t &__window)
-    {
-        if (__window == _wifi_dropdown_window)
-        {
-            _wifi_close_window.unmap();
-            _wifi_close_window.kill();
-            _wifi_info_window.unmap();
-            _wifi_info_window.kill();
-            _wifi_dropdown_window.unmap();
-            _wifi_dropdown_window.kill();
+            _audio_window.set_pointer(CURSOR::hand2);
+            expose(_audio_window);
         }
 
-        if (__window == _audio_dropdown_window)
+        void show__(const uint32_t &__window)
         {
-            _audio_dropdown_window.unmap();
-            _audio_dropdown_window.kill();
+            if (__window == _wifi_dropdown_window)
+            {
+                _wifi_dropdown_window.create_window(
+                    screen->root,
+                    WIFI_DROPDOWN_X,
+                    WIFI_DROPDOWN_Y,
+                    WIFI_DROPDOWN_WIDTH,
+                    WIFI_DROPDOWN_HEIGHT,
+                    DARK_GREY,
+                    NONE,
+                    MAP,
+                    (int[3]){ALL, WIFI_DROPDOWN_BORDER, BLACK}
+                );
+                _wifi_close_window.create_window(
+                    _wifi_dropdown_window,
+                    WIFI_CLOSE_WINDOW_X,
+                    WIFI_CLOSE_WINDOW_Y,
+                    WIFI_CLOSE_WINDOW_WIDTH,
+                    WIFI_CLOSE_WINDOW_HEIGHT,
+                    WHITE,
+                    XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE,
+                    MAP,
+                    (int[3]){ALL, WIFI_DROPDOWN_BORDER, BLACK}
+                );
+                _wifi_close_window.set_pointer(CURSOR::hand2);
+                expose(_wifi_close_window);  
+                _wifi_info_window.create_window(
+                    _wifi_dropdown_window,
+                    WIFI_INFO_WINDOW_X,
+                    WIFI_INFO_WINDOW_Y,
+                    WIFI_INFO_WINDOW_WIDTH,
+                    WIFI_INFO_WINDOW_HEIGHT,
+                    WHITE,
+                    XCB_EVENT_MASK_EXPOSURE,
+                    MAP,
+                    (int[3]){ALL, WIFI_DROPDOWN_BORDER, BLACK}
+                );
+                expose(_wifi_info_window);
+            }
+            
+            if (__window == _audio_dropdown_window)
+            {
+                _audio_dropdown_window.create_window(
+                    screen->root,
+                    ((WIFI_WINDOW_X - (50 / 2) - (200 / 2))),
+                    20,
+                    200,
+                    100,
+                    DARK_GREY,
+                    NONE,
+                    MAP,
+                    (int[3]){ALL, 2, BLACK}
+                );
+            }
         }
-    }
 
-    void setup_events__()
-    {
-        event_handler->setEventCallback(XCB_EXPOSE,  [&](Ev ev)-> void
+        void hide__(const uint32_t &__window)
         {
-            RE_CAST_EV(xcb_expose_event_t);
-            expose(e->window);
-        });
-        
-        _wifi_close_window.on_button_press_event([&]()-> void
-        {
-            hide__(_wifi_dropdown_window);
-        });
+            if (__window == _wifi_dropdown_window)
+            {
+                _wifi_close_window.unmap();
+                _wifi_close_window.kill();
+                _wifi_info_window.unmap();
+                _wifi_info_window.kill();
+                _wifi_dropdown_window.unmap();
+                _wifi_dropdown_window.kill();
+            }
 
-        _wifi_window.on_button_press_event([&]()-> void
+            if (__window == _audio_dropdown_window)
+            {
+                _audio_dropdown_window.unmap();
+                _audio_dropdown_window.kill();
+            }
+        }
+
+        void setup_events__()
         {
-            if (_wifi_dropdown_window.is_mapped())
+            event_handler->setEventCallback(XCB_EXPOSE,  [&](Ev ev)-> void
+            {
+                RE_CAST_EV(xcb_expose_event_t);
+                expose(e->window);
+            });
+            
+            _wifi_close_window.on_button_press_event([&]()-> void
             {
                 hide__(_wifi_dropdown_window);
-            }
-            else
-            {
-                if (_audio_dropdown_window.is_mapped())
-                {
-                    hide__(_audio_dropdown_window);
-                }
+            });
 
-                show__(_wifi_dropdown_window);
-            }
-        });
-
-        _audio_window.on_button_press_event([&]()-> void
-        {
-            if (_audio_dropdown_window.is_mapped())
-            {
-                hide__(_audio_dropdown_window);
-            }
-            else
+            _wifi_window.on_button_press_event([&]()-> void
             {
                 if (_wifi_dropdown_window.is_mapped())
                 {
                     hide__(_wifi_dropdown_window);
                 }
-
-                show__(_audio_dropdown_window);
-            }
-        });
-    }
-
-    void setup_thread__(const uint32_t &__window)
-    {
-        if (__window == _time_date_window)
-        {
-            function<void()> __time__ = [&]()-> void
-            {
-                while (true)
+                else
                 {
-                    this->_time_date_window.send_event(XCB_EVENT_MASK_EXPOSURE);
-                    this_thread::sleep_for(chrono::seconds(1));
+                    if (_audio_dropdown_window.is_mapped())
+                    {
+                        hide__(_audio_dropdown_window);
+                    }
+
+                    show__(_wifi_dropdown_window);
                 }
-            };
+            });
 
-            thread(__time__).detach();
+            _audio_window.on_button_press_event([&]()-> void
+            {
+                if (_audio_dropdown_window.is_mapped())
+                {
+                    hide__(_audio_dropdown_window);
+                }
+                else
+                {
+                    if (_wifi_dropdown_window.is_mapped())
+                    {
+                        hide__(_wifi_dropdown_window);
+                    }
+
+                    show__(_audio_dropdown_window);
+                }
+            });
         }
-    }
 
-public:
+        void setup_thread__(const uint32_t &__window)
+        {
+            if (__window == _time_date_window)
+            {
+                function<void()> __time__ = [&]()-> void
+                {
+                    while (true)
+                    {
+                        this->_time_date_window.send_event(XCB_EVENT_MASK_EXPOSURE);
+                        this_thread::sleep_for(chrono::seconds(1));
+                    }
+                };
+
+                thread(__time__).detach();
+            }
+        }
+
+    public:
     // Variabels.
-    window(_bar_window),
-        (_time_date_window), 
-        (_wifi_window), (_wifi_dropdown_window), (_wifi_close_window), (_wifi_info_window),
-        (_audio_window), (_audio_dropdown_window);
+        window(_bar_window),
+            (_time_date_window), 
+            (_wifi_window), (_wifi_dropdown_window), (_wifi_close_window), (_wifi_info_window),
+            (_audio_window), (_audio_dropdown_window);
 
     // Methods.
-    void init()
-    {
-        create_windows__();
-        setup_events__();
-        setup_thread__(_time_date_window);
-    }
-
-    void expose(const uint32_t &__window)
-    {
-        if (__window == _time_date_window ) _time_date_window.draw_text_auto_color(get_time_and_date__().c_str(), 4, 15);
-        if (__window == _audio_window     ) _audio_window.draw_text_auto_color("Audio", 4, 15);
-        if (__window == _wifi_close_window) _wifi_close_window.draw_text_auto_color("Close", 22, 15,BLACK);
-        if (__window == _wifi_info_window )
+        void init()
         {
-            string local_ip("Local ip: " + network->get_local_ip_info(__network__::LOCAL_IP));
-            _wifi_info_window.draw_text_auto_color(local_ip.c_str(), 4, 16, BLACK);
-
-            string local_interface("interface: " + network->get_local_ip_info(__network__::INTERFACE_FOR_LOCAL_IP));
-            _wifi_info_window.draw_text_auto_color(local_interface.c_str(), 4, 30, BLACK);
+            create_windows__();
+            setup_events__();
+            setup_thread__(_time_date_window);
         }
-    }
+
+        void expose(const uint32_t &__window)
+        {
+            if (__window == _time_date_window ) _time_date_window.draw_text_auto_color(get_time_and_date__().c_str(), 4, 15);
+            if (__window == _audio_window     ) _audio_window.draw_text_auto_color("Audio", 4, 15);
+            if (__window == _wifi_close_window) _wifi_close_window.draw_text_auto_color("Close", 22, 15,BLACK);
+            if (__window == _wifi_info_window )
+            {
+                string local_ip("Local ip: " + network->get_local_ip_info(__network__::LOCAL_IP));
+                _wifi_info_window.draw_text_auto_color(local_ip.c_str(), 4, 16, BLACK);
+
+                string local_interface("interface: " + network->get_local_ip_info(__network__::INTERFACE_FOR_LOCAL_IP));
+                _wifi_info_window.draw_text_auto_color(local_interface.c_str(), 4, 30, BLACK);
+            }
+        }
 
     // Constructor.
-    __status_bar__() {}
+        __status_bar__() {}
 
 }; static __status_bar__ *status_bar(nullptr);
 
