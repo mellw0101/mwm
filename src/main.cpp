@@ -2385,6 +2385,12 @@ class window {
                         *__y        = hints.y;
                         *__width    = hints.width;
                         *__height   = hints.height;
+                        log_num("min_width: ", hints.min_width);
+                        log_num("min_height: ", hints.min_height);
+                        log_num("width", hints.width);
+                        log_num("height", hints.height);
+                        log_num("x", hints.x);
+                        log_num("y", hints.y);
                     }
                     else
                     {
@@ -4420,6 +4426,24 @@ class client {
                 free(reply);
             }
 
+            void get_window_parameters_and_log()
+            {
+                xcb_get_geometry_cookie_t cookie = xcb_get_geometry(conn, win);
+                xcb_get_geometry_reply_t *reply = xcb_get_geometry_reply(conn, cookie, nullptr);
+                if (reply == nullptr)
+                {
+                    log_error("Unable to get window geometry.");
+                    return;
+                }
+
+                log_num("", reply->x);
+                log_num("", reply->y);
+                log_num("", reply->width);
+                log_num("", reply->height);
+
+                free(reply);
+            }
+
         // Unset.
             void unset_EWMH_fullscreen_state()
             {
@@ -5667,6 +5691,7 @@ class Window_Manager {
                 // c->win.get_min_window_size_hints();
                 // c->win.get_window_size_hints();
                 c->set_client_params();
+                c->get_window_parameters_and_log();
                 c->win.get_window_icon_name();
                 // c->get_window_parameters();
 
