@@ -5589,8 +5589,12 @@ class Window_Manager {
         // Init.
             void _conn(const char *displayname, int *screenp)
             {
+                loutI << "Running" << endl;
+
                 conn = xcb_connect(displayname, screenp);
                 check_conn();
+                
+                loutI << "Done" << endl;
             }
 
             void _ewmh()
