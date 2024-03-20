@@ -3078,227 +3078,235 @@ class window {
                     update(x, y, _width, height);
                 }
 
-            // Backround.
-                void set_backround_color(COLOR color)
+        // Backround.
+            void set_backround_color(int __color)
+            {
+                _color = __color;
+                change_back_pixel(get_color(__color));
+            }
+
+            void change_backround_color(int __color)
+            {
+                set_backround_color(__color);
+                clear();
+                xcb_flush(conn);
+                send_event(XCB_EVENT_MASK_EXPOSURE);
+            }
+
+            void set_backround_color_8_bit(const uint8_t &red_value, const uint8_t &green_value, const uint8_t &blue_value)
+            {
+                change_back_pixel(get_color(red_value, green_value, blue_value));
+            }
+
+            void set_backround_color_16_bit(const uint16_t & red_value, const uint16_t & green_value, const uint16_t & blue_value)
+            {
+                change_back_pixel(get_color(red_value, green_value, blue_value));
+            }
+
+            void set_backround_png(const char * imagePath)
+            {
+                Imlib_Image image = imlib_load_image(imagePath);
+                if (!image)
                 {
-                    _color = color;
-                    change_back_pixel(get_color(color));
+                    log_error("Failed to load image: " + std::string(imagePath));
+                    return;
                 }
 
-                void set_backround_color_8_bit(const uint8_t &red_value, const uint8_t &green_value, const uint8_t &blue_value)
+                imlib_context_set_image(image);
+                int originalWidth = imlib_image_get_width();
+                int originalHeight = imlib_image_get_height();
+
+                // Calculate new size maintaining aspect ratio
+                double aspectRatio = (double)originalWidth / originalHeight;
+                int newHeight = _height;
+                int newWidth = (int)(newHeight * aspectRatio);
+
+                if (newWidth > _width)
                 {
-                    change_back_pixel(get_color(red_value, green_value, blue_value));
+                    newWidth = _width;
+                    newHeight = (int)(newWidth / aspectRatio);
                 }
 
-                void set_backround_color_16_bit(const uint16_t & red_value, const uint16_t & green_value, const uint16_t & blue_value)
+                Imlib_Image scaledImage = imlib_create_cropped_scaled_image(
+                    0, 
+                    0, 
+                    originalWidth, 
+                    originalHeight, 
+                    newWidth, 
+                    newHeight
+                );
+                imlib_free_image(); // Free original image
+                imlib_context_set_image(scaledImage);
+                DATA32 *data = imlib_image_get_data(); // Get the scaled image data
+                
+                // Create an XCB image from the scaled data
+                xcb_image_t *xcb_image = xcb_image_create_native( 
+                    conn, 
+                    newWidth, 
+                    newHeight,
+                    XCB_IMAGE_FORMAT_Z_PIXMAP, 
+                    screen->root_depth, 
+                    NULL, 
+                    ~0, (uint8_t*)data
+                );
+
+                create_pixmap();
+                create_graphics_exposure_gc();
+                xcb_rectangle_t rect = {0, 0, _width, _height};
+                xcb_poly_fill_rectangle(
+                    conn, 
+                    pixmap, 
+                    gc, 
+                    1, 
+                    &rect
+                );
+
+                // Calculate position to center the image
+                int x(0), y(0);
+                if (newWidth != _width)
                 {
-                    change_back_pixel(get_color(red_value, green_value, blue_value));
+                    x = (_width - newWidth) / 2;
+                }
+                if (newHeight != _height)
+                {
+                    y = (_height - newHeight) / 2;
+                }
+                
+                xcb_image_put( // Put the scaled image onto the pixmap at the calculated position
+                    conn, 
+                    pixmap, 
+                    gc, 
+                    xcb_image, 
+                    x,
+                    y, 
+                    0
+                );
+
+                xcb_change_window_attributes( // Set the pixmap as the background of the window
+                    conn,
+                    _window,
+                    XCB_CW_BACK_PIXMAP,
+                    &pixmap
+                );
+
+                // Cleanup
+                xcb_free_gc(conn, gc); // Free the GC
+                xcb_image_destroy(xcb_image);
+                imlib_free_image(); // Free scaled image
+
+                clear_window();
+            }
+
+            void set_backround_png(const string &__imagePath)
+            {
+                Imlib_Image image = imlib_load_image(__imagePath.c_str());
+                if (!image)
+                {
+                    log_error("Failed to load image: " + __imagePath);
+                    return;
                 }
 
-                void set_backround_png(const char * imagePath)
+                imlib_context_set_image(image);
+                int originalWidth = imlib_image_get_width();
+                int originalHeight = imlib_image_get_height();
+
+                // Calculate new size maintaining aspect ratio
+                double aspectRatio = (double)originalWidth / originalHeight;
+                int newHeight = _height;
+                int newWidth = (int)(newHeight * aspectRatio);
+
+                if (newWidth > _width)
                 {
-                    Imlib_Image image = imlib_load_image(imagePath);
-                    if (!image)
-                    {
-                        log_error("Failed to load image: " + std::string(imagePath));
-                        return;
-                    }
-
-                    imlib_context_set_image(image);
-                    int originalWidth = imlib_image_get_width();
-                    int originalHeight = imlib_image_get_height();
-
-                    // Calculate new size maintaining aspect ratio
-                    double aspectRatio = (double)originalWidth / originalHeight;
-                    int newHeight = _height;
-                    int newWidth = (int)(newHeight * aspectRatio);
-
-                    if (newWidth > _width)
-                    {
-                        newWidth = _width;
-                        newHeight = (int)(newWidth / aspectRatio);
-                    }
-
-                    Imlib_Image scaledImage = imlib_create_cropped_scaled_image(
-                        0, 
-                        0, 
-                        originalWidth, 
-                        originalHeight, 
-                        newWidth, 
-                        newHeight
-                    );
-                    imlib_free_image(); // Free original image
-                    imlib_context_set_image(scaledImage);
-                    DATA32 *data = imlib_image_get_data(); // Get the scaled image data
-                    
-                    // Create an XCB image from the scaled data
-                    xcb_image_t *xcb_image = xcb_image_create_native( 
-                        conn, 
-                        newWidth, 
-                        newHeight,
-                        XCB_IMAGE_FORMAT_Z_PIXMAP, 
-                        screen->root_depth, 
-                        NULL, 
-                        ~0, (uint8_t*)data
-                    );
-
-                    create_pixmap();
-                    create_graphics_exposure_gc();
-                    xcb_rectangle_t rect = {0, 0, _width, _height};
-                    xcb_poly_fill_rectangle(
-                        conn, 
-                        pixmap, 
-                        gc, 
-                        1, 
-                        &rect
-                    );
-
-                    // Calculate position to center the image
-                    int x(0), y(0);
-                    if (newWidth != _width)
-                    {
-                        x = (_width - newWidth) / 2;
-                    }
-                    if (newHeight != _height)
-                    {
-                        y = (_height - newHeight) / 2;
-                    }
-                    
-                    xcb_image_put( // Put the scaled image onto the pixmap at the calculated position
-                        conn, 
-                        pixmap, 
-                        gc, 
-                        xcb_image, 
-                        x,
-                        y, 
-                        0
-                    );
-
-                    xcb_change_window_attributes( // Set the pixmap as the background of the window
-                        conn,
-                        _window,
-                        XCB_CW_BACK_PIXMAP,
-                        &pixmap
-                    );
-
-                    // Cleanup
-                    xcb_free_gc(conn, gc); // Free the GC
-                    xcb_image_destroy(xcb_image);
-                    imlib_free_image(); // Free scaled image
-
-                    clear_window();
+                    newWidth = _width;
+                    newHeight = (int)(newWidth / aspectRatio);
                 }
 
-                void set_backround_png(const string &__imagePath)
+                Imlib_Image scaledImage = imlib_create_cropped_scaled_image(
+                    0, 
+                    0, 
+                    originalWidth, 
+                    originalHeight, 
+                    newWidth, 
+                    newHeight
+                );
+                imlib_free_image(); // Free original image
+                imlib_context_set_image(scaledImage);
+                DATA32 *data = imlib_image_get_data(); // Get the scaled image data
+                
+                // Create an XCB image from the scaled data
+                xcb_image_t *xcb_image = xcb_image_create_native( 
+                    conn, 
+                    newWidth, 
+                    newHeight,
+                    XCB_IMAGE_FORMAT_Z_PIXMAP, 
+                    screen->root_depth, 
+                    NULL, 
+                    ~0, (uint8_t*)data
+                );
+
+                create_pixmap();
+                create_graphics_exposure_gc();
+                xcb_rectangle_t rect = {0, 0, _width, _height};
+                xcb_poly_fill_rectangle(
+                    conn, 
+                    pixmap, 
+                    gc, 
+                    1, 
+                    &rect
+                );
+
+                // Calculate position to center the image
+                int x(0), y(0);
+                if (newWidth != _width)
                 {
-                    Imlib_Image image = imlib_load_image(__imagePath.c_str());
-                    if (!image)
-                    {
-                        log_error("Failed to load image: " + __imagePath);
-                        return;
-                    }
-
-                    imlib_context_set_image(image);
-                    int originalWidth = imlib_image_get_width();
-                    int originalHeight = imlib_image_get_height();
-
-                    // Calculate new size maintaining aspect ratio
-                    double aspectRatio = (double)originalWidth / originalHeight;
-                    int newHeight = _height;
-                    int newWidth = (int)(newHeight * aspectRatio);
-
-                    if (newWidth > _width)
-                    {
-                        newWidth = _width;
-                        newHeight = (int)(newWidth / aspectRatio);
-                    }
-
-                    Imlib_Image scaledImage = imlib_create_cropped_scaled_image(
-                        0, 
-                        0, 
-                        originalWidth, 
-                        originalHeight, 
-                        newWidth, 
-                        newHeight
-                    );
-                    imlib_free_image(); // Free original image
-                    imlib_context_set_image(scaledImage);
-                    DATA32 *data = imlib_image_get_data(); // Get the scaled image data
-                    
-                    // Create an XCB image from the scaled data
-                    xcb_image_t *xcb_image = xcb_image_create_native( 
-                        conn, 
-                        newWidth, 
-                        newHeight,
-                        XCB_IMAGE_FORMAT_Z_PIXMAP, 
-                        screen->root_depth, 
-                        NULL, 
-                        ~0, (uint8_t*)data
-                    );
-
-                    create_pixmap();
-                    create_graphics_exposure_gc();
-                    xcb_rectangle_t rect = {0, 0, _width, _height};
-                    xcb_poly_fill_rectangle(
-                        conn, 
-                        pixmap, 
-                        gc, 
-                        1, 
-                        &rect
-                    );
-
-                    // Calculate position to center the image
-                    int x(0), y(0);
-                    if (newWidth != _width)
-                    {
-                        x = (_width - newWidth) / 2;
-                    }
-                    if (newHeight != _height)
-                    {
-                        y = (_height - newHeight) / 2;
-                    }
-                    
-                    xcb_image_put( // Put the scaled image onto the pixmap at the calculated position
-                        conn, 
-                        pixmap, 
-                        gc, 
-                        xcb_image, 
-                        x,
-                        y, 
-                        0
-                    );
-
-                    xcb_change_window_attributes( // Set the pixmap as the background of the window
-                        conn,
-                        _window,
-                        XCB_CW_BACK_PIXMAP,
-                        &pixmap
-                    );
-
-                    // Cleanup
-                    xcb_free_gc(conn, gc); // Free the GC
-                    xcb_image_destroy(xcb_image);
-                    imlib_free_image(); // Free scaled image
-
-                    clear_window();
+                    x = (_width - newWidth) / 2;
                 }
-
-                void make_then_set_png(const char * file_name, const std::vector<std::vector<bool>> &bitmap)
+                if (newHeight != _height)
                 {
-                    create_png_from_vector_bitmap(file_name, bitmap);
-                    set_backround_png(file_name);
+                    y = (_height - newHeight) / 2;
                 }
+                
+                xcb_image_put( // Put the scaled image onto the pixmap at the calculated position
+                    conn, 
+                    pixmap, 
+                    gc, 
+                    xcb_image, 
+                    x,
+                    y, 
+                    0
+                );
 
-                void make_then_set_png(const string &__file_name, const std::vector<std::vector<bool>> &bitmap)
-                {
-                    create_png_from_vector_bitmap(__file_name.c_str(), bitmap);
-                    set_backround_png(__file_name);
-                }
+                xcb_change_window_attributes( // Set the pixmap as the background of the window
+                    conn,
+                    _window,
+                    XCB_CW_BACK_PIXMAP,
+                    &pixmap
+                );
 
-                int get_current_backround_color() const
-                {
-                    return _color;
-                }
+                // Cleanup
+                xcb_free_gc(conn, gc); // Free the GC
+                xcb_image_destroy(xcb_image);
+                imlib_free_image(); // Free scaled image
+
+                clear_window();
+            }
+
+            void make_then_set_png(const char * file_name, const std::vector<std::vector<bool>> &bitmap)
+            {
+                create_png_from_vector_bitmap(file_name, bitmap);
+                set_backround_png(file_name);
+            }
+
+            void make_then_set_png(const string &__file_name, const std::vector<std::vector<bool>> &bitmap)
+            {
+                create_png_from_vector_bitmap(__file_name.c_str(), bitmap);
+                set_backround_png(__file_name);
+            }
+
+            int get_current_backround_color() const
+            {
+                return _color;
+            }
 
         // Draw.
             void draw_text(const char *str , const int &text_color, const int &backround_color, const char *font_name, const int16_t &x, const int16_t &y)
@@ -6540,10 +6548,11 @@ class __status_bar__ {
 
                 if (e->event == this->_wifi_close_window)
                 {
-                    this->_wifi_close_window.set_backround_color(WHITE);
-                    this->_wifi_close_window.clear();
-                    xcb_flush(conn);
-                    this->_wifi_close_window.send_event(XCB_EVENT_MASK_EXPOSURE);
+                    // this->_wifi_close_window.set_backround_color(WHITE);
+                    // this->_wifi_close_window.clear();
+                    // xcb_flush(conn);
+                    // this->_wifi_close_window.send_event(XCB_EVENT_MASK_EXPOSURE);
+                    this->_wifi_close_window.change_backround_color(WHITE);
                 }
             });
 
@@ -6560,10 +6569,11 @@ class __status_bar__ {
 
                 if (e->event == this->_wifi_close_window)
                 {
-                    this->_wifi_close_window.set_backround_color(DARK_GREY);
-                    this->_wifi_close_window.clear();
-                    xcb_flush(conn);
-                    this->_wifi_close_window.send_event(XCB_EVENT_MASK_EXPOSURE);
+                    this->_wifi_close_window.change_backround_color(DARK_GREY);
+                    // this->_wifi_close_window.set_backround_color(DARK_GREY);
+                    // this->_wifi_close_window.clear();
+                    // xcb_flush(conn);
+                    // this->_wifi_close_window.send_event(XCB_EVENT_MASK_EXPOSURE);
                 }
             });
         }
