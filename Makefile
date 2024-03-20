@@ -111,4 +111,4 @@ ARMV8: test
 
 uninstall:
 
-.PHONY: all depends clean dist install uninstall
+.PHONY: all depends conf clean dist install uninstall
