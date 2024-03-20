@@ -8390,7 +8390,7 @@ class __screen_settings__ {
 
             if (!res_reply)
             {
-                log_error("Could not get screen resources");
+                loutE << "Could not get screen resources" << endl;
                 return{};
             }
 

@@ -60,7 +60,7 @@ class FileHandler {
 
 class TIME {
 	public:
-		static const std::string get() 
+		static const string get()
 		{
 			// Get the current time
 			const auto & now = std::chrono::system_clock::now();
@@ -76,6 +76,31 @@ class TIME {
 			return ss.str();
 		}
 
+        static string mili()
+        {
+            // Get the current time point
+            auto now = std::chrono::system_clock::now();
+
+            // Convert to time_t for seconds and tm for local time
+            auto in_time_t = std::chrono::system_clock::to_time_t(now);
+            std::tm buf{};
+            localtime_r(&in_time_t, &buf);
+
+            // Use stringstream to format the time
+            std::ostringstream ss;
+            ss << "[" << std::put_time(&buf, "%Y-%m-%d %H:%M:%S");
+
+            // Calculate milliseconds (now time since epoch minus time_t converted back to time since epoch)
+            auto since_epoch = now.time_since_epoch();
+            auto s = std::chrono::duration_cast<std::chrono::seconds>(since_epoch);
+            since_epoch -= s;
+            auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(since_epoch);
+
+            // Append milliseconds to the formatted string, correctly placing the closing square bracket
+            ss << "." << std::setfill('0') << std::setw(3) << ms.count() << "]";
+
+            return ss.str();
+        }
 };
 
 class Converter {
@@ -381,17 +406,15 @@ class toString
 #define log_RESET 		"\033[0m"
 
 
-enum LogLevel 
-{
+typedef enum {
     INFO,
 	INFO_PRIORITY,
     WARNING,
     ERROR,
 	FUNC
-};
+} LogLevel;
 
-class Logger 
-{
+class Logger {
 	public:
 		template<typename T, typename... Args>
 		void log(LogLevel level, const std::string &function, const T& message, Args&&... args) 
@@ -526,7 +549,12 @@ class LogQueue {
 class lout {
 	public:
 	// Methods.
-		static lout& inst() // Make lout a singleton to ensure a single object instance
+		/**
+		 *
+		 * @brief Make lout a singleton to ensure a single object instance
+		 *
+		 */
+		static lout& inst()
 		{
 			static lout instance;
 			return instance;
@@ -601,7 +629,7 @@ class lout {
 			ofstream file("/home/mellw/nlog", ios::app); // Append mode
 			if (file)
 			{
-				file << TIME::get() << ":" << getLogPrefix(currentLevel) << ":" << log_MEGENTA << "[" << currentFunction << "]" << log_RESET << ":" << log_YELLOW << "[Line:" << current_line << "]" << log_RESET << ": " << buffer.str() << "\n";
+				file << TIME::mili() << ":" << getLogPrefix(currentLevel) << ":" << log_MEGENTA << "[" << currentFunction << "]" << log_RESET << ":" << log_YELLOW << "[Line:" << current_line << "]" << log_RESET << ": " << buffer.str() << "\n";
 			}
 		}
 
@@ -657,10 +685,35 @@ inline line_obj_t line(int __line)
 #define LINE line(__LINE__)
 #define FILE_NAME file_name(__FILE__)
 
-#define loutI lout::inst() << INFO << FUNC << LINE
-#define loutE lout::inst() << ERROR << FUNC << LINE
-
 /* LOG DEFENITIONS */
+/**
+ * @brief Macro to log info to the log file
+ *        using the lout class  
+ */
+#define loutI \
+    lout::inst() << INFO << FUNC << LINE
+
+/**
+ * @brief Macro to log an error to the log file
+ *        using the lout class  
+ */
+#define loutE \
+	lout::inst() << ERROR << FUNC << LINE
+
+/**
+ * @brief Macro to log a warning to the log file
+ *        using the lout class
+ */
+#define loutW \
+    lout::inst() << WARNING << FUNC << LINE
+
+/**
+ * @brief Macro to log priority info to the log file
+ *        using the lout class  
+ */
+#define loutIP \
+    lout::inst() << INFO_PRIORITY << FUNC << LINE
+
 #define LOG_ev_response_type(ev)    	    Log::xcb_event_response_type(__func__, ev);
 #define LOG_func                    	    Log::FUNC(__func__);
 #define LOG_error(message)          	    Log::ERROR(__FUNCTION__, "]:[", message);
