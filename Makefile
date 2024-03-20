@@ -14,7 +14,6 @@ ARMV8_CXXFLAGS = ${ARMV8_CFLAGS}
 ARMV8_LDFLAGS =  ${LIBS}       	\
                  -flto         	\
                  -O2           	\
-                 -march=native	\
                  -std=c++20		\
 				 -DARMV8_BUILD
 
@@ -66,6 +65,11 @@ SRC = 	src/main.cpp
 OBJ = $(SRC:../src/%.cpp=%.o)
 DEPS = $(OBJ:.o=.d)
 
+ifeq ($(NET_LOG_ENABLED),1)
+CXXFLAGS += -DNET_LOG_ENABLED
+LDFLAGS += -DNET_LOG_ENABLED
+endif
+
 all: test
 
 %.o: %.cpp
@@ -76,6 +80,7 @@ test: $(OBJ)
 	${CXX} -o $@ $^ ${LDFLAGS}
 
 clean:
+	sudo rm test
 
 backup:
 
@@ -83,6 +88,10 @@ depends:
 	sudo chmod u+x tools/install_depends.sh
 	sudo chmod u+x tools/check_and_install.sh
 	./tools/check_and_install.sh
+
+conf:
+	sudo chmod u+x tools/configure.sh
+	./tools/configure.sh
 
 dist: clean
 

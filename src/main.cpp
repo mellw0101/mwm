@@ -275,98 +275,120 @@ namespace { // Tools
 }
 
 class __net_logger__ {
-// Defines.
-    #define ESP_SERVER "192.168.0.29"
-    #define ESP_PORT 23
+    // Defines.
+        #define ESP_SERVER "192.168.0.29"
+        #define ESP_PORT 23
 
-    #define NET_LOG_MSG(message)                "\033[33m" + message + "\033[0m"
-    #define FUNC_NAME_STR                       string(__func__)
-    #define NET_LOG_FUNCTION                    "\033[34m(FUNCTION) " + FUNC_NAME_STR + "\033[0m"
-    #define NET_LOG_WINDOW(window_name, window) "\033[35m(FUNCTION) " + FUNC_NAME_STR + ":\033[34m (WINDOW_NAME) " + window_name + ":\033[32m (uint32_t) " + to_string(window) + "\033[0m"
-    #define WINDOW(window)                      to_string(window)
-    #define CLASS_NAME_RAW                      typeid(*this).name()
-    #define CLASS_NAME_STR                      string(CLASS_NAME_RAW)
-    /*
-    *
-    * @breif fetches the calling class's name and extracts a substr containing only the class name
-    *
-    * NOTE: this only works for class's with prefix '__'
-    *
-    */
-    #define CLASS_NAME                          CLASS_NAME_STR.substr(CLASS_NAME_STR.find("__"))
-    #define NET_LOG_CLASS                       "\033[35m(CLASS) " + CLASS_NAME + "\033[0m"
-    #define NET_LOG(__type)                     net_logger->send_to_server(__type)
-    #define NET_LOG_CLASS_FUNCTION_START()      NET_LOG(NET_LOG_CLASS + " -> " + NET_LOG_FUNCTION + " -> " + NET_LOG_MSG("Starting"))
-    #define NET_LOG_CLASS_FUNCTION_DONE()       NET_LOG(NET_LOG_CLASS + " -> " + NET_LOG_FUNCTION + " -> " + NET_LOG_MSG("Done!!!"))
+        #define NET_LOG_MSG(message)                "\033[33m" + message + "\033[0m"
+        #define FUNC_NAME_STR                       string(__func__)
+        #define NET_LOG_FUNCTION                    "\033[34m(FUNCTION) " + FUNC_NAME_STR + "\033[0m"
+        #define NET_LOG_WINDOW(window_name, window) "\033[35m(FUNCTION) " + FUNC_NAME_STR + ":\033[34m (WINDOW_NAME) " + window_name + ":\033[32m (uint32_t) " + to_string(window) + "\033[0m"
+        #define WINDOW(window)                      to_string(window)
+        #define CLASS_NAME_RAW                      typeid(*this).name()
+        #define CLASS_NAME_STR                      string(CLASS_NAME_RAW)
+        /**
+         *
+         * @brief fetches the calling class's name and extracts a substr containing only the class name
+         *
+         * NOTE: this only works for class's with prefix '__'
+         *
+         */
+        #define CLASS_NAME                          CLASS_NAME_STR.substr(CLASS_NAME_STR.find("__"))
+        #define NET_LOG_CLASS                       "\033[35m(CLASS) " + CLASS_NAME + "\033[0m"
+        
+        // #define NET_LOG(__type)                     net_logger->send_to_server(__type)
 
-private:
+        #ifdef NET_LOG_ENABLED
+            #define NET_LOG(__type) \
+                net_logger->send_to_server(__type)
+        #else
+            #define NET_LOG(__type) \
+                (void)0
+        #endif
+
+        #ifdef NET_LOG_ENABLED
+            #define INIT_NET_LOG(__address) \
+                net_logger = new __net_logger__; \
+                net_logger->init(__address);
+        #else
+            #define INIT_NET_LOG(__address) \
+                (void)0
+        #endif
+
+        #define NET_LOG_CLASS_FUNCTION_START()      NET_LOG(NET_LOG_CLASS + " -> " + NET_LOG_FUNCTION + " -> " + NET_LOG_MSG("Starting"))
+        #define NET_LOG_CLASS_FUNCTION_DONE()       NET_LOG(NET_LOG_CLASS + " -> " + NET_LOG_FUNCTION + " -> " + NET_LOG_MSG("Done!!!"))
+
+    private:
     // Variabels.
-    long _socket;
-    int _connected;
-    struct sockaddr_in(_sock_addr);
+        long _socket;
+        int _connected;
+        struct sockaddr_in(_sock_addr);
 
-public:
+    public:
     // Methods.
-    void init(const char *__address, const int &__port = 0)
-    {
-        if (NET_DEBUG == false) return;
-
-        if ((_socket = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+        void init(const char *__address, const int &__port = 0)
         {
-            perror("socket");
-            return;
+            if (NET_DEBUG == false) return;
+
+            if ((_socket = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+            {
+                perror("socket");
+                return;
+            }
+
+            _sock_addr.sin_family = AF_INET;
+            if (__address == string(ESP_SERVER))
+            {
+                _sock_addr.sin_port = htons(ESP_PORT);
+            }
+            else
+            {
+                _sock_addr.sin_port = htons(__port);
+            }
+
+            if (inet_pton(AF_INET, __address, &_sock_addr.sin_addr) < 0)
+            {
+                perror("inet_pton");
+                return;
+            }
+
+            if (connect(_socket, (struct sockaddr*)&_sock_addr, sizeof(_sock_addr)) < 0)
+            {
+                perror("connect");
+                return;
+            }
+
+            _connected = true;
         }
 
-        _sock_addr.sin_family = AF_INET;
-        if (__address == string(ESP_SERVER))
+        void send_to_server(const string &__input)
         {
-            _sock_addr.sin_port = htons(ESP_PORT);
+            if (NET_DEBUG == false) return;
+
+            if (!_connected) return;
+
+            if (send(_socket, __input.c_str(), __input.length(), 0) < 0)
+            {
+                _connected = false;
+                return;
+            }
+
+            char s_char('\0');
+            if (send(_socket, &s_char, 1, 0) < 0)
+            {
+                _connected = false;
+                return;
+            }
         }
-        else
-        {
-            _sock_addr.sin_port = htons(__port);
-        }
-
-        if (inet_pton(AF_INET, __address, &_sock_addr.sin_addr) < 0)
-        {
-            perror("inet_pton");
-            return;
-        }
-
-        if (connect(_socket, (struct sockaddr*)&_sock_addr, sizeof(_sock_addr)) < 0)
-        {
-            perror("connect");
-            return;
-        }
-
-        _connected = true;
-    }
-
-    void send_to_server(const string &__input)
-    {
-        if (NET_DEBUG == false) return;
-
-        if (!_connected) return;
-
-        if (send(_socket, __input.c_str(), __input.length(), 0) < 0)
-        {
-            _connected = false;
-            return;
-        }
-
-        char s_char('\0');
-        if (send(_socket, &s_char, 1, 0) < 0)
-        {
-            _connected = false;
-            return;
-        }
-    }
 
     // Constructor.
-    __net_logger__()
-    : _connected(false) {}
+        __net_logger__()
+        : _connected(false) {}
 
-}; static __net_logger__ *net_logger(nullptr);
+}; 
+#ifdef NET_LOG_ENABLED
+    static __net_logger__ *net_logger(nullptr);
+#endif
 
 struct size_pos
 {
@@ -11773,8 +11795,7 @@ void setup_wm()
 
 int main()
 {
-    net_logger = new __net_logger__;
-    net_logger->init(ESP_SERVER);
+    INIT_NET_LOG(ESP_SERVER);
     NET_LOG("Starting mwm.");
 
     function<void()> audio_thread = [&]()-> void
