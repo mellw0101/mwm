@@ -11810,6 +11810,8 @@ class test {
 
 void setup_wm()
 {
+    loutI << "Running" << endl;
+
     user = get_user_name();
 
     wm = new Window_Manager;
@@ -11846,6 +11848,8 @@ void setup_wm()
     
     system_settings = new __system_settings__;
     system_settings->init();
+
+    loutI << "Done" << endl;
 }
 
 int main()

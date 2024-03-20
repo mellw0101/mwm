@@ -19,6 +19,8 @@
 #include <X11/X.h>
 #include <vector>
 #include <xcb/xproto.h>
+#include <mutex>
+#include <queue>
 
 using namespace std;
 
@@ -475,26 +477,58 @@ class Logger
 	;
 };
 
-struct FuncNameWrapper {
+typedef struct {
     string value;
-};
+} FuncNameWrapper;
 
 typedef struct {
 	int line;
-} line_obj_t ;
+} line_obj_t;
+
+typedef struct {
+    LogLevel level;
+    string function;
+    int line;
+    string message;
+    // Include a timestamp if you prefer logging it to be handled by the logger rather than each log call
+} LogMessage;
+
+class LogQueue {
+	public:
+		void push(const LogMessage& message)
+		{
+			lock_guard<mutex> guard(mutex_);
+			queue_.push(message);
+		}
+
+		bool try_pop(LogMessage& message)
+		{
+			lock_guard<mutex> guard(mutex_);
+			if (queue_.empty())
+			{
+				return false;
+			}
+
+			message = queue_.front();
+			queue_.pop();
+			return true;
+	    }
+
+	private:
+		mutex mutex_;
+		queue<LogMessage> queue_;
+};
 
 class lout {
 	public:
 	// Methods.
-		// Make lout a singleton to ensure a single object instance
-		static lout& inst()
+		static lout& inst() // Make lout a singleton to ensure a single object instance
 		{
 			static lout instance;
 			return instance;
 		}
-
-		// Overloads for handling log level, function name wrapper, and endl
-		lout& operator<<(LogLevel logLevel)
+		
+		lout& operator<<(LogLevel logLevel) // Overloads for handling log level, function name wrapper, and endl
 		{
 			currentLevel = logLevel;
 			return *this;
@@ -537,6 +571,7 @@ class lout {
 		string currentFunction;
 		int current_line;
 		ostringstream buffer;
+		mutex log_mutex;
 
 	// Constructor is private to prevent multiple instances
 		lout() {}
@@ -544,6 +579,8 @@ class lout {
 	// Methods.
 		void logMessage()
 		{
+			lock_guard<mutex> guard(log_mutex);
+
 			std::ofstream file("/home/mellw/nlog", std::ios::app); // Append mode
 			if (file)
 			{
