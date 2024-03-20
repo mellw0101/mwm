@@ -6137,7 +6137,11 @@ class __wifi__ {
     // Methods.
         void init()
         {
+            loutI << "Running" << endl;
+
             event_handler->set_key_press_callback((ALT + SUPER), wm->key_codes.f, [this]()-> void { scan__("wlo1"); });
+            
+            loutI << "Done" << endl;
         }
 
     // Constructor.
@@ -6597,9 +6601,13 @@ class __status_bar__ {
     // Methods.
         void init()
         {
+            loutI << "Running" << endl;
+
             create_windows__();
             setup_events__();
             setup_thread__(_time_date_window);
+
+            loutI << "Done" << endl;
         }
 
         void expose(const uint32_t &__window)
@@ -7949,6 +7957,8 @@ class Mwm_Runner {
     // Methods.
         void init()
         {
+            loutI << "Running" << endl;
+
             main_window.create_default(
                 screen->root,
                 (screen->width_in_pixels / 2) - ((140 + (BORDER * 2)) / 2),
@@ -7978,6 +7988,8 @@ class Mwm_Runner {
                 launcher.program((char *) search_window.string().c_str());
                 hide();
             });
+        
+            loutI << "Done" << endl;
         }
 
         void show()
@@ -8020,6 +8032,7 @@ class Mwm_Runner {
                 }
             });
         }
+
 }; static Mwm_Runner * mwm_runner;
 
 class add_app_dialog_window
@@ -8328,7 +8341,11 @@ class __file_app__ {
 
         void init()
         {
+            loutI << "Running" << endl;
+
             setup_events();
+
+            loutI << "Done" << endl;
         }
 
     // Constructor.
@@ -8766,9 +8783,13 @@ class __screen_settings__ {
 
         void init()
         {
+            loutI << "Running" << endl;
+
             _avalible_resolutions     = get_avalible_resolutions__();
             _current_resolution       = get_current_resolution__();
             _current_resoluton_string = get_current_resolution_string__();
+
+            loutI << "Done" << endl;
         }
 
     // Constructor.
@@ -9340,7 +9361,11 @@ class __system_settings__ {
 
         void init()
         {
+            loutI << "Running" << endl;
+
             setup_events__();
+
+            loutI << "Done" << endl;
         }
 
     // Constructor.
@@ -9363,6 +9388,8 @@ class Dock {
     // Methods.
         void init()
         {
+            loutI << "Running" << endl;
+
             main_window.create_default(screen->root, 0, 0, width, height);
             setup_dock();
             configure_context_menu();
@@ -9375,6 +9402,8 @@ class Dock {
 
             context_menu.init();
             configure_events();
+
+            loutI << "Done" << endl;
         }
 
         void add_app(const char *app_name)

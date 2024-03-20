@@ -482,6 +482,10 @@ typedef struct {
 } FuncNameWrapper;
 
 typedef struct {
+	string value;
+} file_name_obj_t;
+
+typedef struct {
 	int line;
 } line_obj_t;
 
@@ -546,7 +550,19 @@ class lout {
 			return *this;
 		}
 
-		lout& operator<<(std::ostream& (*pf)(std::ostream&))
+		/**
+		 *
+		 * TODO: Add this into the logMessage function to append it to the log message
+		 *
+		 */
+		lout& operator<<(const file_name_obj_t &__name)
+		{
+			current_file = __name.value;
+			return *this;
+		}
+
+
+		lout& operator<<(ostream& (*pf)(ostream&))
 		{
 			if (pf == static_cast<std::ostream& (*)(std::ostream&)>(std::endl))
 			{
@@ -569,6 +585,7 @@ class lout {
 	// Variabels.
 		LogLevel currentLevel;
 		string currentFunction;
+		string current_file;
 		int current_line;
 		ostringstream buffer;
 		mutex log_mutex;
@@ -581,7 +598,7 @@ class lout {
 		{
 			lock_guard<mutex> guard(log_mutex);
 
-			std::ofstream file("/home/mellw/nlog", std::ios::app); // Append mode
+			ofstream file("/home/mellw/nlog", ios::app); // Append mode
 			if (file)
 			{
 				file << TIME::get() << ":" << getLogPrefix(currentLevel) << ":" << log_MEGENTA << "[" << currentFunction << "]" << log_RESET << ":" << log_YELLOW << "[Line:" << current_line << "]" << log_RESET << ": " << buffer.str() << "\n";
@@ -626,6 +643,11 @@ inline FuncNameWrapper func(const char* name)
     return FuncNameWrapper{name};
 }
 
+inline file_name_obj_t file_name(const char* name)
+{
+	return file_name_obj_t{name};
+}
+
 inline line_obj_t line(int __line)
 {
 	return line_obj_t{__line};
@@ -633,6 +655,8 @@ inline line_obj_t line(int __line)
 
 #define FUNC func(__func__)
 #define LINE line(__LINE__)
+#define FILE_NAME file_name(__FILE__)
+
 #define loutI lout::inst() << INFO << FUNC << LINE
 #define loutE lout::inst() << ERROR << FUNC << LINE
 
