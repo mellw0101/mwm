@@ -91,7 +91,7 @@ using namespace std;
 using Uint = unsigned int;
 using SUint = unsigned short int;
 
-#define NET_DEBUG false
+#define NET_DEBUG true
 
 #define EV_CALL(__type) \
     __type, [&](Ev ev)-> void

@@ -81,6 +81,8 @@ test: $(OBJ)
 
 clean:
 	sudo rm test
+	unset CXXFLAGS
+	unset LDFLAGS
 
 backup:
 
