@@ -6,6 +6,7 @@ ARMV8_CFLAGS =   -std=c++20                     \
                  -pedantic                      \
                  -Wall                          \
                  -Wno-deprecated-declarations   \
+				 -DARMV8_BUILD					\
                  ${ARMV8_FASTFLAGS}
 
 ARMV8_CXXFLAGS = ${ARMV8_CFLAGS}
@@ -14,7 +15,8 @@ ARMV8_LDFLAGS =  ${LIBS}       	\
                  -flto         	\
                  -O2           	\
                  -march=native	\
-                 -std=c++20
+                 -std=c++20		\
+				 -DARMV8_BUILD
 
 FASTFLAGS = -O2	 			\
 			-march=native
@@ -52,7 +54,7 @@ LDFLAGS = 	${LIBS} 		\
 			-flto 			\
 			-O2 			\
 			-march=native 	\
-			-std=c++20				
+			-std=c++20		
 
 # -std=c++20
 
