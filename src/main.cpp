@@ -3410,11 +3410,11 @@ class window {
                     {   U_ARROW,    SUPER                   },
                     {   D_ARROW,    SUPER                   },
                     {   TAB,        ALT                     },
-                    {   K,          SUPER                   },
+                    {   K,          SUPER                   }/* ,
                     {   R,          SUPER                   }, // key_binding for 'runner_window'
                     {   F,          SUPER                   }, // key_binding for 'file_app'
                     {   S,          SUPER                   }, // key_binding for 'system_settings'
-                    {   D,          SUPER                   }  // key_binding for 'debub menu'
+                    {   D,          SUPER                   }  // key_binding for 'debub menu' */
                 });
             }
         
@@ -7882,8 +7882,7 @@ class search_window
         vector<window> entry_list;
 };
 
-class Mwm_Runner
-{
+class Mwm_Runner {
     public:
     // Variabels.
         window main_window;
@@ -7965,8 +7964,7 @@ class Mwm_Runner
                 }
             });
         }
-};
-static Mwm_Runner * mwm_runner;
+}; static Mwm_Runner * mwm_runner;
 
 class add_app_dialog_window
 {
@@ -8279,8 +8277,7 @@ class __file_app__ {
 
     // Constructor.
         __file_app__() {}
-};
-static __file_app__ *file_app;
+}; static __file_app__ *file_app;
 
 class __screen_settings__ {
     private:
@@ -8720,8 +8717,7 @@ class __screen_settings__ {
 
     // Constructor.
         __screen_settings__() {}
-};
-static __screen_settings__ *screen_settings(nullptr);
+}; static __screen_settings__ *screen_settings(nullptr);
 
 typedef struct dropdown_menu_t {
     window         _window;
@@ -9296,8 +9292,7 @@ class __system_settings__ {
 
 }; static __system_settings__ *system_settings(nullptr);
 
-class Dock
-{
+class Dock {
     public:
     // Constructor.
         Dock() {}
@@ -9426,11 +9421,9 @@ class Dock
                 }
             }); 
         }
-};
-static Dock * dock;
+}; static Dock * dock;
 
-class mv_client
-{
+class mv_client {
     // Defines.
         #define RIGHT_  screen->width_in_pixels  - c->width
         #define BOTTOM_ screen->height_in_pixels - c->height
@@ -9655,8 +9648,7 @@ class mv_client
 };
 
 mutex mtx;
-class change_desktop
-{
+class change_desktop {
     public:
     // Constructor.
         change_desktop(xcb_connection_t *connection) {}
@@ -10676,125 +10668,123 @@ class resize_client {
         }
 };
 
-class max_win
-{
-private:
+class max_win {
+    private:
     // Variabels.
-    client(*c);
+        client(*c);
 
     // Methods.
-    void max_win_animate(const int &endX, const int &endY, const int &endWidth, const int &endHeight)
-    {
-        animate_client(
-            c, 
-            endX, 
-            endY, 
-            endWidth, 
-            endHeight, 
-            MAXWIN_ANIMATION_DURATION
-        );
-        xcb_flush(conn);
-    }
-    
-    void button_unmax_win()
-    {
-        if (c->max_button_ogsize.x > screen->width_in_pixels ) c->max_button_ogsize.x = (screen->width_in_pixels  / 4);
-        if (c->max_button_ogsize.y > screen->height_in_pixels) c->max_button_ogsize.y = (screen->height_in_pixels / 4);
-
-        if (c->max_button_ogsize.width  == 0 || c->max_button_ogsize.width  > screen->width_in_pixels ) c->max_button_ogsize.width  = (screen->width_in_pixels  / 2);
-        if (c->max_button_ogsize.height == 0 || c->max_button_ogsize.height > screen->height_in_pixels) c->max_button_ogsize.height = (screen->height_in_pixels / 2);
-
-        max_win_animate(
-            c->max_button_ogsize.x,
-            c->max_button_ogsize.y,
-            c->max_button_ogsize.width,
-            c->max_button_ogsize.height
-        ); 
-    }
-    
-    void button_max_win()
-    {
-        c->save_max_button_ogsize();
-        max_win_animate(
-            -BORDER_SIZE,
-            -BORDER_SIZE,
-            (screen->width_in_pixels  + (BORDER_SIZE * 2)),
-            (screen->height_in_pixels + (BORDER_SIZE * 2))
-        );
-    }
-    
-    void ewmh_max_win()
-    {
-        c->save_max_ewmh_ogsize();
-        max_win_animate(
-            - BORDER_SIZE,
-            - TITLE_BAR_HEIGHT - BORDER_SIZE,
-            screen->width_in_pixels + (BORDER_SIZE * 2),
-            screen->height_in_pixels + TITLE_BAR_HEIGHT + (BORDER_SIZE * 2)
-        );
-        c->set_EWMH_fullscreen_state();
-    }
-
-    void ewmh_unmax_win()
-    {
-        if (c->max_ewmh_ogsize.width  > screen->width_in_pixels ) c->max_ewmh_ogsize.width  = screen->width_in_pixels  / 2;
-        if (c->max_ewmh_ogsize.height > screen->height_in_pixels) c->max_ewmh_ogsize.height = screen->height_in_pixels / 2;
+        void max_win_animate(const int &endX, const int &endY, const int &endWidth, const int &endHeight)
+        {
+            animate_client(
+                c, 
+                endX, 
+                endY, 
+                endWidth, 
+                endHeight, 
+                MAXWIN_ANIMATION_DURATION
+            );
+            xcb_flush(conn);
+        }
         
-        if (c->max_ewmh_ogsize.x >= screen->width_in_pixels  - 1) c->max_ewmh_ogsize.x = ((screen->width_in_pixels / 2) - (c->max_ewmh_ogsize.width / 2) - BORDER_SIZE);
-        if (c->max_ewmh_ogsize.y >= screen->height_in_pixels - 1) c->max_ewmh_ogsize.y = ((screen->height_in_pixels / 2) - (c->max_ewmh_ogsize.height / 2) - TITLE_BAR_HEIGHT - BORDER_SIZE);
+        void button_unmax_win()
+        {
+            if (c->max_button_ogsize.x > screen->width_in_pixels ) c->max_button_ogsize.x = (screen->width_in_pixels  / 4);
+            if (c->max_button_ogsize.y > screen->height_in_pixels) c->max_button_ogsize.y = (screen->height_in_pixels / 4);
 
-        max_win_animate(
-            c->max_ewmh_ogsize.x, 
-            c->max_ewmh_ogsize.y, 
-            c->max_ewmh_ogsize.width, 
-            c->max_ewmh_ogsize.height
-        );
-        c->unset_EWMH_fullscreen_state();
-    }
+            if (c->max_button_ogsize.width  == 0 || c->max_button_ogsize.width  > screen->width_in_pixels ) c->max_button_ogsize.width  = (screen->width_in_pixels  / 2);
+            if (c->max_button_ogsize.height == 0 || c->max_button_ogsize.height > screen->height_in_pixels) c->max_button_ogsize.height = (screen->height_in_pixels / 2);
 
-public:
+            max_win_animate(
+                c->max_button_ogsize.x,
+                c->max_button_ogsize.y,
+                c->max_button_ogsize.width,
+                c->max_button_ogsize.height
+            ); 
+        }
+        
+        void button_max_win()
+        {
+            c->save_max_button_ogsize();
+            max_win_animate(
+                -BORDER_SIZE,
+                -BORDER_SIZE,
+                (screen->width_in_pixels  + (BORDER_SIZE * 2)),
+                (screen->height_in_pixels + (BORDER_SIZE * 2))
+            );
+        }
+        
+        void ewmh_max_win()
+        {
+            c->save_max_ewmh_ogsize();
+            max_win_animate(
+                - BORDER_SIZE,
+                - TITLE_BAR_HEIGHT - BORDER_SIZE,
+                screen->width_in_pixels + (BORDER_SIZE * 2),
+                screen->height_in_pixels + TITLE_BAR_HEIGHT + (BORDER_SIZE * 2)
+            );
+            c->set_EWMH_fullscreen_state();
+        }
+
+        void ewmh_unmax_win()
+        {
+            if (c->max_ewmh_ogsize.width  > screen->width_in_pixels ) c->max_ewmh_ogsize.width  = screen->width_in_pixels  / 2;
+            if (c->max_ewmh_ogsize.height > screen->height_in_pixels) c->max_ewmh_ogsize.height = screen->height_in_pixels / 2;
+            
+            if (c->max_ewmh_ogsize.x >= screen->width_in_pixels  - 1) c->max_ewmh_ogsize.x = ((screen->width_in_pixels / 2) - (c->max_ewmh_ogsize.width / 2) - BORDER_SIZE);
+            if (c->max_ewmh_ogsize.y >= screen->height_in_pixels - 1) c->max_ewmh_ogsize.y = ((screen->height_in_pixels / 2) - (c->max_ewmh_ogsize.height / 2) - TITLE_BAR_HEIGHT - BORDER_SIZE);
+
+            max_win_animate(
+                c->max_ewmh_ogsize.x, 
+                c->max_ewmh_ogsize.y, 
+                c->max_ewmh_ogsize.width, 
+                c->max_ewmh_ogsize.height
+            );
+            c->unset_EWMH_fullscreen_state();
+        }
+
+    public:
     // Variabels.
-    enum max_win_type
-    {
-        BUTTON_MAXWIN,
-        EWMH_MAXWIN 
-    };
+        typedef enum {
+            BUTTON_MAXWIN,
+            EWMH_MAXWIN 
+        } max_win_type;
 
     // Constructor.
-    max_win(client *c, max_win_type type)
-    : c(c)
-    {
-        switch (type)
+        max_win(client *c, max_win_type type)
+        : c(c)
         {
-            case EWMH_MAXWIN:
+            switch (type)
             {
-                if (c->is_EWMH_fullscreen())
+                case EWMH_MAXWIN:
                 {
-                    ewmh_unmax_win();
-                }
-                else
-                {
-                    ewmh_max_win();
+                    if (c->is_EWMH_fullscreen())
+                    {
+                        ewmh_unmax_win();
+                    }
+                    else
+                    {
+                        ewmh_max_win();
+                    }
+
+                    break;
                 }
 
-                break;
-            }
-
-            case BUTTON_MAXWIN:
-            {
-                if (c->is_button_max_win())
+                case BUTTON_MAXWIN:
                 {
-                    button_unmax_win();
-                }
-                else
-                { 
-                    button_max_win();
-                }
+                    if (c->is_button_max_win())
+                    {
+                        button_unmax_win();
+                    }
+                    else
+                    { 
+                        button_max_win();
+                    }
 
-                break; 
+                    break; 
+                }
             }
         }
-    }
 };
 
 /**
