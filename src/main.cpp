@@ -11811,15 +11811,15 @@ void setup_wm()
     wm->init();
     
     change_desktop::teleport_to(1);
-    #ifndef ARMV8_BUILD
-        dock = new Dock;
-        dock->add_app("konsole");
-        dock->add_app("alacritty");
-        dock->add_app("google-chrome-stable");
-        dock->add_app("code");
-        dock->add_app("falkon");
-        dock->init();
-    #endif
+    // #ifndef ARMV8_BUILD
+    //     dock = new Dock;
+    //     dock->add_app("konsole");
+    //     dock->add_app("alacritty");
+    //     dock->add_app("google-chrome-stable");
+    //     dock->add_app("code");
+    //     dock->add_app("falkon");
+    //     dock->init();
+    // #endif
 
     mwm_runner = new Mwm_Runner;
     mwm_runner->init();
