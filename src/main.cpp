@@ -6540,18 +6540,11 @@ class __status_bar__ {
                 RE_CAST_EV(xcb_enter_notify_event_t);
                 if (e->event == this->_audio_window)
                 {
-                    this->_audio_window.set_backround_color(WHITE);
-                    this->_audio_window.clear();
-                    xcb_flush(conn);
-                    this->_audio_window.send_event(XCB_EVENT_MASK_EXPOSURE);
+                    this->_audio_window.change_backround_color(WHITE);
                 }
 
                 if (e->event == this->_wifi_close_window)
                 {
-                    // this->_wifi_close_window.set_backround_color(WHITE);
-                    // this->_wifi_close_window.clear();
-                    // xcb_flush(conn);
-                    // this->_wifi_close_window.send_event(XCB_EVENT_MASK_EXPOSURE);
                     this->_wifi_close_window.change_backround_color(WHITE);
                 }
             });
@@ -6561,19 +6554,12 @@ class __status_bar__ {
                 RE_CAST_EV(xcb_leave_notify_event_t);
                 if (e->event == this->_audio_window)
                 {
-                    this->_audio_window.set_backround_color(DARK_GREY);
-                    this->_audio_window.clear();
-                    xcb_flush(conn);
-                    this->_audio_window.send_event(XCB_EVENT_MASK_EXPOSURE);
+                    this->_audio_window.change_backround_color(DARK_GREY);
                 }
 
                 if (e->event == this->_wifi_close_window)
                 {
                     this->_wifi_close_window.change_backround_color(DARK_GREY);
-                    // this->_wifi_close_window.set_backround_color(DARK_GREY);
-                    // this->_wifi_close_window.clear();
-                    // xcb_flush(conn);
-                    // this->_wifi_close_window.send_event(XCB_EVENT_MASK_EXPOSURE);
                 }
             });
         }
