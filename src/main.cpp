@@ -4933,8 +4933,7 @@ class Entry
         function<void()> entryAction;
 };
 
-class context_menu 
-{
+class context_menu {
     private:
     // Variabels.
         window context_window;
@@ -6424,13 +6423,14 @@ class __status_bar__ {
                     WIFI_CLOSE_WINDOW_Y,
                     WIFI_CLOSE_WINDOW_WIDTH,
                     WIFI_CLOSE_WINDOW_HEIGHT,
-                    WHITE,
-                    XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE,
+                    DARK_GREY,
+                    BUTTON_EVENT_MASK,
                     MAP,
                     (int[3]){ALL, WIFI_DROPDOWN_BORDER, BLACK}
                 );
                 _wifi_close_window.set_pointer(CURSOR::hand2);
-                expose(_wifi_close_window);  
+                expose(_wifi_close_window);
+
                 _wifi_info_window.create_window(
                     _wifi_dropdown_window,
                     WIFI_INFO_WINDOW_X,
@@ -6482,7 +6482,7 @@ class __status_bar__ {
 
         void setup_events__()
         {
-            event_handler->setEventCallback(XCB_EXPOSE,  [&](Ev ev)-> void
+            event_handler->setEventCallback(EV_CALL(XCB_EXPOSE)
             {
                 RE_CAST_EV(xcb_expose_event_t);
                 expose(e->window);
@@ -6537,6 +6537,14 @@ class __status_bar__ {
                     xcb_flush(conn);
                     this->_audio_window.send_event(XCB_EVENT_MASK_EXPOSURE);
                 }
+
+                if (e->event == this->_wifi_close_window)
+                {
+                    this->_wifi_close_window.set_backround_color(WHITE);
+                    this->_wifi_close_window.clear();
+                    xcb_flush(conn);
+                    this->_wifi_close_window.send_event(XCB_EVENT_MASK_EXPOSURE);
+                }
             });
 
             event_handler->setEventCallback(EV_CALL(XCB_LEAVE_NOTIFY)
@@ -6548,6 +6556,14 @@ class __status_bar__ {
                     this->_audio_window.clear();
                     xcb_flush(conn);
                     this->_audio_window.send_event(XCB_EVENT_MASK_EXPOSURE);
+                }
+
+                if (e->event == this->_wifi_close_window)
+                {
+                    this->_wifi_close_window.set_backround_color(DARK_GREY);
+                    this->_wifi_close_window.clear();
+                    xcb_flush(conn);
+                    this->_wifi_close_window.send_event(XCB_EVENT_MASK_EXPOSURE);
                 }
             });
         }
@@ -6586,20 +6602,58 @@ class __status_bar__ {
 
         void expose(const uint32_t &__window)
         {
-            if (__window == _time_date_window ) _time_date_window.draw_text_auto_color(get_time_and_date__().c_str(), 4, 15);
-            if (__window == _audio_window     )
+            if (__window == _time_date_window)
+            {
+                _time_date_window.draw_text_auto_color(
+                    get_time_and_date__().c_str(),
+                    4,
+                    15
+                );
+            }
+
+            if (__window == _audio_window)
             {
                 if (_audio_window.get_current_backround_color() == WHITE)
                 {
-                    _audio_window.draw_text_auto_color("Audio", CENTER_TEXT(_audio_window.width(), TEXT_LEN("Audio")), 15, BLACK);
+                    _audio_window.draw_text_auto_color(
+                        "Audio",
+                        CENTER_TEXT(_audio_window.width(), TEXT_LEN("Audio")),
+                        15,
+                        BLACK
+                    );
                 }
                 else
                 {
-                    _audio_window.draw_text_auto_color("Audio", CENTER_TEXT(_audio_window.width(), TEXT_LEN("Audio")), 15);
+                    _audio_window.draw_text_auto_color(
+                        "Audio",
+                        CENTER_TEXT(_audio_window.width(), TEXT_LEN("Audio")),
+                        15
+                    );
                 }
             }
 
-            if (__window == _wifi_close_window) _wifi_close_window.draw_text_auto_color("Close", 22, 15,BLACK);
+            if (__window == _wifi_close_window)
+            {
+                if (_wifi_close_window.get_current_backround_color() == WHITE)
+                {
+                    _wifi_close_window.draw_text_auto_color(
+                        "Close",
+                        CENTER_TEXT(_wifi_close_window.width(), TEXT_LEN("Close")),
+                        15,
+                        BLACK
+                    );
+                }
+                else
+                {
+                    _wifi_close_window.draw_text_auto_color(
+                        "Close",
+                        CENTER_TEXT(_wifi_close_window.width(),
+                        TEXT_LEN("Close")),
+                        15
+                    );
+                }
+            }
+
             if (__window == _wifi_info_window )
             {
                 string local_ip("Local ip: " + network->get_local_ip_info(__network__::LOCAL_IP));
