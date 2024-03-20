@@ -624,12 +624,12 @@ class lout {
 	// Methods.
 		void logMessage()
 		{
-			lock_guard<mutex> guard(log_mutex);
+			// lock_guard<mutex> guard(log_mutex);
 
 			ofstream file("/home/mellw/nlog", ios::app); // Append mode
 			if (file)
 			{
-				file << TIME::get() << ":" << getLogPrefix(currentLevel) << ":" << log_MEGENTA << "[" << currentFunction << "]" << log_RESET << ":" << log_YELLOW << "[Line:" << current_line << "]" << log_RESET << ": " << buffer.str() << "\n";
+				file << TIME::mili() << ":" << getLogPrefix(currentLevel) << ":" << log_MEGENTA << "[" << currentFunction << "]" << log_RESET << ":" << log_YELLOW << "[Line:" << current_line << "]" << log_RESET << ": " << buffer.str() << "\n";
 			}
 		}
 
@@ -690,8 +690,7 @@ inline line_obj_t line(int __line)
  * @brief Macro to log info to the log file
  *        using the lout class  
  */
-#define loutI \
-    lout::inst() << INFO << FUNC << LINE
+#define loutI lout::inst() << INFO << FUNC << LINE
 
 /**
  * @brief Macro to log an error to the log file
