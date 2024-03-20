@@ -4933,7 +4933,7 @@ class Entry
         function<void()> entryAction;
 };
 
-class context_menu
+class context_menu 
 {
     private:
     // Variabels.
@@ -8055,8 +8055,7 @@ class add_app_dialog_window
         function<void()> enter_function;
 };
 
-class __file_app__
-{
+class __file_app__ {
     // Defines.
         #define FILE_APP_LEFT_MENU_WIDTH 120
         #define FILE_APP_LEFT_MENU_ENTRY_HEIGHT 20
@@ -8280,8 +8279,7 @@ class __file_app__
 
     // Constructor.
         __file_app__() {}
-};
-static __file_app__ *file_app;
+}; /* static __file_app__ *file_app; */
 
 class __screen_settings__ {
     private:
@@ -8721,8 +8719,7 @@ class __screen_settings__ {
 
     // Constructor.
         __screen_settings__() {}
-};
-static __screen_settings__ *screen_settings(nullptr);
+}; /* static __screen_settings__ *screen_settings(nullptr); */
 
 typedef struct dropdown_menu_t {
     window         _window;
@@ -9295,10 +9292,9 @@ class __system_settings__ {
     // Constructor.
         __system_settings__() {}
 
-}; static __system_settings__ *system_settings(nullptr);
+}; /* static __system_settings__ *system_settings(nullptr); */
 
-class Dock
-{
+class Dock {
     public:
     // Constructor.
         Dock() {}
@@ -9430,8 +9426,7 @@ class Dock
 };
 static Dock * dock;
 
-class mv_client
-{
+class mv_client {
     // Defines.
         #define RIGHT_  screen->width_in_pixels  - c->width
         #define BOTTOM_ screen->height_in_pixels - c->height
@@ -9604,8 +9599,8 @@ class mv_client
                     {
                         RE_CAST_EV(xcb_expose_event_t);
                         status_bar->expose(e->window);
-                        file_app->expose(e->window);
-                        system_settings->expose(e->window);
+                        // file_app->expose(e->window);
+                        // system_settings->expose(e->window);
                         
                         client *c = wm->client_from_any_window(&e->window);
                         if (c != nullptr)
@@ -9656,8 +9651,7 @@ class mv_client
 };
 
 mutex mtx;
-class change_desktop
-{
+class change_desktop {
     public:
     // Constructor.
         change_desktop(xcb_connection_t *connection) {}
@@ -10484,8 +10478,8 @@ class resize_client {
                             {
                                 RE_CAST_EV(xcb_expose_event_t);
                                 status_bar->expose(e->window);
-                                file_app->expose(e->window);
-                                system_settings->expose(e->window);
+                                // file_app->expose(e->window);
+                                // system_settings->expose(e->window);
 
                                 client *c = wm->client_from_any_window(&e->window);
                                 if (c != nullptr)
@@ -10502,8 +10496,8 @@ class resize_client {
                             case XCB_CONFIGURE_NOTIFY:
                             {
                                 RE_CAST_EV(xcb_configure_notify_event_t);
-                                file_app->configure(e->window, e->width, e->height);
-                                system_settings->configure(e->window, e->width, e->height);
+                                // file_app->configure(e->window, e->width, e->height);
+                                // system_settings->configure(e->window, e->width, e->height);
 
                                 break;
                             }
@@ -11785,8 +11779,8 @@ void setup_wm()
     Events events;
     events.setup();
 
-    file_app = new __file_app__;
-    file_app->init();
+    // file_app = new __file_app__;
+    // file_app->init();
 
     status_bar = new __status_bar__;
     status_bar->init();
@@ -11796,11 +11790,11 @@ void setup_wm()
 
     network = new __network__;
 
-    screen_settings = new __screen_settings__;
-    screen_settings->init();
+    // screen_settings = new __screen_settings__;
+    // screen_settings->init();
     
-    system_settings = new __system_settings__;
-    system_settings->init();
+    // system_settings = new __system_settings__;
+    // system_settings->init();
 }
 
 int main()
