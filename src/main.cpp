@@ -11804,6 +11804,7 @@ class test {
 
 void setup_wm()
 {
+    loutI << "Running" << endl;
     user = get_user_name();
 
     wm = new Window_Manager;
