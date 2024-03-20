@@ -406,13 +406,13 @@ class toString
 #define log_RESET 		"\033[0m"
 
 
-typedef enum {
+enum LogLevel {
     INFO,
 	INFO_PRIORITY,
     WARNING,
     ERROR,
 	FUNC
-} LogLevel;
+};
 
 class Logger {
 	public:
@@ -624,7 +624,7 @@ class lout {
 	// Methods.
 		void logMessage()
 		{
-			// lock_guard<mutex> guard(log_mutex);
+			lock_guard<mutex> guard(log_mutex);
 
 			ofstream file("/home/mellw/nlog", ios::app); // Append mode
 			if (file)
@@ -690,7 +690,8 @@ inline line_obj_t line(int __line)
  * @brief Macro to log info to the log file
  *        using the lout class  
  */
-#define loutI lout::inst() << INFO << FUNC << LINE
+#define loutI \
+    lout::inst() << INFO << FUNC << LINE
 
 /**
  * @brief Macro to log an error to the log file
