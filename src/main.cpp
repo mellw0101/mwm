@@ -5102,7 +5102,7 @@ class Window_Manager {
         // Main.
             void init()
             {
-                lout::inst() << INFO << func(__func__) << "running" << endl;
+                loutI << "Running" << endl;
 
                 _conn(nullptr, nullptr);
                 _setup();
@@ -5134,7 +5134,7 @@ class Window_Manager {
 
                 context_menu->init();
 
-                lout::inst() << INFO << func(__func__) << "Done" << endl;
+                loutI << "Done" << endl;
             }
 
             void launch_program(char *program)

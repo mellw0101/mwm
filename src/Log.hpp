@@ -479,6 +479,10 @@ struct FuncNameWrapper {
     string value;
 };
 
+typedef struct {
+	int line;
+} line_obj_t ;
+
 class lout {
 	public:
 	// Methods.
@@ -502,6 +506,12 @@ class lout {
 			return *this;
 		}
 
+		lout& operator<<(const line_obj_t &__line)
+		{
+			current_line = __line.line;
+			return *this;
+		}
+
 		lout& operator<<(std::ostream& (*pf)(std::ostream&))
 		{
 			if (pf == static_cast<std::ostream& (*)(std::ostream&)>(std::endl))
@@ -510,6 +520,7 @@ class lout {
 				buffer = std::ostringstream(); // Reset the buffer for new messages
 				// Reset log level and function as well if desired
 			}
+
 			return *this;
 		}
 
@@ -524,6 +535,7 @@ class lout {
 	// Variabels.
 		LogLevel currentLevel;
 		string currentFunction;
+		int current_line;
 		ostringstream buffer;
 
 	// Constructor is private to prevent multiple instances
@@ -535,7 +547,7 @@ class lout {
 			std::ofstream file("/home/mellw/nlog", std::ios::app); // Append mode
 			if (file)
 			{
-				file << TIME::get() << ":" << getLogPrefix(currentLevel) << ":" << log_MEGENTA << "[" << currentFunction << "]" << log_RESET << ":" << buffer.str() << "\n";
+				file << TIME::get() << ":" << getLogPrefix(currentLevel) << ":" << log_MEGENTA << "[" << currentFunction << "]" << log_RESET << ":[At Line: " << current_line << "]: " << buffer.str() << "\n";
 			}
 		}
 
@@ -576,6 +588,16 @@ inline FuncNameWrapper func(const char* name)
 {
     return FuncNameWrapper{name};
 }
+
+inline line_obj_t line(int __line)
+{
+	return line_obj_t{__line};
+}
+
+#define FUNC func(__func__)
+#define LINE line(__LINE__)
+#define loutI lout::inst() << INFO << FUNC << LINE
+#define loutE lout::inst() << ERROR << FUNC << LINE
 
 /* LOG DEFENITIONS */
 #define LOG_ev_response_type(ev)    	    Log::xcb_event_response_type(__func__, ev);
