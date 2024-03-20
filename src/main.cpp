@@ -5102,8 +5102,6 @@ class Window_Manager {
         // Main.
             void init()
             {
-                loutI << "Running" << endl;
-
                 _conn(nullptr, nullptr);
                 _setup();
                 _iter();
@@ -5134,7 +5132,7 @@ class Window_Manager {
 
                 context_menu->init();
 
-                loutI << "Done" << endl;
+                // std::thread(check_volt()); // dosent work 
             }
 
             void launch_program(char *program)
@@ -5589,12 +5587,8 @@ class Window_Manager {
         // Init.
             void _conn(const char *displayname, int *screenp)
             {
-                loutI << "Running" << endl;
-
                 conn = xcb_connect(displayname, screenp);
                 check_conn();
-                
-                loutI << "Done" << endl;
             }
 
             void _ewmh()
@@ -6137,11 +6131,7 @@ class __wifi__ {
     // Methods.
         void init()
         {
-            loutI << "Running" << endl;
-
             event_handler->set_key_press_callback((ALT + SUPER), wm->key_codes.f, [this]()-> void { scan__("wlo1"); });
-            
-            loutI << "Done" << endl;
         }
 
     // Constructor.
@@ -6601,13 +6591,9 @@ class __status_bar__ {
     // Methods.
         void init()
         {
-            loutI << "Running" << endl;
-
             create_windows__();
             setup_events__();
             setup_thread__(_time_date_window);
-
-            loutI << "Done" << endl;
         }
 
         void expose(const uint32_t &__window)
@@ -7957,8 +7943,6 @@ class Mwm_Runner {
     // Methods.
         void init()
         {
-            loutI << "Running" << endl;
-
             main_window.create_default(
                 screen->root,
                 (screen->width_in_pixels / 2) - ((140 + (BORDER * 2)) / 2),
@@ -7988,8 +7972,6 @@ class Mwm_Runner {
                 launcher.program((char *) search_window.string().c_str());
                 hide();
             });
-        
-            loutI << "Done" << endl;
         }
 
         void show()
@@ -8032,7 +8014,6 @@ class Mwm_Runner {
                 }
             });
         }
-
 }; static Mwm_Runner * mwm_runner;
 
 class add_app_dialog_window
@@ -8341,11 +8322,7 @@ class __file_app__ {
 
         void init()
         {
-            loutI << "Running" << endl;
-
             setup_events();
-
-            loutI << "Done" << endl;
         }
 
     // Constructor.
@@ -8783,13 +8760,9 @@ class __screen_settings__ {
 
         void init()
         {
-            loutI << "Running" << endl;
-
             _avalible_resolutions     = get_avalible_resolutions__();
             _current_resolution       = get_current_resolution__();
             _current_resoluton_string = get_current_resolution_string__();
-
-            loutI << "Done" << endl;
         }
 
     // Constructor.
@@ -9361,11 +9334,7 @@ class __system_settings__ {
 
         void init()
         {
-            loutI << "Running" << endl;
-
             setup_events__();
-
-            loutI << "Done" << endl;
         }
 
     // Constructor.
@@ -9388,8 +9357,6 @@ class Dock {
     // Methods.
         void init()
         {
-            loutI << "Running" << endl;
-
             main_window.create_default(screen->root, 0, 0, width, height);
             setup_dock();
             configure_context_menu();
@@ -9402,8 +9369,6 @@ class Dock {
 
             context_menu.init();
             configure_events();
-
-            loutI << "Done" << endl;
         }
 
         void add_app(const char *app_name)
@@ -11839,24 +11804,19 @@ class test {
 
 void setup_wm()
 {
-    loutI << "Running" << endl;
-
     user = get_user_name();
 
     wm = new Window_Manager;
     wm->init();
     
     change_desktop::teleport_to(1);
-    
-    #ifndef ARMV8_BUILD
-        dock = new Dock;
-        dock->add_app("konsole");
-        dock->add_app("alacritty");
-        dock->add_app("google-chrome-stable");
-        dock->add_app("code");
-        dock->add_app("falkon");
-        dock->init();
-    #endif
+    dock = new Dock;
+    dock->add_app("konsole");
+    dock->add_app("alacritty");
+    dock->add_app("google-chrome-stable");
+    dock->add_app("code");
+    dock->add_app("falkon");
+    dock->init();
 
     mwm_runner = new Mwm_Runner;
     mwm_runner->init();
@@ -11880,8 +11840,6 @@ void setup_wm()
     
     system_settings = new __system_settings__;
     system_settings->init();
-
-    loutI << "Done" << endl;
 }
 
 int main()
