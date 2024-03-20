@@ -20,13 +20,16 @@
 #include <vector>
 #include <xcb/xproto.h>
 
-class FileHandler 
-{
-	public:
-		explicit FileHandler(std::string filename) : m_filename(std::move(filename)) {}
+using namespace std;
+
+class FileHandler {
+	private:
+	// Variabels.
+		string m_filename;
 		
-		bool
-		append(const std::string &text) 
+	public:
+	// Methods.
+		bool append(const std::string &text) 
 		{
 			std::ofstream file(m_filename, std::ios::app);// Open in append mode
 
@@ -39,23 +42,21 @@ class FileHandler
 			return true;
 		}
 
-		bool
-		open() 
+		bool open() 
 		{
 			std::ofstream file(m_filename, std::ios::app);// Open in append mode
 			bool isOpen = file.is_open();
 			file.close();
 			return isOpen;
 		}
-	;
 
-	private:
-		std::string m_filename;
-	;
+	// Constructor.
+		explicit FileHandler(std::string filename)
+		: m_filename(std::move(filename)) {}
+
 };
 
-class TIME 
-{
+class TIME {
 	public:
 		static const std::string get() 
 		{
@@ -72,14 +73,12 @@ class TIME
 			ss << "[" << std::put_time(&buf, "%Y-%m-%d %H:%M:%S") << "]";
 			return ss.str();
 		}
-	;
+
 };
 
-class Converter 
-{
+class Converter {
 	public:
-		static const char * 
-		xcb_event_response_type_to_str(const uint8_t &response_type) 
+		static const char *xcb_event_response_type_to_str(const uint8_t &response_type) 
 		{
 			switch (response_type) 
 			{
@@ -121,8 +120,7 @@ class Converter
 			}    
 		}
 		
-		static const char *
-		xcb_event_detail_to_str(const uint8_t &detail) 
+		static const char *xcb_event_detail_to_str(const uint8_t &detail) 
 		{
 			switch (detail) 
 			{
@@ -138,8 +136,7 @@ class Converter
 			}
 		}
 
-		static const char *
-		xcb_event_mode_to_str(const uint8_t &mode)
+		static const char *xcb_event_mode_to_str(const uint8_t &mode)
 		{
 			switch (mode) 
 			{
@@ -153,11 +150,9 @@ class Converter
 	;
 };
 
-class Log 
-{
+class Log {
 	public:
-		static void
-		xcb_event_response_type(const char* FUNC, const uint8_t &response_type) 
+		static void xcb_event_response_type(const char* FUNC, const uint8_t &response_type) 
 		{
 			const char* ev = Converter::xcb_event_response_type_to_str(response_type);
 			logMessage 
@@ -169,8 +164,7 @@ class Log
 			);
 		}
 
-		static void
-		xcb_event_detail(const char* FUNC, const uint8_t &detail) 
+		static void xcb_event_detail(const char* FUNC, const uint8_t &detail) 
 		{
 			const char* ev = Converter::xcb_event_detail_to_str(detail);
 			logMessage 
@@ -182,72 +176,61 @@ class Log
 			);
 		}
 		
-		static void
-		FUNC(const std::string &message) 
+		static void FUNC(const std::string &message) 
 		{
 			logMessage(":[" + message + "]");
 		}
 		
-		static void
-		Start(const std::string &message) 
+		static void Start(const std::string &message) 
 		{
 			StartMessage( ":[Start]  :["+message+"]:[STARTED]" );
 		}
 		
-		static void
-		End() 
+		static void End() 
 		{
 			EndMessage( ":[End]    :[dwm-M]:[KILLED]\n" );
 		}
 		
-		static void
-		ENDFUNC(const std::string &message)
+		static void ENDFUNC(const std::string &message)
 		{
 			logMessage ( ":[ENDFUNC]:[" + message + "]" + "\n");
 		}
 
-		static void
-		INFO(const std::string &message) 
+		static void INFO(const std::string &message) 
 		{
 			logMessage ( ":[INFO]:[" + message + "]" );
 		}
 
 		template<typename T, typename... Args>
-		static void
-		INFO(const T &message, Args... args) 
+		static void INFO(const T &message, Args... args) 
 		{
 			logMessage ( ":[INFO]   :[" + toString ( message, args... ) + "]" );
 		}
 
 		template<typename T, typename... Args>
-		static void
-		FUNC_INFO(const T &message, Args... args) 
+		static void FUNC_INFO(const T &message, Args... args) 
 		{
 			logMessage ( ":----[INFO]:[" + toString ( message, args... ) + "]" );
 		}
 
-		static void
-		WARNING(const std::string &message) 
+		static void WARNING(const std::string &message) 
 		{
 			logMessage ( ":[WARNING]:[" + message + "]" );
 		}
 
 		template<typename T, typename... Args>
-		static void
-		WARNING(const T &first, Args... args) 
+		static void WARNING(const T &first, Args... args) 
 		{
 			logMessage ( ":[WARNING]:[" + toString ( first, args... ) + "]" );
 		}
 
-		static void
-		ERROR(const std::string &message) 
+		static void ERROR(const std::string &message) 
 		{
 			logMessage ( ":[ERROR]  :[" + message + "]" );
 		}
 
 		template<typename T, typename... Args>
-		static void
-		ERROR(const T &message, Args... args) 
+		static void ERROR(const T &message, Args... args) 
 		{
 			logMessage ( ":[ERROR]  :[" + toString ( message, args... ) + "]" );
 		}
@@ -256,8 +239,7 @@ class Log
 	private:
 		// Static function for conversion
 		template<typename T>
-		static std::string
-		toString(const T &arg) 
+		static std::string toString(const T &arg) 
 		{
 			std::ostringstream stream;
 			stream << arg;
@@ -410,16 +392,14 @@ class Logger
 {
 	public:
 		template<typename T, typename... Args>
-		void 
-		log(LogLevel level, const std::string &function, const T& message, Args&&... args) 
+		void log(LogLevel level, const std::string &function, const T& message, Args&&... args) 
 		{
 			FileHandler file("/home/mellw/nlog");
 			log_arragnge(list, message, args...);
 			file.append(TIME::get() + ":" + getLogPrefix(level) + ":" + log_MEGENTA + "[" + function + "]" + log_RESET + ":" + str + "\n");
 		}
 
-		void 
-		log(LogLevel level, const std::string &function) 
+		void log(LogLevel level, const std::string &function) 
 		{
 			FileHandler file("/home/mellw/nlog");
 			file.append(TIME::get() + ":" + getLogPrefix(level) + ":[" + log_MEGENTA + function + log_RESET + "]\n");
@@ -430,8 +410,7 @@ class Logger
 		std::vector<std::string> list;
 		std::string str;
 
-		std::string 
-		getLogPrefix(LogLevel level) const 
+		std::string getLogPrefix(LogLevel level) const 
 		{
 			switch (level) 
 			{
@@ -495,6 +474,108 @@ class Logger
 		}
 	;
 };
+
+struct FuncNameWrapper {
+    string value;
+};
+
+class lout {
+	public:
+	// Methods.
+		// Make lout a singleton to ensure a single object instance
+		static lout& inst()
+		{
+			static lout instance;
+			return instance;
+		}
+
+		// Overloads for handling log level, function name wrapper, and endl
+		lout& operator<<(LogLevel logLevel)
+		{
+			currentLevel = logLevel;
+			return *this;
+		}
+
+		lout& operator<<(const FuncNameWrapper& funcName)
+		{
+			currentFunction = funcName.value;
+			return *this;
+		}
+
+		lout& operator<<(std::ostream& (*pf)(std::ostream&))
+		{
+			if (pf == static_cast<std::ostream& (*)(std::ostream&)>(std::endl))
+			{
+				logMessage();
+				buffer = std::ostringstream(); // Reset the buffer for new messages
+				// Reset log level and function as well if desired
+			}
+			return *this;
+		}
+
+		template<typename T>
+		lout& operator<<(const T& message)
+		{
+			buffer << message;
+			return *this;
+		}
+
+	private:
+	// Variabels.
+		LogLevel currentLevel;
+		string currentFunction;
+		ostringstream buffer;
+
+	// Constructor is private to prevent multiple instances
+		lout() {}
+
+	// Methods.
+		void logMessage()
+		{
+			std::ofstream file("/home/mellw/nlog", std::ios::app); // Append mode
+			if (file)
+			{
+				file << TIME::get() << ":" << getLogPrefix(currentLevel) << ":" << log_MEGENTA << "[" << currentFunction << "]" << log_RESET << ":" << buffer.str() << "\n";
+			}
+		}
+
+		string getLogPrefix(LogLevel level) const 
+		{
+			switch (level) 
+			{
+				case INFO:
+				{
+					return log_GREEN 	"[INFO]" 		  log_RESET;
+				}
+				case INFO_PRIORITY:
+				{
+					return log_CYAN		"[INFO_PRIORITY]" log_RESET;
+				}
+				case WARNING:
+				{
+					return log_YELLOW 	"[WARNING]" 	  log_RESET;
+				}
+				case ERROR:
+				{
+					return log_RED 		"[ERROR]" 		  log_RESET;
+				}
+				case FUNC:
+				{
+					return log_MEGENTA	"[FUNC]"		  log_RESET;
+				}
+				default:
+				{
+					return std::to_string(level);
+				}
+			}
+		}
+};
+
+// Utility function for wrapping function names
+inline FuncNameWrapper func(const char* name)
+{
+    return FuncNameWrapper{name};
+}
 
 /* LOG DEFENITIONS */
 #define LOG_ev_response_type(ev)    	    Log::xcb_event_response_type(__func__, ev);

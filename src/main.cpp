@@ -5102,6 +5102,8 @@ class Window_Manager {
         // Main.
             void init()
             {
+                lout::inst() << INFO << func(__func__) << "running" << endl;
+
                 _conn(nullptr, nullptr);
                 _setup();
                 _iter();
@@ -5132,7 +5134,7 @@ class Window_Manager {
 
                 context_menu->init();
 
-                // std::thread(check_volt()); // dosent work 
+                lout::inst() << INFO << func(__func__) << "Done" << endl;
             }
 
             void launch_program(char *program)
