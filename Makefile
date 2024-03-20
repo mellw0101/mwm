@@ -1,5 +1,5 @@
 ARMV8_FASTFLAGS = -O2               \
-                  -march=armv8-a     \
+                  -march=native     \
                   -mtune=native      # Optional, use if you know the specific variant
 
 ARMV8_CFLAGS =   -std=c++20                     \
