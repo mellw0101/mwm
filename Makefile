@@ -94,7 +94,7 @@ install-armv8: ARMV8
 	cp -f test /bin/mwm
 	chmod 755 /bin/mwm
 
-ARMV8: CXXFLAGS = ${ARMV8_CXXFLAGS}
+ARMV8: CXXFLAGS = ${ARMV8_CXXFLAGS} -DARMV8_BUILD
 ARMV8: LDFLAGS = ${ARMV8_LDFLAGS}
 ARMV8: test
 

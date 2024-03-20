@@ -5639,7 +5639,11 @@ class Window_Manager {
                     { R_ARROW, CTRL   | SUPER }
                 });
                 root.clear();
-                root.set_backround_png(USER_PATH_PREFIX("/mwm_png/galaxy21.png"));
+                
+                #ifndef ARMV8_BUILD
+                    root.set_backround_png(USER_PATH_PREFIX("/mwm_png/galaxy21.png"));
+                #endif
+
                 root.set_pointer(CURSOR::arrow);
             }
 
@@ -10782,355 +10786,354 @@ public:
  * The class also includes helper methods to check the current tile position of a window and set the size and position of a window.
  *
  */
-class tile 
-{
-private:
+class tile {
+    private:
     // Variabels.
-    client(*c);
+        client(*c);
 
     // Methods.
-    /**
-     *
-     * @brief Checks if the current tile position of a window is the specified tile position.
-     *
-     * This method checks if the current tile position of a window is the specified tile position.
-     * It takes a `TILEPOS` enum value as an argument, which specifies the tile position to check.
-     * The method returns `true` if the current tile position is the specified tile position, and `false` otherwise.
-     *
-     * @param mode The tile position to check.
-     * @return true if the current tile position is the specified tile position.
-     * @return false if the current tile position is not the specified tile position.
-     *
-     */
-    bool current_tile_pos(TILEPOS mode)
-    {
-        switch (mode)
+        /**
+        *
+        * @brief Checks if the current tile position of a window is the specified tile position.
+        *
+        * This method checks if the current tile position of a window is the specified tile position.
+        * It takes a `TILEPOS` enum value as an argument, which specifies the tile position to check.
+        * The method returns `true` if the current tile position is the specified tile position, and `false` otherwise.
+        *
+        * @param mode The tile position to check.
+        * @return true if the current tile position is the specified tile position.
+        * @return false if the current tile position is not the specified tile position.
+        *
+        */
+        bool current_tile_pos(TILEPOS mode)
         {
-            case TILEPOS::LEFT:
+            switch (mode)
             {
-                if (c->x      == 0 
-                &&  c->y      == 0 
-                &&  c->width  == screen->width_in_pixels / 2 
-                &&  c->height == screen->height_in_pixels)
+                case TILEPOS::LEFT:
                 {
-                    return true;
+                    if (c->x      == 0 
+                    &&  c->y      == 0 
+                    &&  c->width  == screen->width_in_pixels / 2 
+                    &&  c->height == screen->height_in_pixels)
+                    {
+                        return true;
+                    }
+
+                    break;
                 }
 
-                break;
+                case TILEPOS::RIGHT:
+                {
+                    if (c->x      == screen->width_in_pixels / 2 
+                    &&  c->y      == 0 
+                    &&  c->width  == screen->width_in_pixels / 2
+                    &&  c->height == screen->height_in_pixels)
+                    {
+                        return true;
+                    }
+
+                    break;
+                }    
+                
+                case TILEPOS::LEFT_DOWN:
+                {
+                    if (c->x      == 0
+                    &&  c->y      == screen->height_in_pixels / 2
+                    &&  c->width  == screen->width_in_pixels  / 2
+                    &&  c->height == screen->height_in_pixels / 2)
+                    {
+                        return true;
+                    }
+
+                    break;
+                }
+                
+                case TILEPOS::RIGHT_DOWN:
+                {
+                    if (c->x      == screen->width_in_pixels  / 2
+                    &&  c->y      == screen->height_in_pixels / 2
+                    &&  c->width  == screen->width_in_pixels  / 2
+                    &&  c->height == screen->height_in_pixels / 2)
+                    {    
+                        return true;
+                    }
+                        
+                    break;
+                }
+                
+                case TILEPOS::LEFT_UP:
+                {
+                    if (c->x      == 0
+                    &&  c->y      == 0
+                    &&  c->width  == screen->width_in_pixels  / 2
+                    &&  c->height == screen->height_in_pixels / 2)
+                    {
+                        return true;
+                    }
+                    
+                    break;
+                }
+
+                case TILEPOS::RIGHT_UP:
+                {
+                    if (c->x      == screen->width_in_pixels  / 2
+                    &&  c->y      == 0
+                    &&  c->width  == screen->width_in_pixels  / 2
+                    &&  c->height == screen->height_in_pixels / 2)
+                    {
+                        return true;
+                    }
+
+                    break;
+                }
             }
 
-            case TILEPOS::RIGHT:
+            return false; 
+        }
+        
+        /**
+        *
+        * @brief Sets the size and position of a window to a specific tile position.
+        *
+        * This method sets the size and position of a window to a specific tile position.
+        * It takes a `TILEPOS` enum value as an argument, which specifies the tile position to set.
+        * The method uses the `animate` method to animate the window to the specified tile position.
+        *
+        * @param sizepos The tile position to set.
+        *
+        */
+        void set_tile_sizepos(TILEPOS sizepos)
+        {
+            switch (sizepos)
             {
-                if (c->x      == screen->width_in_pixels / 2 
-                &&  c->y      == 0 
-                &&  c->width  == screen->width_in_pixels / 2
-                &&  c->height == screen->height_in_pixels)
+                case TILEPOS::LEFT:
                 {
-                    return true;
+                    animate(
+                        0,
+                        0,
+                        screen->width_in_pixels / 2,
+                        screen->height_in_pixels
+                    );
+                    return;
                 }
 
-                break;
-            }    
-            
-            case TILEPOS::LEFT_DOWN:
-            {
-                if (c->x      == 0
-                &&  c->y      == screen->height_in_pixels / 2
-                &&  c->width  == screen->width_in_pixels  / 2
-                &&  c->height == screen->height_in_pixels / 2)
+                case TILEPOS::RIGHT:
                 {
-                    return true;
+                    animate(
+                        screen->width_in_pixels / 2,
+                        0,
+                        screen->width_in_pixels / 2,
+                        screen->height_in_pixels
+                    );
+                    return;
                 }
 
-                break;
+                case TILEPOS::LEFT_DOWN:
+                {
+                    animate(
+                        0,
+                        screen->height_in_pixels / 2,
+                        screen->width_in_pixels / 2,
+                        screen->height_in_pixels / 2
+                    );
+                    return;
+                }
+
+                case TILEPOS::RIGHT_DOWN:
+                {
+                    animate(
+                        screen->width_in_pixels / 2,
+                        screen->height_in_pixels / 2,
+                        screen->width_in_pixels / 2,
+                        screen->height_in_pixels / 2
+                    );
+                    return;
+                }
+
+                case TILEPOS::LEFT_UP:
+                {
+                    animate(
+                        0,
+                        0,
+                        screen->width_in_pixels / 2,
+                        screen->height_in_pixels / 2
+                    );
+                    return;
+                }
+
+                case TILEPOS::RIGHT_UP:
+                {
+                    animate(
+                        screen->width_in_pixels / 2,
+                        0,
+                        screen->width_in_pixels / 2,
+                        screen->height_in_pixels / 2
+                    );
+                    return;
+                }
             }
-            
-            case TILEPOS::RIGHT_DOWN:
+        }
+        
+        void restore_og_tile_pos()
+        {
+            animate(
+                c->tile_ogsize.x,
+                c->tile_ogsize.y,
+                c->tile_ogsize.width,
+                c->tile_ogsize.height
+            );
+        }
+
+        void animate(const int &end_x, const int &end_y, const int &end_width, const int &end_height)
+        {
+            Mwm_Animator anim(c);
+            anim.animate_client(
+                c->x,
+                c->y, 
+                c->width, 
+                c->height, 
+                end_x,
+                end_y, 
+                end_width, 
+                end_height, 
+                TILE_ANIMATION_DURATION
+            );
+            c->update();
+        }
+
+    public:
+    // Constructor.
+        tile(client *&c, TILE tile)
+        : c(c)
+        {
+            if (c->is_EWMH_fullscreen()) return;
+            switch (tile)
             {
-                if (c->x      == screen->width_in_pixels  / 2
-                &&  c->y      == screen->height_in_pixels / 2
-                &&  c->width  == screen->width_in_pixels  / 2
-                &&  c->height == screen->height_in_pixels / 2)
-                {    
-                    return true;
+                case TILE::LEFT:
+                {
+                    // IF 'CURRENTLT_TILED' TO 'LEFT'
+                    if (current_tile_pos(TILEPOS::LEFT))
+                    {
+                        restore_og_tile_pos();
+                        return;
+                    }
+                    
+                    // IF 'CURRENTLY_TILED' TO 'RIGHT', 'LEFT_DOWN' OR 'LEFT_UP'
+                    if (current_tile_pos(TILEPOS::RIGHT)
+                    ||  current_tile_pos(TILEPOS::LEFT_DOWN)
+                    ||  current_tile_pos(TILEPOS::LEFT_UP))
+                    {
+                        set_tile_sizepos(TILEPOS::LEFT);
+                        return;
+                    }
+                    
+                    // IF 'CURRENTLY_TILED' TO 'RIGHT_DOWN'
+                    if (current_tile_pos(TILEPOS::RIGHT_DOWN))
+                    {
+                        set_tile_sizepos(TILEPOS::LEFT_DOWN);
+                        return;
+                    }
+                    
+                    // IF 'CURRENTLY_TILED' TO 'RIGHT_UP'
+                    if (current_tile_pos(TILEPOS::RIGHT_UP))
+                    {
+                        set_tile_sizepos(TILEPOS::LEFT_UP);
+                        return;
+                    }
+
+                    c->save_tile_ogsize();
+                    set_tile_sizepos(TILEPOS::LEFT);
+                    break;
                 }
                     
-                break;
-            }
-            
-            case TILEPOS::LEFT_UP:
-            {
-                if (c->x      == 0
-                &&  c->y      == 0
-                &&  c->width  == screen->width_in_pixels  / 2
-                &&  c->height == screen->height_in_pixels / 2)
+                case TILE::RIGHT:
                 {
-                    return true;
-                }
-                
-                break;
-            }
+                    // IF 'CURRENTLY_TILED' TO 'RIGHT'
+                    if (current_tile_pos(TILEPOS::RIGHT))
+                    {
+                        restore_og_tile_pos();
+                        return;
+                    }
+                    
+                    // IF 'CURRENTLT_TILED' TO 'LEFT', 'RIGHT_DOWN' OR 'RIGHT_UP' 
+                    if (current_tile_pos(TILEPOS::LEFT)
+                    ||  current_tile_pos(TILEPOS::RIGHT_UP)
+                    ||  current_tile_pos(TILEPOS::RIGHT_DOWN))
+                    {
+                        set_tile_sizepos(TILEPOS::RIGHT);
+                        return;
+                    }
+                    
+                    // IF 'CURRENTLT_TILED' 'LEFT_DOWN'
+                    if (current_tile_pos(TILEPOS::LEFT_DOWN))
+                    {
+                        set_tile_sizepos(TILEPOS::RIGHT_DOWN);
+                        return;
+                    }
+                    
+                    // IF 'CURRENTLY_TILED' 'LEFT_UP'
+                    if (current_tile_pos(TILEPOS::LEFT_UP))
+                    {
+                        set_tile_sizepos(TILEPOS::RIGHT_UP);
+                        return;
+                    }
 
-            case TILEPOS::RIGHT_UP:
-            {
-                if (c->x      == screen->width_in_pixels  / 2
-                &&  c->y      == 0
-                &&  c->width  == screen->width_in_pixels  / 2
-                &&  c->height == screen->height_in_pixels / 2)
-                {
-                    return true;
-                }
-
-                break;
-            }
-        }
-
-        return false; 
-    }
-    
-    /**
-     *
-     * @brief Sets the size and position of a window to a specific tile position.
-     *
-     * This method sets the size and position of a window to a specific tile position.
-     * It takes a `TILEPOS` enum value as an argument, which specifies the tile position to set.
-     * The method uses the `animate` method to animate the window to the specified tile position.
-     *
-     * @param sizepos The tile position to set.
-     *
-     */
-    void set_tile_sizepos(TILEPOS sizepos)
-    {
-        switch (sizepos)
-        {
-            case TILEPOS::LEFT:
-            {
-                animate(
-                    0,
-                    0,
-                    screen->width_in_pixels / 2,
-                    screen->height_in_pixels
-                );
-                return;
-            }
-
-            case TILEPOS::RIGHT:
-            {
-                animate(
-                    screen->width_in_pixels / 2,
-                    0,
-                    screen->width_in_pixels / 2,
-                    screen->height_in_pixels
-                );
-                return;
-            }
-
-            case TILEPOS::LEFT_DOWN:
-            {
-                animate(
-                    0,
-                    screen->height_in_pixels / 2,
-                    screen->width_in_pixels / 2,
-                    screen->height_in_pixels / 2
-                );
-                return;
-            }
-
-            case TILEPOS::RIGHT_DOWN:
-            {
-                animate(
-                    screen->width_in_pixels / 2,
-                    screen->height_in_pixels / 2,
-                    screen->width_in_pixels / 2,
-                    screen->height_in_pixels / 2
-                );
-                return;
-            }
-
-            case TILEPOS::LEFT_UP:
-            {
-                animate(
-                    0,
-                    0,
-                    screen->width_in_pixels / 2,
-                    screen->height_in_pixels / 2
-                );
-                return;
-            }
-
-            case TILEPOS::RIGHT_UP:
-            {
-                animate(
-                    screen->width_in_pixels / 2,
-                    0,
-                    screen->width_in_pixels / 2,
-                    screen->height_in_pixels / 2
-                );
-                return;
-            }
-        }
-    }
-    
-    void restore_og_tile_pos()
-    {
-        animate(
-            c->tile_ogsize.x,
-            c->tile_ogsize.y,
-            c->tile_ogsize.width,
-            c->tile_ogsize.height
-        );
-    }
-
-    void animate(const int &end_x, const int &end_y, const int &end_width, const int &end_height)
-    {
-        Mwm_Animator anim(c);
-        anim.animate_client(
-            c->x,
-            c->y, 
-            c->width, 
-            c->height, 
-            end_x,
-            end_y, 
-            end_width, 
-            end_height, 
-            TILE_ANIMATION_DURATION
-        );
-        c->update();
-    }
-
-public:
-    // Constructor.
-    tile(client *&c, TILE tile)
-    : c(c)
-    {
-        if (c->is_EWMH_fullscreen()) return;
-        switch (tile)
-        {
-            case TILE::LEFT:
-            {
-                // IF 'CURRENTLT_TILED' TO 'LEFT'
-                if (current_tile_pos(TILEPOS::LEFT))
-                {
-                    restore_og_tile_pos();
-                    return;
-                }
-                
-                // IF 'CURRENTLY_TILED' TO 'RIGHT', 'LEFT_DOWN' OR 'LEFT_UP'
-                if (current_tile_pos(TILEPOS::RIGHT)
-                ||  current_tile_pos(TILEPOS::LEFT_DOWN)
-                ||  current_tile_pos(TILEPOS::LEFT_UP))
-                {
-                    set_tile_sizepos(TILEPOS::LEFT);
-                    return;
-                }
-                
-                // IF 'CURRENTLY_TILED' TO 'RIGHT_DOWN'
-                if (current_tile_pos(TILEPOS::RIGHT_DOWN))
-                {
-                    set_tile_sizepos(TILEPOS::LEFT_DOWN);
-                    return;
-                }
-                
-                // IF 'CURRENTLY_TILED' TO 'RIGHT_UP'
-                if (current_tile_pos(TILEPOS::RIGHT_UP))
-                {
-                    set_tile_sizepos(TILEPOS::LEFT_UP);
-                    return;
-                }
-
-                c->save_tile_ogsize();
-                set_tile_sizepos(TILEPOS::LEFT);
-                break;
-            }
-                
-            case TILE::RIGHT:
-            {
-                // IF 'CURRENTLY_TILED' TO 'RIGHT'
-                if (current_tile_pos(TILEPOS::RIGHT))
-                {
-                    restore_og_tile_pos();
-                    return;
-                }
-                
-                // IF 'CURRENTLT_TILED' TO 'LEFT', 'RIGHT_DOWN' OR 'RIGHT_UP' 
-                if (current_tile_pos(TILEPOS::LEFT)
-                ||  current_tile_pos(TILEPOS::RIGHT_UP)
-                ||  current_tile_pos(TILEPOS::RIGHT_DOWN))
-                {
+                    c->save_tile_ogsize();
                     set_tile_sizepos(TILEPOS::RIGHT);
-                    return;
+                    break;
                 }
                 
-                // IF 'CURRENTLT_TILED' 'LEFT_DOWN'
-                if (current_tile_pos(TILEPOS::LEFT_DOWN))
+                case TILE::DOWN:
                 {
-                    set_tile_sizepos(TILEPOS::RIGHT_DOWN);
-                    return;
-                }
-                
-                // IF 'CURRENTLY_TILED' 'LEFT_UP'
-                if (current_tile_pos(TILEPOS::LEFT_UP))
-                {
-                    set_tile_sizepos(TILEPOS::RIGHT_UP);
-                    return;
+                    // IF 'CURRENTLY_TILED' 'LEFT' OR 'LEFT_UP'
+                    if (current_tile_pos(TILEPOS::LEFT)
+                    ||  current_tile_pos(TILEPOS::LEFT_UP))
+                    {
+                        set_tile_sizepos(TILEPOS::LEFT_DOWN);
+                        return;
+                    }
+
+                    // IF 'CURRENTLY_TILED' 'RIGHT' OR 'RIGHT_UP'
+                    if (current_tile_pos(TILEPOS::RIGHT) 
+                    ||  current_tile_pos(TILEPOS::RIGHT_UP))
+                    {
+                        set_tile_sizepos(TILEPOS::RIGHT_DOWN);
+                        return;
+                    }
+                    
+                    // IF 'CURRENTLY_TILED' 'LEFT_DOWN' OR 'RIGHT_DOWN'
+                    if (current_tile_pos(TILEPOS::LEFT_DOWN)
+                    ||  current_tile_pos(TILEPOS::RIGHT_DOWN))
+                    {
+                        restore_og_tile_pos();
+                        return;
+                    }
+
+                    break;
                 }
 
-                c->save_tile_ogsize();
-                set_tile_sizepos(TILEPOS::RIGHT);
-                break;
-            }
-            
-            case TILE::DOWN:
-            {
-                // IF 'CURRENTLY_TILED' 'LEFT' OR 'LEFT_UP'
-                if (current_tile_pos(TILEPOS::LEFT)
-                ||  current_tile_pos(TILEPOS::LEFT_UP))
+                case TILE::UP:
                 {
-                    set_tile_sizepos(TILEPOS::LEFT_DOWN);
-                    return;
-                }
+                    // IF 'CURRENTLY_TILED' 'LEFT'
+                    if (current_tile_pos(TILEPOS::LEFT)
+                    ||  current_tile_pos(TILEPOS::LEFT_DOWN))
+                    {
+                        set_tile_sizepos(TILEPOS::LEFT_UP);
+                        return;
+                    }
 
-                // IF 'CURRENTLY_TILED' 'RIGHT' OR 'RIGHT_UP'
-                if (current_tile_pos(TILEPOS::RIGHT) 
-                ||  current_tile_pos(TILEPOS::RIGHT_UP))
-                {
-                    set_tile_sizepos(TILEPOS::RIGHT_DOWN);
-                    return;
-                }
-                
-                // IF 'CURRENTLY_TILED' 'LEFT_DOWN' OR 'RIGHT_DOWN'
-                if (current_tile_pos(TILEPOS::LEFT_DOWN)
-                ||  current_tile_pos(TILEPOS::RIGHT_DOWN))
-                {
-                    restore_og_tile_pos();
-                    return;
-                }
+                    // IF 'CURRENTLY_TILED' 'RIGHT' OR RIGHT_DOWN
+                    if (current_tile_pos(TILEPOS::RIGHT)
+                    ||  current_tile_pos(TILEPOS::RIGHT_DOWN))
+                    {
+                        set_tile_sizepos(TILEPOS::RIGHT_UP);
+                        return;
+                    }
 
-                break;
-            }
-
-            case TILE::UP:
-            {
-                // IF 'CURRENTLY_TILED' 'LEFT'
-                if (current_tile_pos(TILEPOS::LEFT)
-                ||  current_tile_pos(TILEPOS::LEFT_DOWN))
-                {
-                    set_tile_sizepos(TILEPOS::LEFT_UP);
-                    return;
+                    break;
                 }
-
-                // IF 'CURRENTLY_TILED' 'RIGHT' OR RIGHT_DOWN
-                if (current_tile_pos(TILEPOS::RIGHT)
-                ||  current_tile_pos(TILEPOS::RIGHT_DOWN))
-                {
-                    set_tile_sizepos(TILEPOS::RIGHT_UP);
-                    return;
-                }
-
-                break;
             }
         }
-    }
 };
 
 class Events {
@@ -11594,8 +11597,7 @@ class Events {
         }
 };
 
-class test
-{
+class test {
     private:
     // Methods.
         void setup_events()
