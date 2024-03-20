@@ -3410,11 +3410,11 @@ class window {
                     {   U_ARROW,    SUPER                   },
                     {   D_ARROW,    SUPER                   },
                     {   TAB,        ALT                     },
-                    {   K,          SUPER                   },
+                    {   K,          SUPER                   }/* ,
                     {   R,          SUPER                   }, // key_binding for 'runner_window'
                     {   F,          SUPER                   }, // key_binding for 'file_app'
                     {   S,          SUPER                   }, // key_binding for 'system_settings'
-                    {   D,          SUPER                   }  // key_binding for 'debub menu'
+                    {   D,          SUPER                   }  // key_binding for 'debub menu' */
                 });
             }
         
@@ -7882,8 +7882,7 @@ class search_window
         vector<window> entry_list;
 };
 
-class Mwm_Runner
-{
+class Mwm_Runner {
     public:
     // Variabels.
         window main_window;
@@ -7965,8 +7964,7 @@ class Mwm_Runner
                 }
             });
         }
-};
-static Mwm_Runner * mwm_runner;
+}; /* static Mwm_Runner * mwm_runner; */
 
 class add_app_dialog_window
 {
@@ -8279,7 +8277,7 @@ class __file_app__ {
 
     // Constructor.
         __file_app__() {}
-}; /* static __file_app__ *file_app; */
+}; static __file_app__ *file_app;
 
 class __screen_settings__ {
     private:
@@ -8719,7 +8717,7 @@ class __screen_settings__ {
 
     // Constructor.
         __screen_settings__() {}
-}; /* static __screen_settings__ *screen_settings(nullptr); */
+}; static __screen_settings__ *screen_settings(nullptr);
 
 typedef struct dropdown_menu_t {
     window         _window;
@@ -9292,7 +9290,7 @@ class __system_settings__ {
     // Constructor.
         __system_settings__() {}
 
-}; /* static __system_settings__ *system_settings(nullptr); */
+}; static __system_settings__ *system_settings(nullptr);
 
 class Dock {
     public:
@@ -11773,8 +11771,8 @@ void setup_wm()
     dock->add_app("falkon");
     dock->init();
 
-    mwm_runner = new Mwm_Runner;
-    mwm_runner->init();
+    // mwm_runner = new Mwm_Runner;
+    // mwm_runner->init();
 
     Events events;
     events.setup();
