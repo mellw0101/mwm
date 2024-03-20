@@ -65,11 +65,6 @@ SRC = 	src/main.cpp
 OBJ = $(SRC:../src/%.cpp=%.o)
 DEPS = $(OBJ:.o=.d)
 
-ifeq ($(NET_LOG_ENABLED),1)
-CXXFLAGS += -DNET_LOG_ENABLED
-LDFLAGS += -DNET_LOG_ENABLED
-endif
-
 all: test
 
 %.o: %.cpp

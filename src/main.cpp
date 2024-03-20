@@ -11583,6 +11583,16 @@ class Events {
         {
             RE_CAST_EV(xcb_destroy_notify_event_t);
             GET_CLIENT_FROM_WINDOW(e->event);
+            if (c->atoms.is_modal)
+            {
+                client *c_trans = wm->client_from_any_window(&c->modal_data.transient_for);
+                if (c_trans != nullptr)
+                {
+                    c_trans->focus();
+                    wm->focused_client = c_trans;
+                }
+            }
+
             wm->send_sigterm_to_client(c);
         }
         
