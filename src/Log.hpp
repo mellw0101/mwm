@@ -562,7 +562,8 @@ class lout {
 		#define loutCFUNC(__calling_function) \
 			"calling_function(\033[35m" << __calling_function << "\033[0m)"
 
-		
+		#define lout_error_code(__error_code) \
+			"\033[31merror_code\033[0m(\033[31m" << __error_code << "\033[0m)"
 
 	public:
 	// Methods.
@@ -756,9 +757,6 @@ inline error_code_t error_code_helper(uint8_t __error_code)
 #define WINDOW_ID window_id(_window)
 
 /* LOG DEFENITIONS */
-#define lout_error_code(__error_code) \
-			"error_code(\033[31m" << error_code_helper(__error_code) << "\033[0m)"
-
 /**
  * @brief Macro to log info to the log file
  *        using the lout class  
