@@ -9516,7 +9516,7 @@ class __dock__ {
                 RE_CAST_EV(xcb_key_press_event_t);
                 if (e->detail == wm->key_codes.super_l)
                 {
-                    if (e->state != SUPER)
+                    if (e->state == SHIFT)
                     {
                         if (dock_menu.is_mapped())
                         {
