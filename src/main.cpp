@@ -5666,7 +5666,8 @@ class Window_Manager {
                     { Q,       SHIFT  | ALT   },
                     { T,       CTRL   | ALT   },
                     { L_ARROW, CTRL   | SUPER },
-                    { R_ARROW, CTRL   | SUPER }
+                    { R_ARROW, CTRL   | SUPER },
+                    { SUPER_L, NULL  }
                 });
                 root.clear();
                 
@@ -11895,6 +11896,8 @@ void setup_wm()
     
     system_settings = new __system_settings__;
     system_settings->init();
+
+    __dock__::inst().init();
 }
 
 int main()
