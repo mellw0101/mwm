@@ -6174,11 +6174,11 @@ class __audio__ {
             // End of list
             if (eol > 0)
             {
-                loutE << "end of list" << '\n';
+                // loutE << "end of list" << '\n';
                 return;
             }
 
-            loutI << "Sink name: " << l->name << " Description: " << l->description << '\n';
+            // loutI << "Sink name: " << l->name << " Description: " << l->description << '\n';
         }
 
         static void success_cb(pa_context* c, int success, void* userdata)
