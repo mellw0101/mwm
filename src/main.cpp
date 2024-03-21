@@ -195,6 +195,7 @@ static string user;
     string("/home/" + user + __address).c_str()
 
 #define SCREEN_CENTER_X(__window_width)  ((screen->width_in_pixels / 2) - (__window_width / 2))
+#define SCREEN_CENTER_Y(__window_height) ((screen->height_in_pixels / 2) - (__window_height / 2))
 #define SCREEN_BOTTOM_Y(__window_height) (screen->height_in_pixels - __window_height)
 
 namespace { // Tools
