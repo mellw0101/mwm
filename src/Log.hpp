@@ -715,6 +715,9 @@ inline window_obj_t window_id(uint32_t __window)
 #define FILE_NAME file_name(__FILE__)
 #define WINDOW_ID window_id(_window)
 
+#define loutNUM(__variable) \
+    "\033[33m" << __variable << "\033[0m" 
+
 /* LOG DEFENITIONS */
 /**
  * @brief Macro to log info to the log file
