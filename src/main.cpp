@@ -2,6 +2,7 @@
 #include <features.h>
 #include <iterator>
 #include <regex>
+#include <sstream>
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -4937,7 +4938,7 @@ class Key_Codes {
             f11{}, n_1{}, n_2{}, n_3{}, n_4{}, n_5{}, r_arrow{},
             l_arrow{}, u_arrow{}, d_arrow{}, tab{}, _delete{},
             super_l{};
-    
+
     private:
     // variabels.
         xcb_key_symbols_t * keysyms;
@@ -9597,11 +9598,11 @@ class __dock_search__ {
             {                                                       \
                 if (e->state == SHIFT)                              \
                 {                                                   \
-                    search_string += lower_to_upper_case(__char);   \
+                    search_string << lower_to_upper_case(__char);   \
                 }                                                   \
                 else                                                \
                 {                                                   \
-                    search_string += __char;                        \
+                    search_string << __char;                        \
                 }                                                   \
             }
     
@@ -9643,14 +9644,16 @@ class __dock_search__ {
 
                     if (e->detail == wm->key_codes.space_bar)
                     {
-                        search_string += " ";
+                        search_string << " ";
                     }
 
                     if (e->detail == wm->key_codes._delete)
                     {
-                        if(search_string.length() > 0) {
-                            search_string.erase(search_string.length() - 1);
+                        if (search_string.str().length() > 0)
+                        {
+                            search_string.str().erase(search_string.str().length() - 1);
                             main_window.clear();
+                            FLUSH_X();
                         }
                     }
 
@@ -9661,8 +9664,9 @@ class __dock_search__ {
                             enter_function();
                         }
                     
-                        search_string = "";
+                        search_string << "";
                         main_window.clear();
+                        FLUSH_X();
                     }
 
                     draw_text();
@@ -9682,7 +9686,7 @@ class __dock_search__ {
 
         void draw_text()
         {
-            main_window.draw_text(search_string.c_str(), WHITE, BLACK, "7x14", 2, 14);
+            main_window.draw_text(search_string.str().c_str(), WHITE, BLACK, "7x14", 2, 14);
             // if (search_string.length() > 0)
             // {
             //     results = file.search_for_binary(search_string.c_str());
@@ -9710,7 +9714,7 @@ class __dock_search__ {
     public:
     // Variabels.
         window(main_window);
-        string search_string = "";
+        stringstream search_string{};
     
     // Methods.
         void create(uint32_t __parent_window, int16_t __x, int16_t __y, uint16_t __width, uint16_t __height)
