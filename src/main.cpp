@@ -9516,13 +9516,16 @@ class __dock__ {
                 RE_CAST_EV(xcb_key_press_event_t);
                 if (e->detail == wm->key_codes.super_l)
                 {
-                    if (dock_menu.is_mapped())
+                    if (e->state != SUPER)
                     {
-                        dock_menu.unmap();
-                    }
-                    else
-                    {
-                        dock_menu.map();
+                        if (dock_menu.is_mapped())
+                        {
+                            dock_menu.unmap();
+                        }
+                        else
+                        {
+                            dock_menu.map();
+                        }
                     }
                 }
             });
