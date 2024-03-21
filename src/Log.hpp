@@ -561,6 +561,9 @@ class lout {
 		#define lout_error_code(__error_code) \
 			"\033[31merror_code\033[0m" << __error_code
 
+		#define loutCEcode(__error_code) \
+			lout_error_code(__error_code) << " " << loutCFUNC(__calling_function)
+
 	public:
 	// Methods.
 		/**
@@ -775,6 +778,9 @@ inline window_obj_t window_id(uint32_t __window)
  */
 #define loutEWin \
     loutE << WINDOW_ID
+
+#define loutEerror_code(__calling_function, __error_code) \
+	loutE << loutCFUNC(__calling_function) << " " << lout_error_code(__error_code)
 
 /**
  * @brief Macro to log a warning to the log file

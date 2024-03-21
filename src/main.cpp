@@ -287,7 +287,7 @@ namespace { // Tools
         int err = xcb_flush(conn);
         if (err <= 0)
         {
-            loutE << "Error flushing the x server, ERROR CODE: " << err << " calling function: " << __calling_function << '\n';
+            loutE << "Error flushing the x server: " << loutCEcode(err) << '\n';
         }
     }
     #define FLUSH_X() flush_x(__func__)
@@ -297,11 +297,12 @@ namespace { // Tools
         xcb_generic_error_t *error = xcb_request_check(conn, cookie);
         if (error)
         {
-            loutE << loutCFUNC(__calling_function) << lout_error_code(error->error_code) << '\n';
-            
+            loutEerror_code(__calling_function, error->error_code) << '\n';
             free(error); // Remember to free the error
         }
     }
+    #define VOID_COOKIE xcb_void_cookie_t cookie
+    #define CHECK_VOID_COOKIE() check_xcb_void_cookie_t(cookie, __func__)
 }
 
 class __net_logger__ {
@@ -1961,8 +1962,17 @@ class window {
 
             void make_xcb_borders(const int &__color)
             {
-                xcb_change_window_attributes(conn, _window, XCB_CW_BORDER_PIXEL, (uint32_t[1]){get_color(__color)});
+                VOID_COOKIE = xcb_change_window_attributes(
+                    conn,
+                    _window,
+                    XCB_CW_BORDER_PIXEL,
+                    (uint32_t[1])
+                    {
+                        get_color(__color)
+                    }
+                );
                 FLUSH_X();
+                CHECK_VOID_COOKIE();
             }
         
         // Main.
@@ -2254,6 +2264,7 @@ class window {
                     &active_window,
                     nullptr
                 );
+
                 return _window == active_window;
             }
             
@@ -2386,7 +2397,7 @@ class window {
         // Unset.
             void unset_EWMH_fullscreen_state()
             {
-                xcb_change_property(
+                VOID_COOKIE = xcb_change_property(
                     conn,
                     XCB_PROP_MODE_REPLACE,
                     _window,
@@ -2396,7 +2407,8 @@ class window {
                     0,
                     0
                 );
-                xcb_flush(conn);
+                FLUSH_X();
+                CHECK_VOID_COOKIE();
             }
         
         // Get.
@@ -11904,7 +11916,7 @@ void setup_wm()
         return;
     }
 
-    loutE << loutCFUNC(__func__) << lout_error_code(2) << '\n';
+    loutEerror_code(__func__, 2) << '\n';
 
     wm->init();
     change_desktop::teleport_to(1);
