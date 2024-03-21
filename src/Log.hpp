@@ -520,6 +520,10 @@ typedef struct {
     // Include a timestamp if you prefer logging it to be handled by the logger rather than each log call
 } LogMessage;
 
+typedef struct {
+    uint32_t value;
+} window_obj_t;
+
 class LogQueue {
 	public:
 		void push(const LogMessage& message)
@@ -591,6 +595,11 @@ class lout {
 			return *this;
 		}
 
+        lout& operator<<(const window_obj_t &__window)
+        {
+            buffer << "[WINDOW_ID:" << __window.value << "]";
+            return *this;
+        }
 
 		lout& operator<<(ostream& (*pf)(ostream&))
 		{
@@ -695,9 +704,15 @@ inline line_obj_t line(int __line)
 	return line_obj_t{__line};
 }
 
+inline window_obj_t window_id(uint32_t __window)
+{
+    return window_obj_t{__window};
+}
+
 #define FUNC func(__func__)
 #define LINE line(__LINE__)
 #define FILE_NAME file_name(__FILE__)
+#define WINDOW_ID window_id(_window)
 
 /* LOG DEFENITIONS */
 /**
@@ -708,11 +723,31 @@ inline line_obj_t line(int __line)
     lout << INFO << FUNC << LINE
 
 /**
+ *
+ * @brief Used to log info related to window acrions
+ *
+ * NOTE: ONLY USE THIS INSIDE WINDOW CLASS AS VAR '_window' IS A MEMBER
+ *
+ */
+#define loutIWin \
+    loutI << WINDOW_ID
+
+/**
  * @brief Macro to log an error to the log file
  *        using the lout class  
  */
 #define loutE \
 	lout << ERROR << FUNC << LINE
+
+/**
+ *
+ * @brief Used to log errors related to window acrions
+ *
+ * NOTE: ONLY USE THIS INSIDE WINDOW CLASS AS VAR '_window' IS A MEMBER
+ *
+ */
+#define loutEWin \
+    loutE << WINDOW_ID
 
 /**
  * @brief Macro to log a warning to the log file
