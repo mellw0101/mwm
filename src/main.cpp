@@ -2403,7 +2403,7 @@ class window {
                     xcb_get_property_cookie_t prop_cookie = xcb_get_property(conn, 0, _window, ewmh->_NET_WM_ICON, XCB_GET_PROPERTY_TYPE_ANY, 0, UINT32_MAX);
                     xcb_get_property_reply_t* prop_reply = xcb_get_property_reply(conn, prop_cookie, nullptr);
 
-                    std::vector<uint32_t> icon_data;
+                    vector<uint32_t> icon_data;
                     if (prop_reply && prop_reply->value_len > 0)
                     {
                         // The value is an array of 32-bit items, so cast the reply's value to a uint32_t pointer
@@ -2411,7 +2411,7 @@ class window {
                         uint32_t len = xcb_get_property_value_length(prop_reply) / sizeof(uint32_t);
 
                         // Parse icon data (width, height, and ARGB data)
-                        for (uint32_t i = 0; i < len; )
+                        for (uint32_t i = 0; i < len;)
                         {
                             uint32_t width = data[i++];
                             uint32_t height = data[i++];
