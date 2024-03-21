@@ -103,6 +103,9 @@ using SUint = unsigned short int;
 #define TEXT_LEN(__str) \
     (size(__str) - 1)
 
+#define CENTER_C_STR(__width, __c_str) \
+    CENTER_TEXT(__width, TEXT_LEN(__c_str))
+
 #define FRAME_EVENT_MASK \
     XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY   | \
     XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT | \
@@ -9689,7 +9692,11 @@ class __dock_search__ {
 
         void draw_text()
         {
-            main_window.draw_text(search_string.str().c_str(), WHITE, BLACK, "7x14", 2, 14);
+            main_window.draw_text_auto_color(
+                search_string.str().c_str(),
+                CENTER_TEXT(main_window.width(), search_string.str().length()),
+                15
+            );
             // if (search_string.length() > 0)
             // {
             //     results = file.search_for_binary(search_string.c_str());
