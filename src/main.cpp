@@ -9492,7 +9492,7 @@ class __dock__ {
             dock_menu.create_window(
                 screen->root,
                 SCREEN_CENTER_X(200),
-                0,
+                SCREEN_BOTTOM_Y(200),
                 200,
                 200,
                 RED
