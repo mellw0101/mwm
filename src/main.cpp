@@ -200,7 +200,17 @@ static string user;
 
 template<typename Type>
 constexpr Type make_constexpr(Type value) { return value; }
-#define MAKE_CONSTEXPR(__name, __value) constexpr auto __name = make_constexpr(__value)
+#define CONSTEXPR(__name, __value) \
+    constexpr auto __name = make_constexpr(__value)
+
+#define CONSTEXPR_TYPE(__type, __name, __value) \
+    constexpr __type __name = make_constexpr<__type>((__type)__value)
+
+#define STATIC_CONSTEXPR(__name, __value) \
+    static CONSTEXPR(__name, __value)
+
+#define STATIC_CONSTEXPR_TYPE(__type, __name, __value) \
+    static constexpr __type __name = make_constexpr<__type>((__type)__value)
 
 namespace { // Tools
     constexpr const char * pointer_from_enum(CURSOR CURSOR)
@@ -9527,8 +9537,8 @@ class __dock__ {
 
     // Variabels.
         window dock_menu;
-        static MAKE_CONSTEXPR(_width, 200);
-        static MAKE_CONSTEXPR(_height, 200);
+        STATIC_CONSTEXPR_TYPE(uint16_t, _width, 200);
+        STATIC_CONSTEXPR_TYPE(uint16_t, _height, 200);
 
     // Methods.
         void create_window()
