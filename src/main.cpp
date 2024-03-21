@@ -2185,7 +2185,7 @@ class window {
             }
 
             // Function to fetch and check the _MOTIF_WM_HINTS property
-            bool check_frameless_window_hint() 
+            bool check_frameless_window_hint()
             {
                 bool is_frameless = false;
                 xcb_atom_t property;
@@ -2206,7 +2206,7 @@ class window {
                     }
                     else
                     {
-                        log_error("No _MOTIF_WM_HINTS property found.");
+                        loutEWin << "No _MOTIF_WM_HINTS property found." << '\n';
                     }
 
                     free(reply);
@@ -2255,8 +2255,8 @@ class window {
                 xcb_get_window_attributes_reply_t *reply = xcb_get_window_attributes_reply(conn, cookie, nullptr);
 
                 if (reply == nullptr) // Check if the reply is valid
-                { 
-                    log_error("Unable to get window attributes.");
+                {
+                    loutEWin << "Unable to get window attributes." << '\n';
                     return 0;
                 }
 
@@ -3548,9 +3548,10 @@ class window {
         // Buttons.
             void grab_button(std::initializer_list<std::pair<const uint8_t, const uint16_t>> bindings)
             {
-                for (const auto & binding : bindings) {
-                    const uint8_t & button = binding.first;
-                    const uint16_t & modifier = binding.second;
+                for (const auto &binding : bindings)
+                {
+                    const uint8_t &button = binding.first;
+                    const uint16_t &modifier = binding.second;
                     xcb_grab_button(
                         conn, 
                         1, 
@@ -3563,13 +3564,14 @@ class window {
                         button, 
                         modifier    
                     );
-                    xcb_flush(conn); 
+                    FLUSH_X();
                 }
             }
         
             void ungrab_button(std::initializer_list<std::pair<const uint8_t, const uint16_t>> bindings)
             {
-                for (const auto & binding : bindings) {
+                for (const auto & binding : bindings)
+                {
                     const uint8_t & button = binding.first;
                     const uint16_t & modifier = binding.second;
                     xcb_ungrab_button(
@@ -3579,7 +3581,8 @@ class window {
                         modifier
                     );
                 }
-                xcb_flush(conn); // Flush the request to the X server
+
+                FLUSH_X();
             }
         
     private:
@@ -4193,9 +4196,9 @@ class window {
 class client {
     public:
     // Sub Classes.
-        class client_border_decor
-        {
+        class client_border_decor {
             public:
+            // Variables.
                 window left;
                 window right;
                 window top;
@@ -4246,14 +4249,16 @@ class client {
 
     // Methods.
         // Main.
-            void make_decorations() {
+            void make_decorations()
+            {
                 make_frame();
                 make_titlebar();
                 make_close_button();
                 make_max_button();
                 make_min_button();
                 
-                if (BORDER_SIZE > 0) {
+                if (BORDER_SIZE > 0)
+                {
                     make_borders();
                 }
             }
@@ -4332,10 +4337,12 @@ class client {
             #define TITLE_REQ_DRAW  (uint32_t)1 << 0
             #define TITLE_INTR_DRAW (uint32_t)1 << 1
 
-            void draw_title(const uint32_t &__mode) {
+            void draw_title(const uint32_t &__mode)
+            {
                 titlebar.clear();
 
-                if (__mode & TITLE_REQ_DRAW ) {
+                if (__mode & TITLE_REQ_DRAW )
+                {
                     titlebar.draw_text_16_auto_color(
                         win.get_net_wm_name_by_req().c_str(),
                         CENTER_TEXT(width, win.get_net_wm_name_by_req().length()),
@@ -9514,6 +9521,7 @@ class __dock__ {
         }
 
     public:
+    // Methods.
         static __dock__& inst()
         {
             static __dock__ instance;
