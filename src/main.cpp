@@ -9483,6 +9483,19 @@ class __dock__ {
     // Variabels.
         window dock_menu;
 
+    // Methods.
+        void create_window()
+        {
+            dock_menu.create_window(
+                screen->root,
+                0,
+                0,
+                200,
+                200,
+                RED
+            );
+        }
+
     public:
         static __dock__& inst()
         {
@@ -9492,21 +9505,21 @@ class __dock__ {
 
         void init()
         {
+            create_window();
+
             event_handler->setEventCallback(EV_CALL(XCB_KEY_PRESS)
             {
                 RE_CAST_EV(xcb_key_press_event_t);
                 if (e->detail == wm->key_codes.super_l)
                 {
-                    dock_menu.create_window(
-                        screen->root,
-                        0,
-                        0,
-                        200,
-                        200,
-                        RED,
-                        NONE,
-                        MAP
-                    );
+                    if (dock_menu.is_mapped())
+                    {
+                        dock_menu.unmap();
+                    }
+                    else
+                    {
+                        dock_menu.map();
+                    }
                 }
             });
         }
