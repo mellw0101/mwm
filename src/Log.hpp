@@ -597,7 +597,7 @@ class lout {
 
         lout& operator<<(const window_obj_t &__window)
         {
-            buffer << "[" << log_BLUE << "WINDOW_ID" << log_RESET << ":" << log_YELLOW << __window.value << log_RESET << "]";
+            buffer << "[" << log_BLUE << "WINDOW_ID" << log_RESET << ":" << __window.value << "]";
             return *this;
         }
 
