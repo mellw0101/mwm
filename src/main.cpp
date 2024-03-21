@@ -292,7 +292,16 @@ namespace { // Tools
     }
     #define FLUSH_X() flush_x(__func__)
 
-    
+    void check_xcb_void_cookie_t(xcb_void_cookie_t cookie, const char *__calling_function)
+    {
+        xcb_generic_error_t *error = xcb_request_check(conn, cookie);
+        if (error)
+        {
+            loutE << loutCFUNC(__calling_function) << lout_error_code(error->error_code) << '\n';
+            
+            free(error); // Remember to free the error
+        }
+    }
 }
 
 class __net_logger__ {
@@ -11894,6 +11903,8 @@ void setup_wm()
         loutE << "failed to allocate memory for wm exeting" << endl;
         return;
     }
+
+    loutE << loutCFUNC(__func__) << lout_error_code(12) << '\n';
 
     wm->init();
     change_desktop::teleport_to(1);

@@ -524,6 +524,10 @@ typedef struct {
     uint32_t value;
 } window_obj_t;
 
+typedef struct {
+	uint8_t value;
+} error_code_t;
+
 class LogQueue {
 	public:
 		void push(const LogMessage& message)
@@ -554,6 +558,11 @@ class lout {
     // Defines.
         #define loutNUM(__variable) \
             "(\033[33m" << __variable << "\033[0m)"
+
+		#define loutCFUNC(__calling_function) \
+			"calling_function(\033[35m" << __calling_function << "\033[0m)"
+
+		
 
 	public:
 	// Methods.
@@ -604,6 +613,12 @@ class lout {
             buffer << "[" << log_BLUE << "WINDOW_ID" << log_RESET << ":" << loutNUM(__window.value) << "] ";
             return *this;
         }
+
+		lout& operator<<(const error_code_t &__error_code)
+		{
+			buffer << __error_code.value;
+			return *this;
+		}
 
 		lout& operator<<(ostream& (*pf)(ostream&))
 		{
@@ -730,12 +745,20 @@ inline window_obj_t window_id(uint32_t __window)
     return window_obj_t{__window};
 }
 
+inline error_code_t error_code_helper(uint8_t __error_code)
+{
+	return error_code_t{__error_code};
+}
+
 #define FUNC func(__func__)
 #define LINE line(__LINE__)
 #define FILE_NAME file_name(__FILE__)
 #define WINDOW_ID window_id(_window)
 
 /* LOG DEFENITIONS */
+#define lout_error_code(__error_code) \
+			"error_code(\033[31m" << error_code_helper(__error_code) << "\033[0m)"
+
 /**
  * @brief Macro to log info to the log file
  *        using the lout class  
