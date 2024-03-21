@@ -103,9 +103,6 @@ using SUint = unsigned short int;
 #define TEXT_LEN(__str) \
     (size(__str) - 1)
 
-#define CENTER_C_STR(__width, __c_str) \
-    CENTER_TEXT(__width, TEXT_LEN(__c_str))
-
 #define FRAME_EVENT_MASK \
     XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY   | \
     XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT | \
