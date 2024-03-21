@@ -194,6 +194,8 @@ static string user;
 #define USER_PATH_PREFIX_C_STR(__address) \
     string("/home/" + user + __address).c_str()
 
+#define SCREEN_CENTER_X(__window_width) ((screen->width_in_pixels / 2) - (__window_width / 2))
+
 namespace { // Tools
     constexpr const char * pointer_from_enum(CURSOR CURSOR)
     {
@@ -9488,7 +9490,7 @@ class __dock__ {
         {
             dock_menu.create_window(
                 screen->root,
-                0,
+                SCREEN_CENTER_X(200),
                 0,
                 200,
                 200,
