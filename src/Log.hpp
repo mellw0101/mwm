@@ -551,6 +551,10 @@ class LogQueue {
 };
 
 class lout {
+    // Defines.
+        #define loutNUM(__variable) \
+            "(\033[33m" << __variable << "\033[0m)"
+
 	public:
 	// Methods.
 		/**
@@ -632,7 +636,7 @@ class lout {
         typename std::enable_if<std::is_arithmetic<T>::value, lout&>::type
         operator<<(T value)
         {
-            buffer << value;
+            buffer << loutNUM(value);
             return *this;
         }
 
@@ -730,9 +734,6 @@ inline window_obj_t window_id(uint32_t __window)
 #define LINE line(__LINE__)
 #define FILE_NAME file_name(__FILE__)
 #define WINDOW_ID window_id(_window)
-
-#define loutNUM(__variable) \
-    "\033[33m(" << __variable << ")\033[0m"
 
 /* LOG DEFENITIONS */
 /**
