@@ -601,7 +601,7 @@ class lout {
 
         lout& operator<<(const window_obj_t &__window)
         {
-            buffer << "[" << log_BLUE << "WINDOW_ID" << log_RESET << ":" << __window.value << "] ";
+            buffer << "[" << log_BLUE << "WINDOW_ID" << log_RESET << ":" << loutNUM(__window.value) << "] ";
             return *this;
         }
 
@@ -633,7 +633,7 @@ class lout {
         }
 
         template<typename T>
-        typename std::enable_if<std::is_arithmetic<T>::value, lout&>::type
+        typename enable_if<is_arithmetic<T>::value, lout&>::type
         operator<<(T value)
         {
             buffer << loutNUM(value);
@@ -641,7 +641,7 @@ class lout {
         }
 
         template<typename T>
-        typename std::enable_if<!std::is_arithmetic<T>::value, lout&>::type
+        typename enable_if<!is_arithmetic<T>::value, lout&>::type
         operator<<(const T& message)
         {
             buffer << message;
