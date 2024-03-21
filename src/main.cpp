@@ -2958,13 +2958,14 @@ class window {
 
             void apply_event_mask(const uint32_t *__mask)
             {
-                xcb_change_window_attributes(
+                VOID_COOKIE = xcb_change_window_attributes(
                     conn,
                     _window,
                     XCB_CW_EVENT_MASK,
                     __mask
                 );
-                xcb_flush(conn);
+                FLUSH_X();
+                CHECK_VOID_COOKIE();
             }
 
             void set_pointer(CURSOR cursor_type)
@@ -2972,20 +2973,20 @@ class window {
                 xcb_cursor_context_t *ctx;
                 if (xcb_cursor_context_new(conn, screen, &ctx) < 0)
                 {
-                    log_error("Unable to create cursor context.");
+                    loutEWin << "Unable to create cursor context" << '\n';
                     return;
                 }
 
                 xcb_cursor_t cursor = xcb_cursor_load_cursor(ctx, pointer_from_enum(cursor_type));
                 if (!cursor)
                 {
-                    log_error("Unable to load cursor.");
+                    loutEWin << "Unable to load cursor" << '\n';
                     xcb_cursor_context_free(ctx);
                     xcb_free_cursor(conn, cursor);
                     return;
                 }
 
-                xcb_change_window_attributes(
+                VOID_COOKIE = xcb_change_window_attributes(
                     conn,
                     _window,
                     XCB_CW_CURSOR,
@@ -2994,7 +2995,8 @@ class window {
                         cursor
                     }
                 );
-                xcb_flush(conn);
+                FLUSH_X();
+                CHECK_VOID_COOKIE();
                 xcb_cursor_context_free(ctx);
                 xcb_free_cursor(conn, cursor);
             }
@@ -3370,7 +3372,7 @@ class window {
                 int backround_color = __backround_color;
                 if (backround_color == 0) backround_color = _color;
                 create_font_gc(__text_color, backround_color, font);
-                xcb_image_text_8(
+                VOID_COOKIE = xcb_image_text_8(
                     conn,
                     strlen(__str),
                     _window,
@@ -3379,7 +3381,8 @@ class window {
                     __y,
                     __str
                 );
-                xcb_flush(conn);
+                FLUSH_X();
+                CHECK_VOID_COOKIE();
             }
 
             void draw_text_16(const char *str, const int &text_color, const int &background_color, const char *font_name, const int16_t &x, const int16_t &y)
