@@ -9895,6 +9895,7 @@ class __dock__ {
             );
 
             dock_search.create(dock_menu, 0, 0, _width, 20);
+            dock_search.init();
         }
 
     public:
