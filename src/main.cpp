@@ -9667,7 +9667,7 @@ class __dock_search__ {
                             enter_function();
                         }
                     
-                        search_string << "";
+                        search_string.str("");
                         main_window.clear();
                         FLUSH_X();
                     }
