@@ -9537,8 +9537,8 @@ class __dock__ {
 
     // Variabels.
         window dock_menu;
-        STATIC_CONSTEXPR_TYPE(uint16_t, _width, 200);
-        STATIC_CONSTEXPR_TYPE(uint16_t, _height, 200);
+        STATIC_CONSTEXPR_TYPE(uint16_t, _width, 400);
+        STATIC_CONSTEXPR_TYPE(uint16_t, _height, 500);
 
     // Methods.
         void create_window()
