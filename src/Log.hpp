@@ -628,12 +628,28 @@ class lout {
             return *this;
         }
 
-		template<typename T>
-		lout& operator<<(const T& message)
-		{
-			buffer << message;
-			return *this;
-		}
+        template<typename T>
+        typename std::enable_if<std::is_arithmetic<T>::value, lout&>::type
+        operator<<(T value)
+        {
+            buffer << value;
+            return *this;
+        }
+
+        template<typename T>
+        typename std::enable_if<!std::is_arithmetic<T>::value, lout&>::type
+        operator<<(const T& message)
+        {
+            buffer << message;
+            return *this;
+        }
+
+		// template<typename T>
+		// lout& operator<<(const T& message)
+		// {
+		// 	buffer << message;
+		// 	return *this;
+		// }
 
 	private:
 	// Variabels.
@@ -716,7 +732,7 @@ inline window_obj_t window_id(uint32_t __window)
 #define WINDOW_ID window_id(_window)
 
 #define loutNUM(__variable) \
-    "\033[33m" << __variable << "\033[0m" 
+    "\033[33m(" << __variable << ")\033[0m"
 
 /* LOG DEFENITIONS */
 /**

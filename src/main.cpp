@@ -2395,7 +2395,7 @@ class window {
                     xcb_intern_atom_cookie_t* cookie = xcb_ewmh_init_atoms(conn, ewmh);
                     if (!xcb_ewmh_init_atoms_replies(ewmh, cookie, nullptr))
                     {
-                        log_error("Failed to initialize EWMH atoms.");
+                        loutEWin << "Failed to initialize EWMH atoms" << '\n';
                         return {};
                     }
 
@@ -2569,11 +2569,11 @@ class window {
                     {
                         icon_name = string(reply.name, reply.name_len);
                         xcb_icccm_get_text_property_reply_wipe(&reply);
-                        logger.log(INFO, __func__, "icon_name: ", icon_name);
+                        loutIWin << "icon_name: " << icon_name << '\n';
                     }
                     else
                     {
-                        log_error("Failed to retrieve the window icon name.");
+                        loutEWin << "Failed to retrieve the window icon name" << '\n';
                     }
 
                     return icon_name;
@@ -2664,14 +2664,14 @@ class window {
                 cookie = xcb_icccm_get_wm_class(conn, _window); // Request WM_CLASS property
                 if (xcb_icccm_get_wm_class_reply(conn, cookie, &wm_class_reply, NULL)) // Retrieve the WM_CLASS property
                 {
-                    logger.log(INFO, __func__, "Instance Name", wm_class_reply.instance_name);
-                    logger.log(INFO, __func__, "Class Name", wm_class_reply.class_name);
+                    loutIWin << "Instance Name: " << wm_class_reply.instance_name << '\n';
+                    loutIWin << "Class Name: "    << wm_class_reply.class_name    << '\n';
 
                     xcb_icccm_get_wm_class_reply_wipe(&wm_class_reply);
                 }
                 else
                 {
-                    logger.log(ERROR, __func__, "Failed to retrieve WM_CLASS for window");
+                    loutEWin << "Failed to retrieve WM_CLASS for window" << '\n';
                 }
             }
 
