@@ -1953,7 +1953,7 @@ class window {
             void make_xcb_borders(const int &__color)
             {
                 xcb_change_window_attributes(conn, _window, XCB_CW_BORDER_PIXEL, (uint32_t[1]){get_color(__color)});
-                xcb_flush(conn);
+                FLUSH_X();
             }
         
         // Main.
