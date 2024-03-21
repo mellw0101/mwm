@@ -11922,6 +11922,8 @@ void setup_wm()
 
 int main()
 {
+    loutI << "-- mwm starting --" << '\n';
+
     INIT_NET_LOG(ESP_SERVER);
     NET_LOG("Starting mwm.");
 
@@ -11932,9 +11934,7 @@ int main()
     };
     thread(audio_thread).detach();
 
-    LOG_start()
     setup_wm();
-
     audio.list_sinks();
 
     test tester;

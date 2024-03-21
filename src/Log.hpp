@@ -602,6 +602,21 @@ class lout {
 			return *this;
 		}
 
+        lout& operator<<(char c)
+        {
+            if (c == '\n')
+            {
+                logMessage();
+				buffer = std::ostringstream(); // Reset the buffer for new messages
+            }
+            else
+            {
+                buffer << c;
+            }
+
+            return *this;
+        }
+
 		template<typename T>
 		lout& operator<<(const T& message)
 		{
