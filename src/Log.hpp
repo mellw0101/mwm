@@ -554,11 +554,13 @@ class lout {
 		 * @brief Make lout a singleton to ensure a single object instance
 		 *
 		 */
-		static lout& inst()
-		{
-			static lout instance;
-			return instance;
-		}
+		// static lout& inst()
+		// {
+		// 	static lout instance;
+		// 	return instance;
+		// }
+
+        lout() {}
 		
 		lout& operator<<(LogLevel logLevel) // Overloads for handling log level, function name wrapper, and endl
 		{
@@ -633,9 +635,6 @@ class lout {
 		ostringstream buffer;
 		mutex log_mutex;
 
-	// Constructor is private to prevent multiple instances
-		lout() {}
-
 	// Methods.
 		void logMessage()
 		{
@@ -678,7 +677,7 @@ class lout {
 				}
 			}
 		}
-};
+}; static lout lout;
 
 // Utility function for wrapping function names
 inline FuncNameWrapper func(const char* name)
@@ -706,28 +705,28 @@ inline line_obj_t line(int __line)
  *        using the lout class  
  */
 #define loutI \
-    lout::inst() << INFO << FUNC << LINE
+    lout << INFO << FUNC << LINE
 
 /**
  * @brief Macro to log an error to the log file
  *        using the lout class  
  */
 #define loutE \
-	lout::inst() << ERROR << FUNC << LINE
+	lout << ERROR << FUNC << LINE
 
 /**
  * @brief Macro to log a warning to the log file
  *        using the lout class
  */
 #define loutW \
-    lout::inst() << WARNING << FUNC << LINE
+    lout << WARNING << FUNC << LINE
 
 /**
  * @brief Macro to log priority info to the log file
  *        using the lout class  
  */
 #define loutIP \
-    lout::inst() << INFO_PRIORITY << FUNC << LINE
+    lout << INFO_PRIORITY << FUNC << LINE
 
 #define LOG_ev_response_type(ev)    	    Log::xcb_event_response_type(__func__, ev);
 #define LOG_func                    	    Log::FUNC(__func__);
