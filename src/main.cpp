@@ -2298,7 +2298,7 @@ class window {
                 xcb_get_window_attributes_reply_t *reply = xcb_get_window_attributes_reply(conn, cookie, nullptr);
                 if (reply == nullptr) 
                 {
-                    log_error("Unable to get window attributes.");
+                    loutE << "Unable to get window attributes" << '\n';
                     return false;
                 }
 
