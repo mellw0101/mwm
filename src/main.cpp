@@ -6185,11 +6185,12 @@ class __audio__ {
         {
             if (success)
             {
-                loutI << "Default sink changed successfully" << '\n';
+                // loutI << "Default sink changed successfully" << '\n';
             }
             else
             {
-                loutE << "Failed to change the default sink" << '\n';
+                // loutE << "Failed to change the default sink" << '\n';
+
             }
 
             // Signal the main loop to quit after attempting to change the default sink
