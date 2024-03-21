@@ -743,6 +743,8 @@ inline window_obj_t window_id(uint32_t __window)
 #define LINE line(__LINE__)
 #define FILE_NAME file_name(__FILE__)
 #define WINDOW_ID window_id(_window)
+#define WINDOW_ID_BY_INPUT(__window) \
+	window_id(__window)
 
 /* LOG DEFENITIONS */
 /**

@@ -12200,7 +12200,7 @@ void setup_wm()
     file_app = new __file_app__;
     if (file_app == nullptr)
     {
-        loutE << "Failed to allocate memory for file_app" << endl;
+        loutE << "Failed to allocate memory for file_app" << '\n';
     }
     else
     {
