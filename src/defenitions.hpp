@@ -79,6 +79,7 @@
 #define DOT     0x2e
 #define SLASH   0x2f
 #define ESC     0xff1b
+#define SUPER_L 0xffeb
 
 /* BUTTON DEFENITIONS */
 #define L_MOUSE_BUTTON XCB_BUTTON_INDEX_1

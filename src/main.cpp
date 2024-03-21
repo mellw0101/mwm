@@ -94,7 +94,7 @@ using SUint = unsigned short int;
 #define NET_DEBUG true
 
 #define EV_CALL(__type) \
-    __type, [&](Ev ev)-> void
+    __type, [&](Ev ev) -> void
 
 #define CENTER_TEXT(__width, __str_len) \
     ((__width / 2) - ((__str_len * DEFAULT_FONT_WIDTH) / 2))
@@ -3108,7 +3108,7 @@ class window {
                 Imlib_Image image = imlib_load_image(imagePath);
                 if (!image)
                 {
-                    log_error("Failed to load image: " + std::string(imagePath));
+                    loutE << "Failed to load image: " << imagePath << endl;
                     return;
                 }
 
@@ -3202,7 +3202,7 @@ class window {
                 Imlib_Image image = imlib_load_image(__imagePath.c_str());
                 if (!image)
                 {
-                    log_error("Failed to load image: " + __imagePath);
+                    loutE << "Failed to load image: " << __imagePath << endl;
                     return;
                 }
 
@@ -4798,8 +4798,7 @@ class desktop
         uint16_t height;
 };
 
-class Key_Codes
-{
+class Key_Codes {
     public:
     // constructor and destructor.
         Key_Codes() 
@@ -4858,7 +4857,8 @@ class Key_Codes
                     { L_ARROW,      &l_arrow   },
                     { U_ARROW,      &u_arrow   },
                     { D_ARROW,      &d_arrow   },
-                    { TAB,          &tab       }
+                    { TAB,          &tab       },
+                    { SUPER_L,      &super_l   }
                 };
                 
                 for (auto &pair : key_map) {
@@ -4879,7 +4879,8 @@ class Key_Codes
             space_bar{}, enter{},
 
             f11{}, n_1{}, n_2{}, n_3{}, n_4{}, n_5{}, r_arrow{},
-            l_arrow{}, u_arrow{}, d_arrow{}, tab{}, _delete{};
+            l_arrow{}, u_arrow{}, d_arrow{}, tab{}, _delete{},
+            super_l{};
     
     private:
     // variabels.
@@ -8367,7 +8368,7 @@ class __screen_settings__ {
 
             if (!res_reply)
             {
-                log_error("Could not get screen resources");
+                loutE << "Could not get screen resources" << endl;
                 return{};
             }
 
@@ -8704,7 +8705,7 @@ class __screen_settings__ {
 
             if (!res_reply)
             {
-                log_error("Could not get screen resources");
+                loutE << "Could not get screen resources" << endl;
                 return;
             }
 
@@ -8714,7 +8715,7 @@ class __screen_settings__ {
 
             if (!outputs_len)
             {
-                log_error("No outputs found");
+                loutE << "No outputs found" << endl;
                 free(res_reply);
                 return;
             }
@@ -8727,7 +8728,7 @@ class __screen_settings__ {
 
             if (!output_info_reply || output_info_reply->crtc == XCB_NONE)
             {
-                log_error("Output is not connected to any CRTC");
+                loutE << "Output is not connected to any CRTC" << endl;
                 free(output_info_reply);
                 free(res_reply);
                 return;
@@ -9472,6 +9473,44 @@ class Dock {
             }); 
         }
 }; static Dock * dock;
+
+class __dock__ {
+    private:
+    // Constructor.
+        __dock__() {}
+
+    // Variabels.
+        window dock_menu;
+
+    public:
+        static __dock__& inst()
+        {
+            static __dock__ instance;
+            return instance;
+        }
+
+        void init()
+        {
+            event_handler->setEventCallback(EV_CALL(XCB_KEY_PRESS)
+            {
+                RE_CAST_EV(xcb_key_press_event_t);
+                if (e->detail == wm->key_codes.super_l)
+                {
+                    dock_menu.create_window(
+                        screen->root,
+                        0,
+                        0,
+                        200,
+                        200,
+                        RED,
+                        NONE,
+                        MAP
+                    );
+                }
+            });
+        }
+
+};
 
 class mv_client {
     // Defines.
@@ -11808,9 +11847,15 @@ void setup_wm()
     user = get_user_name();
 
     wm = new Window_Manager;
+    if (wm == nullptr)
+    {
+        loutE << "failed to allocate memory for wm exeting" << endl;
+        return;
+    }
+
     wm->init();
-    
     change_desktop::teleport_to(1);
+    
     // #ifndef ARMV8_BUILD
     //     dock = new Dock;
     //     dock->add_app("konsole");
@@ -11828,7 +11873,14 @@ void setup_wm()
     events.setup();
 
     file_app = new __file_app__;
-    file_app->init();
+    if (file_app == nullptr)
+    {
+        loutE << "Failed to allocate memory for file_app" << endl;
+    }
+    else
+    {
+        file_app->init();
+    }
 
     status_bar = new __status_bar__;
     status_bar->init();
