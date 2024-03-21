@@ -3655,7 +3655,7 @@ class window {
                     _value_mask,
                     _value_list
                 );
-                xcb_flush(conn);
+                FLUSH_X();
             }
             
             void clear_window()
