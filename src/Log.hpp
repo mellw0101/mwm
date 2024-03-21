@@ -644,7 +644,7 @@ class lout {
 			ofstream file("/home/mellw/nlog", ios::app); // Append mode
 			if (file)
 			{
-				file << TIME::mili() << ":" << getLogPrefix(currentLevel) << ":" << log_MEGENTA << "[" << currentFunction << "]" << log_RESET << ":" << log_YELLOW << "[Line:" << current_line << "]" << log_RESET << ": " << buffer.str() << "\n";
+				file << TIME::mili() << ":" << getLogPrefix(currentLevel) << ":" << log_YELLOW << "[Line:" << current_line << "]" << log_RESET << ":" << log_MEGENTA << "[" << currentFunction << "]" << log_RESET << ": " << buffer.str() << "\n";
 			}
 		}
 

@@ -276,6 +276,21 @@ namespace { // Tools
 
         return username;
     }
+
+    /**
+     *
+     * @brief Flushes any X server requests in que and checks for errors 
+     *
+     */
+    void flush_x(const char *__calling_function)
+    {
+        int err = xcb_flush(conn);
+        if (err <= 0)
+        {
+            loutE << "Error flushing the x server, ERROR CODE: " << err << " calling function: " << __calling_function << '\n';
+        }
+    }
+    #define FLUSH_X() flush_x(__func__)
 }
 
 class __net_logger__ {
@@ -1951,19 +1966,19 @@ class window {
                         XCB_STACK_MODE_ABOVE
                     }
                 );
-                xcb_flush(conn);
+                FLUSH_X();
             }
             
             void map()
             {
                 xcb_map_window(conn, _window);
-                xcb_flush(conn);
+                FLUSH_X();
             }
             
             void unmap()
             {
                 xcb_unmap_window(conn, _window);
-                xcb_flush(conn);
+                FLUSH_X();
             }
             
             void reparent(uint32_t __new_parent, int16_t __x, int16_t __y)
@@ -1975,7 +1990,7 @@ class window {
                     __x,
                     __y
                 );
-                xcb_flush(conn);
+                FLUSH_X();
             }
             
             void make_child(uint32_t __window_to_make_child, uint32_t __child_x, uint32_t __child_y)
@@ -1987,7 +2002,7 @@ class window {
                     __child_x,
                     __child_y
                 );
-                xcb_flush(conn);
+                FLUSH_X();
             }
             
             void kill()
@@ -2030,7 +2045,7 @@ class window {
                     _width,
                     _height
                 );
-                xcb_flush(conn);
+                FLUSH_X();
             }
             
             void focus_input()
@@ -2041,7 +2056,7 @@ class window {
                     _window, 
                     XCB_CURRENT_TIME
                 );
-                xcb_flush(conn);
+                FLUSH_X();
             }
 
             void send_event(uint32_t __event_mask, void *__value_list = nullptr)
@@ -6159,23 +6174,24 @@ class __audio__ {
             // End of list
             if (eol > 0)
             {
-                log_error("end of list.");
+                loutE << "end of list" << '\n';
                 return;
             }
 
-            log_info("Sink name: " + string(l->name) + " Description: " + string(l->description));
+            loutI << "Sink name: " << l->name << " Description: " << l->description << '\n';
         }
 
         static void success_cb(pa_context* c, int success, void* userdata)
         {
             if (success)
             {
-                std::cout << "Default sink changed successfully." << std::endl;
+                loutI << "Default sink changed successfully" << '\n';
             }
             else
             {
-                std::cout << "Failed to change the default sink." << std::endl;
+                loutE << "Failed to change the default sink" << '\n';
             }
+
             // Signal the main loop to quit after attempting to change the default sink
             pa_mainloop_quit(reinterpret_cast<pa_mainloop*>(userdata), 0);
         }
