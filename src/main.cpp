@@ -198,6 +198,10 @@ static string user;
 #define SCREEN_CENTER_Y(__window_height) ((screen->height_in_pixels / 2) - (__window_height / 2))
 #define SCREEN_BOTTOM_Y(__window_height) (screen->height_in_pixels - __window_height)
 
+template<typename Type>
+constexpr Type make_constexpr(Type value) { return value; }
+#define MAKE_CONSTEXPR(__name, __value) constexpr auto __name = make_constexpr(__value)
+
 namespace { // Tools
     constexpr const char * pointer_from_enum(CURSOR CURSOR)
     {
@@ -1603,10 +1607,8 @@ class _scale
         }
 };
 
-namespace // window namespace
-{
-    enum BORDER
-    {
+namespace { // window namespace 
+    enum BORDER {
         NONE  = 0,
         LEFT  = 1 << 0, // 1
         RIGHT = 1 << 1, // 2
@@ -1615,15 +1617,13 @@ namespace // window namespace
         ALL   = 1 << 4  // 16
     };
 
-    enum window_flags
-    {
+    enum window_flags {
         MAP          = 1 << 0, // 1
         DEFAULT_KEYS = 1 << 1, // 2
         FOCUS_INPUT  = 1 << 2  // 4
     };
 
-    enum window_event_mask : uint32_t
-    {
+    enum window_event_mask : uint32_t {
         KILL_WINDOW = 1 << 25
     };
 
@@ -1668,10 +1668,8 @@ namespace // window namespace
         } \
         enum class EnumName : UnderlyingType
 
-    namespace // WINDOW_CONFIG.
-    {
-        enum class WINDOW_CONF : uint32_t
-        {
+    namespace { // WINDOW_CONFIG.
+        enum class WINDOW_CONF : uint32_t {
             X      = 1 << 0,
             Y      = 1 << 1,
             WIDTH  = 1 << 2,
@@ -1705,8 +1703,7 @@ namespace // window namespace
                 ~static_cast<std::underlying_type<WINDOW_CONF>::type>(a));
         }
 
-        DEFINE_BITWISE_ENUM(WINDOW_CONFIG, uint16_t)
-        {
+        DEFINE_BITWISE_ENUM(WINDOW_CONFIG, uint16_t) {
             X      = 1 << 0,
             Y      = 1 << 1,
             WIDTH  = 1 << 2,
@@ -3019,7 +3016,7 @@ class window {
                     }
                 
                     uint16_t height() const
-                    {
+                    { 
                         return _height;
                     }
 
@@ -9530,16 +9527,18 @@ class __dock__ {
 
     // Variabels.
         window dock_menu;
+        static MAKE_CONSTEXPR(_width, 200);
+        static MAKE_CONSTEXPR(_height, 200);
 
     // Methods.
         void create_window()
         {
             dock_menu.create_window(
                 screen->root,
-                SCREEN_CENTER_X(200),
-                SCREEN_BOTTOM_Y(200),
-                200,
-                200,
+                SCREEN_CENTER_X(_width),
+                SCREEN_BOTTOM_Y(_height),
+                _width,
+                _height,
                 RED
             );
         }
