@@ -2483,7 +2483,7 @@ class window {
                     {
                         if (error)
                         {
-                            log_error("Error retrieving window hints.");
+                            loutEWin << "Error retrieving window hints" << '\n';
                             free(error);
                         }
 
@@ -2495,16 +2495,17 @@ class window {
                     {
                         _min_width = hints.min_width;
                         _min_height = hints.min_height;
-                        log_num("min_width: ", hints.min_width);
-                        log_num("min_height: ", hints.min_height);
-                        log_num("width", hints.width);
-                        log_num("height", hints.height);
-                        log_num("x", hints.x);
-                        log_num("y", hints.y);
+
+                        loutIWin << "min_width: "  << hints.min_width  << '\n';
+                        loutIWin << "min_height: " << hints.min_height << '\n';
+                        loutIWin << "width: "      << hints.width      << '\n';
+                        loutIWin << "height: "     << hints.height     << '\n';
+                        loutIWin << "x: "          << hints.x          << '\n';
+                        loutIWin << "y: "          << hints.y          << '\n';
                     }
                     else
                     {
-                        log_info("No minimum size hints available.");
+                        loutEWin << "No minimum size hints available" << '\n';
                     }
                 }
 
@@ -2521,7 +2522,7 @@ class window {
                     {
                         if (error)
                         {
-                            log_error("Error retrieving window hints.");
+                            loutEWin << "Error retrieving window hints" << '\n';
                             free(error);
                         }
 
@@ -2540,14 +2541,14 @@ class window {
 
                         loutIWin << "min_width: "  << hints.min_width  << '\n';
                         loutIWin << "min_height: " << hints.min_height << '\n';
-                        loutIWin << "width"        << hints.width      << '\n';
-                        loutIWin << "height"       << hints.height     << '\n';
-                        loutIWin << "x"            << hints.x          << '\n';
-                        loutIWin << "y"            << hints.y          << '\n';
+                        loutIWin << "width: "      << hints.width      << '\n';
+                        loutIWin << "height: "     << hints.height     << '\n';
+                        loutIWin << "x: "          << hints.x          << '\n';
+                        loutIWin << "y: "          << hints.y          << '\n';
                     }
                     else
                     {
-                        log_error("Could not get size hints.");
+                        loutEWin << "Could not get size hints" << '\n';
                     }
                 }
 

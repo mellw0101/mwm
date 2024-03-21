@@ -597,7 +597,7 @@ class lout {
 
         lout& operator<<(const window_obj_t &__window)
         {
-            buffer << "[" << log_BLUE << "WINDOW_ID" << log_RESET << ":" << __window.value << "]";
+            buffer << "[" << log_BLUE << "WINDOW_ID" << log_RESET << ":" << __window.value << "] ";
             return *this;
         }
 
@@ -686,6 +686,7 @@ class lout {
 				}
 			}
 		}
+
 }; static lout lout;
 
 // Utility function for wrapping function names
@@ -724,9 +725,9 @@ inline window_obj_t window_id(uint32_t __window)
 
 /**
  *
- * @brief Used to log info related to window acrions
+ * @brief Used to log info related to window actions
  *
- * NOTE: ONLY USE THIS INSIDE WINDOW CLASS AS VAR '_window' IS A MEMBER
+ * NOTE: ONLY USE THIS INSIDE THE 'window' CLASS AS VAR '_window' IS A MEMBER
  *
  */
 #define loutIWin \
@@ -741,9 +742,9 @@ inline window_obj_t window_id(uint32_t __window)
 
 /**
  *
- * @brief Used to log errors related to window acrions
+ * @brief Used to log errors related to window actions
  *
- * NOTE: ONLY USE THIS INSIDE WINDOW CLASS AS VAR '_window' IS A MEMBER
+ * NOTE: ONLY USE THIS INSIDE THE 'window' CLASS AS VAR '_window' IS A MEMBER
  *
  */
 #define loutEWin \
@@ -755,6 +756,16 @@ inline window_obj_t window_id(uint32_t __window)
  */
 #define loutW \
     lout << WARNING << FUNC << LINE
+
+/**
+ *
+ * @brief Used to log warnings related to window actions
+ *
+ * NOTE: ONLY USE THIS INSIDE THE 'window' CLASS AS VAR '_window' IS A MEMBER
+ *
+ */
+#define loutWWin \
+    loutW << WINDOW_ID
 
 /**
  * @brief Macro to log priority info to the log file
