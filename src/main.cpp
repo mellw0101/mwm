@@ -194,7 +194,8 @@ static string user;
 #define USER_PATH_PREFIX_C_STR(__address) \
     string("/home/" + user + __address).c_str()
 
-#define SCREEN_CENTER_X(__window_width) ((screen->width_in_pixels / 2) - (__window_width / 2))
+#define SCREEN_CENTER_X(__window_width)  ((screen->width_in_pixels / 2) - (__window_width / 2))
+#define SCREEN_BOTTOM_Y(__window_height) (screen->height_in_pixels - __window_height)
 
 namespace { // Tools
     constexpr const char * pointer_from_enum(CURSOR CURSOR)
