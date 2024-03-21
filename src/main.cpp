@@ -2539,12 +2539,12 @@ class window {
                         *__width    = hints.width;
                         *__height   = hints.height;
 
-                        loutIWin << "min_width: "  << hints.min_width  << '\n';
-                        loutIWin << "min_height: " << hints.min_height << '\n';
-                        loutIWin << "width: "      << hints.width      << '\n';
-                        loutIWin << "height: "     << hints.height     << '\n';
-                        loutIWin << "x: "          << hints.x          << '\n';
-                        loutIWin << "y: "          << hints.y          << '\n';
+                        loutIWin << "min_width:"  << loutNUM(hints.min_width)  << '\n';
+                        loutIWin << "min_height:" << loutNUM(hints.min_height) << '\n';
+                        loutIWin << "width:"      << loutNUM(hints.width)      << '\n';
+                        loutIWin << "height:"     << loutNUM(hints.height)     << '\n';
+                        loutIWin << "x:"          << loutNUM(hints.x)          << '\n';
+                        loutIWin << "y:"          << loutNUM(hints.y)          << '\n';
                     }
                     else
                     {
