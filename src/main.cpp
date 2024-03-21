@@ -9521,26 +9521,40 @@ class Dock {
 }; static Dock * dock;
 
 class __dock_search__ {
+    // Defines.
+        char lower_to_upper_case(char c)
+        {
+            switch (c)
+            {
+                case 'a': return 'A';
+            }
+
+            return '\0';
+        }
+        #define APPEND_TO_STR(__code, __letter) \
+            if (e->detail == __code)                                \
+            {                                                       \
+                if (e->state == SHIFT)                              \
+                {                                                   \
+                    search_string += lower_to_upper_case(__letter); \
+                }                                                   \
+                else                                                \
+                {                                                   \
+                    search_string += __letter;                      \
+                }                                                   \
+            }
+    
     private:
     // Methods.
         void setup_events()
         {
             event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev) -> void
             {
-                const xcb_key_press_event_t * e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
+                // const xcb_key_press_event_t * e = reinterpret_cast<const xcb_key_press_event_t *>(ev);
+                RE_CAST_EV(xcb_key_press_event_t);
                 if (e->event == main_window)
                 {
-                    if (e->detail == wm->key_codes.a)
-                    {
-                        if (e->state == SHIFT)
-                        {
-                            search_string += "A";
-                        }
-                        else
-                        {
-                            search_string += "a";
-                        }
-                    }
+                    APPEND_TO_STR(wm->key_codes.a, 'a')
 
                     if (e->detail == wm->key_codes.b)
                     {
