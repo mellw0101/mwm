@@ -2417,9 +2417,9 @@ class window {
                             uint32_t height = data[i++];
                             uint32_t size = width * height;
 
-                            log_num("width", width);
-                            log_num("height", height);
-                            log_num("size", size);
+                            loutIWin << "width"  << width  << '\n';
+                            loutIWin << "height" << height << '\n';
+                            loutIWin << "size"   << size   << '\n';
 
                             if (i + size > len) break; // Sanity check
 
