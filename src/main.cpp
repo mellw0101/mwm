@@ -5671,7 +5671,7 @@ class Window_Manager {
                     { T,       CTRL   | ALT   },
                     { L_ARROW, CTRL   | SUPER },
                     { R_ARROW, CTRL   | SUPER },
-                    { SUPER_L, NULL  }
+                    { SUPER_L, SHIFT          }
                 });
                 root.clear();
                 
