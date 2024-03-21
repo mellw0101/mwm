@@ -291,6 +291,8 @@ namespace { // Tools
         }
     }
     #define FLUSH_X() flush_x(__func__)
+
+    
 }
 
 class __net_logger__ {
@@ -2428,6 +2430,7 @@ class window {
                             break; // This example only processes the first icon
                         }
                     }
+
                     free(prop_reply);
                     return icon_data;
                 }
@@ -2461,12 +2464,6 @@ class window {
                         _min_height = hints.min_height;
                         log_num("min_width", hints.min_width);
                         log_num("min_height", hints.min_height);
-                    }
-
-                    if (hints.flags & XCB_ICCCM_SIZE_HINT_BASE_SIZE)
-                    {
-                        logger.log(INFO, __func__, "base_width: ", hints.base_width);
-                        logger.log(INFO, __func__, "base_height: ", hints.base_height);
                     }
                 }
 
@@ -2539,12 +2536,12 @@ class window {
                         *__width    = hints.width;
                         *__height   = hints.height;
 
-                        loutIWin << "min_width:"  << hints.min_width  << '\n';
-                        loutIWin << "min_height:" << hints.min_height << '\n';
-                        loutIWin << "width:"      << hints.width      << '\n';
-                        loutIWin << "height:"     << hints.height     << '\n';
-                        loutIWin << "x:"          << hints.x          << '\n';
-                        loutIWin << "y:"          << hints.y          << '\n';
+                        loutIWin << "min_width"  << hints.min_width  << '\n';
+                        loutIWin << "min_height" << hints.min_height << '\n';
+                        loutIWin << "width"      << hints.width      << '\n';
+                        loutIWin << "height"     << hints.height     << '\n';
+                        loutIWin << "x"          << hints.x          << '\n';
+                        loutIWin << "y"          << hints.y          << '\n';
                     }
                     else
                     {
@@ -4601,14 +4598,14 @@ class client {
                 xcb_get_geometry_reply_t *reply = xcb_get_geometry_reply(conn, cookie, nullptr);
                 if (reply == nullptr)
                 {
-                    log_error("Unable to get window geometry.");
+                    loutE << "Unable to get window geometry" << '\n';
                     return;
                 }
 
-                log_num("", reply->x);
-                log_num("", reply->y);
-                log_num("", reply->width);
-                log_num("", reply->height);
+                loutI << "reply->x"      << reply->x      << '\n';
+                loutI << "reply->y"      << reply->y      << '\n';
+                loutI << "reply->width"  << reply->width  << '\n';
+                loutI << "reply->height" << reply->height << '\n';
 
                 free(reply);
             }
@@ -5854,20 +5851,17 @@ class Window_Manager {
         // Client.
             client *make_client(const uint32_t &window)
             {
-                client * c = new client;
+                client *c = new client;
                 if (c == nullptr)
                 {
-                    log_error("Could not allocate memory for client");
+                    loutE << "Could not allocate memory for client" << '\n';
                     return nullptr;
                 }
 
                 c->win = window;
-                // c->win.get_min_window_size_hints();
-                // c->win.get_window_size_hints();
                 c->set_client_params();
                 c->get_window_parameters_and_log();
                 c->win.get_window_icon_name();
-                // c->get_window_parameters();
 
                 if (c->width  < c->win.get_min_width() ) c->width  = 200;
                 if (c->height < c->win.get_min_height()) c->height = 100;
@@ -5904,13 +5898,13 @@ class Window_Manager {
                 return c;
             }
 
-            void check_client(client * c)
+            void check_client(client *c)
             {
                 c->win.x(BORDER_SIZE);
-                xcb_flush(conn);
+                FLUSH_X();
 
                 c->win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
-                xcb_flush(conn);
+                FLUSH_X();
 
                 // if client if full_screen but 'y' is offset for some reason, make 'y' (0)
                 if (c->x == 0
@@ -5919,7 +5913,7 @@ class Window_Manager {
                 &&  c->height == screen->height_in_pixels)
                 {
                     c->_y(0);
-                    xcb_flush(conn);
+                    FLUSH_X();
                     return;
                 }
 
@@ -5930,44 +5924,44 @@ class Window_Manager {
                 &&  c->height == screen->height_in_pixels)
                 {
                     c->x_y(0,0);
-                    xcb_flush(conn);
+                    FLUSH_X();
                     return;
                 }
 
                 if (c->x < 0)
                 {
                     c->_x(0);
-                    xcb_flush(conn);
+                    FLUSH_X();
                 }
 
                 if (c->y < 0)
                 {
                     c->_y(0);
-                    xcb_flush(conn);
+                    FLUSH_X();
                 }
 
                 if (c->width > screen->width_in_pixels)
                 {
                     c->_width(screen->width_in_pixels);
-                    xcb_flush(conn);
+                    FLUSH_X();
                 }
 
                 if (c->height > screen->height_in_pixels)
                 {
                     c->_height(screen->height_in_pixels);
-                    xcb_flush(conn);
+                    FLUSH_X();
                 }
                 
                 if ((c->x + c->width) > screen->width_in_pixels)
                 {
                     c->_width(screen->width_in_pixels - c->x);
-                    xcb_flush(conn);
+                    FLUSH_X();
                 }
                 
                 if ((c->y + c->height) > screen->height_in_pixels)
                 {
                     c->_height(screen->height_in_pixels - c->y);
-                    xcb_flush(conn);
+                    FLUSH_X();
                 }
             }
 
