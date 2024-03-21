@@ -11904,7 +11904,7 @@ void setup_wm()
         return;
     }
 
-    loutE << loutCFUNC(__func__) << lout_error_code(1) << '\n';
+    loutE << loutCFUNC(__func__) << lout_error_code(2) << '\n';
 
     wm->init();
     change_desktop::teleport_to(1);
