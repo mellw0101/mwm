@@ -4618,7 +4618,7 @@ class client {
                 {
                     titlebar.draw_text_16_auto_color(
                         win.get_net_wm_name_by_req().c_str(),
-                        CENTER_TEXT(width, win.get_net_wm_name_by_req().length()),
+                        CENTER_TEXT((width - (BORDER_SIZE * 2)), win.get_net_wm_name_by_req().length()),
                         15
                     );
                 }
@@ -4627,7 +4627,7 @@ class client {
                 {
                     titlebar.draw_text_16_auto_color(
                         win.get_net_wm_name().c_str(),
-                        CENTER_TEXT(width, win.get_net_wm_name().length()),
+                        CENTER_TEXT((width - (BORDER_SIZE * 2)), win.get_net_wm_name().length()),
                         15
                     );
                 }       
@@ -4909,7 +4909,7 @@ class client {
         {
             titlebar.create_window(
                 frame,
-                BORDER_SIZE + BUTTON_SIZE,
+                BORDER_SIZE,
                 BORDER_SIZE,
                 (width - (BUTTON_SIZE * 4)),
                 TITLE_BAR_HEIGHT,
@@ -4919,6 +4919,7 @@ class client {
             );
             titlebar.grab_button({ { L_MOUSE_BUTTON, NULL } });
             draw_title(TITLE_REQ_DRAW);
+            icon.raise();
             event_handler->setEventCallback(XCB_EXPOSE,          [this](Ev ev)-> void
             {
                 RE_CAST_EV(xcb_expose_event_t);
