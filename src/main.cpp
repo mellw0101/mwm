@@ -4525,6 +4525,7 @@ class client {
             {
                 make_frame();
                 make_titlebar();
+                set_icon_png();
                 make_close_button();
                 make_max_button();
                 make_min_button();
@@ -4533,8 +4534,6 @@ class client {
                 {
                     make_borders();
                 }
-
-                set_icon_png();
             }
         
             void raise()
@@ -4845,7 +4844,6 @@ class client {
                 {
                     get_window_parameters();
                 }
-
             }
 
         // Get.
