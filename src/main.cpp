@@ -2912,26 +2912,25 @@ class window {
                     loutEWin << "Failed to retrieve WM_CLASS for window" << '\n';
                 }
             }
-
-            void print_icccm_wm_name()
+            
+            string get_icccm_class()
             {
                 xcb_get_property_cookie_t cookie;
-                xcb_icccm_get_text_property_reply_t wm_name_reply;
+                xcb_icccm_get_wm_class_reply_t wm_class_reply;
+                string result = "";
 
-                // Request WM_NAME property
-                cookie = xcb_icccm_get_wm_name(conn, _window);
-
-                // Retrieve the WM_NAME property
-                if (xcb_icccm_get_wm_name_reply(conn, cookie, &wm_name_reply, NULL))
+                cookie = xcb_icccm_get_wm_class(conn, _window); // Request WM_CLASS property
+                if (xcb_icccm_get_wm_class_reply(conn, cookie, &wm_class_reply, NULL)) // Retrieve the WM_CLASS property
                 {
-                    logger.log(INFO, __func__, "Window Name", wm_name_reply.name);
-
-                    xcb_icccm_get_text_property_reply_wipe(&wm_name_reply);
+                    result = string(wm_class_reply.class_name);
+                    xcb_icccm_get_wm_class_reply_wipe(&wm_class_reply);
                 }
                 else
                 {
-                    logger.log(ERROR, __func__, "Failed to retrieve WM_NAME for window");
+                    loutEWin << "Failed to retrieve WM_CLASS for window" << '\n';
                 }
+
+                return result;
             }
 
             char * property(const char *atom_name)
@@ -4821,7 +4820,7 @@ class client {
 
                 win.make_png_from_icon();
 
-                win.print_icccm_wm_class();
+                loutI << win.get_icccm_class() << '\n';
             }
 
         // Get.
