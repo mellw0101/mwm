@@ -12120,8 +12120,6 @@ class Events {
                         }
                     }
 
-                    if (wm->focused_client->atoms.is_modal) return;
-
                     c->raise();
                     c->focus();
                     wm->focused_client = c;
