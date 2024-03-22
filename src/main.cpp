@@ -345,14 +345,14 @@ class __file_system__ {
                 }
                 catch (exception &__e)
                 {
-                    loutE << "Failed to create dir: " << loutPath(config_folder) << " error: " << __e.what() << "\n";
+                    loutE << "Failed to create dir:" << loutPath(config_folder) << " error: " << __e.what() << "\n";
                     status = false;
                     return;
                 }
 
                 if (create_bool == true)
                 {
-                    loutI << "Successfully created dir: " << loutPath(config_folder) << '\n';
+                    loutI << "Successfully created dir:" << loutPath(config_folder) << '\n';
                     status = true;
                     return;
                 }
