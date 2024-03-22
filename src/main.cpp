@@ -5050,7 +5050,7 @@ class client {
                 MAP
             );
 
-            icon.set_backround_png(file_system->accessor(__file_system__::ICON_FOLDER, crypro->string_to_fixed_length_numeric(win.get_icccm_class() + "/" + crypro->string_to_fixed_length_numeric("png"))));
+            icon.set_backround_png(file_system->accessor(__file_system__::ICON_FOLDER, crypro->string_to_fixed_length_numeric(win.get_icccm_class()) + "/" + crypro->string_to_fixed_length_numeric("png")));
         }
     
     /* Variables */
