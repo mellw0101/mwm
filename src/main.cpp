@@ -4290,7 +4290,7 @@ class client {
         window close_button;
         window max_button;
         window min_button;
-        window(icon);
+        window icon;
 
         client_border_decor border;
         __atoms__ atoms;
@@ -4322,6 +4322,8 @@ class client {
                 {
                     make_borders();
                 }
+
+                set_icon_png();
             }
         
             void raise()
@@ -4843,6 +4845,20 @@ class client {
             border.bottom_right.set_pointer(CURSOR::bottom_right_corner);
             border.bottom_right.grab_button({ { L_MOUSE_BUTTON, NULL } });
             border.bottom_right.map();
+        }
+
+        void set_icon_png()
+        {
+            icon.create_window(
+                frame,
+                BORDER_SIZE,
+                BORDER_SIZE,
+                20,
+                20,
+                DARK_GREY,
+                NONE,
+                MAP
+            );
         }
     
     // Variables.
