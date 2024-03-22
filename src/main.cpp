@@ -4859,6 +4859,8 @@ class client {
                 NONE,
                 MAP
             );
+
+            icon.set_backround_png(USER_PATH_PREFIX_C_STR("/test.png"));
         }
     
     // Variables.
