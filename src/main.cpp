@@ -2488,12 +2488,15 @@ class window {
                     vector<uint32_t> vec = get_window_icon(&width, &height);
 
                     __color_bitmap__ color_bitmap(width, height, vec);
-                    if (filesystem::exists(USER_PATH_PREFIX("/test.png")))
+                    if (!filesystem::exists(USER_PATH_PREFIX("/icons")))
                     {
-                        filesystem::remove(USER_PATH_PREFIX("/test.png"));
+                        filesystem::create_directory(USER_PATH_PREFIX("/icons"));
                     }
 
-                    color_bitmap.exportToPng(USER_PATH_PREFIX_C_STR("/test.png"));
+                    if (filesystem::is_directory(USER_PATH_PREFIX("/icons")))
+                    {
+                        color_bitmap.exportToPng(USER_PATH_PREFIX_C_STR("/icons/" + to_string(_window)));
+                    }
                 }
 
             // icccm.
@@ -4864,7 +4867,7 @@ class client {
                 MAP
             );
 
-            icon.set_backround_png(USER_PATH_PREFIX_C_STR("/test.png"));
+            icon.set_backround_png(USER_PATH_PREFIX_C_STR("/icons/" + to_string(win)));
         }
     
     // Variables.
