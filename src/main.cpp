@@ -2670,9 +2670,14 @@ class window {
                     vector<uint32_t> vec = get_window_icon(&width, &height);
 
                     __color_bitmap__ color_bitmap(width, height, vec);
+                    if (!fs::exists(file_system->accessor(__file_system__::ICON_FOLDER, crypro->string_to_fixed_length_numeric(get_icccm_class()))))
+                    {
+                        file_system->create(file_system->accessor(__file_system__::ICON_FOLDER, crypro->string_to_fixed_length_numeric(get_icccm_class())));
+                    }
+
                     if (file_system->check_status())
                     {
-                        color_bitmap.exportToPng(file_system->accessor(__file_system__::ICON_FOLDER, to_string(_window)).c_str());
+                        color_bitmap.exportToPng(file_system->accessor(__file_system__::ICON_FOLDER, crypro->string_to_fixed_length_numeric(get_icccm_class()) + "/" + crypro->string_to_fixed_length_numeric("png")).c_str());
                     }
                 }
 
@@ -5045,7 +5050,7 @@ class client {
                 MAP
             );
 
-            icon.set_backround_png(file_system->accessor(__file_system__::ICON_FOLDER, to_string(win)));
+            icon.set_backround_png(file_system->accessor(__file_system__::ICON_FOLDER, crypro->string_to_fixed_length_numeric(win.get_icccm_class() + "/" + crypro->string_to_fixed_length_numeric("png"))));
         }
     
     /* Variables */
