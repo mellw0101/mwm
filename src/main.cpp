@@ -4525,7 +4525,7 @@ class client {
             {
                 make_frame();
                 make_titlebar();
-                set_icon_png();
+                // set_icon_png();
                 make_close_button();
                 make_max_button();
                 make_min_button();
