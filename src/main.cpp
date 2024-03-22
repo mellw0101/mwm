@@ -1354,8 +1354,7 @@ class File
         }  
 };
 
-class Launcher
-{
+class Launcher {
     public:
     // Methods.
         void program(char *program)
@@ -9687,6 +9686,7 @@ class __dock_search__ {
         File file;
         vector<string> results;
         vector<window> entry_list;
+        Launcher launcher;
 
         vector<int8_t> _char_vec = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
 
@@ -9716,7 +9716,7 @@ class __dock_search__ {
             main_window.grab_default_keys();
         }
 
-        void add_enter_action(std::function<void()> enter_action)
+        void add_enter_action(function<void()> enter_action)
         {
             enter_function = enter_action;
         }
@@ -9724,6 +9724,10 @@ class __dock_search__ {
         void init()
         {
             setup_events();
+            add_enter_action([this]() -> void
+            {
+                launcher.program((char *)search_string.str().c_str());
+            });
         }
 
         void show()
