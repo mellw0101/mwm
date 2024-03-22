@@ -9620,32 +9620,37 @@ class __dock_search__ {
                 RE_CAST_EV(xcb_key_press_event_t);
                 if (e->event == main_window)
                 {
-                    APPEND_TO_STR('a')
-                    APPEND_TO_STR('b')
-                    APPEND_TO_STR('c')
-                    APPEND_TO_STR('d')
-                    APPEND_TO_STR('e')
-                    APPEND_TO_STR('f')
-                    APPEND_TO_STR('g')
-                    APPEND_TO_STR('h')
-                    APPEND_TO_STR('i')
-                    APPEND_TO_STR('j')
-                    APPEND_TO_STR('k')
-                    APPEND_TO_STR('l')
-                    APPEND_TO_STR('m')
-                    APPEND_TO_STR('n')
-                    APPEND_TO_STR('o')
-                    APPEND_TO_STR('p')
-                    APPEND_TO_STR('q')
-                    APPEND_TO_STR('r')
-                    APPEND_TO_STR('s')
-                    APPEND_TO_STR('t')
-                    APPEND_TO_STR('u')
-                    APPEND_TO_STR('v')
-                    APPEND_TO_STR('w')
-                    APPEND_TO_STR('x')
-                    APPEND_TO_STR('y')
-                    APPEND_TO_STR('z')
+                    // APPEND_TO_STR('a')
+                    // APPEND_TO_STR('b')
+                    // APPEND_TO_STR('c')
+                    // APPEND_TO_STR('d')
+                    // APPEND_TO_STR('e')
+                    // APPEND_TO_STR('f')
+                    // APPEND_TO_STR('g')
+                    // APPEND_TO_STR('h')
+                    // APPEND_TO_STR('i')
+                    // APPEND_TO_STR('j')
+                    // APPEND_TO_STR('k')
+                    // APPEND_TO_STR('l')
+                    // APPEND_TO_STR('m')
+                    // APPEND_TO_STR('n')
+                    // APPEND_TO_STR('o')
+                    // APPEND_TO_STR('p')
+                    // APPEND_TO_STR('q')
+                    // APPEND_TO_STR('r')
+                    // APPEND_TO_STR('s')
+                    // APPEND_TO_STR('t')
+                    // APPEND_TO_STR('u')
+                    // APPEND_TO_STR('v')
+                    // APPEND_TO_STR('w')
+                    // APPEND_TO_STR('x')
+                    // APPEND_TO_STR('y')
+                    // APPEND_TO_STR('z')
+
+                    for (int i = 0; i < _char_vec.size(); ++i)
+                    {
+                        APPEND_TO_STR(_char_vec[i]);
+                    }
 
                     if (e->detail == wm->key_codes.space_bar)
                     {
@@ -9697,6 +9702,8 @@ class __dock_search__ {
         File file;
         vector<string> results;
         vector<window> entry_list;
+
+        vector<int8_t> _char_vec = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
 
     public:
     // Variabels.
