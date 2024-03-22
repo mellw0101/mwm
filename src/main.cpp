@@ -2488,6 +2488,11 @@ class window {
                     vector<uint32_t> vec = get_window_icon(&width, &height);
 
                     __color_bitmap__ color_bitmap(width, height, vec);
+                    if (filesystem::exists(USER_PATH_PREFIX("/test.png")))
+                    {
+                        filesystem::remove(USER_PATH_PREFIX("/test.png"));
+                    }
+
                     color_bitmap.exportToPng(USER_PATH_PREFIX_C_STR("/test.png"));
                 }
 
