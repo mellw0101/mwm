@@ -2874,6 +2874,53 @@ class window {
                 return _name;
             }
 
+            string getWindowClass()
+            {
+                string result;
+
+                // Get the atom for WM_CLASS
+                xcb_intern_atom_cookie_t cookie = xcb_intern_atom(conn, 0, 12, "WM_CLASS");
+                xcb_intern_atom_reply_t* reply = xcb_intern_atom_reply(conn, cookie, NULL);
+                if (!reply)
+                {
+                    loutE << "Failed to get WM_CLASS atom." << '\n';
+                    return result;
+                }
+
+                xcb_atom_t wm_class_atom = reply->atom;
+                free(reply); // Free the reply to avoid memory leak
+
+                // Get WM_CLASS property of the window
+                xcb_get_property_cookie_t prop_cookie = xcb_get_property(
+                    conn,
+                    0, // delete = 0, do not delete
+                    _window,
+                    wm_class_atom,
+                    XCB_GET_PROPERTY_TYPE_ANY,
+                    0,
+                    1024 // length of the data to retrieve
+                );
+                xcb_get_property_reply_t* prop_reply = xcb_get_property_reply(conn, prop_cookie, NULL);
+
+                if (prop_reply && prop_reply->value_len)
+                {
+                    // The value is a list of null-terminated strings. The first is the instance name, and the second is the class name.
+                    char* value = static_cast<char*>(xcb_get_property_value(prop_reply));
+                    
+                    // Class name is after the instance name
+                    char* class_name = value + strlen(value) + 1; 
+
+                    result = string(class_name);
+                }
+                else
+                {
+                    loutE << "Could not get WM_CLASS property or window may not exist." << '\n';
+                }
+
+                free(prop_reply);
+                return result; 
+            }
+
             void print_wm_class(xcb_connection_t* conn, xcb_window_t window)
             {
                 xcb_get_property_cookie_t cookie;
@@ -4820,6 +4867,8 @@ class client {
                 }
 
                 win.make_png_from_icon();
+
+                loutI << win.getWindowClass() << '\n';
             }
 
         // Get.
@@ -12345,12 +12394,6 @@ void setup_wm()
     file_system->init_check();
 
     crypro = new __crypto__;
-
-    loutI << crypro->string_to_fixed_length_numeric("balle") << '\n';
-    loutI << crypro->string_to_fixed_length_numeric("balle") << '\n';
-    loutI << crypro->string_to_fixed_length_numeric("balle") << '\n';
-    loutI << crypro->string_to_fixed_length_numeric("balle") << '\n';
-    loutI << crypro->string_to_fixed_length_numeric("balle") << '\n';
 
     wm = new Window_Manager;
     if (wm == nullptr)
