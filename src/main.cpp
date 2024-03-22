@@ -329,7 +329,7 @@ class __file_system__ {
             config_folder = USER_PATH_PREFIX("/.config/mwm"),
             icon_folder = config_folder + "/icons";
 
-        static bool status;
+        bool status;
     
     /* Methods */
         void init_check()
