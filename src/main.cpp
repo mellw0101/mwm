@@ -90,10 +90,16 @@ static xcb_screen_t * screen;
 #define DEFAULT_FONT_HEIGHT 14
 
 using namespace std;
-using Uint = unsigned int;
-using SUint = unsigned short int;
 
 #define NET_DEBUG false
+
+#define NEW_CLASS(__class_inst, __class_name) \
+    __class_inst = new __class_name;                                    \
+    if (__class_inst == nullptr)                                        \
+    {                                                                   \
+        loutE << "Failed to allocate memory to make new class" << '\n'; \
+    }                                                                   \
+    else
 
 #define EV_CALL(__type) \
     __type, [&](Ev ev) -> void
@@ -1577,9 +1583,9 @@ class Launcher {
 };
 
 using Ev = const xcb_generic_event_t *;
-class Event_Handler
-{
-    public: // methods
+class Event_Handler {
+    public:
+    /* Methods */
         using EventCallback = function<void(Ev)>;
 
         void run()
@@ -1610,6 +1616,7 @@ class Event_Handler
         {
             shouldContinue = false;
         }
+
         using CallbackId = int;
 
         CallbackId setEventCallback(uint8_t eventType, EventCallback callback)
@@ -1651,7 +1658,8 @@ class Event_Handler
             });
         }
 
-    private: // variables
+    private:
+    /* Variables */
         unordered_map<uint8_t, vector<pair<CallbackId, EventCallback>>>(eventCallbacks);
         bool shouldContinue = false;
         CallbackId nextCallbackId = 0;
@@ -11482,18 +11490,18 @@ class tile {
 
     // Methods.
         /**
-        *
-        * @brief Checks if the current tile position of a window is the specified tile position.
-        *
-        * This method checks if the current tile position of a window is the specified tile position.
-        * It takes a `TILEPOS` enum value as an argument, which specifies the tile position to check.
-        * The method returns `true` if the current tile position is the specified tile position, and `false` otherwise.
-        *
-        * @param mode The tile position to check.
-        * @return true if the current tile position is the specified tile position.
-        * @return false if the current tile position is not the specified tile position.
-        *
-        */
+         *
+         * @brief Checks if the current tile position of a window is the specified tile position.
+         *
+         * This method checks if the current tile position of a window is the specified tile position.
+         * It takes a `TILEPOS` enum value as an argument, which specifies the tile position to check.
+         * The method returns `true` if the current tile position is the specified tile position, and `false` otherwise.
+         *
+         * @param mode The tile position to check.
+         * @return true if the current tile position is the specified tile position.
+         * @return false if the current tile position is not the specified tile position.
+         *
+         */
         bool current_tile_pos(TILEPOS mode)
         {
             switch (mode)
@@ -11579,18 +11587,18 @@ class tile {
 
             return false; 
         }
-        
+
         /**
-        *
-        * @brief Sets the size and position of a window to a specific tile position.
-        *
-        * This method sets the size and position of a window to a specific tile position.
-        * It takes a `TILEPOS` enum value as an argument, which specifies the tile position to set.
-        * The method uses the `animate` method to animate the window to the specified tile position.
-        *
-        * @param sizepos The tile position to set.
-        *
-        */
+         *
+         * @brief Sets the size and position of a window to a specific tile position.
+         *
+         * This method sets the size and position of a window to a specific tile position.
+         * It takes a `TILEPOS` enum value as an argument, which specifies the tile position to set.
+         * The method uses the `animate` method to animate the window to the specified tile position.
+         *
+         * @param sizepos The tile position to set.
+         *
+         */
         void set_tile_sizepos(TILEPOS sizepos)
         {
             switch (sizepos)
@@ -12448,16 +12456,6 @@ void setup_wm()
 
     wm->init();
     change_desktop::teleport_to(1);
-    
-    // #ifndef ARMV8_BUILD
-    //     dock = new Dock;
-    //     dock->add_app("konsole");
-    //     dock->add_app("alacritty");
-    //     dock->add_app("google-chrome-stable");
-    //     dock->add_app("code");
-    //     dock->add_app("falkon");
-    //     dock->init();
-    // #endif
 
     mwm_runner = new Mwm_Runner;
     mwm_runner->init();
@@ -12465,12 +12463,13 @@ void setup_wm()
     Events events;
     events.setup();
 
-    file_app = new __file_app__;
-    if (file_app == nullptr)
-    {
-        loutE << "Failed to allocate memory for file_app" << '\n';
-    }
-    else
+    // file_app = new __file_app__;
+    // if (file_app == nullptr)
+    // {
+    //     loutE << "Failed to allocate memory for file_app" << '\n';
+    // }
+    // else
+    NEW_CLASS(file_app, __file_app__)
     {
         file_app->init();
     }
