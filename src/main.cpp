@@ -9823,7 +9823,7 @@ class Dock {
                 }
             }); 
         }
-}; static Dock * dock;
+};
 
 class __dock_search__ {
     // Defines.
@@ -10007,16 +10007,13 @@ class __dock_search__ {
 
 class __dock__ {
     private:
-    // Constructor.
-        __dock__() {}
-
-    // Variabels.
+    /* Variabels */
         window dock_menu;
         __dock_search__ dock_search;
         STATIC_CONSTEXPR_TYPE(uint16_t, _width, 400);
         STATIC_CONSTEXPR_TYPE(uint16_t, _height, 500);
 
-    // Methods.
+    /* Methods */
         void create_window()
         {
             dock_menu.create_window(
@@ -10033,13 +10030,7 @@ class __dock__ {
         }
 
     public:
-    // Methods.
-        static __dock__& inst()
-        {
-            static __dock__ instance;
-            return instance;
-        }
-
+    /* Methods */
         void init()
         {
             create_window();
@@ -10064,8 +10055,11 @@ class __dock__ {
                 }
             });
         }
+    
+    /* Constructor */
+        __dock__() {}
 
-};
+}; static __dock__ *dock(nullptr);
 
 class mv_client {
     // Defines.
@@ -12469,12 +12463,13 @@ void setup_wm()
     system_settings = new __system_settings__;
     system_settings->init();
 
-    __dock__::inst().init();
+    dock = new __dock__;
+    dock->init();
 }
 
 int main()
 {
-    loutI << "-- mwm starting --" << '\n';
+    loutI << "\n\n-- mwm starting --" << '\n';
 
     INIT_NET_LOG(ESP_SERVER);
     NET_LOG("Starting mwm.");
