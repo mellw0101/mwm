@@ -3835,6 +3835,7 @@ class window {
                     { _X, NULL  },
                     { _Y, NULL  },
                     { Z,  NULL  },
+                    {MINUS, NULL},
 
                     { A,  SHIFT },
                     { B,  SHIFT },
@@ -3862,6 +3863,7 @@ class window {
                     { _X, SHIFT },
                     { _Y, SHIFT },
                     { Z,  SHIFT },
+                    {MINUS, SHIFT},
 
                     { SPACE_BAR,    NULL        },
                     { SPACE_BAR,    SHIFT       },
