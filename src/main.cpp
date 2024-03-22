@@ -403,7 +403,7 @@ class __file_system__ {
             return status;
         }
 
-}; static __file_system__ file_system;
+}; static __file_system__ *file_system(nullptr);
 
 class __net_logger__ {
     // Defines.
@@ -12249,7 +12249,8 @@ void setup_wm()
     user = get_user_name();
     loutI << "Current USER: " << USER << '\n';
 
-    file_system.init_check();
+    file_system = new __file_system__;
+    file_system->init_check();
 
     wm = new Window_Manager;
     if (wm == nullptr)
