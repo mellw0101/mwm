@@ -4868,7 +4868,7 @@ class client {
 
                 win.make_png_from_icon();
 
-                loutI << win.getWindowClass() << '\n';
+                loutIP << win.getWindowClass() << '\n';
             }
 
         // Get.
