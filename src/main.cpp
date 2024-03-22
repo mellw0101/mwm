@@ -338,21 +338,21 @@ class __file_system__ {
 
             if (!fs::exists(config_folder))
             {
-                loutI << "(" << config_folder << ") does not exist creating dir" << '\n';    
+                loutI << "dir:" << loutPath(config_folder) << " does not exist creating dir" << '\n';    
                 try 
                 {
                     create_bool = fs::create_directory(config_folder);   
                 }
                 catch (exception &__e)
                 {
-                    loutE << "Failed to create dir: " << config_folder << " error: " << __e.what() << "\n";
+                    loutE << "Failed to create dir: " << loutPath(config_folder) << " error: " << __e.what() << "\n";
                     status = false;
                     return;
                 }
 
                 if (create_bool == true)
                 {
-                    loutI << "Successfully created dir:(" << config_folder << ")" << '\n';
+                    loutI << "Successfully created dir: " << loutPath(config_folder) << '\n';
                     status = true;
                     return;
                 }
@@ -361,7 +361,7 @@ class __file_system__ {
             if (!fs::is_directory(config_folder))
             {
                 bool remove_bool = false;
-                loutI << "(" << config_folder << ") exists but is not a dir deleting and remaking as dir" << '\n';
+                loutI << "dir:" << loutPath(config_folder) << " exists but is not a dir deleting and remaking as dir" << '\n';
 
                 try
                 {
@@ -369,7 +369,7 @@ class __file_system__ {
                 }
                 catch (exception &__e)
                 {
-                    loutE << "Failed to remove non dir:(" << config_folder << ") error: " << __e.what() << '\n';
+                    loutE << "Failed to remove non dir:" << loutPath(config_folder) << " error: " << __e.what() << '\n';
                     status = false;
                     return;
                 }
@@ -383,14 +383,14 @@ class __file_system__ {
                     }
                     catch (exception &__e)
                     {
-                        loutE << "Failed to create dir:(" << config_folder << ") error: " << __e.what() << '\n';
+                        loutE << "Failed to create dir:" << loutPath(config_folder) << " error: " << __e.what() << '\n';
                         status = true;
                         return;
                     }
 
                     if (create_bool == true)
                     {
-                        loutI << "Successfully created dir:(" << config_folder << ")" << '\n';
+                        loutI << "Successfully created dir:" << loutPath(config_folder) << '\n';
                         status = false;
                         return;
                     }

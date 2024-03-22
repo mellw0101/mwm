@@ -564,6 +564,9 @@ class lout {
 		#define loutCEcode(__error_code) \
 			lout_error_code(__error_code) << " " << loutCFUNC(__calling_function)
 
+		#define loutPath(__path) \
+			"(\033[32m" << __path << "\033[0m)"
+
 	public:
 	// Methods.
 		/**
