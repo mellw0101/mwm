@@ -5227,13 +5227,17 @@ class Key_Codes {
                     { U_ARROW,      &u_arrow   },
                     { D_ARROW,      &d_arrow   },
                     { TAB,          &tab       },
-                    { SUPER_L,      &super_l   }
+                    { SUPER_L,      &super_l   },
+                    { MINUS,        &minus     },
+                    { UNDERSCORE,   &underscore}
                 };
                 
-                for (auto &pair : key_map) {
+                for (auto &pair : key_map)
+                {
                     xcb_keycode_t * keycode = xcb_key_symbols_get_keycode(keysyms, pair.first);
-                    if (keycode) {
-                        * (pair.second) = * keycode;
+                    if (keycode)
+                    {
+                        *(pair.second) = *keycode;
                         free(keycode);
                     }
                 }
@@ -5249,7 +5253,7 @@ class Key_Codes {
 
             f11{}, n_1{}, n_2{}, n_3{}, n_4{}, n_5{}, r_arrow{},
             l_arrow{}, u_arrow{}, d_arrow{}, tab{}, _delete{},
-            super_l{};
+            super_l{}, minus{}, underscore{};
 
     private:
     // variabels.
@@ -9702,7 +9706,7 @@ class __system_settings__ {
 
 }; static __system_settings__ *system_settings(nullptr);
 
-/* DEPRECATED */
+/** NOTE: DEPRECATED */
 class Dock {
     public:
     // Constructor.
@@ -9903,9 +9907,19 @@ class __dock_search__ {
                         APPEND_TO_STR(_char_vec[i]);
                     }
 
+                    if (e->detail == wm->key_codes.minus)
+                    {
+                        search_string << '-';
+                    }
+
+                    if (e->detail == wm->key_codes.underscore)
+                    {
+                        search_string << '_';
+                    }
+
                     if (e->detail == wm->key_codes.space_bar)
                     {
-                        search_string << " ";
+                        search_string << ' ';
                     }
 
                     if (e->detail == wm->key_codes._delete)

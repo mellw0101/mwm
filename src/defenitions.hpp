@@ -80,6 +80,8 @@
 #define SLASH   0x2f
 #define ESC     0xff1b
 #define SUPER_L 0xffeb
+#define MINUS   0x2d
+#define UNDERSCORE 0x5f
 
 /* BUTTON DEFENITIONS */
 #define L_MOUSE_BUTTON XCB_BUTTON_INDEX_1
