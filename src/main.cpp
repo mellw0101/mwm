@@ -9694,6 +9694,7 @@ class __system_settings__ {
 
 }; static __system_settings__ *system_settings(nullptr);
 
+/* DEPRECATED */
 class Dock {
     public:
     // Constructor.
@@ -10049,6 +10050,7 @@ class __dock__ {
                         else
                         {
                             dock_menu.map();
+                            dock_menu.raise();
                             dock_search.show();
                         }
                     }
