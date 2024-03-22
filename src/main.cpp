@@ -323,6 +323,72 @@ namespace { // Tools
 
 namespace fs = filesystem;
 class __file_system__ {
+    private:
+    /* Variabels */
+        typedef enum : uint8_t {
+            FOLDER
+        } create_type_t;
+
+    /* Methods */
+        void create(const string &__path, create_type_t __type = FOLDER)
+        {
+            if (__type == FOLDER)
+            {
+                bool create_bool = false;
+
+                if (!fs::exists(__path))
+                {
+                    loutI << "dir:" << loutPath(__path) << " does not exist creating dir" << '\n';    
+                    try 
+                    {
+                        create_bool = fs::create_directory(__path);   
+                    }
+                    catch (exception &__e)
+                    {
+                        loutE << "Failed to create dir:" << loutPath(__path) << " error: " << __e.what() << "\n";
+                    }
+
+                    if (create_bool == true)
+                    {
+                        loutI << "Successfully created dir:" << loutPath(__path) << '\n';
+                    }
+                }
+
+                if (!fs::is_directory(__path))
+                {
+                    bool remove_bool = false;
+                    loutI << "dir:" << loutPath(__path) << " exists but is not a dir deleting and remaking as dir" << '\n';
+
+                    try
+                    {
+                        remove_bool = fs::remove(__path);
+                    }
+                    catch (exception &__e)
+                    {
+                        loutE << "Failed to remove non dir:" << loutPath(__path) << " error: " << __e.what() << '\n';
+                    }
+
+
+                    if (remove_bool == true)
+                    {
+                        try
+                        {
+                            create_bool = fs::create_directory(__path);
+                        }
+                        catch (exception &__e)
+                        {
+                            loutE << "Failed to create dir:" << loutPath(__path) << " error: " << __e.what() << '\n';
+                        }
+
+                        if (create_bool == true)
+                        {
+                            loutI << "Successfully created dir:" << loutPath(__path) << '\n';
+                        }
+                    }
+                }
+            }
+        }
+
     public:
     /* Variabels */
         string
@@ -334,68 +400,76 @@ class __file_system__ {
     /* Methods */
         void init_check()
         {
-            bool create_bool = false;
+            create(config_folder);
+            create(icon_folder);
 
-            if (!fs::exists(config_folder))
-            {
-                loutI << "dir:" << loutPath(config_folder) << " does not exist creating dir" << '\n';    
-                try 
-                {
-                    create_bool = fs::create_directory(config_folder);   
-                }
-                catch (exception &__e)
-                {
-                    loutE << "Failed to create dir:" << loutPath(config_folder) << " error: " << __e.what() << "\n";
-                    status = false;
-                    return;
-                }
+            // bool create_bool = false;
 
-                if (create_bool == true)
-                {
-                    loutI << "Successfully created dir:" << loutPath(config_folder) << '\n';
-                    status = true;
-                    return;
-                }
-            }
+            // if (!fs::exists(config_folder))
+            // {
+            //     loutI << "dir:" << loutPath(config_folder) << " does not exist creating dir" << '\n';    
+            //     try 
+            //     {
+            //         create_bool = fs::create_directory(config_folder);   
+            //     }
+            //     catch (exception &__e)
+            //     {
+            //         loutE << "Failed to create dir:" << loutPath(config_folder) << " error: " << __e.what() << "\n";
+            //         status = false;
+            //         return;
+            //     }
 
-            if (!fs::is_directory(config_folder))
-            {
-                bool remove_bool = false;
-                loutI << "dir:" << loutPath(config_folder) << " exists but is not a dir deleting and remaking as dir" << '\n';
+            //     if (create_bool == true)
+            //     {
+            //         loutI << "Successfully created dir:" << loutPath(config_folder) << '\n';
+            //         status = true;
+            //         return;
+            //     }
+            // }
 
-                try
-                {
-                    remove_bool = fs::remove(config_folder);
-                }
-                catch (exception &__e)
-                {
-                    loutE << "Failed to remove non dir:" << loutPath(config_folder) << " error: " << __e.what() << '\n';
-                    status = false;
-                    return;
-                }
+            // if (!fs::is_directory(config_folder))
+            // {
+            //     bool remove_bool = false;
+            //     loutI << "dir:" << loutPath(config_folder) << " exists but is not a dir deleting and remaking as dir" << '\n';
+
+            //     try
+            //     {
+            //         remove_bool = fs::remove(config_folder);
+            //     }
+            //     catch (exception &__e)
+            //     {
+            //         loutE << "Failed to remove non dir:" << loutPath(config_folder) << " error: " << __e.what() << '\n';
+            //         status = false;
+            //         return;
+            //     }
 
 
-                if (remove_bool == true)
-                {
-                    try
-                    {
-                        create_bool = fs::create_directory(config_folder);
-                    }
-                    catch (exception &__e)
-                    {
-                        loutE << "Failed to create dir:" << loutPath(config_folder) << " error: " << __e.what() << '\n';
-                        status = true;
-                        return;
-                    }
+            //     if (remove_bool == true)
+            //     {
+            //         try
+            //         {
+            //             create_bool = fs::create_directory(config_folder);
+            //         }
+            //         catch (exception &__e)
+            //         {
+            //             loutE << "Failed to create dir:" << loutPath(config_folder) << " error: " << __e.what() << '\n';
+            //             status = true;
+            //             return;
+            //         }
 
-                    if (create_bool == true)
-                    {
-                        loutI << "Successfully created dir:" << loutPath(config_folder) << '\n';
-                        status = false;
-                        return;
-                    }
-                }
-            }
+            //         if (create_bool == true)
+            //         {
+            //             loutI << "Successfully created dir:" << loutPath(config_folder) << '\n';
+            //             status = false;
+            //             return;
+            //         }
+            //     }
+            // }
+        }
+
+        void subfolder_check()
+        {
+
         }
 
         bool check_status()
