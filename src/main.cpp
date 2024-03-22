@@ -93,7 +93,7 @@ using namespace std;
 using Uint = unsigned int;
 using SUint = unsigned short int;
 
-#define NET_DEBUG true
+#define NET_DEBUG false
 
 #define EV_CALL(__type) \
     __type, [&](Ev ev) -> void
@@ -220,12 +220,6 @@ constexpr Type make_constexpr(Type value) { return value; }
 #define STATIC_CONSTEXPR_TYPE(__type, __name, __value) \
     static constexpr __type __name = make_constexpr<__type>((__type)__value)
 
-#define ICON_DATA_FOLDER_HASH(__class) \
-    file_system->accessor(__file_system__::ICON_FOLDER, crypro->string_to_fixed_length_numeric(__class))
-
-#define PNG_HASH(__class) \
-    file_system->accessor(__file_system__::ICON_FOLDER, crypro->string_to_fixed_length_numeric(__class) + "/" + crypro->string_to_fixed_length_numeric("png"))
-
 namespace { // Tools
     constexpr const char * pointer_from_enum(CURSOR CURSOR)
     {
@@ -334,6 +328,10 @@ namespace { // Tools
 }
 
 class __crypto__ {
+    /* Defines */
+        #define HASH(__input) \
+            crypro->str_hash_32(__input)
+
     public:
     /* Methods */
         vector<unsigned long> hash_str_32_bit_fixed(const string &__input)
@@ -365,7 +363,7 @@ class __crypto__ {
             return ss.str();
         }
 
-        string string_to_fixed_length_numeric(const string &__input)
+        string str_hash_32(const string &__input)
         {
             // Hash the input
             hash<string> hashFn;
@@ -392,10 +390,24 @@ class __crypto__ {
 
             return paddedHexString;
         }
+
 }; static __crypto__ *crypro(nullptr);
 
 namespace fs = filesystem;
 class __file_system__ {
+    /* Defines */
+        #define FS_ACC(__folder, __sub_path) \
+            file_system->accessor(__folder, __sub_path)
+
+        #define ICONFOLDER \
+            __file_system__::ICON_FOLDER
+
+        #define ICON_FOLDER_HASH(__class) \
+            FS_ACC(ICONFOLDER, HASH(__class))
+
+        #define PNG_HASH(__class) \
+            FS_ACC(ICONFOLDER, HASH(__class) + "/" + HASH("png"))
+
     private:
     /* Variabels */
         typedef enum : uint8_t {
@@ -2681,9 +2693,9 @@ class window {
                     vector<uint32_t> vec = get_window_icon(&width, &height);
 
                     __color_bitmap__ color_bitmap(width, height, vec);
-                    if (!fs::exists(ICON_DATA_FOLDER_HASH(get_icccm_class())))
+                    if (!fs::exists(ICON_FOLDER_HASH(get_icccm_class())))
                     {
-                        file_system->create(ICON_DATA_FOLDER_HASH(get_icccm_class()));
+                        file_system->create(ICON_FOLDER_HASH(get_icccm_class()));
                     }
 
                     if (file_system->check_status())
@@ -5054,7 +5066,7 @@ class client {
                 BORDER_SIZE,
                 20,
                 20,
-                DARK_GREY,
+                BLACK,
                 NONE,
                 MAP
             );
