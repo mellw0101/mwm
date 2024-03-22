@@ -10014,6 +10014,8 @@ class __dock__ {
         STATIC_CONSTEXPR_TYPE(uint16_t, _width, 400);
         STATIC_CONSTEXPR_TYPE(uint16_t, _height, 500);
 
+        client *f_c = nullptr;
+
     /* Methods */
         void create_window__()
         {
@@ -10034,6 +10036,8 @@ class __dock__ {
         {
             if (__window == dock_menu)
             {
+                if (wm->focused_client != nullptr) f_c = wm->focused_client;
+
                 dock_menu.map();
                 dock_menu.raise();
                 dock_search.show();
@@ -10045,6 +10049,12 @@ class __dock__ {
             if (__window == dock_menu)
             {
                 dock_menu.unmap();
+
+                if (f_c != nullptr)
+                {
+                    f_c->focus();
+                    f_c = nullptr;
+                }
             }
         }
 
