@@ -10108,6 +10108,15 @@ class __dock__ {
                     }
                 }
             });
+
+            event_handler->setEventCallback(EV_CALL(XCB_FOCUS_OUT)
+            {
+                RE_CAST_EV(xcb_focus_out_event_t);
+                if (e->event == dock_search.main_window)
+                {
+                    hide__(dock_menu);
+                }
+            });
         }
     
     /* Constructor */
