@@ -2345,6 +2345,30 @@ class window {
                 }
             }
 
+            void create_and_set_icon()
+            {
+                if (fs::exists(PNG_HASH(get_icccm_class())))
+                {
+                    set_backround_png(PNG_HASH(get_icccm_class()));
+                    return;
+                }
+
+                uint32_t width, height;
+                vector<uint32_t> vec = get_window_icon(&width, &height);
+
+                __color_bitmap__ color_bitmap(width, height, vec);
+                if (!fs::exists(ICON_FOLDER_HASH(get_icccm_class())))
+                {
+                    file_system->create(ICON_FOLDER_HASH(get_icccm_class()));
+                }
+
+                if (file_system->check_status())
+                {
+                    color_bitmap.exportToPng(PNG_HASH(get_icccm_class()).c_str());
+                    set_backround_png(PNG_HASH(get_icccm_class()));
+                }
+            }
+
         // Event.
             template<typename Callback>
             void on_expose_event(Callback&& callback)
@@ -2680,28 +2704,6 @@ class window {
 
                     free(reply);
                     return icon_data;
-                }
-
-                void make_png_from_icon()
-                {
-                    if (fs::exists(PNG_HASH(get_icccm_class())))
-                    {
-                        return;
-                    }
-
-                    uint32_t width, height;
-                    vector<uint32_t> vec = get_window_icon(&width, &height);
-
-                    __color_bitmap__ color_bitmap(width, height, vec);
-                    if (!fs::exists(ICON_FOLDER_HASH(get_icccm_class())))
-                    {
-                        file_system->create(ICON_FOLDER_HASH(get_icccm_class()));
-                    }
-
-                    if (file_system->check_status())
-                    {
-                        color_bitmap.exportToPng(PNG_HASH(get_icccm_class()).c_str());
-                    }
                 }
 
             // icccm.
@@ -4845,8 +4847,6 @@ class client {
                 {
                     get_window_parameters();
                 }
-
-                win.make_png_from_icon();
             }
 
         // Get.
@@ -5071,7 +5071,7 @@ class client {
                 MAP
             );
 
-            icon.set_backround_png(PNG_HASH(win.get_icccm_class()));
+            icon.create_and_set_icon();
         }
     
     /* Variables */
