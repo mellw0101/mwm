@@ -9558,39 +9558,44 @@ class __dock_search__ {
             return (uint8_t)0;
         }
 
-        constexpr char lower_to_upper_case(char c)
-        {
-            switch (c)
-            {
-                case 'a': return 'A';
-                case 'b': return 'B';
-                case 'c': return 'C';
-                case 'd': return 'D';
-                case 'e': return 'E';
-                case 'f': return 'F';
-                case 'g': return 'G';
-                case 'h': return 'H';
-                case 'i': return 'I';
-                case 'j': return 'J';
-                case 'k': return 'K';
-                case 'l': return 'L';
-                case 'm': return 'M';
-                case 'n': return 'N';
-                case 'o': return 'O';
-                case 'p': return 'P';
-                case 'q': return 'Q';
-                case 'r': return 'R';
-                case 's': return 'S';
-                case 't': return 'T';
-                case 'u': return 'U';
-                case 'v': return 'V';
-                case 'w': return 'W';
-                case 'x': return 'X';
-                case 'y': return 'Y';
-                case 'z': return 'Z';
-            }
+        // constexpr int8_t lower_to_upper_case(int8_t c)
+        // {
+        //     switch (c)
+        //     {
+        //         case 'a': return 'A';
+        //         case 'b': return 'B';
+        //         case 'c': return 'C';
+        //         case 'd': return 'D';
+        //         case 'e': return 'E';
+        //         case 'f': return 'F';
+        //         case 'g': return 'G';
+        //         case 'h': return 'H';
+        //         case 'i': return 'I';
+        //         case 'j': return 'J';
+        //         case 'k': return 'K';
+        //         case 'l': return 'L';
+        //         case 'm': return 'M';
+        //         case 'n': return 'N';
+        //         case 'o': return 'O';
+        //         case 'p': return 'P';
+        //         case 'q': return 'Q';
+        //         case 'r': return 'R';
+        //         case 's': return 'S';
+        //         case 't': return 'T';
+        //         case 'u': return 'U';
+        //         case 'v': return 'V';
+        //         case 'w': return 'W';
+        //         case 'x': return 'X';
+        //         case 'y': return 'Y';
+        //         case 'z': return 'Z';
+        //     }
 
-            return '\0';
+        //     return '\0';
+        // }
+
+        constexpr int8_t lower_to_upper_case(int8_t c)
+        {
+            return (c - 32);
         }
 
         #define APPEND_TO_STR(__char) \
@@ -9687,31 +9692,6 @@ class __dock_search__ {
             });
         }
 
-        void draw_text()
-        {
-            main_window.draw_text_auto_color(
-                search_string.str().c_str(),
-                CENTER_TEXT(main_window.width(), search_string.str().length()),
-                15
-            );
-            // if (search_string.length() > 0)
-            // {
-            //     results = file.search_for_binary(search_string.c_str());
-            //     int entry_list_size = results.size(); 
-            //     if (results.size() > 7)
-            //     {
-            //         entry_list_size = 7;
-            //     }
-
-            //     main_window.height(20 * entry_list_size);
-            //     xcb_flush(conn);
-            //     for (int i = 0; i < entry_list_size; ++i)
-            //     {
-            //         entry_list[i].draw_text(results[i].c_str(), WHITE, BLACK, "7x14", 2, 14);
-            //     }
-            // }
-        }
-        
     // Variables.
         function<void()> enter_function;
         File file;
@@ -9742,16 +9722,6 @@ class __dock_search__ {
 
             main_window.grab_keys_for_typing();
             main_window.grab_default_keys();
-
-            // for (int i = 0; i < 7; ++i)
-            // {
-            //     window entry;
-            //     entry.create_default(main_window, 0, (20 * (i + 1)) , 140, 20);
-            //     entry.set_backround_color(BLACK);
-            //     entry.raise();
-            //     entry.map();
-            //     entry_list.push_back(entry);
-            // }
         }
 
         void add_enter_action(std::function<void()> enter_action)
@@ -9771,6 +9741,14 @@ class __dock_search__ {
             main_window.focus_input();
         }
 
+        void draw_text()
+        {
+            main_window.draw_text_auto_color(
+                search_string.str().c_str(),
+                CENTER_TEXT(main_window.width(), search_string.str().length()),
+                15
+            );
+        }
 };
 
 class __dock__ {
@@ -10068,8 +10046,7 @@ class change_desktop {
     // Variabels.
         int duration = 100;
 
-        enum DIRECTION
-        {
+        enum DIRECTION {
             NEXT,
             PREV
         };
@@ -10583,12 +10560,15 @@ class resize_client {
             public:
             // Constructor.
                 border(client *&c, edge _edge) 
-                : c(c) {
+                : c(c)
+                {
                     if (c->win.is_EWMH_fullscreen()) return;
 
                     map<client *, edge> map = wm->get_client_next_to_client(c, _edge);
-                    for (const auto &pair : map) {
-                        if (pair.first != nullptr) {
+                    for (const auto &pair : map)
+                    {
+                        if (pair.first != nullptr)
+                        {
                             c2 = pair.first;
                             c2_edge = pair.second;
                             pointer.grab();
@@ -10619,47 +10599,57 @@ class resize_client {
             // Methods.
                 void teleport_mouse(edge edge)
                 {
-                    switch (edge) {
-                        case edge::TOP: {
+                    switch (edge)
+                    {
+                        case edge::TOP:
+                        {
                             pointer.teleport(pointer.x(), (c->y + 1));
                             break;
                         }
 
-                        case edge::BOTTOM_edge: {
+                        case edge::BOTTOM_edge:
+                        {
                             pointer.teleport(pointer.x(), ((c->y + c->height) - 1));
                             break;
                         }
 
-                        case edge::LEFT: {
+                        case edge::LEFT:
+                        {
                             pointer.teleport((c->x + 1), pointer.y());
                             break;
                         }
 
-                        case edge::RIGHT: {
+                        case edge::RIGHT:
+                        {
                             pointer.teleport(((c->x + c->width) - 1), pointer.y());
                             break;
                         }
 
-                        case edge::NONE: {
+                        case edge::NONE:
+                        {
                             break;
                         }
 
-                        case edge::TOP_LEFT: {
+                        case edge::TOP_LEFT:
+                        {
                             pointer.teleport((c->x + 1), (c->y + 1));
                             break;
                         }
 
-                        case edge::TOP_RIGHT: {
+                        case edge::TOP_RIGHT:
+                        {
                             pointer.teleport(((c->x + c->width) - 2), (c->y + 2));
                             break;
                         }
 
-                        case edge::BOTTOM_LEFT: {
+                        case edge::BOTTOM_LEFT:
+                        {
                             pointer.teleport((c->x + 1), ((c->y + c->height) - 1));
                             break;
                         }
 
-                        case edge::BOTTOM_RIGHT: {
+                        case edge::BOTTOM_RIGHT:
+                        {
                             pointer.teleport(((c->x + c->width) - 1), ((c->y + c->height) - 1));
                             break;
                         }
@@ -12175,8 +12165,6 @@ void setup_wm()
         loutE << "failed to allocate memory for wm exeting" << endl;
         return;
     }
-
-    loutEerror_code(__func__, 2) << '\n';
 
     wm->init();
     change_desktop::teleport_to(1);
