@@ -4524,8 +4524,8 @@ class client {
             void make_decorations()
             {
                 make_frame();
+                set_icon_png();
                 make_titlebar();
-                // set_icon_png();
                 make_close_button();
                 make_max_button();
                 make_min_button();
@@ -4909,9 +4909,9 @@ class client {
         {
             titlebar.create_window(
                 frame,
+                BORDER_SIZE + BUTTON_SIZE,
                 BORDER_SIZE,
-                BORDER_SIZE,
-                (width - (BUTTON_SIZE * 3)),
+                (width - (BUTTON_SIZE * 4)),
                 TITLE_BAR_HEIGHT,
                 BLACK,
                 XCB_EVENT_MASK_EXPOSURE,
@@ -5061,8 +5061,8 @@ class client {
                 frame,
                 BORDER_SIZE,
                 BORDER_SIZE,
-                20,
-                20,
+                BUTTON_SIZE,
+                BUTTON_SIZE,
                 BLACK,
                 NONE,
                 MAP
