@@ -9911,12 +9911,14 @@ class __dock_search__ {
 
                     if (e->detail == wm->key_codes.minus)
                     {
-                        search_string << '-';
-                    }
-
-                    if (e->detail == wm->key_codes.underscore)
-                    {
-                        search_string << '_';
+                        if (e->state == SHIFT)
+                        {
+                            search_string << '_';
+                        }
+                        else
+                        {
+                            search_string << '-';
+                        }
                     }
 
                     if (e->detail == wm->key_codes.space_bar)
