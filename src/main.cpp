@@ -12432,7 +12432,7 @@ void setup_wm()
 {
     loutI << "Running" << '\n';
     user = get_user_name();
-    loutI << "Current USER: " << loutUser(USER) << '\n';
+    loutI << "Current USER:" << loutUser(USER) << '\n';
 
     file_system = new __file_system__;
     file_system->init_check();
