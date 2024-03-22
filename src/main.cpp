@@ -9827,7 +9827,7 @@ class Dock {
 };
 
 class __dock_search__ {
-    // Defines.
+    /* Defines */
         constexpr uint8_t char_to_keycode(int8_t c)
         {
             switch (c)
@@ -9882,7 +9882,7 @@ class __dock_search__ {
             }
     
     private:
-    // Methods.
+    /* Methods */
         void setup_events()
         {
             event_handler->setEventCallback(EV_CALL(XCB_KEY_PRESS)
@@ -9940,7 +9940,7 @@ class __dock_search__ {
             });
         }
 
-    // Variables.
+    /* Variables */
         function<void()> enter_function;
         File file;
         vector<string> results;
@@ -9950,11 +9950,11 @@ class __dock_search__ {
         vector<int8_t> _char_vec = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
 
     public:
-    // Variabels.
+    /* Variabels */
         window(main_window);
         stringstream search_string{};
     
-    // Methods.
+    /* Methods */
         void create(uint32_t __parent_window, int16_t __x, int16_t __y, uint16_t __width, uint16_t __height)
         {
             main_window.create_window(
@@ -10015,7 +10015,7 @@ class __dock__ {
         STATIC_CONSTEXPR_TYPE(uint16_t, _height, 500);
 
     /* Methods */
-        void create_window()
+        void create_window__()
         {
             dock_menu.create_window(
                 screen->root,
@@ -10030,11 +10030,29 @@ class __dock__ {
             dock_search.init();
         }
 
+        void show__(uint32_t __window)
+        {
+            if (__window == dock_menu)
+            {
+                dock_menu.map();
+                dock_menu.raise();
+                dock_search.show();
+            }
+        }
+
+        void hide__(uint32_t __window)
+        {
+            if (__window == dock_menu)
+            {
+                dock_menu.unmap();
+            }
+        }
+
     public:
     /* Methods */
         void init()
         {
-            create_window();
+            create_window__();
 
             event_handler->setEventCallback(EV_CALL(XCB_KEY_PRESS)
             {
@@ -10045,13 +10063,11 @@ class __dock__ {
                     {
                         if (dock_menu.is_mapped())
                         {
-                            dock_menu.unmap();
+                            hide__(dock_menu);
                         }
                         else
                         {
-                            dock_menu.map();
-                            dock_menu.raise();
-                            dock_search.show();
+                            show__(dock_menu);
                         }
                     }
                 }
@@ -12408,7 +12424,7 @@ void setup_wm()
 {
     loutI << "Running" << '\n';
     user = get_user_name();
-    loutI << "Current USER: " << USER << '\n';
+    loutI << "Current USER: " << loutUser(USER) << '\n';
 
     file_system = new __file_system__;
     file_system->init_check();

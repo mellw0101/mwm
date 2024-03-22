@@ -567,6 +567,9 @@ class lout {
 		#define loutPath(__path) \
 			"(\033[32m" << __path << "\033[0m)"
 
+		#define loutUser(__user) \
+			"(" << log_BLUE << __user << log_RESET << ")"
+
 	public:
 	// Methods.
 		/**
