@@ -335,6 +335,19 @@ class __file_system__ {
             FOLDER
         } create_type_t;
 
+    public:
+    /* Variabels */
+        string
+            config_folder = USER_PATH_PREFIX("/.config/mwm"),
+            icon_folder = config_folder + "/icons";
+
+        bool status;
+
+        typedef enum : uint8_t {
+            CONDIG_FOLDER,
+            ICON_FOLDER
+        } accessor_t;
+    
     /* Methods */
         void create(const string &__path, create_type_t __type = FOLDER)
         {
@@ -400,20 +413,6 @@ class __file_system__ {
             }
         }
 
-    public:
-    /* Variabels */
-        string
-            config_folder = USER_PATH_PREFIX("/.config/mwm"),
-            icon_folder = config_folder + "/icons";
-
-        bool status;
-
-        typedef enum : uint8_t {
-            CONDIG_FOLDER,
-            ICON_FOLDER
-        } accessor_t;
-    
-    /* Methods */
         void init_check()
         {
             create(config_folder);
@@ -2610,15 +2609,6 @@ class window {
                     vector<uint32_t> vec = get_window_icon(&width, &height);
 
                     __color_bitmap__ color_bitmap(width, height, vec);
-                    // if (!filesystem::exists(USER_PATH_PREFIX("/icons")))
-                    // {
-                    //     filesystem::create_directory(USER_PATH_PREFIX("/icons"));
-                    // }
-
-                    // if (filesystem::is_directory(USER_PATH_PREFIX("/icons")))
-                    // {
-                    //     color_bitmap.exportToPng(USER_PATH_PREFIX_C_STR("/icons/" + to_string(_window)));
-                    // }
                     if (file_system->check_status())
                     {
                         color_bitmap.exportToPng(file_system->accessor(__file_system__::ICON_FOLDER, to_string(_window)).c_str());
@@ -3780,7 +3770,7 @@ class window {
             }
         
     private:
-    // Variables.
+    /* Variables */
         // main variables.
             uint8_t        _depth;
             uint32_t       _window;
@@ -3808,7 +3798,7 @@ class window {
 
         Logger log;
     
-    // Methods.
+    /* Methods */
         // Main.
             void make_window()
             {
@@ -4820,7 +4810,7 @@ class client {
             }
     
     private:
-    // Methods.
+    /* Methods */
         void make_frame()
         {
             frame.create_default(screen->root, (x - BORDER_SIZE), (y - TITLE_BAR_HEIGHT - BORDER_SIZE), (width + (BORDER_SIZE * 2)), (height + TITLE_BAR_HEIGHT + (BORDER_SIZE * 2)));
@@ -4993,10 +4983,10 @@ class client {
                 MAP
             );
 
-            icon.set_backround_png(USER_PATH_PREFIX_C_STR("/icons/" + to_string(win)));
+            icon.set_backround_png(file_system->accessor(__file_system__::ICON_FOLDER, to_string(win)));
         }
     
-    // Variables.
+    /* Variables */
         vector<vector<bool>> CLOSE_BUTTON_BITMAP = {
             {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
             {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
