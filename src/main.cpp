@@ -12455,41 +12455,41 @@ void setup_wm()
     }
 
     wm->init();
+
     change_desktop::teleport_to(1);
 
-    mwm_runner = new Mwm_Runner;
-    mwm_runner->init();
+    NEW_CLASS(mwm_runner, Mwm_Runner) {
+        mwm_runner->init();
+    }
 
     Events events;
     events.setup();
 
-    // file_app = new __file_app__;
-    // if (file_app == nullptr)
-    // {
-    //     loutE << "Failed to allocate memory for file_app" << '\n';
-    // }
-    // else
-    NEW_CLASS(file_app, __file_app__)
-    {
+    NEW_CLASS(file_app, __file_app__) {
         file_app->init();
     }
 
-    status_bar = new __status_bar__;
-    status_bar->init();
+    NEW_CLASS(status_bar, __status_bar__) {
+        status_bar->init();
+    }
 
-    wifi = new __wifi__;
-    wifi->init();
+    NEW_CLASS(wifi, __wifi__) {
+        wifi->init();
+    }
 
-    network = new __network__;
+    NEW_CLASS(network, __network__) {}
 
-    screen_settings = new __screen_settings__;
-    screen_settings->init();
-    
-    system_settings = new __system_settings__;
-    system_settings->init();
+    NEW_CLASS(screen_settings, __screen_settings__) {
+        screen_settings->init();
+    }
 
-    dock = new __dock__;
-    dock->init();
+    NEW_CLASS(system_settings, __system_settings__) {
+        system_settings->init();
+    }
+
+    NEW_CLASS(dock, __dock__) {
+        dock->init();
+    }
 }
 
 int main()
