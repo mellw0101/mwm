@@ -2682,6 +2682,53 @@ class window {
                     return icon_data;
                 }
 
+                vector<uint32_t> get_best_quality_window_icon(uint32_t *__width = nullptr, uint32_t *__height = nullptr)
+                {
+                    xcb_intern_atom_cookie_t* ewmh_cookie = xcb_ewmh_init_atoms(conn, ewmh);
+                    if (!xcb_ewmh_init_atoms_replies(ewmh, ewmh_cookie, nullptr))
+                    {
+                        loutE << "Failed to initialize EWMH atoms" << '\n';
+                        free(ewmh_cookie);
+                        return {};
+                    }
+
+                    xcb_get_property_cookie_t cookie = xcb_get_property(conn, 0, _window, ewmh->_NET_WM_ICON, XCB_ATOM_CARDINAL, 0, UINT32_MAX);
+                    xcb_get_property_reply_t* reply = xcb_get_property_reply(conn, cookie, nullptr);
+
+                    vector<uint32_t> best_icon_data;
+                    uint32_t best_size = 0;
+                    uint32_t best_width = 0, best_height = 0;
+
+                    if (reply && reply->value_len > 0)
+                    {
+                        uint32_t* data = (uint32_t*)xcb_get_property_value(reply);
+                        uint32_t len = xcb_get_property_value_length(reply) / sizeof(uint32_t);
+
+                        for (uint32_t i = 0; i < len; )
+                        {
+                            uint32_t width = data[i++];
+                            uint32_t height = data[i++];
+                            uint32_t size = width * height;
+
+                            if (size > best_size)
+                            {
+                                best_size = size;
+                                best_width = width;
+                                best_height = height;
+                                best_icon_data.assign(data + i, data + i + size);
+                            }
+
+                            i += size; // Move to the next icon in the data
+                        }
+                    }
+
+                    if (__width  != nullptr) *__width  = best_width;
+                    if (__height != nullptr) *__height = best_height;
+
+                    free(reply);
+                    return best_icon_data;
+                }
+
                 void make_png_from_icon()
                 {
                     if (fs::exists(PNG_HASH(get_icccm_class())))
@@ -2690,7 +2737,7 @@ class window {
                     }
 
                     uint32_t width, height;
-                    vector<uint32_t> vec = get_window_icon(&width, &height);
+                    vector<uint32_t> vec = get_best_quality_window_icon(&width, &height);
 
                     __color_bitmap__ color_bitmap(width, height, vec);
                     if (!fs::exists(ICON_FOLDER_HASH(get_icccm_class())))
