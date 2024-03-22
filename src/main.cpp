@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include <exception>
 #include <features.h>
 #include <iterator>
 #include <regex>
@@ -319,6 +320,90 @@ namespace { // Tools
     #define VOID_COOKIE xcb_void_cookie_t cookie
     #define CHECK_VOID_COOKIE() check_xcb_void_cookie_t(cookie, __func__)
 }
+
+namespace fs = filesystem;
+class __file_system__ {
+    public:
+    /* Variabels */
+        string
+            config_folder = USER_PATH_PREFIX("/.config/mwm"),
+            icon_folder = config_folder + "/icons";
+
+        static bool status;
+    
+    /* Methods */
+        void init_check()
+        {
+            bool create_bool = false;
+
+            if (!fs::exists(config_folder))
+            {
+                loutI << "(" << config_folder << ") does not exist creating dir" << '\n';    
+                try 
+                {
+                    create_bool = fs::create_directory(config_folder);   
+                }
+                catch (exception &__e)
+                {
+                    loutE << "Failed to create dir: " << config_folder << " error: " << __e.what() << "\n";
+                    status = false;
+                    return;
+                }
+
+                if (create_bool == true)
+                {
+                    loutI << "Successfully created dir:(" << config_folder << ")" << '\n';
+                    status = true;
+                    return;
+                }
+            }
+
+            if (!fs::is_directory(config_folder))
+            {
+                bool remove_bool = false;
+                loutI << "(" << config_folder << ") exists but is not a dir deleting and remaking as dir" << '\n';
+
+                try
+                {
+                    remove_bool = fs::remove(config_folder);
+                }
+                catch (exception &__e)
+                {
+                    loutE << "Failed to remove non dir:(" << config_folder << ") error: " << __e.what() << '\n';
+                    status = false;
+                    return;
+                }
+
+
+                if (remove_bool == true)
+                {
+                    try
+                    {
+                        create_bool = fs::create_directory(config_folder);
+                    }
+                    catch (exception &__e)
+                    {
+                        loutE << "Failed to create dir:(" << config_folder << ") error: " << __e.what() << '\n';
+                        status = true;
+                        return;
+                    }
+
+                    if (create_bool == true)
+                    {
+                        loutI << "Successfully created dir:(" << config_folder << ")" << '\n';
+                        status = false;
+                        return;
+                    }
+                }
+            }
+        }
+
+        bool check_status()
+        {
+            return status;
+        }
+
+}; static __file_system__ file_system;
 
 class __net_logger__ {
     // Defines.
@@ -12162,6 +12247,9 @@ void setup_wm()
 {
     loutI << "Running" << '\n';
     user = get_user_name();
+    loutI << "Current USER: " << USER << '\n';
+
+    file_system.init_check();
 
     wm = new Window_Manager;
     if (wm == nullptr)
