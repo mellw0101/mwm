@@ -4820,7 +4820,7 @@ class client {
 
                 win.make_png_from_icon();
 
-                loutI << win.get_icccm_class() << '\n';
+                loutI << WINDOW_ID_BY_INPUT(win) << "Class: " << win.get_icccm_class() << " Hash: " << crypro->string_to_fixed_length_numeric(win.get_icccm_class()) << '\n';
             }
 
         // Get.
