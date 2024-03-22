@@ -1559,7 +1559,7 @@ class __color_bitmap__ {
             FILE *fp = fopen(fileName, "wb");
             if (!fp)
             {
-                // Handle error
+                loutE << "Could not open file: " << fileName << '\n';
                 return;
             }
 
@@ -1567,7 +1567,7 @@ class __color_bitmap__ {
             if (!png_ptr)
             {
                 fclose(fp);
-                // Handle error
+                loutE << "Could not create write struct" << '\n';
                 return;
             }
 
@@ -1576,7 +1576,7 @@ class __color_bitmap__ {
             {
                 fclose(fp);
                 png_destroy_write_struct(&png_ptr, nullptr);
-                // Handle error
+                loutE << "Could not create info struct" << '\n';
                 return;
             }
 
@@ -1584,7 +1584,7 @@ class __color_bitmap__ {
             {
                 fclose(fp);
                 png_destroy_write_struct(&png_ptr, &info_ptr);
-                // Handle error
+                loutE << "setjmp failed" << '\n';
                 return;
             }
 
@@ -2421,31 +2421,50 @@ class window {
         
         // Get.
             // ewmh.
-                vector<uint32_t> get_window_icon()
+                vector<uint32_t> get_window_icon(uint32_t *__width = nullptr, uint32_t *__height = nullptr)
                 {
-                    xcb_intern_atom_cookie_t* cookie = xcb_ewmh_init_atoms(conn, ewmh);
-                    if (!xcb_ewmh_init_atoms_replies(ewmh, cookie, nullptr))
+                    xcb_intern_atom_cookie_t* ewmh_cookie = xcb_ewmh_init_atoms(conn, ewmh);
+                    if (!xcb_ewmh_init_atoms_replies(ewmh, ewmh_cookie, nullptr))
                     {
                         loutEWin << "Failed to initialize EWMH atoms" << '\n';
+                        free(ewmh_cookie);
                         return {};
                     }
 
                     // Request the _NET_WM_ICON property
-                    xcb_get_property_cookie_t prop_cookie = xcb_get_property(conn, 0, _window, ewmh->_NET_WM_ICON, XCB_GET_PROPERTY_TYPE_ANY, 0, UINT32_MAX);
-                    xcb_get_property_reply_t* prop_reply = xcb_get_property_reply(conn, prop_cookie, nullptr);
+                    xcb_get_property_cookie_t cookie = xcb_get_property(conn, 0, _window, ewmh->_NET_WM_ICON, XCB_GET_PROPERTY_TYPE_ANY, 0, UINT32_MAX);
+                    xcb_get_property_reply_t* reply = xcb_get_property_reply(conn, cookie, nullptr);
+                    
+                    if (reply == nullptr)
+                    {
+                        loutE << "reply = nullptr" << '\n';
+                        free(reply);
+                        return {};
+                    }
+                    
 
                     vector<uint32_t> icon_data;
-                    if (prop_reply && prop_reply->value_len > 0)
+                    if (reply && reply->value_len > 0)
                     {
                         // The value is an array of 32-bit items, so cast the reply's value to a uint32_t pointer
-                        uint32_t* data = (uint32_t*)xcb_get_property_value(prop_reply);
-                        uint32_t len = xcb_get_property_value_length(prop_reply) / sizeof(uint32_t);
+                        uint32_t* data = (uint32_t*)xcb_get_property_value(reply);
+                        uint32_t len = xcb_get_property_value_length(reply) / sizeof(uint32_t);
 
                         // Parse icon data (width, height, and ARGB data)
                         for (uint32_t i = 0; i < len;)
                         {
                             uint32_t width = data[i++];
+                            if (__width != nullptr)
+                            {
+                                *__width = width;
+                            }
+
                             uint32_t height = data[i++];
+                            if (__height != nullptr)
+                            {
+                                *__height = height;
+                            }
+
                             uint32_t size = width * height;
 
                             loutIWin << "width"  << width  << '\n';
@@ -2460,8 +2479,17 @@ class window {
                         }
                     }
 
-                    free(prop_reply);
+                    free(reply);
                     return icon_data;
+                }
+
+                void make_png_from_icon()
+                {
+                    uint32_t width, height;
+                    vector<uint32_t> vec = get_window_icon(&width, &height);
+
+                    __color_bitmap__ color_bitmap(width, height, vec);
+                    color_bitmap.exportToPng(USER_PATH_PREFIX_C_STR("/test.png"));
                 }
 
             // icccm.
@@ -2889,7 +2917,7 @@ class window {
 
                 return x;
             }
-        
+
             int16_t y_from_req()
             {
                 xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, _window);
@@ -2926,18 +2954,19 @@ class window {
         
             int16_t height_from_req()
             {
-                xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, _window);
-                xcb_get_geometry_reply_t *geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
+                xcb_get_geometry_cookie_t cookie = xcb_get_geometry(conn, _window);
+                xcb_get_geometry_reply_t *reply = xcb_get_geometry_reply(conn, cookie, nullptr);
 
                 int16_t height;
-                if (geometry == nullptr)
+                if (reply == nullptr)
                 {
+                    loutE << "reply == nullptr" << '\n';
                     height = 200;
                     return height;
                 }
 
-                height = geometry->height;
-                free(geometry);
+                height = reply->height;
+                free(reply);
                 return height;
             }
         
@@ -4604,7 +4633,7 @@ class client {
                     get_window_parameters();
                 }
 
-                win.get_window_icon();
+                win.make_png_from_icon();
             }
 
         // Get.
@@ -9523,7 +9552,7 @@ class Dock {
 
 class __dock_search__ {
     // Defines.
-        constexpr uint8_t char_to_keycode(char c)
+        constexpr uint8_t char_to_keycode(int8_t c)
         {
             switch (c)
             {
@@ -9558,41 +9587,6 @@ class __dock_search__ {
             return (uint8_t)0;
         }
 
-        // constexpr int8_t lower_to_upper_case(int8_t c)
-        // {
-        //     switch (c)
-        //     {
-        //         case 'a': return 'A';
-        //         case 'b': return 'B';
-        //         case 'c': return 'C';
-        //         case 'd': return 'D';
-        //         case 'e': return 'E';
-        //         case 'f': return 'F';
-        //         case 'g': return 'G';
-        //         case 'h': return 'H';
-        //         case 'i': return 'I';
-        //         case 'j': return 'J';
-        //         case 'k': return 'K';
-        //         case 'l': return 'L';
-        //         case 'm': return 'M';
-        //         case 'n': return 'N';
-        //         case 'o': return 'O';
-        //         case 'p': return 'P';
-        //         case 'q': return 'Q';
-        //         case 'r': return 'R';
-        //         case 's': return 'S';
-        //         case 't': return 'T';
-        //         case 'u': return 'U';
-        //         case 'v': return 'V';
-        //         case 'w': return 'W';
-        //         case 'x': return 'X';
-        //         case 'y': return 'Y';
-        //         case 'z': return 'Z';
-        //     }
-
-        //     return '\0';
-        // }
-
         constexpr int8_t lower_to_upper_case(int8_t c)
         {
             return (c - 32);
@@ -9620,33 +9614,6 @@ class __dock_search__ {
                 RE_CAST_EV(xcb_key_press_event_t);
                 if (e->event == main_window)
                 {
-                    // APPEND_TO_STR('a')
-                    // APPEND_TO_STR('b')
-                    // APPEND_TO_STR('c')
-                    // APPEND_TO_STR('d')
-                    // APPEND_TO_STR('e')
-                    // APPEND_TO_STR('f')
-                    // APPEND_TO_STR('g')
-                    // APPEND_TO_STR('h')
-                    // APPEND_TO_STR('i')
-                    // APPEND_TO_STR('j')
-                    // APPEND_TO_STR('k')
-                    // APPEND_TO_STR('l')
-                    // APPEND_TO_STR('m')
-                    // APPEND_TO_STR('n')
-                    // APPEND_TO_STR('o')
-                    // APPEND_TO_STR('p')
-                    // APPEND_TO_STR('q')
-                    // APPEND_TO_STR('r')
-                    // APPEND_TO_STR('s')
-                    // APPEND_TO_STR('t')
-                    // APPEND_TO_STR('u')
-                    // APPEND_TO_STR('v')
-                    // APPEND_TO_STR('w')
-                    // APPEND_TO_STR('x')
-                    // APPEND_TO_STR('y')
-                    // APPEND_TO_STR('z')
-
                     for (int i = 0; i < _char_vec.size(); ++i)
                     {
                         APPEND_TO_STR(_char_vec[i]);
