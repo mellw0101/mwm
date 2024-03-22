@@ -327,6 +327,67 @@ namespace { // Tools
     #define CHECK_VOID_COOKIE() check_xcb_void_cookie_t(cookie, __func__)
 }
 
+class __crypto__ {
+    public:
+    /* Methods */
+        vector<unsigned long> hash_str_32_bit_fixed(const string &__input)
+        {
+            hash<string> hasher;
+            auto hashedValue = hasher(__input);
+
+            vector<unsigned long> hashSequence(32);
+            for (size_t i = 0; i < hashSequence.size(); ++i)
+            {
+                hashSequence[i] = hashedValue ^ (hashedValue >> (i % (sizeof(size_t) * 8)));
+            }
+
+            return hashSequence;
+        }
+
+        string hash_vec_to_str(const vector<unsigned long> &__hash_vec)
+        {
+            stringstream ss;
+            for (size_t i = 0; i < __hash_vec.size(); ++i) {
+                // Convert each number to a string and concatenate them
+                // You might want to use a delimiter if you need to parse this string back into numbers
+                ss << __hash_vec[i];
+                if (i < __hash_vec.size() - 1)
+                {
+                    ss << ", "; // Add a delimiter (comma) between the numbers
+                }
+            }
+            return ss.str();
+        }
+
+        string string_to_fixed_length_numeric(const string &__input)
+        {
+            // Hash the input
+            hash<string> hashFn;
+            auto hash = hashFn(__input);
+
+            // Convert hash to a hexadecimal string
+            stringstream hexStream;
+            hexStream << hex << hash;
+
+            // Get the hexadecimal string
+            string hexString = hexStream.str();
+
+            // Ensure the hexadecimal string is 32 characters long
+            // Note: This involves padding and possibly trimming,
+            // assuming size_t is less than or equal to 64 bits.
+            string paddedHexString = string(32 - std::min(32, static_cast<int>(hexString.length())), '0') + hexString;
+            if (paddedHexString.length() > 32)
+            {
+                paddedHexString = paddedHexString.substr(0, 32);
+            }
+
+            // Optionally, convert hex to a purely numeric string if needed
+            // For simplicity, we'll assume the hex string suffices for demonstration
+
+            return paddedHexString;
+        }
+}; static __crypto__ *crypro(nullptr);
+
 namespace fs = filesystem;
 class __file_system__ {
     private:
@@ -12282,6 +12343,14 @@ void setup_wm()
 
     file_system = new __file_system__;
     file_system->init_check();
+
+    crypro = new __crypto__;
+
+    loutI << crypro->string_to_fixed_length_numeric("balle") << '\n';
+    loutI << crypro->string_to_fixed_length_numeric("balle") << '\n';
+    loutI << crypro->string_to_fixed_length_numeric("balle") << '\n';
+    loutI << crypro->string_to_fixed_length_numeric("balle") << '\n';
+    loutI << crypro->string_to_fixed_length_numeric("balle") << '\n';
 
     wm = new Window_Manager;
     if (wm == nullptr)
