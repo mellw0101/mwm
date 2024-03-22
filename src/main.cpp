@@ -131,22 +131,28 @@ using SUint = unsigned short int;
     XCB_EVENT_MASK_FOCUS_CHANGE 
 
 /**
+ *
  * @brief General purpose definition to reinterpret cast.
+ *
  */
 #define RE_CAST(__type, __from) \
     reinterpret_cast<__type>(__from)
 
 /**
+ *
  * @brief Specialized definition to reinterpret a const xcb_generic_event_t *
- * into a const __type * (the event that 'e' should represent) with the name 'e' for use in event handling.
+ *        into a const __type * (the event that 'e' should represent) with the name 'e' for use in event handling.
+ *
  */
 #define RE_CAST_EV(__type) \
     auto e = RE_CAST(const __type *, ev)
 
-/*
- * @breif Defenition to set an event callback to the global event handler
- * from within the class that holds the internal client
- * as this way it can be properly cleaned when killed
+/**
+ *
+ * @brief Defenition to set an event callback to the global event handler
+ *        from within the class that holds the internal client
+ *        as this way it can be properly cleaned when killed
+ *
  */
 #define SET_INTR_CLI_KILL_CALLBACK() \
     event_handler->setEventCallback(XCB_CLIENT_MESSAGE, [this](Ev ev)-> void \
@@ -346,11 +352,13 @@ class __file_system__ {
                     catch (exception &__e)
                     {
                         loutE << "Failed to create dir:" << loutPath(__path) << " error: " << __e.what() << "\n";
+                        status = false;
                     }
 
                     if (create_bool == true)
                     {
                         loutI << "Successfully created dir:" << loutPath(__path) << '\n';
+                        status = true;
                     }
                 }
 
@@ -365,7 +373,8 @@ class __file_system__ {
                     }
                     catch (exception &__e)
                     {
-                        loutE << "Failed to remove non dir:" << loutPath(__path) << " error: " << __e.what() << '\n';
+                        loutE << "Failed to remove non-dir:" << loutPath(__path) << " error: " << __e.what() << '\n';
+                        status = false;
                     }
 
 
@@ -378,11 +387,13 @@ class __file_system__ {
                         catch (exception &__e)
                         {
                             loutE << "Failed to create dir:" << loutPath(__path) << " error: " << __e.what() << '\n';
+                            status = false;
                         }
 
                         if (create_bool == true)
                         {
                             loutI << "Successfully created dir:" << loutPath(__path) << '\n';
+                            status = false;
                         }
                     }
                 }
@@ -396,85 +407,37 @@ class __file_system__ {
             icon_folder = config_folder + "/icons";
 
         bool status;
+
+        typedef enum : uint8_t {
+            CONDIG_FOLDER,
+            ICON_FOLDER
+        } accessor_t;
     
     /* Methods */
         void init_check()
         {
             create(config_folder);
             create(icon_folder);
-
-            // bool create_bool = false;
-
-            // if (!fs::exists(config_folder))
-            // {
-            //     loutI << "dir:" << loutPath(config_folder) << " does not exist creating dir" << '\n';    
-            //     try 
-            //     {
-            //         create_bool = fs::create_directory(config_folder);   
-            //     }
-            //     catch (exception &__e)
-            //     {
-            //         loutE << "Failed to create dir:" << loutPath(config_folder) << " error: " << __e.what() << "\n";
-            //         status = false;
-            //         return;
-            //     }
-
-            //     if (create_bool == true)
-            //     {
-            //         loutI << "Successfully created dir:" << loutPath(config_folder) << '\n';
-            //         status = true;
-            //         return;
-            //     }
-            // }
-
-            // if (!fs::is_directory(config_folder))
-            // {
-            //     bool remove_bool = false;
-            //     loutI << "dir:" << loutPath(config_folder) << " exists but is not a dir deleting and remaking as dir" << '\n';
-
-            //     try
-            //     {
-            //         remove_bool = fs::remove(config_folder);
-            //     }
-            //     catch (exception &__e)
-            //     {
-            //         loutE << "Failed to remove non dir:" << loutPath(config_folder) << " error: " << __e.what() << '\n';
-            //         status = false;
-            //         return;
-            //     }
-
-
-            //     if (remove_bool == true)
-            //     {
-            //         try
-            //         {
-            //             create_bool = fs::create_directory(config_folder);
-            //         }
-            //         catch (exception &__e)
-            //         {
-            //             loutE << "Failed to create dir:" << loutPath(config_folder) << " error: " << __e.what() << '\n';
-            //             status = true;
-            //             return;
-            //         }
-
-            //         if (create_bool == true)
-            //         {
-            //             loutI << "Successfully created dir:" << loutPath(config_folder) << '\n';
-            //             status = false;
-            //             return;
-            //         }
-            //     }
-            // }
-        }
-
-        void subfolder_check()
-        {
-
         }
 
         bool check_status()
         {
             return status;
+        }
+
+        string accessor(accessor_t __folder, const string &__sub_path)
+        {
+            if (__folder == CONDIG_FOLDER)
+            {
+                return (config_folder + "/" + __sub_path);
+            }
+            
+            if (__folder == ICON_FOLDER)
+            {
+                return (icon_folder + "/" + __sub_path);
+            }
+
+            return string();
         }
 
 }; static __file_system__ *file_system(nullptr);
@@ -2647,14 +2610,18 @@ class window {
                     vector<uint32_t> vec = get_window_icon(&width, &height);
 
                     __color_bitmap__ color_bitmap(width, height, vec);
-                    if (!filesystem::exists(USER_PATH_PREFIX("/icons")))
-                    {
-                        filesystem::create_directory(USER_PATH_PREFIX("/icons"));
-                    }
+                    // if (!filesystem::exists(USER_PATH_PREFIX("/icons")))
+                    // {
+                    //     filesystem::create_directory(USER_PATH_PREFIX("/icons"));
+                    // }
 
-                    if (filesystem::is_directory(USER_PATH_PREFIX("/icons")))
+                    // if (filesystem::is_directory(USER_PATH_PREFIX("/icons")))
+                    // {
+                    //     color_bitmap.exportToPng(USER_PATH_PREFIX_C_STR("/icons/" + to_string(_window)));
+                    // }
+                    if (file_system->check_status())
                     {
-                        color_bitmap.exportToPng(USER_PATH_PREFIX_C_STR("/icons/" + to_string(_window)));
+                        color_bitmap.exportToPng(file_system->accessor(__file_system__::ICON_FOLDER, to_string(_window)).c_str());
                     }
                 }
 
