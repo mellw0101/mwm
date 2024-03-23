@@ -9980,7 +9980,8 @@ class __dock_search__ {
                 __height,
                 BLACK,
                 XCB_EVENT_MASK_STRUCTURE_NOTIFY | XCB_EVENT_MASK_FOCUS_CHANGE,
-                DEFAULT_KEYS | KEYS_FOR_TYPING
+                DEFAULT_KEYS | KEYS_FOR_TYPING,
+                (int[]){ALL, 2, BLUE}
             );
 
             main_window.grab_button({
