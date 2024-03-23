@@ -2632,7 +2632,7 @@ class window {
             }
         
         /* Get           */
-            // ewmh.
+            /* ewmh  */
                 vector<uint32_t> get_window_icon(uint32_t *__width = nullptr, uint32_t *__height = nullptr)
                 {
                     xcb_intern_atom_cookie_t* ewmh_cookie = xcb_ewmh_init_atoms(conn, ewmh);
@@ -2764,7 +2764,7 @@ class window {
                     }
                 }
 
-            // icccm.
+            /* icccm */
                 void get_override_redirect()
                 {
                     xcb_get_window_attributes_reply_t *wa = xcb_get_window_attributes_reply(conn, xcb_get_window_attributes(conn, _window), NULL);
@@ -3206,12 +3206,12 @@ class window {
                 return y;
             }
         
-            int16_t width_from_req()
+            uint16_t width_from_req()
             {
                 xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(conn, _window);
                 xcb_get_geometry_reply_t * geometry = xcb_get_geometry_reply(conn, geometry_cookie, nullptr);
 
-                int16_t width;
+                uint16_t width;
                 if (geometry == nullptr)
                 {
                     width = 200;
@@ -3223,12 +3223,12 @@ class window {
                 return width;
             }
         
-            int16_t height_from_req()
+            uint16_t height_from_req()
             {
                 xcb_get_geometry_cookie_t cookie = xcb_get_geometry(conn, _window);
                 xcb_get_geometry_reply_t *reply = xcb_get_geometry_reply(conn, cookie, nullptr);
 
-                int16_t height;
+                uint16_t height;
                 if (reply == nullptr)
                 {
                     loutE << "reply == nullptr" << '\n';
@@ -3949,7 +3949,7 @@ class window {
         Logger log;
     
     /* Methods     */
-        // Main.
+        /* Main       */
             void make_window()
             {
                 _window = xcb_generate_id(conn);
@@ -4032,8 +4032,8 @@ class window {
                 );
             }
 
-        // Create.
-            // Gc.
+        /* Create     */
+            /* Gc     */
                 void create_graphics_exposure_gc()
                 {
                     gc = xcb_generate_id(conn);
@@ -4071,7 +4071,7 @@ class window {
                     );
                 }
             
-            // Pixmap.
+            /* Pixmap */
                 void create_pixmap()
                 {
                     pixmap = xcb_generate_id(conn);
@@ -4086,7 +4086,7 @@ class window {
                     xcb_flush(conn);
                 }
             
-            // Png.
+            /* Png    */
                 void create_png_from_vector_bitmap(const char *file_name, const vector<vector<bool>> &bitmap)
                 {
                     int width = bitmap[0].size();
@@ -4146,7 +4146,7 @@ class window {
                     png_destroy_write_struct(&png_ptr, &info_ptr);
                 }
         
-        // Get.
+        /* Get        */
             xcb_atom_t atom(const char *atom_name)
             {
                 xcb_intern_atom_cookie_t cookie = xcb_intern_atom(
@@ -4198,7 +4198,7 @@ class window {
                 xcb_flush(conn);
             }
         
-        // Background.
+        /* Background */
             void change_back_pixel(const uint32_t &pixel)
             {
                 xcb_change_window_attributes(
@@ -4389,7 +4389,7 @@ class window {
                 return color;
             }
         
-        // Borders.
+        /* Borders    */
             void create_border_window(const int __color, const uint32_t __x, const uint32_t __y, const uint32_t __width, const uint32_t __height)
             {
                 uint32_t window = xcb_generate_id(conn);
@@ -4458,7 +4458,7 @@ class window {
                 }
             }
 
-        // Font.
+        /* Font       */
             /*
              * Decodes a single UTF-8 encoded character from the input string
              * and returns the Unicode code point.
@@ -5159,8 +5159,7 @@ class client {
         Logger log;
 };
 
-class desktop
-{
+class desktop {
     public:
     // Variabels
         vector<client *>(current_clients);
