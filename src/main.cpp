@@ -73,7 +73,6 @@
 #include <pulse/pulseaudio.h>
 #include <type_traits>
 
-
 #include "Log.hpp"
 Logger logger;
 #include "defenitions.hpp"
@@ -1751,16 +1750,16 @@ class Bitmap {
 
 class __color_bitmap__ {
     private:
-    // Variabels.
+    /* Variabels   */
         int width, height;
         std::vector<uint32_t> pixels; // Pixel data in ARGB format
 
     public:
-    // Constructor.
+    /* Constructor */
         __color_bitmap__(int width, int height, const vector<uint32_t>& pixels)
         : width(width), height(height), pixels(pixels) {}
 
-    // Methods.
+    /* Methods     */
         void exportToPng(const char *fileName) const
         {
             FILE *fp = fopen(fileName, "wb");
@@ -1816,33 +1815,33 @@ class __color_bitmap__ {
 
 };
 
-class _scale
-{
+class _scale {
     public:
+    /* Methods */
         static uint16_t from_8_to_16_bit(const uint8_t & n)
         {
             return (n << 8) | n;
         }
 };
 
-namespace { // window namespace 
+namespace { /* 'window' class Namespace */
     enum BORDER {
         NONE  = 0,
-        LEFT  = 1 << 0, // 1
-        RIGHT = 1 << 1, // 2
-        UP    = 1 << 2, // 4
-        DOWN  = 1 << 3, // 8
-        ALL   = 1 << 4  // 16
+        LEFT  = 1 << 0, /* 1  */
+        RIGHT = 1 << 1, /* 2  */
+        UP    = 1 << 2, /* 4  */
+        DOWN  = 1 << 3, /* 8  */
+        ALL   = 1 << 4  /* 16 */
     };
 
     enum window_flags {
-        MAP          = 1 << 0, // 1
-        DEFAULT_KEYS = 1 << 1, // 2
-        FOCUS_INPUT  = 1 << 2  // 4
+        MAP          = 1 << 0, /* 1 */
+        DEFAULT_KEYS = 1 << 1, /* 2 */
+        FOCUS_INPUT  = 1 << 2  /* 4 */
     };
 
     enum window_event_mask : uint32_t {
-        KILL_WINDOW = 1 << 25
+        KILL_WINDOW = 1 << 25 /* 33554432 */
     };
 
     void get_atom(char *__name, xcb_atom_t *__atom)
@@ -1860,7 +1859,11 @@ namespace { // window namespace
         free(reply);
     }
 
-    // Struct representing the _MOTIF_WM_HINTS property format
+    /**
+     *
+     * @brief Struct representing the _MOTIF_WM_HINTS property format 
+     *
+     */
     typedef struct {
         uint32_t flags;
         uint32_t functions;
@@ -1932,10 +1935,10 @@ namespace { // window namespace
 
 class window {
     public:  
-    // Constructor.
+    /* Constructor */
         window() {}
 
-    // Operators.
+    /* Operators   */
         operator uint32_t() const
         {
             return _window;
@@ -1947,8 +1950,8 @@ class window {
             return *this;
         }
     
-    // Methods.
-        // Create.
+    /* Methods     */
+        /* Create        */
             void create(const uint8_t  &depth,
                         const uint32_t &parent,
                         const int16_t  &x,
@@ -2165,7 +2168,7 @@ class window {
                 make_window();
             }
 
-        // Borders.
+        /* Borders       */
             void make_borders(int __border_mask, const uint32_t __size, const int __color)
             {
                 if (__border_mask & UP   ) make_border_window(UP,    __size, __color);
@@ -2190,7 +2193,7 @@ class window {
                 CHECK_VOID_COOKIE();
             }
         
-        // Main.
+        /* Main          */
             void raise()
             {
                 xcb_configure_window(
@@ -2353,7 +2356,7 @@ class window {
                 }
             }
 
-        // Event.
+        /* Event         */
             template<typename Callback>
             void on_expose_event(Callback&& callback)
             {
@@ -2395,7 +2398,7 @@ class window {
                 });
             }
 
-        // Check.
+        /* Check         */
             bool check_atom(xcb_atom_t __atom)
             {
                 xcb_get_property_cookie_t cookie = xcb_ewmh_get_wm_state(ewmh, _window);
@@ -2582,7 +2585,7 @@ class window {
                 return true; // Default to decorating if we can't find or interpret the hints
             }
         
-        // Set.
+        /* Set           */
             void set_active_EWMH_window()
             {
                 // 0 for the first (default) screen
@@ -2609,7 +2612,7 @@ class window {
                 xcb_flush(conn);
             }
         
-        // Unset.
+        /* Unset         */
             void unset_EWMH_fullscreen_state()
             {
                 VOID_COOKIE = xcb_change_property(
@@ -2626,7 +2629,7 @@ class window {
                 CHECK_VOID_COOKIE();
             }
         
-        // Get.
+        /* Get           */
             // ewmh.
                 vector<uint32_t> get_window_icon(uint32_t *__width = nullptr, uint32_t *__height = nullptr)
                 {
@@ -3236,7 +3239,7 @@ class window {
                 return height;
             }
         
-        // Configuration.
+        /* Configuration */
             void apply_event_mask(const vector<uint32_t> &values)
             {
                 if (values.empty())
@@ -3304,8 +3307,8 @@ class window {
                 xcb_free_cursor(conn, cursor);
             }
 
-            // Size_pos.
-                // Fetch.
+            /* Size_pos  */
+                /* Fetch */
                     int16_t x() const
                     {
                         return _x;
@@ -3422,7 +3425,7 @@ class window {
                     update(x, y, _width, height);
                 }
 
-        // Backround.
+        /* Backround     */
             void set_backround_color(int __color)
             {
                 _color = __color;
@@ -3652,7 +3655,7 @@ class window {
                 return _color;
             }
 
-        // Draw.
+        /* Draw          */
             void draw_text(const char *str , const int &text_color, const int &backround_color, const char *font_name, const int16_t &x, const int16_t &y)
             {
                 get_font(font_name);
@@ -3742,7 +3745,7 @@ class window {
                 });
             }
 
-        // Keys.
+        /* Keys          */
             void grab_default_keys()
             {
                 grab_keys({
@@ -3874,7 +3877,7 @@ class window {
                 });
             }
         
-        // Buttons.
+        /* Buttons       */
             void grab_button(std::initializer_list<std::pair<const uint8_t, const uint16_t>> bindings)
             {
                 for (const auto &binding : bindings)
@@ -3915,7 +3918,7 @@ class window {
             }
         
     private:
-    /* Variables */
+    /* Variables   */
         // main variables.
             uint8_t        _depth;
             uint32_t       _window;
@@ -3943,7 +3946,7 @@ class window {
 
         Logger log;
     
-    /* Methods */
+    /* Methods     */
         // Main.
             void make_window()
             {
@@ -4524,10 +4527,10 @@ class window {
 
 class client {
     public:
-    // Sub Classes.
+    /* Sub Classes */
         class client_border_decor {
             public:
-            // Variables.
+            /* Variables */
                 window left;
                 window right;
                 window top;
@@ -4539,19 +4542,17 @@ class client {
                 window bottom_right;
         };
 
-        struct __atoms__
-        {
+        struct __atoms__ {
             bool is_modal = false;
             bool has_modal = false;
         };
 
-        struct __modal_data__
-        {
+        struct __modal_data__ {
             uint32_t transient_for = 0;
             uint32_t modal_window = 0;
         };
 
-    // Variabels.
+    /* Variabels   */
         window win;
         window frame;
         window titlebar;
@@ -4576,8 +4577,8 @@ class client {
         uint16_t desktop;
         pid_t pid;
 
-    // Methods.
-        // Main.
+    /* Methods     */
+        /* Main     */
             void make_decorations()
             {
                 make_frame();
@@ -4690,7 +4691,7 @@ class client {
                 }       
             }
         
-        // Config.
+        /* Config   */
             void x_y(const uint32_t &x, const uint32_t &y)
             {
                 frame.x_y(x, y);
@@ -4837,7 +4838,7 @@ class client {
                 xcb_flush(conn);
             }
         
-        // Size_pos.
+        /* Size_pos */
             void save_ogsize()
             {
                 ogsize.save(x, y, width, height);
@@ -4858,7 +4859,7 @@ class client {
                 max_button_ogsize.save(x, y, width, height);
             }
         
-        // Check.
+        /* Check    */
             bool is_active_EWMH_window()
             {
                 return win.is_active_EWMH_window();
@@ -4882,7 +4883,7 @@ class client {
                 return false;
             }
         
-        // Set.
+        /* Set      */
             void set_active_EWMH_window()
             {
                 win.set_active_EWMH_window();
@@ -4903,7 +4904,7 @@ class client {
                 }
             }
 
-        // Get.
+        /* Get      */
             void get_window_parameters()
             {
                 xcb_get_geometry_cookie_t cookie = xcb_get_geometry(conn, win);
@@ -4945,14 +4946,14 @@ class client {
                 free(reply);
             }
 
-        // Unset.
+        /* Unset    */
             void unset_EWMH_fullscreen_state()
             {
                 win.unset_EWMH_fullscreen_state();
             }
     
     private:
-    /* Methods */
+    /* Methods     */
         void make_frame()
         {
             frame.create_default(screen->root, (x - BORDER_SIZE), (y - TITLE_BAR_HEIGHT - BORDER_SIZE), (width + (BORDER_SIZE * 2)), (height + TITLE_BAR_HEIGHT + (BORDER_SIZE * 2)));
@@ -5130,7 +5131,7 @@ class client {
             icon.set_backround_png(PNG_HASH(win.get_icccm_class()));
         }
     
-    /* Variables */
+    /* Variables   */
         vector<vector<bool>> CLOSE_BUTTON_BITMAP = {
             {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
             {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
@@ -5457,10 +5458,10 @@ class context_menu {
 
 class Window_Manager {
     public:
-    // Constructor.
+    /* Constructor */
         Window_Manager() {}
     
-    // Variabels.
+    /* Variabels   */
         window root;
         Launcher launcher;
         Logger log;
@@ -5474,8 +5475,8 @@ class Window_Manager {
         client *focused_client = nullptr;
         desktop *cur_d = nullptr;
     
-    // Methods.
-        // Main.
+    /* Methods     */
+        /* Main         */
             void init()
             {
                 _conn(nullptr, nullptr);
@@ -5545,7 +5546,7 @@ class Window_Manager {
                 free(reply);
             }
 
-        // Window.
+        /* Window       */
             bool window_exists(const uint32_t &__window)
             {
                 xcb_generic_error_t *err;
@@ -5581,7 +5582,7 @@ class Window_Manager {
                 window_stack(__window1, __window2, XCB_STACK_MODE_BELOW);
             }
 
-        // Client.
+        /* Client       */
             // Focus.
                 void cycle_focus()
                 {
@@ -5901,7 +5902,7 @@ class Window_Manager {
             delete c;
             }
 
-        // desktop.
+        /* Desktop      */
             void create_new_desktop(const uint16_t &n)
             {
                 desktop *d = new desktop;
@@ -5914,7 +5915,7 @@ class Window_Manager {
                 desktop_list.push_back(d);
             }
 
-        // experimental.
+        /* Experimental */
             xcb_visualtype_t *find_argb_visual(xcb_connection_t *conn, xcb_screen_t *screen)
             {
                 xcb_depth_iterator_t depth_iter = xcb_screen_allowed_depths_iterator(screen);
@@ -5938,7 +5939,7 @@ class Window_Manager {
                 free(xcb_get_input_focus_reply(conn, xcb_get_input_focus(conn), NULL));
             }
 
-        // xcb.
+        /* Xcb          */
             void send_expose_event(window &__window)
             {
                 xcb_expose_event_t expose_event = {
@@ -5956,10 +5957,10 @@ class Window_Manager {
             }
 
     private:
-    // Variables.
+    /* Variables   */
         window start_window;
 
-    // Functions.
+    /* Functions   */
         // Init.
             void _conn(const char *displayname, int *screenp)
             {
@@ -6218,7 +6219,6 @@ class Window_Manager {
                 c->win = window;
                 c->set_client_params();
                 c->get_window_parameters_and_log();
-                c->win.get_window_icon_name();
 
                 if (c->width  < c->win.get_min_width() ) c->width  = 200;
                 if (c->height < c->win.get_min_height()) c->height = 100;
@@ -6353,7 +6353,7 @@ class Window_Manager {
 
 class __network__ {
     public:
-    // Methods.
+    /* Methods     */
         enum {
             LOCAL_IP = 0,
             INTERFACE_FOR_LOCAL_IP = 1
@@ -6399,7 +6399,7 @@ class __network__ {
             return result;
         }
 
-    // Constructor.
+    /* Constructor */
         __network__() {}
 
 }; static __network__ *network(nullptr);
@@ -9872,6 +9872,8 @@ class __dock_search__ {
                 case 'x': return wm->key_codes.x;
                 case 'y': return wm->key_codes.y;
                 case 'z': return wm->key_codes.z;
+                case '-': return wm->key_codes.minus;
+                case ' ': return wm->key_codes.space_bar;
             }
 
             return (uint8_t)0;
@@ -9879,6 +9881,8 @@ class __dock_search__ {
 
         constexpr int8_t lower_to_upper_case(int8_t c)
         {
+            if (c == '-') return '_';
+            if (c == ' ') return ' ';
             return (c - 32);
         }
 
@@ -9907,23 +9911,6 @@ class __dock_search__ {
                     for (int i = 0; i < _char_vec.size(); ++i)
                     {
                         APPEND_TO_STR(_char_vec[i]);
-                    }
-
-                    if (e->detail == wm->key_codes.minus)
-                    {
-                        if (e->state == SHIFT)
-                        {
-                            search_string << '_';
-                        }
-                        else
-                        {
-                            search_string << '-';
-                        }
-                    }
-
-                    if (e->detail == wm->key_codes.space_bar)
-                    {
-                        search_string << ' ';
                     }
 
                     if (e->detail == wm->key_codes._delete)
@@ -9973,7 +9960,7 @@ class __dock_search__ {
         vector<window> entry_list;
         Launcher launcher;
 
-        vector<int8_t> _char_vec = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
+        vector<int8_t> _char_vec = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '-', ' '};
 
     public:
     /* Variabels */
