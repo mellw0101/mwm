@@ -1835,9 +1835,10 @@ namespace { /* 'window' class Namespace */
     };
 
     enum window_flags {
-        MAP          = 1 << 0, /* 1 */
-        DEFAULT_KEYS = 1 << 1, /* 2 */
-        FOCUS_INPUT  = 1 << 2  /* 4 */
+        MAP             = 1 << 0, /* 1 */
+        DEFAULT_KEYS    = 1 << 1, /* 2 */
+        FOCUS_INPUT     = 1 << 2, /* 4 */
+        KEYS_FOR_TYPING = 1 << 3  /* 8 */ 
     };
 
     enum window_event_mask : uint32_t {
@@ -1868,7 +1869,7 @@ namespace { /* 'window' class Namespace */
         uint32_t flags;
         uint32_t functions;
         uint32_t decorations;
-        int32_t input_mode;
+        int32_t  input_mode;
         uint32_t status;
     } motif_wm_hints;
 
@@ -2128,8 +2129,9 @@ class window {
 
                 make_window();
                 set_backround_color(__color);
-                if (__flags & DEFAULT_KEYS) grab_default_keys();
-                if (__flags & FOCUS_INPUT ) focus_input();
+                if (__flags & DEFAULT_KEYS   ) grab_default_keys();
+                if (__flags & KEYS_FOR_TYPING) grab_keys_for_typing();
+                if (__flags & FOCUS_INPUT    ) focus_input();
                 if (__flags & MAP)
                 {
                     map();
@@ -9977,15 +9979,13 @@ class __dock_search__ {
                 __width,
                 __height,
                 BLACK,
-                XCB_EVENT_MASK_STRUCTURE_NOTIFY | XCB_EVENT_MASK_FOCUS_CHANGE
+                XCB_EVENT_MASK_STRUCTURE_NOTIFY | XCB_EVENT_MASK_FOCUS_CHANGE,
+                DEFAULT_KEYS | KEYS_FOR_TYPING
             );
 
             main_window.grab_button({
                 { L_MOUSE_BUTTON, NULL }
             });
-
-            main_window.grab_keys_for_typing();
-            main_window.grab_default_keys();
         }
 
         void add_enter_action(function<void()> enter_action)
