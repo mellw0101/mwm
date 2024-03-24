@@ -1932,6 +1932,27 @@ namespace { /* 'window' class Namespace */
             HEIGHT = 1 << 3
         };
     }
+
+    /** EXPEREMENT: TODO: implement  */
+    enum DataType {
+        TYPE_NONE,
+        TYPE_INT,
+        TYPE_FLOAT,
+        // Add more types as needed
+        // TYPE_KEYS_DATA,
+        // TYPE_OTHER_DATA,
+    };
+
+    struct WindowData {
+        DataType type;
+        union {
+            int intValue;
+            float floatValue;
+            // Define other data types here
+            // keys_data_t keysData;
+            // other_data_t otherData;
+        };
+    };
 }
 
 class window {
