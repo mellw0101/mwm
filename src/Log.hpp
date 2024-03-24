@@ -576,6 +576,9 @@ class lout {
 		#define loutUser(__user) \
 			"(" << log_BLUE << __user << log_RESET << ")"
 
+		#define loutEND \
+			'\n'
+
 	public:
 	/* Methods */
 		/**

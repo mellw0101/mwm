@@ -9196,14 +9196,14 @@ class __screen_settings__ {
 
             if (!res_reply)
             {
-                log_error("Could not get screen resources");
+                loutE << "Could not get screen resources" << loutEND;
                 return {};
             }
 
             xcb_randr_output_t *outputs = xcb_randr_get_screen_resources_current_outputs(res_reply);
             if (!res_reply->num_outputs)
             {
-                log_error("No outputs found");
+                loutE << "No outputs found" << loutEND;
                 free(res_reply);
                 return {};
             }
@@ -9215,7 +9215,7 @@ class __screen_settings__ {
 
             if (!output_info_reply || output_info_reply->crtc == XCB_NONE)
             {
-                log_error("Output is not currently connected to a CRTC");
+                loutE << "Output is not currently connected to a CRTC" << loutEND;
                 free(output_info_reply);
                 free(res_reply);
                 return{};
@@ -9226,7 +9226,7 @@ class __screen_settings__ {
 
             if (!crtc_info_reply)
             {
-                log_error("Could not get CRTC info");
+                loutE << "Could not get CRTC info" << loutEND;
                 free(output_info_reply);
                 free(res_reply);
                 return{};
@@ -9238,6 +9238,11 @@ class __screen_settings__ {
             for (int i = 0; i < mode_count; i++) // Iterate through all modes
             {
                 string s = to_string(mode_info[i].width) + "x" + to_string(mode_info[i].height) + " " + to_string(calculate_refresh_rate(&mode_info[i])) + " Hz";
+
+                #ifdef ARMV8_BUILD
+                    loutI << s << loutEND;
+                #endif
+
                 pair<xcb_randr_mode_t, string> pair{mode_info[i].id, s};
                 results.push_back(pair);
             }
