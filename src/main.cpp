@@ -1707,7 +1707,7 @@ class __pid_manager__ {
             pid_cmd_line__(__pid);
             if (__name != "")
             {
-                loutI << get_correct_prosses_name__(__name) << '\n';
+                loutI << __name << '\n';
             }
         }
 
