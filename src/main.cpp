@@ -9965,13 +9965,6 @@ class __dock_search__ {
 
                     if (e->detail == wm->key_codes._delete)
                     {
-                    //     if (search_string.str().length() > 0)
-                    //     {
-                    //         string temp = search_string.str();
-                    //         temp.pop_back();
-                    //         search_string.str("");
-                    //         search_string << temp;
-                    //     }
                         pop_last_ss(search_string);
                         main_window.clear();
                         FLUSH_X();
