@@ -3500,12 +3500,12 @@ class window {
                 {
                     if (reply != nullptr)
                     {
-                        log_error("reply length for property(" + std::string(atom_name) + ") = 0");
+                        loutE << "reply length for property(" << string(atom_name) << ") = 0" << loutEND;
                         free(reply);
                         return (char *) "";
                     }
 
-                    log_error("reply == nullptr");
+                    loutE << "reply == nullptr" << loutEND;
                     return (char *) "";
                 }
 
@@ -3519,7 +3519,7 @@ class window {
                     free(reply);
                 }
 
-                log_info("property(" + std::string(atom_name) + ") = " + std::string(propertyValue));
+                loutI << "property(" << string(atom_name) << ") = " << string(propertyValue) << loutEND;
                 return propertyValue;
             }
 
@@ -6298,6 +6298,11 @@ class Window_Manager {
 
                 pid_manager->check_pid(c->win.get_pid());
                 c->win.print_window_states();
+                xcb_atom_t atom;
+                get_atom((char *)"_NET_WM_STATE", &atom);
+                loutI << c->win.get_window_property(atom) << loutEND;
+
+                c->win.property("_NET_WM_STATE");
 
                 c->win.map();
                 c->win.grab_button({
