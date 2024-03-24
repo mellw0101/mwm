@@ -12284,7 +12284,7 @@ class Events {
                 {
                     case (CTRL + ALT):
                     {
-                        wm->launcher.program((char *) "konsole");
+                        wm->launcher.launch_child_process("konsole");
                         return;
                     }
                 }
@@ -12468,7 +12468,7 @@ class Events {
                     case SUPER:
                     {
                         GET_CLIENT_FROM_WINDOW(e->event);
-                        c->win.kill();
+                        c->kill();
                         // c->win.x(BORDER_SIZE);
                         // c->win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
                         // xcb_flush(conn);
