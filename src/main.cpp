@@ -2936,13 +2936,13 @@ class window {
         /* Set           */
             void set_active_EWMH_window()
             {
-                // 0 for the first (default) screen
-                xcb_ewmh_set_active_window(
+                VOID_COOKIE = xcb_ewmh_set_active_window(
                     ewmh,
                     0,
                     _window
                 );
-                xcb_flush(conn);
+                FLUSH_X();
+                CHECK_VOID_COOKIE();
             }
         
             void set_EWMH_fullscreen_state()
@@ -6914,13 +6914,13 @@ class __wifi__ {
 
 class __audio__ {
     private:
-    // Variabels
+    /* Variabels   */
         pa_mainloop* mainloop = nullptr;
         pa_mainloop_api* mainloop_api = nullptr;
         pa_context* context = nullptr;
 
     public:
-    // Methods.
+    /* Methods     */
         static void sink_list_cb(pa_context* c, const pa_sink_info* l, int eol, void* userdata)
         {
             // End of list
@@ -7058,7 +7058,7 @@ class __audio__ {
             if (op) pa_operation_unref(op);
         }
         
-    // Constructor.
+    /* Constructor */
         __audio__() {}
 
 }; __audio__ audio;
