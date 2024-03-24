@@ -650,12 +650,6 @@ class lout {
             return *this;
         }
 
-		lout& err()
-		{
-			buffer << "Error: " << strerror(errno) << " (errno: " << errno << ")";
-			return *this;
-		}
-
 		lout& err(const string &__err_msg)
 		{
 			buffer << __err_msg << ": " << strerror(errno) << " (errno: " << errno << ")";
