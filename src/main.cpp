@@ -1796,6 +1796,24 @@ class __pid_manager__ {
             }
         }
 
+        void check_pid(pid_t __pid)
+        {
+            bool found = false;
+            for (int i = 0; i < _pid_vec.size(); ++i)
+            {
+                if (__pid == _pid_vec[i])
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found)
+            {
+                add_pid(__pid);
+            }
+        }
+
     /* Constructor */
         __pid_manager__() {}
 
