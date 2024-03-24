@@ -1795,6 +1795,8 @@ class __pid_manager__ {
             {
                 if (!terminateProcess(__pid))
                 {
+                    if (isProcessRunning(__pid)) loutI << "pid" << __pid << " still running" << '\n';
+
                     if (sendSignal(__pid, SIGKILL))
                     {
                         loutI << "SIGKILL signal sent to process" << __pid << " for forceful termination." << '\n';
