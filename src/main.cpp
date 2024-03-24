@@ -4310,7 +4310,7 @@ class window {
         
     private:
     /* Variables   */
-        // main variables.
+        /* Main */
             uint8_t        _depth;
             uint32_t       _window;
             uint32_t       _parent;
@@ -4334,9 +4334,8 @@ class window {
         uint32_t _min_width  = 200;
         uint32_t _min_height = 100;
         uint8_t  _override_redirect = 0;
+        pid_t pid = 0;
 
-        Logger log;
-    
     /* Methods     */
         /* Main       */
             void make_window()
@@ -11757,10 +11756,10 @@ class resize_client {
 
 class max_win {
     private:
-    // Variabels.
+    /* Variabels   */
         client(*c);
 
-    // Methods.
+    /* Methods     */
         void max_win_animate(const int &endX, const int &endY, const int &endWidth, const int &endHeight)
         {
             animate_client(
@@ -11831,13 +11830,13 @@ class max_win {
         }
 
     public:
-    // Variabels.
+    /* Variabels   */
         typedef enum {
             BUTTON_MAXWIN,
             EWMH_MAXWIN 
         } max_win_type;
 
-    // Constructor.
+    /* Constructor */
         max_win(client *c, max_win_type type)
         : c(c)
         {
