@@ -1805,23 +1805,23 @@ class __pid_manager__ {
 
         void kill_all_pids()
         {
-            vector<thread> threads;
+            // vector<thread> threads;
 
             for (pid_t pid : _pid_vec)
             {
-                threads.emplace_back([&]() -> void
-                {
-                    kill_pid(pid);
-                });
+                kill_pid(pid);
+                // threads.emplace_back([&]() -> void
+                // {
+                // });
             }
 
-            for (auto& t : threads)
-            {
-                if (t.joinable())
-                {
-                    t.join();
-                }
-            }
+            // for (auto& t : threads)
+            // {
+            //     if (t.joinable())
+            //     {
+            //         t.join();
+            //     }
+            // }
         }
 
         void check_pid(pid_t __pid)
