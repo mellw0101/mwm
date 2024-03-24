@@ -5612,6 +5612,13 @@ class Window_Manager {
                 window_stack(__window1, __window2, XCB_STACK_MODE_BELOW);
             }
 
+            void unmap_window(uint32_t __window)
+            {
+                VOID_COOKIE = xcb_unmap_window(conn, __window);
+                FLUSH_X();
+                CHECK_VOID_COOKIE();
+            }
+
         /* Client       */
             // Focus.
                 void cycle_focus()
@@ -9871,7 +9878,7 @@ class Dock {
 };
 
 class __dock_search__ {
-    /* Defines */
+    /* Defines   */
         constexpr uint8_t char_to_keycode(int8_t c)
         {
             switch (c)
@@ -9930,7 +9937,7 @@ class __dock_search__ {
             }
     
     private:
-    /* Methods */
+    /* Methods   */
         void setup_events()
         {
             event_handler->setEventCallback(EV_CALL(XCB_KEY_PRESS)
@@ -9960,6 +9967,7 @@ class __dock_search__ {
                     {
                         if (enter_function)
                         {
+                            wm->unmap_window(main_window.parent());
                             enter_function();
                         }
                     
@@ -9997,7 +10005,7 @@ class __dock_search__ {
         window(main_window);
         stringstream search_string{};
     
-    /* Methods */
+    /* Methods   */
         void create(uint32_t __parent_window, int16_t __x, int16_t __y, uint16_t __width, uint16_t __height)
         {
             main_window.create_window(
