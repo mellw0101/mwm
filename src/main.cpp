@@ -12881,14 +12881,14 @@ void setup_wm()
     Events events;
     events.setup();
 
-    NEW_CLASS(file_app, __file_app__) { file_app->init(); }
-    NEW_CLASS(status_bar, __status_bar__) { status_bar->init(); }
-    NEW_CLASS(wifi, __wifi__) { wifi->init(); }
-    NEW_CLASS(network, __network__) {}
+    NEW_CLASS(file_app,        __file_app__       ) { file_app->init(); }
+    NEW_CLASS(status_bar,      __status_bar__     ) { status_bar->init(); }
+    NEW_CLASS(wifi,            __wifi__           ) { wifi->init(); }
+    NEW_CLASS(network,         __network__        ) {}
     NEW_CLASS(screen_settings, __screen_settings__) { screen_settings->init(); }
     NEW_CLASS(system_settings, __system_settings__) { system_settings->init(); }
-    NEW_CLASS(dock, __dock__) { dock->init(); }
-    NEW_CLASS(pid_manager, __pid_manager__) {}
+    NEW_CLASS(dock,            __dock__           ) { dock->init(); }
+    NEW_CLASS(pid_manager,     __pid_manager__    ) {}
 }
 
 int main()
