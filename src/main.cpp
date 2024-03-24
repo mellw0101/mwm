@@ -1831,6 +1831,17 @@ class __pid_manager__ {
             }
         }
 
+        void remove_pid(pid_t __pid)
+        {
+            for (int i = 0; i < _pid_vec.size(); ++i)
+            {
+                if (_pid_vec[i] == __pid)
+                {
+                    remove_element_from_vec(_pid_vec, i);
+                }
+            }
+        }
+
     /* Constructor */
         __pid_manager__() {}
 
@@ -3293,7 +3304,13 @@ class window {
                 uint32_t pid = *(uint32_t*)xcb_get_property_value(prop_reply);
                 free(prop_reply);
 
+                _pid = pid;
                 return pid;
+            }
+
+            pid_t pid() const
+            {
+                return _pid;
             }
 
             string get_window_property(xcb_atom_t __atom)
@@ -4321,7 +4338,7 @@ class window {
         uint32_t _min_width  = 200;
         uint32_t _min_height = 100;
         uint8_t  _override_redirect = 0;
-        pid_t pid = 0;
+        pid_t    _pid = 0;
 
     /* Methods     */
         /* Main       */
@@ -12660,7 +12677,8 @@ class Events {
                     wm->focused_client = c_trans;
                 }
             }
-
+            
+            pid_manager->remove_pid(c->win.pid());
             wm->send_sigterm_to_client(c);
         }
         
