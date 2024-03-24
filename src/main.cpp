@@ -3224,12 +3224,15 @@ class window {
                         *__width    = hints.width;
                         *__height   = hints.height;
 
-                        // loutIWin << "min_width"  << hints.min_width  << '\n';
-                        // loutIWin << "min_height" << hints.min_height << '\n';
-                        // loutIWin << "width"      << hints.width      << '\n';
-                        // loutIWin << "height"     << hints.height     << '\n';
-                        // loutIWin << "x"          << hints.x          << '\n';
-                        // loutIWin << "y"          << hints.y          << '\n';
+                        if (hints.width < hints.min_width)
+                        {
+                            loutE << "something went wrong hints.width" << hints.width << " is less then hints.min_width" << hints.min_width << '\n';
+                        }
+
+                        if (hints.height < hints.min_height)
+                        {
+                            loutE << "something went wrong hints.height" << hints.height << " is less then hints.min_height" << hints.min_height << '\n';
+                        }
                     }
                     else
                     {
@@ -5318,7 +5321,7 @@ class client {
                 xcb_get_geometry_reply_t *reply = xcb_get_geometry_reply(conn, cookie, nullptr);
                 if (reply == nullptr)
                 {
-                    log_error("Unable to get window geometry.");
+                    loutE << "Unable to get window geometry" << '\n';
                     return;
                 }
             
@@ -5327,10 +5330,10 @@ class client {
                 width  = reply->width;
                 height = reply->height;
 
-                log_num("", reply->x);
-                log_num("", reply->y);
-                log_num("", reply->width);
-                log_num("", reply->height);
+                loutI << "reply->x"      << reply->x      << '\n';
+                loutI << "reply->y"      << reply->y      << '\n';
+                loutI << "reply->width"  << reply->width  << '\n';
+                loutI << "reply->height" << reply->height << '\n';
 
                 free(reply);
             }
