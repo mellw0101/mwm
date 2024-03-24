@@ -1718,6 +1718,34 @@ class __pid_manager__ {
             return stat(procPath.c_str(), &statBuf) == 0;
         }
 
+        bool terminateProcess(pid_t pid)
+        {
+            if (kill(pid, SIGTERM) == -1)
+            {
+                loutErrno("Error sending SIGTERM");
+                return false;
+            }
+
+            int status;
+            pid_t result = waitpid(pid, &status, 0); // Wait for the process to change state
+            if (result == -1)
+            {
+                loutErrno("Error waiting for process");
+                return false;
+            }
+
+            if (WIFEXITED(status)) // Check if the child exited normally
+            {
+                loutI << "Process" << pid << " terminated successfully with exit status " << WEXITSTATUS(status) << '\n';
+                return true;
+            }
+            else
+            {
+                loutI << "Process" << pid << " did not terminate successfully." << '\n';
+                return false;
+            }
+        }
+
         void terminate_process(const pid_t pid, const chrono::seconds timeout)
         {
             if (!isProcessRunning(pid))
@@ -1761,6 +1789,24 @@ class __pid_manager__ {
             }
         }
 
+        void kill_pid(pid_t __pid)
+        {
+            if (isProcessRunning(__pid))
+            {
+                if (!terminateProcess(__pid))
+                {
+                    if (sendSignal(__pid, SIGKILL))
+                    {
+                        loutI << "SIGKILL signal sent to process" << __pid << " for forceful termination." << '\n';
+                    }
+                    else
+                    {
+                        loutE << "Failed to send SIGKILL to process" << __pid << '\n';
+                    }
+                }
+            }
+        }
+
     public:
     /* Methods     */
         void add_pid(pid_t __pid, const string &__name = "")
@@ -1797,7 +1843,7 @@ class __pid_manager__ {
             {
                 threads.emplace_back([&]() -> void
                 {
-                    terminate_process(pid, chrono::seconds(5));
+                    kill_pid(pid);
                 });
             }
 
