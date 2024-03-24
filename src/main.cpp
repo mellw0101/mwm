@@ -1734,7 +1734,7 @@ class __pid_manager__ {
                 return false;
             }
 
-            if (WIFEXITED(status)) // Check if the child exited normally
+            if (!isProcessRunning(pid)) // Check if the child exited normally
             {
                 loutI << "Process" << pid << " terminated successfully with exit status " << WEXITSTATUS(status) << '\n';
                 return true;
