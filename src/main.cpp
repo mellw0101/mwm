@@ -1600,6 +1600,7 @@ class __pid_manager__ {
         void add_pid(pid_t __pid)
         {
             _pid_vec.push_back(__pid);
+            loutI << "pid" << __pid << '\n';
             pid_status__(__pid);
         }
 
