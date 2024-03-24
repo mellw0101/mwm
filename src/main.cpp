@@ -1570,6 +1570,44 @@ class File
         }  
 };
 
+class __pid_manager__ {
+    private:
+    /* Variabels   */
+        vector<pid_t> _pid_vec;
+
+    /* Methods     */
+        string pid_status__(pid_t __pid) 
+        {
+            string line_str = "/proc/" + to_string(__pid) + "/status";
+            ifstream file;
+            file.open(line_str);
+            string var;
+            stringstream buffer;
+            while (getline(file, var))
+            {
+                buffer << var << '\n';
+            }
+
+            string result;
+            result = buffer.str();
+            loutI << result << '\n';
+            file.close();
+            return string();
+        }
+
+    public:
+    /* Methods     */
+        void add_pid(pid_t __pid)
+        {
+            _pid_vec.push_back(__pid);
+            pid_status__(__pid);
+        }
+
+    /* Constructor */
+        __pid_manager__() {}
+
+}; static __pid_manager__ *pid_manager(nullptr);
+
 class Launcher {
     public:
     // Methods.
@@ -1584,6 +1622,32 @@ class Launcher {
             {
                 setsid();
                 execvp(program, (char *[]) { program, NULL });
+            }
+
+            return 0;
+        }
+
+        int launch_program_pid_manager(char *program)
+        {
+            if (!file.check_if_binary_exists(program))
+            {
+                return 1; // Program binary does not exist
+            }
+
+            pid_t pid = fork();
+            if (pid == -1)
+            {
+                return 2;
+            }
+            else if (pid == 0)
+            {
+                setsid(); // Create a new session
+                execvp(program, (char *[]) {program, NULL});
+                exit(EXIT_FAILURE); // execvp failed
+            }
+            else
+            {
+                pid_manager->add_pid(pid);
             }
 
             return 0;
@@ -10041,7 +10105,7 @@ class __dock_search__ {
             setup_events();
             add_enter_action([this]() -> void
             {
-                int status = launcher.program((char *)search_string.str().c_str());
+                int status = launcher.launch_program_pid_manager((char *)search_string.str().c_str());
                 if (status == 0)
                 {
                     wm->unmap_window(main_window.parent());
@@ -12520,38 +12584,19 @@ void setup_wm()
 
     change_desktop::teleport_to(1);
 
-    NEW_CLASS(mwm_runner, Mwm_Runner) {
-        mwm_runner->init();
-    }
+    NEW_CLASS(mwm_runner, Mwm_Runner) { mwm_runner->init(); }
 
     Events events;
     events.setup();
 
-    NEW_CLASS(file_app, __file_app__) {
-        file_app->init();
-    }
-
-    NEW_CLASS(status_bar, __status_bar__) {
-        status_bar->init();
-    }
-
-    NEW_CLASS(wifi, __wifi__) {
-        wifi->init();
-    }
-
+    NEW_CLASS(file_app, __file_app__) { file_app->init(); }
+    NEW_CLASS(status_bar, __status_bar__) { status_bar->init(); }
+    NEW_CLASS(wifi, __wifi__) { wifi->init(); }
     NEW_CLASS(network, __network__) {}
-
-    NEW_CLASS(screen_settings, __screen_settings__) {
-        screen_settings->init();
-    }
-
-    NEW_CLASS(system_settings, __system_settings__) {
-        system_settings->init();
-    }
-
-    NEW_CLASS(dock, __dock__) {
-        dock->init();
-    }
+    NEW_CLASS(screen_settings, __screen_settings__) { screen_settings->init(); }
+    NEW_CLASS(system_settings, __system_settings__) { system_settings->init(); }
+    NEW_CLASS(dock, __dock__) { dock->init(); }
+    NEW_CLASS(pid_manager, __pid_manager__) {}
 }
 
 int main()

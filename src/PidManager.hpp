@@ -24,8 +24,7 @@
 
 using namespace std;
 
-class PidManager 
-{
+class PidManager {
     public:
         vector<string> pidInfo(pid_t pid) 
         {
@@ -36,6 +35,7 @@ class PidManager
             {
                 pidStatus(std::stoi(sub));
             }
+
             return subprocesses;
         }
 
