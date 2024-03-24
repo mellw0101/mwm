@@ -1700,6 +1700,59 @@ class __pid_manager__ {
             return string();
         }
 
+        bool sendSignal(const pid_t pid, int signal)
+        {
+            return kill(pid, signal) == 0;
+        }
+
+        bool isProcessRunning(const pid_t pid)
+        {
+            return kill(pid, 0) == 0;
+        }
+
+        void terminate_process(const pid_t pid, const chrono::seconds timeout)
+        {
+            if (!isProcessRunning(pid))
+            {
+                loutI << "Process" << pid << " is not running." << '\n';
+                return;
+            }
+
+            // Step 1: Send SIGTERM to politely ask the process to terminate
+            if (sendSignal(pid, SIGTERM))
+            {
+                loutI << "SIGTERM signal sent to process" << pid << '\n';
+            }
+            else
+            {
+                loutE << "Failed to send SIGTERM to process" << pid << '\n';
+                return;
+            }
+
+            // Step 2: Wait for the process to terminate
+            auto start = chrono::steady_clock::now();
+            while (chrono::steady_clock::now() - start < timeout)
+            {
+                if (!isProcessRunning(pid))
+                {
+                    loutI << "Process" << pid << " terminated successfully." << '\n';
+                    return;
+                }
+
+                this_thread::sleep_for(chrono::milliseconds(100));
+            }
+
+            // Step 3: If the process is still running, send SIGKILL to forcefully terminate it
+            if (sendSignal(pid, SIGKILL))
+            {
+                loutI << "SIGKILL signal sent to process" << pid << " for forceful termination." << '\n';
+            }
+            else
+            {
+                loutE << "Failed to send SIGKILL to process" << pid << '\n';
+            }
+        }
+
     public:
     /* Methods     */
         void add_pid(pid_t __pid, const string &__name = "")
@@ -1712,6 +1765,20 @@ class __pid_manager__ {
             {
                 loutI << __name << '\n';
             }
+        }
+
+        void kill_all_pids()
+        {
+            for (int i = 0; i < _pid_vec.size(); ++i)
+            {
+                function<void()>__terminate_pid__ = [&]() -> void
+                {
+                    terminate_process(_pid_vec[i], chrono::seconds(5));
+                };
+                thread(__terminate_pid__).detach();
+            }
+
+            this_thread::sleep_for(chrono::seconds(6));
         }
 
     /* Constructor */
@@ -5842,6 +5909,7 @@ class Window_Manager {
 
             void quit(const int &__status)
             {
+                pid_manager->kill_all_pids();
                 xcb_flush(conn);
                 delete_client_vec(client_list);
                 delete_desktop_vec(desktop_list);
