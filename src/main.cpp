@@ -2797,7 +2797,7 @@ class window {
                     xcb_get_window_attributes_reply_t *wa = xcb_get_window_attributes_reply(conn, xcb_get_window_attributes(conn, _window), NULL);
                     if (wa == nullptr)
                     {
-                        log_error("wa == nullptr");
+                        loutEWin << "wa == nullptr" << '\n';
                         free(wa);
                         return;
                     }
@@ -2805,8 +2805,10 @@ class window {
                     _override_redirect = wa->override_redirect;
                     free(wa);
 
-                    if (_override_redirect == true ) log_info("overide_redirect = true");
-                    if (_override_redirect == false) log_info("overide_redirect = false");
+                    if (_override_redirect == true)
+                    {
+                        loutIWin << "override_redirect = true" << '\n'; 
+                    }
                 }
 
                 void get_min_window_size_hints()
@@ -2892,12 +2894,12 @@ class window {
                         *__width    = hints.width;
                         *__height   = hints.height;
 
-                        loutIWin << "min_width"  << hints.min_width  << '\n';
-                        loutIWin << "min_height" << hints.min_height << '\n';
-                        loutIWin << "width"      << hints.width      << '\n';
-                        loutIWin << "height"     << hints.height     << '\n';
-                        loutIWin << "x"          << hints.x          << '\n';
-                        loutIWin << "y"          << hints.y          << '\n';
+                        // loutIWin << "min_width"  << hints.min_width  << '\n';
+                        // loutIWin << "min_height" << hints.min_height << '\n';
+                        // loutIWin << "width"      << hints.width      << '\n';
+                        // loutIWin << "height"     << hints.height     << '\n';
+                        // loutIWin << "x"          << hints.x          << '\n';
+                        // loutIWin << "y"          << hints.y          << '\n';
                     }
                     else
                     {
@@ -10048,7 +10050,7 @@ class __dock_search__ {
 
 class __dock__ {
     private:
-    /* Variabels */
+    /* Variabels   */
         window dock_menu;
         __dock_search__ dock_search;
         STATIC_CONSTEXPR_TYPE(uint16_t, _width, 400);
@@ -10056,7 +10058,7 @@ class __dock__ {
 
         client *f_c = nullptr;
 
-    /* Methods */
+    /* Methods     */
         void create_window__()
         {
             dock_menu.create_window(
@@ -10099,7 +10101,7 @@ class __dock__ {
         }
 
     public:
-    /* Methods */
+    /* Methods     */
         void init()
         {
             create_window__();
@@ -12314,6 +12316,8 @@ class Events {
             RE_CAST_EV(xcb_unmap_notify_event_t);
             client *c = wm->client_from_window(&e->window);
             if (c == nullptr) return;
+
+            loutI << WINDOW_ID_BY_INPUT(e->window) << '\n';
         }
         
         void reparent_notify_handler(const xcb_generic_event_t *&ev)
