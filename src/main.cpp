@@ -6618,7 +6618,6 @@ class Window_Manager {
 
                 c->win = window;
                 c->set_client_params();
-                c->get_window_parameters_and_log();
 
                 if (c->width  < c->win.get_min_width() ) c->width  = 200;
                 if (c->height < c->win.get_min_height()) c->height = 100;
