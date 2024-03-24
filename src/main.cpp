@@ -1781,6 +1781,27 @@ class __pid_manager__ {
             this_thread::sleep_for(chrono::seconds(2));
         }
 
+        void kill_all_pids_test()
+        {
+            vector<thread> threads;
+
+            for (pid_t pid : _pid_vec)
+            {
+                threads.emplace_back([&]() -> void
+                {
+                    terminate_process(pid, chrono::seconds(2));
+                });
+            }
+
+            for (auto& t : threads)
+            {
+                if (t.joinable())
+                {
+                    t.join();
+                }
+            }
+        }
+
     /* Constructor */
         __pid_manager__() {}
 
@@ -1788,7 +1809,7 @@ class __pid_manager__ {
 
 class Launcher {
     public:
-    // Methods.
+    /* Methods */
         int program(char *program)
         {
             if (!file.check_if_binary_exists(program))
@@ -1933,7 +1954,7 @@ class Launcher {
         }
     
     private:
-    // Variabels.
+    /* Variabels */
         File file;
 };
 
@@ -5909,7 +5930,7 @@ class Window_Manager {
 
             void quit(const int &__status)
             {
-                pid_manager->kill_all_pids();
+                pid_manager->kill_all_pids_test();
                 xcb_flush(conn);
                 delete_client_vec(client_list);
                 delete_desktop_vec(desktop_list);
