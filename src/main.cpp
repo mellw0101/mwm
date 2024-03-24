@@ -1573,11 +1573,11 @@ class File
 class Launcher {
     public:
     // Methods.
-        void program(char *program)
+        int program(char *program)
         {
             if (!file.check_if_binary_exists(program))
             {
-                return;
+                return 1;
             }
 
             if (fork() == 0)
@@ -1585,6 +1585,8 @@ class Launcher {
                 setsid();
                 execvp(program, (char *[]) { program, NULL });
             }
+
+            return 0;
         }
     
     private:
@@ -9979,7 +9981,6 @@ class __dock_search__ {
                     {
                         if (enter_function)
                         {
-                            wm->unmap_window(main_window.parent());
                             enter_function();
                         }
                     
@@ -10047,7 +10048,11 @@ class __dock_search__ {
             setup_events();
             add_enter_action([this]() -> void
             {
-                launcher.program((char *)search_string.str().c_str());
+                int status = launcher.program((char *)search_string.str().c_str());
+                if (status == 0)
+                {
+                    wm->unmap_window(main_window.parent());
+                }
             });
         }
 
