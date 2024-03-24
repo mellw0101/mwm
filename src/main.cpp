@@ -1595,13 +1595,31 @@ class __pid_manager__ {
             return string();
         }
 
+        string get_process_name_by_pid__(pid_t pid) 
+        {
+            string path = "/proc/" + std::to_string(pid) + "/comm";
+            ifstream commFile(path);
+            string name;
+
+            if (commFile.good())
+            {
+                getline(commFile, name);
+                return name;
+            }
+            else
+            {
+                return "Process not found";
+            }
+        }
+
     public:
     /* Methods     */
         void add_pid(pid_t __pid)
         {
             _pid_vec.push_back(__pid);
-            loutI << "pid" << __pid << '\n';
+            loutI << get_process_name_by_pid__(__pid) << '\n';
             pid_status__(__pid);
+
         }
 
     /* Constructor */
