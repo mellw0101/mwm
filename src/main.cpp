@@ -1591,8 +1591,14 @@ extern char **environ;
 
 class __pid_manager__ {
     private:
+    /* Structs     */
+        typedef struct {
+            pid_t  pid;
+            string name;
+        } pid_data_t;
+
     /* Variabels   */
-        vector<pid_t> _pid_vec;
+        vector<pid_data_t> _pid_vec;
 
     /* Methods     */
         /* Pid Info    */
@@ -1786,7 +1792,7 @@ class __pid_manager__ {
         {
             for (int i = 0; i < _pid_vec.size(); ++i)
             {
-                if (!isProcessRunning(_pid_vec[i]))
+                if (!isProcessRunning(_pid_vec[i].pid))
                 {
                     remove_element_from_vec(_pid_vec, i);
                 }
@@ -1797,17 +1803,15 @@ class __pid_manager__ {
     /* Methods     */
         void add_pid(pid_t __pid)
         {
-            _pid_vec.push_back(__pid);
-            loutI << "get_process_name_by_pid__: " << get_process_name_by_pid__(__pid) << '\n';
-
+            _pid_vec.push_back({__pid, get_process_name_by_pid__(__pid)});
             check_vec__();
         }
 
         void kill_all_pids()
         {
-            for (pid_t pid : _pid_vec)
+            for (pid_data_t pid_data : _pid_vec)
             {
-                kill_pid(pid);
+                kill_pid(pid_data.pid);
             }
         }
 
@@ -1818,7 +1822,7 @@ class __pid_manager__ {
             bool found = false;
             for (int i = 0; i < _pid_vec.size(); ++i)
             {
-                if (__pid == _pid_vec[i])
+                if (__pid == _pid_vec[i].pid)
                 {
                     found = true;
                     break;
@@ -1835,10 +1839,20 @@ class __pid_manager__ {
         {
             for (int i = 0; i < _pid_vec.size(); ++i)
             {
-                if (_pid_vec[i] == __pid)
+                if (_pid_vec[i].pid == __pid)
                 {
                     remove_element_from_vec(_pid_vec, i);
                 }
+            }
+        }
+
+        void list_pids()
+        {
+            check_vec__();
+
+            for (int i = 0; i < _pid_vec.size(); ++i)
+            {
+                loutI << "pid" << _pid_vec[i].pid << " name: " << _pid_vec[i].name << '\n';
             }
         }
 
@@ -1882,7 +1896,6 @@ class Launcher {
 
             if (result == 0)
             {
-                loutI << "Child pid" << pid << '\n';
                 pid_manager->add_pid(pid);
                 return 0;
             }
@@ -12454,8 +12467,9 @@ class Events {
                 {
                     case SUPER:
                     {
-                        GET_CLIENT_FROM_WINDOW(e->event);
-                        c->kill();
+                        pid_manager->list_pids();
+                        // GET_CLIENT_FROM_WINDOW(e->event);
+                        // c->kill();
                         // c->win.x(BORDER_SIZE);
                         // c->win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
                         // xcb_flush(conn);
