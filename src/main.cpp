@@ -330,6 +330,17 @@ namespace { // Tools
     }
     #define VOID_COOKIE xcb_void_cookie_t cookie
     #define CHECK_VOID_COOKIE() check_xcb_void_cookie_t(cookie, __func__)
+
+    void pop_last_ss(stringstream & __ss)
+    {
+        if (__ss.str().length() > 0)
+        {
+            string temp = __ss.str();
+            temp.pop_back();
+            __ss.str("");
+            __ss << temp;
+        }
+    }
 }
 
 class __crypto__ {
@@ -9952,15 +9963,16 @@ class __dock_search__ {
 
                     if (e->detail == wm->key_codes._delete)
                     {
-                        if (search_string.str().length() > 0)
-                        {
-                            string temp = search_string.str();
-                            temp.pop_back();
-                            search_string.str("");
-                            search_string << temp;
-                            main_window.clear();
-                            FLUSH_X();
-                        }
+                    //     if (search_string.str().length() > 0)
+                    //     {
+                    //         string temp = search_string.str();
+                    //         temp.pop_back();
+                    //         search_string.str("");
+                    //         search_string << temp;
+                    //     }
+                        pop_last_ss(search_string);
+                        main_window.clear();
+                        FLUSH_X();
                     }
 
                     if (e->detail == wm->key_codes.enter)
