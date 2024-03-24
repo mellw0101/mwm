@@ -10549,12 +10549,10 @@ class mv_client {
         chrono::high_resolution_clock::time_point lastUpdateTime = chrono::high_resolution_clock::now();
         
         #ifdef ARMV8_BUILD
-            STATIC_CONSTEXPR_TYPE(double, frameRate, 30.0);
+            STATIC_CONSTEXPR_TYPE(double, frameRate, 15.0);
         #else
             STATIC_CONSTEXPR_TYPE(double, frameRate, 120.0);
         #endif
-        // const double frameRate = 120.0;
-        // const double frameDuration = 1000.0 / frameRate;
         STATIC_CONSTEXPR_TYPE(double, frameDuration, (1000 / frameRate));
     
     /* Methods     */
@@ -11307,10 +11305,16 @@ class resize_client {
                 client(*c2);
                 edge(c2_edge);
                 pointer(pointer); 
-                const double frameRate = 120.0;
                 chrono::high_resolution_clock::time_point lastUpdateTime = chrono::high_resolution_clock::now();
-                const double frameDuration = 1000.0 / frameRate;
-                private:
+                #ifdef ARMV8_BUILD
+                    STATIC_CONSTEXPR_TYPE(double, frameRate, 15.0);
+                #else
+                    STATIC_CONSTEXPR_TYPE(double, frameRate, 120.0);
+                #endif
+                STATIC_CONSTEXPR_TYPE(double, frameDuration, (1000 / frameRate));
+                
+                // const double frameRate = 120.0;
+                // const double frameDuration = 1000.0 / frameRate;
 
             // Methods.
                 void teleport_mouse(edge edge)
@@ -11696,8 +11700,9 @@ class resize_client {
         uint32_t x;
         pointer pointer;
         uint32_t y;
-        const double frameRate = 120.0;
         chrono::high_resolution_clock::time_point lastUpdateTime = chrono::high_resolution_clock::now();
+        
+        const double frameRate = 120.0;
         const double frameDuration = 1000.0 / frameRate;
     
     // Methods.
