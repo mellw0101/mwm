@@ -526,6 +526,10 @@ typedef struct {
     uint32_t value;
 } window_obj_t;
 
+typedef struct {
+	string value;
+} errno_msg_t;
+
 class LogQueue {
 	public:
 		void push(const LogMessage& message)
@@ -650,6 +654,12 @@ class lout {
             return *this;
         }
 
+		lout& operator<<(const errno_msg_t &__errno)
+		{
+			buffer << __errno.value;
+			return *this;
+		}
+
 		// lout& err(const string &__err_msg)
 		// {
 		// 	buffer << __err_msg << ": " << strerror(errno) << " (errno: " << errno << ")";
@@ -754,10 +764,18 @@ inline window_obj_t window_id(uint32_t __window)
     return window_obj_t{__window};
 }
 
+inline errno_msg_t errno_msg(const char *__str)
+{
+	string s = string(__str) + ": " + strerror(errno) + " (errno: " + to_string(errno) + ")";
+	return {s};
+}
+
 #define FUNC func(__func__)
 #define LINE line(__LINE__)
 #define FILE_NAME file_name(__FILE__)
 #define WINDOW_ID window_id(_window)
+#define ERRNO_MSG(__msg) errno_msg(__msg)
+
 #define WINDOW_ID_BY_INPUT(__window) \
 	window_id(__window)
 
@@ -786,8 +804,8 @@ inline window_obj_t window_id(uint32_t __window)
 #define loutE \
 	lout << ERROR << FUNC << LINE
 
-// #define loutErrno(__msg) \
-// 	loutE << lout.err(__msg) << '\n'
+#define loutErrno(__msg) \
+	loutE << ERRNO_MSG(__msg) << '\n'
 
 /**
  *

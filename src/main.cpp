@@ -1854,12 +1854,12 @@ class Launcher {
 
             if (result == 0)
             {
-                loutI << "Child pid: " << pid << '\n';
+                loutI << "Child pid" << pid << '\n';
                 return 0;
             }
             else
             {
-                // loutErrno("posix_spawn failed");
+                loutErrno("posix_spawn failed");
                 return result;
             }
         }
