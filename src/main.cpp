@@ -3282,6 +3282,50 @@ class window {
                 return transient_for;
             }
 
+            void print_window_states()
+            {
+                xcb_intern_atom_cookie_t wm_state_cookie = xcb_intern_atom(conn, 1, 12, "_NET_WM_STATE");
+                xcb_intern_atom_reply_t* wm_state_reply = xcb_intern_atom_reply(conn, wm_state_cookie, NULL);
+                if (!wm_state_reply)
+                {
+                    loutE << "Failed to get _NET_WM_STATE atom." << loutEND;
+                    return;
+                }
+
+                xcb_atom_t wm_state_atom = wm_state_reply->atom;
+                free(wm_state_reply);
+
+                xcb_get_property_cookie_t property_cookie = xcb_get_property(conn, 0, _window, wm_state_atom, XCB_ATOM_ATOM, 0, 1024);
+                xcb_get_property_reply_t* property_reply = xcb_get_property_reply(conn, property_cookie, NULL);
+
+                if (!property_reply)
+                {
+                    loutE << "Failed to get property." << loutEND;
+                    return;
+                }
+
+                xcb_atom_t* atoms = static_cast<xcb_atom_t*>(xcb_get_property_value(property_reply));
+                int atom_count = xcb_get_property_value_length(property_reply) / sizeof(xcb_atom_t);
+
+                for (int i = 0; i < atom_count; ++i)
+                {
+                    xcb_get_atom_name_cookie_t atom_name_cookie = xcb_get_atom_name(conn, atoms[i]);
+                    xcb_get_atom_name_reply_t* atom_name_reply = xcb_get_atom_name_reply(conn, atom_name_cookie, NULL);
+
+                    if (atom_name_reply)
+                    {
+                        int name_len = xcb_get_atom_name_name_length(atom_name_reply);
+                        char* name = xcb_get_atom_name_name(atom_name_reply);
+
+                        loutI << "Window State: " << string(name, name_len) << loutEND;
+
+                        free(atom_name_reply);
+                    }
+                }
+
+                free(property_reply);
+            }
+
             uint32_t get_pid()
             {
                 xcb_atom_t property = XCB_ATOM_NONE;
@@ -5332,10 +5376,10 @@ class client {
                 width  = reply->width;
                 height = reply->height;
 
-                loutI << "reply->x"      << reply->x      << '\n';
-                loutI << "reply->y"      << reply->y      << '\n';
-                loutI << "reply->width"  << reply->width  << '\n';
-                loutI << "reply->height" << reply->height << '\n';
+                // loutI << "reply->x"      << reply->x      << '\n';
+                // loutI << "reply->y"      << reply->y      << '\n';
+                // loutI << "reply->width"  << reply->width  << '\n';
+                // loutI << "reply->height" << reply->height << '\n';
 
                 free(reply);
             }
@@ -6244,7 +6288,7 @@ class Window_Manager {
                 client *c = make_client(__window);
                 if (c == nullptr)
                 {
-                    log_error("could not make client");
+                    loutE << "could not make client" << loutEND;
                     return;
                 }
 
@@ -6253,6 +6297,7 @@ class Window_Manager {
                 FLUSH_X();
 
                 pid_manager->check_pid(c->win.get_pid());
+                c->win.print_window_states();
 
                 c->win.map();
                 c->win.grab_button({
@@ -6393,28 +6438,16 @@ class Window_Manager {
             {
                 if (!(ewmh = static_cast<xcb_ewmh_connection_t *>(calloc(1, sizeof(xcb_ewmh_connection_t)))))
                 {
-                    log_error("ewmh faild to initialize");
+                    loutE << "ewmh faild to initialize" << loutEND;
                     quit(1);
                 }    
                 
                 xcb_intern_atom_cookie_t * cookie = xcb_ewmh_init_atoms(conn, ewmh);
                 if (!(xcb_ewmh_init_atoms_replies(ewmh, cookie, 0)))
                 {
-                    log_error("xcb_ewmh_init_atoms_replies:faild");
+                    loutE << "xcb_ewmh_init_atoms_replies:faild" << loutEND;
                     quit(1);
                 }
-
-                const char * str = "mwm";
-                check_error(
-                    xcb_ewmh_set_wm_name(
-                        ewmh,
-                        screen->root,
-                        strlen(str),
-                        str
-                    ), 
-                    __func__,
-                    "xcb_ewmh_set_wm_name"
-                );
             }
 
             void _setup()
@@ -6447,7 +6480,7 @@ class Window_Manager {
                 xcb_generic_error_t * error = xcb_request_check(conn, cookie);
                 if (error)
                 {
-                    log_error("Error: Another window manager is already running or failed to set SubstructureRedirect mask."); 
+                    loutE << "Error: Another window manager is already running or failed to set SubstructureRedirect mask" << loutEND; 
                     free(error);
                     return false;
                 }
@@ -6947,22 +6980,22 @@ class __audio__ {
             // End of list
             if (eol > 0)
             {
-                loutE << "end of list" << '\n';
+                // loutE << "end of list" << '\n';
                 return;
             }
 
-            loutI << "Sink name: " << l->name << " Description: " << l->description << '\n';
+            // loutI << "Sink name: " << l->name << " Description: " << l->description << '\n';
         }
 
         static void success_cb(pa_context* c, int success, void* userdata)
         {
             if (success)
             {
-                loutI << "Default sink changed successfully" << '\n';
+                // loutI << "Default sink changed successfully" << '\n';
             }
             else
             {
-                loutE << "Failed to change the default sink" << '\n';
+                // loutE << "Failed to change the default sink" << '\n';
 
             }
 
@@ -7063,7 +7096,7 @@ class __audio__ {
             int ret;
             if (pa_mainloop_run(mainloop, &ret) < 0)
             {
-                log_error("Failed to run mainloop.");
+                loutE << "Failed to run mainloop." << loutEND;
             }
         }
 
@@ -12676,7 +12709,7 @@ class Events {
             wm->data.x      = e->x;
             wm->data.y      = e->y;
 
-            loutI << WINDOW_ID_BY_INPUT(e->window) << " e->x" << e->x << " e->y" << e->y << " e->width" << e->width << "e->height" << e->height << '\n';
+            // loutI << WINDOW_ID_BY_INPUT(e->window) << " e->x" << e->x << " e->y" << e->y << " e->width" << e->width << "e->height" << e->height << '\n';
         }
 
         void focus_in_handler(const xcb_generic_event_t *&ev)
