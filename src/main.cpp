@@ -1646,14 +1646,69 @@ class __pid_manager__ {
             return string();
         }
 
+        string get_correct_prosses_name__(const string &__launchName)
+        {
+            DIR* dir;
+            struct dirent* ent;
+            string path;
+            string line;
+
+            vector<string> parts;
+            for (int i(0), start(0); i < __launchName.length(); ++i)
+            {
+                if (__launchName[i] == '-')
+                {
+                    string s = __launchName.substr(start, i - start);
+                    parts.push_back(s);
+                    start = i + 1;
+                }
+
+                if (i == (__launchName.length() - 1))
+                {
+                    string s = __launchName.substr(start, i - start);
+                    parts.push_back(s);
+                }
+            }
+
+            for (int i = 0; i < parts.size(); ++i)
+            {
+                if ((dir = opendir("/proc")) != NULL)
+                {
+                    while ((ent = readdir(dir)) != NULL)
+                    {
+                        if (ent->d_type == DT_DIR) // Check if the directory is a PID
+                        {
+                            path = std::string("/proc/") + ent->d_name + "/comm";
+                            std::ifstream comm(path.c_str());
+                            if (comm.good())
+                            {
+                                getline(comm, line);
+                                if (line == parts[i])
+                                {
+                                    return parts[i];
+                                }
+                            }
+                        }
+                    }
+                    closedir(dir);
+                }
+            }
+
+            return string();
+        }
+
     public:
     /* Methods     */
-        void add_pid(pid_t __pid)
+        void add_pid(pid_t __pid, const string &__name = "")
         {
             _pid_vec.push_back(__pid);
             loutI << get_process_name_by_pid__(__pid) << '\n';
             pid_status__(__pid);
             pid_cmd_line__(__pid);
+            if (__name != "")
+            {
+                loutI << get_correct_prosses_name__(__name) << '\n';
+            }
         }
 
     /* Constructor */
