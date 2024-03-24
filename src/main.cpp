@@ -2134,7 +2134,8 @@ class window {
                                 COLOR    __color = DEFAULT_COLOR,
                                 uint32_t __event_mask = 0,
                                 int      __flags = NONE,
-                                void    *__border_data = nullptr)
+                                void    *__border_data = nullptr,
+                                CURSOR   __cursor = CURSOR::arrow)
             {
                 _depth        = 0L;
                 _parent       = __parent;
@@ -2165,6 +2166,11 @@ class window {
                 {
                     int *border_data = static_cast<int *>(__border_data);
                     make_borders(border_data[0], border_data[1], border_data[2]);
+                }
+
+                if (__cursor != CURSOR::arrow)
+                {
+                    set_pointer(__cursor);
                 }
             }
             
@@ -4480,11 +4486,11 @@ class window {
             }
 
         /* Font       */
-            /*
-             * Decodes a single UTF-8 encoded character from the input string
-             * and returns the Unicode code point.
-             * Also advances the input string by the number of bytes used for
-             * the decoded character. 
+            /**
+             * @brief Decodes a single UTF-8 encoded character from the input string
+             *        and returns the Unicode code point.
+             *        Also advances the input string by the number of bytes used for
+             *        the decoded character. 
              */
             uint32_t decode_utf8_char(const char **input)
             {
@@ -5983,7 +5989,7 @@ class Window_Manager {
         window start_window;
 
     /* Functions   */
-        // Init.
+        /* Init   */
             void _conn(const char *displayname, int *screenp)
             {
                 conn = xcb_connect(displayname, screenp);
@@ -6076,7 +6082,7 @@ class Window_Manager {
                 root.set_pointer(CURSOR::arrow);
             }
 
-        // Check.
+        /* Check  */
             void check_error(const int &code)
             {
                 switch (code)
@@ -6175,7 +6181,7 @@ class Window_Manager {
                 return 0;
             }
 
-        // Delete.
+        /* Delete */
             void delete_client_vec(vector<client *> &vec)
             {
                 for (client *c : vec)
@@ -6228,7 +6234,7 @@ class Window_Manager {
                 delete c;
             }
 
-        // Client.
+        /* Client */
             client *make_client(const uint32_t &window)
             {
                 client *c = new client;
@@ -6344,7 +6350,7 @@ class Window_Manager {
                 }
             }
 
-        // Window.
+        /* Window */
             void get_window_parameters(const uint32_t &__window, int16_t *__x, int16_t *__y, uint16_t *__width,  uint16_t *__height)
             {
                 xcb_get_geometry_cookie_t cookie = xcb_get_geometry(conn, __window);
@@ -6363,7 +6369,7 @@ class Window_Manager {
                 free(reply);
             }
 
-        // Status.
+        /* Status */
             void check_volt()
             {
                 log_info("running");
@@ -6428,7 +6434,7 @@ class __network__ {
 
 class __wifi__ {
     private:
-    // Methods.
+    /* Methods     */
         void scan__(const char* interface)
         {
             wireless_scan_head head;
@@ -6524,13 +6530,13 @@ class __wifi__ {
         }
 
     public:
-    // Methods.
+    /* Methods     */
         void init()
         {
             event_handler->set_key_press_callback((ALT + SUPER), wm->key_codes.f, [this]()-> void { scan__("wlo1"); });
         }
 
-    // Constructor.
+    /* Constructor */
         __wifi__() {}
 
 }; static __wifi__ *wifi(nullptr);
@@ -12253,6 +12259,8 @@ class Events {
             wm->data.height = e->height;
             wm->data.x      = e->x;
             wm->data.y      = e->y;
+
+            loutI << WINDOW_ID_BY_INPUT(e->window) << " e->x" << e->x << " e->y" << e->y << " e->width" << e->width << "e->height" << e->height << '\n';
         }
 
         void focus_in_handler(const xcb_generic_event_t *&ev)
