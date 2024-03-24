@@ -343,6 +343,21 @@ namespace { // Tools
             __ss << temp;
         }
     }
+
+    template<typename Type>
+    bool remove_element_from_vec(vector<Type>& vec, size_t index)
+    {
+        if (index < vec.size())
+        {
+            vec.erase(vec.begin() + index);
+            return true;
+        }
+        else
+        {
+            loutE << "index out of bounds" << '\n';
+            return false;
+        }
+    }
 }
 
 class __crypto__ {
@@ -1702,17 +1717,17 @@ class __pid_manager__ {
                 return string();
             }
 
+            bool isProcessRunning(const pid_t __pid)
+            {
+                struct stat statBuf;
+                string procPath = "/proc/" + to_string(__pid);
+                return stat(procPath.c_str(), &statBuf) == 0;
+            }
+
         /* Pid Killing */
             bool sendSignal(const pid_t pid, int signal)
             {
                 return kill(pid, signal) == 0;
-            }
-
-            bool isProcessRunning(const pid_t pid)
-            {
-                struct stat statBuf;
-                string procPath = "/proc/" + to_string(pid);
-                return stat(procPath.c_str(), &statBuf) == 0;
             }
 
             bool send_sigterm__(pid_t pid)
@@ -1767,12 +1782,25 @@ class __pid_manager__ {
                 }
             }
 
+        void check_vec__()
+        {
+            for (int i = 0; i < _pid_vec.size(); ++i)
+            {
+                if (!isProcessRunning(_pid_vec[i]))
+                {
+                    remove_element_from_vec(_pid_vec, i);
+                }
+            }
+        }
+
     public:
     /* Methods     */
         void add_pid(pid_t __pid)
         {
             _pid_vec.push_back(__pid);
             loutI << "get_process_name_by_pid__: " << get_process_name_by_pid__(__pid) << '\n';
+
+            check_vec__();
         }
 
         void kill_all_pids()
@@ -5953,7 +5981,7 @@ class Window_Manager {
             }
 
         /* Client       */
-            // Focus.
+            /* Focus */
                 void cycle_focus()
                 {
                     if (focused_client == nullptr)
@@ -6011,7 +6039,7 @@ class Window_Manager {
                     tmp.kill();
                 }
 
-            // Fetch.
+            /* Fetch */
                 client *client_from_window(const xcb_window_t *window)
                 {
                     for (const auto &c:client_list)
@@ -6229,49 +6257,49 @@ class Window_Manager {
 
             client *make_internal_client(window window)
             {
-            client *c = new client;
+                client *c = new client;
 
-            c->win    = window;
-            c->x      = window.x();
-            c->y      = window.y();
-            c->width  = window.width();
-            c->height = window.height();
+                c->win    = window;
+                c->x      = window.x();
+                c->y      = window.y();
+                c->width  = window.width();
+                c->height = window.height();
 
-            c->make_decorations();
-            client_list.push_back(c);
-            cur_d->current_clients.push_back(c);
-            c->focus();
+                c->make_decorations();
+                client_list.push_back(c);
+                cur_d->current_clients.push_back(c);
+                c->focus();
 
-            return c;
+                return c;
             }
 
             void send_sigterm_to_client(client *c)
             {
-            c->kill();
-            remove_client(c);
+                c->kill();
+                remove_client(c);
             }
 
             void remove_client(client *c)
             {
-            client_list.erase(
-                remove(
-                    client_list.begin(),
-                    client_list.end(),
-                    c
-                ), 
-                client_list.end()
-            );
+                client_list.erase(
+                    remove(
+                        client_list.begin(),
+                        client_list.end(),
+                        c
+                    ), 
+                    client_list.end()
+                );
 
-            cur_d->current_clients.erase(
-                remove(
-                    cur_d->current_clients.begin(),
-                    cur_d->current_clients.end(),
-                    c
-                ),
-                cur_d->current_clients.end()
-            );
+                cur_d->current_clients.erase(
+                    remove(
+                        cur_d->current_clients.begin(),
+                        cur_d->current_clients.end(),
+                        c
+                    ),
+                    cur_d->current_clients.end()
+                );
 
-            delete c;
+                delete c;
             }
 
         /* Desktop      */
@@ -12657,7 +12685,7 @@ class Events {
             client *c = wm->client_from_window(&e->window);
             if (c == nullptr) return;
 
-            loutI << WINDOW_ID_BY_INPUT(e->window) << '\n';
+            // loutI << WINDOW_ID_BY_INPUT(e->window) << '\n';
         }
         
         void reparent_notify_handler(const xcb_generic_event_t *&ev)
