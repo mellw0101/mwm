@@ -6297,12 +6297,12 @@ class Window_Manager {
                 FLUSH_X();
 
                 pid_manager->check_pid(c->win.get_pid());
-                c->win.print_window_states();
-                xcb_atom_t atom;
-                get_atom((char *)"_NET_WM_STATE", &atom);
-                loutI << c->win.get_window_property(atom) << loutEND;
+                // c->win.print_window_states();
+                // xcb_atom_t atom;
+                // get_atom((char *)"_NET_WM_STATE", &atom);
+                // loutI << c->win.get_window_property(atom) << loutEND;
 
-                c->win.property("_NET_WM_STATE");
+                // c->win.property("_NET_WM_STATE");
 
                 c->win.map();
                 c->win.grab_button({
