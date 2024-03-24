@@ -650,11 +650,11 @@ class lout {
             return *this;
         }
 
-		lout& err(const string &__err_msg)
-		{
-			buffer << __err_msg << ": " << strerror(errno) << " (errno: " << errno << ")";
-			return *this;
-		}
+		// lout& err(const string &__err_msg)
+		// {
+		// 	buffer << __err_msg << ": " << strerror(errno) << " (errno: " << errno << ")";
+		// 	return *this;
+		// }
 
         template<typename T>
         typename enable_if<is_arithmetic<T>::value, lout&>::type
@@ -786,8 +786,8 @@ inline window_obj_t window_id(uint32_t __window)
 #define loutE \
 	lout << ERROR << FUNC << LINE
 
-#define loutErrno(__msg) \
-	loutE << lout.err(__msg) << '\n'
+// #define loutErrno(__msg) \
+// 	loutE << lout.err(__msg) << '\n'
 
 /**
  *

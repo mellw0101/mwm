@@ -1833,7 +1833,7 @@ class Launcher {
             }
             else
             {
-                loutErrno("posix_spawn failed");
+                // loutErrno("posix_spawn failed");
                 return result;
             }
         }
@@ -1859,7 +1859,7 @@ class Launcher {
             }
             else
             {
-                loutErrno("posix_spawn failed");
+                // loutErrno("posix_spawn failed");
                 return result;
             }
         }
