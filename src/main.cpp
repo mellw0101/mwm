@@ -1855,6 +1855,7 @@ class Launcher {
             if (result == 0)
             {
                 loutI << "Child pid" << pid << '\n';
+                pid_manager->add_pid(pid);
                 return 0;
             }
             else
