@@ -1612,6 +1612,40 @@ class __pid_manager__ {
             }
         }
 
+        string pid_cmd_line__(pid_t __pid) 
+        {
+            string line_str = "/proc/" + to_string(__pid) + "/cmdline";
+            ifstream file;
+            file.open(line_str);
+            string var;
+            stringstream buffer;
+            while (getline(file, var))
+            {
+                buffer << var << '\n';
+            }
+
+            string result;
+            result = buffer.str();
+            loutI << result << '\n';
+            string test = result;
+            ifstream iss(test);
+            string token;
+            vector<string> parts;
+            while (getline(iss, token, ' '))
+            {
+                parts.push_back(token);
+            }
+            
+            if (parts.size() == 1)
+            {
+                file.close();
+                return "mainPid";
+            }
+
+            file.close();
+            return string();
+        }
+
     public:
     /* Methods     */
         void add_pid(pid_t __pid)
@@ -1619,7 +1653,7 @@ class __pid_manager__ {
             _pid_vec.push_back(__pid);
             loutI << get_process_name_by_pid__(__pid) << '\n';
             pid_status__(__pid);
-
+            pid_cmd_line__(__pid);
         }
 
     /* Constructor */
