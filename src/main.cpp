@@ -1755,7 +1755,7 @@ class Launcher {
             }
             else
             {
-                pid_manager->add_pid(pid);
+                pid_manager->add_pid(pid, program);
             }
 
             return 0;
