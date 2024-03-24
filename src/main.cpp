@@ -10523,12 +10523,12 @@ class __dock__ {
 }; static __dock__ *dock(nullptr);
 
 class mv_client {
-    // Defines.
+    /* Defines     */
         #define RIGHT_  screen->width_in_pixels  - c->width
         #define BOTTOM_ screen->height_in_pixels - c->height
    
     public:
-    // Constructor.
+    /* Constructor */
         mv_client(client * c, int start_x, int start_y)
         : c(c), start_x(start_x), start_y(start_y)
         {
@@ -10540,17 +10540,24 @@ class mv_client {
         }
 
     private:
-    // Variabels.
+    /* Variabels   */
         client(*c);
         pointer(pointer);
         int start_x, start_y;
         bool shouldContinue = true;
         xcb_generic_event_t(*ev);
-        const double frameRate = 120.0;
         chrono::high_resolution_clock::time_point lastUpdateTime = chrono::high_resolution_clock::now();
-        const double frameDuration = 1000.0 / frameRate;
+        
+        #ifdef ARMV8_BUILD
+            STATIC_CONSTEXPR_TYPE(double, frameRate, 30.0);
+        #else
+            STATIC_CONSTEXPR_TYPE(double, frameRate, 120.0);
+        #endif
+        // const double frameRate = 120.0;
+        // const double frameDuration = 1000.0 / frameRate;
+        STATIC_CONSTEXPR_TYPE(double, frameDuration, (1000 / frameRate));
     
-    // Methods.
+    /* Methods     */
         void snap(int x, int y)
         {
             // WINDOW TO WINDOW SNAPPING 
@@ -10670,14 +10677,14 @@ class mv_client {
                 {
                     case XCB_MOTION_NOTIFY:
                     {
-                        const auto *e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
-                        int new_x = e->root_x - start_x - BORDER_SIZE;
-                        int new_y = e->root_y - start_y - BORDER_SIZE;
-                        
                         if (isTimeToRender())
                         {
+                            const auto *e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
+                            int new_x = e->root_x - start_x - BORDER_SIZE;
+                            int new_y = e->root_y - start_y - BORDER_SIZE;
+                        
                             snap(new_x, new_y);
-                            xcb_flush(conn);
+                            FLUSH_X();
                         }
                         
                         break;
