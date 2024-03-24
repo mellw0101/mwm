@@ -1773,12 +1773,12 @@ class __pid_manager__ {
             {
                 function<void()>__terminate_pid__ = [&]() -> void
                 {
-                    terminate_process(_pid_vec[i], chrono::seconds(5));
+                    terminate_process(_pid_vec[i], chrono::seconds(2));
                 };
                 thread(__terminate_pid__).detach();
             }
 
-            this_thread::sleep_for(chrono::seconds(6));
+            this_thread::sleep_for(chrono::seconds(2));
         }
 
     /* Constructor */
