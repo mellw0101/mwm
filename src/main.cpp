@@ -12643,7 +12643,7 @@ class Events {
             wm->data.x      = e->x;
             wm->data.y      = e->y;
 
-            loutI << WINDOW_ID_BY_INPUT(e->window) << " e->x" << e->x << " e->y" << e->y << " e->width" << e->width << "e->height" << e->height << '\n';
+            // loutI << WINDOW_ID_BY_INPUT(e->window) << " e->x" << e->x << " e->y" << e->y << " e->width" << e->width << "e->height" << e->height << '\n';
         }
 
         void focus_in_handler(const xcb_generic_event_t *&ev)
