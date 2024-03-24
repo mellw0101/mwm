@@ -11575,9 +11575,9 @@ class resize_client {
                         {
                             case XCB_MOTION_NOTIFY:
                             {
-                                RE_CAST_EV(xcb_motion_notify_event_t);
                                 if (isTimeToRender())
                                 {
+                                    RE_CAST_EV(xcb_motion_notify_event_t);
                                     snap(e->root_x, e->root_y, edge, 12);
                                     c->update();
                                     xcb_flush(conn);
