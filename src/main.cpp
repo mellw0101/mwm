@@ -73,6 +73,7 @@
 #include <pulse/pulseaudio.h>
 #include <type_traits>
 #include <spawn.h>
+#include <sys/stat.h>
 
 #include "Log.hpp"
 Logger logger;
@@ -1705,9 +1706,16 @@ class __pid_manager__ {
             return kill(pid, signal) == 0;
         }
 
+        // bool isProcessRunning(const pid_t pid)
+        // {
+        //     return kill(pid, 0) == 0;
+        // }
+
         bool isProcessRunning(const pid_t pid)
         {
-            return kill(pid, 0) == 0;
+            struct stat statBuf;
+            std::string procPath = "/proc/" + std::to_string(pid);
+            return stat(procPath.c_str(), &statBuf) == 0;
         }
 
         void terminate_process(const pid_t pid, const chrono::seconds timeout)
