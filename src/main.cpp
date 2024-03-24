@@ -1706,19 +1706,14 @@ class __pid_manager__ {
             return kill(pid, signal) == 0;
         }
 
-        // bool isProcessRunning(const pid_t pid)
-        // {
-        //     return kill(pid, 0) == 0;
-        // }
-
         bool isProcessRunning(const pid_t pid)
         {
             struct stat statBuf;
-            std::string procPath = "/proc/" + std::to_string(pid);
+            string procPath = "/proc/" + to_string(pid);
             return stat(procPath.c_str(), &statBuf) == 0;
         }
 
-        bool terminateProcess(pid_t pid)
+        bool send_sigterm__(pid_t pid)
         {
             if (kill(pid, SIGTERM) == -1)
             {
@@ -1746,46 +1741,15 @@ class __pid_manager__ {
             }
         }
 
-        void terminate_process(const pid_t pid, const chrono::seconds timeout)
+        void send_sigkill__(pid_t __pid)
         {
-            if (!isProcessRunning(pid))
+            if (sendSignal(__pid, SIGKILL))
             {
-                loutI << "Process" << pid << " is not running." << '\n';
-                return;
-            }
-
-            // Step 1: Send SIGTERM to politely ask the process to terminate
-            if (sendSignal(pid, SIGTERM))
-            {
-                loutI << "SIGTERM signal sent to process" << pid << '\n';
+                loutI << "SIGKILL signal sent to process" << __pid << " for forceful termination." << '\n';
             }
             else
             {
-                loutE << "Failed to send SIGTERM to process" << pid << '\n';
-                return;
-            }
-
-            // Step 2: Wait for the process to terminate
-            auto start = chrono::steady_clock::now();
-            while (chrono::steady_clock::now() - start < timeout)
-            {
-                if (!isProcessRunning(pid))
-                {
-                    loutI << "Process" << pid << " terminated successfully." << '\n';
-                    return;
-                }
-
-                this_thread::sleep_for(chrono::milliseconds(100));
-            }
-
-            // Step 3: If the process is still running, send SIGKILL to forcefully terminate it
-            if (sendSignal(pid, SIGKILL))
-            {
-                loutI << "SIGKILL signal sent to process" << pid << " for forceful termination." << '\n';
-            }
-            else
-            {
-                loutE << "Failed to send SIGKILL to process" << pid << '\n';
+                loutE << "Failed to send SIGKILL to process" << __pid << '\n';
             }
         }
 
@@ -1793,51 +1757,23 @@ class __pid_manager__ {
         {
             if (isProcessRunning(__pid))
             {
-                if (!terminateProcess(__pid))
+                if (!send_sigterm__(__pid))
                 {
-                    if (isProcessRunning(__pid)) loutI << "pid" << __pid << " still running" << '\n';
-
-                    if (sendSignal(__pid, SIGKILL))
-                    {
-                        loutI << "SIGKILL signal sent to process" << __pid << " for forceful termination." << '\n';
-                    }
-                    else
-                    {
-                        loutE << "Failed to send SIGKILL to process" << __pid << '\n';
-                    }
+                    loutI << "pid" << __pid << " still running forcefully killing" << '\n';
+                    send_sigkill__(__pid);
                 }
             }
         }
 
     public:
     /* Methods     */
-        void add_pid(pid_t __pid, const string &__name = "")
+        void add_pid(pid_t __pid)
         {
             _pid_vec.push_back(__pid);
-            loutI << get_process_name_by_pid__(__pid) << '\n';
-            pid_status__(__pid);
-            pid_cmd_line__(__pid);
-            if (__name != "")
-            {
-                loutI << __name << '\n';
-            }
+            loutI << "get_process_name_by_pid__: " << get_process_name_by_pid__(__pid) << '\n';
         }
 
         void kill_all_pids()
-        {
-            for (int i = 0; i < _pid_vec.size(); ++i)
-            {
-                function<void()>__terminate_pid__ = [&]() -> void
-                {
-                    terminate_process(_pid_vec[i], chrono::seconds(2));
-                };
-                thread(__terminate_pid__).detach();
-            }
-
-            this_thread::sleep_for(chrono::seconds(2));
-        }
-
-        void kill_all_pids_test()
         {
             vector<thread> threads;
 
@@ -1902,7 +1838,7 @@ class Launcher {
             }
             else
             {
-                pid_manager->add_pid(pid, program);
+                pid_manager->add_pid(pid);
             }
 
             return 0;
@@ -5986,7 +5922,7 @@ class Window_Manager {
 
             void quit(const int &__status)
             {
-                pid_manager->kill_all_pids_test();
+                pid_manager->kill_all_pids();
                 xcb_flush(conn);
                 delete_client_vec(client_list);
                 delete_desktop_vec(desktop_list);
