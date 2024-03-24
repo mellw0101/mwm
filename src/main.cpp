@@ -1580,190 +1580,192 @@ class __pid_manager__ {
         vector<pid_t> _pid_vec;
 
     /* Methods     */
-        string pid_status__(pid_t __pid) 
-        {
-            string line_str = "/proc/" + to_string(__pid) + "/status";
-            ifstream file;
-            file.open(line_str);
-            string var;
-            stringstream buffer;
-            while (getline(file, var))
+        /* Pid Info    */
+            string pid_status__(pid_t __pid) 
             {
-                buffer << var << '\n';
-            }
+                string line_str = "/proc/" + to_string(__pid) + "/status";
+                ifstream file;
+                file.open(line_str);
+                string var;
+                stringstream buffer;
+                while (getline(file, var))
+                {
+                    buffer << var << '\n';
+                }
 
-            string result;
-            result = buffer.str();
-            loutI << result << '\n';
-            file.close();
-            return string();
-        }
-
-        string get_process_name_by_pid__(pid_t pid) 
-        {
-            string path = "/proc/" + std::to_string(pid) + "/comm";
-            ifstream commFile(path);
-            string name;
-
-            if (commFile.good())
-            {
-                getline(commFile, name);
-                return name;
-            }
-            else
-            {
-                return "Process not found";
-            }
-        }
-
-        string pid_cmd_line__(pid_t __pid) 
-        {
-            string line_str = "/proc/" + to_string(__pid) + "/cmdline";
-            ifstream file;
-            file.open(line_str);
-            string var;
-            stringstream buffer;
-            while (getline(file, var))
-            {
-                buffer << var << '\n';
-            }
-
-            string result;
-            result = buffer.str();
-            loutI << result << '\n';
-            string test = result;
-            ifstream iss(test);
-            string token;
-            vector<string> parts;
-            while (getline(iss, token, ' '))
-            {
-                parts.push_back(token);
-            }
-            
-            if (parts.size() == 1)
-            {
+                string result;
+                result = buffer.str();
+                loutI << result << '\n';
                 file.close();
-                return "mainPid";
+                return string();
             }
 
-            file.close();
-            return string();
-        }
-
-        string get_correct_prosses_name__(const string &__launchName)
-        {
-            DIR* dir;
-            struct dirent* ent;
-            string path;
-            string line;
-
-            vector<string> parts;
-            for (int i(0), start(0); i < __launchName.length(); ++i)
+            string get_process_name_by_pid__(pid_t pid) 
             {
-                if (__launchName[i] == '-')
-                {
-                    string s = __launchName.substr(start, i - start);
-                    parts.push_back(s);
-                    start = i + 1;
-                }
+                string path = "/proc/" + std::to_string(pid) + "/comm";
+                ifstream commFile(path);
+                string name;
 
-                if (i == (__launchName.length() - 1))
+                if (commFile.good())
                 {
-                    string s = __launchName.substr(start, i - start);
-                    parts.push_back(s);
+                    getline(commFile, name);
+                    return name;
+                }
+                else
+                {
+                    return "Process not found";
                 }
             }
 
-            for (int i = 0; i < parts.size(); ++i)
+            string pid_cmd_line__(pid_t __pid) 
             {
-                if ((dir = opendir("/proc")) != NULL)
+                string line_str = "/proc/" + to_string(__pid) + "/cmdline";
+                ifstream file;
+                file.open(line_str);
+                string var;
+                stringstream buffer;
+                while (getline(file, var))
                 {
-                    while ((ent = readdir(dir)) != NULL)
+                    buffer << var << '\n';
+                }
+
+                string result;
+                result = buffer.str();
+                loutI << result << '\n';
+                string test = result;
+                ifstream iss(test);
+                string token;
+                vector<string> parts;
+                while (getline(iss, token, ' '))
+                {
+                    parts.push_back(token);
+                }
+                
+                if (parts.size() == 1)
+                {
+                    file.close();
+                    return "mainPid";
+                }
+
+                file.close();
+                return string();
+            }
+
+            string get_correct_prosses_name__(const string &__launchName)
+            {
+                DIR* dir;
+                struct dirent* ent;
+                string path;
+                string line;
+
+                vector<string> parts;
+                for (int i(0), start(0); i < __launchName.length(); ++i)
+                {
+                    if (__launchName[i] == '-')
                     {
-                        if (ent->d_type == DT_DIR) // Check if the directory is a PID
+                        string s = __launchName.substr(start, i - start);
+                        parts.push_back(s);
+                        start = i + 1;
+                    }
+
+                    if (i == (__launchName.length() - 1))
+                    {
+                        string s = __launchName.substr(start, i - start);
+                        parts.push_back(s);
+                    }
+                }
+
+                for (int i = 0; i < parts.size(); ++i)
+                {
+                    if ((dir = opendir("/proc")) != NULL)
+                    {
+                        while ((ent = readdir(dir)) != NULL)
                         {
-                            path = std::string("/proc/") + ent->d_name + "/comm";
-                            std::ifstream comm(path.c_str());
-                            if (comm.good())
+                            if (ent->d_type == DT_DIR) // Check if the directory is a PID
                             {
-                                getline(comm, line);
-                                if (line == parts[i])
+                                path = std::string("/proc/") + ent->d_name + "/comm";
+                                std::ifstream comm(path.c_str());
+                                if (comm.good())
                                 {
-                                    return parts[i];
+                                    getline(comm, line);
+                                    if (line == parts[i])
+                                    {
+                                        return parts[i];
+                                    }
                                 }
                             }
                         }
+                        closedir(dir);
                     }
-                    closedir(dir);
                 }
+
+                return string();
             }
 
-            return string();
-        }
-
-        bool sendSignal(const pid_t pid, int signal)
-        {
-            return kill(pid, signal) == 0;
-        }
-
-        bool isProcessRunning(const pid_t pid)
-        {
-            struct stat statBuf;
-            string procPath = "/proc/" + to_string(pid);
-            return stat(procPath.c_str(), &statBuf) == 0;
-        }
-
-        bool send_sigterm__(pid_t pid)
-        {
-            if (kill(pid, SIGTERM) == -1)
+        /* Pid Killing */
+            bool sendSignal(const pid_t pid, int signal)
             {
-                loutErrno("Error sending SIGTERM");
-                return false;
+                return kill(pid, signal) == 0;
             }
 
-            int status;
-            pid_t result = waitpid(pid, &status, 0); // Wait for the process to change state
-            if (result == -1)
+            bool isProcessRunning(const pid_t pid)
             {
-                loutErrno("Error waiting for process");
-                return false;
+                struct stat statBuf;
+                string procPath = "/proc/" + to_string(pid);
+                return stat(procPath.c_str(), &statBuf) == 0;
             }
 
-            if (!isProcessRunning(pid)) // Check if the child exited normally
+            bool send_sigterm__(pid_t pid)
             {
-                loutI << "Process" << pid << " terminated successfully with exit status " << WEXITSTATUS(status) << '\n';
-                return true;
-            }
-            else
-            {
-                loutI << "Process" << pid << " did not terminate successfully." << '\n';
-                return false;
-            }
-        }
-
-        void send_sigkill__(pid_t __pid)
-        {
-            if (sendSignal(__pid, SIGKILL))
-            {
-                loutI << "SIGKILL signal sent to process" << __pid << " for forceful termination." << '\n';
-            }
-            else
-            {
-                loutE << "Failed to send SIGKILL to process" << __pid << '\n';
-            }
-        }
-
-        void kill_pid(pid_t __pid)
-        {
-            if (isProcessRunning(__pid))
-            {
-                if (!send_sigterm__(__pid))
+                if (kill(pid, SIGTERM) == -1)
                 {
-                    loutI << "pid" << __pid << " still running forcefully killing" << '\n';
-                    send_sigkill__(__pid);
+                    loutErrno("Error sending SIGTERM");
+                    return false;
+                }
+
+                int status;
+                pid_t result = waitpid(pid, &status, 0); // Wait for the process to change state
+                if (result == -1)
+                {
+                    loutErrno("Error waiting for process");
+                    return false;
+                }
+
+                if (!isProcessRunning(pid)) // Check if the child exited normally
+                {
+                    loutI << "Process" << pid << " terminated successfully with exit status " << WEXITSTATUS(status) << '\n';
+                    return true;
+                }
+                else
+                {
+                    loutI << "Process" << pid << " did not terminate successfully." << '\n';
+                    return false;
                 }
             }
-        }
+
+            void send_sigkill__(pid_t __pid)
+            {
+                if (sendSignal(__pid, SIGKILL))
+                {
+                    loutI << "SIGKILL signal sent to process" << __pid << " for forceful termination." << '\n';
+                }
+                else
+                {
+                    loutE << "Failed to send SIGKILL to process" << __pid << '\n';
+                }
+            }
+
+            void kill_pid(pid_t __pid)
+            {
+                if (isProcessRunning(__pid))
+                {
+                    if (!send_sigterm__(__pid))
+                    {
+                        loutI << "pid" << __pid << " still running forcefully killing" << '\n';
+                        send_sigkill__(__pid);
+                    }
+                }
+            }
 
     public:
     /* Methods     */
@@ -1816,106 +1818,6 @@ class Launcher {
             }
 
             return 0;
-        }
-
-        int launch_program_pid_manager(char *program)
-        {
-            if (!file.check_if_binary_exists(program))
-            {
-                return 1; // Program binary does not exist
-            }
-
-            pid_t pid = fork();
-            if (pid == -1)
-            {
-                return 2;
-            }
-            else if (pid == 0)
-            {
-                setsid(); // Create a new session
-                execvp(program, (char *[]) {program, NULL});
-                exit(EXIT_FAILURE); // execvp failed
-            }
-            else
-            {
-                pid_manager->add_pid(pid);
-            }
-
-            return 0;
-        }
-
-        int launch_child_process_wait(const char *program_path, char *const args[])
-        {
-            pid_t pid;
-            int status;
-            posix_spawnattr_t attr;
-
-            posix_spawnattr_init(&attr);
-
-            // Set the spawned process to be in its own process group
-            posix_spawnattr_setpgroup(&attr, 0);
-
-            // Launch the child process
-            int result = posix_spawn(&pid, program_path, NULL, &attr, args, environ);
-
-            // Clean up the attribute object
-            posix_spawnattr_destroy(&attr);
-
-            if (result == 0)
-            {
-                std::cout << "Child pid: " << pid << std::endl;
-                // Wait for the child process to complete
-                if (waitpid(pid, &status, 0) == -1)
-                {
-                    perror("waitpid failed");
-                    return -1;
-                }
-
-                if (WIFEXITED(status))
-                {
-                    std::cout << "Child exited with status: " << WEXITSTATUS(status) << std::endl;
-                    return WEXITSTATUS(status);
-                }
-                else
-                {
-                    std::cout << "Child process did not exit normally" << std::endl;
-                    return -1;
-                }
-            }
-            else
-            {
-                perror("posix_spawn failed");
-                return result;
-            }
-        }
-
-        int launch_child_process(const char *program_path, char *const args[])
-        {
-            pid_t pid;
-            posix_spawnattr_t attr;
-
-            // Initialize the spawn attributes
-            posix_spawnattr_init(&attr);
-
-            // Set the spawned process to be in its own process group
-            posix_spawnattr_setpgroup(&attr, 0);
-
-            // Launch the child process
-            int result = posix_spawn(&pid, program_path, NULL, &attr, args, environ);
-
-            // Clean up the attribute object
-            posix_spawnattr_destroy(&attr);
-
-            if (result == 0) /* Successfully launched the child process */
-            {
-                loutI << "Child pid: " << pid << '\n';
-                return 0; /* Return success */
-            }
-            else
-            {
-                // loutErrno("posix_spawn failed");
-                return result;
-            }
         }
 
         int launch_child_process(const char *command)
@@ -3316,6 +3218,47 @@ class window {
 
                 free(reply); // Remember to free the reply
                 return transient_for;
+            }
+
+            uint32_t get_pid()
+            {
+                xcb_atom_t property = XCB_ATOM_NONE;
+                xcb_atom_t type = XCB_ATOM_CARDINAL;
+                xcb_intern_atom_cookie_t cookie = xcb_intern_atom(conn, 0, 11, "_NET_WM_PID");
+                xcb_intern_atom_reply_t* reply = xcb_intern_atom_reply(conn, cookie, NULL);
+
+                if (reply)
+                {
+                    property = reply->atom;
+                    free(reply);
+                }
+
+                if (property == XCB_ATOM_NONE)
+                {
+                    loutEWin << "Unable to find _NET_WM_PID atom." << '\n';
+                    return 0;
+                }
+
+                xcb_get_property_cookie_t prop_cookie = xcb_get_property(conn, 0, _window, property, type, 0, sizeof(uint32_t));
+                xcb_get_property_reply_t* prop_reply = xcb_get_property_reply(conn, prop_cookie, NULL);
+
+                if (!prop_reply)
+                {
+                    loutEWin << "Unable to get window property." << '\n';
+                    return 0;
+                }
+
+                if (xcb_get_property_value_length(prop_reply) == 0)
+                {
+                    free(prop_reply);
+                    loutEWin << "The window does not have the _NET_WM_PID property." << '\n';
+                    return 0;
+                }
+
+                uint32_t pid = *(uint32_t*)xcb_get_property_value(prop_reply);
+                free(prop_reply);
+
+                return pid;
             }
 
             string get_window_property(xcb_atom_t __atom)
@@ -6238,7 +6181,9 @@ class Window_Manager {
 
                 c->win.get_override_redirect();
                 c->win.x_y_width_height(c->x, c->y, c->width, c->height);
-                xcb_flush(conn);
+                FLUSH_X();
+
+                loutI << "client pid" << c->win.get_pid() << '\n';
 
                 c->win.map();
                 c->win.grab_button({
