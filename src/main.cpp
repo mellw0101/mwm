@@ -12177,7 +12177,13 @@ class Events {
                 
                 if (e->event == c->close_button)
                 {
+                    if (!c->win.is_mapped())
+                    {
+                        c->kill();
+                    }
+
                     c->win.kill();
+
                     return;
                 }
                 
