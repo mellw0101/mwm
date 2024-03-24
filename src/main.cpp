@@ -1798,6 +1798,8 @@ class __pid_manager__ {
 
         void check_pid(pid_t __pid)
         {
+            if (__pid == 0) return;
+
             bool found = false;
             for (int i = 0; i < _pid_vec.size(); ++i)
             {
@@ -6201,7 +6203,7 @@ class Window_Manager {
                 c->win.x_y_width_height(c->x, c->y, c->width, c->height);
                 FLUSH_X();
 
-                loutI << "client pid" << c->win.get_pid() << '\n';
+                pid_manager->check_pid(c->win.get_pid());
 
                 c->win.map();
                 c->win.grab_button({
