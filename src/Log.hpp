@@ -21,6 +21,8 @@
 #include <xcb/xproto.h>
 #include <mutex>
 #include <queue>
+#include <cstring> // For strerror
+#include <cerrno>  // For errno
 
 using namespace std;
 
@@ -551,7 +553,7 @@ class LogQueue {
 };
 
 class lout {
-    // Defines.
+    /* Defines */
         #define loutNUM(__variable) \
             "(\033[33m" << __variable << "\033[0m)"
 
@@ -571,17 +573,18 @@ class lout {
 			"(" << log_BLUE << __user << log_RESET << ")"
 
 	public:
-	// Methods.
+	/* Methods */
 		/**
 		 *
 		 * @brief Make lout a singleton to ensure a single object instance
 		 *
+		 * NOTE: not used for now
 		 */
-		// static lout& inst()
-		// {
-		// 	static lout instance;
-		// 	return instance;
-		// }
+		 // static lout& inst()
+		 // {
+		 // 	static lout instance;
+		 // 	return instance;
+		 // }
 
         lout() {}
 		
@@ -646,6 +649,18 @@ class lout {
 
             return *this;
         }
+
+		lout& err()
+		{
+			buffer << "Error: " << strerror(errno) << " (errno: " << errno << ")";
+			return *this;
+		}
+
+		lout& err(const string &__err_msg)
+		{
+			buffer << __err_msg << ": " << strerror(errno) << " (errno: " << errno << ")";
+			return *this;
+		}
 
         template<typename T>
         typename enable_if<is_arithmetic<T>::value, lout&>::type
@@ -776,6 +791,9 @@ inline window_obj_t window_id(uint32_t __window)
  */
 #define loutE \
 	lout << ERROR << FUNC << LINE
+
+#define loutErrno(__msg) \
+	loutE << lout.err(__msg) << '\n'
 
 /**
  *

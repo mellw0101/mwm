@@ -72,6 +72,7 @@
 #include <netdb.h>
 #include <pulse/pulseaudio.h>
 #include <type_traits>
+#include <spawn.h>
 
 #include "Log.hpp"
 Logger logger;
@@ -1570,6 +1571,8 @@ class File
         }  
 };
 
+extern char **environ;
+
 class __pid_manager__ {
     private:
     /* Variabels   */
@@ -1759,6 +1762,106 @@ class Launcher {
             }
 
             return 0;
+        }
+
+        int launch_child_process_wait(const char *program_path, char *const args[])
+        {
+            pid_t pid;
+            int status;
+            posix_spawnattr_t attr;
+
+            posix_spawnattr_init(&attr);
+
+            // Set the spawned process to be in its own process group
+            posix_spawnattr_setpgroup(&attr, 0);
+
+            // Launch the child process
+            int result = posix_spawn(&pid, program_path, NULL, &attr, args, environ);
+
+            // Clean up the attribute object
+            posix_spawnattr_destroy(&attr);
+
+            if (result == 0)
+            {
+                std::cout << "Child pid: " << pid << std::endl;
+                // Wait for the child process to complete
+                if (waitpid(pid, &status, 0) == -1)
+                {
+                    perror("waitpid failed");
+                    return -1;
+                }
+
+                if (WIFEXITED(status))
+                {
+                    std::cout << "Child exited with status: " << WEXITSTATUS(status) << std::endl;
+                    return WEXITSTATUS(status);
+                }
+                else
+                {
+                    std::cout << "Child process did not exit normally" << std::endl;
+                    return -1;
+                }
+            }
+            else
+            {
+                perror("posix_spawn failed");
+                return result;
+            }
+        }
+
+        int launch_child_process(const char *program_path, char *const args[])
+        {
+            pid_t pid;
+            posix_spawnattr_t attr;
+
+            // Initialize the spawn attributes
+            posix_spawnattr_init(&attr);
+
+            // Set the spawned process to be in its own process group
+            posix_spawnattr_setpgroup(&attr, 0);
+
+            // Launch the child process
+            int result = posix_spawn(&pid, program_path, NULL, &attr, args, environ);
+
+            // Clean up the attribute object
+            posix_spawnattr_destroy(&attr);
+
+            if (result == 0) /* Successfully launched the child process */
+            {
+                loutI << "Child pid: " << pid << '\n';
+                return 0; /* Return success */
+            }
+            else
+            {
+                loutErrno("posix_spawn failed");
+                return result;
+            }
+        }
+
+        int launch_child_process(const char *command)
+        {
+            pid_t pid;
+            posix_spawnattr_t attr;
+
+            string command_path = "/bin/" + string(command);
+            char *argv[] = {const_cast<char*>(command_path.c_str()), NULL};
+            
+            posix_spawnattr_init(&attr);
+            posix_spawnattr_setpgroup(&attr, 0);
+            
+            int result = posix_spawn(&pid, command_path.c_str(), NULL, &attr, argv, environ);
+            posix_spawnattr_destroy(&attr);
+
+            if (result == 0)
+            {
+                loutI << "Child pid: " << pid << '\n';
+                return 0;
+            }
+            else
+            {
+                loutErrno("posix_spawn failed");
+                return result;
+            }
         }
     
     private:
@@ -10213,7 +10316,7 @@ class __dock_search__ {
             setup_events();
             add_enter_action([this]() -> void
             {
-                int status = launcher.launch_program_pid_manager((char *)search_string.str().c_str());
+                int status = launcher.launch_child_process(search_string.str().c_str());
                 if (status == 0)
                 {
                     wm->unmap_window(main_window.parent());
