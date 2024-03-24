@@ -4177,12 +4177,14 @@ class window {
                     {   U_ARROW,    SUPER                   },
                     {   D_ARROW,    SUPER                   },
                     {   TAB,        ALT                     },
+                    {   S,          SUPER                   }, // key_binding for 'system_settings'
                     {   K,          SUPER                   }/* ,
                     {   R,          SUPER                   }, // key_binding for 'runner_window'
                     {   F,          SUPER                   }, // key_binding for 'file_app'
-                    {   S,          SUPER                   }, // key_binding for 'system_settings'
                     {   D,          SUPER                   }  // key_binding for 'debub menu' */
                 });
+
+
             }
         
             void grab_keys(initializer_list<pair<const uint32_t, const uint16_t>> bindings)
