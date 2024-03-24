@@ -12857,9 +12857,8 @@ class test {
 
 void setup_wm()
 {
-    loutI << "Running" << '\n';
     user = get_user_name();
-    loutI << "Current USER:" << loutUser(USER) << '\n';
+    loutCUser(USER);
 
     file_system = new __file_system__;
     file_system->init_check();

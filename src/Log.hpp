@@ -844,6 +844,9 @@ inline errno_msg_t errno_msg(const char *__str)
 #define loutIP \
     lout << INFO_PRIORITY << FUNC << LINE
 
+#define loutCUser(__user) \
+	loutI << "Current USER" << loutUser(__user) << '\n'
+
 #define LOG_ev_response_type(ev)    	    Log::xcb_event_response_type(__func__, ev);
 #define LOG_func                    	    Log::FUNC(__func__);
 #define LOG_error(message)          	    Log::ERROR(__FUNCTION__, "]:[", message);
