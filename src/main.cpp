@@ -10421,7 +10421,7 @@ class __dock__ {
         window dock_menu;
         __dock_search__ dock_search;
         STATIC_CONSTEXPR_TYPE(uint16_t, _width, 400);
-        STATIC_CONSTEXPR_TYPE(uint16_t, _height, 500);
+        STATIC_CONSTEXPR_TYPE(uint16_t, _height, 200);
 
         client *f_c = nullptr;
 
