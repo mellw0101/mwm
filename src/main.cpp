@@ -1797,7 +1797,7 @@ class __pid_manager__ {
             {
                 threads.emplace_back([&]() -> void
                 {
-                    terminate_process(pid, chrono::seconds(2));
+                    terminate_process(pid, chrono::seconds(5));
                 });
             }
 
