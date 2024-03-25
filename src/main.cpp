@@ -6825,7 +6825,7 @@ class Window_Manager {
                 check_volt();
             }
 
-}; static Window_Manager *wm;
+}; static Window_Manager *wm(nullptr);
 
 class __network__ {
     public:
