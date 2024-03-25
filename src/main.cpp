@@ -12605,6 +12605,7 @@ class Events {
 
                 if (e->detail == L_MOUSE_BUTTON)
                 {
+                    loutI << "root L_MOUSE_BUTTON pressed unfocusing" << loutEND;
                     wm->unfocus();
                     return;
                 }
@@ -12615,6 +12616,7 @@ class Events {
             {
                 c = wm->get_client_from_pointer();
                 if (c == nullptr) return;
+                loutI << "got client from pointer" << loutEND;
                 c->focus();
                 return;
             }
