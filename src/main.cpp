@@ -12611,8 +12611,14 @@ class Events {
             }
 
             c = wm->client_from_any_window(&e->event);
-            if (c == nullptr) return;
-                
+            if (c == nullptr) 
+            {
+                c = wm->get_client_from_pointer();
+                if (c == nullptr) return;
+                c->focus();
+                return;
+            }
+
             if (e->detail == L_MOUSE_BUTTON)
             {
                 if (e->event == c->win)
