@@ -557,7 +557,7 @@ class LogQueue {
 };
 
 class lout {
-    /* Defines */
+    /* Defines 	 */
         #define loutNUM(__variable) \
             "(\033[33m" << __variable << "\033[0m)"
 
@@ -580,7 +580,7 @@ class lout {
 			'\n'
 
 	public:
-	/* Methods */
+	/* Methods 	 */
 		/**
 		 *
 		 * @brief Make lout a singleton to ensure a single object instance
@@ -693,7 +693,7 @@ class lout {
 		// }
 
 	private:
-	// Variabels.
+	/* Variabels */
 		LogLevel currentLevel;
 		string currentFunction;
 		string current_file;
@@ -701,7 +701,7 @@ class lout {
 		ostringstream buffer;
 		mutex log_mutex;
 
-	// Methods.
+	/* Methods 	 */
 		void logMessage()
 		{
 			lock_guard<mutex> guard(log_mutex);

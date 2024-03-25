@@ -8858,8 +8858,7 @@ class Mwm_Runner {
         }
 }; static Mwm_Runner * mwm_runner;
 
-class add_app_dialog_window
-{
+class add_app_dialog_window {
     public:
     // Variables.
         window(main_window);
@@ -8946,13 +8945,13 @@ class add_app_dialog_window
 };
 
 class __file_app__ {
-    // Defines.
+    /* Defines     */
         #define FILE_APP_LEFT_MENU_WIDTH 120
         #define FILE_APP_LEFT_MENU_ENTRY_HEIGHT 20
         #define FILE_APP_BORDER_SIZE 2
 
     private:
-    // Subclasses.
+    /* Subclasses  */
         class __left_menu__
         {
             private:
@@ -9080,7 +9079,7 @@ class __file_app__ {
         };
         __left_menu__(_left_menu);
 
-    // Methods.
+    /* Methods     */
         void create_main_window()
         {
             int width = (screen->width_in_pixels / 2), height = (screen->height_in_pixels / 2);
@@ -9144,11 +9143,11 @@ class __file_app__ {
         }
 
     public:
-    // Variabels.
+    /* Variabels   */
         window(main_window);
         client *c = nullptr;
 
-    // Methods.
+    /* Methods     */
         void configure(const uint32_t &__window, const uint32_t &__width, const uint32_t &__height)
         {
             if (__window == main_window)
@@ -9167,7 +9166,7 @@ class __file_app__ {
             setup_events();
         }
 
-    // Constructor.
+    /* Constructor */
         __file_app__() {}
 }; static __file_app__ *file_app;
 
