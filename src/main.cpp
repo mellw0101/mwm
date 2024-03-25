@@ -1863,7 +1863,7 @@ class __pid_manager__ {
 
 class Launcher {
     public:
-    /* Methods */
+    /* Methods   */
         int program(char *program)
         {
             if (!file.check_if_binary_exists(program))
@@ -3092,11 +3092,28 @@ class window {
                         }
                     }
 
+                    best_icon_data = invert_color_vec(best_icon_data);
+
                     if (__width  != nullptr) *__width  = best_width;
                     if (__height != nullptr) *__height = best_height;
 
                     free(reply);
                     return best_icon_data;
+                }
+
+                vector<uint32_t> invert_color_vec(vector<uint32_t> __icon_data)
+                {
+                    vector<uint32_t> icon_data = __icon_data;
+                    for (auto& pixel : icon_data)
+                    {
+                        uint8_t* colors = reinterpret_cast<uint8_t*>(&pixel);
+                        colors[0] = 255 - colors[0]; // R
+                        colors[1] = 255 - colors[1]; // G
+                        colors[2] = 255 - colors[2]; // B
+                        // Alpha (colors[3]) remains unchanged
+                    }
+
+                    return icon_data;
                 }
 
                 void make_png_from_icon()
