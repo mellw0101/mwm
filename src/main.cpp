@@ -6102,6 +6102,7 @@ class Window_Manager {
                     tmp.focus_input();
                     tmp.unmap();
                     tmp.kill();
+                    focused_client = nullptr;
                 }
 
             /* Fetch */
