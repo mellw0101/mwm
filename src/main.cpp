@@ -3107,8 +3107,8 @@ class window {
                     for (auto& pixel : icon_data)
                     {
                         uint8_t* colors = reinterpret_cast<uint8_t*>(&pixel);
-                        colors[0] = 255 - colors[0]; // R
-                        colors[1] = 255 - colors[1]; // G
+                        // colors[0] = 255 - colors[0]; // R
+                        // colors[1] = 255 - colors[1]; // G
                         colors[2] = 255 - colors[2]; // B
                         // Alpha (colors[3]) remains unchanged
                     }
