@@ -10811,10 +10811,10 @@ class mv_client {
 mutex mtx;
 class change_desktop {
     public:
-    // Constructor.
+    /* Constructor */
         change_desktop(xcb_connection_t *connection) {}
 
-    // Variabels.
+    /* Variabels   */
         int duration = 100;
 
         enum DIRECTION {
@@ -10822,7 +10822,7 @@ class change_desktop {
             PREV
         };
 
-    // Methods.
+    /* Methods     */
         void change_to(const DIRECTION &direction)
         {
             switch (direction)
@@ -10985,7 +10985,7 @@ class change_desktop {
         }
     
     private:
-    // Variabels.
+    /* Variabels   */
         // xcb_connection_t(*connection);
         vector<client *>(show);
         vector<client *>(hide);
@@ -10996,7 +10996,7 @@ class change_desktop {
         atomic<bool>(reverse_animation_flag){false};
         vector<thread>(animation_threads);
 
-    // Methods.
+    /* Methods     */
         vector<client *> get_clients_on_desktop(const uint8_t &desktop)
         {
             vector<client *>(clients);
@@ -11978,10 +11978,10 @@ class max_win {
  */
 class tile {
     private:
-    // Variabels.
+    /* Variabels   */
         client(*c);
 
-    // Methods.
+    /* Methods     */
         /**
          *
          * @brief Checks if the current tile position of a window is the specified tile position.
@@ -12192,7 +12192,7 @@ class tile {
         }
 
     public:
-    // Constructor.
+    /* Constructor */
         tile(client *&c, TILE tile)
         : c(c)
         {
@@ -12328,10 +12328,10 @@ class tile {
 
 class Events {
     public:
-    // Constructor.
+    /* Constructor */
         Events() {}
     
-    // Methods.
+    /* Methods     */
         void setup()
         {
             event_handler->setEventCallback(XCB_KEY_PRESS,         [&](Ev ev)-> void { key_press_handler(ev); });
@@ -12350,7 +12350,7 @@ class Events {
         }
 
     private:
-    // Methods.
+    /* Methods     */
         void key_press_handler(const xcb_generic_event_t *&ev)
         {
             RE_CAST_EV(xcb_key_press_event_t);
