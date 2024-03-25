@@ -3092,8 +3092,6 @@ class window {
                         }
                     }
 
-                    best_icon_data = invert_color_vec(best_icon_data);
-
                     if (__width  != nullptr) *__width  = best_width;
                     if (__height != nullptr) *__height = best_height;
 
@@ -3107,8 +3105,8 @@ class window {
                     for (auto& pixel : icon_data)
                     {
                         uint8_t* colors = reinterpret_cast<uint8_t*>(&pixel);
-                        // colors[0] = 255 - colors[0]; // R
-                        // colors[1] = 255 - colors[1]; // G
+                        colors[0] = 255 - colors[0]; // R
+                        colors[1] = 255 - colors[1]; // G
                         colors[2] = 255 - colors[2]; // B
                         // Alpha (colors[3]) remains unchanged
                     }
