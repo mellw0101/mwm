@@ -946,32 +946,32 @@ class pointer
 {
     public:
     // Methods.
-        uint32_t x()
+        int16_t x()
         {
             xcb_query_pointer_cookie_t cookie = xcb_query_pointer(conn, screen->root);
             xcb_query_pointer_reply_t *reply = xcb_query_pointer_reply(conn, cookie, nullptr);
             if (!reply)
             {
-                log_error("reply is nullptr.");
+                loutE << "reply is nullptr" << loutEND;
                 return 0;
             }
 
-            uint32_t x = reply->root_x;
+            int16_t x = reply->root_x;
             free(reply);
             return x;
         }
 
-        uint32_t y()
+        int16_t y()
         {
             xcb_query_pointer_cookie_t cookie = xcb_query_pointer(conn, screen->root);
             xcb_query_pointer_reply_t *reply = xcb_query_pointer_reply(conn, cookie, nullptr);
             if (!reply)
             {
-                log_error("reply is nullptr.");
+                loutE << "reply is nullptr" << loutEND;
                 return 0;
             }
 
-            uint32_t y = reply->root_y;
+            int16_t y = reply->root_y;
             free(reply);
             return y;
         }
@@ -1013,8 +1013,9 @@ class pointer
 
         void ungrab()
         {
-            xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
-            xcb_flush(conn);
+            VOID_COOKIE = xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
+            FLUSH_X();
+            CHECK_VOID_COOKIE();
         }
 
         const char * pointer_from_enum(CURSOR CURSOR)
@@ -1077,8 +1078,7 @@ class pointer
         }
 
     private:
-    // Variabels.
-        Logger(log);
+    /* Variabels */
 };
 
 class fast_vector
@@ -6283,6 +6283,23 @@ class Window_Manager {
                     return edge::NONE;
                 }
 
+                client *get_client_from_pointer()
+                {
+                    const int16_t x = pointer.x();
+                    const int16_t y = pointer.y();
+
+                    for (client *const &c : cur_d->current_clients)
+                    {
+                        if (x > c->x && x < c->x + c->width
+                        &&  y > c->y && y < c->y + c->height)
+                        {
+                            return c;
+                        }
+                    }
+
+                    return nullptr;
+                }
+
             void manage_new_client(const uint32_t &__window)
             {
                 client *c = make_client(__window);
@@ -11104,7 +11121,7 @@ class change_desktop {
 
 class resize_client {
     public:
-    // Constructor.
+    /* Constructor */
         /**
          *
          * THE REASON FOR THE 'retard_int' IS BECUSE WITHOUT IT 
@@ -11123,10 +11140,10 @@ class resize_client {
             pointer.ungrab();
         }
 
-    // Subclasses.
+    /* Subclasses  */
         class no_border {
             public:
-            // Constructor.
+            /* Constructor */
                 no_border(client * & c, const uint32_t & x, const uint32_t & y)
                 : c(c)
                 {
@@ -11140,7 +11157,7 @@ class resize_client {
                 }
             
             private:
-            // Variabels.
+            /* Variabels   */
                 client *&c;
                 uint32_t x;
                 pointer pointer;
@@ -11149,7 +11166,7 @@ class resize_client {
                 chrono::high_resolution_clock::time_point lastUpdateTime = chrono::high_resolution_clock::now();
                 const double frameDuration = 1000.0 / frameRate;
             
-            // Methods.
+            /* Methods     */
                 constexpr void teleport_mouse(edge edge) {
                     switch (edge)
                     {
@@ -11314,7 +11331,7 @@ class resize_client {
 
         class border {
             public:
-            // Constructor.
+            /* Constructor */
                 border(client *&c, edge _edge) 
                 : c(c)
                 {
@@ -11342,7 +11359,7 @@ class resize_client {
                 }
 
             private:
-            // Variabels.
+            /* Variabels   */
                 client(*&c);
                 client(*c2);
                 edge(c2_edge);
@@ -11354,11 +11371,8 @@ class resize_client {
                     STATIC_CONSTEXPR_TYPE(double, frameRate, 120.0);
                 #endif
                 STATIC_CONSTEXPR_TYPE(double, frameDuration, (1000 / frameRate));
-                
-                // const double frameRate = 120.0;
-                // const double frameDuration = 1000.0 / frameRate;
 
-            // Methods.
+            /* Methods     */
                 void teleport_mouse(edge edge)
                 {
                     switch (edge)
@@ -11737,7 +11751,7 @@ class resize_client {
         };
 
     private:
-    // Variabels.
+    /* Variabels   */
         client * & c;
         uint32_t x;
         pointer pointer;
@@ -11747,7 +11761,7 @@ class resize_client {
         const double frameRate = 120.0;
         const double frameDuration = 1000.0 / frameRate;
     
-    // Methods.
+    /* Methods     */
         void snap(const uint16_t & x, const uint16_t & y)
         {
             // WINDOW TO WINDOW SNAPPING 
@@ -12585,6 +12599,12 @@ class Events {
                 if (e->detail == R_MOUSE_BUTTON)
                 {
                     wm->context_menu->show();
+                    return;
+                }
+
+                if (e->detail == L_MOUSE_BUTTON)
+                {
+                    wm->unfocus();
                     return;
                 }
             }
