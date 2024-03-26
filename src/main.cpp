@@ -6540,8 +6540,8 @@ class Window_Manager {
                 root.clear();
                 
                 #ifndef ARMV8_BUILD
-                    // root.set_backround_png(USER_PATH_PREFIX("/mwm_png/galaxy21.png"));
-                    root.set_backround_png(USER_PATH_PREFIX("/mwm_png/galaxy16-17-3840x1200.png"));
+                    root.set_backround_png(USER_PATH_PREFIX("/mwm_png/galaxy21.png"));
+                    // root.set_backround_png(USER_PATH_PREFIX("/mwm_png/galaxy16-17-3840x1200.png"));
                 #endif
 
                 root.set_pointer(CURSOR::arrow);
@@ -12560,6 +12560,7 @@ class Events {
                     case SUPER:
                     {
                         pid_manager->list_pids();
+                        wm->root.set_backround_png(USER_PATH_PREFIX("/mwm_png/galaxy16-17-3840x1200.png"));
                         // GET_CLIENT_FROM_WINDOW(e->event);
                         // c->kill();
                         // c->win.x(BORDER_SIZE);
@@ -13009,7 +13010,7 @@ void setup_wm()
 
 int main()
 {
-    loutI << "\n\n-- mwm starting --" << '\n';
+    loutI << "\n\n          -- mwm starting --\n\n" << '\n';
 
     INIT_NET_LOG(ESP_SERVER);
     NET_LOG("Starting mwm.");
