@@ -12991,11 +12991,8 @@ void setup_wm()
     }
 
     wm->init();
-
     change_desktop::teleport_to(1);
-
-    // NEW_CLASS(mwm_runner, Mwm_Runner) { mwm_runner->init(); }
-
+    
     Events events;
     events.setup();
 
