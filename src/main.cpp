@@ -9423,14 +9423,14 @@ class __screen_settings__ {
 
             if (!res_reply)
             {
-                log_error("Could not get screen resources");
+                loutE << "Could not get screen resources" << loutEND;
                 return {};
             }
 
             xcb_randr_output_t *outputs = xcb_randr_get_screen_resources_current_outputs(res_reply);
             if (!res_reply->num_outputs)
             {
-                log_error("No outputs found");
+                loutE << "No outputs found" << loutEND;
                 free(res_reply);
                 return {};
             }
@@ -9442,7 +9442,7 @@ class __screen_settings__ {
 
             if (!output_info_reply || output_info_reply->crtc == XCB_NONE)
             {
-                log_error("Output is not currently connected to a CRTC");
+                loutE << "Output is not currently connected to a CRTC" << loutEND;
                 free(output_info_reply);
                 free(res_reply);
                 return {};
@@ -9453,7 +9453,7 @@ class __screen_settings__ {
 
             if (!crtc_info_reply)
             {
-                log_error("Could not get CRTC info");
+                loutE << "Could not get CRTC info" << loutEND;
                 free(output_info_reply);
                 free(res_reply);
                 return{};
@@ -9491,14 +9491,14 @@ class __screen_settings__ {
 
             if (!res_reply)
             {
-                log_error("Could not get screen resources");
+                loutE << "Could not get screen resources" << loutEND;
                 return {};
             }
 
             xcb_randr_output_t *outputs = xcb_randr_get_screen_resources_current_outputs(res_reply);
             if (!res_reply->num_outputs)
             {
-                log_error("No outputs found");
+                loutE << "No outputs found" << loutEND;
                 free(res_reply);
                 return {};
             }
@@ -9510,7 +9510,7 @@ class __screen_settings__ {
 
             if (!output_info_reply || output_info_reply->crtc == XCB_NONE)
             {
-                log_error("Output is not currently connected to a CRTC");
+                loutE << "Output is not currently connected to a CRTC" << loutEND;
                 free(output_info_reply);
                 free(res_reply);
                 return{};
@@ -9521,7 +9521,7 @@ class __screen_settings__ {
 
             if (!crtc_info_reply)
             {
-                log_error("Could not get CRTC info");
+                loutE << "Could not get CRTC info" << loutEND;
                 free(output_info_reply);
                 free(res_reply);
                 return{};
@@ -12560,7 +12560,7 @@ class Events {
                     case SUPER:
                     {
                         pid_manager->list_pids();
-                        wm->root.set_backround_png(USER_PATH_PREFIX("/mwm_png/galaxy16-17-3840x1200.png"));
+                        // wm->root.set_backround_png(USER_PATH_PREFIX("/mwm_png/galaxy16-17-3840x1200.png"));
                         // GET_CLIENT_FROM_WINDOW(e->event);
                         // c->kill();
                         // c->win.x(BORDER_SIZE);
