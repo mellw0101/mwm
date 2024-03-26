@@ -6540,7 +6540,8 @@ class Window_Manager {
                 root.clear();
                 
                 #ifndef ARMV8_BUILD
-                    root.set_backround_png(USER_PATH_PREFIX("/mwm_png/galaxy21.png"));
+                    // root.set_backround_png(USER_PATH_PREFIX("/mwm_png/galaxy21.png"));
+                    root.set_backround_png(USER_PATH_PREFIX("/mwm_png/galaxy16-17-3840x1200.png"));
                 #endif
 
                 root.set_pointer(CURSOR::arrow);
