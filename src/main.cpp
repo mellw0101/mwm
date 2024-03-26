@@ -8790,6 +8790,7 @@ class search_window {
 
 };
 
+/** NOTE: DEPRECATED */
 class Mwm_Runner {
     public:
     // Variabels.
@@ -8872,7 +8873,7 @@ class Mwm_Runner {
                 }
             });
         }
-}; static Mwm_Runner * mwm_runner;
+}; /* static Mwm_Runner * mwm_runner(nullptr); */
 
 class add_app_dialog_window {
     public:
@@ -9188,7 +9189,7 @@ class __file_app__ {
 
 class __screen_settings__ {
     private:
-    // Methods.
+    /* Methods     */
         void change_refresh_rate(xcb_connection_t *conn, int desired_width, int desired_height, int desired_refresh)
         {
             // Initialize RandR and get screen resources
@@ -9547,12 +9548,12 @@ class __screen_settings__ {
         }
 
     public:
-    // Variabels.
+    /* Variabels   */
         xcb_randr_mode_t(_current_resolution);
         string(_current_resoluton_string);
         vector<pair<xcb_randr_mode_t, string>>(_avalible_resolutions);
 
-    // Methods.
+    /* Methods     */
         void set_resolution(xcb_randr_mode_t __mode_id)
         {
             xcb_randr_get_screen_resources_current_cookie_t res_cookie;
@@ -9627,7 +9628,7 @@ class __screen_settings__ {
             _current_resoluton_string = get_current_resolution_string__();
         }
 
-    // Constructor.
+    /* Constructor */
         __screen_settings__() {}
 }; static __screen_settings__ *screen_settings(nullptr);
 
@@ -12993,7 +12994,7 @@ void setup_wm()
 
     change_desktop::teleport_to(1);
 
-    NEW_CLASS(mwm_runner, Mwm_Runner) { mwm_runner->init(); }
+    // NEW_CLASS(mwm_runner, Mwm_Runner) { mwm_runner->init(); }
 
     Events events;
     events.setup();
