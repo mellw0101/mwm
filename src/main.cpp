@@ -2652,7 +2652,7 @@ class window {
             {
                 VOID_COOKIE = xcb_set_input_focus(
                     conn,
-                    XCB_INPUT_FOCUS_PARENT,
+                    XCB_INPUT_FOCUS_POINTER_ROOT,
                     _window,
                     XCB_CURRENT_TIME
                 );
