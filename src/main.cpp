@@ -2635,7 +2635,7 @@ class window {
             
             void clear()
             {
-                xcb_clear_area(
+                VOID_COOKIE = xcb_clear_area(
                     conn, 
                     0,
                     _window,
@@ -2645,6 +2645,7 @@ class window {
                     _height
                 );
                 FLUSH_X();
+                CHECK_VOID_COOKIE();
             }
             
             void focus_input()
@@ -10604,6 +10605,8 @@ class __dock__ {
                 RED
             );
 
+            loutWin(dock_menu);
+
             dock_search.create(dock_menu, 0, 0, _width, 20);
             dock_search.init();
         }
@@ -12842,6 +12845,7 @@ class Events {
         void focus_in_handler(const xcb_generic_event_t *&ev)
         {
             RE_CAST_EV(xcb_focus_in_event_t);
+            loutWin(e->event);
             GET_CLIENT_FROM_WINDOW(e->event);
 
             c->win.ungrab_button({
@@ -12856,6 +12860,7 @@ class Events {
         void focus_out_handler(const xcb_generic_event_t *&ev)
         {
             RE_CAST_EV(xcb_focus_out_event_t);
+            loutWin(e->event);
             GET_CLIENT_FROM_WINDOW(e->event);
             c->win.grab_button({
                 { L_MOUSE_BUTTON, NULL }

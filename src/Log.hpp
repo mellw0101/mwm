@@ -783,6 +783,9 @@ inline errno_msg_t errno_msg(const char *__str)
 	window_id(__window)
 
 /* LOG DEFENITIONS */
+#define loutWin(__window) \
+	lout << INFO << LINE << FUNC << WINDOW_ID_BY_INPUT(__window) << loutEND 
+
 /**
  * @brief Macro to log info to the log file
  *        using the lout class  
