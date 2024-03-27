@@ -670,8 +670,7 @@ class __net_logger__ {
     static __net_logger__ *net_logger(nullptr);
 #endif
 
-struct size_pos
-{
+struct size_pos {
     int16_t x, y;
     uint16_t width, height;
 
@@ -684,8 +683,7 @@ struct size_pos
     }
 };
 
-class mxb
-{
+class mxb {
     class XConnection
     {
         public: // constructor and destructor
@@ -931,11 +929,11 @@ class mxb
         try
         {
             string response = conn->sendMessage("BIG-REQUESTS");
-            log_info(response);
+            loutI << response << loutEND;
         }
         catch (const exception &e)
         {
-            log_error(e.what());
+            loutE << e.what() << loutEND;
             return 1;
         }
 
@@ -943,10 +941,9 @@ class mxb
     };
 };
 
-class pointer
-{
+class pointer {
     public:
-    // Methods.
+    /* Methods   */
         int16_t x()
         {
             xcb_query_pointer_cookie_t cookie = xcb_query_pointer(conn, screen->root);
@@ -999,14 +996,16 @@ class pointer
             xcb_grab_pointer_reply_t * reply = xcb_grab_pointer_reply(conn, cookie, nullptr);
             if (!reply)
             {
-                log_error("reply is nullptr.");
-                free(reply); return;
+                loutE << "reply is nullptr." << loutEND;
+                free(reply);
+                return;
             }
 
             if (reply->status != XCB_GRAB_STATUS_SUCCESS)
             {
-                log_error("Could not grab pointer"); 
-                free(reply); return;
+                loutE << "Could not grab pointer" << loutEND;
+                free(reply);
+                return;
             }
 
             free(reply);
@@ -1078,8 +1077,6 @@ class pointer
             ungrab();
         }
 
-    private:
-    /* Variabels */
 };
 
 class fast_vector
@@ -1349,8 +1346,7 @@ class fast_str_vector
         vector<str>(data); // Internal vector to store const char* strings
 };
 
-class Directory_Searcher
-{
+class Directory_Searcher {
     public:
     // Construtor.
         Directory_Searcher() {}
@@ -1366,7 +1362,7 @@ class Directory_Searcher
                 DIR *d = opendir(dir);
                 if (d == nullptr)
                 {
-                    log_error("opendir() failed for directory: " + std::string(dir));
+                    loutE << "opendir() failed for directory: " << dir << loutEND;
                     continue;
                 }
 
@@ -1406,11 +1402,10 @@ class Directory_Searcher
     // Variabels.
         vector<const char *>(searchDirectories);
         vector<string>(results);
-        Logger log;
+
 };
 
-class Directory_Lister
-{
+class Directory_Lister {
     public:
     // Constructor.
         Directory_Lister() {}
@@ -1422,7 +1417,7 @@ class Directory_Lister
             DIR *d = opendir(Directory.c_str());
             if (d == nullptr)
             {
-                log_error("Failed to open Directory: " + Directory);
+                loutE << "Failed to open Directory: " << Directory << loutEND;
                 return results;
             }
 
@@ -1437,9 +1432,6 @@ class Directory_Lister
             return results;   
         }
 
-    private:
-    // Variabels.
-        Logger log;
 };
 
 class File
@@ -2010,7 +2002,7 @@ class Bitmap {
         {
             if (row < 0 || row >= height || startCol < 0 || endCol > width)
             {
-                log_error("Invalid row or column indices");
+                loutE << "Invalid row or column indices" << loutEND;
             }
         
             for (int i = startCol; i < endCol; ++i)
@@ -2024,7 +2016,7 @@ class Bitmap {
             FILE *fp = fopen(file_name, "wb");
             if (!fp)
             {
-                // log_error("Failed to create PNG file");
+                loutE << "Failed to create PNG file" << loutEND;
                 return;
             }
 
@@ -2032,7 +2024,7 @@ class Bitmap {
             if (!png_ptr)
             {
                 fclose(fp);
-                // log_error("Failed to create PNG write struct");
+                loutE << "Failed to create PNG write struct" << loutEND;
                 return;
             }
 
@@ -2041,7 +2033,7 @@ class Bitmap {
             {
                 fclose(fp);
                 png_destroy_write_struct(&png_ptr, nullptr);
-                // log_error("Failed to create PNG info struct");
+                loutE << "Failed to create PNG info struct" << loutEND;
                 return;
             }
 
@@ -2049,7 +2041,7 @@ class Bitmap {
             {
                 fclose(fp);
                 png_destroy_write_struct(&png_ptr, &info_ptr);
-                // log_error("Error during PNG creation");
+                loutE << "Error during PNG creation" << loutEND;
                 return;
             }
 
@@ -2184,7 +2176,7 @@ namespace { /* 'window' class Namespace */
         {
             *__atom = XCB_NONE;
             free(reply);
-            log_error("reply is nullptr.");
+            loutE << "reply is nullptr." << loutEND;
             return;
         }
 
@@ -5629,7 +5621,6 @@ class client {
             {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
             {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
         };
-        Logger log;
 };
 
 class desktop {
@@ -6926,14 +6917,14 @@ class __wifi__ {
             sock = iw_sockets_open();
             if (sock < 0)
             {
-                log_error("could not open socket");
+                loutE << "could not open socket" << loutEND;
                 return;
             }
 
             // Get the range of settings
             if (iw_get_range_info(sock, interface, &range) < 0)
             {
-                log_error("could not get range info");
+                loutE << "could not get range info" << loutEND;
                 iw_sockets_close(sock);
                 return;
             }
@@ -6941,7 +6932,7 @@ class __wifi__ {
             // Perform the scan
             if (iw_scan(sock, const_cast<char*>(interface), range.we_version_compiled, &head) < 0)
             {
-                log_error("could not scan");
+                loutE << "could not scan" << loutEND;
                 iw_sockets_close(sock);
                 return;
             }
@@ -6953,14 +6944,14 @@ class __wifi__ {
                 if (result->b.has_essid)
                 {
                     string ssid(result->b.essid);
-                    log_info(
-                        "\nSSID: "    + ssid +
-                        "\nSTATUS: "  + to_string(result->stats.status) +
-                        "\nQUAL: "    + to_string(result->stats.qual.qual) +
-                        "\nLEVEL: "   + to_string(result->stats.qual.level) +
-                        "\nNOICE: "   + to_string(result->stats.qual.noise) +
-                        "\nBITRATE: " + to_string(result->maxbitrate.value)
-                    );
+                    loutI <<
+                        "\nSSID: "    << ssid                     <<
+                        "\nSTATUS: "  << result->stats.status     <<
+                        "\nQUAL: "    << result->stats.qual.qual  <<
+                        "\nLEVEL: "   << result->stats.qual.level <<
+                        "\nNOICE: "   << result->stats.qual.noise <<
+                        "\nBITRATE: " << result->maxbitrate.value <<
+                    loutEND;
                 }
 
                 result = result->next;
@@ -6991,7 +6982,7 @@ class __wifi__ {
                     &&  addressBuffer[1] == '9'
                     &&  addressBuffer[2] == '2')
                     {
-                        log_info("Interface: " + string(ifa->ifa_name) + " Address: " + addressBuffer);
+                        loutI << "Interface: " << ifa->ifa_name << " Address: " << addressBuffer << loutEND;
                     }
                 }
                 else if (ifa->ifa_addr->sa_family == AF_INET6) // check it is IP6
@@ -7000,7 +6991,7 @@ class __wifi__ {
                     tmpAddrPtr = &((struct sockaddr_in6*)ifa->ifa_addr)->sin6_addr;
                     char addressBuffer[INET6_ADDRSTRLEN];
                     inet_ntop(AF_INET6, tmpAddrPtr, addressBuffer, INET6_ADDRSTRLEN);
-                    log_info("Interface: " + string(ifa->ifa_name) + " Address: " + addressBuffer);
+                    loutI << "Interface: " << ifa->ifa_name << " Address: " << addressBuffer << loutEND;
                 } 
                 // Here, you could attempt to deduce the interface type (e.g., wlan for WiFi) by name or other means
             }
@@ -9377,7 +9368,7 @@ class __screen_settings__ {
 
             if (!res_reply)
             {
-                log_error("Could not get screen resources");
+                loutE << "Could not get screen resources" << loutEND;
                 return;
             }
 
@@ -9387,7 +9378,7 @@ class __screen_settings__ {
 
             if (!outputs_len)
             {
-                log_error("No outputs found");
+                loutE << "No outputs found" << loutEND;
                 free(res_reply);
                 return;
             }
@@ -9400,7 +9391,7 @@ class __screen_settings__ {
 
             if (!output_info_reply || output_info_reply->crtc == XCB_NONE)
             {
-                log_error("Output is not connected to any CRTC");
+                loutE << "Output is not connected to any CRTC" << loutEND;
                 free(output_info_reply);
                 free(res_reply);
                 return;
@@ -9440,11 +9431,11 @@ class __screen_settings__ {
 
             if (!set_crtc_config_reply)
             {
-                log_error("Failed to set mode");
+                loutE << "Failed to set mode" << loutEND;
             }
             else
             {
-                log_info("Mode set successfully");
+                loutI << "Mode set successfully" << loutEND;
             }
 
             free(set_crtc_config_reply);
@@ -9649,7 +9640,7 @@ class __screen_settings__ {
 
             if (!set_crtc_config_reply)
             {
-                log_error("Failed to set mode");
+                loutE << "Failed to set mode" << loutEND;
             }
 
             free(set_crtc_config_reply);
@@ -9708,7 +9699,7 @@ class __system_settings__ {
 
             if (reply == nullptr)
             {
-                log_error("xcb_input_xi_query_device_reply_t == nullptr");
+                loutE << "xcb_input_xi_query_device_reply_t == nullptr" << loutEND;
                 return;
             }
 
@@ -9725,8 +9716,8 @@ class __system_settings__ {
                     pointer_device._device_id   = device->deviceid;
                     pointer_vec.push_back(pointer_device);
 
-                    log_info("Found pointing device:" + string(device_name));
-                    log_info("Device ID:" + to_string(device->deviceid));
+                    loutI << "Found pointing device: " << device_name << loutEND;
+                    loutI << "Device ID" << device->deviceid << loutEND;
                 }
             }
 
