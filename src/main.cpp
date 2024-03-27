@@ -10583,6 +10583,8 @@ class __dock__ {
 
             if (__state == MIN)
             {
+                dock_menu.raise();
+                dock_menu.focus_input();
                 __animate__::window(
                     dock_menu,
                     SCREEN_CENTER_X(2),
