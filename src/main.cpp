@@ -10618,7 +10618,7 @@ class __dock__ {
                 if (wm->focused_client != nullptr)
                 {
                     f_c = wm->focused_client;
-                    wm->focus_none();
+                    wm->root.focus_input();
                     wm->focused_client = nullptr;
                 }
 
