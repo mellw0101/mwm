@@ -10602,8 +10602,8 @@ class __dock__ {
                 if (wm->focused_client != nullptr) f_c = wm->focused_client;
 
                 dock_menu.map();
-                // anim_dock_menu(MAX);
                 dock_menu.raise();
+                anim_dock_menu(MAX);
                 dock_search.show();
             }
         }
@@ -10612,7 +10612,7 @@ class __dock__ {
         {
             if (__window == dock_menu)
             {
-                // anim_dock_menu(MIN);
+                anim_dock_menu(MIN);
                 dock_menu.unmap();
 
                 if (f_c != nullptr)
