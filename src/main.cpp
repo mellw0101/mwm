@@ -10552,7 +10552,7 @@ class __dock__ {
 
         void anim_dock_menu(dock_anim_t __state)
         {
-            const int duration = 500;
+            const int duration = 200;
 
             if (__state == MAX)
             {
