@@ -10599,7 +10599,12 @@ class __dock__ {
         {
             if (__window == dock_menu)
             {
-                if (wm->focused_client != nullptr) f_c = wm->focused_client;
+                if (wm->focused_client != nullptr)
+                {
+                    f_c = wm->focused_client;
+                    wm->unfocus();
+                    wm->focused_client = nullptr;
+                }
 
                 dock_menu.map();
                 dock_menu.raise();
