@@ -10624,7 +10624,10 @@ class __dock__ {
 
                 dock_menu.map();
                 dock_menu.raise();
+                dock_menu.focus_input();
                 anim_dock_menu(MAX);
+                dock_menu.raise();
+                dock_menu.focus_input();
                 dock_search.show();
             }
         }
