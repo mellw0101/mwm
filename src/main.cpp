@@ -10549,10 +10549,10 @@ class __dock__ {
         {
             dock_menu.create_window(
                 screen->root,
-                SCREEN_CENT_X(),
+                SCREEN_CENTER_X(2),
                 SCREEN_BOTTOM_Y(2),
-                _width,
-                _height,
+                2,
+                2,
                 RED
             );
 
