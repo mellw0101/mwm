@@ -10564,6 +10564,7 @@ class __dock__ {
                     _height,
                     duration
                 );
+                dock_menu.raise();
             }
 
             if (__state == MIN)
