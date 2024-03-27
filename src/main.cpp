@@ -6018,6 +6018,18 @@ class Window_Manager {
                 free(reply);
             }
 
+            void focus_none()
+            {
+                VOID_COOKIE = xcb_set_input_focus(
+                    conn,
+                    XCB_NONE,
+                    screen->root,
+                    XCB_CURRENT_TIME
+                );
+                FLUSH_X();
+                CHECK_VOID_COOKIE();
+            }
+
         /* Window       */
             bool window_exists(const uint32_t &__window)
             {
@@ -10602,7 +10614,7 @@ class __dock__ {
                 if (wm->focused_client != nullptr)
                 {
                     f_c = wm->focused_client;
-                    wm->unfocus();
+                    wm->focus_none();
                     wm->focused_client = nullptr;
                 }
 
