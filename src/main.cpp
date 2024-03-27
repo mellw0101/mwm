@@ -2649,13 +2649,14 @@ class window {
             
             void focus_input()
             {
-                xcb_set_input_focus(
-                    conn, 
-                    XCB_INPUT_FOCUS_POINTER_ROOT, 
-                    _window, 
+                VOID_COOKIE = xcb_set_input_focus(
+                    conn,
+                    XCB_NONE,
+                    _window,
                     XCB_CURRENT_TIME
                 );
                 FLUSH_X();
+                CHECK_VOID_COOKIE();
             }
 
             void send_event(uint32_t __event_mask, void *__value_list = nullptr)
