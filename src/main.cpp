@@ -2715,6 +2715,14 @@ class window {
                 }
             }
 
+            void update(const uint32_t & x, const uint32_t & y, const uint32_t & width, const uint32_t & height)
+            {
+                _x = x;
+                _y = y;
+                _width = width;
+                _height = height;
+            }
+
         /* Event         */
             template<typename Callback>
             void on_expose_event(Callback&& callback)
@@ -4453,15 +4461,7 @@ class window {
                 );
                 xcb_flush(conn);
             }
-            
-            void update(const uint32_t & x, const uint32_t & y, const uint32_t & width, const uint32_t & height)
-            {
-                _x = x;
-                _y = y;
-                _width = width;
-                _height = height;
-            }
-            
+
             /**
              * @brief Configures the window with the specified mask and value.
              * 
@@ -7539,8 +7539,7 @@ class __status_bar__ {
  * @brief Class for animating the position and size of an XCB window.
  *
  */
-class Mwm_Animator
-{
+class Mwm_Animator {
     public:
     // Constructors And Destructor.
         Mwm_Animator(const uint32_t &window)
@@ -8306,6 +8305,27 @@ class Mwm_Animator
             const uint32_t x = currentX;
             c->frame.x(x);
             xcb_flush(conn);
+        }
+};
+
+class __animate__ {
+    public:
+    /* Methods */
+        static void window(window &__window, int __end_x, int __end_y, int __end_width, int __end_height, int __duration)
+        {
+            Mwm_Animator anim(__window);
+            anim.animate(
+                __window.x(),
+                __window.y(),
+                __window.width(),
+                __window.height(),
+                __end_x,
+                __end_y,
+                __end_width,
+                __end_height,
+                __duration
+            );
+            __window.update(__end_x, __end_y, __end_width, __end_height);
         }
 };
 
@@ -10546,6 +10566,7 @@ class __dock__ {
                 if (wm->focused_client != nullptr) f_c = wm->focused_client;
 
                 dock_menu.map();
+                __animate__::window(dock_menu, 500, 400, 300, 300, 500);
                 dock_menu.raise();
                 dock_search.show();
             }
