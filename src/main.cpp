@@ -210,6 +210,7 @@ static string user;
     string("/home/" + user + __address).c_str()
 
 #define SCREEN_CENTER_X(__window_width)  ((screen->width_in_pixels / 2) - (__window_width / 2))
+#define SCREEN_CENT_X()                  (screen->width_in_pixels / 2)
 #define SCREEN_CENTER_Y(__window_height) ((screen->height_in_pixels / 2) - (__window_height / 2))
 #define SCREEN_BOTTOM_Y(__window_height) (screen->height_in_pixels - __window_height)
 
@@ -10548,8 +10549,8 @@ class __dock__ {
         {
             dock_menu.create_window(
                 screen->root,
-                SCREEN_CENTER_X(_width),
-                SCREEN_BOTTOM_Y(_height),
+                SCREEN_CENT_X(),
+                SCREEN_BOTTOM_Y(2),
                 _width,
                 _height,
                 RED
@@ -10566,7 +10567,14 @@ class __dock__ {
                 if (wm->focused_client != nullptr) f_c = wm->focused_client;
 
                 dock_menu.map();
-                __animate__::window(dock_menu, 500, 400, 300, 300, 500);
+                __animate__::window(
+                    dock_menu,
+                    SCREEN_CENTER_X(_width),
+                    SCREEN_BOTTOM_Y(_height),
+                    _width,
+                    _height,
+                    500
+                );
                 dock_menu.raise();
                 dock_search.show();
             }
