@@ -1812,6 +1812,7 @@ class __pid_manager__ {
         {
             for (pid_data_t pid_data : _pid_vec)
             {
+                if (pid_data.name == "code") continue;
                 kill_pid(pid_data.pid);
             }
         }
@@ -12850,7 +12851,6 @@ class Events {
         void focus_in_handler(const xcb_generic_event_t *&ev)
         {
             RE_CAST_EV(xcb_focus_in_event_t);
-            loutWin(e->event);
             GET_CLIENT_FROM_WINDOW(e->event);
 
             c->win.ungrab_button({
@@ -12865,7 +12865,6 @@ class Events {
         void focus_out_handler(const xcb_generic_event_t *&ev)
         {
             RE_CAST_EV(xcb_focus_out_event_t);
-            loutWin(e->event);
             GET_CLIENT_FROM_WINDOW(e->event);
             c->win.grab_button({
                 { L_MOUSE_BUTTON, NULL }
