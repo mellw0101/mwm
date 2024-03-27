@@ -10545,6 +10545,40 @@ class __dock__ {
         client *f_c = nullptr;
 
     /* Methods     */
+        typedef enum {
+            MAX,
+            MIN
+        } dock_anim_t;
+
+        void anim_dock_menu(dock_anim_t __state)
+        {
+            const int duration = 500;
+
+            if (__state == MAX)
+            {
+                __animate__::window(
+                    dock_menu,
+                    SCREEN_CENTER_X(_width),
+                    SCREEN_BOTTOM_Y(_height),
+                    _width,
+                    _height,
+                    duration
+                );
+            }
+
+            if (__state == MIN)
+            {
+                __animate__::window(
+                    dock_menu,
+                    SCREEN_CENTER_X(2),
+                    SCREEN_BOTTOM_Y(2),
+                    2,
+                    2,
+                    duration
+                );
+            }
+        }
+
         void create_window__()
         {
             dock_menu.create_window(
@@ -10567,14 +10601,7 @@ class __dock__ {
                 if (wm->focused_client != nullptr) f_c = wm->focused_client;
 
                 dock_menu.map();
-                __animate__::window(
-                    dock_menu,
-                    SCREEN_CENTER_X(_width),
-                    SCREEN_BOTTOM_Y(_height),
-                    _width,
-                    _height,
-                    500
-                );
+                anim_dock_menu(MAX);
                 dock_menu.raise();
                 dock_search.show();
             }
@@ -10584,6 +10611,7 @@ class __dock__ {
         {
             if (__window == dock_menu)
             {
+                anim_dock_menu(MIN);
                 dock_menu.unmap();
 
                 if (f_c != nullptr)
