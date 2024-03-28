@@ -662,13 +662,7 @@ class lout {
 			buffer << __errno.value;
 			return *this;
 		}
-
-		// lout& err(const string &__err_msg)
-		// {
-		// 	buffer << __err_msg << ": " << strerror(errno) << " (errno: " << errno << ")";
-		// 	return *this;
-		// }
-
+		
         template<typename T>
         typename enable_if<is_arithmetic<T>::value, lout&>::type
         operator<<(T value)
@@ -684,6 +678,12 @@ class lout {
             buffer << message;
             return *this;
         }
+
+		// lout& err(const string &__err_msg)
+		// {
+		// 	buffer << __err_msg << ": " << strerror(errno) << " (errno: " << errno << ")";
+		// 	return *this;
+		// }
 
 		// template<typename T>
 		// lout& operator<<(const T& message)
@@ -739,7 +739,7 @@ class lout {
 				}
 				default:
 				{
-					return std::to_string(level);
+					return to_string(level);
 				}
 			}
 		}

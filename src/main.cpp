@@ -315,17 +315,23 @@ namespace { // Tools
      * @brief Flushes any X server requests in que and checks for errors 
      *
      */
-    void flush_x(const char *__calling_function)
+    void flush_x(const char *__calling_function, uint32_t __window = 0)
     {
         int err = xcb_flush(conn);
         if (err <= 0)
         {
+            if (__window != 0)
+            {
+                loutE << WINDOW_ID_BY_INPUT(__window) << "Error flushing the x server: " << loutCEcode(err) << '\n';
+            }
+
             loutE << "Error flushing the x server: " << loutCEcode(err) << '\n';
         }
     }
-    #define FLUSH_X() flush_x(__func__)
+    #define FLUSH_X()    flush_x(__func__)
+    #define FLUSH_XWin() flush_x(__func__, _window)
 
-    void check_xcb_void_cookie_t(xcb_void_cookie_t cookie, const char *__calling_function)
+    void check_xcb_void_cookie(xcb_void_cookie_t cookie, const char *__calling_function)
     {
         xcb_generic_error_t *error = xcb_request_check(conn, cookie);
         if (error)
@@ -335,7 +341,7 @@ namespace { // Tools
         }
     }
     #define VOID_COOKIE xcb_void_cookie_t cookie
-    #define CHECK_VOID_COOKIE() check_xcb_void_cookie_t(cookie, __func__)
+    #define CHECK_VOID_COOKIE() check_xcb_void_cookie(cookie, __func__)
 
     void pop_last_ss(stringstream & __ss)
     {
@@ -2700,7 +2706,7 @@ class window {
 
                 if (protocols_reply == nullptr)
                 {
-                    log_error("protocols reply is null");
+                    loutE << "protocols reply is null" << loutEND;
                     free(protocols_reply);
                     free(delete_reply);
                     return;
@@ -2708,7 +2714,7 @@ class window {
 
                 if (delete_reply == nullptr)
                 {
-                    log_error("delete reply is null");
+                    loutE << "delete reply is null" << loutEND;
                     free(protocols_reply);
                     free(delete_reply);
                     return;
@@ -2760,8 +2766,9 @@ class window {
                         .count  = 0                               /* < Number of expose events to follow if this is part of a sequence */
                     };
 
-                    xcb_send_event(conn, false, _window, XCB_EVENT_MASK_EXPOSURE, (char *)&expose_event);
-                    xcb_flush(conn);
+                    VOID_COOKIE = xcb_send_event(conn, false, _window, XCB_EVENT_MASK_EXPOSURE, (char *)&expose_event);
+                    FLUSH_XWin();
+                    CHECK_VOID_COOKIE();
                 }
 
                 if (__event_mask & XCB_EVENT_MASK_STRUCTURE_NOTIFY)
@@ -2782,8 +2789,9 @@ class window {
                     event.pad0              = 0;
                     event.sequence          = 0;
 
-                    xcb_send_event(conn, false, _window, XCB_EVENT_MASK_STRUCTURE_NOTIFY, (char *)&event);
-                    xcb_flush(conn);
+                    VOID_COOKIE = xcb_send_event(conn, false, _window, XCB_EVENT_MASK_STRUCTURE_NOTIFY, (char *)&event);
+                    FLUSH_XWin();
+                    CHECK_VOID_COOKIE();
                 }
 
                 if (__event_mask & KILL_WINDOW)
@@ -2799,8 +2807,9 @@ class window {
                     ev.data.data32[0] = value_list[2];
                     ev.data.data32[1] = XCB_CURRENT_TIME;
 
-                    xcb_send_event(conn, 0, _window, XCB_EVENT_MASK_NO_EVENT, (char *) &ev);
-                    xcb_flush(conn);
+                    VOID_COOKIE = xcb_send_event(conn, 0, _window, XCB_EVENT_MASK_NO_EVENT, (char *) &ev);
+                    FLUSH_XWin();
+                    CHECK_VOID_COOKIE();
                 }
             }
 
@@ -4254,7 +4263,26 @@ class window {
                     __y,
                     __str
                 );
-                FLUSH_X();
+                FLUSH_XWin();
+                CHECK_VOID_COOKIE();
+            }
+
+            void draw_text_auto_color_center(const string &__str, const int &__text_color = WHITE, const int &__backround_color = 0, const char *__font_name = DEFAULT_FONT)
+            {
+                get_font(__font_name);
+                int backround_color = __backround_color;
+                if (backround_color == 0) backround_color = _color;
+                create_font_gc(__text_color, backround_color, font);
+                VOID_COOKIE = xcb_image_text_8(
+                    conn,
+                    strlen(__str.c_str()),
+                    _window,
+                    font_gc,
+                    CENTER_TEXT(_width, __str.length()),
+                    CENTER_TEXT_Y(_height),
+                    __str.c_str()
+                );
+                FLUSH_XWin();
                 CHECK_VOID_COOKIE();
             }
 
@@ -5913,11 +5941,12 @@ class context_menu {
             for (int i(0), y(0); i < entries.size(); ++i, y += _height)
             {
                 entries[i].make_window(context_window, 0, y, _width, _height);
-                entries[i].window.draw_text_auto_color(
-                    entries[i].name.c_str(),
-                    CENTER_TEXT((_width - BORDER_SIZE), entries[i].name.length()),
-                    CENTER_TEXT_Y(_height)
-                );
+                entries[i].window.draw_text_auto_color_center(entries[i].name);
+                // entries[i].window.draw_text_auto_color(
+                //     entries[i].name.c_str(),
+                //     CENTER_TEXT((_width - BORDER_SIZE), entries[i].name.length()),
+                //     CENTER_TEXT_Y(_height)
+                // );
             }
         }
     
