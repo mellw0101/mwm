@@ -5909,7 +5909,6 @@ class Entry {
             );
             window.grab_button({ { L_MOUSE_BUTTON, NULL } });
             window.on_expose_event([this]() -> void { draw(); });
-            window.on_L_MOUSE_BUTTON_PRESS_event([&]() -> void { action(); });
         }
 
         void draw()
