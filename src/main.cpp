@@ -5913,7 +5913,7 @@ class context_menu {
                 entries[i].window.draw_text_auto_color(
                     entries[i].name.c_str(),
                     CENTER_TEXT((_width - BORDER_SIZE), entries[i].name.length()),
-                    13
+                    15
                 );
             }
         }
