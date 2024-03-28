@@ -5853,7 +5853,7 @@ class context_menu {
     private:
     /* Variabels */
         int16_t  _x = 0, _y = 0;
-        uint32_t _width = 120, _height = 30;
+        uint32_t _width = 120, _height = 20;
 
         window context_window;
         int border_size = 1;
