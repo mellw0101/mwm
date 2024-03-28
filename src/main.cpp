@@ -5844,11 +5844,15 @@ class Entry {
 };
 
 class context_menu {
+    /* Defines */
+        int16_t  _x = 0, _y = 0;
+        uint32_t _width = 120, _height = 20;
+
     private:
     // Variabels.
         window context_window;
-        size_pos size_pos;
-        window_borders border;
+        // size_pos size_pos;
+        // window_borders border;
         int border_size = 1;
         
         vector<Entry>(entries);
@@ -5858,7 +5862,7 @@ class context_menu {
     // Methods.
         void create_dialog_win()
         {
-            context_window.create_default(screen->root, 0, 0, size_pos.width, size_pos.height);
+            context_window.create_default(screen->root, 0, 0, _width, _height);
             uint32_t mask = XCB_EVENT_MASK_FOCUS_CHANGE | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY | XCB_EVENT_MASK_POINTER_MOTION;
             context_window.apply_event_mask(& mask);
             context_window.set_backround_color(DARK_GREY);
@@ -5913,8 +5917,8 @@ class context_menu {
                     context_window,
                     (0 + (BORDER_SIZE / 2)),
                     (y + (BORDER_SIZE / 2)),
-                    (size_pos.width - BORDER_SIZE),
-                    (size_pos.height - BORDER_SIZE)
+                    (_width - BORDER_SIZE),
+                    (_height - BORDER_SIZE)
                 );
                 entry.window.draw_text(
                     entry.name.c_str(),
@@ -5924,7 +5928,7 @@ class context_menu {
                     2,
                     14
                 );
-                y += size_pos.height;
+                y += _height;
             }
         }
     
@@ -5937,26 +5941,26 @@ class context_menu {
         
         void show()
         {
-            size_pos.x = pointer.x();
-            size_pos.y = pointer.y();    
-            uint32_t height = entries.size() * size_pos.height;
-            if (size_pos.y + height > screen->height_in_pixels)
+            _x = m_pointer->x();
+            _y = m_pointer->y();
+
+            if (_y + _height > screen->height_in_pixels)
             {
-                size_pos.y = (screen->height_in_pixels - height);
+                _y = (screen->height_in_pixels - _height);
             }
 
-            if (size_pos.x + size_pos.width > screen->width_in_pixels)
+            if (_x + _width > screen->width_in_pixels)
             {
-                size_pos.x = (screen->width_in_pixels - size_pos.width);
+                _x = (screen->width_in_pixels - _width);
             }
 
-            context_window.x_y_height((size_pos.x - BORDER_SIZE), (size_pos.y - BORDER_SIZE), height);
+            context_window.x_y_height((_x - BORDER_SIZE), (_y - BORDER_SIZE), _height);
             context_window.map();
             context_window.raise();
             make_entries();
         }
         
-        void add_entry(const char * name, function<void()> action)
+        void add_entry(string name, function<void()> action)
         {
             Entry entry;
             entry.name = name;
@@ -5967,15 +5971,15 @@ class context_menu {
     // consructor.
         context_menu()
         {
-            size_pos.x      = pointer.x();
-            size_pos.y      = pointer.y();
-            size_pos.width  = 120;
-            size_pos.height = 20;
+            // size_pos.x      = pointer.x();
+            // size_pos.y      = pointer.y();
+            // size_pos.width  = 120;
+            // size_pos.height = 20;
 
-            border.left   = size_pos.x;
-            border.right  = (size_pos.x + size_pos.width);
-            border.top    = size_pos.y;
-            border.bottom = (size_pos.y + size_pos.height);
+            // border.left   = size_pos.x;
+            // border.right  = (size_pos.x + size_pos.width);
+            // border.top    = size_pos.y;
+            // border.bottom = (size_pos.y + size_pos.height);
 
             create_dialog_win();
         }
