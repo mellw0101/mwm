@@ -5820,25 +5820,10 @@ class Entry {
     /* Variabels */
         window window;
         bool menu = false;
-        string entryName;
-        function<void()> entryAction;
+        string name;
+        function<void()> action;
 
     /* Methods */
-        void add_name(const char *name)
-        {
-            entryName = name;
-        }
-
-        void add_action(function<void()> action)
-        {
-            entryAction = action;
-        }
-
-        void activate() const
-        {
-            entryAction();
-        }
-
         void make_window(const xcb_window_t & parent_window, const int16_t & x, const int16_t & y, const uint16_t & width, const uint16_t & height)
         {
             window.create_default(
@@ -5856,10 +5841,6 @@ class Entry {
             window.grab_button({ { L_MOUSE_BUTTON, NULL } });
             window.map();
         }
-
-    private:
-    // vatiabels.
-        
 };
 
 class context_menu {
@@ -5918,7 +5899,7 @@ class context_menu {
             {
                 if (*w == entry.window)
                 {
-                    entry.activate();
+                    entry.action();
                 }
             }
         }
@@ -5936,7 +5917,7 @@ class context_menu {
                     (size_pos.height - BORDER_SIZE)
                 );
                 entry.window.draw_text(
-                    entry.entryName.c_str(),
+                    entry.name.c_str(),
                     WHITE,
                     BLACK,
                     "7x14",
@@ -5975,11 +5956,11 @@ class context_menu {
             make_entries();
         }
         
-        void add_entry(const char * name, std::function<void()> action)
+        void add_entry(const char * name, function<void()> action)
         {
             Entry entry;
-            entry.add_name(name);
-            entry.add_action(action);
+            entry.name = name;
+            entry.action = action;
             entries.push_back(entry);
         }
     
