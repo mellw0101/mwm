@@ -5924,14 +5924,8 @@ class context_menu {
         vector<Entry>(entries);
 
     /* Methods   */
-        void create_dialog_win()
+        void create_dialog_win__()
         {
-            // context_window.create_default(screen->root, 0, 0, _width, _height);
-            // uint32_t mask = XCB_EVENT_MASK_FOCUS_CHANGE | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY | XCB_EVENT_MASK_POINTER_MOTION;
-            // context_window.apply_event_mask(& mask);
-            // context_window.set_backround_color(DARK_GREY);
-            // context_window.raise();
-
             context_window.create_window(
                 screen->root,
                 0,
@@ -5944,13 +5938,13 @@ class context_menu {
             );
         }
         
-        void hide()
+        void hide__()
         {
             context_window.unmap();
             context_window.kill();
         }
         
-        void configure_events()
+        void configure_events__()
         {
             event_handler->setEventCallback(EV_CALL(XCB_EXPOSE)
             {
@@ -5971,7 +5965,7 @@ class context_menu {
                         }
                     }
 
-                    hide();
+                    hide__();
                 }
             });
 
@@ -5980,7 +5974,7 @@ class context_menu {
                 RE_CAST_EV(xcb_enter_notify_event_t);
                 if (e->event == screen->root)
                 {
-                    hide();
+                    hide__();
                 }
 
                 for (int i = 0; i < entries.size(); ++i)
@@ -6005,7 +5999,7 @@ class context_menu {
             });
         }
 
-        void make_entries()
+        void make_entries__()
         {
             for (int i(0), y(0); i < entries.size(); ++i, y += _height)
             {
@@ -6018,7 +6012,7 @@ class context_menu {
     // Methods.
         void init()
         {
-            configure_events();
+            configure_events__();
         }
         
         void show()
@@ -6040,7 +6034,7 @@ class context_menu {
             context_window.x_y_height((_x - BORDER_SIZE), (_y - BORDER_SIZE), new_height);
             context_window.map();
             context_window.raise();
-            make_entries();
+            make_entries__();
         }
 
         void expose(uint32_t __window)
@@ -6063,7 +6057,7 @@ class context_menu {
         }
     
     /* Consructor */
-        context_menu() { create_dialog_win(); }
+        context_menu() { create_dialog_win__(); }
 };
 
 class Window_Manager {
