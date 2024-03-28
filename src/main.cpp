@@ -5909,13 +5909,7 @@ class context_menu {
         {
             for (int i(0), y(0); i < entries.size(); ++i, y += _height)
             {
-                entries[i].make_window(
-                    context_window,
-                    (0 + (BORDER_SIZE / 2)),
-                    (y + (BORDER_SIZE /2)),
-                    (_width - BORDER_SIZE),
-                    (_height - BORDER_SIZE)
-                );
+                entries[i].make_window(context_window, 0, y, _width, _height);
                 entries[i].window.draw_text_auto_color(
                     entries[i].name.c_str(),
                     CENTER_TEXT((_width - BORDER_SIZE), entries[i].name.length()),
