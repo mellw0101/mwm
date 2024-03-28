@@ -7565,20 +7565,22 @@ class __status_bar__ {
             {
                 if (_audio_window.get_current_backround_color() == WHITE)
                 {
-                    _audio_window.draw_text_auto_color(
-                        "Audio",
-                        CENTER_TEXT(_audio_window.width(), TEXT_LEN("Audio")),
-                        15,
-                        BLACK
-                    );
+                    // _audio_window.draw_text_auto_color(
+                    //     "Audio",
+                    //     CENTER_TEXT(_audio_window.width(), TEXT_LEN("Audio")),
+                    //     15,
+                    //     BLACK
+                    // );
+                    _audio_window.draw_text_auto_color_center("Audio", BLACK);
                 }
                 else
                 {
-                    _audio_window.draw_text_auto_color(
-                        "Audio",
-                        CENTER_TEXT(_audio_window.width(), TEXT_LEN("Audio")),
-                        15
-                    );
+                    // _audio_window.draw_text_auto_color(
+                    //     "Audio",
+                    //     CENTER_TEXT(_audio_window.width(), TEXT_LEN("Audio")),
+                    //     15
+                    // );
+                    _audio_window.draw_text_auto_color_center("Audio");
                 }
             }
 
