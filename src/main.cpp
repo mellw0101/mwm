@@ -2698,7 +2698,7 @@ class window {
         /* Main          */
             void raise()
             {
-                xcb_configure_window(
+                VOID_COOKIE = xcb_configure_window(
                     conn,
                     _window,
                     XCB_CONFIG_WINDOW_STACK_MODE, 
@@ -2707,43 +2707,48 @@ class window {
                         XCB_STACK_MODE_ABOVE
                     }
                 );
-                FLUSH_X();
+                FLUSH_XWin();
+                CHECK_VOID_COOKIE();
             }
             
             void map()
             {
-                xcb_map_window(conn, _window);
-                FLUSH_X();
+                VOID_COOKIE = xcb_map_window(conn, _window);
+                FLUSH_XWin();
+                CHECK_VOID_COOKIE();
             }
             
             void unmap()
             {
-                xcb_unmap_window(conn, _window);
-                FLUSH_X();
+                VOID_COOKIE = xcb_unmap_window(conn, _window);
+                FLUSH_XWin();
+                CHECK_VOID_COOKIE();
             }
             
             void reparent(uint32_t __new_parent, int16_t __x, int16_t __y)
             {
-                xcb_reparent_window(
+                VOID_COOKIE = xcb_reparent_window(
                     conn,
                     _window,
                     __new_parent,
                     __x,
                     __y
                 );
-                FLUSH_X();
+                FLUSH_XWin();
+                CHECK_VOID_COOKIE();
             }
             
             void make_child(uint32_t __window_to_make_child, uint32_t __child_x, uint32_t __child_y)
             {
-                xcb_reparent_window(
+                VOID_COOKIE = xcb_reparent_window(
                     conn,
                     __window_to_make_child,
                     _window,
                     __child_x,
                     __child_y
                 );
-                FLUSH_X();
+                FLUSH_XWin();
+                CHECK_VOID_COOKIE();
             }
             
             void kill()
@@ -2788,7 +2793,7 @@ class window {
                     _width,
                     _height
                 );
-                FLUSH_X();
+                FLUSH_XWin();
                 CHECK_VOID_COOKIE();
             }
             
@@ -2800,7 +2805,7 @@ class window {
                     _window,
                     XCB_CURRENT_TIME
                 );
-                FLUSH_X();
+                FLUSH_XWin();
                 CHECK_VOID_COOKIE();
             }
 
@@ -2818,7 +2823,13 @@ class window {
                         .count  = 0                               /* < Number of expose events to follow if this is part of a sequence */
                     };
 
-                    VOID_COOKIE = xcb_send_event(conn, false, _window, XCB_EVENT_MASK_EXPOSURE, (char *)&expose_event);
+                    VOID_COOKIE = xcb_send_event(
+                        conn,
+                        false,
+                        _window,
+                        XCB_EVENT_MASK_EXPOSURE,
+                        (char *)&expose_event
+                    );
                     FLUSH_XWin();
                     CHECK_VOID_COOKIE();
                 }
@@ -2841,7 +2852,13 @@ class window {
                     event.pad0              = 0;
                     event.sequence          = 0;
 
-                    VOID_COOKIE = xcb_send_event(conn, false, _window, XCB_EVENT_MASK_STRUCTURE_NOTIFY, (char *)&event);
+                    VOID_COOKIE = xcb_send_event(
+                        conn,
+                        false,
+                        _window,
+                        XCB_EVENT_MASK_STRUCTURE_NOTIFY,
+                        (char *)&event
+                    );
                     FLUSH_XWin();
                     CHECK_VOID_COOKIE();
                 }
@@ -2859,18 +2876,24 @@ class window {
                     ev.data.data32[0] = value_list[2];
                     ev.data.data32[1] = XCB_CURRENT_TIME;
 
-                    VOID_COOKIE = xcb_send_event(conn, 0, _window, XCB_EVENT_MASK_NO_EVENT, (char *) &ev);
+                    VOID_COOKIE = xcb_send_event(
+                        conn,
+                        0,
+                        _window,
+                        XCB_EVENT_MASK_NO_EVENT,
+                        (char *)&ev
+                    );
                     FLUSH_XWin();
                     CHECK_VOID_COOKIE();
                 }
             }
 
-            void update(const uint32_t & x, const uint32_t & y, const uint32_t & width, const uint32_t & height)
+            void update(uint32_t __x, uint32_t __y, uint32_t __width, uint32_t __height)
             {
-                _x = x;
-                _y = y;
-                _width = width;
-                _height = height;
+                _x      = __x;
+                _y      = __y;
+                _width  = __width;
+                _height = __height;
             }
 
         /* Event         */
@@ -2905,7 +2928,7 @@ class window {
             template<typename Callback>
             void on_L_MOUSE_BUTTON_PRESS_event(Callback&& callback)
             {
-                event_handler->setEventCallback(XCB_BUTTON_PRESS, [this, callback](Ev ev)
+                EV_ID = event_handler->setEventCallback(XCB_BUTTON_PRESS, [this, callback](Ev ev)
                 {
                     RE_CAST_EV(xcb_button_press_event_t);
                     if (e->event == _window)
@@ -2916,13 +2939,12 @@ class window {
                         }
                     }
                 });
+                ADD_EV_ID_IWIN(XCB_BUTTON_PRESS);
             }
 
             void add_event_id(uint8_t __event_type, int __event_id)
             {
-                uint8_t event_type = __event_type;
-                int event_id = __event_id;
-                window_ev_id_handler.add_ev_id_to_map(event_id, event_type);
+                window_ev_id_handler.add_ev_id_to_map(__event_id, __event_type);
             }
 
         /* Experimental  */
