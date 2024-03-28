@@ -5981,7 +5981,7 @@ class context_menu {
                     //     }
                     // }
 
-                    hide__();
+                    // hide__();
                 }
             });
 
