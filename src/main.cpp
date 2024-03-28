@@ -5909,11 +5909,20 @@ class Entry {
             );
             window.grab_button({ { L_MOUSE_BUTTON, NULL } });
             window.on_expose_event([this]() -> void { draw(); });
+            window.on_button_press_event([this]() -> void { run_action(); });
         }
 
         void draw()
         {
             window.draw_acc(name);
+        }
+
+        void run_action()
+        {
+            if (action)
+            {
+                action();
+            }
         }
 };
 
