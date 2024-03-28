@@ -74,7 +74,7 @@
 #include <type_traits>
 #include <spawn.h>
 #include <sys/stat.h>
-#include <any>
+// #include <any>
 
 #include "Log.hpp"
 Logger logger;
@@ -2037,7 +2037,7 @@ class __event_handler__ {
         {
             CallbackId id = nextCallbackId++;
             eventCallbacks[eventType].emplace_back(id, std::move(callback));
-            loutI << "Current event_handler callback id" << id << loutEND;
+            loutI << "Current event_handler callback id" << id << " current eventType vector size" << eventCallbacks[eventType].size() << loutEND;
             return id;
         }
 
@@ -2864,48 +2864,48 @@ class window {
             }
 
         /* Experimental  */
-            template<typename Type>
-            void setValue(Type&& value)
-            {
-                _storedValue = forward<T>(value);
-            }
+            // template<typename Type>
+            // void setValue(Type&& value)
+            // {
+            //     _storedValue = forward<T>(value);
+            // }
 
-            template<typename Type>
-            Type getValue() const
-            {
-                try
-                {
-                    return any_cast<Type>(_storedValue);
-                }
-                catch (const bad_any_cast& e)
-                {
-                    loutE << "Bad any_cast: " << e.what() << loutEND;
-                    throw;
-                }
-            }
+            // template<typename Type>
+            // Type getValue() const
+            // {
+            //     try
+            //     {
+            //         return any_cast<Type>(_storedValue);
+            //     }
+            //     catch (const bad_any_cast& e)
+            //     {
+            //         loutE << "Bad any_cast: " << e.what() << loutEND;
+            //         throw;
+            //     }
+            // }
 
-            template<typename Func>
-            void setAction(Func&& func)
-            {
-                // Ensure the function is wrapped in a std::function with a known signature.
-                _action = function<void()>(forward<Func>(func));
-            }
+            // template<typename Func>
+            // void setAction(Func&& func)
+            // {
+            //     // Ensure the function is wrapped in a std::function with a known signature.
+            //     _action = function<void()>(forward<Func>(func));
+            // }
 
-            void triggerAction()
-            {
-                if (_action.has_value())
-                {
-                    try
-                    {
-                        // We need to cast back to std::function<void()> before calling.
-                        any_cast<function<void()>>(_action)();
-                    }
-                    catch (const bad_any_cast& e)
-                    {
-                        loutE << "Failed to invoke action. " << e.what() << loutEND;
-                    }
-                }
-            }
+            // void triggerAction()
+            // {
+            //     if (_action.has_value())
+            //     {
+            //         try
+            //         {
+            //             // We need to cast back to std::function<void()> before calling.
+            //             any_cast<function<void()>>(_action)();
+            //         }
+            //         catch (const bad_any_cast& e)
+            //         {
+            //             loutE << "Failed to invoke action. " << e.what() << loutEND;
+            //         }
+            //     }
+            // }
 
         /* Check         */
             bool check_atom(xcb_atom_t __atom)
@@ -4621,9 +4621,12 @@ class window {
         uint32_t _min_height = 100;
         uint8_t  _override_redirect = 0;
         pid_t    _pid = 0;
-        any      _storedValue;
-        any      _action;
-        function<void()> _func;
+
+        vector<pair<uint8_t, int>> _event_vec;
+
+        // any      _storedValue;
+        // any      _action;
+        // function<void()> _func;
 
     /* Methods     */
         /* Main       */
