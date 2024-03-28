@@ -10706,8 +10706,6 @@ class __dock__ {
                 RED
             );
 
-            loutWin(dock_menu);
-
             dock_search.create(dock_menu, 0, 0, _width, 20);
             dock_search.init();
         }
