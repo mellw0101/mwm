@@ -5935,10 +5935,11 @@ class context_menu {
         {
             _x = m_pointer->x();
             _y = m_pointer->y();
+            uint16_t new_height = (entries.size() * _height);
 
-            if (_y + _height > screen->height_in_pixels)
+            if (_y + new_height > screen->height_in_pixels)
             {
-                _y = (screen->height_in_pixels - _height);
+                _y = (screen->height_in_pixels - new_height);
             }
 
             if (_x + _width > screen->width_in_pixels)
@@ -5946,7 +5947,7 @@ class context_menu {
                 _x = (screen->width_in_pixels - _width);
             }
 
-            context_window.x_y_height((_x - BORDER_SIZE), (_y - BORDER_SIZE), _height);
+            context_window.x_y_height((_x - BORDER_SIZE), (_y - BORDER_SIZE), new_height);
             context_window.map();
             context_window.raise();
             make_entries();
