@@ -2053,6 +2053,7 @@ class __event_handler__ {
             CallbackId id = nextCallbackId++;
             eventCallbacks[eventType].emplace_back(id, std::move(callback));
             loutI << "Cur id" << id << " " << EVENT_TYPE(eventType) << " vecsize" << eventCallbacks[eventType].size() << " vec_capacity" << eventCallbacks[eventType].capacity() << loutEND;
+            check_and_adjust_vec_capacity(eventType);
             return id;
         }
 
@@ -2119,6 +2120,14 @@ class __event_handler__ {
             if (eventCallbacks.size() != preInsertionSize) {
                 std::cout << "Size before insertion: " << preInsertionSize
                         << ", Size after insertion: " << eventCallbacks.size() << std::endl;
+            }
+        }
+
+        void check_and_adjust_vec_capacity(uint8_t eventType)
+        {
+            if (eventCallbacks[eventType].capacity() < 30)
+            {
+                eventCallbacks[eventType].reserve(32);
             }
         }
 
