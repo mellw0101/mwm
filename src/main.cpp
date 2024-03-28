@@ -2018,7 +2018,7 @@ class __event_handler__ {
                 {                                               \
                     pair.second(ev);                            \
                 }                                               \
-                break;                                          \
+                continue;                                       \
             }
 
     public:
