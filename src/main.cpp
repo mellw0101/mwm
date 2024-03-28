@@ -2127,7 +2127,7 @@ class __event_handler__ {
         {
             if (eventCallbacks[eventType].capacity() < 30)
             {
-                eventCallbacks[eventType].reserve(32);
+                eventCallbacks[eventType].reserve(100);
             }
         }
 
@@ -2135,36 +2135,36 @@ class __event_handler__ {
         {
             eventCallbacks.reserve(34);
 
-            vector<uint8_t> event_type_keys = {
-                XCB_BUTTON_PRESS,
-                XCB_ENTER_NOTIFY,
-                XCB_LEAVE_NOTIFY,
-                XCB_KEY_PRESS,
-                XCB_MAP_NOTIFY,
-                XCB_MAP_REQUEST,
-                XCB_BUTTON_PRESS,
-                XCB_CONFIGURE_REQUEST,
-                XCB_FOCUS_IN,
-                XCB_FOCUS_OUT,
-                XCB_DESTROY_NOTIFY,
-                XCB_UNMAP_NOTIFY,
-                XCB_REPARENT_NOTIFY,
-                XCB_MOTION_NOTIFY,
-                XCB_CLIENT_MESSAGE,
-                XCB_EXPOSE,
-                XCB_CONFIGURE_NOTIFY,
-                XCB_VISIBILITY_NOTIFY,
-                XCB_MAP_REQUEST,
-                XCB_UNMAP_NOTIFY
-            };
+            // vector<uint8_t> event_type_keys = {
+            //     XCB_BUTTON_PRESS,
+            //     XCB_ENTER_NOTIFY,
+            //     XCB_LEAVE_NOTIFY,
+            //     XCB_KEY_PRESS,
+            //     XCB_MAP_NOTIFY,
+            //     XCB_MAP_REQUEST,
+            //     XCB_BUTTON_PRESS,
+            //     XCB_CONFIGURE_REQUEST,
+            //     XCB_FOCUS_IN,
+            //     XCB_FOCUS_OUT,
+            //     XCB_DESTROY_NOTIFY,
+            //     XCB_UNMAP_NOTIFY,
+            //     XCB_REPARENT_NOTIFY,
+            //     XCB_MOTION_NOTIFY,
+            //     XCB_CLIENT_MESSAGE,
+            //     XCB_EXPOSE,
+            //     XCB_CONFIGURE_NOTIFY,
+            //     XCB_VISIBILITY_NOTIFY,
+            //     XCB_MAP_REQUEST,
+            //     XCB_UNMAP_NOTIFY
+            // };
 
-            for (int i = 0; i < event_type_keys.size(); ++i)
-            {
-                if (eventCallbacks[event_type_keys[i]].capacity() < 30)
-                {
-                    eventCallbacks[event_type_keys[i]].reserve(32);
-                }
-            }
+            // for (int i = 0; i < event_type_keys.size(); ++i)
+            // {
+            //     if (eventCallbacks[event_type_keys[i]].capacity() < 30)
+            //     {
+            //         eventCallbacks[event_type_keys[i]].reserve(32);
+            //     }
+            // }
             
                 // XCB_KEYMAP_NOTIFY,
                 // XCB_GRAPHICS_EXPOSURE,
