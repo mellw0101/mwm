@@ -2047,7 +2047,7 @@ class __event_handler__ {
         {
             CallbackId id = nextCallbackId++;
             eventCallbacks[eventType].emplace_back(id, std::move(callback));
-            loutI << "Current event_handler callback id" << id << " current " << EVENT_TYPE(eventType) << " vector size" << eventCallbacks[eventType].size() << loutEND;
+            loutI << "Cur id" << id << " " << EVENT_TYPE(eventType) << " vecsize" << eventCallbacks[eventType].size() << loutEND;
             return id;
         }
 
@@ -2065,6 +2065,7 @@ class __event_handler__ {
                 ),
                 callbacks.end()
             );
+            loutI << "Deleting id" << id << " " << EVENT_TYPE(eventType) << " vecsize" << eventCallbacks[eventType].size() << loutEND;
         }
 
         template<typename Callback>
@@ -2090,6 +2091,46 @@ class __event_handler__ {
         CallbackId nextCallbackId = 0;
 
 }; static __event_handler__ *event_handler(nullptr);
+
+using EventCallback = function<void(Ev)>;
+struct __window_ev_id_handler__ {
+    void add_ev_id_to_map(int __event_id, uint8_t __event_type)
+    {
+        _ev_id_map[__event_id] = __event_type;
+    }
+
+    void delete_callbacks_by_ev_id()
+    {
+        for (const auto &pair : _ev_id_map)
+        {
+            event_handler->removeEventCallback(pair.second, pair.first);
+        }
+    }
+
+    unordered_map<int, uint8_t> _ev_id_map;
+
+    // unordered_map<uint32_t, unordered_map<uint8_t, vector<EventCallback>>> windowCallbacks;/* Maps a window ID to a list of event types and their associated callbacks */
+    
+        // void add_callback(uint32_t __window, uint8_t __event_type, EventCallback __callback)/* Add a callback to a window for a specific event type */
+        // {
+        //     windowCallbacks[__window][__event_type].push_back(__callback);
+        // }
+        
+        // vector<EventCallback> &get_callbacks(uint32_t __window, uint8_t __event_type)/* Get callbacks for a specific window and event type */
+        // {
+        //     return windowCallbacks[__window][__event_type];
+        // }
+
+        // void clear_callbacks_for_window_event(uint32_t __window, uint8_t __event_type)/* Remove all callbacks associated with a window for a specific event type */
+        // {
+        //     windowCallbacks[__window][__event_type].clear();
+        // }
+
+        // void clear_all_callbacks_for_window(uint32_t __window)/* Optionally, remove callbacks for all events for a specific window */
+        // {
+        //     windowCallbacks[__window].clear();
+    // }
+};
 
 class Bitmap {
     private:
@@ -2733,7 +2774,7 @@ class window {
                 free(protocols_reply);
                 free(delete_reply);
 
-                delete_all_event_callbacks();
+                window_ev_id_handler.delete_callbacks_by_ev_id();
             }
             
             void clear()
@@ -2881,7 +2922,7 @@ class window {
             {
                 uint8_t event_type = __event_type;
                 int event_id = __event_id;
-                _event_vec.push_back({event_type, event_id});
+                window_ev_id_handler.add_ev_id_to_map(event_id, event_type);
             }
 
         /* Experimental  */
@@ -4670,8 +4711,9 @@ class window {
         uint8_t  _override_redirect = 0;
         pid_t    _pid = 0;
 
-        vector<pair<uint8_t, int>> _event_vec;
+        __window_ev_id_handler__ window_ev_id_handler;
 
+        // vector<pair<uint8_t, int>> _event_vec;
         // any      _storedValue;
         // any      _action;
         // function<void()> _func;
@@ -5246,14 +5288,6 @@ class window {
                 return char2b;
             }
 
-        /* Events     */
-            void delete_all_event_callbacks()
-            {
-                for (const auto &pair : _event_vec)
-                {
-                    event_handler->removeEventCallback(pair.first, pair.second);
-                }
-            }
 };
 
 class client {
@@ -6275,7 +6309,7 @@ class Window_Manager {
             }
 
         /* Window       */
-            bool window_exists(const uint32_t &__window)
+            bool window_exists(uint32_t __window)
             {
                 xcb_generic_error_t *err;
                 free(xcb_query_tree_reply(conn, xcb_query_tree(conn, __window), &err));
@@ -10576,7 +10610,7 @@ class Dock {
 
 class __dock_search__ {
     /* Defines   */
-        constexpr uint8_t char_to_keycode(int8_t c)
+        constexpr uint8_t char_to_keycode__(int8_t c)
         {
             switch (c)
             {
@@ -10613,7 +10647,7 @@ class __dock_search__ {
             return (uint8_t)0;
         }
 
-        constexpr int8_t lower_to_upper_case(int8_t c)
+        constexpr int8_t lower_to_upper_case__(int8_t c)
         {
             if (c == '-') return '_';
             if (c == ' ') return ' ';
@@ -10621,11 +10655,11 @@ class __dock_search__ {
         }
 
         #define APPEND_TO_STR(__char) \
-            if (e->detail == char_to_keycode(__char))               \
+            if (e->detail == char_to_keycode__(__char))             \
             {                                                       \
                 if (e->state == SHIFT)                              \
                 {                                                   \
-                    search_string << lower_to_upper_case(__char);   \
+                    search_string << lower_to_upper_case__(__char); \
                 }                                                   \
                 else                                                \
                 {                                                   \
@@ -10635,7 +10669,7 @@ class __dock_search__ {
     
     private:
     /* Methods   */
-        void setup_events()
+        void setup_events__()
         {
             event_handler->setEventCallback(EV_CALL(XCB_KEY_PRESS)
             {
@@ -10722,7 +10756,7 @@ class __dock_search__ {
 
         void init()
         {
-            setup_events();
+            setup_events__();
             add_enter_action([this]() -> void
             {
                 int status = launcher.launch_child_process(search_string.str().c_str());
