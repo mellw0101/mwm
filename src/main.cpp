@@ -6021,7 +6021,7 @@ class __context_menu__ {
                 20,
                 BLACK,
                 NONE,
-                NONE
+                MAP
             );
         }
 
