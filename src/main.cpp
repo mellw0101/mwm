@@ -2124,25 +2124,25 @@ class __event_handler__ {
 
         void init_map()
         {
-            const size_t vector_reserve_size = 100;
-            const size_t map_reserve_size    = 34;
-            eventCallbacks.reserve(map_reserve_size);
+            // const size_t vector_reserve_size = 100;
+            // const size_t map_reserve_size    = 34;
+            eventCallbacks.reserve(34);
 
-            vector<uint8_t> event_type_keys;
-            for (uint8_t i = 2; i < 36; ++i)
-            {
-                event_type_keys.push_back(i);
-            }
+            // vector<uint8_t> event_type_keys;
+            // for (uint8_t i = 2; i < 36; ++i)
+            // {
+            //     event_type_keys.push_back(i);
+            // }
 
             // vector<uint8_t> event_type_keys(35);
             // iota(event_type_keys.begin(), event_type_keys.end(), 2);
 
-            for (uint8_t event_type_key : event_type_keys)
-            {
-                vector<pair<CallbackId, EventCallback>> callbacks;
-                callbacks.reserve(vector_reserve_size);
-                eventCallbacks[event_type_key] = std::move(callbacks);
-            }
+            // for (uint8_t event_type_key : event_type_keys)
+            // {
+            //     vector<pair<CallbackId, EventCallback>> callbacks;
+            //     callbacks.reserve(vector_reserve_size);
+            //     eventCallbacks[event_type_key] = std::move(callbacks);
+            // }
         }
 
     private:
