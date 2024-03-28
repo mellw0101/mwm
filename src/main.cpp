@@ -684,41 +684,47 @@ struct size_pos {
 };
 
 class mxb {
-    class XConnection
-    {
-        public: // constructor and destructor
-            
-            struct mxb_auth_info_t {
+    class XConnection {
+        public:
+        // constructor and destructor
+            struct mxb_auth_info_t
+            {
                 int namelen;
                 char* name;
                 int datalen;
                 char* data;
             };
 
-            XConnection(const char * display) {
+            XConnection(const char * display)
+            {
                 string socketPath = getSocketPath(display);
                 memset(&addr, 0, sizeof(addr)); // Initialize address
                 addr.sun_family = AF_UNIX;
                 strncpy(addr.sun_path, socketPath.c_str(), sizeof(addr.sun_path) - 1);
                 fd = socket(AF_UNIX, SOCK_STREAM, 0); // Create socket 
-                if(fd == -1) {
+                if (fd == -1)
+                {
                     throw runtime_error("Failed to create socket");
                 }
 
-                if(connect(fd, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr)) == -1) { // Connect to the X server's socket
+                if (connect(fd, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr)) == -1) // Connect to the X server's socket
+                { 
                     ::close(fd);
                     throw
                     std::runtime_error("Failed to connect to X server");
                 }
                 int displayNumber = parseDisplayNumber(display); // Perform authentication 
-                if(!authenticate_x11_connection(displayNumber, auth_info)) {
+                if (!authenticate_x11_connection(displayNumber, auth_info))
+                {
                     ::close(fd);
                     throw runtime_error("Failed to authenticate with X server");
                 }
             }
             
-            ~XConnection() {
-                if(fd != -1) {
+            ~XConnection()
+            {
+                if(fd != -1)
+                {
                     ::close(fd);
                 }
 
@@ -807,22 +813,35 @@ class mxb {
                 /* Send the request */ if (send(fd, request, 8 + nameLength, 0) == -1)
                 throw runtime_error("Failed to send QueryExtension request");
                 /* Prepare to receive the response */ char reply[32] = {0}; int received = 0;
-                /* Read the response from the server */ while(received < sizeof(reply)) {
-                int n = recv(fd, reply + received, sizeof(reply) - received, 0);
-                if(n == -1)
-                    throw runtime_error("Failed to receive QueryExtension reply");
-                else if(n == 0)
-                    throw runtime_error("Connection closed by X server");
-                received += n; }
-                if (reply[0] != 1) {
+                
+                while(received < sizeof(reply)) /* Read the response from the server */
+                {
+                    int n = recv(fd, reply + received, sizeof(reply) - received, 0);
+                    if(n == -1)
+                    {
+                        throw runtime_error("Failed to receive QueryExtension reply");
+                    }
+                    else if (n == 0)
+                    {
+                        throw runtime_error("Connection closed by X server");
+                    }
+                
+                    received += n;
+                }
+
+                if (reply[0] != 1)
+                {
                     throw runtime_error("Invalid response received from X server");
                 }
                 
                 bool extensionPresent = reply[1]; 
                 // Check if the extension is present
-                if(extensionPresent) {
+                if (extensionPresent)
+                {
                     return("Extension is supported by the X server."); 
-                } else {
+                }
+                else
+                {
                     return "Extension is not supported by the X server.";
                 }
             }
@@ -833,7 +852,8 @@ class mxb {
             mxb_auth_info_t(auth_info);
             Logger(log);
             
-            bool authenticate_x11_connection(int display_number, mxb_auth_info_t & auth_info) {
+            bool authenticate_x11_connection(int display_number, mxb_auth_info_t & auth_info)
+            {
                 const char* xauthority_env = std::getenv("XAUTHORITY"); 
                 string xauthority_file = xauthority_env ? xauthority_env : "~/.Xauthority";
 
@@ -868,7 +888,8 @@ class mxb {
                 return found;
             }
 
-            string getSocketPath(const char * display) {
+            string getSocketPath(const char * display)
+            {
                 string displayStr;
                 if(display == nullptr) {
                     char* envDisplay = getenv("DISPLAY");
@@ -892,7 +913,8 @@ class mxb {
                 return ("/tmp/.X11-unix/X" + std::to_string(displayNumber));
             }
 
-            int parseDisplayNumber(const char * display) {
+            int parseDisplayNumber(const char * display)
+            {
                 if(!display) {
                     display = getenv("DISPLAY");
                 }
@@ -976,8 +998,19 @@ class pointer {
 
         void teleport(const int16_t &x, const int16_t &y)
         {
-            xcb_warp_pointer(conn, XCB_NONE, screen->root, 0, 0, 0, 0, x, y);
-            xcb_flush(conn);
+            VOID_COOKIE = xcb_warp_pointer(
+                conn,
+                XCB_NONE,
+                screen->root,
+                0,
+                0,
+                0,
+                0,
+                x,
+                y
+            );
+            FLUSH_X();
+            CHECK_VOID_COOKIE();
         }
 
         void grab()
@@ -1018,53 +1051,104 @@ class pointer {
             CHECK_VOID_COOKIE();
         }
 
-        const char * pointer_from_enum(CURSOR CURSOR)
+        void center_pointer()
         {
-            switch (CURSOR)
+            grab();
+            int16_t x = (screen->width_in_pixels / 2);
+            int16_t y = (screen->height_in_pixels / 2);
+            teleport(x, y);
+            // xcb_warp_pointer(conn, XCB_NONE, screen->root, 0, 0, 0, 0, x, y);
+            ungrab();
+        }
+
+};
+
+class __pointer__ {
+    public:
+    /* Methods   */
+        int16_t x()
+        {
+            xcb_query_pointer_cookie_t cookie = xcb_query_pointer(conn, screen->root);
+            xcb_query_pointer_reply_t *reply = xcb_query_pointer_reply(conn, cookie, nullptr);
+            if (!reply)
             {
-                case CURSOR::arrow               : return("arrow");
-                case CURSOR::hand1               : return("hand1");
-                case CURSOR::hand2               : return("hand2");
-                case CURSOR::watch               : return("watch");
-                case CURSOR::xterm               : return("xterm");
-                case CURSOR::cross               : return("cross");
-                case CURSOR::left_ptr            : return("left_ptr");
-                case CURSOR::right_ptr           : return("right_ptr");
-                case CURSOR::center_ptr          : return("center_ptr");
-                case CURSOR::sb_v_double_arrow   : return("sb_v_double_arrow");
-                case CURSOR::sb_h_double_arrow   : return("sb_h_double_arrow");
-                case CURSOR::fleur               : return("fleur");
-                case CURSOR::question_arrow      : return("question_arrow");
-                case CURSOR::pirate              : return("pirate");
-                case CURSOR::coffee_mug          : return("coffee_mug");
-                case CURSOR::umbrella            : return("umbrella");
-                case CURSOR::circle              : return("circle");
-                case CURSOR::xsb_left_arrow      : return("xsb_left_arrow");
-                case CURSOR::xsb_right_arrow     : return("xsb_right_arrow");
-                case CURSOR::xsb_up_arrow        : return("xsb_up_arrow");
-                case CURSOR::xsb_down_arrow      : return("xsb_down_arrow");
-                case CURSOR::top_left_corner     : return("top_left_corner");
-                case CURSOR::top_right_corner    : return("top_right_corner");
-                case CURSOR::bottom_left_corner  : return("bottom_left_corner");
-                case CURSOR::bottom_right_corner : return("bottom_right_corner");
-                case CURSOR::sb_left_arrow       : return("sb_left_arrow");
-                case CURSOR::sb_right_arrow      : return("sb_right_arrow");
-                case CURSOR::sb_up_arrow         : return("sb_up_arrow");
-                case CURSOR::sb_down_arrow       : return("sb_down_arrow");
-                case CURSOR::top_side            : return("top_side");
-                case CURSOR::bottom_side         : return("bottom_side");
-                case CURSOR::left_side           : return("left_side");
-                case CURSOR::right_side          : return("right_side");
-                case CURSOR::top_tee             : return("top_tee");
-                case CURSOR::bottom_tee          : return("bottom_tee");
-                case CURSOR::left_tee            : return("left_tee");
-                case CURSOR::right_tee           : return("right_tee");
-                case CURSOR::top_left_arrow      : return("top_left_arrow");
-                case CURSOR::top_right_arrow     : return("top_right_arrow");
-                case CURSOR::bottom_left_arrow   : return("bottom_left_arrow");
-                case CURSOR::bottom_right_arrow  : return("bottom_right_arrow");
-                default                          : return("left_ptr");
+                loutE << "reply is nullptr" << loutEND;
+                return 0;
             }
+
+            int16_t x = reply->root_x;
+            free(reply);
+            return x;
+        }
+
+        int16_t y()
+        {
+            xcb_query_pointer_cookie_t cookie = xcb_query_pointer(conn, screen->root);
+            xcb_query_pointer_reply_t *reply = xcb_query_pointer_reply(conn, cookie, nullptr);
+            if (!reply)
+            {
+                loutE << "reply is nullptr" << loutEND;
+                return 0;
+            }
+
+            int16_t y = reply->root_y;
+            free(reply);
+            return y;
+        }
+
+        void teleport(const int16_t &x, const int16_t &y)
+        {
+            VOID_COOKIE = xcb_warp_pointer(
+                conn,
+                XCB_NONE,
+                screen->root,
+                0,
+                0,
+                0,
+                0,
+                x,
+                y
+            );
+            FLUSH_X();
+            CHECK_VOID_COOKIE();
+        }
+
+        void grab()
+        {
+            xcb_grab_pointer_cookie_t cookie = xcb_grab_pointer(
+                conn,
+                false,
+                screen->root,
+                XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_POINTER_MOTION,
+                XCB_GRAB_MODE_ASYNC,
+                XCB_GRAB_MODE_ASYNC,
+                XCB_NONE,
+                XCB_NONE,
+                XCB_CURRENT_TIME
+            );
+            xcb_grab_pointer_reply_t * reply = xcb_grab_pointer_reply(conn, cookie, nullptr);
+            if (!reply)
+            {
+                loutE << "reply is nullptr." << loutEND;
+                free(reply);
+                return;
+            }
+
+            if (reply->status != XCB_GRAB_STATUS_SUCCESS)
+            {
+                loutE << "Could not grab pointer" << loutEND;
+                free(reply);
+                return;
+            }
+
+            free(reply);
+        }
+
+        void ungrab()
+        {
+            VOID_COOKIE = xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
+            FLUSH_X();
+            CHECK_VOID_COOKIE();
         }
 
         void center_pointer()
@@ -1077,7 +1161,7 @@ class pointer {
             ungrab();
         }
 
-};
+}; static __pointer__ *m_pointer(nullptr);
 
 class fast_vector
 {
@@ -5921,7 +6005,59 @@ class context_menu {
         }
 };
 
+class __context_menu__ {
+    private:
+    /* Variabels  */
+        window context_window;
+
+    /* Methods    */
+        void show__()
+        {
+            context_window.create_window(
+                screen->root,
+                m_pointer->x(),
+                m_pointer->y(),
+                100,
+                20,
+                BLACK,
+                NONE,
+                NONE
+            );
+        }
+
+        void hide__()
+        {
+
+        }
+
+    public:
+    /* Methods    */
+        void init()
+        {
+            event_handler->setEventCallback(EV_CALL(XCB_BUTTON_PRESS)
+            {
+                RE_CAST_EV(xcb_button_press_event_t);
+                if (e->detail == R_MOUSE_BUTTON)
+                {
+                    show__();
+                }
+            });
+        }
+    
+    /* Consructor */
+        __context_menu__() {}
+}; static __context_menu__ *context(nullptr);
+
 class Window_Manager {
+    /* Defines     */
+        #define INIT_NEW_WM(__inst, __class) \
+            __inst = new __class;                                               \
+            if (__inst == nullptr)                                              \
+            {                                                                   \
+                loutE << "failed to allocate memory for wm exeting" << loutEND; \
+                return;                                                         \
+            }                                                                   \
+            else
     public:
     /* Constructor */
         Window_Manager() {}
@@ -13059,15 +13195,10 @@ void setup_wm()
 
     crypro = new __crypto__;
 
-    wm = new Window_Manager;
-    if (wm == nullptr)
-    {
-        loutE << "failed to allocate memory for wm exeting" << endl;
-        return;
-    }
-
-    wm->init();
+    INIT_NEW_WM(wm, Window_Manager) { wm->init(); }
     change_desktop::teleport_to(1);
+
+    NEW_CLASS(m_pointer, __pointer__) {}
     
     Events events;
     events.setup();
@@ -13080,6 +13211,7 @@ void setup_wm()
     NEW_CLASS(system_settings, __system_settings__) { system_settings->init(); }
     NEW_CLASS(dock,            __dock__           ) { dock->init(); }
     NEW_CLASS(pid_manager,     __pid_manager__    ) {}
+    NEW_CLASS(context,         __context_menu__   ) { context->init(); }
 }
 
 int main()
