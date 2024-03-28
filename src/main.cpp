@@ -2722,6 +2722,8 @@ class window {
                 send_event(KILL_WINDOW, (uint32_t[]){32, protocols_reply->atom, delete_reply->atom});
                 free(protocols_reply);
                 free(delete_reply);
+
+                delete_all_event_callbacks();
             }
             
             void clear()
@@ -2824,7 +2826,7 @@ class window {
             template<typename Callback>
             void on_expose_event(Callback&& callback)
             {
-                event_handler->setEventCallback(XCB_EXPOSE, [this, callback](Ev ev)
+                int event_id = event_handler->setEventCallback(XCB_EXPOSE, [this, callback](Ev ev)
                 {
                     RE_CAST_EV(xcb_expose_event_t);
                     if (e->window == _window)
@@ -2832,6 +2834,8 @@ class window {
                         callback();
                     }
                 });
+
+                add_event_id({XCB_EXPOSE, event_id});
             }
             
             template<typename Callback>
@@ -2861,6 +2865,11 @@ class window {
                         }
                     }
                 });
+            }
+
+            void add_event_id(pair<uint8_t, int> __event_pair)
+            {
+                _event_vec.push_back(__event_pair);
             }
 
         /* Experimental  */
@@ -5196,6 +5205,15 @@ class window {
 
                 *len = count; // Actual number of characters converted
                 return char2b;
+            }
+
+        /* Events     */
+            void delete_all_event_callbacks()
+            {
+                for (const auto &pair : _event_vec)
+                {
+                    event_handler->removeEventCallback(pair.first, pair.second);
+                }
             }
 };
 
