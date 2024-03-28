@@ -2246,7 +2246,8 @@ namespace { /* 'window' class Namespace */
         MAP             = 1 << 0, /* 1 */
         DEFAULT_KEYS    = 1 << 1, /* 2 */
         FOCUS_INPUT     = 1 << 2, /* 4 */
-        KEYS_FOR_TYPING = 1 << 3  /* 8 */ 
+        KEYS_FOR_TYPING = 1 << 3, /* 8 */ 
+        RAISE           = 1 << 4  /* 16 */
     };
 
     enum window_event_mask : uint32_t {
@@ -2579,6 +2580,11 @@ class window {
                 if (__cursor != CURSOR::arrow)
                 {
                     set_pointer(__cursor);
+                }
+
+                if (__flags & RAISE)
+                {
+                    raise();
                 }
             }
             
@@ -5836,12 +5842,7 @@ class Entry {
                 BUTTON_EVENT_MASK,
                 MAP
             );
-            // uint32_t mask = XCB_EVENT_MASK_POINTER_MOTION |
-                            // XCB_EVENT_MASK_ENTER_WINDOW   |
-                            // XCB_EVENT_MASK_LEAVE_WINDOW;
-            // window.apply_event_mask(& mask);
             window.grab_button({ { L_MOUSE_BUTTON, NULL } });
-            // window.map();
         }
 };
 
@@ -5873,9 +5874,9 @@ class context_menu {
         
         void configure_events()
         {
-            event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev)-> void
+            event_handler->setEventCallback(EV_CALL(XCB_BUTTON_PRESS)
             {
-                const auto & e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
+                RE_CAST_EV(xcb_button_press_event_t);
                 if (e->detail == L_MOUSE_BUTTON)
                 {
                     run_action(&e->event);
@@ -5883,9 +5884,9 @@ class context_menu {
                 }
             });
 
-            event_handler->setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev)->void
+            event_handler->setEventCallback(EV_CALL(XCB_ENTER_NOTIFY)
             {
-                const auto * e = reinterpret_cast<const xcb_enter_notify_event_t *>(ev);
+                RE_CAST_EV(xcb_enter_notify_event_t);
                 if (e->event == screen->root)
                 {
                     hide();
@@ -5906,25 +5907,41 @@ class context_menu {
         
         void make_entries()
         {
-            int y = 0;
-            for (auto & entry : entries)
+            // int y = 0;
+            // for (auto & entry : entries)
+            // {
+            //     entry.make_window(
+            //         context_window,
+            //         (0 + (BORDER_SIZE / 2)),
+            //         (y + (BORDER_SIZE / 2)),
+            //         (_width - BORDER_SIZE),
+            //         (_height - BORDER_SIZE)
+            //     );
+            //     entry.window.draw_text(
+            //         entry.name.c_str(),
+            //         WHITE,
+            //         BLACK,
+            //         "7x14",
+            //         2,
+            //         14
+            //     );
+            //     y += _height;
+            // }
+
+            for (int i(0), y(0); i < entries.size(); ++i, y += _height)
             {
-                entry.make_window(
+                entries[i].make_window(
                     context_window,
                     (0 + (BORDER_SIZE / 2)),
-                    (y + (BORDER_SIZE / 2)),
+                    (y + (BORDER_SIZE /2)),
                     (_width - BORDER_SIZE),
                     (_height - BORDER_SIZE)
                 );
-                entry.window.draw_text(
-                    entry.name.c_str(),
-                    WHITE,
-                    BLACK,
-                    "7x14",
-                    2,
+                entries[i].window.draw_text_auto_color(
+                    entries[i].name.c_str(),
+                    CENTER_TEXT((_width - BORDER_SIZE), entries[i].name.length()),
                     14
                 );
-                y += _height;
             }
         }
     
@@ -5985,7 +6002,6 @@ class Window_Manager {
     /* Variabels   */
         window root;
         Launcher launcher;
-        Logger log;
         pointer pointer;
         win_data data;
         Key_Codes key_codes;
@@ -6525,7 +6541,6 @@ class Window_Manager {
 
     private:
     /* Variables   */
-        window start_window;
 
     /* Functions   */
         /* Init   */
@@ -6697,15 +6712,15 @@ class Window_Manager {
 
             int start_screen_window()
             {
-                start_window.create_default(
-                    root,
-                    0,
-                    0,
-                    0,
-                    0
-                );
-                start_window.set_backround_color(DARK_GREY);
-                start_window.map();
+                // start_window.create_default(
+                //     root,
+                //     0,
+                //     0,
+                //     0,
+                //     0
+                // );
+                // start_window.set_backround_color(DARK_GREY);
+                // start_window.map();
                 return 0;
             }
 
