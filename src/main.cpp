@@ -3030,17 +3030,31 @@ class window {
             }
             
             template<typename Callback>
-            void on_button_press_event(Callback&& callback)
+            void on_button_press_event(Callback&& callback, bool __add_ev_id = true)
             {
-                EV_ID = event_handler->setEventCallback(XCB_BUTTON_PRESS, [this, callback](Ev ev)
+                if (__add_ev_id)
                 {
-                    RE_CAST_EV(xcb_button_press_event_t);
-                    if (e->event == _window)
+                    EV_ID = event_handler->setEventCallback(XCB_BUTTON_PRESS, [this, callback](Ev ev)
                     {
-                        callback();
-                    }
-                });
-                ADD_EV_ID_IWIN(XCB_BUTTON_PRESS);
+                        RE_CAST_EV(xcb_button_press_event_t);
+                        if (e->event == _window)
+                        {
+                            callback();
+                        }
+                    });
+                    ADD_EV_ID_IWIN(XCB_BUTTON_PRESS);
+                }
+                else
+                {
+                    event_handler->setEventCallback(XCB_BUTTON_PRESS, [this, callback](Ev ev)
+                    {
+                        RE_CAST_EV(xcb_button_press_event_t);
+                        if (e->event == _window)
+                        {
+                            callback();
+                        }
+                    });
+                }
             }
 
             template<typename Callback>
@@ -7826,7 +7840,7 @@ class __status_bar__ {
 
                     show__(_audio_dropdown_window);
                 }
-            });
+            }, false);
 
             event_handler->setEventCallback(EV_CALL(XCB_ENTER_NOTIFY)
             {
