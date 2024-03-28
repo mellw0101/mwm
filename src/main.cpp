@@ -108,6 +108,9 @@ using namespace std;
 #define CENTER_TEXT(__width, __str_len) \
     ((__width / 2) - ((__str_len * DEFAULT_FONT_WIDTH) / 2))
 
+#define CENTER_TEXT_Y(__height) \
+    (__height - (20 - (DEFAULT_FONT_HEIGHT + 1))) - ((__height - 20) / 2)
+
 #define TEXT_LEN(__str) \
     (size(__str) - 1)
 
@@ -5913,7 +5916,7 @@ class context_menu {
                 entries[i].window.draw_text_auto_color(
                     entries[i].name.c_str(),
                     CENTER_TEXT((_width - BORDER_SIZE), entries[i].name.length()),
-                    15
+                    CENTER_TEXT_Y(_height)
                 );
             }
         }
