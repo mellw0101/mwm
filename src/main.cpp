@@ -4232,6 +4232,27 @@ class window {
             }
 
         /* Draw          */
+            #define AUTO -16
+            void draw(const string &__str, int __text_color = WHITE, int __backround_color = AUTO, int16_t __x = AUTO, int16_t __y = AUTO, const char *__font_name = DEFAULT_FONT)
+            {
+                get_font(__font_name);
+                if (__backround_color == AUTO) __backround_color = _color;
+                create_font_gc(__text_color, __backround_color, font);
+                if (__x == AUTO) __x = CENTER_TEXT(_width, __str.length());
+                if (__y == AUTO) __y = CENTER_TEXT_Y(_height);
+                VOID_COOKIE = xcb_image_text_8(
+                    conn,
+                    strlen(__str.c_str()),
+                    _window,
+                    font_gc,
+                    __x,
+                    __y,
+                    __str.c_str()
+                );
+                FLUSH_XWin();
+                CHECK_VOID_COOKIE();
+            }
+
             void draw_text(const char *str , const int &text_color, const int &backround_color, const char *font_name, const int16_t &x, const int16_t &y)
             {
                 get_font(font_name);
@@ -7554,18 +7575,18 @@ class __status_bar__ {
         {
             if (__window == _time_date_window)
             {
-                _time_date_window.draw_text_auto_color_center(get_time_and_date__());
+                _time_date_window.draw(get_time_and_date__());
             }
 
             if (__window == _audio_window)
             {
                 if (_audio_window.get_current_backround_color() == WHITE)
                 {
-                    _audio_window.draw_text_auto_color_center("Audio", BLACK);
+                    _audio_window.draw("Audio", BLACK);
                 }
                 else
                 {
-                    _audio_window.draw_text_auto_color_center("Audio");
+                    _audio_window.draw("Audio");
                 }
             }
 
@@ -7573,11 +7594,11 @@ class __status_bar__ {
             {
                 if (_wifi_close_window.get_current_backround_color() == WHITE)
                 {
-                    _wifi_close_window.draw_text_auto_color_center("Close", BLACK);
+                    _wifi_close_window.draw("Close", BLACK);
                 }
                 else
                 {
-                    _wifi_close_window.draw_text_auto_color_center("Close");
+                    _wifi_close_window.draw("Close");
                 }
             }
 
