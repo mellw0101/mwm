@@ -5939,7 +5939,7 @@ class context_menu {
                 _width,
                 _height,
                 DARK_GREY,
-                NONE,
+                XCB_EVENT_MASK_FOCUS_CHANGE | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY | XCB_EVENT_MASK_POINTER_MOTION,
                 RAISE
             );
         }
