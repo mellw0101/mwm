@@ -5926,11 +5926,22 @@ class context_menu {
     /* Methods   */
         void create_dialog_win()
         {
-            context_window.create_default(screen->root, 0, 0, _width, _height);
-            uint32_t mask = XCB_EVENT_MASK_FOCUS_CHANGE | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY | XCB_EVENT_MASK_POINTER_MOTION;
-            context_window.apply_event_mask(& mask);
-            context_window.set_backround_color(DARK_GREY);
-            context_window.raise();
+            // context_window.create_default(screen->root, 0, 0, _width, _height);
+            // uint32_t mask = XCB_EVENT_MASK_FOCUS_CHANGE | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY | XCB_EVENT_MASK_POINTER_MOTION;
+            // context_window.apply_event_mask(& mask);
+            // context_window.set_backround_color(DARK_GREY);
+            // context_window.raise();
+
+            context_window.create_window(
+                screen->root,
+                0,
+                0,
+                _width,
+                _height,
+                DARK_GREY,
+                NONE,
+                RAISE
+            );
         }
         
         void hide()
