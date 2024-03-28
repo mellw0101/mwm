@@ -5976,26 +5976,26 @@ class context_menu {
                     hide();
                 }
 
-                for (int i = 0; i < entries.size(); ++i)
-                {
-                    if (e->event == entries[i].window)
-                    {
-                        entries[i].window.change_backround_color(BLUE);
-                    }
-                }
+                // for (int i = 0; i < entries.size(); ++i)
+                // {
+                //     if (e->event == entries[i].window)
+                //     {
+                //         entries[i].window.change_backround_color(BLUE);
+                //     }
+                // }
             });
 
-            event_handler->setEventCallback(EV_CALL(XCB_LEAVE_NOTIFY)
-            {
-                RE_CAST_EV(xcb_leave_notify_event_t);
-                for (int i = 0; i < entries.size(); ++i)
-                {
-                    if (e->event == entries[i].window)
-                    {
-                        entries[i].window.change_backround_color(BLACK);
-                    }
-                }
-            });
+            // event_handler->setEventCallback(EV_CALL(XCB_LEAVE_NOTIFY)
+            // {
+            //     RE_CAST_EV(xcb_leave_notify_event_t);
+            //     for (int i = 0; i < entries.size(); ++i)
+            //     {
+            //         if (e->event == entries[i].window)
+            //         {
+            //             entries[i].window.change_backround_color(BLACK);
+            //         }
+            //     }
+            // });
         }
 
         void make_entries()
