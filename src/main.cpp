@@ -2210,11 +2210,15 @@ using EventCallback = function<void(Ev)>;
 struct __window_ev_id_handler__ {
     void add_ev_id_to_map(int __event_id, uint8_t __event_type)
     {
+        if (_ev_id_map.max_size() < 34) _ev_id_map.reserve(34);
+
         _ev_id_map[__event_id] = __event_type;
     }
 
     void delete_callbacks_by_ev_id()
     {
+        if (_ev_id_map.empty()) return;
+
         for (const auto &pair : _ev_id_map)
         {
             event_handler->removeEventCallback(pair.second, pair.first);
@@ -4780,13 +4784,11 @@ class window {
             }
         
         /* Buttons       */
-            void grab_button(std::initializer_list<std::pair<const uint8_t, const uint16_t>> bindings)
+            void grab_button(initializer_list<pair<uint8_t, uint16_t>> __bindings)
             {
-                for (const auto &binding : bindings)
+                for (const auto &pair : __bindings)
                 {
-                    const uint8_t &button = binding.first;
-                    const uint16_t &modifier = binding.second;
-                    xcb_grab_button(
+                    VOID_COOKIE = xcb_grab_button(
                         conn, 
                         1, 
                         _window, 
@@ -4795,28 +4797,27 @@ class window {
                         XCB_GRAB_MODE_ASYNC, 
                         XCB_NONE, 
                         XCB_NONE, 
-                        button, 
-                        modifier    
+                        pair.first, 
+                        pair.second    
                     );
-                    FLUSH_X();
+                    FLUSH_XWin();
+                    CHECK_VOID_COOKIE();
                 }
             }
         
-            void ungrab_button(std::initializer_list<std::pair<const uint8_t, const uint16_t>> bindings)
+            void ungrab_button(initializer_list<pair<uint8_t, uint16_t>> __bindings)
             {
-                for (const auto & binding : bindings)
+                for (const auto &pair : __bindings)
                 {
-                    const uint8_t & button = binding.first;
-                    const uint16_t & modifier = binding.second;
-                    xcb_ungrab_button(
+                    VOID_COOKIE = xcb_ungrab_button(
                         conn,
-                        button,
+                        pair.first,
                         _window,
-                        modifier
+                        pair.second
                     );
+                    FLUSH_XWin();
+                    CHECK_VOID_COOKIE();
                 }
-
-                FLUSH_X();
             }
         
     private:
