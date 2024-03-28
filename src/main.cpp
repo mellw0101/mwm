@@ -5987,7 +5987,7 @@ class context_menu {
                 {
                     if (e->event == entries[i].window)
                     {
-                        entries[i].window.change_backround_color(BLUE);
+                        entries[i].window.change_backround_color(WHITE);
                     }
                 }
             });
