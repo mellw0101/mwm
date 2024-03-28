@@ -2011,14 +2011,22 @@ class __event_handler__ {
         #define ADD_EV_ID_IWIN(__event_type) \
             add_event_id(__event_type, event_id)
 
+        #define EV_LOOP(__type)                                 \
+            case __type:                                        \
+            {                                                   \
+                for (const auto &pair : eventCallbacks[__type]) \
+                {                                               \
+                    pair.second(ev);                            \
+                }                                               \
+                break;                                          \
+            }
+
     public:
     /* Methods   */
         using EventCallback = function<void(Ev)>;
 
         void run()
         {
-            init_map();
-
             xcb_generic_event_t *ev;
             shouldContinue = true;
 
@@ -2030,190 +2038,40 @@ class __event_handler__ {
                 uint8_t responseType = ev->response_type & ~0x80;
                 switch (responseType)
                 {
-                    case XCB_KEY_PRESS:
-                    {
-                        for (const auto &pair : eventCallbacks[XCB_KEY_PRESS])
-                        {
-                            pair.second(ev);
-                        }
-                        break;
-                    }
-                    case XCB_MAP_NOTIFY:
-                    {
-                        for (const auto &pair : eventCallbacks[XCB_MAP_NOTIFY])
-                        {
-                            pair.second(ev);
-                        }
-                        break;
-                    }
-                    case XCB_MAP_REQUEST:
-                    {
-                        for (const auto &pair : eventCallbacks[XCB_MAP_REQUEST])
-                        {
-                            pair.second(ev);
-                        }
-                        break;
-                    }
-                    case XCB_BUTTON_PRESS:
-                    {
-                        for (const auto &pair : eventCallbacks[XCB_BUTTON_PRESS])
-                        {
-                            pair.second(ev);
-                        }
-                        break;
-                    }
-                    case XCB_CONFIGURE_REQUEST:
-                    {
-                        for (const auto &pair : eventCallbacks[XCB_CONFIGURE_REQUEST])
-                        {
-                            pair.second(ev);
-                        }
-                        break;
-                    }
-                    case XCB_FOCUS_IN:
-                    {
-                        for (const auto &pair : eventCallbacks[XCB_FOCUS_IN])
-                        {
-                            pair.second(ev);
-                        }
-                        break;
-                    }
-                    case XCB_FOCUS_OUT:
-                    {
-                        for (const auto &pair : eventCallbacks[XCB_FOCUS_OUT])
-                        {
-                            pair.second(ev);
-                        }
-                        break;
-                    }
-                    case XCB_DESTROY_NOTIFY:
-                    {
-                        for (const auto &pair : eventCallbacks[XCB_DESTROY_NOTIFY])
-                        {
-                            pair.second(ev);
-                        }
-                        break;
-                    }
-                    case XCB_UNMAP_NOTIFY:
-                    {
-                        for (const auto &pair : eventCallbacks[XCB_UNMAP_NOTIFY])
-                        {
-                            pair.second(ev);
-                        }
-                        break;
-                    }
-                    case XCB_REPARENT_NOTIFY:
-                    {
-                        for (const auto &pair : eventCallbacks[XCB_REPARENT_NOTIFY])
-                        {
-                            pair.second(ev);
-                        }
-                        break;
-                    }
-                    case XCB_ENTER_NOTIFY:
-                    {
-                        for (const auto &pair : eventCallbacks[XCB_ENTER_NOTIFY])
-                        {
-                            pair.second(ev);
-                        }
-                        break;
-                    }
-                    case XCB_LEAVE_NOTIFY:
-                    {
-                        for (const auto &pair : eventCallbacks[XCB_LEAVE_NOTIFY])
-                        {
-                            pair.second(ev);
-                        }
-                        break;
-                    }
-                    case XCB_MOTION_NOTIFY:
-                    {
-                        for (const auto &pair : eventCallbacks[XCB_MOTION_NOTIFY])
-                        {
-                            pair.second(ev);
-                        }
-                        break;
-                    }
-                    case XCB_EXPOSE:
-                    {
-                        for (const auto &pair : eventCallbacks[XCB_EXPOSE])
-                        {
-                            pair.second(ev);
-                        }
-                        break;
-                    }
-                    case XCB_CLIENT_MESSAGE:
-                    {
-                        for (const auto &pair : eventCallbacks[XCB_CLIENT_MESSAGE])
-                        {
-                            pair.second(ev);
-                        }
-                        break;
-                    }
-                    case XCB_CONFIGURE_NOTIFY:
-                    {
-                        for (const auto &pair : eventCallbacks[XCB_CONFIGURE_NOTIFY])
-                        {
-                            pair.second(ev);
-                        }
-                        break;
-                    }
-                    case XCB_BUTTON_RELEASE:
-                    {
-                        for (const auto &pair : eventCallbacks[XCB_BUTTON_RELEASE])
-                        {
-                            pair.second(ev);
-                        }
-                        break;
-                    }
-                    case XCB_VISIBILITY_NOTIFY:
-                    {
-                        for (const auto &pair : eventCallbacks[XCB_VISIBILITY_NOTIFY])
-                        {
-                            pair.second(ev);
-                        }
-                        break;
-                    }
-                    case XCB_CREATE_NOTIFY:
-                    {
-                        for (const auto &pair : eventCallbacks[XCB_CREATE_NOTIFY])
-                        {
-                            pair.second(ev);
-                        }
-                        break;
-                    }
-                    case XCB_PROPERTY_NOTIFY:
-                    {
-                        for (const auto &pair : eventCallbacks[XCB_PROPERTY_NOTIFY])
-                        {
-                            pair.second(ev);
-                        }
-                        break;
-                    }
-                    case XCB_RESIZE_REQUEST:
-                    {
-                        for (const auto &pair : eventCallbacks[XCB_RESIZE_REQUEST])
-                        {
-                            pair.second(ev);
-                        }
-                        break;
-                    }
-                    case XCB_MAPPING_NOTIFY:
-                    {
-                        for (const auto &pair : eventCallbacks[XCB_MAPPING_NOTIFY])
-                        {
-                            pair.second(ev);
-                        }
-                        break;
-                    }
-                    case XCB_COLORMAP_NOTIFY:
-                    {
-                        for (const auto &pair : eventCallbacks[XCB_COLORMAP_NOTIFY])
-                        {
-                            pair.second(ev);
-                        }
-                        break;
-                    }
+                    EV_LOOP(XCB_KEY_PRESS);
+                    EV_LOOP(XCB_KEY_RELEASE);
+                    EV_LOOP(XCB_BUTTON_PRESS);
+                    EV_LOOP(XCB_BUTTON_RELEASE);
+                    EV_LOOP(XCB_MOTION_NOTIFY);
+                    EV_LOOP(XCB_ENTER_NOTIFY);
+                    EV_LOOP(XCB_LEAVE_NOTIFY);
+                    EV_LOOP(XCB_FOCUS_IN);
+                    EV_LOOP(XCB_FOCUS_OUT);
+                    EV_LOOP(XCB_KEYMAP_NOTIFY);
+                    EV_LOOP(XCB_EXPOSE);
+                    EV_LOOP(XCB_GRAPHICS_EXPOSURE);
+                    EV_LOOP(XCB_NO_EXPOSURE);
+                    EV_LOOP(XCB_VISIBILITY_NOTIFY);
+                    EV_LOOP(XCB_CREATE_NOTIFY);
+                    EV_LOOP(XCB_DESTROY_NOTIFY);
+                    EV_LOOP(XCB_UNMAP_NOTIFY);
+                    EV_LOOP(XCB_MAP_NOTIFY);
+                    EV_LOOP(XCB_MAP_REQUEST);
+                    EV_LOOP(XCB_REPARENT_NOTIFY);
+                    EV_LOOP(XCB_CONFIGURE_NOTIFY);
+                    EV_LOOP(XCB_CONFIGURE_REQUEST);
+                    EV_LOOP(XCB_GRAVITY_NOTIFY);
+                    EV_LOOP(XCB_RESIZE_REQUEST);
+                    EV_LOOP(XCB_CIRCULATE_NOTIFY);
+                    EV_LOOP(XCB_CIRCULATE_REQUEST);
+                    EV_LOOP(XCB_PROPERTY_NOTIFY);
+                    EV_LOOP(XCB_SELECTION_CLEAR);
+                    EV_LOOP(XCB_SELECTION_REQUEST);
+                    EV_LOOP(XCB_SELECTION_NOTIFY);
+                    EV_LOOP(XCB_COLORMAP_NOTIFY);
+                    EV_LOOP(XCB_CLIENT_MESSAGE);
+                    EV_LOOP(XCB_MAPPING_NOTIFY);
+                    // EV_LOOP(XCB_GE_GENERIC);
                 }
 
                 free(ev);
