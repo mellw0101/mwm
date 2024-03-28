@@ -74,6 +74,7 @@
 #include <type_traits>
 #include <spawn.h>
 #include <sys/stat.h>
+#include <any>
 
 #include "Log.hpp"
 Logger logger;
@@ -2861,6 +2862,50 @@ class window {
                 });
             }
 
+        /* Experimental  */
+            template<typename Type>
+            void setValue(Type&& value)
+            {
+                _storedValue = forward<T>(value);
+            }
+
+            template<typename Type>
+            Type getValue() const
+            {
+                try
+                {
+                    return any_cast<Type>(_storedValue);
+                }
+                catch (const bad_any_cast& e)
+                {
+                    loutE << "Bad any_cast: " << e.what() << loutEND;
+                    throw;
+                }
+            }
+
+            template<typename Func>
+            void setAction(Func&& func)
+            {
+                // Ensure the function is wrapped in a std::function with a known signature.
+                _action = function<void()>(forward<Func>(func));
+            }
+
+            void triggerAction()
+            {
+                if (_action.has_value())
+                {
+                    try
+                    {
+                        // We need to cast back to std::function<void()> before calling.
+                        any_cast<function<void()>>(_action)();
+                    }
+                    catch (const bad_any_cast& e)
+                    {
+                        loutE << "Failed to invoke action. " << e.what() << loutEND;
+                    }
+                }
+            }
+
         /* Check         */
             bool check_atom(xcb_atom_t __atom)
             {
@@ -4575,6 +4620,9 @@ class window {
         uint32_t _min_height = 100;
         uint8_t  _override_redirect = 0;
         pid_t    _pid = 0;
+        any      _storedValue;
+        any      _action;
+        function<void()> _func;
 
     /* Methods     */
         /* Main       */
@@ -5909,20 +5957,11 @@ class Entry {
             );
             window.grab_button({ { L_MOUSE_BUTTON, NULL } });
             window.on_expose_event([this]() -> void { draw(); });
-            window.on_button_press_event([this]() -> void { run_action(); });
         }
 
         void draw()
         {
             window.draw_acc(name);
-        }
-
-        void run_action()
-        {
-            if (action)
-            {
-                action();
-            }
         }
 };
 
@@ -5963,6 +6002,7 @@ class context_menu {
             {
                 entries[i].make_window(context_window, 0, y, _width, _height);
                 entries[i].window.draw_acc(entries[i].name);
+                entries[i].window.on_L_MOUSE_BUTTON_PRESS_event([this, i]() -> void { entries[i].action(); });
             }
         }
     
@@ -5970,12 +6010,6 @@ class context_menu {
     // Methods.
         void init()
         {
-            // event_handler->setEventCallback(EV_CALL(XCB_EXPOSE)
-            // {
-            //     RE_CAST_EV(xcb_expose_event_t);
-            //     expose(e->window);
-            // });
-
             event_handler->setEventCallback(EV_CALL(XCB_BUTTON_PRESS)
             {
                 RE_CAST_EV(xcb_button_press_event_t);
