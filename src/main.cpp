@@ -5957,8 +5957,16 @@ class context_menu {
                 RE_CAST_EV(xcb_button_press_event_t);
                 if (e->detail == L_MOUSE_BUTTON)
                 {
-                    run_action(&e->event);
-                    hide();
+                    for (int i = 0; i < entries.size(); ++i)
+                    {
+                        if (e->event == entries[i].window)
+                        {
+                            entries[i].action();
+                            hide();
+                        }
+                    }
+                    // run_action(&e->event);
+                    // hide();
                 }
             });
 
