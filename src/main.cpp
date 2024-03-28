@@ -2,11 +2,13 @@
 #include <exception>
 #include <features.h>
 #include <iterator>
+#include <numeric>
 #include <regex>
 #include <sstream>
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <sys/cdefs.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <string.h>
@@ -1756,7 +1758,7 @@ class __pid_manager__ {
                 return string();
             }
 
-            string get_correct_prosses_name__(const string &__launchName)
+            string get_correct_process_name__(const string &__launchName)
             {
                 DIR* dir;
                 struct dirent* ent;
@@ -1807,7 +1809,7 @@ class __pid_manager__ {
                 return string();
             }
 
-            bool isProcessRunning(const pid_t __pid)
+            bool is_process_running__(const pid_t __pid)
             {
                 struct stat statBuf;
                 string procPath = "/proc/" + to_string(__pid);
@@ -1815,59 +1817,59 @@ class __pid_manager__ {
             }
 
         /* Pid Killing */
-            bool sendSignal(const pid_t pid, int signal)
+            bool send_signal__(const pid_t pid, int signal)
             {
                 return kill(pid, signal) == 0;
             }
 
-            bool send_sigterm__(pid_t pid)
+            bool send_sigterm__(pid_t __pid, const string &__name)
             {
-                if (kill(pid, SIGTERM) == -1)
+                if (kill(__pid, SIGTERM) == -1)
                 {
-                    loutErrno("Error sending SIGTERM");
+                    loutE << ERRNO_MSG("Error sending SIGTERM") << " Process " << __name << __pid << loutEND;
                     return false;
                 }
 
                 int status;
-                pid_t result = waitpid(pid, &status, 0); // Wait for the process to change state
+                pid_t result = waitpid(__pid, &status, 0); // Wait for the process to change state
                 if (result == -1)
                 {
-                    loutErrno("Error waiting for process");
+                    loutE << ERRNO_MSG("Error waiting for process") << " Process " << __name << __pid << loutEND;
                     return false;
                 }
 
-                if (!isProcessRunning(pid)) // Check if the child exited normally
+                if (!is_process_running__(__pid)) // Check if the child exited normally
                 {
-                    loutI << "Process" << pid << " terminated successfully with exit status " << WEXITSTATUS(status) << '\n';
+                    loutI << "Process " << __name << __pid << " terminated successfully with exit status " << WEXITSTATUS(status) << loutEND;
                     return true;
                 }
                 else
                 {
-                    loutI << "Process" << pid << " did not terminate successfully." << '\n';
+                    loutI << "Process " << __name << __pid << " did not terminate successfully." << loutEND;
                     return false;
                 }
             }
 
-            void send_sigkill__(pid_t __pid)
+            void send_sigkill__(pid_t __pid, const string &__name)
             {
-                if (sendSignal(__pid, SIGKILL))
+                if (send_signal__(__pid, SIGKILL))
                 {
-                    loutI << "SIGKILL signal sent to process" << __pid << " for forceful termination." << '\n';
+                    loutI << "SIGKILL signal sent to process " << __name << __pid << " for forceful termination." << loutEND;
                 }
                 else
                 {
-                    loutE << "Failed to send SIGKILL to process" << __pid << '\n';
+                    loutE << "Failed to send SIGKILL to process " << __name << __pid << loutEND;
                 }
             }
 
-            void kill_pid(pid_t __pid)
+            void kill_pid__(pid_t __pid, const string &__name)
             {
-                if (isProcessRunning(__pid))
+                if (is_process_running__(__pid))
                 {
-                    if (!send_sigterm__(__pid))
+                    if (!send_sigterm__(__pid, __name))
                     {
-                        loutI << "pid" << __pid << " still running forcefully killing" << '\n';
-                        send_sigkill__(__pid);
+                        loutI << "Process " << __name << __pid << " still running forcefully killing" << loutEND;
+                        send_sigkill__(__pid, __name);
                     }
                 }
             }
@@ -1876,7 +1878,7 @@ class __pid_manager__ {
         {
             for (int i = 0; i < _pid_vec.size(); ++i)
             {
-                if (!isProcessRunning(_pid_vec[i].pid))
+                if (!is_process_running__(_pid_vec[i].pid))
                 {
                     remove_element_from_vec(_pid_vec, i);
                 }
@@ -1896,7 +1898,7 @@ class __pid_manager__ {
             for (pid_data_t pid_data : _pid_vec)
             {
                 if (pid_data.name == "code") continue;
-                kill_pid(pid_data.pid);
+                kill_pid__(pid_data.pid, pid_data.name);
             }
         }
 
@@ -1934,11 +1936,12 @@ class __pid_manager__ {
         void list_pids()
         {
             check_vec__();
-
             for (int i = 0; i < _pid_vec.size(); ++i)
             {
                 loutI << "pid" << _pid_vec[i].pid << " name: " << _pid_vec[i].name << '\n';
             }
+
+            loutI << "Total running pids" << _pid_vec.size() << loutEND;
         }
 
     /* Constructor */
@@ -2014,6 +2017,8 @@ class __event_handler__ {
 
         void run()
         {
+            init_map();
+
             xcb_generic_event_t *ev;
             shouldContinue = true;
 
@@ -2094,6 +2099,50 @@ class __event_handler__ {
             }
             
             loutI << "Total events in map" << total_events << loutEND;
+        }
+
+        void log_map_and_check_rehash()
+        {
+            // Check pre-insertion stats
+            auto preInsertionCapacity = eventCallbacks.bucket_count();
+            auto preInsertionSize = eventCallbacks.size();
+
+            // Check post-insertion stats
+            auto postInsertionCapacity = eventCallbacks.bucket_count();
+            if (postInsertionCapacity != preInsertionCapacity) {
+                // If the capacity has changed, a rehash occurred
+                std::cout << "Rehash occurred. Previous capacity: " << preInsertionCapacity
+                        << ", New capacity: " << postInsertionCapacity << std::endl;
+            }
+
+            // Optionally, log the size change for information
+            if (eventCallbacks.size() != preInsertionSize) {
+                std::cout << "Size before insertion: " << preInsertionSize
+                        << ", Size after insertion: " << eventCallbacks.size() << std::endl;
+            }
+        }
+
+        void init_map()
+        {
+            const size_t vector_reserve_size = 100;
+            const size_t map_reserve_size    = 34;
+            eventCallbacks.reserve(map_reserve_size);
+
+            // vector<uint8_t> event_type_keys;
+            // for (uint8_t i = 2; i < 36; ++i)
+            // {
+            //     event_type_keys.push_back(i);
+            // }
+
+            vector<uint8_t> event_type_keys(35);
+            iota(event_type_keys.begin(), event_type_keys.end(), 2);
+
+            for (uint8_t event_type_key : event_type_keys)
+            {
+                vector<pair<CallbackId, EventCallback>> callbacks;
+                callbacks.reserve(vector_reserve_size);
+                eventCallbacks[event_type_key] = std::move(callbacks);
+            }
         }
 
     private:
