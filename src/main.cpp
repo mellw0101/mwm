@@ -1231,8 +1231,7 @@ class fast_vector
         vector<const char*>(data);
 };
 
-class string_tokenizer
-{
+class string_tokenizer {
     public:
     // Constructors and Destructor.
         string_tokenizer() {}
@@ -1250,6 +1249,7 @@ class string_tokenizer
                 token = strtok(nullptr, delimiter);
             }
         }
+
         ~string_tokenizer()
         {
             delete[] str;
@@ -1527,12 +1527,10 @@ class Directory_Lister {
 
 };
 
-class File
-{
+class File {
     public:
     // Sub Classes.
-        class search
-        {
+        class search {
             public: // construcers and operators
                 search(const string &filename)
                 : file(filename) {}
@@ -1615,7 +1613,6 @@ class File
     
     private:
     // Variables.
-        Logger log;
         string_tokenizer st;
         Directory_Searcher ds;
     
@@ -6114,13 +6111,9 @@ class Window_Manager {
                 create_new_desktop(5);
 
                 context_menu = new class context_menu();
-                context_menu->add_entry("konsole", [this]()-> void
-                {
-                    launcher.program((char *) "konsole");
-                });
-                context_menu->add_entry("hello", nullptr);
-                context_menu->add_entry("my name", nullptr);
-
+                context_menu->add_entry("konsole",              [this]() -> void { launcher.program((char *) "konsole"); });
+                context_menu->add_entry("google-chrome-stable", [this]() -> void { launcher.launch_child_process("google-chrome-stable"); });
+                context_menu->add_entry("code",                 [this]() -> void { launcher.launch_child_process("code"); });
                 context_menu->init();
 
                 // std::thread(check_volt()); // dosent work 
@@ -6617,8 +6610,6 @@ class Window_Manager {
             }
 
     private:
-    /* Variables   */
-
     /* Functions   */
         /* Init   */
             void _conn(const char *displayname, int *screenp)
