@@ -2053,7 +2053,7 @@ class __event_handler__ {
             CallbackId id = nextCallbackId++;
             eventCallbacks[eventType].emplace_back(id, std::move(callback));
             loutI << "Cur id" << id << " " << EVENT_TYPE(eventType) << " vecsize" << eventCallbacks[eventType].size() << " vec_capacity" << eventCallbacks[eventType].capacity() << loutEND;
-            check_and_adjust_vec_capacity(eventType);
+            // check_and_adjust_vec_capacity(eventType);
             return id;
         }
 
@@ -2133,11 +2133,55 @@ class __event_handler__ {
 
         void init_map()
         {
-            // const size_t vector_reserve_size = 100;
-            // const size_t map_reserve_size    = 34;
             eventCallbacks.reserve(34);
 
-            // vector<uint8_t> event_type_keys;
+            vector<uint8_t> event_type_keys = {
+                XCB_BUTTON_PRESS,
+                XCB_ENTER_NOTIFY,
+                XCB_LEAVE_NOTIFY,
+                XCB_KEY_PRESS,
+                XCB_MAP_NOTIFY,
+                XCB_MAP_REQUEST,
+                XCB_BUTTON_PRESS,
+                XCB_CONFIGURE_REQUEST,
+                XCB_FOCUS_IN,
+                XCB_FOCUS_OUT,
+                XCB_DESTROY_NOTIFY,
+                XCB_UNMAP_NOTIFY,
+                XCB_REPARENT_NOTIFY,
+                XCB_MOTION_NOTIFY,
+                XCB_CLIENT_MESSAGE,
+                XCB_EXPOSE,
+                XCB_CONFIGURE_NOTIFY,
+                XCB_VISIBILITY_NOTIFY,
+                XCB_MAP_REQUEST,
+                XCB_UNMAP_NOTIFY
+            };
+
+            for (int i = 0; i < event_type_keys.size(); ++i)
+            {
+                if (eventCallbacks[event_type_keys[i]].capacity() < 30)
+                {
+                    eventCallbacks[event_type_keys[i]].reserve(32);
+                }
+            }
+            
+                // XCB_KEYMAP_NOTIFY,
+                // XCB_GRAPHICS_EXPOSURE,
+                // XCB_NO_EXPOSURE,
+                // XCB_CREATE_NOTIFY,
+                // XCB_DESTROY_NOTIFY,
+                // XCB_CONFIGURE_REQUEST,
+                // XCB_GRAVITY_NOTIFY,
+                // XCB_RESIZE_REQUEST,
+                // XCB_CIRCULATE_NOTIFY,
+                // XCB_CIRCULATE_REQUEST,
+                // XCB_PROPERTY_NOTIFY,
+                // XCB_SELECTION_CLEAR,
+                // XCB_SELECTION_REQUEST,
+                // XCB_SELECTION_NOTIFY,
+                // XCB_COLORMAP_NOTIFY,
+                // XCB_MAPPING_NOTIFY,
             // for (uint8_t i = 2; i < 36; ++i)
             // {
             //     event_type_keys.push_back(i);
