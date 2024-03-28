@@ -5962,9 +5962,10 @@ class context_menu {
                         if (e->event == entries[i].window)
                         {
                             entries[i].action();
-                            hide();
                         }
                     }
+
+                    hide();
                 }
             });
 
