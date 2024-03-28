@@ -2860,19 +2860,19 @@ class window {
                 });
             }
 
-            // void on_L_MOUSE_BUTTON_PRESS_event(function<void()> __action)
-            // {
-            //     event_handler->setEventCallback(EV_CALL(XCB_BUTTON_PRESS)
-            //     {
-            //         RE_CAST_EV(xcb_button_press_event_t);
-            //         if (e->detail != L_MOUSE_BUTTON) return;
+            void on_L_MOUSE_BUTTON_PRESS_event(function<void()> __action)
+            {
+                event_handler->setEventCallback(EV_CALL(XCB_BUTTON_PRESS)
+                {
+                    RE_CAST_EV(xcb_button_press_event_t);
+                    if (e->detail != L_MOUSE_BUTTON) return;
                     
-            //         if (e->event == _window)
-            //         {
-            //             __action();
-            //         }
-            //     });
-            // }
+                    if (e->event == _window)
+                    {
+                        __action();
+                    }
+                });
+            }
 
         /* Check         */
             bool check_atom(xcb_atom_t __atom)
