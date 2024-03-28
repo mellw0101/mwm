@@ -2824,22 +2824,10 @@ class window {
             {
                 event_handler->setEventCallback(XCB_EXPOSE, [this, callback](Ev ev)
                 {
-                    auto e = reinterpret_cast<const xcb_expose_event_t *>(ev);
-                    if (e->window == _window)
-                    {
-                        callback();
-                    }
-                });
-            }
-
-            void on_expose_event(function<void()> __action)
-            {
-                event_handler->setEventCallback(EV_CALL(XCB_EXPOSE)
-                {
                     RE_CAST_EV(xcb_expose_event_t);
                     if (e->window == _window)
                     {
-                        __action();
+                        callback();
                     }
                 });
             }
@@ -2849,7 +2837,7 @@ class window {
             {
                 event_handler->setEventCallback(XCB_BUTTON_PRESS, [this, callback](Ev ev)
                 {
-                    auto e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
+                    RE_CAST_EV(xcb_button_press_event_t);
                     if (e->event == _window)
                     {
                         callback();
@@ -2862,7 +2850,7 @@ class window {
             {
                 event_handler->setEventCallback(XCB_BUTTON_PRESS, [this, callback](Ev ev)
                 {
-                    auto e = reinterpret_cast<const xcb_button_press_event_t *>(ev);
+                    RE_CAST_EV(xcb_button_press_event_t);
                     if (e->detail != L_MOUSE_BUTTON) return;
                     
                     if (e->event == _window)
@@ -2871,6 +2859,20 @@ class window {
                     }
                 });
             }
+
+            // void on_L_MOUSE_BUTTON_PRESS_event(function<void()> __action)
+            // {
+            //     event_handler->setEventCallback(EV_CALL(XCB_BUTTON_PRESS)
+            //     {
+            //         RE_CAST_EV(xcb_button_press_event_t);
+            //         if (e->detail != L_MOUSE_BUTTON) return;
+                    
+            //         if (e->event == _window)
+            //         {
+            //             __action();
+            //         }
+            //     });
+            // }
 
         /* Check         */
             bool check_atom(xcb_atom_t __atom)
@@ -5919,11 +5921,8 @@ class Entry {
                 MAP
             );
             window.grab_button({ { L_MOUSE_BUTTON, NULL } });
-
-            window.on_expose_event([this]() -> void
-            {
-                draw();
-            });
+            window.on_expose_event([this]() -> void { draw(); });
+            window.on_L_MOUSE_BUTTON_PRESS_event(action);
         }
 
         void draw()
@@ -5987,13 +5986,13 @@ class context_menu {
                 RE_CAST_EV(xcb_button_press_event_t);
                 if (e->detail == L_MOUSE_BUTTON)
                 {
-                    for (int i = 0; i < entries.size(); ++i)
-                    {
-                        if (e->event == entries[i].window)
-                        {
-                            entries[i].action();
-                        }
-                    }
+                    // for (int i = 0; i < entries.size(); ++i)
+                    // {
+                    //     if (e->event == entries[i].window)
+                    //     {
+                    //         entries[i].action();
+                    //     }
+                    // }
 
                     hide__();
                 }
@@ -6061,17 +6060,19 @@ class context_menu {
             make_entries__();
         }
 
-        // void expose(uint32_t __window)
-        // {
-        //     for (int i = 0; i < entries.size(); ++i)
-        //     {
-        //         if (__window == entries[i].window)
-        //         {
-        //             entries[i].window.draw_acc(entries[i].name);
-        //         }
-        //     }
-        // }
-        
+        /**
+            void expose(uint32_t __window)
+            {
+                for (int i = 0; i < entries.size(); ++i)
+                {
+                    if (__window == entries[i].window)
+                    {
+                        entries[i].window.draw_acc(entries[i].name);
+                    }
+                }
+            }
+        **/
+
         void add_entry(string name, function<void()> action)
         {
             Entry entry;
