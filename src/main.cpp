@@ -7554,11 +7554,6 @@ class __status_bar__ {
         {
             if (__window == _time_date_window)
             {
-                // _time_date_window.draw_text_auto_color(
-                //     get_time_and_date__().c_str(),
-                //     4,
-                //     15
-                // );
                 _time_date_window.draw_text_auto_color_center(get_time_and_date__());
             }
 
@@ -7566,21 +7561,10 @@ class __status_bar__ {
             {
                 if (_audio_window.get_current_backround_color() == WHITE)
                 {
-                    // _audio_window.draw_text_auto_color(
-                    //     "Audio",
-                    //     CENTER_TEXT(_audio_window.width(), TEXT_LEN("Audio")),
-                    //     15,
-                    //     BLACK
-                    // );
                     _audio_window.draw_text_auto_color_center("Audio", BLACK);
                 }
                 else
                 {
-                    // _audio_window.draw_text_auto_color(
-                    //     "Audio",
-                    //     CENTER_TEXT(_audio_window.width(), TEXT_LEN("Audio")),
-                    //     15
-                    // );
                     _audio_window.draw_text_auto_color_center("Audio");
                 }
             }
@@ -7589,22 +7573,10 @@ class __status_bar__ {
             {
                 if (_wifi_close_window.get_current_backround_color() == WHITE)
                 {
-                    // _wifi_close_window.draw_text_auto_color(
-                    //     "Close",
-                    //     CENTER_TEXT(_wifi_close_window.width(), TEXT_LEN("Close")),
-                    //     15,
-                    //     BLACK
-                    // );
                     _wifi_close_window.draw_text_auto_color_center("Close", BLACK);
                 }
                 else
                 {
-                    // _wifi_close_window.draw_text_auto_color(
-                    //     "Close",
-                    //     CENTER_TEXT(_wifi_close_window.width(),
-                    //     TEXT_LEN("Close")),
-                    //     15
-                    // );
                     _wifi_close_window.draw_text_auto_color_center("Close");
                 }
             }
