@@ -1998,6 +1998,16 @@ class Launcher {
 
 using Ev = const xcb_generic_event_t *;
 class __event_handler__ {
+    /* Defines   */
+        #define EV_ID \
+            int event_id
+
+        #define ADD_EV_ID_WIN(__window, __event_type) \
+            __window.add_event_id(__event_type, event_id)
+
+        #define ADD_EV_ID_IWIN(__event_type) \
+            add_event_id(__event_type, event_id)
+
     public:
     /* Methods   */
         using EventCallback = function<void(Ev)>;
@@ -2826,7 +2836,7 @@ class window {
             template<typename Callback>
             void on_expose_event(Callback&& callback)
             {
-                int event_id = event_handler->setEventCallback(XCB_EXPOSE, [this, callback](Ev ev)
+                EV_ID = event_handler->setEventCallback(XCB_EXPOSE, [this, callback](Ev ev)
                 {
                     RE_CAST_EV(xcb_expose_event_t);
                     if (e->window == _window)
@@ -2834,14 +2844,13 @@ class window {
                         callback();
                     }
                 });
-
-                add_event_id({XCB_EXPOSE, event_id});
+                ADD_EV_ID_IWIN(XCB_EXPOSE);
             }
             
             template<typename Callback>
             void on_button_press_event(Callback&& callback)
             {
-                event_handler->setEventCallback(XCB_BUTTON_PRESS, [this, callback](Ev ev)
+                EV_ID = event_handler->setEventCallback(XCB_BUTTON_PRESS, [this, callback](Ev ev)
                 {
                     RE_CAST_EV(xcb_button_press_event_t);
                     if (e->event == _window)
@@ -2849,6 +2858,7 @@ class window {
                         callback();
                     }
                 });
+                ADD_EV_ID_IWIN(XCB_BUTTON_PRESS);
             }
 
             template<typename Callback>
@@ -2867,9 +2877,11 @@ class window {
                 });
             }
 
-            void add_event_id(pair<uint8_t, int> __event_pair)
+            void add_event_id(uint8_t __event_type, int __event_id)
             {
-                _event_vec.push_back(__event_pair);
+                uint8_t event_type = __event_type;
+                int event_id = __event_id;
+                _event_vec.push_back({event_type, event_id});
             }
 
         /* Experimental  */
@@ -4421,6 +4433,33 @@ class window {
                 free(char2b_str);
             }
 
+            void draw_acc_16(const string &__str, int __text_color = WHITE, int __background_color = 0, const char *__font_name = DEFAULT_FONT)
+            {
+                get_font(__font_name);
+                if (__background_color == 0) __background_color = _color;
+                if (__background_color == WHITE) __text_color = BLACK;
+                create_font_gc(__text_color, __background_color, font);
+
+                int len;
+                xcb_char2b_t *char2b_str = convert_to_char2b(__str.c_str(), &len);
+
+                int16_t x = CENTER_TEXT(_width, __str.length());
+                int16_t y = CENTER_TEXT_Y(_height);
+                
+                VOID_COOKIE = xcb_image_text_16(
+                    conn,
+                    len,
+                    _window,
+                    font_gc,
+                    x,
+                    y,
+                    char2b_str
+                );
+                FLUSH_XWin();
+                free(char2b_str);
+                CHECK_VOID_COOKIE();
+            }
+
             void draw_on_expose_event(const char *str , const int &text_color, const int &backround_color, const char *font_name, const int16_t &x, const int16_t &y)
             {
                 on_expose_event([this, str, text_color, backround_color, font_name, x, y]()-> void
@@ -5319,6 +5358,7 @@ class client {
         
             void kill()
             {
+                frame.unmap();
                 win.unmap();
                 close_button.unmap();
                 max_button.unmap();
@@ -5332,7 +5372,6 @@ class client {
                 border.top_right.unmap();
                 border.bottom_left.unmap();
                 border.bottom_right.unmap();
-                frame.unmap();
 
                 win.kill();
                 close_button.kill();
@@ -5360,27 +5399,12 @@ class client {
             #define TITLE_REQ_DRAW  (uint32_t)1 << 0
             #define TITLE_INTR_DRAW (uint32_t)1 << 1
 
-            void draw_title(const uint32_t &__mode)
+            void draw_title(uint32_t __mode)
             {
                 titlebar.clear();
 
-                if (__mode & TITLE_REQ_DRAW )
-                {
-                    titlebar.draw_text_16_auto_color(
-                        win.get_net_wm_name_by_req().c_str(),
-                        CENTER_TEXT((width - (BORDER_SIZE * 2)), win.get_net_wm_name_by_req().length()),
-                        15
-                    );
-                }
-                
-                if (__mode & TITLE_INTR_DRAW)
-                {
-                    titlebar.draw_text_16_auto_color(
-                        win.get_net_wm_name().c_str(),
-                        CENTER_TEXT((width - (BORDER_SIZE * 2)), win.get_net_wm_name().length()),
-                        15
-                    );
-                }       
+                if (__mode & TITLE_REQ_DRAW ) { titlebar.draw_acc_16(win.get_net_wm_name_by_req()); }
+                if (__mode & TITLE_INTR_DRAW) { titlebar.draw_acc_16(win.get_net_wm_name()); }
             }
         
         /* Config   */
@@ -5670,7 +5694,10 @@ class client {
             titlebar.grab_button({ { L_MOUSE_BUTTON, NULL } });
             draw_title(TITLE_REQ_DRAW);
             icon.raise();
-            event_handler->setEventCallback(XCB_EXPOSE,          [this](Ev ev)-> void
+
+            EV_ID = 0;
+
+            event_id = event_handler->setEventCallback(EV_CALL(XCB_EXPOSE)
             {
                 RE_CAST_EV(xcb_expose_event_t);
                 if (e->window == titlebar)
@@ -5678,7 +5705,9 @@ class client {
                     draw_title(TITLE_INTR_DRAW);
                 }
             });
-            event_handler->setEventCallback(XCB_PROPERTY_NOTIFY, [this](Ev ev)-> void
+            ADD_EV_ID_WIN(titlebar, XCB_EXPOSE);
+
+            event_id = event_handler->setEventCallback(EV_CALL(XCB_PROPERTY_NOTIFY)
             {
                 RE_CAST_EV(xcb_property_notify_event_t);
                 if (e->window == win)
@@ -5689,6 +5718,7 @@ class client {
                     }
                 }
             });
+            ADD_EV_ID_WIN(titlebar, XCB_PROPERTY_NOTIFY);
         }
     
         void make_close_button()
