@@ -5824,40 +5824,38 @@ class Entry {
         function<void()> action;
 
     /* Methods */
-        void make_window(const xcb_window_t & parent_window, const int16_t & x, const int16_t & y, const uint16_t & width, const uint16_t & height)
+        void make_window(uint32_t __parent, int16_t __x, int16_t __y, uint16_t __width, uint16_t __height)
         {
-            window.create_default(
-                parent_window,
-                x,
-                y,
-                width,
-                height
+            window.create_window(
+                __parent,
+                __x,
+                __y,
+                __width,
+                __height,
+                BLACK,
+                BUTTON_EVENT_MASK,
+                MAP
             );
-            window.set_backround_color(BLACK);
-            uint32_t mask = XCB_EVENT_MASK_POINTER_MOTION |
-                            XCB_EVENT_MASK_ENTER_WINDOW   |
-                            XCB_EVENT_MASK_LEAVE_WINDOW;
-            window.apply_event_mask(& mask);
+            // uint32_t mask = XCB_EVENT_MASK_POINTER_MOTION |
+                            // XCB_EVENT_MASK_ENTER_WINDOW   |
+                            // XCB_EVENT_MASK_LEAVE_WINDOW;
+            // window.apply_event_mask(& mask);
             window.grab_button({ { L_MOUSE_BUTTON, NULL } });
-            window.map();
+            // window.map();
         }
 };
 
 class context_menu {
-    /* Defines */
+    private:
+    /* Variabels */
         int16_t  _x = 0, _y = 0;
         uint32_t _width = 120, _height = 20;
 
-    private:
-    // Variabels.
         window context_window;
-        // size_pos size_pos;
-        // window_borders border;
         int border_size = 1;
-        
         vector<Entry>(entries);
 
-    // Methods.
+    /* Methods   */
         void create_dialog_win()
         {
             context_window.create_default(screen->root, 0, 0, _width, _height);
