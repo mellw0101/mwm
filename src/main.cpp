@@ -4258,7 +4258,7 @@ class window {
             {
                 get_font(font_name);
                 create_font_gc(text_color, backround_color, font);
-                xcb_image_text_8(
+                VOID_COOKIE = xcb_image_text_8(
                     conn, 
                     strlen(str), 
                     _window, 
@@ -4267,15 +4267,15 @@ class window {
                     y, 
                     str
                 );
-                xcb_flush(conn);
+                FLUSH_XWin();
+                CHECK_VOID_COOKIE();
             }
 
-            void draw_text_auto_color(const char *__str, const int16_t &__x, const int16_t &__y, const int &__text_color = WHITE, const int &__backround_color = 0, const char *__font_name = DEFAULT_FONT)
+            void draw_text_auto_color(const char *__str, int16_t __x, int16_t __y, int __text_color = WHITE, int __backround_color = 0, const char *__font_name = DEFAULT_FONT)
             {
                 get_font(__font_name);
-                int backround_color = __backround_color;
-                if (backround_color == 0) backround_color = _color;
-                create_font_gc(__text_color, backround_color, font);
+                if (__backround_color == 0) __backround_color = _color;
+                create_font_gc(__text_color, __backround_color, font);
                 VOID_COOKIE = xcb_image_text_8(
                     conn,
                     strlen(__str),
@@ -4289,12 +4289,26 @@ class window {
                 CHECK_VOID_COOKIE();
             }
 
-            void draw_text_auto_color_center(const string &__str, const int &__text_color = WHITE, const int &__backround_color = 0, const char *__font_name = DEFAULT_FONT)
+            /**
+             *
+             * @brief Function that draws text on a window auto centering and coloring(FOLLOWS WINDOWS BACKROUND COLOR)
+             * 
+             * @param __str The string to draw to the window
+             * @param __text_color The color of the text to draw
+             * NOTE: If backround color is 'WHITE' text is auto switched to 'BLACK'
+             * @param __backround_color The color of the text backround, This is auto set to windows backround
+             * @param __font_name The name of the font to use auto selects a define that is called 'DEFAULT_FONT' to make switching alot esier  
+             *
+             * NOTE: THESE ARE MUTEBLE JUST TYPE IN ALL THE PARAMS WHEN MAKING A CALL TO OVERIDE AUTO FUNCTIONALITY
+             *       ALSO IF YOU ONLY WANT AUTO COLOR NOT CENTERING USE 'draw_text_auto_color' FUNCTION
+             *
+             */
+            void draw_acc(const string &__str, int __text_color = WHITE, int __backround_color = 0, const char *__font_name = DEFAULT_FONT)
             {
                 get_font(__font_name);
-                int backround_color = __backround_color;
-                if (backround_color == 0) backround_color = _color;
-                create_font_gc(__text_color, backround_color, font);
+                if (__backround_color == 0) __backround_color = _color;
+                if (__backround_color == WHITE) __text_color = BLACK;
+                create_font_gc(__text_color, __backround_color, font);
                 VOID_COOKIE = xcb_image_text_8(
                     conn,
                     strlen(__str.c_str()),
@@ -5963,12 +5977,7 @@ class context_menu {
             for (int i(0), y(0); i < entries.size(); ++i, y += _height)
             {
                 entries[i].make_window(context_window, 0, y, _width, _height);
-                entries[i].window.draw_text_auto_color_center(entries[i].name);
-                // entries[i].window.draw_text_auto_color(
-                //     entries[i].name.c_str(),
-                //     CENTER_TEXT((_width - BORDER_SIZE), entries[i].name.length()),
-                //     CENTER_TEXT_Y(_height)
-                // );
+                entries[i].window.draw_acc(entries[i].name);
             }
         }
     
@@ -7582,27 +7591,11 @@ class __status_bar__ {
             if (__window == _audio_window)
             {
                 _audio_window.draw("Audio");
-                // if (_audio_window.get_current_backround_color() == WHITE)
-                // {
-                //     _audio_window.draw("Audio", BLACK);
-                // }
-                // else
-                // {
-                //     _audio_window.draw("Audio");
-                // }
             }
 
             if (__window == _wifi_close_window)
             {
                 _wifi_close_window.draw("Close");
-                // if (_wifi_close_window.get_current_backround_color() == WHITE)
-                // {
-                //     _wifi_close_window.draw("Close", BLACK);
-                // }
-                // else
-                // {
-                //     _wifi_close_window.draw("Close");
-                // }
             }
 
             if (__window == _wifi_info_window )
