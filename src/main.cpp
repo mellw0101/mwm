@@ -5952,6 +5952,12 @@ class context_menu {
         
         void configure_events()
         {
+            event_handler->setEventCallback(EV_CALL(XCB_EXPOSE)
+            {
+                RE_CAST_EV(xcb_expose_event_t);
+                expose(e->window);
+            });
+
             event_handler->setEventCallback(EV_CALL(XCB_BUTTON_PRESS)
             {
                 RE_CAST_EV(xcb_button_press_event_t);
@@ -6035,6 +6041,17 @@ class context_menu {
             context_window.map();
             context_window.raise();
             make_entries();
+        }
+
+        void expose(uint32_t __window)
+        {
+            for (int i = 0; i < entries.size(); ++i)
+            {
+                if (__window == entries[i].window)
+                {
+                    entries[i].window.draw_acc(entries[i].name);
+                }
+            }
         }
         
         void add_entry(string name, function<void()> action)
