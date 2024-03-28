@@ -5940,8 +5940,19 @@ class context_menu {
             context_window.unmap();
             context_window.kill();
         }
-        
-        void configure_events__()
+
+        void make_entries__()
+        {
+            for (int i(0), y(0); i < entries.size(); ++i, y += _height)
+            {
+                entries[i].make_window(context_window, 0, y, _width, _height);
+                entries[i].window.draw_acc(entries[i].name);
+            }
+        }
+    
+    public:
+    // Methods.
+        void init()
         {
             event_handler->setEventCallback(EV_CALL(XCB_EXPOSE)
             {
@@ -5995,27 +6006,21 @@ class context_menu {
                 }
             });
         }
-
-        void make_entries__()
-        {
-            for (int i(0), y(0); i < entries.size(); ++i, y += _height)
-            {
-                entries[i].make_window(context_window, 0, y, _width, _height);
-                entries[i].window.draw_acc(entries[i].name);
-            }
-        }
-    
-    public:
-    // Methods.
-        void init()
-        {
-            configure_events__();
-        }
         
         void show()
         {
             _x = m_pointer->x();
             _y = m_pointer->y();
+            
+            for (int i(0), max_len(0); i < entries.size(); ++i)
+            {
+                if (entries[i].name.length() > max_len)
+                {
+                    max_len = entries[i].name.length();
+                    _width = (max_len * DEFAULT_FONT_WIDTH);
+                }
+            }
+
             uint16_t new_height = (entries.size() * _height);
 
             if (_y + new_height > screen->height_in_pixels)
@@ -6028,7 +6033,7 @@ class context_menu {
                 _x = (screen->width_in_pixels - _width);
             }
 
-            context_window.x_y_height((_x - BORDER_SIZE), (_y - BORDER_SIZE), new_height);
+            context_window.x_y_width_height((_x - BORDER_SIZE), (_y - BORDER_SIZE), _width, new_height);
             context_window.map();
             context_window.raise();
             make_entries__();
