@@ -1997,7 +1997,7 @@ class Launcher {
 };
 
 using Ev = const xcb_generic_event_t *;
-class Event_Handler {
+class __event_handler__ {
     public:
     /* Methods   */
         using EventCallback = function<void(Ev)>;
@@ -2037,6 +2037,7 @@ class Event_Handler {
         {
             CallbackId id = nextCallbackId++;
             eventCallbacks[eventType].emplace_back(id, std::move(callback));
+            loutI << "Current event_handler callback id" << id << loutEND;
             return id;
         }
 
@@ -2044,10 +2045,10 @@ class Event_Handler {
         {
             auto& callbacks = eventCallbacks[eventType];
             callbacks.erase(
-                std::remove_if(
+                remove_if(
                     callbacks.begin(),
                     callbacks.end(),
-                    [id](const auto& pair)
+                    [id](const auto &pair)
                     {
                         return pair.first == id;
                     }
@@ -2078,7 +2079,7 @@ class Event_Handler {
         bool shouldContinue = false;
         CallbackId nextCallbackId = 0;
 
-}; static Event_Handler *event_handler(nullptr);
+}; static __event_handler__ *event_handler(nullptr);
 
 class Bitmap {
     private:
@@ -6158,7 +6159,7 @@ class Window_Manager {
                 _ewmh();
                 
                 key_codes.init();
-                event_handler = new Event_Handler();
+                event_handler = new __event_handler__();
                 
                 create_new_desktop(1);
                 create_new_desktop(2);
