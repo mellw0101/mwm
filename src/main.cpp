@@ -2128,14 +2128,14 @@ class __event_handler__ {
             const size_t map_reserve_size    = 34;
             eventCallbacks.reserve(map_reserve_size);
 
-            // vector<uint8_t> event_type_keys;
-            // for (uint8_t i = 2; i < 36; ++i)
-            // {
-            //     event_type_keys.push_back(i);
-            // }
+            vector<uint8_t> event_type_keys;
+            for (uint8_t i = 2; i < 36; ++i)
+            {
+                event_type_keys.push_back(i);
+            }
 
-            vector<uint8_t> event_type_keys(35);
-            iota(event_type_keys.begin(), event_type_keys.end(), 2);
+            // vector<uint8_t> event_type_keys(35);
+            // iota(event_type_keys.begin(), event_type_keys.end(), 2);
 
             for (uint8_t event_type_key : event_type_keys)
             {
