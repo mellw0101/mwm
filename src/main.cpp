@@ -5856,8 +5856,6 @@ class context_menu {
         int border_size = 1;
         
         vector<Entry>(entries);
-        pointer pointer;
-        Launcher launcher;
 
     // Methods.
         void create_dialog_win()
@@ -5968,21 +5966,8 @@ class context_menu {
             entries.push_back(entry);
         }
     
-    // consructor.
-        context_menu()
-        {
-            // size_pos.x      = pointer.x();
-            // size_pos.y      = pointer.y();
-            // size_pos.width  = 120;
-            // size_pos.height = 20;
-
-            // border.left   = size_pos.x;
-            // border.right  = (size_pos.x + size_pos.width);
-            // border.top    = size_pos.y;
-            // border.bottom = (size_pos.y + size_pos.height);
-
-            create_dialog_win();
-        }
+    /* Consructor */
+        context_menu() { create_dialog_win(); }
 };
 
 class Window_Manager {
