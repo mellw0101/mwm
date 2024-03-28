@@ -2831,6 +2831,18 @@ class window {
                     }
                 });
             }
+
+            void on_expose_event(function<void()> __action)
+            {
+                event_handler->setEventCallback(EV_CALL(XCB_EXPOSE)
+                {
+                    RE_CAST_EV(xcb_expose_event_t);
+                    if (e->window == _window)
+                    {
+                        __action();
+                    }
+                });
+            }
             
             template<typename Callback>
             void on_button_press_event(Callback&& callback)
@@ -5907,6 +5919,16 @@ class Entry {
                 MAP
             );
             window.grab_button({ { L_MOUSE_BUTTON, NULL } });
+
+            window.on_expose_event([this]() -> void
+            {
+                draw();
+            });
+        }
+
+        void draw()
+        {
+            window.draw_acc(name);
         }
 };
 
@@ -5954,11 +5976,11 @@ class context_menu {
     // Methods.
         void init()
         {
-            event_handler->setEventCallback(EV_CALL(XCB_EXPOSE)
-            {
-                RE_CAST_EV(xcb_expose_event_t);
-                expose(e->window);
-            });
+            // event_handler->setEventCallback(EV_CALL(XCB_EXPOSE)
+            // {
+            //     RE_CAST_EV(xcb_expose_event_t);
+            //     expose(e->window);
+            // });
 
             event_handler->setEventCallback(EV_CALL(XCB_BUTTON_PRESS)
             {
@@ -6017,7 +6039,7 @@ class context_menu {
                 if (entries[i].name.length() > max_len)
                 {
                     max_len = entries[i].name.length();
-                    _width = (max_len * DEFAULT_FONT_WIDTH);
+                    _width = ((max_len + 2) * DEFAULT_FONT_WIDTH);
                 }
             }
 
@@ -6039,16 +6061,16 @@ class context_menu {
             make_entries__();
         }
 
-        void expose(uint32_t __window)
-        {
-            for (int i = 0; i < entries.size(); ++i)
-            {
-                if (__window == entries[i].window)
-                {
-                    entries[i].window.draw_acc(entries[i].name);
-                }
-            }
-        }
+        // void expose(uint32_t __window)
+        // {
+        //     for (int i = 0; i < entries.size(); ++i)
+        //     {
+        //         if (__window == entries[i].window)
+        //         {
+        //             entries[i].window.draw_acc(entries[i].name);
+        //         }
+        //     }
+        // }
         
         void add_entry(string name, function<void()> action)
         {
