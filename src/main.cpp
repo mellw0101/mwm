@@ -5812,17 +5812,18 @@ class Key_Codes {
         xcb_key_symbols_t * keysyms;
 };
 
-class Entry
-{
+class Entry {
     public:
-    // constructor.
+    /* Constructor */
         Entry() {}
 
-    // variabels.
+    /* Variabels */
         window window;
         bool menu = false;
+        string entryName;
+        function<void()> entryAction;
 
-    // methods.
+    /* Methods */
         void add_name(const char *name)
         {
             entryName = name;
@@ -5836,11 +5837,6 @@ class Entry
         void activate() const
         {
             entryAction();
-        }
-
-        const char * getName() const
-        {
-            return entryName;
         }
 
         void make_window(const xcb_window_t & parent_window, const int16_t & x, const int16_t & y, const uint16_t & width, const uint16_t & height)
@@ -5863,8 +5859,7 @@ class Entry
 
     private:
     // vatiabels.
-        const char * entryName;
-        function<void()> entryAction;
+        
 };
 
 class context_menu {
@@ -5941,7 +5936,7 @@ class context_menu {
                     (size_pos.height - BORDER_SIZE)
                 );
                 entry.window.draw_text(
-                    entry.getName(),
+                    entry.entryName.c_str(),
                     WHITE,
                     BLACK,
                     "7x14",
@@ -6004,49 +5999,6 @@ class context_menu {
             create_dialog_win();
         }
 };
-
-class __context_menu__ {
-    private:
-    /* Variabels  */
-        window context_window;
-
-    /* Methods    */
-        void show__()
-        {
-            context_window.create_window(
-                screen->root,
-                m_pointer->x(),
-                m_pointer->y(),
-                100,
-                20,
-                BLACK,
-                NONE,
-                MAP
-            );
-        }
-
-        void hide__()
-        {
-
-        }
-
-    public:
-    /* Methods    */
-        void init()
-        {
-            event_handler->setEventCallback(EV_CALL(XCB_BUTTON_PRESS)
-            {
-                RE_CAST_EV(xcb_button_press_event_t);
-                if (e->detail == R_MOUSE_BUTTON)
-                {
-                    show__();
-                }
-            });
-        }
-    
-    /* Consructor */
-        __context_menu__() {}
-}; static __context_menu__ *context(nullptr);
 
 class Window_Manager {
     /* Defines     */
@@ -13211,7 +13163,6 @@ void setup_wm()
     NEW_CLASS(system_settings, __system_settings__) { system_settings->init(); }
     NEW_CLASS(dock,            __dock__           ) { dock->init(); }
     NEW_CLASS(pid_manager,     __pid_manager__    ) {}
-    NEW_CLASS(context,         __context_menu__   ) { context->init(); }
 }
 
 int main()
