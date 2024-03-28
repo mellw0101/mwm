@@ -6002,7 +6002,6 @@ class context_menu {
             {
                 entries[i].make_window(context_window, 0, y, _width, _height);
                 entries[i].window.draw_acc(entries[i].name);
-                entries[i].window.on_L_MOUSE_BUTTON_PRESS_event([this, i]() -> void { entries[i].action(); });
             }
         }
     
@@ -6015,13 +6014,13 @@ class context_menu {
                 RE_CAST_EV(xcb_button_press_event_t);
                 if (e->detail == L_MOUSE_BUTTON)
                 {
-                    // for (int i = 0; i < entries.size(); ++i)
-                    // {
-                    //     if (e->event == entries[i].window)
-                    //     {
-                    //         entries[i].action();
-                    //     }
-                    // }
+                    for (int i = 0; i < entries.size(); ++i)
+                    {
+                        if (e->event == entries[i].window)
+                        {
+                            entries[i].action();
+                        }
+                    }
 
                     hide__();
                 }
