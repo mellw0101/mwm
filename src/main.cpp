@@ -2037,7 +2037,7 @@ class __event_handler__ {
         {
             CallbackId id = nextCallbackId++;
             eventCallbacks[eventType].emplace_back(id, std::move(callback));
-            loutI << "Current event_handler callback id" << id << " current eventType vector size" << eventCallbacks[eventType].size() << loutEND;
+            loutI << "Current event_handler callback id" << id << " current " << EVENT_TYPE(eventType) << " vector size" << eventCallbacks[eventType].size() << loutEND;
             return id;
         }
 

@@ -503,6 +503,53 @@ class Logger {
 };
 
 typedef struct {
+	string value;
+} event_type_obj_t;
+
+inline constexpr const char *xcb_event_type_to_str(uint8_t __event_type)
+{
+	switch (__event_type)
+	{
+		case  2: return "XCB_KEY_PRESS";
+		case  3: return "XCB_KEY_RELEASE";
+		case  4: return "XCB_BUTTON_PRESS";
+		case  5: return "XCB_BUTTON_RELEASE";
+		case  6: return "XCB_MOTION_NOTIFY";
+		case  7: return "XCB_ENTER_NOTIFY";
+		case  8: return "XCB_LEAVE_NOTIFY";
+		case  9: return "XCB_FOCUS_IN";
+		case 10: return "XCB_FOCUS_OUT";
+		case 11: return "XCB_KEYMAP_NOTIFY";
+		case 12: return "XCB_EXPOSE";
+		case 13: return "XCB_GRAPHICS_EXPOSURE";
+		case 14: return "XCB_NO_EXPOSURE";
+		case 15: return "XCB_VISIBILITY_NOTIFY";
+		case 16: return "XCB_CREATE_NOTIFY";
+		case 17: return "XCB_DESTROY_NOTIFY";
+		case 18: return "XCB_UNMAP_NOTIFY";
+		case 19: return "XCB_MAP_NOTIFY";
+		case 20: return "XCB_MAP_REQUEST";
+		case 21: return "XCB_REPARENT_NOTIFY";
+		case 22: return "XCB_CONFIGURE_NOTIFY";
+		case 23: return "XCB_CONFIGURE_REQUEST";
+		case 24: return "XCB_GRAVITY_NOTIFY";
+		case 25: return "XCB_RESIZE_REQUEST";
+		case 26: return "XCB_CIRCULATE_NOTIFY";
+		case 27: return "XCB_CIRCULATE_REQUEST";
+		case 28: return "XCB_PROPERTY_NOTIFY";
+		case 29: return "XCB_SELECTION_CLEAR";
+		case 30: return "XCB_SELECTION_REQUEST";
+		case 31: return "XCB_SELECTION_NOTIFY";
+		case 32: return "XCB_COLORMAP_NOTIFY";
+		case 33: return "XCB_CLIENT_MESSAGE";
+		case 34: return "XCB_MAPPING_NOTIFY";
+		case 35: return "XCB_GE_GENERIC";
+
+		default: return "UNKNOWN";
+	}
+}
+
+typedef struct {
     string value;
 } FuncNameWrapper;
 
@@ -598,6 +645,12 @@ class lout {
 		lout& operator<<(LogLevel logLevel) // Overloads for handling log level, function name wrapper, and endl
 		{
 			currentLevel = logLevel;
+			return *this;
+		}
+
+		lout& operator<<(const event_type_obj_t &__event_type)
+		{
+			buffer << "event_type" << '(' << log_BLUE << __event_type.value << log_RESET << ')';
 			return *this;
 		}
 
@@ -773,11 +826,17 @@ inline errno_msg_t errno_msg(const char *__str)
 	return {s};
 }
 
+inline event_type_obj_t event_type(uint8_t __event_type)
+{
+	return {xcb_event_type_to_str(__event_type)};
+}
+
 #define FUNC func(__func__)
 #define LINE line(__LINE__)
 #define FILE_NAME file_name(__FILE__)
 #define WINDOW_ID window_id(_window)
 #define ERRNO_MSG(__msg) errno_msg(__msg)
+#define EVENT_TYPE(__event_type) event_type(__event_type)
 
 #define WINDOW_ID_BY_INPUT(__window) \
 	window_id(__window)
