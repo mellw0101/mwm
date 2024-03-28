@@ -2235,12 +2235,20 @@ class __event_handler__ {
 
         using CallbackId = int;
 
-        CallbackId setEventCallback(uint8_t eventType, EventCallback callback)
+        // CallbackId setEventCallback(uint8_t eventType, EventCallback callback)
+        // {
+        //     CallbackId id = nextCallbackId++;
+        //     eventCallbacks[eventType].emplace_back(id, std::move(callback));
+        //     // loutI << "Cur id" << id << " " << EVENT_TYPE(eventType) << " vecsize" << eventCallbacks[eventType].size() << " vec_capacity" << eventCallbacks[eventType].capacity() << loutEND;
+        //     // check_and_adjust_vec_capacity(eventType);
+        //     return id;
+        // }
+
+        template<typename Callback>
+        CallbackId setEventCallback(uint8_t eventType, Callback&& callback)
         {
             CallbackId id = nextCallbackId++;
-            eventCallbacks[eventType].emplace_back(id, std::move(callback));
-            loutI << "Cur id" << id << " " << EVENT_TYPE(eventType) << " vecsize" << eventCallbacks[eventType].size() << " vec_capacity" << eventCallbacks[eventType].capacity() << loutEND;
-            check_and_adjust_vec_capacity(eventType);
+            eventCallbacks[eventType].emplace_back(id, std::forward<Callback>(callback));
             return id;
         }
 
