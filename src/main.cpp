@@ -2,7 +2,7 @@
 #include <exception>
 #include <features.h>
 #include <iterator>
-#include <numeric>
+// #include <numeric>
 #include <regex>
 #include <sstream>
 #include <stdio.h>
@@ -7806,7 +7806,7 @@ class __status_bar__ {
             _wifi_close_window.on_button_press_event([&]()-> void
             {
                 hide__(_wifi_dropdown_window);
-            });
+            }, false);
 
             _wifi_window.on_button_press_event([&]()-> void
             {
@@ -7823,7 +7823,7 @@ class __status_bar__ {
 
                     show__(_wifi_dropdown_window);
                 }
-            });
+            }, false);
 
             _audio_window.on_button_press_event([&]()-> void
             {
