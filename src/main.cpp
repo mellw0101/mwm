@@ -2017,6 +2017,11 @@ class __event_handler__ {
             xcb_generic_event_t *ev;
             shouldContinue = true;
 
+            set_key_press_callback(SUPER, K, [this]() -> void
+            {
+                iter_and_log_map_size();
+            });
+
             while (shouldContinue)
             {
                 ev = xcb_wait_for_event(conn);
@@ -2084,9 +2089,17 @@ class __event_handler__ {
             });
         }
 
+        void iter_and_log_map_size()
+        {
+            for (const auto &pair : eventCallbacks)
+            {
+                loutI << EVENT_TYPE(pair.first) << " vecsize" << pair.second.size() << loutEND;
+            }
+        }
+
     private:
     /* Variables */
-        unordered_map<uint8_t, vector<pair<CallbackId, EventCallback>>>(eventCallbacks);
+        unordered_map<uint8_t, vector<pair<CallbackId, EventCallback>>> eventCallbacks;
         bool shouldContinue = false;
         CallbackId nextCallbackId = 0;
 
@@ -12894,24 +12907,24 @@ class Events {
                 }
             }
 
-            if (e->detail == wm->key_codes.k)
-            {
-                switch (e->state)
-                {
-                    case SUPER:
-                    {
-                        pid_manager->list_pids();
-                        // wm->root.set_backround_png(USER_PATH_PREFIX("/mwm_png/galaxy16-17-3840x1200.png"));
-                        // GET_CLIENT_FROM_WINDOW(e->event);
-                        // c->kill();
-                        // c->win.x(BORDER_SIZE);
-                        // c->win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
-                        // xcb_flush(conn);
+            // if (e->detail == wm->key_codes.k)
+            // {
+            //     switch (e->state)
+            //     {
+            //         case SUPER:
+            //         {
+            //             pid_manager->list_pids();
+            //             // wm->root.set_backround_png(USER_PATH_PREFIX("/mwm_png/galaxy16-17-3840x1200.png"));
+            //             // GET_CLIENT_FROM_WINDOW(e->event);
+            //             // c->kill();
+            //             // c->win.x(BORDER_SIZE);
+            //             // c->win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
+            //             // xcb_flush(conn);
 
-                        return;
-                    }
-                }
-            }
+            //             return;
+            //         }
+            //     }
+            // }
         }
 
         void map_notify_handler(const xcb_generic_event_t *&ev)
