@@ -5965,8 +5965,6 @@ class context_menu {
                             hide();
                         }
                     }
-                    // run_action(&e->event);
-                    // hide();
                 }
             });
 
@@ -5976,21 +5974,30 @@ class context_menu {
                 if (e->event == screen->root)
                 {
                     hide();
-                } 
+                }
+
+                for (int i = 0; i < entries.size(); ++i)
+                {
+                    if (e->event == entries[i].window)
+                    {
+                        entries[i].window.change_backround_color(BLUE);
+                    }
+                }
+            });
+
+            event_handler->setEventCallback(EV_CALL(XCB_LEAVE_NOTIFY)
+            {
+                RE_CAST_EV(xcb_leave_notify_event_t);
+                for (int i = 0; i < entries.size(); ++i)
+                {
+                    if (e->event == entries[i].window)
+                    {
+                        entries[i].window.change_backround_color(BLACK);
+                    }
+                }
             });
         }
-        
-        void run_action(const xcb_window_t *w)
-        {
-            for (const auto & entry : entries)
-            {
-                if (*w == entry.window)
-                {
-                    entry.action();
-                }
-            }
-        }
-        
+
         void make_entries()
         {
             for (int i(0), y(0); i < entries.size(); ++i, y += _height)
