@@ -5907,27 +5907,6 @@ class context_menu {
         
         void make_entries()
         {
-            // int y = 0;
-            // for (auto & entry : entries)
-            // {
-            //     entry.make_window(
-            //         context_window,
-            //         (0 + (BORDER_SIZE / 2)),
-            //         (y + (BORDER_SIZE / 2)),
-            //         (_width - BORDER_SIZE),
-            //         (_height - BORDER_SIZE)
-            //     );
-            //     entry.window.draw_text(
-            //         entry.name.c_str(),
-            //         WHITE,
-            //         BLACK,
-            //         "7x14",
-            //         2,
-            //         14
-            //     );
-            //     y += _height;
-            // }
-
             for (int i(0), y(0); i < entries.size(); ++i, y += _height)
             {
                 entries[i].make_window(
@@ -6043,6 +6022,8 @@ class Window_Manager {
                 {
                     launcher.program((char *) "konsole");
                 });
+                context_menu->add_entry("hello", nullptr);
+                context_menu->add_entry("my name", nullptr);
 
                 context_menu->init();
 
