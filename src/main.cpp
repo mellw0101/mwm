@@ -4237,6 +4237,7 @@ class window {
             {
                 get_font(__font_name);
                 if (__backround_color == AUTO) __backround_color = _color;
+                if (__backround_color == WHITE) __text_color = BLACK;
                 create_font_gc(__text_color, __backround_color, font);
                 if (__x == AUTO) __x = CENTER_TEXT(_width, __str.length());
                 if (__y == AUTO) __y = CENTER_TEXT_Y(_height);
@@ -7580,26 +7581,28 @@ class __status_bar__ {
 
             if (__window == _audio_window)
             {
-                if (_audio_window.get_current_backround_color() == WHITE)
-                {
-                    _audio_window.draw("Audio", BLACK);
-                }
-                else
-                {
-                    _audio_window.draw("Audio");
-                }
+                _audio_window.draw("Audio");
+                // if (_audio_window.get_current_backround_color() == WHITE)
+                // {
+                //     _audio_window.draw("Audio", BLACK);
+                // }
+                // else
+                // {
+                //     _audio_window.draw("Audio");
+                // }
             }
 
             if (__window == _wifi_close_window)
             {
-                if (_wifi_close_window.get_current_backround_color() == WHITE)
-                {
-                    _wifi_close_window.draw("Close", BLACK);
-                }
-                else
-                {
-                    _wifi_close_window.draw("Close");
-                }
+                _wifi_close_window.draw("Close");
+                // if (_wifi_close_window.get_current_backround_color() == WHITE)
+                // {
+                //     _wifi_close_window.draw("Close", BLACK);
+                // }
+                // else
+                // {
+                //     _wifi_close_window.draw("Close");
+                // }
             }
 
             if (__window == _wifi_info_window )
