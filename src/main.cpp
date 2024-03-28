@@ -2086,10 +2086,14 @@ class __event_handler__ {
 
         void iter_and_log_map_size()
         {
+            uint16_t total_events = 0;
             for (const auto &pair : eventCallbacks)
             {
                 loutI << EVENT_TYPE(pair.first) << " vecsize" << pair.second.size() << loutEND;
+                total_events += pair.second.size();
             }
+            
+            loutI << "Total events in map" << total_events << loutEND;
         }
 
     private:
