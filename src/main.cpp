@@ -3014,11 +3014,11 @@ class window {
             return *this;
         }
 
-        int id; // Example identifier for hashing and equality checks
-        bool operator==(const window& other) const
-        {
-            return id == other.id;
-        }
+        // int id; // Example identifier for hashing and equality checks
+        // bool operator==(const window& other) const
+        // {
+        //     return id == other.id;
+        // }
     
     /* Methods     */
         /* Create        */
