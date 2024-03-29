@@ -8200,7 +8200,7 @@ class __status_bar__ {
                 XCB_EVENT_MASK_EXPOSURE,
                 MAP
             );
-            _time_date_window.setup_WIN_SIG(DRAW_SIGNAL, [&](window &__window) -> void
+            _time_date_window.setup_WIN_SIG(DRAW_SIGNAL, [&]() -> void
             {
                 long now(time({}));
                 char buf[80];
@@ -8211,7 +8211,7 @@ class __status_bar__ {
                     localtime(&now)
                 );
                 
-                __window.draw_acc(string(buf));
+                _time_date_window.draw_acc(string(buf));
             });
 
             _wifi_window.create_window(
@@ -8455,7 +8455,7 @@ class __status_bar__ {
         {
             if (__window == _time_date_window)
             {
-                signal_manager->window_sigs.emit(_time_date_window, DRAW_SIGNAL, _time_date_window);
+                _time_date_window.emit_WIN_SIG(DRAW_SIGNAL);
                 // _time_date_window.draw(get_time_and_date__());
             }
 
