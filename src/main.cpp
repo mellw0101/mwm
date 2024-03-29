@@ -8427,8 +8427,7 @@ class __status_bar__ {
                 {
                     while (true)
                     {
-                        // this->_time_date_window.send_event(XCB_EVENT_MASK_EXPOSURE);
-                        signal_manager->window_sigs.emit(_time_date_window, DRAW_SIGNAL, _time_date_window);
+                        this->_time_date_window.send_event(XCB_EVENT_MASK_EXPOSURE);
                         this_thread::sleep_for(chrono::seconds(1));
                     }
                 };
@@ -8454,10 +8453,11 @@ class __status_bar__ {
 
         void expose(const uint32_t &__window)
         {
-            // if (__window == _time_date_window)
-            // {
-            //     _time_date_window.draw(get_time_and_date__());
-            // }
+            if (__window == _time_date_window)
+            {
+                signal_manager->window_sigs.emit(_time_date_window, DRAW_SIGNAL, _time_date_window);
+                // _time_date_window.draw(get_time_and_date__());
+            }
 
             if (__window == _audio_window)
             {
