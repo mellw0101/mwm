@@ -234,8 +234,6 @@ constexpr Type make_constexpr(Type value) { return value; }
 #define STATIC_CONSTEXPR_TYPE(__type, __name, __value) \
     static constexpr __type __name = make_constexpr<__type>((__type)__value)
 
-#define HIDE_DOCK "hide_dock"
-
 namespace { // Tools
     constexpr const char * pointer_from_enum(CURSOR CURSOR)
     {
@@ -376,12 +374,15 @@ namespace { // Tools
 }
 
 class __signal_manager__ {
+    /* Defines   */
+        #define HIDE_DOCK "hide_dock"
+
     private:
     /* Variabels */
         unordered_map<string, vector<function<void()>>> signals;
 
     public:
-    /* Methods */
+    /* Methods   */
         template<typename Callback>
         void connect(const string &__signal_name, Callback &&callback) // Connect a slot to a signal
         {
@@ -405,6 +406,7 @@ class __signal_manager__ {
         {
             signals.reserve(40);
         }
+
 }; static __signal_manager__ *signal_manager(nullptr);
 
 class __crypto__ {
@@ -5936,7 +5938,7 @@ class client {
                 frame,
                 BORDER_SIZE,
                 BORDER_SIZE,
-                (width - (BUTTON_SIZE * 3)),
+                width,
                 TITLE_BAR_HEIGHT,
                 BLACK,
                 XCB_EVENT_MASK_EXPOSURE,
