@@ -6227,7 +6227,8 @@ class client {
                 BLUE,
                 BUTTON_EVENT_MASK,
                 MAP,
-                (int[]){ALL, 1, WHITE}
+                (int[]){ALL, 1, WHITE},
+                CURSOR::hand2
             );
 
             close_button.make_then_set_png(USER_PATH_PREFIX("/close.png"), CLOSE_BUTTON_BITMAP);
