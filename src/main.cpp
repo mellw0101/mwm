@@ -13516,20 +13516,20 @@ class Events {
                 return;
             }
 
-            if (e->event == wm->root)
-            {
-                if (e->detail == R_MOUSE_BUTTON)
-                {
-                    wm->context_menu->show();
-                    return;
-                }
+            // if (e->event == wm->root)
+            // {
+            //     if (e->detail == R_MOUSE_BUTTON)
+            //     {
+            //         wm->context_menu->show();
+            //         return;
+            //     }
 
-                if (e->detail == L_MOUSE_BUTTON)
-                {
-                    wm->unfocus();
-                    return;
-                }
-            }
+            //     if (e->detail == L_MOUSE_BUTTON)
+            //     {
+            //         wm->unfocus();
+            //         return;
+            //     }
+            // }
 
             c = wm->client_from_any_window(&e->event);
             if (c == nullptr) 
