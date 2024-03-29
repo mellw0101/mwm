@@ -616,7 +616,8 @@ namespace {
     };
 
     enum {
-        DRAW_SIGNAL = 1
+        DRAW_SIGNAL          = 1,
+        L_MOUSE_BUTTON_PRESS = 2
     };
 
     template<> /* for windows to pass the window as well */
@@ -3533,7 +3534,7 @@ class window {
             template<typename Callback>
             void on_L_MOUSE_BUTTON_PRESS_event(Callback&& callback)
             {
-                EV_ID = event_handler->setEventCallback(XCB_BUTTON_PRESS, [this, callback](Ev ev)
+                EV_ID = event_handler->setEventCallback(EV_CALL(XCB_BUTTON_PRESS)
                 {
                     RE_CAST_EV(xcb_button_press_event_t);
                     if (e->event == _window)
@@ -6730,10 +6731,8 @@ class Entry {
     /* Methods */
         void make_window(uint32_t __parent, int16_t __x, int16_t __y, uint16_t __width, uint16_t __height)
         {
-            window.setup_WIN_SIG(DRAW_SIGNAL, [this]()
-            {
-                draw();
-            });
+            window.setup_WIN_SIG(DRAW_SIGNAL, [this]() -> void { window.draw_acc(name); });
+            window.setup_WIN_SIG(L_MOUSE_BUTTON_PRESS, [this]() -> void { if (action) action(); });
 
             window.create_window(
                 __parent,
@@ -6747,11 +6746,7 @@ class Entry {
             );
             window.grab_button({ { L_MOUSE_BUTTON, NULL } });
             window.on_expose_event([this]() -> void { window.emit_WIN_SIG(DRAW_SIGNAL); });
-        }
-
-        void draw()
-        {
-            window.draw_acc(name);
+            window.on_L_MOUSE_BUTTON_PRESS_event([this]() -> void { window.emit_WIN_SIG(L_MOUSE_BUTTON_PRESS); });
         }
 
 };
@@ -6797,7 +6792,7 @@ class context_menu {
             for (int i(0), y(0); i < entries.size(); ++i, y += _height)
             {
                 entries[i].make_window(context_window, 0, y, _width, _height);
-                entries[i].window.draw_acc(entries[i].name);
+                entries[i].window.emit_WIN_SIG(DRAW_SIGNAL);
             }
         }
     
@@ -6810,13 +6805,13 @@ class context_menu {
                 RE_CAST_EV(xcb_button_press_event_t);
                 if (e->detail == L_MOUSE_BUTTON)
                 {
-                    for (int i = 0; i < entries.size(); ++i)
-                    {
-                        if (e->event == entries[i].window)
-                        {
-                            entries[i].action();
-                        }
-                    }
+                    // for (int i = 0; i < entries.size(); ++i)
+                    // {
+                    //     if (e->event == entries[i].window)
+                    //     {
+                    //         entries[i].action();
+                    //     }
+                    // }
 
                     hide__();
                 }
