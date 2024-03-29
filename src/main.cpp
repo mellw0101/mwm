@@ -649,6 +649,35 @@ namespace {
                 }
             }
     };
+
+    template<>
+    class UMapWithID<window &, void> {
+        public:
+            // Define the static map
+            std::unordered_map<window *, std::vector<std::pair<int, std::function<void()>>>> windowSignalMap;
+
+            // Example of a function to connect a signal with no arguments to a window
+            void connect(window *win, int signalID, std::function<void()> callback)
+            {
+                windowSignalMap[win].emplace_back(signalID, std::move(callback));
+            }
+
+            // Example of a function to emit a signal for a window
+            void emit(window *win, int signalID)
+            {
+                auto it = windowSignalMap.find(win);
+                if (it != windowSignalMap.end())
+                {
+                    for (auto& pair : it->second)
+                    {
+                        if (pair.first == signalID)
+                        {
+                            pair.second(); // Invoke the callback
+                        }
+                    }
+                }
+            }
+    };
 }
 
 class __signal_manager__ {
@@ -662,7 +691,7 @@ class __signal_manager__ {
         UMapWithID<client *, client *> client_signals;
 
         UMapWithID<uint32_t> enum_sigs;
-        UMapWithID<uint32_t, window> window_sigs;
+        UMapWithID<window &> window_sigs;
 
     /* Methods   */
         template<typename Callback>
@@ -2952,6 +2981,12 @@ class window {
             _window = new_window;
             return *this;
         }
+
+        int id; // Example identifier for hashing and equality checks
+        bool operator==(const window& other) const
+        {
+            return id == other.id;
+        }
     
     /* Methods     */
         /* Create        */
@@ -3412,12 +3447,12 @@ class window {
             template<typename Callback>
             void setup_WIN_SIG(int __signal_id, Callback &&__callback)
             {
-                signal_manager->window_sigs.connect(this->_window, 0, __callback);
+                signal_manager->window_sigs.connect(this, __signal_id, __callback);
             }
 
             void emit_WIN_SIG(int __signal_id)
             {
-                signal_manager->window_sigs.emit(this->_window, __signal_id, *this);
+                signal_manager->window_sigs.emit(this, __signal_id);
             }
 
         /* Event         */
