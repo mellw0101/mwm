@@ -5682,7 +5682,7 @@ class client {
                 win.width((width - (BORDER_SIZE * 2)));
                 xcb_flush(conn);
                 frame.width((width));
-                titlebar.width((width - (BORDER_SIZE * 2)));
+                titlebar.width((width - (BORDER_SIZE * 2)) - (BUTTON_SIZE * 6));
                 close_button.x((width - BUTTON_SIZE - BORDER_SIZE));
                 max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
                 min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
@@ -5710,7 +5710,7 @@ class client {
                 win.width((width - (BORDER_SIZE * 2)));
                 xcb_flush(conn);
                 frame.x_width(x, (width));
-                titlebar.width((width - (BORDER_SIZE * 2)));
+                titlebar.width((width - (BORDER_SIZE * 2) - (BUTTON_SIZE * 6)));
                 close_button.x((width - BUTTON_SIZE - BORDER_SIZE));
                 max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
                 min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
@@ -5739,7 +5739,7 @@ class client {
             {
                 frame.x_width_height(x, width, height);
                 win.width_height((width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
-                titlebar.width((width - BORDER_SIZE));
+                titlebar.width((width - (BORDER_SIZE * 2) - (BUTTON_SIZE * 6)));
                 close_button.x((width - BUTTON_SIZE - BORDER_SIZE));
                 max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
                 min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
@@ -5756,7 +5756,7 @@ class client {
             {
                 frame.y_width_height(y, width, height);
                 win.width_height((width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
-                titlebar.width((width - BORDER_SIZE));
+                titlebar.width((width - BORDER_SIZE * 2) - (BUTTON_SIZE * 6));
                 close_button.x((width - BUTTON_SIZE - BORDER_SIZE));
                 max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
                 min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
@@ -5774,7 +5774,7 @@ class client {
                 win.width_height((width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
                 xcb_flush(conn);
                 frame.x_y_width_height(x, y, width, height);
-                titlebar.width((width - (BORDER_SIZE * 2)));
+                titlebar.width((width - (BORDER_SIZE * 2) - (BUTTON_SIZE * 6)));
                 close_button.x((width - BUTTON_SIZE - BORDER_SIZE));
                 max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
                 min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
@@ -5793,7 +5793,7 @@ class client {
                 win.width_height((width - (BORDER_SIZE * 2)), (height - (BORDER_SIZE * 2) - TITLE_BAR_HEIGHT));
                 xcb_flush(conn);
                 frame.width_height(width, height);
-                titlebar.width((width - (BORDER_SIZE * 2)));
+                titlebar.width((width - (BORDER_SIZE * 2) - (BUTTON_SIZE * 6)));
                 close_button.x((width - BUTTON_SIZE - BORDER_SIZE));
                 max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
                 min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
@@ -5938,7 +5938,7 @@ class client {
                 frame,
                 BORDER_SIZE + (BUTTON_SIZE * 3),
                 BORDER_SIZE,
-                (width - (BUTTON_SIZE * 3) - (BORDER_SIZE * 2)),
+                (width - (BUTTON_SIZE * 6) - (BORDER_SIZE * 2)),
                 TITLE_BAR_HEIGHT,
                 BLACK,
                 XCB_EVENT_MASK_EXPOSURE,
