@@ -13513,6 +13513,7 @@ void setup_wm()
     user = get_user_name();
     loutCUser(USER);
 
+    NEW_CLASS(signal_manager, __signal_manager__) { signal_manager->init(); }
     file_system = new __file_system__;
     file_system->init_check();
 
