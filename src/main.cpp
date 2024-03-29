@@ -6213,11 +6213,22 @@ class client {
     
         void make_close_button()
         {
-            close_button.create_default(frame, (width - BUTTON_SIZE + BORDER_SIZE), BORDER_SIZE, BUTTON_SIZE, BUTTON_SIZE);
-            close_button.apply_event_mask({XCB_EVENT_MASK_ENTER_WINDOW, XCB_EVENT_MASK_LEAVE_WINDOW});
-            close_button.set_backround_color(BLUE);
-            close_button.grab_button({ { L_MOUSE_BUTTON, NULL } });
-            close_button.map();
+            // close_button.create_default(frame, (width - BUTTON_SIZE + BORDER_SIZE), BORDER_SIZE, BUTTON_SIZE, BUTTON_SIZE);
+            // close_button.apply_event_mask({XCB_EVENT_MASK_ENTER_WINDOW, XCB_EVENT_MASK_LEAVE_WINDOW});
+            // close_button.set_backround_color(BLUE);
+            // close_button.grab_button({ { L_MOUSE_BUTTON, NULL } });
+            // close_button.map();
+            close_button.create_window(
+                frame,
+                (width - BUTTON_SIZE + BORDER_SIZE),
+                BORDER_SIZE,
+                BUTTON_SIZE,
+                BUTTON_SIZE,
+                BLUE,
+                BUTTON_EVENT_MASK,
+                MAP
+            );
+
             close_button.make_then_set_png(USER_PATH_PREFIX("/close.png"), CLOSE_BUTTON_BITMAP);
         }
     
