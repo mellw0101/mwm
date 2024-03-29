@@ -8423,7 +8423,7 @@ class __status_bar__ {
         {
             if (__window == _time_date_window)
             {
-                function<void()> __time__ = [&]()-> void
+                function<void()> __time__ = [this]()-> void
                 {
                     while (true)
                     {
