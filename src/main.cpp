@@ -3565,13 +3565,7 @@ class window {
             template<typename Callback>
             void draw_on_expose(Callback &&callback)
             {
-                this->setup_WIN_SIG(
-                    DRAW_SIGNAL,
-                    [this, callback]() -> void
-                    {
-                        callback();
-                    }
-                );
+                this->setup_WIN_SIG(DRAW_SIGNAL, callback);
 
                 EV_ID = event_handler->emit_on_XCB_EXPOSE_event(this->_window);
                 ADD_EV_ID_IWIN(XCB_EXPOSE);
