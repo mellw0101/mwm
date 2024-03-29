@@ -6720,6 +6720,11 @@ class Entry {
     /* Methods */
         void make_window(uint32_t __parent, int16_t __x, int16_t __y, uint16_t __width, uint16_t __height)
         {
+            window.setup_WIN_SIG(DRAW_SIGNAL, [this]()
+            {
+                draw();
+            });
+
             window.create_window(
                 __parent,
                 __x,
@@ -6731,7 +6736,7 @@ class Entry {
                 MAP
             );
             window.grab_button({ { L_MOUSE_BUTTON, NULL } });
-            window.on_expose_event([this]() -> void { draw(); });
+            window.on_expose_event([this]() -> void { window.emit_WIN_SIG(DRAW_SIGNAL); });
         }
 
         void draw()
