@@ -373,6 +373,40 @@ namespace { // Tools
     }
 }
 
+typedef function<void()> slot_function_t;
+
+class __signal_manager__ {
+    private:
+    /* Variabels */
+        unordered_map<string, vector<slot_function_t>> signals;
+
+    public:
+    /* Methods */
+        template<typename Callback>
+        void connect(const string &__signal_name, Callback &&callback) // Connect a slot to a signal
+        {
+            signals[__signal_name].emplace_back(std::forward<Callback>(callback));
+        }
+
+        
+        void emit(const string &__signal_name) // Emit a signal, calling all connected slots
+        {
+            auto it = signals.find(__signal_name);
+            if (it != signals.end())
+            {
+                for (auto& slot : it->second)
+                {
+                    slot();
+                }
+            }
+        }
+
+        void init()
+        {
+            signals.reserve(40);
+        }
+};
+
 class __crypto__ {
     /* Defines */
         #define HASH(__input) \
@@ -13124,7 +13158,6 @@ class Events {
 
                 if (e->detail == L_MOUSE_BUTTON)
                 {
-                    loutI << "root L_MOUSE_BUTTON pressed unfocusing" << loutEND;
                     wm->unfocus();
                     return;
                 }
