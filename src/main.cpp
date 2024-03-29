@@ -6827,7 +6827,7 @@ class context_menu {
                 entries[i].window.setup_WIN_SIG(L_MOUSE_BUTTON_PRESS, [this, i]() -> void { if (entries[i].action) entries[i].action(); });
                 entries[i].make_window(context_window, 0, y, _width, _height);
                 entries[i].window.emit_WIN_SIG(DRAW_SIGNAL);
-                entries[i].window.emit_signal_on_ev(L_MOUSE_BUTTON_PRESS);
+                // entries[i].window.emit_signal_on_ev(L_MOUSE_BUTTON_PRESS);
             }
         }
     
@@ -6848,10 +6848,7 @@ class context_menu {
                         }
                     }
 
-                    if (context_window.is_mapped())
-                    {
-                        hide__();
-                    }
+                    hide__();
                 }
             });
 
