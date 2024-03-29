@@ -6780,6 +6780,7 @@ class Entry {
             );
             window.grab_button({ { L_MOUSE_BUTTON, NULL } });
             window.emit_signal_on_ev(DRAW_SIGNAL);
+            window.emit_signal_on_ev(L_MOUSE_BUTTON_PRESS);
         }
 
 };
