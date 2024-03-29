@@ -6732,7 +6732,6 @@ class Entry {
         void make_window(uint32_t __parent, int16_t __x, int16_t __y, uint16_t __width, uint16_t __height)
         {
             window.setup_WIN_SIG(DRAW_SIGNAL, [this]() -> void { window.draw_acc(name); });
-            window.setup_WIN_SIG(L_MOUSE_BUTTON_PRESS, [this]() -> void { if (action) action(); });
 
             window.create_window(
                 __parent,
@@ -6790,7 +6789,8 @@ class context_menu {
         void make_entries__()
         {
             for (int i(0), y(0); i < entries.size(); ++i, y += _height)
-            {
+            {   
+                entries[i].window.setup_WIN_SIG(L_MOUSE_BUTTON_PRESS, [this, i]() -> void { if (entries[i].action) entries[i].action(); });
                 entries[i].make_window(context_window, 0, y, _width, _height);
                 entries[i].window.emit_WIN_SIG(DRAW_SIGNAL);
             }
