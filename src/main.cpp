@@ -653,16 +653,13 @@ namespace {
     template<>
     class UMapWithID<window &, void> {
         public:
-            // Define the static map
-            std::unordered_map<window *, std::vector<std::pair<int, std::function<void()>>>> windowSignalMap;
+            unordered_map<window *, vector<std::pair<int, function<void()>>>> windowSignalMap;
 
-            // Example of a function to connect a signal with no arguments to a window
-            void connect(window &win, int signalID, std::function<void()> callback)
+            void connect(window &win, int signalID, function<void()> callback)
             {
                 windowSignalMap[&win].emplace_back(signalID, std::move(callback));
             }
 
-            // Example of a function to emit a signal for a window
             void emit(window &win, int signalID)
             {
                 auto it = windowSignalMap.find(&win);
@@ -673,6 +670,30 @@ namespace {
                         if (pair.first == signalID)
                         {
                             pair.second(); // Invoke the callback
+                        }
+                    }
+                }
+            }
+
+            void remove_window(window &win)
+            {
+                auto it = windowSignalMap.find(&win);
+                if (it != windowSignalMap.end())
+                {
+                    windowSignalMap.erase(it);
+                }
+            }
+
+            void remove_window_signal(window &win, int __signal_id)
+            {
+                auto it = windowSignalMap.find(&win);
+                if (it != windowSignalMap.end())
+                {
+                    for (int i = 0; i < it->second.size(); ++i)
+                    {
+                        if (it->second[i].first == __signal_id)
+                        {
+                            remove_element_from_vec(it->second, i);
                         }
                     }
                 }
@@ -3328,6 +3349,7 @@ class window {
                 free(delete_reply);
 
                 window_ev_id_handler.delete_callbacks_by_ev_id();
+                signal_manager->window_sigs.remove_window(*this);
             }
             
             void clear()
