@@ -377,6 +377,155 @@ enum {
     KILL = 1
 };
 
+// Primary template with two parameters, Type for the map's key and ArgType for the function's argument.
+template<typename Type, typename ArgType = void>
+struct umap_w_id {
+    using type = unordered_map<Type, vector<pair<int, function<void(ArgType)>>>>;
+};
+
+// Specialization for when ArgType is void, meaning the function takes no arguments.
+template<typename Type>
+struct umap_w_id<Type, void> {
+    using type = unordered_map<Type, vector<pair<int, function<void()>>>>;
+};
+
+// Helper type alias to simplify usage
+template<typename Type, typename ArgType = void>
+using umap_w_id_t = typename umap_w_id<Type, ArgType>::type;
+
+// Forward declaration of the class template to allow its use in the specialization below
+template<typename Type, typename ArgType = void>
+class UMapWithID;
+
+// Specialization for when ArgType is void, meaning the function takes no arguments.
+template<typename Type>
+class UMapWithID<Type, void> {
+    public:
+    /* Vatiables */
+        using SignalMap = unordered_map<Type, vector<pair<int, function<void()>>>>;
+        SignalMap signalMap;
+
+    /* Methods */
+        // Connect a signal with no arguments
+        void connect(Type key, int signalID, function<void()> callback)
+        {
+            signalMap[key].emplace_back(signalID, std::move(callback));
+        }
+
+        // Emit a signal with no arguments
+        void emit(Type key, int signalID)
+        {
+            auto it = signalMap.find(key);
+            if (it != signalMap.end())
+            {
+                for (auto& pair : it->second)
+                {
+                    if (pair.first == signalID)
+                    {
+                        pair.second(); // Invoke the callback
+                    }
+                }
+            }
+        }
+};
+
+// Primary template for cases where ArgType is not void
+template<typename Type, typename ArgType>
+class UMapWithID {
+    public:
+    /* Variables */
+        using SignalMap = unordered_map<Type, vector<pair<int, function<void(ArgType)>>>>;
+        SignalMap signalMap;
+
+    /* Methods */
+        // Connect a signal with arguments
+        void connect(Type key, int signalID, function<void(ArgType)> callback)
+        {
+            signalMap[key].emplace_back(signalID, std::move(callback));
+        }
+
+        // Emit a signal with arguments
+        void emit(Type key, int signalID, ArgType arg)
+        {
+            auto it = signalMap.find(key);
+            if (it != signalMap.end())
+            {
+                for (auto& pair : it->second)
+                {
+                    if (pair.first == signalID)
+                    {
+                        pair.second(arg); // Invoke the callback with argument
+                    }
+                }
+            }
+        }
+};
+
+#define CLI_SIG [](client *c) -> void
+
+class client;
+template<typename ArgType>
+class UMapWithID<client *, ArgType> {
+    public:
+    /* Variables */
+        using SignalMap = unordered_map<client *, vector<pair<int, function<void(ArgType)>>>>;
+        SignalMap signalMap;
+
+    /* Methods */
+        template<typename Callback>
+        void connect(client *key, int signalID, Callback&& callback)
+        {
+            signalMap[key].emplace_back(signalID, function<void(ArgType)>(std::forward<Callback>(callback)));
+        }
+
+        // Emit a signal with arguments
+        void emit(client *key, int signalID, ArgType arg)
+        {
+            auto it = signalMap.find(key);
+            if (it != signalMap.end())
+            {
+                for (auto& pair : it->second)
+                {
+                    if (pair.first == signalID)
+                    {
+                        pair.second(arg); // Invoke the callback with argument
+                    }
+                }
+            }
+        }
+};
+
+template<>
+class UMapWithID<client *, void> {
+    public:
+    /* Vatiables */
+        using SignalMap = unordered_map<client *, vector<pair<int, function<void()>>>>;
+        SignalMap signalMap;
+
+    /* Methods */
+        // Connect a signal with no arguments
+        void connect(client *key, int signalID, function<void()> callback)
+        {
+            signalMap[key].emplace_back(signalID, std::move(callback));
+        }
+
+        // Emit a signal with no arguments
+        void emit(client *key, int signalID)
+        {
+            auto it = signalMap.find(key);
+            if (it != signalMap.end())
+            {
+                for (auto& pair : it->second)
+                {
+                    if (pair.first == signalID)
+                    {
+                        pair.second(); // Invoke the callback
+                    }
+                }
+            }
+        }
+};
+
 class __signal_manager__ {
     /* Defines   */
         #define HIDE_DOCK "hide_dock"
@@ -6360,6 +6509,7 @@ class Entry {
         {
             window.draw_acc(name);
         }
+
 };
 
 class context_menu {
@@ -6391,6 +6541,11 @@ class context_menu {
         {
             context_window.unmap();
             context_window.kill();
+
+            for (int i = 0; i < entries.size(); ++i)
+            {
+                entries[i].window.kill();
+            }
         }
 
         void make_entries__()
@@ -6536,6 +6691,8 @@ class Window_Manager {
         vector<desktop *> desktop_list;
         client *focused_client = nullptr;
         desktop *cur_d = nullptr;
+
+        UMapWithID<client *, client *> client_signals;
     
     /* Methods     */
         /* Main         */
@@ -6932,7 +7089,16 @@ class Window_Manager {
                 FLUSH_X();
 
                 pid_manager->check_pid(c->win.get_pid());
-                c->setup_kill_signal();
+                client_signals.connect(c, KILL, CLI_SIG
+                {
+                    if (!c->win.is_mapped())
+                    {
+                        c->kill();
+                    }
+
+                    c->win.kill();
+                });
+
                 // c->win.print_window_states();
                 // xcb_atom_t atom;
                 // get_atom((char *)"_NET_WM_STATE", &atom);
@@ -13311,7 +13477,7 @@ class Events {
                     // }
 
                     // c->win.kill();
-                    signal_manager->emit_client(c->frame, KILL);
+                    wm->client_signals.emit(c, KILL, c);
 
                     return;
                 }
