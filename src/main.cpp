@@ -598,7 +598,7 @@ namespace {
             template<typename Callback>
             void connect(uint32_t key, Callback &&callback)
             {
-                signalMap[key].emplace_back(0, std::forward<Callback>(callback));
+                signalMap[key].emplace_back(std::forward<Callback>(callback));
             }
 
             // Emit a signal with no arguments
