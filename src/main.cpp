@@ -373,6 +373,10 @@ namespace { // Tools
     }
 }
 
+typedef enum {
+    KILL = 1
+} client_signal_t;
+
 class __signal_manager__ {
     /* Defines   */
         #define HIDE_DOCK "hide_dock"
@@ -380,6 +384,7 @@ class __signal_manager__ {
     private:
     /* Variabels */
         unordered_map<string, vector<function<void()>>> signals;
+        unordered_map<uint32_t, vector<pair<int, function<void()>>>> client_signal_map;
 
     public:
     /* Methods   */
@@ -393,6 +398,12 @@ class __signal_manager__ {
         void connect_window(uint32_t __window, const string &__function, Callback &&callback) // Connect a slot to a signal
         {
             signals[to_string(__window) + "__" + __function].emplace_back(std::forward<Callback>(callback));
+        }
+
+        template<typename Callback>
+        void connect_client(uint32_t __frame_window_id, client_signal_t __client_signal, Callback &&callback) // Connect a slot to a signal
+        {
+            client_signal_map[__frame_window_id].emplace_back(__client_signal, std::forward<Callback>(callback));
         }
 
         void emit(const string &__signal_name) // Emit a signal, calling all connected slots
@@ -417,7 +428,28 @@ class __signal_manager__ {
                     slot();
                 }
             }
-        }        
+        }
+
+        void emit_client(uint32_t __frame_window_id, client_signal_t __client_signal)
+        {
+            auto it = client_signal_map.find(__frame_window_id);
+            if (it != client_signal_map.end())
+            {
+                for (const auto &pair : it->second)
+                {
+                    if (pair.first == __client_signal)
+                    {
+                        pair.second();
+                    }
+                }
+            }
+        }
+
+        void remove_client(uint32_t __frame_window_id)
+        {
+            client_signal_map.erase(__frame_window_id);
+        }
+
 
         void init()
         {
@@ -5686,6 +5718,19 @@ class client {
                 // frame.kill();
             }
 
+            void setup_kill_signal()
+            {
+                signal_manager->connect_client(frame, KILL, [this]() -> void
+                {
+                    if (!this->win.is_mapped())
+                    {
+                        this->kill();
+                    }
+
+                    this->win.kill();
+                });
+            }
+
             void align()
             {
                 win.x(BORDER_SIZE);
@@ -6884,6 +6929,7 @@ class Window_Manager {
                 FLUSH_X();
 
                 pid_manager->check_pid(c->win.get_pid());
+                c->setup_kill_signal();
                 // c->win.print_window_states();
                 // xcb_atom_t atom;
                 // get_atom((char *)"_NET_WM_STATE", &atom);
@@ -13256,12 +13302,13 @@ class Events {
                 
                 if (e->event == c->close_button)
                 {
-                    if (!c->win.is_mapped())
-                    {
-                        c->kill();
-                    }
+                    // if (!c->win.is_mapped())
+                    // {
+                    //     c->kill();
+                    // }
 
-                    c->win.kill();
+                    // c->win.kill();
+                    signal_manager->emit_client(c->frame, KILL);
 
                     return;
                 }
