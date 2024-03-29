@@ -374,6 +374,7 @@ namespace { // Tools
 }
 
 class client;
+class window;
 namespace {
     enum {
         KILL = 1,
@@ -572,14 +573,85 @@ namespace {
                     }
                 }
             }
+
+            void remove(client *key)
+            {
+                auto it = signalMap.find(key);
+                if (it == signalMap.end()) return;
+                signalMap.erase(it);
+            }
+    };
+
+    enum { // Signals
+        SET_EV_CALLBACK__RESIZE_NO_BORDER = 1,
+        HIDE_DOCK                         = 2
+    };
+
+    template<>
+    class UMapWithID<uint32_t> {
+        public:
+        /* Vatiables */
+            using SignalMap = unordered_map<uint32_t, vector<function<void()>>>;
+            SignalMap signalMap;
+
+        /* Methods */
+            template<typename Callback>
+            void connect(uint32_t key, Callback &&callback)
+            {
+                signalMap[key].emplace_back(0, std::forward<Callback>(callback));
+            }
+
+            // Emit a signal with no arguments
+            void emit(uint32_t key)
+            {
+                auto it = signalMap.find(key);
+                if (it != signalMap.end())
+                {
+                    for (auto &action : it->second)
+                    {
+                        action();
+                    }
+                }
+            }
+    };
+
+    enum {
+        DRAW_SIGNAL = 1
+    };
+
+    template<> /* for windows to pass the window as well */
+    class UMapWithID<uint32_t, window> {
+        public:
+        /* Vatiables */
+            using SignalMap = unordered_map<uint32_t, vector<pair<int, function<void(window &)>>>>;
+            SignalMap signalMap;
+
+        /* Methods */
+            template<typename Callback>
+            void connect(uint32_t __key, int __signal, Callback &&__callback)
+            {
+                signalMap[__key].emplace_back(__signal, std::forward<Callback>(__callback));
+            }
+
+            // Emit a signal with no arguments
+            void emit(uint32_t key, int __signal, window &window)
+            {
+                auto it = signalMap.find(key);
+                if (it != signalMap.end())
+                {
+                    for (auto &pair : it->second)
+                    {
+                        if (pair.first == __signal)
+                        {
+                            pair.second(window);
+                        }
+                    }
+                }
+            }
     };
 }
 
 class __signal_manager__ {
-    /* Defines   */
-        #define HIDE_DOCK "hide_dock"
-        #define RESIZE_NO_BORDER "RESIZE_NO_BORDER"
-
     private:
     /* Variabels */
         unordered_map<string, vector<function<void()>>> signals;
@@ -588,6 +660,9 @@ class __signal_manager__ {
     public:
     /* Variabels */
         UMapWithID<client *, client *> client_signals;
+
+        UMapWithID<uint32_t> enum_sigs;
+        UMapWithID<uint32_t, window> window_sigs;
 
     /* Methods   */
         template<typename Callback>
@@ -654,7 +729,6 @@ class __signal_manager__ {
         {
             client_signal_map.erase(__frame_window_id);
         }
-
 
         void init()
         {
@@ -3333,6 +3407,17 @@ class window {
                 _y      = __y;
                 _width  = __width;
                 _height = __height;
+            }
+
+            template<typename Callback>
+            void setup_WIN_SIG(int __signal_id, Callback &&__callback)
+            {
+                signal_manager->window_sigs.connect(this->_window, 0, __callback);
+            }
+
+            void emit_WIN_SIG(int __signal_id)
+            {
+                signal_manager->window_sigs.emit(this->_window, __signal_id, *this);
             }
 
         /* Event         */
@@ -6235,30 +6320,7 @@ class client {
             draw_title(TITLE_REQ_DRAW);
             icon.raise();
 
-            EV_ID = 0;
-
-            event_id = event_handler->setEventCallback(EV_CALL(XCB_EXPOSE)
-            {
-                RE_CAST_EV(xcb_expose_event_t);
-                if (e->window == titlebar)
-                {
-                    draw_title(TITLE_INTR_DRAW);
-                }
-            });
-            ADD_EV_ID_WIN(titlebar, XCB_EXPOSE);
-
-            event_id = event_handler->setEventCallback(EV_CALL(XCB_PROPERTY_NOTIFY)
-            {
-                RE_CAST_EV(xcb_property_notify_event_t);
-                if (e->window == win)
-                {
-                    if (e->atom == ewmh->_NET_WM_NAME)
-                    {
-                        draw_title(TITLE_REQ_DRAW);
-                    }
-                }
-            });
-            ADD_EV_ID_WIN(titlebar, XCB_PROPERTY_NOTIFY);
+            setup_events(titlebar);
         }
     
         void make_close_button()
@@ -6278,25 +6340,7 @@ class client {
 
             close_button.make_then_set_png(USER_PATH_PREFIX("/close.png"), CLOSE_BUTTON_BITMAP);
 
-            this->setup_CLI_SIG(KILL, CLI_SIG
-            {
-                if (!c->win.is_mapped())
-                {
-                    c->kill();
-                }
-
-                c->win.kill();
-            });
-
-            EV_ID = event_handler->setEventCallback(EV_CALL(XCB_BUTTON_PRESS)
-            {
-                RE_CAST_EV(xcb_button_press_event_t);
-                if (e->event == close_button && e->detail == L_MOUSE_BUTTON)
-                {
-                    signal_manager->client_signals.emit(this, KILL);
-                }    
-            });
-            ADD_EV_ID_WIN(close_button, XCB_BUTTON_PRESS);
+            setup_events(close_button);
         }
     
         void make_max_button()
@@ -6419,6 +6463,60 @@ class client {
 
             win.make_png_from_icon();
             icon.set_backround_png(PNG_HASH(win.get_icccm_class()));
+        }
+
+        void setup_events(uint32_t __window)
+        {
+            if (__window == close_button)
+            {
+                this->setup_CLI_SIG(KILL, CLI_SIG
+                {
+                    if (!c->win.is_mapped())
+                    {
+                        c->kill();
+                    }
+
+                    c->win.kill();
+                });
+
+                EV_ID = event_handler->setEventCallback(EV_CALL(XCB_BUTTON_PRESS)
+                {
+                    RE_CAST_EV(xcb_button_press_event_t);
+                    if (e->event == close_button && e->detail == L_MOUSE_BUTTON)
+                    {
+                        signal_manager->client_signals.emit(this, KILL);
+                    }    
+                });
+                ADD_EV_ID_WIN(close_button, XCB_BUTTON_PRESS);
+            }
+
+            if (__window == titlebar)
+            {
+                EV_ID = 0;
+
+                event_id = event_handler->setEventCallback(EV_CALL(XCB_EXPOSE)
+                {
+                    RE_CAST_EV(xcb_expose_event_t);
+                    if (e->window == titlebar)
+                    {
+                        draw_title(TITLE_INTR_DRAW);
+                    }
+                });
+                ADD_EV_ID_WIN(titlebar, XCB_EXPOSE);
+
+                event_id = event_handler->setEventCallback(EV_CALL(XCB_PROPERTY_NOTIFY)
+                {
+                    RE_CAST_EV(xcb_property_notify_event_t);
+                    if (e->window == win)
+                    {
+                        if (e->atom == ewmh->_NET_WM_NAME)
+                        {
+                            draw_title(TITLE_REQ_DRAW);
+                        }
+                    }
+                });
+                ADD_EV_ID_WIN(titlebar, XCB_PROPERTY_NOTIFY);
+            }
         }
     
     /* Variables   */
@@ -7418,7 +7516,7 @@ class Window_Manager {
 
                 if (BORDER_SIZE == 0)
                 {
-                    signal_manager->emit(RESIZE_NO_BORDER);
+                    signal_manager->enum_sigs.emit(SET_EV_CALLBACK__RESIZE_NO_BORDER);
                 }
             }
 
@@ -8102,6 +8200,20 @@ class __status_bar__ {
                 XCB_EVENT_MASK_EXPOSURE,
                 MAP
             );
+            _time_date_window.setup_WIN_SIG(DRAW_SIGNAL, [&](window &__window) -> void
+            {
+                long now(time({}));
+                char buf[80];
+                strftime(
+                    buf,
+                    size(buf),
+                    "%Y-%m-%d %H:%M:%S",
+                    localtime(&now)
+                );
+                
+                __window.draw_acc(string(buf));
+            });
+
             _wifi_window.create_window(
                 _bar_window,
                 WIFI_WINDOW_X,
@@ -8315,7 +8427,8 @@ class __status_bar__ {
                 {
                     while (true)
                     {
-                        this->_time_date_window.send_event(XCB_EVENT_MASK_EXPOSURE);
+                        // this->_time_date_window.send_event(XCB_EVENT_MASK_EXPOSURE);
+                        signal_manager->window_sigs.emit(_time_date_window, DRAW_SIGNAL, _time_date_window);
                         this_thread::sleep_for(chrono::seconds(1));
                     }
                 };
@@ -8341,10 +8454,10 @@ class __status_bar__ {
 
         void expose(const uint32_t &__window)
         {
-            if (__window == _time_date_window)
-            {
-                _time_date_window.draw(get_time_and_date__());
-            }
+            // if (__window == _time_date_window)
+            // {
+            //     _time_date_window.draw(get_time_and_date__());
+            // }
 
             if (__window == _audio_window)
             {
@@ -11349,10 +11462,9 @@ class __dock_search__ {
                 int status = launcher.launch_child_process(search_string.str().c_str());
                 if (status == 0)
                 {
-                    // wm->unmap_window(main_window.parent());
                     search_string.str().clear();
                     main_window.clear();
-                    signal_manager->emit(HIDE_DOCK);
+                    signal_manager->enum_sigs.emit(HIDE_DOCK);
                 }
             });
         }
@@ -11494,7 +11606,7 @@ class __dock__ {
                 }
             });
 
-            signal_manager->connect(HIDE_DOCK, [this]()
+            signal_manager->enum_sigs.connect(HIDE_DOCK, [this]()
             {
                 hide__(dock_menu);
             });
@@ -13506,37 +13618,6 @@ class Events {
         {
             RE_CAST_EV(xcb_button_press_event_t);
             client *c;
-            // if (BORDER_SIZE == 0)
-            // {
-            //     c = wm->client_from_pointer(10);
-            //     if (c == nullptr) return;
-                
-            //     if (e->detail == L_MOUSE_BUTTON)
-            //     {
-            //         c->raise();
-            //         c->focus();
-            //         resize_client::no_border border(c, 0, 0);
-            //         wm->focused_client = c;
-            //     }
-
-            //     return;
-            // }
-
-            // if (e->event == wm->root)
-            // {
-            //     if (e->detail == R_MOUSE_BUTTON)
-            //     {
-            //         wm->context_menu->show();
-            //         return;
-            //     }
-
-            //     if (e->detail == L_MOUSE_BUTTON)
-            //     {
-            //         wm->unfocus();
-            //         return;
-            //     }
-            // }
-
             c = wm->client_from_any_window(&e->event);
             if (c == nullptr) 
             {
@@ -13892,7 +13973,7 @@ class __signal_factory__ {
     public:
         void init()
         {
-            signal_manager->connect(RESIZE_NO_BORDER, _resize_cli_no_border_ev_);
+            signal_manager->enum_sigs.connect(SET_EV_CALLBACK__RESIZE_NO_BORDER, _resize_cli_no_border_ev_);
         }
 
 };
