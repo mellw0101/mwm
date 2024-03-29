@@ -2188,67 +2188,46 @@ class __event_handler__ {
         {
             eventCallbacks.reserve(34);
 
-            // vector<uint8_t> event_type_keys = {
-            //     XCB_BUTTON_PRESS,
-            //     XCB_ENTER_NOTIFY,
-            //     XCB_LEAVE_NOTIFY,
-            //     XCB_KEY_PRESS,
-            //     XCB_MAP_NOTIFY,
-            //     XCB_MAP_REQUEST,
-            //     XCB_BUTTON_PRESS,
-            //     XCB_CONFIGURE_REQUEST,
-            //     XCB_FOCUS_IN,
-            //     XCB_FOCUS_OUT,
-            //     XCB_DESTROY_NOTIFY,
-            //     XCB_UNMAP_NOTIFY,
-            //     XCB_REPARENT_NOTIFY,
-            //     XCB_MOTION_NOTIFY,
-            //     XCB_CLIENT_MESSAGE,
-            //     XCB_EXPOSE,
-            //     XCB_CONFIGURE_NOTIFY,
-            //     XCB_VISIBILITY_NOTIFY,
-            //     XCB_MAP_REQUEST,
-            //     XCB_UNMAP_NOTIFY
-            // };
+            vector<uint8_t> event_type_keys = {
+                XCB_KEY_PRESS,
+                XCB_KEY_RELEASE,
+                XCB_BUTTON_PRESS,
+                XCB_BUTTON_RELEASE,
+                XCB_MOTION_NOTIFY,
+                XCB_ENTER_NOTIFY,
+                XCB_LEAVE_NOTIFY,
+                XCB_FOCUS_IN,
+                XCB_FOCUS_OUT,
+                XCB_KEYMAP_NOTIFY,
+                XCB_EXPOSE,
+                XCB_GRAPHICS_EXPOSURE,
+                XCB_NO_EXPOSURE,
+                XCB_VISIBILITY_NOTIFY,
+                XCB_CREATE_NOTIFY,
+                XCB_DESTROY_NOTIFY,
+                XCB_UNMAP_NOTIFY,
+                XCB_MAP_NOTIFY,
+                XCB_MAP_REQUEST,
+                XCB_REPARENT_NOTIFY,
+                XCB_CONFIGURE_NOTIFY,
+                XCB_CONFIGURE_REQUEST,
+                XCB_GRAVITY_NOTIFY,
+                XCB_RESIZE_REQUEST,
+                XCB_CIRCULATE_NOTIFY,
+                XCB_CIRCULATE_REQUEST,
+                XCB_PROPERTY_NOTIFY,
+                XCB_SELECTION_CLEAR,
+                XCB_SELECTION_REQUEST,
+                XCB_SELECTION_NOTIFY,
+                XCB_COLORMAP_NOTIFY,
+                XCB_CLIENT_MESSAGE,
+                XCB_MAPPING_NOTIFY
+            };
 
-            // for (int i = 0; i < event_type_keys.size(); ++i)
-            // {
-            //     if (eventCallbacks[event_type_keys[i]].capacity() < 30)
-            //     {
-            //         eventCallbacks[event_type_keys[i]].reserve(32);
-            //     }
-            // }
-            
-                // XCB_KEYMAP_NOTIFY,
-                // XCB_GRAPHICS_EXPOSURE,
-                // XCB_NO_EXPOSURE,
-                // XCB_CREATE_NOTIFY,
-                // XCB_DESTROY_NOTIFY,
-                // XCB_CONFIGURE_REQUEST,
-                // XCB_GRAVITY_NOTIFY,
-                // XCB_RESIZE_REQUEST,
-                // XCB_CIRCULATE_NOTIFY,
-                // XCB_CIRCULATE_REQUEST,
-                // XCB_PROPERTY_NOTIFY,
-                // XCB_SELECTION_CLEAR,
-                // XCB_SELECTION_REQUEST,
-                // XCB_SELECTION_NOTIFY,
-                // XCB_COLORMAP_NOTIFY,
-                // XCB_MAPPING_NOTIFY,
-            // for (uint8_t i = 2; i < 36; ++i)
-            // {
-            //     event_type_keys.push_back(i);
-            // }
-
-            // vector<uint8_t> event_type_keys(35);
-            // iota(event_type_keys.begin(), event_type_keys.end(), 2);
-
-            // for (uint8_t event_type_key : event_type_keys)
-            // {
-            //     vector<pair<CallbackId, EventCallback>> callbacks;
-            //     callbacks.reserve(vector_reserve_size);
-            //     eventCallbacks[event_type_key] = std::move(callbacks);
-            // }
+            for (int i = 0; i < event_type_keys.size(); ++i)
+            {
+                eventCallbacks[event_type_keys[i]].reserve(100);
+            }
         }
 
     private:
@@ -12881,11 +12860,11 @@ class Events {
             event_handler->setEventCallback(EV_CALL(XCB_FOCUS_IN)          { focus_in_handler(ev); });
             event_handler->setEventCallback(EV_CALL(XCB_FOCUS_OUT)         { focus_out_handler(ev); });
             event_handler->setEventCallback(EV_CALL(XCB_DESTROY_NOTIFY)    { destroy_notify_handler(ev); });
-            event_handler->setEventCallback(EV_CALL(XCB_UNMAP_NOTIFY)      { unmap_notify_handler(ev); });
+            // event_handler->setEventCallback(EV_CALL(XCB_UNMAP_NOTIFY)      { unmap_notify_handler(ev); });
             event_handler->setEventCallback(EV_CALL(XCB_REPARENT_NOTIFY)   { reparent_notify_handler(ev); });
-            event_handler->setEventCallback(EV_CALL(XCB_ENTER_NOTIFY)      { enter_notify_handler(ev); });
-            event_handler->setEventCallback(EV_CALL(XCB_LEAVE_NOTIFY)      { leave_notify_handler(ev); });
-            event_handler->setEventCallback(EV_CALL(XCB_MOTION_NOTIFY)     { motion_notify_handler(ev); });
+            // event_handler->setEventCallback(EV_CALL(XCB_ENTER_NOTIFY)      { enter_notify_handler(ev); });
+            // event_handler->setEventCallback(EV_CALL(XCB_LEAVE_NOTIFY)      { leave_notify_handler(ev); });
+            // event_handler->setEventCallback(EV_CALL(XCB_MOTION_NOTIFY)     { motion_notify_handler(ev); });
         }
 
     private:
@@ -13544,6 +13523,7 @@ int main()
     test tester;
     tester.init();
 
+    event_handler->init_map();
     event_handler->run();
     xcb_disconnect(conn);
     return 0;
