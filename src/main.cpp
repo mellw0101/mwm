@@ -380,6 +380,7 @@ class __signal_manager__ {
     private:
     /* Variabels */
         unordered_map<string, vector<function<void()>>> signals;
+        unordered_map<string, vector<function<int(uint32_t)>>> _window_signals;
 
     public:
     /* Methods   */
@@ -389,7 +390,12 @@ class __signal_manager__ {
             signals[__signal_name].emplace_back(std::forward<Callback>(callback));
         }
 
-        
+        template<typename Callback>
+        void connect_window(const string &__signal_name, Callback &&callback) // Connect a slot to a signal
+        {
+            _window_signals[__signal_name].emplace_back(std::forward<Callback>(callback));
+        }
+
         void emit(const string &__signal_name) // Emit a signal, calling all connected slots
         {
             auto it = signals.find(__signal_name);
@@ -11164,7 +11170,7 @@ class mv_client {
         chrono::high_resolution_clock::time_point lastUpdateTime = chrono::high_resolution_clock::now();
         
         #ifdef ARMV8_BUILD
-            STATIC_CONSTEXPR_TYPE(double, frameRate, 15.0);
+            STATIC_CONSTEXPR_TYPE(double, frameRate, 30.0);
         #else
             STATIC_CONSTEXPR_TYPE(double, frameRate, 120.0);
         #endif
@@ -11174,7 +11180,7 @@ class mv_client {
         void snap(int x, int y)
         {
             // WINDOW TO WINDOW SNAPPING 
-            for (client * const &cli : wm->cur_d->current_clients)
+            for (client *const &cli : wm->cur_d->current_clients)
             {
                 if (cli == c) continue;
                 
