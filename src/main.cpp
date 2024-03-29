@@ -536,6 +536,9 @@ class __signal_manager__ {
         unordered_map<uint32_t, vector<pair<int, function<void()>>>> client_signal_map;
 
     public:
+    /* Variabels */
+        UMapWithID<client *, client *> client_signals;
+
     /* Methods   */
         template<typename Callback>
         void connect(const string &__signal_name, Callback &&callback) // Connect a slot to a signal
@@ -6692,7 +6695,7 @@ class Window_Manager {
         client *focused_client = nullptr;
         desktop *cur_d = nullptr;
 
-        UMapWithID<client *, client *> client_signals;
+        // UMapWithID<client *, client *> client_signals;
     
     /* Methods     */
         /* Main         */
@@ -7089,7 +7092,7 @@ class Window_Manager {
                 FLUSH_X();
 
                 pid_manager->check_pid(c->win.get_pid());
-                client_signals.connect(c, KILL, CLI_SIG
+                signal_manager->client_signals.connect(c, KILL, CLI_SIG
                 {
                     if (!c->win.is_mapped())
                     {
@@ -13477,7 +13480,7 @@ class Events {
                     // }
 
                     // c->win.kill();
-                    wm->client_signals.emit(c, KILL, c);
+                    signal_manager->client_signals.emit(c, KILL, c);
 
                     return;
                 }
