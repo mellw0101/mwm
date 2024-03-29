@@ -3641,11 +3641,11 @@ class window {
             }
 
             template<EV ev, typename Callback>
-            void on_ev(Callback &&callback)
+            void on_ev(Callback &&callback, int __mode = 0)
             {
                 if constexpr (ev == EXPOSE)
                 {
-                    this->setup_WIN_SIG<EXPOSE>(callback);
+                    if (__mode == 0) this->setup_WIN_SIG<EXPOSE>(callback);
 
                     EV_ID = event_handler->emit_on<EXPOSE>(this->_window);
                     ADD_EV_ID_IWIN(XCB_EXPOSE);
@@ -3654,7 +3654,8 @@ class window {
 
                 if constexpr (ev == L_MOUSE_BUTTON_EVENT)
                 {
-                    this->setup_WIN_SIG<L_MOUSE_BUTTON_EVENT>(callback);
+                    
+                    if (__mode == 0) this->setup_WIN_SIG<L_MOUSE_BUTTON_EVENT>(callback);
 
                     EV_ID = event_handler->emit_on<L_MOUSE_BUTTON_EVENT>(this->_window);
                     ADD_EV_ID_IWIN(XCB_BUTTON_PRESS);
@@ -6943,9 +6944,7 @@ class Entry {
                 MAP
             );
             window.grab_button({ { L_MOUSE_BUTTON, NULL } });
-            window.on_ev<EXPOSE>([&]() -> void { window.draw_acc(name); });
-            window.on_ev<L_MOUSE_BUTTON_EVENT>([&]() -> void { action(); });
-
+            window.on_ev<EXPOSE>(nullptr, 1);
         }
 
 };
@@ -7004,13 +7003,13 @@ class context_menu {
                 RE_CAST_EV(xcb_button_press_event_t);
                 if (e->detail == L_MOUSE_BUTTON)
                 {
-                    // for (int i = 0; i < entries.size(); ++i)
-                    // {
-                    //     if (e->event == entries[i].window)
-                    //     {
-                    //         entries[i].window.emit_WIN_SIG<L_MOUSE_BUTTON_EVENT>();
-                    //     }
-                    // }
+                    for (int i = 0; i < entries.size(); ++i)
+                    {
+                        if (e->event == entries[i].window)
+                        {
+                            entries[i].window.emit_WIN_SIG<L_MOUSE_BUTTON_EVENT>();
+                        }
+                    }
 
                     hide__();
                 }
