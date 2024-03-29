@@ -375,12 +375,10 @@ namespace { // Tools
     }
 }
 
-typedef function<void()> slot_function_t;
-
 class __signal_manager__ {
     private:
     /* Variabels */
-        unordered_map<string, vector<slot_function_t>> signals;
+        unordered_map<string, vector<function<void()>>> signals;
 
     public:
     /* Methods */
