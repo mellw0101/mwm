@@ -6232,6 +6232,16 @@ class client {
             );
 
             close_button.make_then_set_png(USER_PATH_PREFIX("/close.png"), CLOSE_BUTTON_BITMAP);
+
+            EV_ID = event_handler->setEventCallback(EV_CALL(XCB_BUTTON_PRESS)
+            {
+                RE_CAST_EV(xcb_button_press_event_t);
+                if (e->event == close_button && e->detail == L_MOUSE_BUTTON)
+                {
+                    signal_manager->client_signals.emit(this, KILL, this);
+                }    
+            });
+            ADD_EV_ID_WIN(close_button, XCB_BUTTON_PRESS);
         }
     
         void make_max_button()
@@ -13488,18 +13498,18 @@ class Events {
                     return;
                 }
                 
-                if (e->event == c->close_button)
-                {
-                    // if (!c->win.is_mapped())
-                    // {
-                    //     c->kill();
-                    // }
+                // if (e->event == c->close_button)
+                // {
+                //     // if (!c->win.is_mapped())
+                //     // {
+                //     //     c->kill();
+                //     // }
 
-                    // c->win.kill();
-                    signal_manager->client_signals.emit(c, KILL, c);
+                //     // c->win.kill();
+                //     // signal_manager->client_signals.emit(c, KILL, c);
 
-                    return;
-                }
+                //     return;
+                // }
                 
                 if (e->event == c->max_button)
                 {
