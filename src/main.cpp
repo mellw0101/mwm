@@ -373,9 +373,9 @@ namespace { // Tools
     }
 }
 
-typedef enum {
+enum {
     KILL = 1
-} client_signal_t;
+};
 
 class __signal_manager__ {
     /* Defines   */
@@ -401,7 +401,7 @@ class __signal_manager__ {
         }
 
         template<typename Callback>
-        void connect_client(uint32_t __frame_window_id, client_signal_t __client_signal, Callback &&callback) // Connect a slot to a signal
+        void connect_client(uint32_t __frame_window_id, int __client_signal, Callback &&callback) // Connect a slot to a signal
         {
             client_signal_map[__frame_window_id].emplace_back(__client_signal, std::forward<Callback>(callback));
         }
@@ -430,17 +430,20 @@ class __signal_manager__ {
             }
         }
 
-        void emit_client(uint32_t __frame_window_id, client_signal_t __client_signal)
+        void emit_client(uint32_t __frame_window_id, int __client_signal)
         {
             auto it = client_signal_map.find(__frame_window_id);
-            if (it != client_signal_map.end())
+            if (it == client_signal_map.end())
             {
-                for (const auto &pair : it->second)
+                loutE << "client could not be found frame_window_id:" << __frame_window_id << loutEND;
+                return;
+            }
+            
+            for (const auto &pair : it->second)
+            {
+                if (pair.first == __client_signal)
                 {
-                    if (pair.first == __client_signal)
-                    {
-                        pair.second();
-                    }
+                    pair.second();
                 }
             }
         }
