@@ -405,7 +405,7 @@ class __signal_manager__ {
         {
             signals.reserve(40);
         }
-};
+}; static __signal_manager__ *signal_manager(nullptr);
 
 class __crypto__ {
     /* Defines */
