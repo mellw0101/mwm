@@ -6847,7 +6847,10 @@ class context_menu {
                     //     }
                     // }
 
-                    hide__();
+                    if (context_window.is_mapped())
+                    {
+                        hide__();
+                    }
                 }
             });
 
