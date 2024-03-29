@@ -5982,7 +5982,7 @@ class client {
                 frame,
                 BORDER_SIZE + (BUTTON_SIZE * 3),
                 BORDER_SIZE,
-                (width - (BUTTON_SIZE * 6) - (BORDER_SIZE * 2)),
+                (width - (BORDER_SIZE * 2)) - (BUTTON_SIZE * 6) ,
                 TITLE_BAR_HEIGHT,
                 BLACK,
                 XCB_EVENT_MASK_EXPOSURE,
