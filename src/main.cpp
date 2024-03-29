@@ -2148,7 +2148,7 @@ class __event_handler__ {
             uint16_t total_events = 0;
             for (const auto &pair : eventCallbacks)
             {
-                loutI << EVENT_TYPE(pair.first) << " vecsize" << pair.second.size() << loutEND;
+                loutI << EVENT_TYPE(pair.first) << " vecsize" << pair.second.size() << " res" << pair.second.capacity() << loutEND;
                 total_events += pair.second.size();
             }
             
@@ -13505,7 +13505,7 @@ void setup_wm()
 
 int main()
 {
-    loutI << "\n\n          -- mwm starting --\n\n" << '\n';
+    loutI << "\n\n          -- mwm starting --\n" << '\n';
 
     INIT_NET_LOG(ESP_SERVER);
     NET_LOG("Starting mwm.");
