@@ -657,15 +657,15 @@ namespace {
             std::unordered_map<window *, std::vector<std::pair<int, std::function<void()>>>> windowSignalMap;
 
             // Example of a function to connect a signal with no arguments to a window
-            void connect(window *win, int signalID, std::function<void()> callback)
+            void connect(window &win, int signalID, std::function<void()> callback)
             {
-                windowSignalMap[win].emplace_back(signalID, std::move(callback));
+                windowSignalMap[&win].emplace_back(signalID, std::move(callback));
             }
 
             // Example of a function to emit a signal for a window
-            void emit(window *win, int signalID)
+            void emit(window &win, int signalID)
             {
-                auto it = windowSignalMap.find(win);
+                auto it = windowSignalMap.find(&win);
                 if (it != windowSignalMap.end())
                 {
                     for (auto& pair : it->second)
@@ -3447,12 +3447,12 @@ class window {
             template<typename Callback>
             void setup_WIN_SIG(int __signal_id, Callback &&__callback)
             {
-                signal_manager->window_sigs.connect(this, __signal_id, __callback);
+                signal_manager->window_sigs.connect(*this, __signal_id, __callback);
             }
 
             void emit_WIN_SIG(int __signal_id)
             {
-                signal_manager->window_sigs.emit(this, __signal_id);
+                signal_manager->window_sigs.emit(*this, __signal_id);
             }
 
         /* Event         */
