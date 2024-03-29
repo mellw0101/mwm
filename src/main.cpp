@@ -578,6 +578,7 @@ namespace {
 class __signal_manager__ {
     /* Defines   */
         #define HIDE_DOCK "hide_dock"
+        #define RESIZE_NO_BORDER "RESIZE_NO_BORDER"
 
     private:
     /* Variabels */
@@ -7414,6 +7415,11 @@ class Window_Manager {
                         return;
                     }
                 });
+
+                if (BORDER_SIZE == 0)
+                {
+                    signal_manager->emit(RESIZE_NO_BORDER);
+                }
             }
 
         /* Check  */
@@ -13500,21 +13506,21 @@ class Events {
         {
             RE_CAST_EV(xcb_button_press_event_t);
             client *c;
-            if (BORDER_SIZE == 0)
-            {
-                c = wm->client_from_pointer(10);
-                if (c == nullptr) return;
+            // if (BORDER_SIZE == 0)
+            // {
+            //     c = wm->client_from_pointer(10);
+            //     if (c == nullptr) return;
                 
-                if (e->detail == L_MOUSE_BUTTON)
-                {
-                    c->raise();
-                    c->focus();
-                    resize_client::no_border border(c, 0, 0);
-                    wm->focused_client = c;
-                }
+            //     if (e->detail == L_MOUSE_BUTTON)
+            //     {
+            //         c->raise();
+            //         c->focus();
+            //         resize_client::no_border border(c, 0, 0);
+            //         wm->focused_client = c;
+            //     }
 
-                return;
-            }
+            //     return;
+            // }
 
             // if (e->event == wm->root)
             // {
@@ -13864,12 +13870,42 @@ class test {
         test() {}
 };
 
+class __signal_factory__ {
+    private:
+        function<void()> _resize_cli_no_border_ev_ = [&]() -> void
+        {
+            event_handler->setEventCallback(EV_CALL(XCB_BUTTON_PRESS)
+            {
+                client *c = wm->client_from_pointer(10);
+                if (c == nullptr) return;
+
+                RE_CAST_EV(xcb_button_press_event_t);
+                if (e->detail != L_MOUSE_BUTTON) return;
+                
+                c->raise();
+                c->focus();
+                resize_client::no_border border(c, 0, 0);
+                wm->focused_client = c;
+            });
+        };
+
+    public:
+        void init()
+        {
+            signal_manager->connect(RESIZE_NO_BORDER, _resize_cli_no_border_ev_);
+        }
+
+};
+
 void setup_wm()
 {
     user = get_user_name();
     loutCUser(USER);
 
     NEW_CLASS(signal_manager, __signal_manager__) { signal_manager->init(); }
+    __signal_factory__ signal_factory;
+    signal_factory.init();
+
     NEW_CLASS(file_system, __file_system__      ) { file_system->init_check(); }
 
     crypro = new __crypto__;
