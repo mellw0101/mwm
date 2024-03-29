@@ -5873,17 +5873,10 @@ class client {
                 // frame.kill();
             }
 
-            void setup_kill_signal()
+            template<typename Callback>
+            void setup_CLI_SIG(int __signal_type_id, Callback &&callback)
             {
-                signal_manager->connect_client(frame, KILL, [&]() -> void
-                {
-                    if (!this->win.is_mapped())
-                    {
-                        this->kill();
-                    }
-
-                    this->win.kill();
-                });
+                signal_manager->client_signals.connect(this, __signal_type_id, callback);
             }
 
             void align()
@@ -7092,7 +7085,7 @@ class Window_Manager {
                 FLUSH_X();
 
                 pid_manager->check_pid(c->win.get_pid());
-                signal_manager->client_signals.connect(c, KILL, CLI_SIG
+                c->setup_CLI_SIG(KILL, CLI_SIG
                 {
                     if (!c->win.is_mapped())
                     {
@@ -7101,6 +7094,16 @@ class Window_Manager {
 
                     c->win.kill();
                 });
+
+                // signal_manager->client_signals.connect(c, KILL, CLI_SIG
+                // {
+                //     if (!c->win.is_mapped())
+                //     {
+                //         c->kill();
+                //     }
+
+                //     c->win.kill();
+                // });
 
                 // c->win.print_window_states();
                 // xcb_atom_t atom;
