@@ -6745,7 +6745,6 @@ class Entry {
             );
             window.grab_button({ { L_MOUSE_BUTTON, NULL } });
             window.on_expose_event([this]() -> void { window.emit_WIN_SIG(DRAW_SIGNAL); });
-            window.on_L_MOUSE_BUTTON_PRESS_event([this]() -> void { window.emit_WIN_SIG(L_MOUSE_BUTTON_PRESS); });
         }
 
 };
@@ -6805,13 +6804,13 @@ class context_menu {
                 RE_CAST_EV(xcb_button_press_event_t);
                 if (e->detail == L_MOUSE_BUTTON)
                 {
-                    // for (int i = 0; i < entries.size(); ++i)
-                    // {
-                    //     if (e->event == entries[i].window)
-                    //     {
-                    //         entries[i].action();
-                    //     }
-                    // }
+                    for (int i = 0; i < entries.size(); ++i)
+                    {
+                        if (e->event == entries[i].window)
+                        {
+                            entries[i].window.emit_WIN_SIG(L_MOUSE_BUTTON_PRESS);
+                        }
+                    }
 
                     hide__();
                 }
