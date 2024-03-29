@@ -11298,8 +11298,8 @@ class mv_client {
                     {
                         if (isTimeToRender())
                         {
-                            const auto *e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
-                            int new_x = e->root_x - start_x - BORDER_SIZE;
+                            RE_CAST_EV(xcb_motion_notify_event_t);
+                            int new_x = e->root_x - start_x - BORDER_SIZE - (BUTTON_SIZE * 3);
                             int new_y = e->root_y - start_y - BORDER_SIZE;
                         
                             snap(new_x, new_y);
