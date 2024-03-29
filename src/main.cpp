@@ -10982,6 +10982,8 @@ class __dock_search__ {
                 if (status == 0)
                 {
                     // wm->unmap_window(main_window.parent());
+                    search_string.str().clear();
+                    main_window.clear();
                     signal_manager->emit(HIDE_DOCK);
                 }
             });
