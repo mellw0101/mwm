@@ -658,6 +658,7 @@ namespace {
             void connect(window &win, int signalID, function<void()> callback)
             {
                 windowSignalMap[&win].emplace_back(signalID, std::move(callback));
+                loutI << "map size:" << windowSignalMap.size() << loutEND;
             }
 
             void emit(window &win, int signalID)
@@ -693,10 +694,18 @@ namespace {
                     {
                         if (it->second[i].first == __signal_id)
                         {
-                            remove_element_from_vec(it->second, i);
+                            if (remove_element_from_vec(it->second, i))
+                            {
+                                loutI << "Succesfully deleted window from map current size:" << windowSignalMap.size() << loutEND;
+                            }
                         }
                     }
                 }
+            }
+
+            size_t size() const
+            {
+                return windowSignalMap.size();
             }
     };
 }
