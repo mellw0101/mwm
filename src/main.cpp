@@ -6937,6 +6937,7 @@ class Entry {
             );
             window.grab_button({ { L_MOUSE_BUTTON, NULL } });
             window.on_ev<EXPOSE>([&]() -> void { window.draw_acc(name); });
+            window.on_ev<L_MOUSE_BUTTON_EVENT>([&]() -> void { action(); });
         }
 
 };
@@ -6980,17 +6981,9 @@ class context_menu {
         void make_entries__()
         {
             for (int i(0), y(0); i < entries.size(); ++i, y += _height)
-            {   
-                entries[i].window.setup_WIN_SIG<L_MOUSE_BUTTON_EVENT>([this, i]() -> void { if (entries[i].action) entries[i].action(); });
+            {
                 entries[i].make_window(context_window, 0, y, _width, _height);
                 entries[i].window.emit_WIN_SIG<EXPOSE>();
-                string name = entries[i].name;
-                entries[i].window.on_ev<EXPOSE>(
-                    [this]() -> void
-                    {
-                    }
-                );
-                // entries[i].window.emit_signal_on_ev(L_MOUSE_BUTTON_PRESS);
             }
         }
     
