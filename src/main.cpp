@@ -380,7 +380,6 @@ class __signal_manager__ {
     private:
     /* Variabels */
         unordered_map<string, vector<function<void()>>> signals;
-        unordered_map<string, vector<function<int(uint32_t)>>> _window_signals;
 
     public:
     /* Methods   */
@@ -391,9 +390,9 @@ class __signal_manager__ {
         }
 
         template<typename Callback>
-        void connect_window(const string &__signal_name, Callback &&callback) // Connect a slot to a signal
+        void connect_window(uint32_t __window, const string &__function, Callback &&callback) // Connect a slot to a signal
         {
-            _window_signals[__signal_name].emplace_back(std::forward<Callback>(callback));
+            signals[to_string(__window) + "__" + __function].emplace_back(std::forward<Callback>(callback));
         }
 
         void emit(const string &__signal_name) // Emit a signal, calling all connected slots
@@ -407,6 +406,18 @@ class __signal_manager__ {
                 }
             }
         }
+
+        void emit_window(uint32_t __window, const string &__function) // Emit a signal, calling all connected slots
+        {
+            auto it = signals.find(to_string(__window) + "__" + __function);
+            if (it != signals.end())
+            {
+                for (auto& slot : it->second)
+                {
+                    slot();
+                }
+            }
+        }        
 
         void init()
         {
@@ -2329,7 +2340,6 @@ class Bitmap {
     // variables
         int width, height;
         vector<vector<bool>>(bitmap);
-        Logger log;
         
     public:
     // methods
@@ -5632,20 +5642,48 @@ class client {
                 border.bottom_left.unmap();
                 border.bottom_right.unmap();
 
-                win.kill();
-                close_button.kill();
-                max_button.kill();
-                min_button.kill();
-                titlebar.kill();
-                border.left.kill();
-                border.right.kill();
-                border.top.kill();
-                border.bottom.kill();
-                border.top_left.kill();
-                border.top_right.kill();
-                border.bottom_left.kill();
-                border.bottom_right.kill();
-                frame.kill();
+                vector<window> window_vec = {
+                    win,
+                    close_button,
+                    max_button,
+                    min_button,
+                    titlebar,
+                    border.left,
+                    border.right,
+                    border.top,
+                    border.bottom,
+                    border.top_left,
+                    border.top_right,
+                    border.bottom_left,
+                    border.bottom_right,
+                    frame
+                };
+                vector<thread> threads;
+
+                for (auto &window : window_vec)
+                {
+                    threads.emplace_back([&](){window.kill();});
+                }
+
+                for (auto &t : threads)
+                {
+                    t.join();   
+                }
+
+                // win.kill();
+                // close_button.kill();
+                // max_button.kill();
+                // min_button.kill();
+                // titlebar.kill();
+                // border.left.kill();
+                // border.right.kill();
+                // border.top.kill();
+                // border.bottom.kill();
+                // border.top_left.kill();
+                // border.top_right.kill();
+                // border.bottom_left.kill();
+                // border.bottom_right.kill();
+                // frame.kill();
             }
 
             void align()
