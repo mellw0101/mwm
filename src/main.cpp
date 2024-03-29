@@ -682,7 +682,7 @@ namespace {
                 if (it != windowSignalMap.end())
                 {
                     windowSignalMap.erase(it);
-                    loutI << "Current vec size:" << size() << loutEND;
+                    loutI << "Deleted window, Current vec size:" << size() << loutEND;
                 }
             }
 
