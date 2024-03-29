@@ -3531,6 +3531,41 @@ class window {
                 }
             }
 
+            void emit_signal_on_ev(int __type)
+            {
+                switch (__type)
+                {
+                    case DRAW_SIGNAL:
+                    {
+                        EV_ID = event_handler->setEventCallback(XCB_EXPOSE, [this](Ev ev) -> void
+                        {
+                            RE_CAST_EV(xcb_expose_event_t);
+                            if (e->window == _window)
+                            {
+                                emit_WIN_SIG(DRAW_SIGNAL);
+                            }
+                        });
+                        ADD_EV_ID_IWIN(XCB_EXPOSE);
+                    }
+
+                    case L_MOUSE_BUTTON_PRESS:
+                    {
+                        EV_ID = event_handler->setEventCallback(EV_CALL(XCB_BUTTON_PRESS)
+                        {
+                            RE_CAST_EV(xcb_button_press_event_t);
+                            if (e->event == _window)
+                            {
+                                if (e->detail == L_MOUSE_BUTTON)
+                                {
+                                    emit_WIN_SIG(L_MOUSE_BUTTON_PRESS);
+                                }
+                            }
+                        });
+                        ADD_EV_ID_IWIN(XCB_BUTTON_PRESS);
+                    }
+                }
+            }
+
             template<typename Callback>
             void on_L_MOUSE_BUTTON_PRESS_event(Callback&& callback)
             {
@@ -6744,7 +6779,7 @@ class Entry {
                 MAP
             );
             window.grab_button({ { L_MOUSE_BUTTON, NULL } });
-            window.on_expose_event([this]() -> void { window.emit_WIN_SIG(DRAW_SIGNAL); });
+            window.emit_signal_on_ev(DRAW_SIGNAL);
         }
 
 };
