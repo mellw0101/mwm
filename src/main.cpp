@@ -6944,7 +6944,11 @@ class Entry {
 
             window.setup_WIN_SIG<EXPOSE>([this]() -> void { this->window.draw_acc(name); });
             window.on_ev<EXPOSE>(nullptr, 1);
+            
             window.grab_button({ { L_MOUSE_BUTTON, NULL } });
+            
+            window.setup_WIN_SIG<L_MOUSE_BUTTON_EVENT>([this]() -> void { this->action(); });
+            window.on_ev<L_MOUSE_BUTTON_EVENT>(nullptr, 1);
         }
 
 };
