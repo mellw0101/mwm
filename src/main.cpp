@@ -6839,13 +6839,13 @@ class context_menu {
                 RE_CAST_EV(xcb_button_press_event_t);
                 if (e->detail == L_MOUSE_BUTTON)
                 {
-                    for (int i = 0; i < entries.size(); ++i)
-                    {
-                        if (e->event == entries[i].window)
-                        {
-                            entries[i].window.emit_WIN_SIG(L_MOUSE_BUTTON_PRESS);
-                        }
-                    }
+                    // for (int i = 0; i < entries.size(); ++i)
+                    // {
+                    //     if (e->event == entries[i].window)
+                    //     {
+                    //         entries[i].window.emit_WIN_SIG(L_MOUSE_BUTTON_PRESS);
+                    //     }
+                    // }
 
                     hide__();
                 }
