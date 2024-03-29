@@ -587,7 +587,8 @@ namespace {
         SET_EV_CALLBACK__RESIZE_NO_BORDER = 1,
         HIDE_DOCK                         = 2,
         DRAW_SIGNAL                       = 3,
-        L_MOUSE_BUTTON_PRESS              = 4
+        L_MOUSE_BUTTON_PRESS              = 4,
+        HIDE_SIGNAL                       = 5
     };
 
     template<>
@@ -2578,6 +2579,35 @@ class __event_handler__ {
             });
         }
 
+        template<typename Callback>
+        void set_button_press_callback(uint32_t __window, const uint16_t &__mask, const xcb_keycode_t &__key, Callback &&callback)
+        {
+            setEventCallback(XCB_KEY_PRESS, [this, __window, callback, __key, __mask](Ev ev)
+            {
+                RE_CAST_EV(xcb_key_press_event_t);
+                if (e->event != __window) return;
+                if (e->detail == __key)
+                {
+                    if (e->state == __mask)
+                    {
+                        callback();
+                    }
+                }
+            });
+        }
+
+        void emit_on_L_BUTTON_PRESS_event(uint32_t __window)
+        {
+            setEventCallback(XCB_KEY_PRESS, [this, __window](Ev ev)
+            {
+                RE_CAST_EV(xcb_button_press_event_t);
+                if (e->event != __window) return;
+                if (e->detail != L_MOUSE_BUTTON) return;
+
+                signal_manager->window_sigs.emit(__window, L_MOUSE_BUTTON_PRESS);
+            });
+        }
+
         void iter_and_log_map_size()
         {
             uint16_t total_events = 0;
@@ -3492,12 +3522,12 @@ class window {
             template<typename Callback>
             void setup_WIN_SIG(int __signal_id, Callback &&__callback)
             {
-                signal_manager->window_sigs.connect(*this, __callback, __signal_id);
+                signal_manager->window_sigs.connect(this->_window, __callback, __signal_id);
             }
 
             void emit_WIN_SIG(int __signal_id)
             {
-                signal_manager->window_sigs.emit(*this, __signal_id);
+                signal_manager->window_sigs.emit(this->_window, __signal_id);
             }
 
         /* Event         */
@@ -3513,6 +3543,11 @@ class window {
                     }
                 });
                 ADD_EV_ID_IWIN(XCB_EXPOSE);
+            }
+
+            void enable_L_MOUSE_BUTTON_event()
+            {
+                event_handler->emit_on_L_BUTTON_PRESS_event(_window);
             }
             
             template<typename Callback>
@@ -6791,7 +6826,6 @@ class Entry {
                 MAP
             );
             window.grab_button({ { L_MOUSE_BUTTON, NULL } });
-            window.emit_signal_on_ev(DRAW_SIGNAL);
         }
 
 };
@@ -11578,7 +11612,7 @@ class __dock_search__ {
                 {
                     search_string.str().clear();
                     main_window.clear();
-                    signal_manager->enum_sigs.emit(HIDE_DOCK);
+                    signal_manager->window_sigs.emit(main_window.parent(), HIDE_SIGNAL);
                 }
             });
         }
@@ -11720,10 +11754,19 @@ class __dock__ {
                 }
             });
 
-            signal_manager->enum_sigs.connect(HIDE_DOCK, [this]()
-            {
-                hide__(dock_menu);
-            });
+            signal_manager->window_sigs.connect(
+                dock_menu,
+                [this]() -> void
+                {
+                    hide__(dock_menu);
+                },
+                HIDE_SIGNAL
+            );
+
+            // signal_manager->enum_sigs.connect(HIDE_DOCK, [this]()
+            // {
+            //     hide__(dock_menu);
+            // });
         }
     
     /* Constructor */
