@@ -583,41 +583,50 @@ namespace {
     };
 
     enum { // Signals
+        NO_SIGNAL_ID                      = -24,
         SET_EV_CALLBACK__RESIZE_NO_BORDER = 1,
-        HIDE_DOCK                         = 2
+        HIDE_DOCK                         = 2,
+        DRAW_SIGNAL                       = 3,
+        L_MOUSE_BUTTON_PRESS              = 4
     };
 
     template<>
     class UMapWithID<uint32_t> {
         public:
         /* Vatiables */
-            using SignalMap = unordered_map<uint32_t, vector<function<void()>>>;
+            using SignalMap = unordered_map<uint32_t, vector<pair<int, function<void()>>>>;
             SignalMap signalMap;
 
         /* Methods */
             template<typename Callback>
-            void connect(uint32_t key, Callback &&callback)
+            void connect(uint32_t key, Callback &&callback, int __signal_id = NO_SIGNAL_ID)
             {
-                signalMap[key].emplace_back(std::forward<Callback>(callback));
+                signalMap[key].emplace_back(__signal_id, std::forward<Callback>(callback));
             }
 
-            // Emit a signal with no arguments
-            void emit(uint32_t key)
+            void emit(uint32_t key, int __signal_id = NO_SIGNAL_ID)
             {
                 auto it = signalMap.find(key);
                 if (it != signalMap.end())
                 {
-                    for (auto &action : it->second)
+                    for (auto &pair : it->second)
                     {
-                        action();
+                        if (pair.first == __signal_id || pair.first == NO_SIGNAL_ID)
+                        {
+                            pair.second();
+                        }
                     }
                 }
             }
-    };
 
-    enum {
-        DRAW_SIGNAL          = 1,
-        L_MOUSE_BUTTON_PRESS = 2
+            void remove(uint32_t __key, int __signal_id = NO_SIGNAL_ID)
+            {
+                auto key = signalMap.find(__key);
+                if (key != signalMap.end())
+                {
+                    signalMap.erase(key);
+                }
+            }
     };
 
     template<> /* for windows to pass the window as well */
@@ -710,6 +719,7 @@ namespace {
                 return windowSignalMap.size();
             }
     };
+
 }
 
 class __signal_manager__ {
@@ -723,7 +733,7 @@ class __signal_manager__ {
         UMapWithID<client *, client *> client_signals;
 
         UMapWithID<uint32_t> enum_sigs;
-        UMapWithID<window &> window_sigs;
+        UMapWithID<uint32_t> window_sigs;
 
     /* Methods   */
         template<typename Callback>
@@ -2662,8 +2672,8 @@ class __event_handler__ {
         CallbackId nextCallbackId = 0;
 
 }; static __event_handler__ *event_handler(nullptr);
-
 using EventCallback = function<void(Ev)>;
+
 struct __window_ev_id_handler__ {
     void add_ev_id_to_map(int __event_id, uint8_t __event_type)
     {
@@ -2683,6 +2693,8 @@ struct __window_ev_id_handler__ {
     }
 
     unordered_map<int, uint8_t> _ev_id_map;
+
+    unordered_map<int, function<void()>> _signal_map;
 
     // unordered_map<uint32_t, unordered_map<uint8_t, vector<EventCallback>>> windowCallbacks;/* Maps a window ID to a list of event types and their associated callbacks */
     
@@ -3360,7 +3372,7 @@ class window {
                 free(delete_reply);
 
                 window_ev_id_handler.delete_callbacks_by_ev_id();
-                signal_manager->window_sigs.remove_window(*this);
+                signal_manager->window_sigs.remove(this->_window);
             }
             
             void clear()
@@ -3480,7 +3492,7 @@ class window {
             template<typename Callback>
             void setup_WIN_SIG(int __signal_id, Callback &&__callback)
             {
-                signal_manager->window_sigs.connect(*this, __signal_id, __callback);
+                signal_manager->window_sigs.connect(*this, __callback, __signal_id);
             }
 
             void emit_WIN_SIG(int __signal_id)
