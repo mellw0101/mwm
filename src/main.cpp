@@ -5662,7 +5662,7 @@ class client {
 
                 for (auto &window : window_vec)
                 {
-                    threads.emplace_back([&](){window.kill();});
+                    threads.emplace_back([&]() -> void { window.kill(); });
                 }
 
                 for (auto &t : threads)
