@@ -5936,9 +5936,9 @@ class client {
         {
             titlebar.create_window(
                 frame,
+                BORDER_SIZE + (BUTTON_SIZE * 3),
                 BORDER_SIZE,
-                BORDER_SIZE,
-                width,
+                (width - (BUTTON_SIZE * 3) - (BORDER_SIZE * 2)),
                 TITLE_BAR_HEIGHT,
                 BLACK,
                 XCB_EVENT_MASK_EXPOSURE,
