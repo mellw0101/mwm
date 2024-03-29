@@ -598,9 +598,9 @@ namespace {
                     signalMap[key].emplace_back(L_MOUSE_BUTTON_EVENT, std::forward<Callback>(callback));
                 }
 
-                if constexpr (__signal_id == EXPOSE)
+                if constexpr (__signal_id == XCB_EXPOSE)
                 {
-                    signalMap[key].emplace_back(EXPOSE, std::forward<Callback>(callback));
+                    signalMap[key].emplace_back(XCB_EXPOSE, std::forward<Callback>(callback));
                 }
 
                 if constexpr (__signal_id == SET_EV_CALLBACK__RESIZE_NO_BORDER)
@@ -611,6 +611,11 @@ namespace {
                 if constexpr (__signal_id == HIDE_DOCK)
                 {
                     signalMap[key].emplace_back(HIDE_DOCK, std::forward<Callback>(callback));
+                }
+
+                if constexpr (__signal_id == XCB_LEAVE_NOTIFY)
+                {
+                    signalMap[key].emplace_back(XCB_LEAVE_NOTIFY, std::forward<Callback>(callback));
                 }
             }
 
@@ -2671,8 +2676,10 @@ class __event_handler__ {
             {
                 EV_ID = setEventCallback(XCB_BUTTON_PRESS, [__window](Ev ev) -> void
                 {
-                    RE_CAST_EV(xcb_expose_event_t);
-                    if (e->window != __window) return;
+                    RE_CAST_EV(xcb_button_press_event_t);
+                    if (e->event != __window) return;
+                    
+                    if (e->detail != L_MOUSE_BUTTON) return;
 
                     signal_manager->window_sigs.emit<L_MOUSE_BUTTON_EVENT>(__window);
                 });
@@ -6938,6 +6945,7 @@ class Entry {
             window.grab_button({ { L_MOUSE_BUTTON, NULL } });
             window.on_ev<EXPOSE>([&]() -> void { window.draw_acc(name); });
             window.on_ev<L_MOUSE_BUTTON_EVENT>([&]() -> void { action(); });
+
         }
 
 };
@@ -6996,13 +7004,13 @@ class context_menu {
                 RE_CAST_EV(xcb_button_press_event_t);
                 if (e->detail == L_MOUSE_BUTTON)
                 {
-                    for (int i = 0; i < entries.size(); ++i)
-                    {
-                        if (e->event == entries[i].window)
-                        {
-                            entries[i].window.emit_WIN_SIG<L_MOUSE_BUTTON_EVENT>();
-                        }
-                    }
+                    // for (int i = 0; i < entries.size(); ++i)
+                    // {
+                    //     if (e->event == entries[i].window)
+                    //     {
+                    //         entries[i].window.emit_WIN_SIG<L_MOUSE_BUTTON_EVENT>();
+                    //     }
+                    // }
 
                     hide__();
                 }
