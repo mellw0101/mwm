@@ -15,6 +15,14 @@ enum
      */
 };
 
+enum EV {
+    REMOVE_ALL = 0,
+    EXPOSE = XCB_EXPOSE,
+    L_MOUSE_BUTTON_EVENT = 36,
+    SET_EV_CALLBACK__RESIZE_NO_BORDER = 37,
+    HIDE_DOCK = 38
+};
+
 enum SET_COLOR
 {
     RAW

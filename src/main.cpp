@@ -582,15 +582,6 @@ namespace {
             }
     };
 
-    enum { // Signals
-        NO_SIGNAL_ID                      = -24,
-        SET_EV_CALLBACK__RESIZE_NO_BORDER = 1,
-        HIDE_DOCK                         = 2,
-        DRAW_SIGNAL                       = 3,
-        L_MOUSE_BUTTON_PRESS              = 4,
-        HIDE_SIGNAL                       = 5
-    };
-
     template<>
     class UMapWithID<uint32_t> {
         public:
@@ -599,20 +590,39 @@ namespace {
             SignalMap signalMap;
 
         /* Methods */
-            template<typename Callback>
-            void connect(uint32_t key, Callback &&callback, int __signal_id = NO_SIGNAL_ID)
+            template<EV __signal_id,typename Callback>
+            void connect(uint32_t key, Callback &&callback)
             {
-                signalMap[key].emplace_back(__signal_id, std::forward<Callback>(callback));
+                if constexpr (__signal_id == L_MOUSE_BUTTON_EVENT)
+                {
+                    signalMap[key].emplace_back(L_MOUSE_BUTTON_EVENT, std::forward<Callback>(callback));
+                }
+
+                if constexpr (__signal_id == EXPOSE)
+                {
+                    signalMap[key].emplace_back(EXPOSE, std::forward<Callback>(callback));
+                }
+
+                if constexpr (__signal_id == SET_EV_CALLBACK__RESIZE_NO_BORDER)
+                {
+                    signalMap[key].emplace_back(SET_EV_CALLBACK__RESIZE_NO_BORDER, std::forward<Callback>(callback));
+                }
+
+                if constexpr (__signal_id == HIDE_DOCK)
+                {
+                    signalMap[key].emplace_back(HIDE_DOCK, std::forward<Callback>(callback));
+                }
             }
 
-            void emit(uint32_t key, int __signal_id = NO_SIGNAL_ID)
+            template<EV __event>
+            void emit(uint32_t key)
             {
                 auto it = signalMap.find(key);
                 if (it != signalMap.end())
                 {
                     for (auto &pair : it->second)
                     {
-                        if (pair.first == __signal_id || pair.first == NO_SIGNAL_ID)
+                        if (pair.first == __event)
                         {
                             pair.second();
                         }
@@ -620,12 +630,31 @@ namespace {
                 }
             }
 
-            void remove(uint32_t __key, int __signal_id = NO_SIGNAL_ID)
+            template<int __event>
+            void remove(uint32_t __key)
             {
                 auto key = signalMap.find(__key);
-                if (key != signalMap.end())
+
+                if
+                (key != signalMap.end())
                 {
-                    signalMap.erase(key);
+                    if
+                    constexpr (__event == 0)
+                    {
+                        signalMap.erase(key);
+                    }
+                    else
+                    {
+                        for
+                        (int i = 0; i < signalMap[__event].size(); ++i)
+                        {
+                            if
+                            constexpr (signalMap[__event][i].first == __event)
+                            {
+                                remove_element_from_vec(signalMap[__event], i);
+                            }
+                        }
+                    }
                 }
             }
     };
@@ -2604,7 +2633,7 @@ class __event_handler__ {
                 if (e->event != __window) return;
                 if (e->detail != L_MOUSE_BUTTON) return;
 
-                signal_manager->window_sigs.emit(__window, L_MOUSE_BUTTON_PRESS);
+                signal_manager->window_sigs.emit<L_MOUSE_BUTTON_EVENT>(__window);
             });
         }
 
@@ -2615,10 +2644,42 @@ class __event_handler__ {
                 RE_CAST_EV(xcb_button_press_event_t);
                 if (e->event != __window) return;
 
-                signal_manager->window_sigs.emit(__window, DRAW_SIGNAL);
+                signal_manager->window_sigs.emit<EXPOSE>(__window);
             });
             return event_id;
         }
+
+        template<EV __event_type>
+        int emit_on(uint32_t __window)
+        {
+            if
+            constexpr (__event_type == EXPOSE)
+            {
+                EV_ID = setEventCallback(XCB_EXPOSE, [__window](Ev ev) -> void
+                {
+                    RE_CAST_EV(xcb_expose_event_t);
+                    if (e->window != __window) return;
+
+                    signal_manager->window_sigs.emit<EXPOSE>(__window);
+                });
+
+                return event_id;
+            }
+
+            if
+            constexpr (__event_type == L_MOUSE_BUTTON_EVENT)
+            {
+                EV_ID = setEventCallback(XCB_BUTTON_PRESS, [__window](Ev ev) -> void
+                {
+                    RE_CAST_EV(xcb_expose_event_t);
+                    if (e->window != __window) return;
+
+                    signal_manager->window_sigs.emit<L_MOUSE_BUTTON_EVENT>(__window);
+                });
+
+                return event_id;
+            }
+        }        
 
         void iter_and_log_map_size()
         {
@@ -3414,7 +3475,7 @@ class window {
                 free(delete_reply);
 
                 window_ev_id_handler.delete_callbacks_by_ev_id();
-                signal_manager->window_sigs.remove(this->_window);
+                signal_manager->window_sigs.remove<REMOVE_ALL>(this->_window);
             }
             
             void clear()
@@ -3531,15 +3592,16 @@ class window {
                 _height = __height;
             }
 
-            template<typename Callback>
-            void setup_WIN_SIG(int __signal_id, Callback &&__callback)
+            template<EV __signal_id, typename Callback>
+            void setup_WIN_SIG(Callback &&__callback)
             {
-                signal_manager->window_sigs.connect(this->_window, __callback, __signal_id);
+                signal_manager->window_sigs.connect<__signal_id>(this->_window, __callback);
             }
 
-            void emit_WIN_SIG(int __signal_id)
+            template<EV __signal_id>
+            void emit_WIN_SIG()
             {
-                signal_manager->window_sigs.emit(this->_window, __signal_id);
+                signal_manager->window_sigs.emit<__signal_id>(this->_window);
             }
 
         /* Event         */
@@ -3565,12 +3627,33 @@ class window {
             template<typename Callback>
             void draw_on_expose(Callback &&callback)
             {
-                this->setup_WIN_SIG(DRAW_SIGNAL, callback);
+                this->setup_WIN_SIG<EXPOSE>(callback);
 
                 EV_ID = event_handler->emit_on_XCB_EXPOSE_event(this->_window);
                 ADD_EV_ID_IWIN(XCB_EXPOSE);
             }
-            
+
+            template<EV ev, typename Callback>
+            void on_ev(Callback &&callback)
+            {
+                if constexpr (ev == EXPOSE)
+                {
+                    this->setup_WIN_SIG<EXPOSE>(callback);
+
+                    EV_ID = event_handler->emit_on<EXPOSE>(this->_window);
+                    ADD_EV_ID_IWIN(XCB_EXPOSE);
+                    return;
+                }
+
+                if constexpr (ev == L_MOUSE_BUTTON_EVENT)
+                {
+                    this->setup_WIN_SIG<L_MOUSE_BUTTON_EVENT>(callback);
+
+                    EV_ID = event_handler->emit_on<L_MOUSE_BUTTON_EVENT>(this->_window);
+                    ADD_EV_ID_IWIN(XCB_BUTTON_PRESS);
+                }
+            }
+
             template<typename Callback>
             void on_button_press_event(Callback&& callback, bool __add_ev_id = true)
             {
@@ -3603,20 +3686,20 @@ class window {
             {
                 switch (__type)
                 {
-                    case DRAW_SIGNAL:
+                    case EXPOSE:
                     {
                         EV_ID = event_handler->setEventCallback(XCB_EXPOSE, [this](Ev ev) -> void
                         {
                             RE_CAST_EV(xcb_expose_event_t);
-                            if (e->window == _window)
+                            if (e->window == this->_window)
                             {
-                                emit_WIN_SIG(DRAW_SIGNAL);
+                                this->emit_WIN_SIG<EXPOSE>();
                             }
                         });
                         ADD_EV_ID_IWIN(XCB_EXPOSE);
                     }
 
-                    case L_MOUSE_BUTTON_PRESS:
+                    case L_MOUSE_BUTTON_EVENT:
                     {
                         EV_ID = event_handler->setEventCallback(EV_CALL(XCB_BUTTON_PRESS)
                         {
@@ -3625,7 +3708,7 @@ class window {
                             {
                                 if (e->detail == L_MOUSE_BUTTON)
                                 {
-                                    emit_WIN_SIG(L_MOUSE_BUTTON_PRESS);
+                                    emit_WIN_SIG<L_MOUSE_BUTTON_EVENT>();
                                 }
                             }
                         });
@@ -6675,10 +6758,10 @@ class client {
                 // });
                 // ADD_EV_ID_WIN(titlebar, XCB_EXPOSE);
 
-                titlebar.draw_on_expose(
+                titlebar.on_ev<EXPOSE>(
                 [this]() -> void
                 {
-                    draw_title(TITLE_INTR_DRAW);
+                    this->titlebar.draw_acc_16(this->win.get_net_wm_name());
                 });
 
                 event_id = event_handler->setEventCallback(EV_CALL(XCB_PROPERTY_NOTIFY)
@@ -6840,7 +6923,7 @@ class Entry {
     /* Methods */
         void make_window(uint32_t __parent, int16_t __x, int16_t __y, uint16_t __width, uint16_t __height)
         {
-            window.setup_WIN_SIG(DRAW_SIGNAL, [this]() -> void { window.draw_acc(name); });
+            window.setup_WIN_SIG<EXPOSE>([this]() -> void { window.draw_acc(name); });
 
             window.create_window(
                 __parent,
@@ -6853,6 +6936,7 @@ class Entry {
                 MAP
             );
             window.grab_button({ { L_MOUSE_BUTTON, NULL } });
+            window.on_ev<EXPOSE>([&]() -> void { window.draw_acc(name); });
         }
 
 };
@@ -6897,9 +6981,15 @@ class context_menu {
         {
             for (int i(0), y(0); i < entries.size(); ++i, y += _height)
             {   
-                entries[i].window.setup_WIN_SIG(L_MOUSE_BUTTON_PRESS, [this, i]() -> void { if (entries[i].action) entries[i].action(); });
+                entries[i].window.setup_WIN_SIG<L_MOUSE_BUTTON_EVENT>([this, i]() -> void { if (entries[i].action) entries[i].action(); });
                 entries[i].make_window(context_window, 0, y, _width, _height);
-                entries[i].window.emit_WIN_SIG(DRAW_SIGNAL);
+                entries[i].window.emit_WIN_SIG<EXPOSE>();
+                string name = entries[i].name;
+                entries[i].window.on_ev<EXPOSE>(
+                    [this]() -> void
+                    {
+                    }
+                );
                 // entries[i].window.emit_signal_on_ev(L_MOUSE_BUTTON_PRESS);
             }
         }
@@ -6917,7 +7007,7 @@ class context_menu {
                     {
                         if (e->event == entries[i].window)
                         {
-                            entries[i].window.emit_WIN_SIG(L_MOUSE_BUTTON_PRESS);
+                            entries[i].window.emit_WIN_SIG<L_MOUSE_BUTTON_EVENT>();
                         }
                     }
 
@@ -7691,7 +7781,7 @@ class Window_Manager {
 
                 if (BORDER_SIZE == 0)
                 {
-                    signal_manager->enum_sigs.emit(SET_EV_CALLBACK__RESIZE_NO_BORDER);
+                    signal_manager->enum_sigs.emit<SET_EV_CALLBACK__RESIZE_NO_BORDER>(SET_EV_CALLBACK__RESIZE_NO_BORDER);
                 }
             }
 
@@ -8375,7 +8465,7 @@ class __status_bar__ {
                 XCB_EVENT_MASK_EXPOSURE,
                 MAP
             );
-            _time_date_window.setup_WIN_SIG(DRAW_SIGNAL, [&]() -> void
+            _time_date_window.on_ev<EXPOSE>([&]() -> void
             {
                 long now(time({}));
                 char buf[80];
@@ -8630,7 +8720,7 @@ class __status_bar__ {
         {
             if (__window == _time_date_window)
             {
-                _time_date_window.emit_WIN_SIG(DRAW_SIGNAL);
+                _time_date_window.emit_WIN_SIG<EXPOSE>();
                 // _time_date_window.draw(get_time_and_date__());
             }
 
@@ -11639,7 +11729,7 @@ class __dock_search__ {
                 {
                     search_string.str().clear();
                     main_window.clear();
-                    signal_manager->window_sigs.emit(main_window.parent(), HIDE_SIGNAL);
+                    signal_manager->window_sigs.emit<HIDE_DOCK>(main_window.parent());
                 }
             });
         }
@@ -11781,19 +11871,13 @@ class __dock__ {
                 }
             });
 
-            signal_manager->window_sigs.connect(
+            signal_manager->enum_sigs.connect<HIDE_DOCK>(
                 dock_menu,
-                [this]() -> void
+                [this]()
                 {
                     hide__(dock_menu);
-                },
-                HIDE_SIGNAL
+                }
             );
-
-            // signal_manager->enum_sigs.connect(HIDE_DOCK, [this]()
-            // {
-            //     hide__(dock_menu);
-            // });
         }
     
     /* Constructor */
@@ -14157,7 +14241,7 @@ class __signal_factory__ {
     public:
         void init()
         {
-            signal_manager->enum_sigs.connect(SET_EV_CALLBACK__RESIZE_NO_BORDER, _resize_cli_no_border_ev_);
+            signal_manager->enum_sigs.connect<SET_EV_CALLBACK__RESIZE_NO_BORDER>(SET_EV_CALLBACK__RESIZE_NO_BORDER, _resize_cli_no_border_ev_);
         }
 
 };
