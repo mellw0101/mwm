@@ -6931,8 +6931,6 @@ class Entry {
     /* Methods */
         void make_window(uint32_t __parent, int16_t __x, int16_t __y, uint16_t __width, uint16_t __height)
         {
-            window.setup_WIN_SIG<EXPOSE>([this]() -> void { window.draw_acc(name); });
-
             window.create_window(
                 __parent,
                 __x,
@@ -6943,8 +6941,10 @@ class Entry {
                 BUTTON_EVENT_MASK,
                 MAP
             );
-            window.grab_button({ { L_MOUSE_BUTTON, NULL } });
+
+            window.setup_WIN_SIG<EXPOSE>([this]() -> void { this->window.draw_acc(name); });
             window.on_ev<EXPOSE>(nullptr, 1);
+            window.grab_button({ { L_MOUSE_BUTTON, NULL } });
         }
 
 };
