@@ -234,6 +234,8 @@ constexpr Type make_constexpr(Type value) { return value; }
 #define STATIC_CONSTEXPR_TYPE(__type, __name, __value) \
     static constexpr __type __name = make_constexpr<__type>((__type)__value)
 
+#define HIDE_DOCK "hide_dock"
+
 namespace { // Tools
     constexpr const char * pointer_from_enum(CURSOR CURSOR)
     {
@@ -10979,7 +10981,8 @@ class __dock_search__ {
                 int status = launcher.launch_child_process(search_string.str().c_str());
                 if (status == 0)
                 {
-                    wm->unmap_window(main_window.parent());
+                    // wm->unmap_window(main_window.parent());
+                    signal_manager->emit(HIDE_DOCK);
                 }
             });
         }
@@ -10993,11 +10996,7 @@ class __dock_search__ {
 
         void draw_text()
         {
-            main_window.draw_text_auto_color(
-                search_string.str().c_str(),
-                CENTER_TEXT(main_window.width(), search_string.str().length()),
-                15
-            );
+            main_window.draw_acc(search_string.str());
         }
 };
 
@@ -11123,6 +11122,11 @@ class __dock__ {
                         }
                     }
                 }
+            });
+
+            signal_manager->connect(HIDE_DOCK, [this]()
+            {
+                hide__(dock_menu);
             });
         }
     
@@ -13514,8 +13518,7 @@ void setup_wm()
     loutCUser(USER);
 
     NEW_CLASS(signal_manager, __signal_manager__) { signal_manager->init(); }
-    file_system = new __file_system__;
-    file_system->init_check();
+    NEW_CLASS(file_system, __file_system__      ) { file_system->init_check(); }
 
     crypro = new __crypto__;
 
