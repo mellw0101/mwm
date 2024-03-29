@@ -5720,7 +5720,7 @@ class client {
 
             void setup_kill_signal()
             {
-                signal_manager->connect_client(frame, KILL, [this]() -> void
+                signal_manager->connect_client(frame, KILL, [&]() -> void
                 {
                     if (!this->win.is_mapped())
                     {
