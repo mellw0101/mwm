@@ -2608,6 +2608,18 @@ class __event_handler__ {
             });
         }
 
+        int emit_on_XCB_EXPOSE_event(uint32_t __window)
+        {
+            EV_ID = setEventCallback(XCB_EXPOSE, [__window](Ev ev) -> void
+            {
+                RE_CAST_EV(xcb_button_press_event_t);
+                if (e->event != __window) return;
+
+                signal_manager->window_sigs.emit(__window, DRAW_SIGNAL);
+            });
+            return event_id;
+        }
+
         void iter_and_log_map_size()
         {
             uint16_t total_events = 0;
@@ -3548,6 +3560,21 @@ class window {
             void enable_L_MOUSE_BUTTON_event()
             {
                 event_handler->emit_on_L_BUTTON_PRESS_event(_window);
+            }
+
+            template<typename Callback>
+            void draw_on_expose(Callback &&callback)
+            {
+                this->setup_WIN_SIG(
+                    DRAW_SIGNAL,
+                    [this, callback]() -> void
+                    {
+                        callback();
+                    }
+                );
+
+                EV_ID = event_handler->emit_on_XCB_EXPOSE_event(this->_window);
+                ADD_EV_ID_IWIN(XCB_EXPOSE);
             }
             
             template<typename Callback>
@@ -6644,15 +6671,21 @@ class client {
             {
                 EV_ID = 0;
 
-                event_id = event_handler->setEventCallback(EV_CALL(XCB_EXPOSE)
+                // event_id = event_handler->setEventCallback(EV_CALL(XCB_EXPOSE)
+                // {
+                //     RE_CAST_EV(xcb_expose_event_t);
+                //     if (e->window == titlebar)
+                //     {
+                //         draw_title(TITLE_INTR_DRAW);
+                //     }
+                // });
+                // ADD_EV_ID_WIN(titlebar, XCB_EXPOSE);
+
+                titlebar.draw_on_expose(
+                [this]() -> void
                 {
-                    RE_CAST_EV(xcb_expose_event_t);
-                    if (e->window == titlebar)
-                    {
-                        draw_title(TITLE_INTR_DRAW);
-                    }
+                    draw_title(TITLE_INTR_DRAW);
                 });
-                ADD_EV_ID_WIN(titlebar, XCB_EXPOSE);
 
                 event_id = event_handler->setEventCallback(EV_CALL(XCB_PROPERTY_NOTIFY)
                 {
