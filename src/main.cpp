@@ -480,6 +480,7 @@ namespace {
                 if (it != _data[__window].end())
                 {
                     it->second(__window);
+                    FLUSH_X();
                 }
 
             }
