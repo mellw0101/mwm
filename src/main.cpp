@@ -425,7 +425,7 @@ namespace {
             uumap_t<T1, T2, T3> _data;
 
             template<typename Callback>
-            void conect(uint32_t __window, EV __signal_id, Callback &&callback)
+            void conect(T1 __window, T2 __signal_id, Callback &&callback)
             {
                 _data[__window][__signal_id] = std::forward<Callback>(callback);
             }
@@ -444,6 +444,8 @@ namespace {
                 if (it == _data.end()) return;
 
                 _data.erase(it);
+
+                loutI << "_data size:" << _data.size() << loutEND;
             }
     };
     
@@ -6820,24 +6822,26 @@ class client {
             if (__window == titlebar)
             {
                 signal_manager->u32_map.conect(
-                this->titlebar,
-                EXPOSE,
-                [this]() -> void
-                {   
-                    this->titlebar.clear();
-                    this->titlebar.draw_acc_16(this->win.get_net_wm_name());
-                    FLUSH_X();
-                });
+                    this->titlebar,
+                    EXPOSE,
+                    [this]() -> void
+                    {   
+                        this->titlebar.clear();
+                        this->titlebar.draw_acc_16(this->win.get_net_wm_name());
+                        FLUSH_X();
+                    }
+                );
 
                 signal_manager->u32_map.conect(
-                this->win,
-                EXPOSE_REQ,
-                [this]() -> void
-                {
-                    this->titlebar.clear();
-                    this->titlebar.draw_acc_16(this->win.get_net_wm_name_by_req());
-                    FLUSH_X();
-                });
+                    this->win,
+                    EXPOSE_REQ,
+                    [this]() -> void
+                    {
+                        this->titlebar.clear();
+                        this->titlebar.draw_acc_16(this->win.get_net_wm_name_by_req());
+                        FLUSH_X();
+                    }
+                );
             }
         }
     
