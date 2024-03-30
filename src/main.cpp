@@ -6831,24 +6831,34 @@ class client {
                 // });
                 // ADD_EV_ID_WIN(titlebar, XCB_EXPOSE);
 
-                titlebar.on_ev<EXPOSE>(
+                signal_manager->u32_map.conect(
+                this->titlebar,
+                EXPOSE,
                 [this]() -> void
                 {
                     this->titlebar.draw_acc_16(this->win.get_net_wm_name());
                 });
 
-                event_id = event_handler->setEventCallback(EV_CALL(XCB_PROPERTY_NOTIFY)
+                signal_manager->u32_map.conect(
+                this->titlebar,
+                EXPOSE_REQ,
+                [this]() -> void
                 {
-                    RE_CAST_EV(xcb_property_notify_event_t);
-                    if (e->window == win)
-                    {
-                        if (e->atom == ewmh->_NET_WM_NAME)
-                        {
-                            draw_title(TITLE_REQ_DRAW);
-                        }
-                    }
+                    this->titlebar.draw_acc_16(this->win.get_net_wm_name_by_req());
                 });
-                ADD_EV_ID_WIN(titlebar, XCB_PROPERTY_NOTIFY);
+
+                // event_id = event_handler->setEventCallback(EV_CALL(XCB_PROPERTY_NOTIFY)
+                // {
+                //     RE_CAST_EV(xcb_property_notify_event_t);
+                //     if (e->window == win)
+                //     {
+                //         if (e->atom == ewmh->_NET_WM_NAME)
+                //         {
+                //             draw_title(TITLE_REQ_DRAW);
+                //         }
+                //     }
+                // });
+                // ADD_EV_ID_WIN(titlebar, XCB_PROPERTY_NOTIFY);
             }
         }
     
@@ -7851,6 +7861,21 @@ class Window_Manager {
                 {
                     signal_manager->emit("SET_EV_CALLBACK__RESIZE_NO_BORDER");
                 }
+
+                event_handler->setEventCallback(EV_CALL(XCB_EXPOSE)
+                {
+                    RE_CAST_EV(xcb_expose_event_t);
+                    signal_manager->u32_map.emit(e->window, EXPOSE);
+                });
+
+                event_handler->setEventCallback(EV_CALL(XCB_PROPERTY_NOTIFY)
+                {
+                    RE_CAST_EV(xcb_property_notify_event_t);
+                    if (e->atom == ewmh->_NET_WM_NAME)
+                    {
+                        signal_manager->u32_map.emit(e->window, EXPOSE_REQ);
+                    }
+                });
             }
 
         /* Check  */
