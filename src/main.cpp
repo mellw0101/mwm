@@ -2611,6 +2611,32 @@ class Launcher {
                 return result;
             }
         }
+
+        static int static_launch_child_process(const char *command)
+        {
+            pid_t pid;
+            posix_spawnattr_t attr;
+
+            string command_path = "/bin/" + string(command);
+            char *argv[] = {const_cast<char*>(command_path.c_str()), NULL};
+            
+            posix_spawnattr_init(&attr);
+            posix_spawnattr_setpgroup(&attr, 0);
+            
+            int result = posix_spawn(&pid, command_path.c_str(), NULL, &attr, argv, environ);
+            posix_spawnattr_destroy(&attr);
+
+            if (result == 0)
+            {
+                pid_manager->add_pid(pid);
+                return 0;
+            }
+            else
+            {
+                loutErrno("posix_spawn failed");
+                return result;
+            }
+        }
     
     private:
     /* Variabels */
@@ -7095,10 +7121,37 @@ class Entry {
                 MAP
             );
 
-            signal_manager->u32_map.conect(this->window, EXPOSE, [this]() -> void { this->window.draw_acc(name); });
-            window.on_ev<EXPOSE>(nullptr, 1);
+            signal_manager->_window_signals.conect(
+                this->window,
+                EXPOSE,
+                [this](uint32_t __window) -> void
+                {
+                    thread([&]() -> void {
 
-            signal_manager->u32_map.conect(window, L_MOUSE_BUTTON_EVENT, [this]() -> void { if (this->action != nullptr) this->action(); });
+                        this->window.draw_acc(name);
+                    
+                    }).detach();
+                }
+            );
+
+            signal_manager->_window_signals.conect(
+                window,
+                L_MOUSE_BUTTON_EVENT,
+                [this](uint32_t __window) -> void
+                {
+                    thread([&]() -> void {
+
+                        if (this->action == nullptr)
+                        {
+                            loutE << WINDOW_ID_BY_INPUT(__window) << "action == nullptr" << loutEND;
+                            return; 
+                        }
+                        
+                        this->action();
+
+                    }).detach();
+                }
+            );
             
             window.grab_button({ { L_MOUSE_BUTTON, NULL } });
         }
