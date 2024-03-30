@@ -6843,7 +6843,6 @@ class client {
             border.left.set_pointer(CURSOR::left_side);
             border.left.grab_button({ { L_MOUSE_BUTTON, NULL } });
             border.left.map();
-            signal_manager->_window_signals.conect(border.left, CLIENT_RESIZE, _resize_border_left_);
 
             border.right.create_default(frame, (width + BORDER_SIZE), BORDER_SIZE, BORDER_SIZE, (height + TITLE_BAR_HEIGHT));
             signal_manager->_window_client_map.connect(this->border.right, this);
@@ -14122,11 +14121,11 @@ class Events {
                     return;
                 }
                 
-                // if (e->event == c->border.left)
-                // {
-                //     resize_client::border border(c, edge::LEFT);
-                //     return;
-                // }
+                if (e->event == c->border.left)
+                {
+                    resize_client::border border(c, edge::LEFT);
+                    return;
+                }
                 
                 if (e->event == c->border.right)
                 {
@@ -14447,7 +14446,10 @@ class __signal_factory__ {
 
 namespace {
     #define MAKE_CALLBACK(__name) function<void(uint32_t)> __name = [](uint32_t __window) -> void
-    
+    #define MAKE_C(__name) \
+        template<typename Callback> \
+        Callback &&make_call
+
     MAKE_CALLBACK(_resize_border_left_)
     {
         client *c = signal_manager->_window_client_map.retrive(__window);
@@ -14455,6 +14457,14 @@ namespace {
 
         resize_client::border(c, edge::LEFT);
     };
+
+    MAKE_C(_border_left)(uint32_t __window)
+    {
+        client *c = signal_manager->_window_client_map.retrive(__window);
+        if (c == nullptr) return;
+
+        resize_client::border border(c, edge::LEFT);
+    }
 
     MAKE_CALLBACK(_resize_border_right_)
     {
