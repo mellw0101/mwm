@@ -6843,7 +6843,7 @@ class client {
             border.left.set_pointer(CURSOR::left_side);
             border.left.grab_button({ { L_MOUSE_BUTTON, NULL } });
             border.left.map();
-            add_ev_to_window(border.left, CLIENT_RESIZE, std::forward<function<void(uint32_t)>>(_resize_border_left_));
+            signal_manager->_window_signals.conect(border.left, CLIENT_RESIZE, _resize_border_left_);
 
             border.right.create_default(frame, (width + BORDER_SIZE), BORDER_SIZE, BORDER_SIZE, (height + TITLE_BAR_HEIGHT));
             signal_manager->_window_client_map.connect(this->border.right, this);
