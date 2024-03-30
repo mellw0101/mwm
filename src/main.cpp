@@ -911,10 +911,6 @@ class __signal_manager__ {
     /* Variabels */
         UMapWithID<client *, client *> client_signals;
 
-        // UMapWithID<uint32_t> enum_sigs;
-        // UMapWithID<uint32_t, window> window_sigs;
-
-        __uumap__<uint32_t, EV, void> u32_map;
         __window_signals__ _window_signals;
         __window_client_map__ _window_client_map;
 
@@ -2679,6 +2675,7 @@ class __event_handler__ {
                 ev = xcb_wait_for_event(conn);
                 if (!ev) continue;
 
+                processEvent(ev);
                 uint8_t responseType = ev->response_type & ~0x80;
                 switch (responseType)
                 {
@@ -2722,14 +2719,56 @@ class __event_handler__ {
             }
         }
 
-        // auto it = eventCallbacks.find(responseType);
-            // if (it != eventCallbacks.end())
-            // {
-            //     for (const pair<CallbackId, EventCallback> &callback : it->second)
-            //     {
-            //         callback.second(ev);
-            //     }
-        // }
+        std::mutex event_mutex;
+
+        // Template function to handle specific events
+        template <typename EventType>
+        static void handleEvent(EventType* e);
+
+        template<>
+        void handleEvent(xcb_button_press_event_t *e)
+        {
+            if (e->detail == L_MOUSE_BUTTON)
+            {
+                signal_manager->_window_signals.emit(e->event, L_MOUSE_BUTTON_EVENT);
+            }
+        }
+
+        template<>
+        void handleEvent(xcb_expose_event_t *e)
+        {
+            signal_manager->_window_signals.emit(e->window, EXPOSE);
+        }
+
+        // Function that creates a separate thread for each event type
+        void processEvent(xcb_generic_event_t* ev)
+        {
+            uint8_t responseType = ev->response_type & ~0x80;
+
+            switch
+            (responseType)
+            {
+                case
+                XCB_KEY_PRESS:
+                {
+                    thread(handleEvent<xcb_key_press_event_t>, (xcb_key_press_event_t*)ev).detach();
+                    break;
+                }
+
+                case
+                XCB_EXPOSE:
+                {
+                    thread(handleEvent<xcb_expose_event_t>, (xcb_expose_event_t*)ev).detach();
+                    break;
+                }
+                
+                // // Add cases for other event types as needed
+                // default:
+                //     std::cerr << "Unhandled event type: " << (int)responseType << std::endl;
+            }
+        }
+
+
         void end()
         {
             shouldContinue = false;
@@ -2803,39 +2842,6 @@ class __event_handler__ {
                 }
             });
         }
-
-        int emit_on(uint32_t __window, EV __signal_id)
-        {
-            if (__signal_id == EXPOSE)
-            {
-                EV_ID = setEventCallback(XCB_EXPOSE, [this, __window](Ev ev) -> void
-                {
-                    RE_CAST_EV(xcb_expose_event_t);
-                    if (e->window != __window) return;
-
-                    signal_manager->u32_map.emit(__window, EXPOSE);
-                });
-
-                return event_id;
-            }
-
-            if (__signal_id == L_MOUSE_BUTTON_EVENT)
-            {
-                EV_ID = setEventCallback(XCB_BUTTON_PRESS, [this, __window](Ev ev) -> void
-                {
-                    RE_CAST_EV(xcb_button_press_event_t);
-                    if (e->event != __window) return;
-                    
-                    if (e->detail != L_MOUSE_BUTTON) return;
-
-                    signal_manager->u32_map.emit(__window, L_MOUSE_BUTTON_EVENT);
-                });
-
-                return event_id;
-            }
-
-            return -1;
-        }        
 
         void iter_and_log_map_size()
         {
@@ -3631,7 +3637,6 @@ class window {
                 free(delete_reply);
 
                 window_ev_id_handler.delete_callbacks_by_ev_id();
-                signal_manager->u32_map.remove(this->_window);
                 signal_manager->_window_signals.remove(this->_window);
                 signal_manager->_window_client_map.remove(this->_window);
             }
@@ -3753,12 +3758,12 @@ class window {
             template<typename Callback>
             void setup_WIN_SIG(EV __signal_id, Callback &&__callback)
             {
-                signal_manager->u32_map.conect(this->_window, __signal_id,  std::forward<Callback>(__callback));
+                signal_manager->_window_signals.conect(this->_window, __signal_id,  std::forward<Callback>(__callback));
             }
 
             void emit_WIN_SIG(EV __signal_id)
             {
-                signal_manager->u32_map.emit(this->_window, __signal_id);
+                signal_manager->_window_signals.emit(this->_window, __signal_id);
             }
 
         /* Event         */
@@ -3776,55 +3781,55 @@ class window {
                 ADD_EV_ID_IWIN(XCB_EXPOSE);
             }
 
-            template<EV __signal_id> void
-            enable_on()
-            {
-                constexpr int signal_id = __signal_id;
+            // template<EV __signal_id> void
+            // enable_on()
+            // {
+            //     constexpr int signal_id = __signal_id;
                 
-                switch
-                (signal_id)
-                {
-                    case
-                    EXPOSE:
-                    {
-                        event_handler->emit_on(this->_window, EXPOSE);
-                    }
+            //     switch
+            //     (signal_id)
+            //     {
+            //         case
+            //         EXPOSE:
+            //         {
+            //             event_handler->emit_on(this->_window, EXPOSE);
+            //         }
 
-                    case
-                    KILL_SIGNAL:
-                    {
-                        event_handler->emit_on(this->_window, KILL_SIGNAL);
-                    }
+            //         case
+            //         KILL_SIGNAL:
+            //         {
+            //             event_handler->emit_on(this->_window, KILL_SIGNAL);
+            //         }
 
-                    case
-                    L_MOUSE_BUTTON_EVENT:
-                    {
-                        event_handler->emit_on(this->_window, L_MOUSE_BUTTON_EVENT);
-                    }
-                }
-            }
+            //         case
+            //         L_MOUSE_BUTTON_EVENT:
+            //         {
+            //             event_handler->emit_on(this->_window, L_MOUSE_BUTTON_EVENT);
+            //         }
+            //     }
+            // }
 
-            template<EV ev, typename Callback> void
-            on_ev(Callback &&callback, int __mode = 0)
-            {
-                if constexpr (ev == EXPOSE)
-                {
-                    if (__mode == 0) this->setup_WIN_SIG(EXPOSE, callback);
+            // template<EV ev, typename Callback> void
+            // on_ev(Callback &&callback, int __mode = 0)
+            // {
+            //     if constexpr (ev == EXPOSE)
+            //     {
+            //         if (__mode == 0) this->setup_WIN_SIG(EXPOSE, callback);
 
-                    EV_ID = event_handler->emit_on(this->_window, EXPOSE);
-                    ADD_EV_ID_IWIN(XCB_EXPOSE);
-                    return;
-                }
+            //         EV_ID = event_handler->emit_on(this->_window, EXPOSE);
+            //         ADD_EV_ID_IWIN(XCB_EXPOSE);
+            //         return;
+            //     }
 
-                if constexpr (ev == L_MOUSE_BUTTON_EVENT)
-                {
+            //     if constexpr (ev == L_MOUSE_BUTTON_EVENT)
+            //     {
                     
-                    if (__mode == 0) signal_manager->u32_map.conect(this->_window, callback);
+            //         if (__mode == 0) signal_manager->u32_map.conect(this->_window, callback);
 
-                    EV_ID = event_handler->emit_on(this->_window, L_MOUSE_BUTTON_EVENT);
-                    ADD_EV_ID_IWIN(XCB_BUTTON_PRESS);
-                }
-            }
+            //         EV_ID = event_handler->emit_on(this->_window, L_MOUSE_BUTTON_EVENT);
+            //         ADD_EV_ID_IWIN(XCB_BUTTON_PRESS);
+            //     }
+            // }
 
             template<typename Callback>
             void on_button_press_event(Callback&& callback, bool __add_ev_id = true)
@@ -3854,40 +3859,40 @@ class window {
                 }
             }
 
-            void emit_signal_on_ev(int __type)
-            {
-                switch (__type)
-                {
-                    case EXPOSE:
-                    {
-                        EV_ID = event_handler->setEventCallback(XCB_EXPOSE, [this](Ev ev) -> void
-                        {
-                            RE_CAST_EV(xcb_expose_event_t);
-                            if (e->window == this->_window)
-                            {
-                                signal_manager->u32_map.emit(this->_window, EXPOSE);
-                            }
-                        });
-                        ADD_EV_ID_IWIN(XCB_EXPOSE);
-                    }
+            // void emit_signal_on_ev(int __type)
+            // {
+            //     switch (__type)
+            //     {
+            //         case EXPOSE:
+            //         {
+            //             EV_ID = event_handler->setEventCallback(XCB_EXPOSE, [this](Ev ev) -> void
+            //             {
+            //                 RE_CAST_EV(xcb_expose_event_t);
+            //                 if (e->window == this->_window)
+            //                 {
+            //                     signal_manager->u32_map.emit(this->_window, EXPOSE);
+            //                 }
+            //             });
+            //             ADD_EV_ID_IWIN(XCB_EXPOSE);
+            //         }
 
-                    case L_MOUSE_BUTTON_EVENT:
-                    {
-                        EV_ID = event_handler->setEventCallback(EV_CALL(XCB_BUTTON_PRESS)
-                        {
-                            RE_CAST_EV(xcb_button_press_event_t);
-                            if (e->event == _window)
-                            {
-                                if (e->detail == L_MOUSE_BUTTON)
-                                {
-                                    signal_manager->u32_map.emit(this->_window, L_MOUSE_BUTTON_EVENT);
-                                }
-                            }
-                        });
-                        ADD_EV_ID_IWIN(XCB_BUTTON_PRESS);
-                    }
-                }
-            }
+            //         case L_MOUSE_BUTTON_EVENT:
+            //         {
+            //             EV_ID = event_handler->setEventCallback(EV_CALL(XCB_BUTTON_PRESS)
+            //             {
+            //                 RE_CAST_EV(xcb_button_press_event_t);
+            //                 if (e->event == _window)
+            //                 {
+            //                     if (e->detail == L_MOUSE_BUTTON)
+            //                     {
+            //                         signal_manager->u32_map.emit(this->_window, L_MOUSE_BUTTON_EVENT);
+            //                     }
+            //                 }
+            //             });
+            //             ADD_EV_ID_IWIN(XCB_BUTTON_PRESS);
+            //         }
+            //     }
+            // }
 
             template<typename Callback>
             void on_L_MOUSE_BUTTON_PRESS_event(Callback&& callback)
@@ -8923,6 +8928,15 @@ class __status_bar__ {
         {
             if (__window == _time_date_window)
             {
+                signal_manager->_window_signals.conect(_time_date_window, EXPOSE,
+                [this](uint32_t __window) -> void
+                {
+
+                    if (__window != this->_time_date_window) return;
+                    this->_time_date_window.draw_acc(this->get_time_and_date__());
+
+                });
+
                 function<void()> __time__ = [this]()-> void
                 {
                     while (true)
@@ -8955,9 +8969,13 @@ class __status_bar__ {
         {
             if (__window == _time_date_window)
             {
-                signal_manager->u32_map.conect(_time_date_window, EXPOSE, [this]()
+                signal_manager->_window_signals.conect(_time_date_window, EXPOSE,
+                [this](uint32_t __window) -> void
                 {
-                    _time_date_window.draw_acc(get_time_and_date__());
+
+                    if (__window != this->_time_date_window) return;
+
+                    this->_time_date_window.draw_acc(this->get_time_and_date__());
                 });
                 // _time_date_window.draw(get_time_and_date__());
             }
