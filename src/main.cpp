@@ -6819,24 +6819,14 @@ class client {
 
             if (__window == titlebar)
             {
-                EV_ID = 0;
-
-                // event_id = event_handler->setEventCallback(EV_CALL(XCB_EXPOSE)
-                // {
-                //     RE_CAST_EV(xcb_expose_event_t);
-                //     if (e->window == titlebar)
-                //     {
-                //         draw_title(TITLE_INTR_DRAW);
-                //     }
-                // });
-                // ADD_EV_ID_WIN(titlebar, XCB_EXPOSE);
-
                 signal_manager->u32_map.conect(
                 this->titlebar,
                 EXPOSE,
                 [this]() -> void
-                {
+                {   
+                    this->titlebar.clear();
                     this->titlebar.draw_acc_16(this->win.get_net_wm_name());
+                    FLUSH_X();
                 });
 
                 signal_manager->u32_map.conect(
@@ -6844,21 +6834,10 @@ class client {
                 EXPOSE_REQ,
                 [this]() -> void
                 {
+                    this->titlebar.clear();
                     this->titlebar.draw_acc_16(this->win.get_net_wm_name_by_req());
+                    FLUSH_X();
                 });
-
-                // event_id = event_handler->setEventCallback(EV_CALL(XCB_PROPERTY_NOTIFY)
-                // {
-                //     RE_CAST_EV(xcb_property_notify_event_t);
-                //     if (e->window == win)
-                //     {
-                //         if (e->atom == ewmh->_NET_WM_NAME)
-                //         {
-                //             draw_title(TITLE_REQ_DRAW);
-                //         }
-                //     }
-                // });
-                // ADD_EV_ID_WIN(titlebar, XCB_PROPERTY_NOTIFY);
             }
         }
     
