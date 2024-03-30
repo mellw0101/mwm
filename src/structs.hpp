@@ -22,6 +22,7 @@ enum EV {
     LEAVE_NOTIFY                      = XCB_LEAVE_NOTIFY,
     ENTER_NOTIFY                      = 41,
     L_MOUSE_BUTTON_EVENT              = 36,
+    CLIENT_RESIZE                     = 42,
     KILL_SIGNAL                       = 39
 };
 
