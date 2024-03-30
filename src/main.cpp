@@ -451,8 +451,6 @@ namespace {
         public:
             uumap_t<uint32_t, int, uint32_t> _data;
 
-            umap<int, uint32_t> _window_map;
-
             template<typename Callback>
             void conect(uint32_t __window, int __signal_id, Callback &&callback)
             {
@@ -461,7 +459,12 @@ namespace {
 
             void emit(uint32_t __window, int __signal_id)
             {
-                _data[__window][__signal_id](__window);
+                auto it = _data[__window].find(__signal_id);
+                if (it != _data[__window].end())
+                {
+                    it->second(__window);
+                }
+
             }
 
             void remove(uint32_t __window)
@@ -6856,21 +6859,21 @@ class client {
         {
             if (__window == titlebar)
             {
-                signal_manager->u32_map.conect(
-                    this->titlebar,
+                signal_manager->_window_signals.conect(
+                    titlebar,
                     EXPOSE,
-                    [this]() -> void
-                    {   
+                    [this](uint32_t __window) -> void
+                    {
                         this->titlebar.clear();
                         this->titlebar.draw_acc_16(this->win.get_net_wm_name());
                         FLUSH_X();
                     }
                 );
 
-                signal_manager->u32_map.conect(
+                signal_manager->_window_signals.conect(
                     this->win,
                     EXPOSE_REQ,
-                    [this]() -> void
+                    [this](uint32_t __window) -> void
                     {
                         this->titlebar.clear();
                         this->titlebar.draw_acc_16(this->win.get_net_wm_name_by_req());
@@ -7883,7 +7886,7 @@ class Window_Manager {
                 event_handler->setEventCallback(EV_CALL(XCB_EXPOSE)
                 {
                     RE_CAST_EV(xcb_expose_event_t);
-                    signal_manager->u32_map.emit(e->window, EXPOSE);
+                    signal_manager->_window_signals.emit(e->window, EXPOSE);
                 });
 
                 event_handler->setEventCallback(EV_CALL(XCB_PROPERTY_NOTIFY)
@@ -7891,7 +7894,7 @@ class Window_Manager {
                     RE_CAST_EV(xcb_property_notify_event_t);
                     if (e->atom == ewmh->_NET_WM_NAME)
                     {
-                        signal_manager->u32_map.emit(e->window, EXPOSE_REQ);
+                        signal_manager->_window_signals.emit(e->window, EXPOSE_REQ);
                     }
                 });
 
@@ -7900,7 +7903,7 @@ class Window_Manager {
                     RE_CAST_EV(xcb_button_press_event_t);
                     if (e->detail != L_MOUSE_BUTTON) return;
  
-                    signal_manager->u32_map.emit(e->event, L_MOUSE_BUTTON_EVENT);
+                    signal_manager->_window_signals.emit(e->event, L_MOUSE_BUTTON_EVENT);
                 });
             }
 
@@ -8584,7 +8587,7 @@ class __status_bar__ {
                 XCB_EVENT_MASK_EXPOSURE,
                 MAP
             );
-            signal_manager->u32_map.conect(_time_date_window, EXPOSE, [&]() -> void
+            signal_manager->_window_signals.conect(_time_date_window, EXPOSE, [this](uint32_t __window) -> void
             {
                 long now(time({}));
                 char buf[80];
@@ -8598,13 +8601,13 @@ class __status_bar__ {
                 _time_date_window.draw_acc(string(buf));
             });
 
-            event_handler->setEventCallback(XCB_EXPOSE, [this](Ev ev)
-            {
-                RE_CAST_EV(xcb_expose_event_t);
-                // if (e->window != this->_time_date_window) return; 
-                signal_manager->u32_map.emit(e->window, EXPOSE);
+            // event_handler->setEventCallback(XCB_EXPOSE, [this](Ev ev)
+            // {
+            //     RE_CAST_EV(xcb_expose_event_t);
+            //     // if (e->window != this->_time_date_window) return; 
+            //     signal_manager->u32_map.emit(e->window, EXPOSE);
             
-            });
+            // });
 
             _wifi_window.create_window(
                 _bar_window,
