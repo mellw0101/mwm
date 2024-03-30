@@ -12299,6 +12299,7 @@ class mv_client {
                 ev = xcb_wait_for_event(conn);
                 if (ev == nullptr) continue;
 
+                event_handler->processEvent(ev);
                 switch (ev->response_type & ~0x80)
                 {
                     case XCB_MOTION_NOTIFY:
