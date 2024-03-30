@@ -446,6 +446,32 @@ namespace {
                 _data.erase(it);
             }
     };
+
+    class __window_signals__ {
+        public:
+            uumap_t<uint32_t, int, uint32_t> _data;
+
+            umap<int, uint32_t> _window_map;
+
+            template<typename Callback>
+            void conect(uint32_t __window, int __signal_id, Callback &&callback)
+            {
+                _data[__window][__signal_id] = std::forward<Callback>(callback);
+            }
+
+            void emit(uint32_t __window, int __signal_id)
+            {
+                _data[__window][__signal_id](__window);
+            }
+
+            void remove(uint32_t __window)
+            {
+                auto it = _data.find(__window);
+                if (it == _data.end()) return;
+
+                _data.erase(it);
+            }
+    };
     
 
     /*
@@ -846,6 +872,7 @@ class __signal_manager__ {
         // UMapWithID<uint32_t, window> window_sigs;
 
         __uumap__<uint32_t, EV, void> u32_map;
+        __window_signals__ _window_signals;
 
     /* Methods   */
         template<typename Callback>
@@ -3535,6 +3562,7 @@ class window {
 
                 window_ev_id_handler.delete_callbacks_by_ev_id();
                 signal_manager->u32_map.remove(this->_window);
+                signal_manager->_window_signals.remove(*this);
             }
             
             void clear()
@@ -6667,10 +6695,10 @@ class client {
 
             close_button.make_then_set_png(USER_PATH_PREFIX("/close.png"), CLOSE_BUTTON_BITMAP);
             
-            signal_manager->u32_map.conect(
+            signal_manager->_window_signals.conect(
                 this->close_button,
                 L_MOUSE_BUTTON_EVENT,
-                [this]() -> void
+                [this](uint32_t __window) -> void
                 {
                     if (!win.is_mapped())
                     {
