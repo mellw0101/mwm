@@ -7124,8 +7124,12 @@ class Entry {
             signal_manager->_window_signals.conect(this->window, EXPOSE,
             [this](uint32_t __window) -> void
             {
-                this->window.draw_acc(name);
-                FLUSH_X();   
+                thread([&]() -> void {
+
+                    this->window.draw_acc(name);
+                    FLUSH_X();
+
+                }).detach();
             });
 
             signal_manager->_window_signals.conect(window, L_MOUSE_BUTTON_EVENT,
@@ -7187,7 +7191,7 @@ class context_menu {
             for (int i(0), y(0); i < entries.size(); ++i, y += _height)
             {
                 entries[i].make_window(context_window, 0, y, _width, _height);
-                signal_manager->u32_map.emit(entries[i].window, EXPOSE);
+                signal_manager->_window_signals.emit(entries[i].window, EXPOSE);
             }
         }
     
@@ -7204,7 +7208,7 @@ class context_menu {
                     {
                         if (e->event == entries[i].window)
                         {
-                            signal_manager->u32_map.emit(entries[i].window, L_MOUSE_BUTTON_EVENT);
+                            signal_manager->_window_signals.emit(entries[i].window, L_MOUSE_BUTTON_EVENT);
                         }
                     }
 
