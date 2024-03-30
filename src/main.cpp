@@ -6843,7 +6843,7 @@ class client {
             border.left.set_pointer(CURSOR::left_side);
             border.left.grab_button({ { L_MOUSE_BUTTON, NULL } });
             border.left.map();
-            add_ev_to_window(border.left, L_MOUSE_BUTTON_EVENT, std::forward<function<void(uint32_t)>>(_resize_border_left_));
+            add_ev_to_window(border.left, CLIENT_RESIZE, std::forward<function<void(uint32_t)>>(_resize_border_left_));
 
             border.right.create_default(frame, (width + BORDER_SIZE), BORDER_SIZE, BORDER_SIZE, (height + TITLE_BAR_HEIGHT));
             signal_manager->_window_client_map.connect(this->border.right, this);
@@ -7924,7 +7924,7 @@ class Window_Manager {
                 event_handler->setEventCallback(EV_CALL(XCB_BUTTON_PRESS)
                 {
                     RE_CAST_EV(xcb_button_press_event_t);
-                    signal_manager->_window_signals.emit(e->event, L_MOUSE_BUTTON_EVENT);
+                    signal_manager->_window_signals.emit(e->event, CLIENT_RESIZE);
                     if (e->event != root) return;
                     if (e->detail == R_MOUSE_BUTTON)
                     {
