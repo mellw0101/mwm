@@ -859,6 +859,29 @@ namespace {
             }
     };
 
+
+    class __window_client_map__ {
+        public:
+            umap<uint32_t, client *> _data;
+
+            void connect(uint32_t __window, client *__c)
+            {
+                _data[__window] = __c;
+            }
+
+            const client *retrive(uint32_t __window) const
+            {
+                auto it = _data.find(__window);
+                if (it == _data.end()) return nullptr;
+
+                return it->second;
+            }
+
+            void remove(uint32_t __window)
+            {
+                _data.erase(__window);
+            }
+    };
 }
 
 class __signal_manager__ {
@@ -876,6 +899,7 @@ class __signal_manager__ {
 
         __uumap__<uint32_t, EV, void> u32_map;
         __window_signals__ _window_signals;
+        __window_client_map__ _window_client_map;
 
     /* Methods   */
         template<typename Callback>
@@ -3565,7 +3589,8 @@ class window {
 
                 window_ev_id_handler.delete_callbacks_by_ev_id();
                 signal_manager->u32_map.remove(this->_window);
-                signal_manager->_window_signals.remove(*this);
+                signal_manager->_window_signals.remove(this->_window);
+                signal_manager->_window_client_map.remove(this->_window);
             }
             
             void clear()
@@ -6660,6 +6685,7 @@ class client {
             win.reparent(frame, BORDER_SIZE, (TITLE_BAR_HEIGHT + BORDER_SIZE));
             frame.apply_event_mask({XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY});
             frame.map();
+            signal_manager->_window_client_map.connect(frame, this);
         }
     
         void make_titlebar()
@@ -6674,6 +6700,7 @@ class client {
                 XCB_EVENT_MASK_EXPOSURE,
                 MAP
             );
+            signal_manager->_window_client_map.connect(titlebar, this);
             titlebar.grab_button({ { L_MOUSE_BUTTON, NULL } });
             draw_title(TITLE_REQ_DRAW);
             icon.raise();
@@ -6695,6 +6722,7 @@ class client {
                 (int[]){ALL, 1, WHITE},
                 CURSOR::hand2
             );
+            signal_manager->_window_client_map.connect(this->close_button, this);
 
             close_button.make_then_set_png(USER_PATH_PREFIX("/close.png"), CLOSE_BUTTON_BITMAP);
             
@@ -6736,6 +6764,7 @@ class client {
         void make_max_button()
         {
             max_button.create_default(frame, (width - (BUTTON_SIZE * 2) + BORDER_SIZE), BORDER_SIZE, BUTTON_SIZE, BUTTON_SIZE);
+            signal_manager->_window_client_map.connect(this->max_button, this);
             max_button.set_backround_color(RED);
             max_button.apply_event_mask({XCB_EVENT_MASK_ENTER_WINDOW, XCB_EVENT_MASK_LEAVE_WINDOW});
             max_button.grab_button({ { L_MOUSE_BUTTON, NULL } });
@@ -6773,6 +6802,7 @@ class client {
         void make_min_button()
         {
             min_button.create_default(frame, (width - (BUTTON_SIZE * 3) + BORDER_SIZE), BORDER_SIZE, BUTTON_SIZE, BUTTON_SIZE);
+            signal_manager->_window_client_map.connect(this->min_button, this);
             min_button.set_backround_color(GREEN);
             min_button.apply_event_mask({XCB_EVENT_MASK_ENTER_WINDOW, XCB_EVENT_MASK_LEAVE_WINDOW});
             min_button.grab_button({ { L_MOUSE_BUTTON, NULL } });
@@ -7228,6 +7258,8 @@ class Window_Manager {
         client *focused_client = nullptr;
         desktop *cur_d = nullptr;
 
+        // umap<uint32_t, client *> _window_clint_map;
+        __window_client_map__ _window_client_map;
         // UMapWithID<client *, client *> client_signals;
     
     /* Methods     */

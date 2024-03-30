@@ -20,6 +20,7 @@ enum EV {
     EXPOSE                            = XCB_EXPOSE,
     EXPOSE_REQ                        = 40,
     LEAVE_NOTIFY                      = XCB_LEAVE_NOTIFY,
+    ENTER_NOTIFY                      = 41,
     L_MOUSE_BUTTON_EVENT              = 36,
     KILL_SIGNAL                       = 39
 };
