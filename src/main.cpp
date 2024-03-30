@@ -420,36 +420,9 @@ namespace {
 
 
     template<typename T1, typename T2 = int, typename T3 = void>
-    class __uumap__;
-
-    template<typename T1>
-    class __uumap__<T1, int, void> {
+    class __uumap__ {
         public:
-            uumap_t<T1, int, void> _data;
-
-            TEMP_CB
-            void conect(uint32_t __window, int __signal, CB)
-            {
-                _data[__window];
-            }
-    };
-
-    template<typename T1, typename T2>
-    class __uumap__<T1, int, T2> {
-        public:
-            uumap_t<T1, int, T2> _data;
-
-            TEMP_CB
-            void conect(uint32_t __window, int __signal, CB)
-            {
-                _data[__window];
-            }
-    };
-
-    template<>
-    class __uumap__<uint32_t, EV, void> {
-        public:
-            uumap_t<uint32_t, EV, void> _data;
+            uumap_t<T1, T2, T3> _data;
 
             template<typename Callback>
             void conect(uint32_t __window, EV __signal_id, Callback &&callback)
@@ -465,8 +438,7 @@ namespace {
                 it->second();
             }
 
-            template<typename T1>
-            void remove(T1 &__value)
+            void remove(T1 __value)
             {
                 auto it = _data.find(__value);
                 if (it == _data.end()) return;
