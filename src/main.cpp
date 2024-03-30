@@ -869,7 +869,7 @@ namespace {
                 _data[__window] = __c;
             }
 
-            const client *retrive(uint32_t __window) const
+            client *retrive(uint32_t __window)
             {
                 auto it = _data.find(__window);
                 if (it == _data.end()) return nullptr;
@@ -6685,7 +6685,8 @@ class client {
             win.reparent(frame, BORDER_SIZE, (TITLE_BAR_HEIGHT + BORDER_SIZE));
             frame.apply_event_mask({XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY});
             frame.map();
-            signal_manager->_window_client_map.connect(frame, this);
+            signal_manager->_window_client_map.connect(this->win, this);
+            signal_manager->_window_client_map.connect(this->frame, this);
         }
     
         void make_titlebar()
@@ -7259,7 +7260,7 @@ class Window_Manager {
         desktop *cur_d = nullptr;
 
         // umap<uint32_t, client *> _window_clint_map;
-        __window_client_map__ _window_client_map;
+        // __window_client_map__ _window_client_map;
         // UMapWithID<client *, client *> client_signals;
     
     /* Methods     */
@@ -13849,7 +13850,7 @@ class Events {
             
             if (e->detail == wm->key_codes.f11)
             {
-                GET_CLIENT_FROM_WINDOW(e->event);
+                client *c = signal_manager->_window_client_map.retrive(e->event);
                 max_win(c, max_win::EWMH_MAXWIN);
                 return;
             }
@@ -13934,7 +13935,7 @@ class Events {
 
                     case SUPER:
                     {
-                        GET_CLIENT_FROM_WINDOW(e->event);
+                        client *c = signal_manager->_window_client_map.retrive(e->event);
                         tile(c, TILE::RIGHT);
                         return;
                     }
@@ -13961,7 +13962,7 @@ class Events {
                     
                     case SUPER:
                     {
-                        GET_CLIENT_FROM_WINDOW(e->event);
+                        client *c = signal_manager->_window_client_map.retrive(e->event);
                         tile(c, TILE::LEFT);
                         return;
                     }
@@ -13974,7 +13975,7 @@ class Events {
                 {
                     case SUPER:
                     {
-                        GET_CLIENT_FROM_WINDOW(e->event);
+                        client *c = signal_manager->_window_client_map.retrive(e->event);
                         tile(c, TILE::DOWN);
                         return;
                     }
@@ -13987,7 +13988,7 @@ class Events {
                 {
                     case SUPER:
                     {
-                        GET_CLIENT_FROM_WINDOW(e->event);
+                        client *c = signal_manager->_window_client_map.retrive(e->event);
                         tile(c, TILE::UP);
                         return;
                     }
@@ -14030,17 +14031,15 @@ class Events {
         void map_notify_handler(const xcb_generic_event_t *&ev)
         {
             RE_CAST_EV(xcb_map_notify_event_t);
-            client *c = wm->client_from_window(&e->window);
-            if (c != nullptr)
-            {
-                c->update();
-            } 
+            client *c = signal_manager->_window_client_map.retrive(e->window);
+            if (!c) return;
+            c->update(); 
         }
 
         void map_req_handler(const xcb_generic_event_t *&ev)
         {
             RE_CAST_EV(xcb_map_request_event_t);
-            client *c = wm->client_from_window(&e->window); 
+            client *c = signal_manager->_window_client_map.retrive(e->window); 
             if (c != nullptr) return;
             wm->manage_new_client(e->window);
         }
@@ -14048,8 +14047,7 @@ class Events {
         void button_press_handler(const xcb_generic_event_t *&ev)
         {
             RE_CAST_EV(xcb_button_press_event_t);
-            client *c;
-            c = wm->client_from_any_window(&e->event);
+            client *c = signal_manager->_window_client_map.retrive(e->event);
             if (c == nullptr) 
             {
                 c = wm->get_client_from_pointer();
