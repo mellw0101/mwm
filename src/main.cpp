@@ -7129,6 +7129,7 @@ class Entry {
                     thread([&]() -> void {
 
                         this->window.draw_acc(name);
+                        FLUSH_X();
                     
                     }).detach();
                 }
@@ -7148,6 +7149,7 @@ class Entry {
                         }
                         
                         this->action();
+                        FLUSH_X();
 
                     }).detach();
                 }
