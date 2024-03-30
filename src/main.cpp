@@ -2732,6 +2732,7 @@ class __event_handler__ {
             if (e->detail == L_MOUSE_BUTTON)
             {
                 signal_manager->_window_signals.emit(e->event, L_MOUSE_BUTTON_EVENT);
+                FLUSH_X();
             }
         }
 
@@ -2739,6 +2740,7 @@ class __event_handler__ {
         void handleEvent(xcb_expose_event_t *e)
         {
             signal_manager->_window_signals.emit(e->window, EXPOSE);
+            FLUSH_X();
         }
 
         template<>
@@ -12300,7 +12302,6 @@ class mv_client {
                 ev = xcb_wait_for_event(conn);
                 if (ev == nullptr) continue;
 
-                event_handler->processEvent(ev);
                 switch (ev->response_type & ~0x80)
                 {
                     case XCB_MOTION_NOTIFY:
@@ -12315,7 +12316,7 @@ class mv_client {
                             FLUSH_X();
                         }
                         
-                        break;
+                        continue;
                     }
                 
                     case XCB_BUTTON_RELEASE:
@@ -12323,11 +12324,16 @@ class mv_client {
                         shouldContinue = false;
                         c->update();
 
-                        break;
+                        continue;
                     }
 
                     // case XCB_EXPOSE:
                     // {
+                    //     RE_CAST_EV(xcb_expose_event_t);
+                    //     signal_manager->_window_signals.emit(e->window, EXPOSE);
+                        
+                    //     continue;
+                    // }
                     //     RE_CAST_EV(xcb_expose_event_t);
                     //     status_bar->expose(e->window);
                     //     file_app->expose(e->window);
@@ -12342,8 +12348,6 @@ class mv_client {
                     //         }
                     //     }
 
-                    //     break;
-                    // }
 
                     // case XCB_PROPERTY_NOTIFY:
                     // {
@@ -12362,6 +12366,7 @@ class mv_client {
                     // }
                 }
 
+                event_handler->processEvent(ev);
                 free(ev);
             }
         }
