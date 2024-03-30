@@ -2740,6 +2740,15 @@ class __event_handler__ {
             signal_manager->_window_signals.emit(e->window, EXPOSE);
         }
 
+        template<>
+        void handleEvent(xcb_property_notify_event_t *e)
+        {
+            if (e->atom == ewmh->_NET_WM_NAME)
+            {
+                signal_manager->_window_signals.emit(e->window, EXPOSE_REQ);
+            }
+        }
+
         // Function that creates a separate thread for each event type
         void processEvent(xcb_generic_event_t* ev)
         {
@@ -2761,13 +2770,15 @@ class __event_handler__ {
                     thread(handleEvent<xcb_expose_event_t>, (xcb_expose_event_t*)ev).detach();
                     break;
                 }
-                
-                // // Add cases for other event types as needed
-                // default:
-                //     std::cerr << "Unhandled event type: " << (int)responseType << std::endl;
+
+                case
+                XCB_PROPERTY_NOTIFY:
+                {
+                    thread(handleEvent<xcb_property_notify_event_t>, (xcb_property_notify_event_t*)ev).detach();
+                    break;
+                }
             }
         }
-
 
         void end()
         {
@@ -7993,28 +8004,28 @@ class Window_Manager {
                     signal_manager->emit("SET_EV_CALLBACK__RESIZE_NO_BORDER");
                 }
 
-                event_handler->setEventCallback(EV_CALL(XCB_EXPOSE)
-                {
-                    RE_CAST_EV(xcb_expose_event_t);
-                    signal_manager->_window_signals.emit(e->window, EXPOSE);
-                });
+                // event_handler->setEventCallback(EV_CALL(XCB_EXPOSE)
+                // {
+                //     RE_CAST_EV(xcb_expose_event_t);
+                //     signal_manager->_window_signals.emit(e->window, EXPOSE);
+                // });
 
-                event_handler->setEventCallback(EV_CALL(XCB_PROPERTY_NOTIFY)
-                {
-                    RE_CAST_EV(xcb_property_notify_event_t);
-                    if (e->atom == ewmh->_NET_WM_NAME)
-                    {
-                        signal_manager->_window_signals.emit(e->window, EXPOSE_REQ);
-                    }
-                });
+                // event_handler->setEventCallback(EV_CALL(XCB_PROPERTY_NOTIFY)
+                // {
+                //     RE_CAST_EV(xcb_property_notify_event_t);
+                //     if (e->atom == ewmh->_NET_WM_NAME)
+                //     {
+                //         signal_manager->_window_signals.emit(e->window, EXPOSE_REQ);
+                //     }
+                // });
 
-                event_handler->setEventCallback(EV_CALL(XCB_BUTTON_PRESS)
-                {
-                    RE_CAST_EV(xcb_button_press_event_t);
-                    if (e->detail != L_MOUSE_BUTTON) return;
+                // event_handler->setEventCallback(EV_CALL(XCB_BUTTON_PRESS)
+                // {
+                //     RE_CAST_EV(xcb_button_press_event_t);
+                //     if (e->detail != L_MOUSE_BUTTON) return;
  
-                    signal_manager->_window_signals.emit(e->event, L_MOUSE_BUTTON_EVENT);
-                });
+                //     signal_manager->_window_signals.emit(e->event, L_MOUSE_BUTTON_EVENT);
+                // });
             }
 
         /* Check  */
