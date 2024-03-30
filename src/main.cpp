@@ -2749,9 +2749,9 @@ class __event_handler__ {
             (responseType)
             {
                 case
-                XCB_KEY_PRESS:
+                XCB_BUTTON_PRESS:
                 {
-                    thread(handleEvent<xcb_key_press_event_t>, (xcb_key_press_event_t*)ev).detach();
+                    thread(handleEvent<xcb_button_press_event_t>, (xcb_button_press_event_t*)ev).detach();
                     break;
                 }
 
