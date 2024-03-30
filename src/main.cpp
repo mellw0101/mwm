@@ -444,8 +444,6 @@ namespace {
                 if (it == _data.end()) return;
 
                 _data.erase(it);
-
-                loutI << "_data size:" << _data.size() << loutEND;
             }
     };
     
@@ -6668,8 +6666,40 @@ class client {
             );
 
             close_button.make_then_set_png(USER_PATH_PREFIX("/close.png"), CLOSE_BUTTON_BITMAP);
+            
+            signal_manager->u32_map.conect(
+                this->close_button,
+                L_MOUSE_BUTTON_EVENT,
+                [this]() -> void
+                {
+                    if (!win.is_mapped())
+                    {
+                        kill();
+                    }
 
-            setup_events(close_button);
+                    win.kill();
+                }
+            );
+
+            // this->setup_CLI_SIG(KILL, CLI_SIG
+            // {
+            //     if (!c->win.is_mapped())
+            //     {
+            //         c->kill();
+            //     }
+
+            //     c->win.kill();
+            // });
+
+            // EV_ID = event_handler->setEventCallback(EV_CALL(XCB_BUTTON_PRESS)
+            // {
+            //     RE_CAST_EV(xcb_button_press_event_t);
+            //     if (e->event == close_button && e->detail == L_MOUSE_BUTTON)
+            //     {
+            //         signal_manager->client_signals.emit(this, KILL);
+            //     }    
+            // });
+            // ADD_EV_ID_WIN(close_button, XCB_BUTTON_PRESS);
         }
     
         void make_max_button()
@@ -6796,29 +6826,6 @@ class client {
 
         void setup_events(uint32_t __window)
         {
-            if (__window == close_button)
-            {
-                this->setup_CLI_SIG(KILL, CLI_SIG
-                {
-                    if (!c->win.is_mapped())
-                    {
-                        c->kill();
-                    }
-
-                    c->win.kill();
-                });
-
-                EV_ID = event_handler->setEventCallback(EV_CALL(XCB_BUTTON_PRESS)
-                {
-                    RE_CAST_EV(xcb_button_press_event_t);
-                    if (e->event == close_button && e->detail == L_MOUSE_BUTTON)
-                    {
-                        signal_manager->client_signals.emit(this, KILL);
-                    }    
-                });
-                ADD_EV_ID_WIN(close_button, XCB_BUTTON_PRESS);
-            }
-
             if (__window == titlebar)
             {
                 signal_manager->u32_map.conect(
@@ -7858,6 +7865,14 @@ class Window_Manager {
                     {
                         signal_manager->u32_map.emit(e->window, EXPOSE_REQ);
                     }
+                });
+
+                event_handler->setEventCallback(EV_CALL(XCB_BUTTON_PRESS)
+                {
+                    RE_CAST_EV(xcb_button_press_event_t);
+                    if (e->detail != L_MOUSE_BUTTON) return;
+ 
+                    signal_manager->u32_map.emit(e->event, L_MOUSE_BUTTON_EVENT);
                 });
             }
 
