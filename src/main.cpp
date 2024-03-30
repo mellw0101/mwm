@@ -390,8 +390,25 @@ namespace { // Tools
     }
 }
 
+#define STATIC_DECLARIATION(__name) static function<void(uint32_t)> __name
+
 class client;
 class window;
+
+STATIC_DECLARIATION(_resize_border_left_);
+STATIC_DECLARIATION(_resize_border_right_);
+STATIC_DECLARIATION(_resize_border_top_);
+STATIC_DECLARIATION(_resize_border_bottom_);
+STATIC_DECLARIATION(_resize_border_top_left_);
+STATIC_DECLARIATION(_resize_border_bottom_left_);
+STATIC_DECLARIATION(_resize_border_top_right_);
+STATIC_DECLARIATION(_resize_border_bottom_right_);
+
+static function<void(uint32_t)> _resize_cli_border_left;
+
+template<typename Callback>
+static void add_ev_to_window(uint32_t __window, int __signal_id, Callback &&__callback);
+
 namespace {
     enum {
         KILL = 1,
@@ -6826,6 +6843,7 @@ class client {
             border.left.set_pointer(CURSOR::left_side);
             border.left.grab_button({ { L_MOUSE_BUTTON, NULL } });
             border.left.map();
+            add_ev_to_window(border.left, L_MOUSE_BUTTON_EVENT, _resize_border_left_);
 
             border.right.create_default(frame, (width + BORDER_SIZE), BORDER_SIZE, BORDER_SIZE, (height + TITLE_BAR_HEIGHT));
             signal_manager->_window_client_map.connect(this->border.right, this);
@@ -6889,6 +6907,7 @@ class client {
                 NONE,
                 MAP
             );
+            signal_manager->_window_client_map.connect(this->icon, this);
 
             win.make_png_from_icon();
             icon.set_backround_png(PNG_HASH(win.get_icccm_class()));
@@ -14102,11 +14121,11 @@ class Events {
                     return;
                 }
                 
-                if (e->event == c->border.left)
-                {
-                    resize_client::border border(c, edge::LEFT);
-                    return;
-                }
+                // if (e->event == c->border.left)
+                // {
+                //     resize_client::border border(c, edge::LEFT);
+                //     return;
+                // }
                 
                 if (e->event == c->border.right)
                 {
@@ -14407,6 +14426,16 @@ class __signal_factory__ {
             });
         };
 
+        function<void(uint32_t)> _resize_cli_border_left = [&](uint32_t __window) -> void
+        {
+            client *c = signal_manager->_window_client_map.retrive(__window);
+            if (!c) return;
+
+            resize_client::border border(c, edge::LEFT);
+        };
+
+        
+
     public:
         void init()
         {
@@ -14414,6 +14443,81 @@ class __signal_factory__ {
         }
 
 };
+
+namespace {
+    #define MAKE_CALLBACK(__name) function<void(uint32_t)> __name = [](uint32_t __window) -> void
+    
+    MAKE_CALLBACK(_resize_border_left_)
+    {
+        client *c = signal_manager->_window_client_map.retrive(__window);
+        if (!c) return;
+
+        resize_client::border(c, edge::LEFT);
+    };
+
+    MAKE_CALLBACK(_resize_border_right_)
+    {
+        client *c = signal_manager->_window_client_map.retrive(__window);
+        if (!c) return;
+
+        resize_client::border(c, edge::RIGHT);
+    };
+
+    MAKE_CALLBACK(_resize_border_top_)
+    {
+        client *c = signal_manager->_window_client_map.retrive(__window);
+        if (!c) return;
+
+        resize_client::border(c, edge::TOP);
+    };
+
+    MAKE_CALLBACK(_resize_border_bottom_)
+    {
+        client *c = signal_manager->_window_client_map.retrive(__window);
+        if (!c) return;
+
+        resize_client::border(c, edge::BOTTOM_edge);
+    };
+
+    MAKE_CALLBACK(_resize_border_top_left_)
+    {
+        client *c = signal_manager->_window_client_map.retrive(__window);
+        if (!c) return;
+
+        resize_client::border(c, edge::TOP_LEFT);
+    };
+
+    MAKE_CALLBACK(_resize_border_bottom_left_)
+    {
+        client *c = signal_manager->_window_client_map.retrive(__window);
+        if (!c) return;
+
+        resize_client::border(c, edge::BOTTOM_LEFT);
+    };
+
+    MAKE_CALLBACK(_resize_border_top_right_)
+    {
+        client *c = signal_manager->_window_client_map.retrive(__window);
+        if (!c) return;
+
+        resize_client::border(c, edge::TOP_RIGHT);
+    };
+
+    MAKE_CALLBACK(_resize_border_bottom_right_)
+    {
+        client *c = signal_manager->_window_client_map.retrive(__window);
+        if (!c) return;
+
+        resize_client::border(c, edge::BOTTOM_RIGHT);
+    };
+
+}
+
+template<typename Callback>
+void add_ev_to_window(uint32_t __window, int __signal_id, Callback &&__callback)
+{
+    signal_manager->_window_signals.conect(__window, __signal_id, std::forward<Callback>(__callback));
+}
 
 void setup_wm()
 {
