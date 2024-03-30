@@ -7050,7 +7050,6 @@ class Entry {
             signal_manager->u32_map.conect(window, L_MOUSE_BUTTON_EVENT, [this]() -> void { if (this->action != nullptr) this->action(); });
             
             window.grab_button({ { L_MOUSE_BUTTON, NULL } });
-
         }
 
 };
@@ -7113,7 +7112,7 @@ class context_menu {
                     {
                         if (e->event == entries[i].window)
                         {
-                            entries[i].window.emit_WIN_SIG<L_MOUSE_BUTTON_EVENT>();
+                            signal_manager->u32_map.emit(entries[i].window, L_MOUSE_BUTTON_EVENT);
                         }
                     }
 
