@@ -8778,9 +8778,16 @@ class __status_bar__ {
                 DARK_GREY,
                 BUTTON_EVENT_MASK,
                 MAP,
-                (int[]){ALL, 2, BLACK}
+                (int[]){ALL, 2, BLACK},
+                CURSOR::hand2
             );
-            _audio_window.set_pointer(CURSOR::hand2);
+            signal_manager->_window_signals.conect(_audio_window, EXPOSE,
+            [this](uint32_t __window) -> void
+            {
+                if (__window != _audio_window) return;
+                _audio_window.draw_acc("Audio");
+            });
+
             expose(_audio_window);
         }
 
@@ -12316,7 +12323,7 @@ class mv_client {
                             FLUSH_X();
                         }
                         
-                        continue;
+                        break;
                     }
                 
                     case XCB_BUTTON_RELEASE:
@@ -12324,46 +12331,8 @@ class mv_client {
                         shouldContinue = false;
                         c->update();
 
-                        continue;
+                        break;
                     }
-
-                    // case XCB_EXPOSE:
-                    // {
-                    //     RE_CAST_EV(xcb_expose_event_t);
-                    //     signal_manager->_window_signals.emit(e->window, EXPOSE);
-                        
-                    //     continue;
-                    // }
-                    //     RE_CAST_EV(xcb_expose_event_t);
-                    //     status_bar->expose(e->window);
-                    //     file_app->expose(e->window);
-                    //     system_settings->expose(e->window);
-                        
-                    //     client *c = wm->client_from_any_window(&e->window);
-                    //     if (c != nullptr)
-                    //     {
-                    //         if (e->window == c->titlebar)
-                    //         {
-                    //             c->draw_title(TITLE_INTR_DRAW);
-                    //         }
-                    //     }
-
-
-                    // case XCB_PROPERTY_NOTIFY:
-                    // {
-                    //     RE_CAST_EV(xcb_property_notify_event_t);
-                    //     client *c = wm->client_from_any_window(&e->window);
-                    //     if (c != nullptr)
-                    //     {
-                    //         if (e->atom   == ewmh->_NET_WM_NAME
-                    //         &&  e->window == c->win)
-                    //         {
-                    //             c->draw_title(TITLE_REQ_DRAW);
-                    //         }
-                    //     }
-
-                    //     break;
-                    // }
                 }
 
                 event_handler->processEvent(ev);
