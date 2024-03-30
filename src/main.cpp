@@ -6840,7 +6840,7 @@ class client {
                 });
 
                 signal_manager->u32_map.conect(
-                this->titlebar,
+                this->win,
                 EXPOSE_REQ,
                 [this]() -> void
                 {
