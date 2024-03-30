@@ -7121,39 +7121,25 @@ class Entry {
                 MAP
             );
 
-            signal_manager->_window_signals.conect(
-                this->window,
-                EXPOSE,
-                [this](uint32_t __window) -> void
+            signal_manager->_window_signals.conect(this->window, EXPOSE,
+            [this](uint32_t __window) -> void
+            {
+                this->window.draw_acc(name);
+                FLUSH_X();   
+            });
+
+            signal_manager->_window_signals.conect(window, L_MOUSE_BUTTON_EVENT,
+            [this](uint32_t __window) -> void
+            {
+                if (this->action == nullptr)
                 {
-                    thread([&]() -> void {
-
-                        this->window.draw_acc(name);
-                        FLUSH_X();
-                    
-                    }).detach();
+                    loutE << WINDOW_ID_BY_INPUT(__window) << "action == nullptr" << loutEND;
+                    return; 
                 }
-            );
-
-            signal_manager->_window_signals.conect(
-                window,
-                L_MOUSE_BUTTON_EVENT,
-                [this](uint32_t __window) -> void
-                {
-                    thread([&]() -> void {
-
-                        if (this->action == nullptr)
-                        {
-                            loutE << WINDOW_ID_BY_INPUT(__window) << "action == nullptr" << loutEND;
-                            return; 
-                        }
-                        
-                        this->action();
-                        FLUSH_X();
-
-                    }).detach();
-                }
-            );
+                
+                this->action();
+                FLUSH_X();
+            });
             
             window.grab_button({ { L_MOUSE_BUTTON, NULL } });
         }
