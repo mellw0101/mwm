@@ -464,6 +464,15 @@ namespace {
 
                 it->second();
             }
+
+            template<typename T1>
+            void remove(T1 &__value)
+            {
+                auto it = _data.find(__value);
+                if (it == _data.end()) return;
+
+                _data.erase(it);
+            }
     };
     
 
@@ -861,8 +870,8 @@ class __signal_manager__ {
     /* Variabels */
         UMapWithID<client *, client *> client_signals;
 
-        UMapWithID<uint32_t> enum_sigs;
-        UMapWithID<uint32_t, window> window_sigs;
+        // UMapWithID<uint32_t> enum_sigs;
+        // UMapWithID<uint32_t, window> window_sigs;
 
         __uumap__<uint32_t, EV, void> u32_map;
 
@@ -2726,38 +2735,37 @@ class __event_handler__ {
             });
         }
 
-        template<EV __event_type>
-        int emit_on(uint32_t __window_u32,window &__window)
+        int emit_on(uint32_t __window, EV __signal_id)
         {
-            if
-            constexpr (__event_type == EXPOSE)
+            if (__signal_id == EXPOSE)
             {
-                EV_ID = setEventCallback(XCB_EXPOSE, [__window_u32, &__window](Ev ev) -> void
+                EV_ID = setEventCallback(XCB_EXPOSE, [this, __window](Ev ev) -> void
                 {
                     RE_CAST_EV(xcb_expose_event_t);
-                    if (e->window != __window_u32) return;
+                    if (e->window != __window) return;
 
-                    signal_manager->window_sigs.emit<EXPOSE>(__window_u32, __window);
+                    signal_manager->u32_map.emit(__window, EXPOSE);
                 });
 
                 return event_id;
             }
 
-            if
-            constexpr (__event_type == L_MOUSE_BUTTON_EVENT)
+            if (__signal_id == L_MOUSE_BUTTON_EVENT)
             {
-                EV_ID = setEventCallback(XCB_BUTTON_PRESS, [__window_u32, &__window](Ev ev) -> void
+                EV_ID = setEventCallback(XCB_BUTTON_PRESS, [this, __window](Ev ev) -> void
                 {
                     RE_CAST_EV(xcb_button_press_event_t);
-                    if (e->event != __window_u32) return;
+                    if (e->event != __window) return;
                     
                     if (e->detail != L_MOUSE_BUTTON) return;
 
-                    signal_manager->window_sigs.emit<L_MOUSE_BUTTON_EVENT>(__window_u32, __window);
+                    signal_manager->u32_map.emit(__window, L_MOUSE_BUTTON_EVENT);
                 });
 
                 return event_id;
             }
+
+            return -1;
         }        
 
         void iter_and_log_map_size()
@@ -3554,7 +3562,7 @@ class window {
                 free(delete_reply);
 
                 window_ev_id_handler.delete_callbacks_by_ev_id();
-                signal_manager->window_sigs.remove_window(this->_window);
+                signal_manager->u32_map.remove(this->_window);
             }
             
             void clear()
@@ -3671,32 +3679,15 @@ class window {
                 _height = __height;
             }
 
-            template<EV __signal_id, typename Callback>
-            void setup_WIN_SIG(Callback &&__callback)
+            template<typename Callback>
+            void setup_WIN_SIG(EV __signal_id, Callback &&__callback)
             {
-                if constexpr (__signal_id == L_MOUSE_BUTTON_EVENT)
-                {
-                    signal_manager->window_sigs.connect<L_MOUSE_BUTTON_EVENT>(this->_window, std::forward<Callback>(__callback));
-                }
-
-                if constexpr (__signal_id == EXPOSE)
-                {
-                    signal_manager->window_sigs.connect<EXPOSE>(this->_window, std::forward<Callback>(__callback));
-                }
-
-                if constexpr (__signal_id == KILL_SIGNAL)
-                {
-                    signal_manager->window_sigs.connect<KILL_SIGNAL>(this->_window, std::forward<Callback>(__callback));
-                }
+                signal_manager->u32_map.conect(this->_window, __signal_id,  std::forward<Callback>(__callback));
             }
 
-            template<EV __signal_id>
-            void emit_WIN_SIG()
+            void emit_WIN_SIG(EV __signal_id)
             {
-                if constexpr (__signal_id == EXPOSE)
-                {
-                    signal_manager->window_sigs.emit<EXPOSE>(this->_window, *this);
-                }
+                signal_manager->u32_map.emit(this->_window, __signal_id);
             }
 
         /* Event         */
@@ -3725,19 +3716,19 @@ class window {
                     case
                     EXPOSE:
                     {
-                        event_handler->emit_on<EXPOSE>(uint32_t(this->_window), *this);
+                        event_handler->emit_on(this->_window, EXPOSE);
                     }
 
                     case
                     KILL_SIGNAL:
                     {
-                        event_handler->emit_on<KILL_SIGNAL>(uint32_t(this->_window), *this);
+                        event_handler->emit_on(this->_window, KILL_SIGNAL);
                     }
 
                     case
                     L_MOUSE_BUTTON_EVENT:
                     {
-                        event_handler->emit_on<L_MOUSE_BUTTON_EVENT>((uint32_t)this->_window, *this);
+                        event_handler->emit_on(this->_window, L_MOUSE_BUTTON_EVENT);
                     }
                 }
             }
@@ -3747,9 +3738,9 @@ class window {
             {
                 if constexpr (ev == EXPOSE)
                 {
-                    if (__mode == 0) this->setup_WIN_SIG<EXPOSE>(callback);
+                    if (__mode == 0) this->setup_WIN_SIG(EXPOSE, callback);
 
-                    EV_ID = event_handler->emit_on<EXPOSE>(this->_window, *this);
+                    EV_ID = event_handler->emit_on(this->_window, EXPOSE);
                     ADD_EV_ID_IWIN(XCB_EXPOSE);
                     return;
                 }
@@ -3757,9 +3748,9 @@ class window {
                 if constexpr (ev == L_MOUSE_BUTTON_EVENT)
                 {
                     
-                    if (__mode == 0) this->setup_WIN_SIG<L_MOUSE_BUTTON_EVENT>(callback);
+                    if (__mode == 0) signal_manager->u32_map.conect(this->_window, callback);
 
-                    EV_ID = event_handler->emit_on<L_MOUSE_BUTTON_EVENT>(this->_window, *this);
+                    EV_ID = event_handler->emit_on(this->_window, L_MOUSE_BUTTON_EVENT);
                     ADD_EV_ID_IWIN(XCB_BUTTON_PRESS);
                 }
             }
@@ -3803,7 +3794,7 @@ class window {
                             RE_CAST_EV(xcb_expose_event_t);
                             if (e->window == this->_window)
                             {
-                                this->emit_WIN_SIG<EXPOSE>();
+                                signal_manager->u32_map.emit(this->_window, EXPOSE);
                             }
                         });
                         ADD_EV_ID_IWIN(XCB_EXPOSE);
@@ -3818,7 +3809,7 @@ class window {
                             {
                                 if (e->detail == L_MOUSE_BUTTON)
                                 {
-                                    emit_WIN_SIG<L_MOUSE_BUTTON_EVENT>();
+                                    signal_manager->u32_map.emit(this->_window, L_MOUSE_BUTTON_EVENT);
                                 }
                             }
                         });
@@ -7044,7 +7035,7 @@ class Entry {
                 MAP
             );
 
-            window.setup_WIN_SIG<EXPOSE>([this]() -> void { this->window.draw_acc(name); });
+            signal_manager->u32_map.conect(this->window, EXPOSE, [this]() -> void { this->window.draw_acc(name); });
             window.on_ev<EXPOSE>(nullptr, 1);
 
             signal_manager->u32_map.conect(window, L_MOUSE_BUTTON_EVENT, [this]() -> void { if (this->action != nullptr) this->action(); });
@@ -7095,7 +7086,7 @@ class context_menu {
             for (int i(0), y(0); i < entries.size(); ++i, y += _height)
             {
                 entries[i].make_window(context_window, 0, y, _width, _height);
-                entries[i].window.emit_WIN_SIG<EXPOSE>();
+                signal_manager->u32_map.emit(entries[i].window, EXPOSE);
             }
         }
     
@@ -7886,7 +7877,7 @@ class Window_Manager {
 
                 if (BORDER_SIZE == 0)
                 {
-                    signal_manager->enum_sigs.emit<SET_EV_CALLBACK__RESIZE_NO_BORDER>(SET_EV_CALLBACK__RESIZE_NO_BORDER);
+                    signal_manager->emit("SET_EV_CALLBACK__RESIZE_NO_BORDER");
                 }
             }
 
@@ -8570,7 +8561,7 @@ class __status_bar__ {
                 XCB_EVENT_MASK_EXPOSURE,
                 MAP
             );
-            _time_date_window.on_ev<EXPOSE>([&]() -> void
+            signal_manager->u32_map.conect(_time_date_window, EXPOSE, [&]() -> void
             {
                 long now(time({}));
                 char buf[80];
@@ -8582,6 +8573,14 @@ class __status_bar__ {
                 );
                 
                 _time_date_window.draw_acc(string(buf));
+            });
+
+            event_handler->setEventCallback(XCB_EXPOSE, [this](Ev ev)
+            {
+                RE_CAST_EV(xcb_expose_event_t);
+                // if (e->window != this->_time_date_window) return; 
+                signal_manager->u32_map.emit(e->window, EXPOSE);
+            
             });
 
             _wifi_window.create_window(
@@ -8825,7 +8824,10 @@ class __status_bar__ {
         {
             if (__window == _time_date_window)
             {
-                _time_date_window.emit_WIN_SIG<EXPOSE>();
+                signal_manager->u32_map.conect(_time_date_window, EXPOSE, [this]()
+                {
+                    _time_date_window.draw_acc(get_time_and_date__());
+                });
                 // _time_date_window.draw(get_time_and_date__());
             }
 
@@ -11834,7 +11836,7 @@ class __dock_search__ {
                 {
                     search_string.str().clear();
                     main_window.clear();
-                    signal_manager->enum_sigs.emit<HIDE_DOCK>(main_window.parent());
+                    signal_manager->emit("HIDE_DOCK");
                 }
             });
         }
@@ -11976,13 +11978,11 @@ class __dock__ {
                 }
             });
 
-            signal_manager->enum_sigs.connect<HIDE_DOCK>(
-                [this]()
-                {
-                    hide__(dock_menu);
-                },
-                dock_menu
-            );
+            signal_manager->connect("HIDE_DOCK",
+            [this]() -> void
+            {
+                hide__(dock_menu);
+            });
         }
     
     /* Constructor */
@@ -14346,7 +14346,7 @@ class __signal_factory__ {
     public:
         void init()
         {
-            signal_manager->enum_sigs.connect<SET_EV_CALLBACK__RESIZE_NO_BORDER>(_resize_cli_no_border_ev_, SET_EV_CALLBACK__RESIZE_NO_BORDER);
+            signal_manager->connect("SET_EV_CALLBACK__RESIZE_NO_BORDER", _resize_cli_no_border_ev_);
         }
 
 };
