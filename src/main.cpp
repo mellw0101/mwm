@@ -12325,40 +12325,40 @@ class mv_client {
                         break;
                     }
 
-                    case XCB_EXPOSE:
-                    {
-                        RE_CAST_EV(xcb_expose_event_t);
-                        status_bar->expose(e->window);
-                        file_app->expose(e->window);
-                        system_settings->expose(e->window);
+                    // case XCB_EXPOSE:
+                    // {
+                    //     RE_CAST_EV(xcb_expose_event_t);
+                    //     status_bar->expose(e->window);
+                    //     file_app->expose(e->window);
+                    //     system_settings->expose(e->window);
                         
-                        client *c = wm->client_from_any_window(&e->window);
-                        if (c != nullptr)
-                        {
-                            if (e->window == c->titlebar)
-                            {
-                                c->draw_title(TITLE_INTR_DRAW);
-                            }
-                        }
+                    //     client *c = wm->client_from_any_window(&e->window);
+                    //     if (c != nullptr)
+                    //     {
+                    //         if (e->window == c->titlebar)
+                    //         {
+                    //             c->draw_title(TITLE_INTR_DRAW);
+                    //         }
+                    //     }
 
-                        break;
-                    }
+                    //     break;
+                    // }
 
-                    case XCB_PROPERTY_NOTIFY:
-                    {
-                        RE_CAST_EV(xcb_property_notify_event_t);
-                        client *c = wm->client_from_any_window(&e->window);
-                        if (c != nullptr)
-                        {
-                            if (e->atom   == ewmh->_NET_WM_NAME
-                            &&  e->window == c->win)
-                            {
-                                c->draw_title(TITLE_REQ_DRAW);
-                            }
-                        }
+                    // case XCB_PROPERTY_NOTIFY:
+                    // {
+                    //     RE_CAST_EV(xcb_property_notify_event_t);
+                    //     client *c = wm->client_from_any_window(&e->window);
+                    //     if (c != nullptr)
+                    //     {
+                    //         if (e->atom   == ewmh->_NET_WM_NAME
+                    //         &&  e->window == c->win)
+                    //         {
+                    //             c->draw_title(TITLE_REQ_DRAW);
+                    //         }
+                    //     }
 
-                        break;
-                    }
+                    //     break;
+                    // }
                 }
 
                 free(ev);
