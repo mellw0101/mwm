@@ -3700,7 +3700,6 @@ class window {
             #define CHANGE_BORDER_COLOR(__data) \
                 if (__data[0] != 0) {                                                                   \
                     change_back_pixel(get_color(__color), __data[0]);                                   \
-                    clear_window((uint32_t[5]){__data[0], __data[1], __data[2], __data[3], __data[4]}); \
                     FLUSH_X();                                                                          \
                 }
             ;
@@ -3726,6 +3725,8 @@ class window {
                 {
                     CHANGE_BORDER_COLOR(_border[3])
                 }
+
+                clear();
             }
 
             void make_xcb_borders(const int &__color)
@@ -6453,48 +6454,12 @@ class window {
             #define CREATE_LEFT_BORDER(__size, __color)  create_border_window(LEFT,  __color, 0, 0, __size, _height)
             #define CREATE_RIGHT_BORDER(__size, __color) create_border_window(RIGHT, __color, (_width - __size), 0, __size, _height)
 
-            void make_border_window(BORDER __border, const uint32_t &__size, const int &__color)
+            void make_border_window(int __border, const uint32_t &__size, const int &__color)
             {
-                switch (__border)
-                {
-                    case UP:
-                    {
-                        CREATE_UP_BORDER(__size, __color);
-                        break;
-                    }
-                    
-                    case DOWN:
-                    {
-                        CREATE_DOWN_BORDER(__size, __color);
-                        break;
-                    }
-
-                    case LEFT:
-                    {
-                        CREATE_LEFT_BORDER(__size, __color);
-                        break;
-                    }
-                    
-                    case RIGHT:
-                    {
-                        CREATE_RIGHT_BORDER(__size, __color);
-                        break;
-                    }
-                    
-                    case ALL:
-                    {
-                        CREATE_UP_BORDER(__size, __color);
-                        CREATE_DOWN_BORDER(__size, __color);
-                        CREATE_LEFT_BORDER(__size, __color);
-                        CREATE_RIGHT_BORDER(__size, __color);
-                        break;
-                    }
-                    
-                    case NONE:
-                    {
-                        break;
-                    }
-                }
+                if (__border & UP   ) CREATE_UP_BORDER(__size, __color);
+                if (__border & DOWN ) CREATE_DOWN_BORDER(__size, __color);
+                if (__border & LEFT ) CREATE_LEFT_BORDER(__size, __color);
+                if (__border & RIGHT) CREATE_RIGHT_BORDER(__size, __color);
             }
 
         /* Font       */
