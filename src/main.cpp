@@ -3301,7 +3301,7 @@ namespace { /* 'window' class Namespace */
         RIGHT = 1 << 1, /* 2  */
         UP    = 1 << 2, /* 4  */
         DOWN  = 1 << 3, /* 8  */
-        ALL   = 1 << 4  /* 16 */
+        ALL   = LEFT | RIGHT | UP | DOWN
     };
 
     enum window_flags {
@@ -3695,7 +3695,6 @@ class window {
                 if (__border_mask & DOWN ) make_border_window(DOWN,  __size, __color);
                 if (__border_mask & LEFT ) make_border_window(LEFT,  __size, __color);
                 if (__border_mask & RIGHT) make_border_window(RIGHT, __size, __color);
-                if (__border_mask == ALL ) make_border_window(ALL,   __size, __color);
             }
 
             #define CHANGE_BORDER_COLOR(__data) \
@@ -3706,17 +3705,8 @@ class window {
                 }
             ;
 
-            void change_border_color(int __color, int __border_mask = 0)
+            void change_border_color(int __color, int __border_mask = ALL)
             {
-                if (__border_mask == 0)
-                {
-                    CHANGE_BORDER_COLOR(_border[0]);
-                    CHANGE_BORDER_COLOR(_border[1]);
-                    CHANGE_BORDER_COLOR(_border[2]);
-                    CHANGE_BORDER_COLOR(_border[3]);
-                    return;
-                }
-
                 if (__border_mask & UP)
                 {
                     CHANGE_BORDER_COLOR(_border[0]);
@@ -7103,7 +7093,7 @@ class client {
             [this](uint32_t __window) -> void
             {
                 if (__window != this->close_button) return;
-                this->close_button.change_border_color(WHITE);
+                this->close_button.change_border_color(WHITE, UP | DOWN | LEFT | RIGHT);
             });
         }
     
