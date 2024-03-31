@@ -3709,24 +3709,26 @@ class window {
                 if (__border_mask & UP)
                 {
                     CHANGE_BORDER_COLOR(_border[0]);
+                    clear_window(0);
                 }
 
                 if (__border_mask & DOWN)
                 {
                     CHANGE_BORDER_COLOR(_border[1]);
+                    clear_window(1);
                 }
 
                 if (__border_mask & DOWN)
                 {
                     CHANGE_BORDER_COLOR(_border[2]);
+                    clear_window(2);
                 }
 
                 if (__border_mask & DOWN)
                 {
                     CHANGE_BORDER_COLOR(_border[3])
+                    clear_window(3);
                 }
-
-                clear();
             }
 
             void make_xcb_borders(const int &__color)
@@ -5957,16 +5959,16 @@ class window {
                 CHECK_VOID_COOKIE();
             }
 
-            void clear_window(uint32_t *__arr)
+            void clear_window(uint8_t __index)
             {
                 VOID_COOKIE = xcb_clear_area(
                     conn, 
                     0,
-                    __arr[0],
-                    __arr[1],
-                    __arr[2],
-                    __arr[3],
-                    __arr[4]
+                    _border[__index][0],
+                    0,
+                    0,
+                    _border[__index][3],
+                    _border[__index][4]
                 );
                 FLUSH_XWin();
                 CHECK_VOID_COOKIE();
