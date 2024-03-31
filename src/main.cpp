@@ -8944,16 +8944,18 @@ class __status_bar__ {
 
                 if (this->_wifi_dropdown_window.is_mapped())
                 {
-                    hide__(this->_wifi_dropdown_window);
+                    this->hide__(this->_wifi_dropdown_window);
                 }
                 else
                 {
                     if (this->_audio_dropdown_window.is_mapped())
                     {
-                        hide__(this->_audio_dropdown_window);
+                        this->hide__(this->_audio_dropdown_window);
                     }
 
                     show__(this->_wifi_dropdown_window);
+                    this->_wifi_info_window.send_event(XCB_EVENT_MASK_EXPOSURE);
+                    this->_wifi_close_window.send_event(XCB_EVENT_MASK_EXPOSURE);
                 }
             });
 
@@ -9001,22 +9003,24 @@ class __status_bar__ {
                 this->_audio_window.draw("Audio");
             });
 
+            this->_audio_window.send_event(XCB_EVENT_MASK_EXPOSURE);
+
             WS_conn(this->_audio_window, L_MOUSE_BUTTON_EVENT, W_callback
             {
                 if (__window != this->_audio_window) return;
 
-                if (_audio_dropdown_window.is_mapped())
+                if (this->_audio_dropdown_window.is_mapped())
                 {
-                    hide__(_audio_dropdown_window);
+                    this->hide__(this->_audio_dropdown_window);
                 }
                 else
                 {
-                    if (_wifi_dropdown_window.is_mapped())
+                    if (this->_wifi_dropdown_window.is_mapped())
                     {
-                        hide__(_wifi_dropdown_window);
+                        this->hide__(this->_wifi_dropdown_window);
                     }
 
-                    show__(_audio_dropdown_window);
+                    this->show__(this->_audio_dropdown_window);
                 }
             });
 
@@ -9074,6 +9078,8 @@ class __status_bar__ {
                     this->_wifi_close_window.draw_acc("Close");
                 });
 
+                this->_wifi_close_window.send_event(XCB_EVENT_MASK_EXPOSURE);
+
                 WS_conn(this->_wifi_close_window, ENTER_NOTIFY, W_callback
                 {
                     if (__window != this->_wifi_close_window) return;
@@ -9106,6 +9112,8 @@ class __status_bar__ {
                     string local_interface("interface: " + network->get_local_ip_info(__network__::INTERFACE_FOR_LOCAL_IP));
                     this->_wifi_info_window.draw_text_auto_color(local_interface.c_str(), 4, 30, BLACK);
                 });
+
+                this->_wifi_info_window.send_event(XCB_EVENT_MASK_EXPOSURE);
             }
             
             if (__window == _audio_dropdown_window)
