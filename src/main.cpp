@@ -143,6 +143,11 @@ using namespace std;
     XCB_EVENT_MASK_BUTTON_PRESS          | \
     XCB_EVENT_MASK_FOCUS_CHANGE 
 
+#define GC_MASK \
+    XCB_GC_FOREGROUND         |\
+    XCB_GC_BACKGROUND         |\
+    XCB_GC_GRAPHICS_EXPOSURES
+
 /**
  *
  * @brief General purpose definition to reinterpret cast.
@@ -2662,6 +2667,9 @@ class __event_handler__ {
                 continue;                                       \
             }
 
+        #define MAKE_HANDLE_THREAD(__event_type) \
+            thread(handleEvent<__event_type>, (__event_type*)ev).detach()
+
     public:
     /* Methods   */
         using EventCallback = function<void(Ev)>;
@@ -2752,6 +2760,12 @@ class __event_handler__ {
             }
         }
 
+        template<>
+        void handleEvent(xcb_enter_notify_event_t *e)
+        {
+            signal_manager->_window_signals.emit(e->event, ENTER_NOTIFY);
+        }
+
         // Function that creates a separate thread for each event type
         void processEvent(xcb_generic_event_t* ev)
         {
@@ -2778,6 +2792,20 @@ class __event_handler__ {
                 XCB_PROPERTY_NOTIFY:
                 {
                     thread(handleEvent<xcb_property_notify_event_t>, (xcb_property_notify_event_t*)ev).detach();
+                    break;
+                }
+
+                case
+                XCB_ENTER_NOTIFY:
+                {
+                    MAKE_HANDLE_THREAD(xcb_enter_notify_event_t);
+                    break;
+                }
+
+                case
+                XCB_LEAVE_NOTIFY:
+                {
+                    MAKE_HANDLE_THREAD(xcb_leave_notify_event_t);
                     break;
                 }
             }
@@ -3305,11 +3333,20 @@ class window {
             return *this;
         }
 
-        // int id; // Example identifier for hashing and equality checks
-        // bool operator==(const window& other) const
-        // {
-        //     return id == other.id;
-        // }
+        window& operator=(const window &other)
+        {
+            if (this != &other)
+            {
+                // Copy each member from 'other' to 'this'
+            }
+
+            return *this;
+        }
+
+        bool operator==(const window& other) const
+        {
+            return _window == other._window;
+        }
     
     /* Methods     */
         /* Create        */
@@ -5190,7 +5227,7 @@ class window {
                 xcb_poly_fill_rectangle(
                     conn, 
                     pixmap, 
-                    gc, 
+                    _gc, 
                     1, 
                     &rect
                 );
@@ -5206,25 +5243,32 @@ class window {
                     y = (_height - newHeight) / 2;
                 }
                 
-                xcb_image_put( // Put the scaled image onto the pixmap at the calculated position
+                // Put the scaled image onto the pixmap at the calculated position
+                VOID_COOKIE; 
+
+                cookie = xcb_image_put(
                     conn, 
                     pixmap, 
-                    gc, 
+                    _gc,
                     xcb_image, 
                     x,
                     y, 
                     0
                 );
+                CHECK_VOID_COOKIE();
 
-                xcb_change_window_attributes( // Set the pixmap as the background of the window
+                cookie = xcb_change_window_attributes( // Set the pixmap as the background of the window
                     conn,
                     _window,
                     XCB_CW_BACK_PIXMAP,
                     &pixmap
                 );
+                CHECK_VOID_COOKIE();
 
                 // Cleanup
-                xcb_free_gc(conn, gc); // Free the GC
+                cookie = xcb_free_gc(conn, _gc); // Free the GC
+                CHECK_VOID_COOKIE();
+
                 xcb_image_destroy(xcb_image);
                 imlib_free_image(); // Free scaled image
 
@@ -5284,7 +5328,7 @@ class window {
                 xcb_poly_fill_rectangle(
                     conn, 
                     pixmap, 
-                    gc, 
+                    _gc, 
                     1, 
                     &rect
                 );
@@ -5303,7 +5347,7 @@ class window {
                 xcb_image_put( // Put the scaled image onto the pixmap at the calculated position
                     conn, 
                     pixmap, 
-                    gc, 
+                    _gc,
                     xcb_image, 
                     x,
                     y, 
@@ -5318,7 +5362,7 @@ class window {
                 );
 
                 // Cleanup
-                xcb_free_gc(conn, gc); // Free the GC
+                xcb_free_gc(conn, _gc); // Free the GC
                 xcb_image_destroy(xcb_image);
                 imlib_free_image(); // Free scaled image
 
@@ -5701,7 +5745,7 @@ class window {
             uint32_t       _value_mask;
             const void    *_value_list;
         
-        xcb_gcontext_t gc;
+        uint32_t _gc;
         xcb_gcontext_t font_gc;
         xcb_font_t     font;
         xcb_pixmap_t   pixmap;
@@ -5714,6 +5758,7 @@ class window {
         pid_t    _pid = 0;
 
         __window_ev_id_handler__ window_ev_id_handler;
+        mutex _mtx;
 
         // vector<pair<uint8_t, int>> _event_vec;
         // any      _storedValue;
@@ -5784,38 +5829,41 @@ class window {
             {
                 if (values.empty())
                 {
-                    log_error("values vector is empty");
+                    loutEWin << "values vector is empty" << loutEND;
                     return;
                 }
 
-                xcb_configure_window(
+                VOID_COOKIE = xcb_configure_window(
                     conn,
                     _window,
                     mask,
                     values.data()
                 );
+                FLUSH_XWin();
+                CHECK_VOID_COOKIE();
             }
 
         /* Create     */
             /* Gc     */
                 void create_graphics_exposure_gc()
                 {
-                    gc = xcb_generate_id(conn);
-                    uint32_t mask = XCB_GC_FOREGROUND | XCB_GC_BACKGROUND | XCB_GC_GRAPHICS_EXPOSURES;
-                    uint32_t values[3] = {
-                        screen->black_pixel,
-                        screen->white_pixel,
-                        0
-                    };
+                    _gc = xcb_generate_id(conn);
+                    // uint32_t mask = XCB_GC_FOREGROUND | XCB_GC_BACKGROUND | XCB_GC_GRAPHICS_EXPOSURES;
 
-                    xcb_create_gc(
+                    VOID_COOKIE = xcb_create_gc(
                         conn,
-                        gc,
+                        _gc,
                         _window,
-                        mask,
-                        values
+                        GC_MASK,
+                        (uint32_t[3])
+                        {
+                            screen->black_pixel,
+                            screen->white_pixel,
+                            0
+                        }
                     );
-                    xcb_flush(conn);
+                    FLUSH_XWin();
+                    CHECK_VOID_COOKIE();
                 }
             
                 void create_font_gc(const int & text_color, const int & backround_color, xcb_font_t font)
@@ -6409,48 +6457,48 @@ class client {
                 border.bottom_left.unmap();
                 border.bottom_right.unmap();
 
-                vector<window> window_vec = {
-                    win,
-                    close_button,
-                    max_button,
-                    min_button,
-                    titlebar,
-                    border.left,
-                    border.right,
-                    border.top,
-                    border.bottom,
-                    border.top_left,
-                    border.top_right,
-                    border.bottom_left,
-                    border.bottom_right,
-                    frame
-                };
-                vector<thread> threads;
+                // vector<window> window_vec = {
+                //     win,
+                //     close_button,
+                //     max_button,
+                //     min_button,
+                //     titlebar,
+                //     border.left,
+                //     border.right,
+                //     border.top,
+                //     border.bottom,
+                //     border.top_left,
+                //     border.top_right,
+                //     border.bottom_left,
+                //     border.bottom_right,
+                //     frame
+                // };
+                // vector<thread> threads;
 
-                for (auto &window : window_vec)
-                {
-                    threads.emplace_back([&]() -> void { window.kill(); });
-                }
+                // for (auto &window : window_vec)
+                // {
+                //     threads.emplace_back([&]() -> void { window.kill(); });
+                // }
 
-                for (auto &t : threads)
-                {
-                    t.join();   
-                }
+                // for (auto &t : threads)
+                // {
+                //     t.join();   
+                // }
 
-                // win.kill();
-                // close_button.kill();
-                // max_button.kill();
-                // min_button.kill();
-                // titlebar.kill();
-                // border.left.kill();
-                // border.right.kill();
-                // border.top.kill();
-                // border.bottom.kill();
-                // border.top_left.kill();
-                // border.top_right.kill();
-                // border.bottom_left.kill();
-                // border.bottom_right.kill();
-                // frame.kill();
+                win.kill();
+                close_button.kill();
+                max_button.kill();
+                min_button.kill();
+                titlebar.kill();
+                border.left.kill();
+                border.right.kill();
+                border.top.kill();
+                border.bottom.kill();
+                border.top_left.kill();
+                border.top_right.kill();
+                border.bottom_left.kill();
+                border.bottom_right.kill();
+                frame.kill();
             }
 
             template<typename Callback>
@@ -7218,28 +7266,13 @@ class context_menu {
     // Methods.
         void init()
         {
-            // event_handler->setEventCallback(EV_CALL(XCB_BUTTON_PRESS)
-            // {
-            //     RE_CAST_EV(xcb_button_press_event_t);
-            //     if (e->detail == L_MOUSE_BUTTON)
-            //     {
-            //         for (int i = 0; i < entries.size(); ++i)
-            //         {
-            //             if (e->event == entries[i].window)
-            //             {
-            //                 signal_manager->_window_signals.emit(entries[i].window, L_MOUSE_BUTTON_EVENT);
-            //             }
-            //         }
-
-            //         hide__();
-            //     }
-            // });
             signal_manager->_window_signals.conect(screen->root, L_MOUSE_BUTTON_EVENT,
             [this](uint32_t __window) -> void
             {
-                if (__window != screen->root) return;
-                
-                this->hide__();
+                if (__window == screen->root)
+                {
+                    this->hide__();
+                }
             });
 
             event_handler->setEventCallback(EV_CALL(XCB_ENTER_NOTIFY)
@@ -7303,19 +7336,6 @@ class context_menu {
             context_window.raise();
             make_entries__();
         }
-
-        /**
-            void expose(uint32_t __window)
-            {
-                for (int i = 0; i < entries.size(); ++i)
-                {
-                    if (__window == entries[i].window)
-                    {
-                        entries[i].window.draw_acc(entries[i].name);
-                    }
-                }
-            }
-        **/
 
         void add_entry(string name, function<void()> action)
         {
@@ -7804,7 +7824,7 @@ class Window_Manager {
                 c->win.grab_default_keys();
             }
 
-            client *make_internal_client(window window)
+            client *make_internal_client(window &window)
             {
                 client *c = new client;
 

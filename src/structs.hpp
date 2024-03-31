@@ -19,11 +19,11 @@ enum EV {
     REMOVE_ALL                        = 0,
     EXPOSE                            = XCB_EXPOSE,
     EXPOSE_REQ                        = 40,
+    ENTER_NOTIFY                      = XCB_ENTER_NOTIFY,
     LEAVE_NOTIFY                      = XCB_LEAVE_NOTIFY,
-    ENTER_NOTIFY                      = 41,
     L_MOUSE_BUTTON_EVENT              = 36,
     CLIENT_RESIZE                     = 42,
-    KILL_SIGNAL                       = 39
+    KILL_SIGNAL                       = 39,
 };
 
 typedef enum {
