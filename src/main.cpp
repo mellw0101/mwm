@@ -956,6 +956,12 @@ class __signal_manager__ {
         #define W_callback \
             [this](uint32_t __window)
 
+        #define CONN_Win(__window, __event, __callback) \
+            signal_manager->_window_signals.conect(this->__window, __event, W_callback {__callback})
+
+        #define CONNECT_window_client(__window, __c) signal_manager->_window_client_map.connect(__window, __c)
+        #define CWC(__window) CONNECT_window_client(this->__window, this)
+
     private:
     /* Variabels */
         unordered_map<string, vector<function<void()>>> signals;
@@ -2840,45 +2846,10 @@ class __event_handler__ {
 
         std::mutex event_mutex;
 
-        // Template function to handle specific events
-        template <typename EventType>
-        static void handleEvent(EventType* e);
-
-        template<>
-        void handleEvent(xcb_button_press_event_t *e)
-        {
-            if (e->detail == L_MOUSE_BUTTON)
-            {
-                signal_manager->_window_signals.emit(e->event, L_MOUSE_BUTTON_EVENT);
-                FLUSH_X();
-            }
-        }
-
-        template<>
-        void handleEvent(xcb_expose_event_t *e)
-        {
-            signal_manager->_window_signals.emit(e->window, EXPOSE);
-            FLUSH_X();
-        }
-
-        template<>
-        void handleEvent(xcb_property_notify_event_t *e)
-        {
-            if (e->atom == ewmh->_NET_WM_NAME)
-            {
-                signal_manager->_window_signals.emit(e->window, EXPOSE_REQ);
-            }
-        }
-
-        template<>
-        void handleEvent(xcb_enter_notify_event_t *e)
-        {
-            signal_manager->_window_signals.emit(e->event, ENTER_NOTIFY);
-        }
-
-
         template<uint8_t __event_id> static void handle_event(uint32_t __window) { WS_emit(__window, __event_id); }
         #define HANDLE_EVENT(__type) thread(handle_event<__type>, e->event).detach()
+        #define HANDLE_WINDOW(__type) thread(handle_event<__type>, e->window).detach()
+        
 
         // Function that creates a separate thread for each event type
         void processEvent(xcb_generic_event_t* ev)
@@ -2907,13 +2878,15 @@ class __event_handler__ {
 
                 case XCB_EXPOSE:
                 {
-                    thread(handleEvent<xcb_expose_event_t>, (xcb_expose_event_t*)ev).detach();
+                    RE_CAST_EV(xcb_expose_event_t);
+                    HANDLE_WINDOW(EXPOSE);
                     break;
                 }
 
                 case XCB_PROPERTY_NOTIFY:
                 {
-                    thread(handleEvent<xcb_property_notify_event_t>, (xcb_property_notify_event_t*)ev).detach();
+                    RE_CAST_EV(xcb_property_notify_event_t);
+                    HANDLE_WINDOW(PROPERTY_NOTIFY);
                     break;
                 }
 
@@ -2941,15 +2914,6 @@ class __event_handler__ {
         }
 
         using CallbackId = int;
-
-        // CallbackId setEventCallback(uint8_t eventType, EventCallback callback)
-        // {
-        //     CallbackId id = nextCallbackId++;
-        //     eventCallbacks[eventType].emplace_back(id, std::move(callback));
-        //     // loutI << "Cur id" << id << " " << EVENT_TYPE(eventType) << " vecsize" << eventCallbacks[eventType].size() << " vec_capacity" << eventCallbacks[eventType].capacity() << loutEND;
-        //     // check_and_adjust_vec_capacity(eventType);
-        //     return id;
-        // }
 
         template<typename Callback>
         CallbackId setEventCallback(uint8_t eventType, Callback&& callback)
@@ -3666,38 +3630,22 @@ class window {
                 if (__border_mask & RIGHT) make_border_window(RIGHT, __size, __color);
             }
 
-            #define CHANGE_BORDER_COLOR(__data) \
-                if (__data[0] != 0) {                                                                   \
-                    change_back_pixel(get_color(__color), __data[0]);                                   \
-                    FLUSH_X();                                                                          \
+            #define CHANGE_BORDER_COLOR(__window) \
+                if (__window != 0)                                   \
+                {                                                    \
+                    change_back_pixel(get_color(__color), __window); \
+                    FLUSH_X();                                       \
+                    clear_window(__window);                          \
+                    FLUSH_X();                                       \
                 }
             ;
 
             void change_border_color(int __color, int __border_mask = ALL)
             {
-                if (__border_mask & UP)
-                {
-                    CHANGE_BORDER_COLOR(_border[0]);
-                    clear_window(0);
-                }
-
-                if (__border_mask & DOWN)
-                {
-                    CHANGE_BORDER_COLOR(_border[1]);
-                    clear_window(1);
-                }
-
-                if (__border_mask & DOWN)
-                {
-                    CHANGE_BORDER_COLOR(_border[2]);
-                    clear_window(2);
-                }
-
-                if (__border_mask & DOWN)
-                {
-                    CHANGE_BORDER_COLOR(_border[3])
-                    clear_window(3);
-                }
+                if (__border_mask & UP   ) CHANGE_BORDER_COLOR(_border[0]);
+                if (__border_mask & DOWN ) CHANGE_BORDER_COLOR(_border[1]);
+                if (__border_mask & LEFT ) CHANGE_BORDER_COLOR(_border[2]);
+                if (__border_mask & RIGHT) CHANGE_BORDER_COLOR(_border[3]);
             }
 
             void make_xcb_borders(const int &__color)
@@ -3929,160 +3877,6 @@ class window {
             {
                 signal_manager->_window_signals.emit(this->_window, __signal_id);
             }
-
-        /* Event         */
-            // template<typename Callback>
-            // void on_expose_event(Callback&& callback)
-            // {
-            //     // EV_ID = event_handler->setEventCallback(XCB_EXPOSE, [this, callback](Ev ev)
-            //     // {
-            //     //     RE_CAST_EV(xcb_expose_event_t);
-            //     //     if (e->window == _window)
-            //     //     {
-            //     //         callback();
-            //     //     }
-            //     // });
-            //     // ADD_EV_ID_IWIN(XCB_EXPOSE);
-            // }
-
-            // template<EV __signal_id> void
-            // enable_on()
-            // {
-            //     constexpr int signal_id = __signal_id;
-                
-            //     switch
-            //     (signal_id)
-            //     {
-            //         case
-            //         EXPOSE:
-            //         {
-            //             event_handler->emit_on(this->_window, EXPOSE);
-            //         }
-
-            //         case
-            //         KILL_SIGNAL:
-            //         {
-            //             event_handler->emit_on(this->_window, KILL_SIGNAL);
-            //         }
-
-            //         case
-            //         L_MOUSE_BUTTON_EVENT:
-            //         {
-            //             event_handler->emit_on(this->_window, L_MOUSE_BUTTON_EVENT);
-            //         }
-            //     }
-            // }
-
-            // template<EV ev, typename Callback> void
-            // on_ev(Callback &&callback, int __mode = 0)
-            // {
-            //     if constexpr (ev == EXPOSE)
-            //     {
-            //         if (__mode == 0) this->setup_WIN_SIG(EXPOSE, callback);
-
-            //         EV_ID = event_handler->emit_on(this->_window, EXPOSE);
-            //         ADD_EV_ID_IWIN(XCB_EXPOSE);
-            //         return;
-            //     }
-
-            //     if constexpr (ev == L_MOUSE_BUTTON_EVENT)
-            //     {
-                    
-            //         if (__mode == 0) signal_manager->u32_map.conect(this->_window, callback);
-
-            //         EV_ID = event_handler->emit_on(this->_window, L_MOUSE_BUTTON_EVENT);
-            //         ADD_EV_ID_IWIN(XCB_BUTTON_PRESS);
-            //     }
-            // }
-
-            // template<typename Callback>
-            // void on_button_press_event(Callback&& callback, bool __add_ev_id = true)
-            // {
-            //     if (__add_ev_id)
-            //     {
-            //         EV_ID = event_handler->setEventCallback(XCB_BUTTON_PRESS, [this, callback](Ev ev)
-            //         {
-            //             RE_CAST_EV(xcb_button_press_event_t);
-            //             if (e->event == _window)
-            //             {
-            //                 callback();
-            //             }
-            //         });
-            //         ADD_EV_ID_IWIN(XCB_BUTTON_PRESS);
-            //     }
-            //     else
-            //     {
-            //         event_handler->setEventCallback(XCB_BUTTON_PRESS, [this, callback](Ev ev)
-            //         {
-            //             RE_CAST_EV(xcb_button_press_event_t);
-            //             if (e->event == _window)
-            //             {
-            //                 callback();
-            //             }
-            //         });
-            //     }
-            // }
-
-            // void emit_signal_on_ev(int __type)
-            // {
-            //     switch (__type)
-            //     {
-            //         case EXPOSE:
-            //         {
-            //             EV_ID = event_handler->setEventCallback(XCB_EXPOSE, [this](Ev ev) -> void
-            //             {
-            //                 RE_CAST_EV(xcb_expose_event_t);
-            //                 if (e->window == this->_window)
-            //                 {
-            //                     signal_manager->u32_map.emit(this->_window, EXPOSE);
-            //                 }
-            //             });
-            //             ADD_EV_ID_IWIN(XCB_EXPOSE);
-            //         }
-
-            //         case L_MOUSE_BUTTON_EVENT:
-            //         {
-            //             EV_ID = event_handler->setEventCallback(EV_CALL(XCB_BUTTON_PRESS)
-            //             {
-            //                 RE_CAST_EV(xcb_button_press_event_t);
-            //                 if (e->event == _window)
-            //                 {
-            //                     if (e->detail == L_MOUSE_BUTTON)
-            //                     {
-            //                         signal_manager->u32_map.emit(this->_window, L_MOUSE_BUTTON_EVENT);
-            //                     }
-            //                 }
-            //             });
-            //             ADD_EV_ID_IWIN(XCB_BUTTON_PRESS);
-            //         }
-            //     }
-            // }
-
-            // template<typename Callback>
-            // void on_L_MOUSE_BUTTON_PRESS_event(Callback&& callback)
-            // {
-            //     EV_ID = event_handler->setEventCallback(EV_CALL(XCB_BUTTON_PRESS)
-            //     {
-            //         RE_CAST_EV(xcb_button_press_event_t);
-            //         if (e->event == _window)
-            //         {
-            //             if (e->detail == L_MOUSE_BUTTON)
-            //             {
-            //                 callback();
-            //             }
-            //         }
-            //     });
-            //     ADD_EV_ID_IWIN(XCB_BUTTON_PRESS);
-            // }
-
-            // template<typename Callback>
-            // void add_event_id(int __event_id, Callback &&__callback)
-            // {
-            //     signal_manager->_window_signals.conect(_window, __event_id, [this](uint32_t __window)
-            //     {
-            //         if (__window != this->_window) return;
-            //     });
-            // }
 
         /* Experimental  */
             // template<typename Type>
@@ -5665,14 +5459,6 @@ class window {
                 CHECK_VOID_COOKIE();
             }
 
-            // void draw_on_expose_event(const char *str , const int &text_color, const int &backround_color, const char *font_name, const int16_t &x, const int16_t &y)
-            // {
-            //     on_expose_event([this, str, text_color, backround_color, font_name, x, y]()-> void
-            //     {
-            //         draw_text(str, text_color, backround_color, font_name, x, y);
-            //     });
-            // }
-
         /* Keys          */
             void grab_default_keys()
             {
@@ -5872,22 +5658,7 @@ class window {
         uint8_t  _override_redirect = 0;
         pid_t    _pid = 0;
 
-        // __window_ev_id_handler__ window_ev_id_handler;
-
-        // typedef struct __border__ {
-        
-
-        // } border_t;
-
-        Array<Array<uint32_t, 5>, 4> _border;
-
-        // border_t _border;
-        // mutex _mtx;
-
-        // vector<pair<uint8_t, int>> _event_vec;
-        // any      _storedValue;
-        // any      _action;
-        // function<void()> _func;
+        Array<uint32_t, 4> _border;
 
     /* Methods     */
         /* Main       */
@@ -5932,16 +5703,16 @@ class window {
                 CHECK_VOID_COOKIE();
             }
 
-            void clear_window(uint8_t __index)
+            void clear_window(uint32_t __window)
             {
                 VOID_COOKIE = xcb_clear_area(
                     conn, 
                     0,
-                    _border[__index][0],
+                    __window,
                     0,
                     0,
-                    _border[__index][3],
-                    _border[__index][4]
+                    20,
+                    20
                 );
                 FLUSH_XWin();
                 CHECK_VOID_COOKIE();
@@ -6387,41 +6158,10 @@ class window {
                 FLUSH_XWin();
                 CHECK_VOID_COOKIE();
 
-                if (__border == UP)
-                {
-                    _border[0][0] = window;
-                    _border[0][1] = __x;
-                    _border[0][2] = __y;
-                    _border[0][3] = __width;
-                    _border[0][4] = __height;
-                }
-
-                if (__border == DOWN)
-                {
-                    _border[1][0] = window;
-                    _border[1][1] = __x;
-                    _border[1][2] = __y;
-                    _border[1][3] = __width;
-                    _border[1][4] = __height;
-                }
-
-                if (__border == LEFT)
-                {
-                    _border[2][0] = window;
-                    _border[2][1] = __x;
-                    _border[2][2] = __y;
-                    _border[2][3] = __width;
-                    _border[2][4] = __height;
-                }
-
-                if (__border == RIGHT)
-                {
-                    _border[3][0] = window;
-                    _border[3][1] = __x;
-                    _border[3][2] = __y;
-                    _border[3][3] = __width;
-                    _border[3][4] = __height;
-                }
+                if (__border == UP   ) _border[0] = window;
+                if (__border == DOWN ) _border[1] = window;
+                if (__border == LEFT ) _border[2] = window;
+                if (__border == RIGHT) _border[3] = window;
             }
 
             #define CREATE_UP_BORDER(__size, __color)    create_border_window(UP,    __color, 0, 0, _width, __size)
@@ -6962,47 +6702,53 @@ class client {
             win.reparent(frame, BORDER_SIZE, (TITLE_BAR_HEIGHT + BORDER_SIZE));
             frame.apply_event_mask({XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY});
             frame.map();
-            signal_manager->_window_client_map.connect(this->win, this);
-            signal_manager->_window_client_map.connect(this->frame, this);
+            CWC(win);
+            CWC(frame);
         }
     
         void make_titlebar()
         {
-            titlebar.create_window(
-                frame,
+            this->titlebar.create_window(
+
+                this->frame,
                 BORDER_SIZE + (BUTTON_SIZE * 3),
                 BORDER_SIZE,
-                (width - (BORDER_SIZE * 2)) - (BUTTON_SIZE * 6) ,
+                (this->width - (BORDER_SIZE * 2)) - (BUTTON_SIZE * 6),
                 TITLE_BAR_HEIGHT,
                 BLACK,
                 XCB_EVENT_MASK_EXPOSURE,
                 MAP
+
             );
-            signal_manager->_window_client_map.connect(titlebar, this);
-            titlebar.grab_button({ { L_MOUSE_BUTTON, NULL } });
+            CWC(titlebar);
+
+            this->titlebar.grab_button({ { L_MOUSE_BUTTON, NULL } });
             draw_title(TITLE_REQ_DRAW);
             icon.raise();
 
-            signal_manager->_window_signals.conect(titlebar, EXPOSE,
-            [this](uint32_t __window) -> void
-            {
+            CONN_Win(titlebar, EXPOSE,
+
+                if (__window != this->titlebar) return;
                 this->titlebar.clear();
                 this->titlebar.draw_acc_16(this->win.get_net_wm_name());
                 FLUSH_X();
-            });
 
-            signal_manager->_window_signals.conect(this->win, EXPOSE_REQ,
-            [this](uint32_t __window) -> void
-            {
+            );
+
+            CONN_Win(win, PROPERTY_NOTIFY,
+            
+                if (__window != this->win) return;
                 this->titlebar.clear();
                 this->titlebar.draw_acc_16(this->win.get_net_wm_name_by_req());
                 FLUSH_X();
-            });
+
+            );
         }
     
         void make_close_button()
         {
             this->close_button.create_window(
+
                 frame,
                 (width - BUTTON_SIZE + BORDER_SIZE),
                 BORDER_SIZE,
@@ -7013,41 +6759,40 @@ class client {
                 MAP,
                 (int[]){ALL, 1, BLACK},
                 CURSOR::hand2
-            );
-            signal_manager->_window_client_map.connect(this->close_button, this);
 
+            );
+            CWC(close_button);
             close_button.make_then_set_png(USER_PATH_PREFIX("/close.png"), CLOSE_BUTTON_BITMAP);
+            CONN_Win(close_button, L_MOUSE_BUTTON_EVENT,
             
-            signal_manager->_window_signals.conect(this->close_button, L_MOUSE_BUTTON_EVENT,
-            [this](uint32_t __window) -> void
-            {
-                if (!win.is_mapped())
+                if (__window != this->close_button) return;
+
+                if (!this->win.is_mapped())
                 {
-                    kill();
+                    this->kill();
                 }
 
-                win.kill();
-            });
-
-            signal_manager->_window_signals.conect(this->close_button, ENTER_NOTIFY,
-            [this](uint32_t __window) -> void
-            {
+                this->win.kill();
+            
+            );
+            CONN_Win(close_button, ENTER_NOTIFY,
+            
                 if (__window != this->close_button) return;
                 this->close_button.change_border_color(WHITE);
-            });
+            
+            );
+            CONN_Win(close_button, LEAVE_NOTIFY,
 
-            signal_manager->_window_signals.conect(this->close_button, LEAVE_NOTIFY,
-            [this](uint32_t __window) -> void
-            {
                 if (__window != this->close_button) return;
                 this->close_button.change_border_color(BLACK);
-            });
+
+            );
         }
     
         void make_max_button()
         {
             max_button.create_default(frame, (width - (BUTTON_SIZE * 2) + BORDER_SIZE), BORDER_SIZE, BUTTON_SIZE, BUTTON_SIZE);
-            signal_manager->_window_client_map.connect(this->max_button, this);
+            CWC(max_button);
             max_button.set_backround_color(RED);
             max_button.apply_event_mask({XCB_EVENT_MASK_ENTER_WINDOW, XCB_EVENT_MASK_LEAVE_WINDOW});
             max_button.grab_button({ { L_MOUSE_BUTTON, NULL } });
@@ -7085,7 +6830,7 @@ class client {
         void make_min_button()
         {
             min_button.create_default(frame, (width - (BUTTON_SIZE * 3) + BORDER_SIZE), BORDER_SIZE, BUTTON_SIZE, BUTTON_SIZE);
-            signal_manager->_window_client_map.connect(this->min_button, this);
+            CWC(min_button);
             min_button.set_backround_color(GREEN);
             min_button.apply_event_mask({XCB_EVENT_MASK_ENTER_WINDOW, XCB_EVENT_MASK_LEAVE_WINDOW});
             min_button.grab_button({ { L_MOUSE_BUTTON, NULL } });
@@ -7103,56 +6848,56 @@ class client {
         void make_borders()
         {
             border.left.create_default(frame, 0, BORDER_SIZE, BORDER_SIZE, (height + TITLE_BAR_HEIGHT));
-            signal_manager->_window_client_map.connect(this->border.left, this);
+            CWC(border.left);
             border.left.set_backround_color(BLACK);
             border.left.set_pointer(CURSOR::left_side);
             border.left.grab_button({ { L_MOUSE_BUTTON, NULL } });
             border.left.map();
 
             border.right.create_default(frame, (width + BORDER_SIZE), BORDER_SIZE, BORDER_SIZE, (height + TITLE_BAR_HEIGHT));
-            signal_manager->_window_client_map.connect(this->border.right, this);
+            CWC(border.right);
             border.right.set_backround_color(BLACK);
             border.right.set_pointer(CURSOR::right_side);
             border.right.grab_button({ { L_MOUSE_BUTTON, NULL } });
             border.right.map();
 
             border.top.create_default(frame, BORDER_SIZE, 0, width, BORDER_SIZE);
-            signal_manager->_window_client_map.connect(this->border.top, this);
+            CWC(border.top);
             border.top.set_backround_color(BLACK);
             border.top.set_pointer(CURSOR::top_side);
             border.top.grab_button({ { L_MOUSE_BUTTON, NULL } });
             border.top.map();
 
             border.bottom.create_default(frame, BORDER_SIZE, (height + TITLE_BAR_HEIGHT + BORDER_SIZE), width, BORDER_SIZE);
-            signal_manager->_window_client_map.connect(this->border.bottom, this);
+            CWC(border.bottom);
             border.bottom.set_backround_color(BLACK);
             border.bottom.set_pointer(CURSOR::bottom_side);
             border.bottom.grab_button({ { L_MOUSE_BUTTON, NULL } });
             border.bottom.map();
 
             border.top_left.create_default(frame, 0, 0, BORDER_SIZE, BORDER_SIZE);
-            signal_manager->_window_client_map.connect(this->border.top_left, this);
+            CWC(border.top_left);
             border.top_left.set_backround_color(BLACK);
             border.top_left.set_pointer(CURSOR::top_left_corner);
             border.top_left.grab_button({ { L_MOUSE_BUTTON, NULL } });
             border.top_left.map();
 
             border.top_right.create_default(frame, (width + BORDER_SIZE), 0, BORDER_SIZE, BORDER_SIZE);
-            signal_manager->_window_client_map.connect(this->border.top_right, this);
+            CWC(border.top_right);
             border.top_right.set_backround_color(BLACK);
             border.top_right.set_pointer(CURSOR::top_right_corner);
             border.top_right.grab_button({ { L_MOUSE_BUTTON, NULL } });
             border.top_right.map();
 
             border.bottom_left.create_default(frame, 0, (height + TITLE_BAR_HEIGHT + BORDER_SIZE), BORDER_SIZE, BORDER_SIZE);
-            signal_manager->_window_client_map.connect(this->border.bottom_left, this);
+            CWC(border.bottom_left);
             border.bottom_left.set_backround_color(BLACK);
             border.bottom_left.set_pointer(CURSOR::bottom_left_corner);
             border.bottom_left.grab_button({ { L_MOUSE_BUTTON, NULL } });
             border.bottom_left.map();
         
             border.bottom_right.create_default(frame, (width + BORDER_SIZE), (height + TITLE_BAR_HEIGHT + BORDER_SIZE), BORDER_SIZE, BORDER_SIZE);
-            signal_manager->_window_client_map.connect(this->border.bottom_right, this);
+            CWC(border.bottom_right);
             border.bottom_right.set_backround_color(BLACK);
             border.bottom_right.set_pointer(CURSOR::bottom_right_corner);
             border.bottom_right.grab_button({ { L_MOUSE_BUTTON, NULL } });
@@ -7162,6 +6907,7 @@ class client {
         void set_icon_png()
         {
             icon.create_window(
+
                 frame,
                 BORDER_SIZE,
                 BORDER_SIZE,
@@ -7170,11 +6916,12 @@ class client {
                 BLACK,
                 NONE,
                 MAP
-            );
-            signal_manager->_window_client_map.connect(this->icon, this);
 
-            win.make_png_from_icon();
-            icon.set_backround_png(PNG_HASH(win.get_icccm_class()));
+            );
+            CWC(icon);
+
+            this->win.make_png_from_icon();
+            this->icon.set_backround_png(PNG_HASH(this->win.get_icccm_class()));
         }
     
     /* Variables   */

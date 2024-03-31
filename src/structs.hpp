@@ -75,6 +75,48 @@ struct __data_array_t__ {
         return Size;
     }
 
+    constexpr void add(T1 &__input)
+    {
+        this->_data[_index] = __input;
+        this->_index++;
+    }
+
+    constexpr __data_array_t__<T1, Size> &operator=(const __data_array_t__<T1, Size> &__other)
+    {
+        if (this != &__other)
+        {
+            for (size_t i = 0; i < Size; ++i)
+            {
+                _data[i] = __other._data[i];
+            }
+        }
+
+        return *this;
+    }
+
+    constexpr __data_array_t__<T1, Size> (const __data_array_t__<T1, Size> &__other)
+    {
+        if (this != &__other)
+        {
+            for (size_t i = 0; i < Size; ++i)
+            {
+                this->_data[i] = __other._data[i];
+            }
+        }
+
+        return *this;
+    }
+
+    constexpr T1 &operator=(T1 others[Size])
+    {
+        _data = others;
+    }
+
+    constexpr T1 &operator=(T1 &other)
+    {
+
+    }
+
     /* Methods */
         constexpr void clear_arr()
         {
@@ -215,7 +257,6 @@ enum
 enum EV : uint8_t {
     REMOVE_ALL                        = 0,
     EXPOSE                            = XCB_EXPOSE,
-    EXPOSE_REQ                        = 40,
     ENTER_NOTIFY                      = XCB_ENTER_NOTIFY,
     LEAVE_NOTIFY                      = XCB_LEAVE_NOTIFY,
     L_MOUSE_BUTTON_EVENT              = 36,
