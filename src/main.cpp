@@ -7062,6 +7062,13 @@ class client {
                 if (__window != this->close_button) return;
                 this->close_button.change_border_color(WHITE);
             });
+
+            signal_manager->_window_signals.conect(this->close_button, LEAVE_NOTIFY,
+            [this](uint32_t __window) -> void
+            {
+                if (__window != this->close_button) return;
+                this->close_button.change_border_color(BLACK);
+            });
         }
     
         void make_max_button()
