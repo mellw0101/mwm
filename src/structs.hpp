@@ -1,22 +1,149 @@
 #ifndef STRUCTS_HPP
 #define STRUCTS_HPP
 #include "include.hpp"
+#include <cassert>
+#include <cstddef>
 #include <cstdint>
 #include <xcb/xcb_ewmh.h>
 #include <xcb/xproto.h>
+// #include <type_traits>
 
-template<typename T1, int V1>
-struct __array__ {
-    T1 _data[V1];
+using namespace std;
+
+typedef enum __array_type_flag__ {
+    
+    _uint32_t      = 1,
+    _int16_t       = 2,
+    _uint16_t      = 3,
+    _float         = 4,
+    _double        = 5,
+    _ptr           = 6,
+    _string        = 7,
+    _client        = 8,
+    _window        = 9,
+    _unknown       = 0
+
+} array_type_flag_t;
+typedef array_type_flag_t __ArrayTypeFlag;
+using ArrayType = __ArrayTypeFlag;
+#define IF_TYPE(__T2) if constexpr (is_same<T1, __T2>::value)
+template<typename T1>
+static ArrayType __make__type_flag__();
+template<> inline ArrayType __make__type_flag__<uint32_t>() { return _uint32_t; }
+template<> inline ArrayType __make__type_flag__<int16_t>()  { return _int16_t;  }
+template<> inline ArrayType __make__type_flag__<uint16_t>() { return _uint16_t; }
+template<> inline ArrayType __make__type_flag__<float>()    { return _float;    }
+template<> inline ArrayType __make__type_flag__<double>()   { return _double;   }
+template<> inline ArrayType __make__type_flag__<void *>()   { return _ptr;      }
+template<> inline ArrayType __make__type_flag__<string>()   { return _string;   }
+class client; template<> inline ArrayType __make__type_flag__<client *>() { return _client; }
+class window; template<> inline ArrayType __make__type_flag__<window *>() { return _window; }
+
+#define make_type_flag(__type) __make__type_flag__<__type>()
+template<typename T1>
+constexpr ArrayType type_flag() { return make_type_flag(T1); }
+#define __MAKE_TYPE_FLAG__(__name, __type) static constexpr ArrayType __name = type_flag<__type>()
+#define __data_array__TF __MAKE_TYPE_FLAG__(_array_type_flag, T1)
+
+template<typename T1, size_t Size>
+struct __data_array__ {
+
+    static_assert(Size > 0, "Size must be greater than 0.");    
+    size_t _size;
+
+    __data_array__<T1, Size> () : _size(Size)
+    {}
+
+    T1 _data[Size];
 
     T1 &operator[](size_t index)
     {
+        assert(index < Size);
         return _data[index];
     }
-};
 
-template<typename T1, int V1>
-using array_t = __array__<T1, V1>;
+    const T1 &operator[](size_t index) const
+    {
+        assert(index < Size);
+        return _data[index];
+    }
+
+};
+template<typename T1, size_t Size>
+using Array = __data_array__<T1, Size>;
+
+template<typename T1, size_t S1, size_t S2>
+using DArray = Array<Array<T1, S1>, S2>;
+
+#define FIRST_T(__name)  __MAKE_TYPE_FLAG__(__name, T1)
+#define SECOND_T(__name) __MAKE_TYPE_FLAG__(__name, T2)
+template<typename T1, typename T2, size_t Size>
+struct __pair_array_t__ {
+
+    Array<T1, Size> first;
+    FIRST_T(_first_t);
+    Array<T2, Size> second;
+    SECOND_T(_second_t);
+
+    typedef struct __proxy_accessor_t__ {
+        /* Variabels    */
+            T1 &_first;
+            T2 &_second;
+
+        /* Constructors */
+            __proxy_accessor_t__(T1 &__first, T2 &__second)
+            : _first(__first), _second(__second) {}
+
+        /* Implicit conversion operators */
+            operator T1&() { return _first; }
+            operator T2&() { return _second; }
+
+    } proxy_accessor_t;
+
+    proxy_accessor_t operator[](size_t index)
+    {
+        return first[index], second[index];
+    }
+
+};
+template<typename T1, typename T2, size_t Size>
+using PairArray = __pair_array_t__<T1, T2, Size>;
+
+template<typename T1, typename T2, typename T3, typename T4, size_t Size>
+struct __quad_array_t__ {
+
+    Array<T1, Size> first;
+    Array<T2, Size> second;
+    Array<T3, Size> third;
+    Array<T4, Size> fourth;
+
+    typedef struct __proxy_accessor_t__ {
+        /* Variabels    */
+            T1 &_first;
+            T2 &_second;
+            T3 &_third;
+            T4 &_fourth;
+
+        /* Constructors */
+            __proxy_accessor_t__(T1 &__first, T2 &__second, T3 &__third, T4 &__fourth)
+            : _first(__first), _second(__second), _third(__third), _fourth(__fourth) {}
+
+        /* Implicit conversion operators */
+            operator T1&() { return _first;  }
+            operator T2&() { return _second; }
+            operator T3&() { return _third;  }
+            operator T4&() { return _fourth; }
+
+    } proxy_accessor_t;
+
+    proxy_accessor_t operator[](size_t index)
+    {
+        return first[index], second[index], third[index], fourth[index];
+    }
+
+};
+template<typename T1, typename T2, typename T3, typename T4, size_t Size>
+using QuadArray = __quad_array_t__<T1, T2, T3, T4, Size>;
 
 enum
 {

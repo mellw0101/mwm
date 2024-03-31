@@ -243,14 +243,6 @@ constexpr Type make_constexpr(Type value) { return value; }
 #define TEMP(__T1) \
     template<__T1>
 
-// #define ty(__T1) \
-//     typename __T1
-
-#define ty(__T1) typename __T1
-
-template<typename T1>
-using ty = T1;
-
 #define TEMP_CB \
     TEMP(typename Callback)
 
@@ -258,6 +250,7 @@ using ty = T1;
     Callback &&callback
 
 namespace { // Tools
+
     constexpr const char * pointer_from_enum(CURSOR CURSOR)
     {
         switch (CURSOR)
@@ -3711,31 +3704,31 @@ class window {
             {
                 if (__border_mask == 0)
                 {
-                    CHANGE_BORDER_COLOR(_border._wid[0]);
-                    CHANGE_BORDER_COLOR(_border._wid[1]);
-                    CHANGE_BORDER_COLOR(_border._wid[2]);
-                    CHANGE_BORDER_COLOR(_border._wid[3]);
+                    CHANGE_BORDER_COLOR(_border._data[0][0]);
+                    CHANGE_BORDER_COLOR(_border._data[1][0]);
+                    CHANGE_BORDER_COLOR(_border._data[2][0]);
+                    CHANGE_BORDER_COLOR(_border._data[3][0]);
                     return;
                 }
 
                 if (__border_mask & UP)
                 {
-                    CHANGE_BORDER_COLOR(_border._wid[0]);
+                    CHANGE_BORDER_COLOR(_border._data[0][0]);
                 }
 
                 if (__border_mask & DOWN)
                 {
-                    CHANGE_BORDER_COLOR(_border._wid[1]);
+                    CHANGE_BORDER_COLOR(_border._data[1][0]);
                 }
 
                 if (__border_mask & DOWN)
                 {
-                    CHANGE_BORDER_COLOR(_border._wid[2]);
+                    CHANGE_BORDER_COLOR(_border._data[2][0]);
                 }
 
                 if (__border_mask & DOWN)
                 {
-                    CHANGE_BORDER_COLOR(_border._wid[3]);
+                    CHANGE_BORDER_COLOR(_border._data[3][0]);
                 }
             }
 
@@ -5911,7 +5904,7 @@ class window {
 
         typedef struct __border__ {
         
-            array_t<uint32_t, 4> _wid;
+            DArray<uint32_t, 5, 4> _data;
 
         } border_t;
 
@@ -5927,8 +5920,12 @@ class window {
         /* Main       */
             void make_window()
             {
-                _window = xcb_generate_id(conn);
-                xcb_create_window(
+                if ((_window = xcb_generate_id(conn)) == -1)
+                {
+                    loutEWin << "Could not generate id for window" << loutEND;
+                }
+
+                VOID_COOKIE = xcb_create_window(
                     conn,
                     _depth,
                     _window,
@@ -5943,7 +5940,8 @@ class window {
                     _value_mask,
                     _value_list
                 );
-                FLUSH_X();
+                FLUSH_XWin();
+                CHECK_VOID_COOKIE();
             }
             
             void clear_window()
@@ -6410,10 +6408,41 @@ class window {
                 FLUSH_XWin();
                 CHECK_VOID_COOKIE();
 
-                if (__border == UP   ) _border._wid[0] = window;
-                if (__border == DOWN ) _border._wid[1] = window;
-                if (__border == LEFT ) _border._wid[2] = window;
-                if (__border == RIGHT) _border._wid[3] = window;
+                if (__border == UP)
+                {
+                    _border._data[0][0] = window;
+                    _border._data[0][1] = __x;
+                    _border._data[0][2] = __y;
+                    _border._data[0][3] = __width;
+                    _border._data[0][4] = __height;
+                }
+
+                if (__border == DOWN)
+                {
+                    _border._data[1][0] = window;
+                    _border._data[1][1] = __x;
+                    _border._data[1][2] = __y;
+                    _border._data[1][3] = __width;
+                    _border._data[1][4] = __height;
+                }
+
+                if (__border == LEFT)
+                {
+                    _border._data[2][0] = window;
+                    _border._data[2][1] = __x;
+                    _border._data[2][2] = __y;
+                    _border._data[2][3] = __width;
+                    _border._data[2][4] = __height;
+                }
+
+                if (__border == RIGHT)
+                {
+                    _border._data[3][0] = window;
+                    _border._data[3][1] = __x;
+                    _border._data[3][2] = __y;
+                    _border._data[3][3] = __width;
+                    _border._data[3][4] = __height;
+                }
             }
 
             #define CREATE_UP_BORDER(__size, __color)    create_border_window(UP,    __color, 0, 0, _width, __size)
@@ -6423,39 +6452,33 @@ class window {
 
             void make_border_window(BORDER __border, const uint32_t &__size, const int &__color)
             {
-                switch
-                (__border)
+                switch (__border)
                 {
-                    case
-                    UP:
+                    case UP:
                     {
                         CREATE_UP_BORDER(__size, __color);
                         break;
                     }
                     
-                    case
-                    DOWN:
+                    case DOWN:
                     {
                         CREATE_DOWN_BORDER(__size, __color);
                         break;
                     }
 
-                    case
-                    LEFT:
+                    case LEFT:
                     {
                         CREATE_LEFT_BORDER(__size, __color);
                         break;
                     }
                     
-                    case
-                    RIGHT:
+                    case RIGHT:
                     {
                         CREATE_RIGHT_BORDER(__size, __color);
                         break;
                     }
                     
-                    case
-                    ALL:
+                    case ALL:
                     {
                         CREATE_UP_BORDER(__size, __color);
                         CREATE_DOWN_BORDER(__size, __color);
@@ -6464,8 +6487,7 @@ class window {
                         break;
                     }
                     
-                    case
-                    NONE:
+                    case NONE:
                     {
                         break;
                     }
