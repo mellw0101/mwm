@@ -7081,7 +7081,7 @@ class client {
                 BLUE,
                 BUTTON_EVENT_MASK,
                 MAP,
-                (int[]){ALL, 1, WHITE},
+                (int[]){ALL, 1, BLACK},
                 CURSOR::hand2
             );
             signal_manager->_window_client_map.connect(this->close_button, this);
