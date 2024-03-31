@@ -7060,7 +7060,7 @@ class client {
             [this](uint32_t __window) -> void
             {
                 if (__window != this->close_button) return;
-                this->close_button.change_border_color(WHITE, UP | DOWN | LEFT | RIGHT);
+                this->close_button.change_border_color(WHITE);
             });
         }
     
