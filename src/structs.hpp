@@ -1,5 +1,6 @@
 #ifndef STRUCTS_HPP
 #define STRUCTS_HPP
+// #include "defenitions.hpp"
 #include "include.hpp"
 #include <X11/Xlib.h>
 #include <cassert>
@@ -11,16 +12,6 @@
 // #include <type_traits>
 
 using namespace std;
-
-template<typename T1, size_t Size = 20> 
-struct __data_arr_struct_t__ { using type = T1[Size]; };
-
-template<typename T1>
-struct __data_arr_struct_t__<T1, 20> { using type = T1[20]; };
-
-template<typename T1, size_t Size = 20>
-using data_arr_struct_t = typename __data_arr_struct_t__<T1, Size>::type;
-
 
 template<typename T1, size_t Size>
 class __data_array_t__ {
@@ -131,6 +122,20 @@ class __data_array_t__ {
         : _index(0)
         { clear(); }
 
+        // Initializer from a C-style array
+        constexpr __data_array_t__(const T1 (&__input)[Size])
+        {
+            clear();
+            _data[0] = *__input;
+
+            // for (size_t i = 0; i < Size; ++i)
+            // {
+            //     this->_data[i] = __input[i];
+            // }
+
+            _index = Size; // Assuming _index should reflect the number of initialized elements
+        }
+
         // constexpr __data_array_t__ (__data_array_t__ &__input)
         // : _index(0), _data(__input._data)
         // { clear(); }
@@ -148,16 +153,7 @@ class __data_array_t__ {
         //     _index = Size;
         // }
 
-        // // // Initializer from a C-style array
-        // // constexpr __data_array_t__(const T1 (&__input)[Size])
-        // // {
-        // //     for (size_t i = 0; i < Size; ++i)
-        // //     {
-        // //         this->_data[i] = __input[i];
-        // //     }
-
-        // //     _index = Size; // Assuming _index should reflect the number of initialized elements
-        // // }
+        
 
         // // Initializer from a C-style array
         // constexpr __data_array_t__(const data_t &__data_t)

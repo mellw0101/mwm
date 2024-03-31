@@ -6694,6 +6694,7 @@ class client {
             }
     
     private:
+    Array<uint16_t, 2> _arr {{0, 0}};
     /* Methods     */
         void make_frame()
         {
