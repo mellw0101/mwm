@@ -514,11 +514,13 @@ namespace {
 
     class __window_signals__ {
         public:
-            uumap_t<uint32_t, int, uint32_t> _data;
+            umap<uint32_t, umap<int, function<void(uint32_t)>>> _data;
 
             template<typename Callback>
             void conect(uint32_t __window, int __signal_id, Callback &&callback)
             {
+                // auto it = _data[__window].find(__signal_id);
+                // if (it == _data[__window].end()) return;
                 _data[__window][__signal_id] = std::forward<Callback>(callback);
             }
 
@@ -951,6 +953,12 @@ namespace {
 }
 
 class __signal_manager__ {
+    /* Defines   */
+        #define WS_conn signal_manager->_window_signals.conect
+        #define WS_emit(_window, _event) signal_manager->_window_signals.emit(_window, _event)
+        #define W_callback \
+            [this](uint32_t __window)
+
     private:
     /* Variabels */
         unordered_map<string, vector<function<void()>>> signals;
@@ -3092,25 +3100,20 @@ using EventCallback = function<void(Ev)>;
 struct __window_ev_id_handler__ {
 
     int _index;
-    STATIC_CONSTEXPR(_ev_type_arr_size, 34);
-    Array<uint8_t, _ev_type_arr_size> _ev_type_arr;
-    STATIC_CONSTEXPR(_id_arr_size, 10);
-    Array<uint8_t, _id_arr_size> _id_arr;
+    Array<uint8_t, 40> _arr;
 
-    void add_ev_id_to_map(int __event_id, uint8_t __event_type)
+    void add_ev_id_to_map(uint8_t __event, int __signal)
     {
-        _ev_type_arr[_index] = __event_type;
-        _id_arr[_index]      = __event_id;
-        ++_index;
+        _arr[__event] = __signal;
     }
 
-    void delete_callbacks_by_ev_id()
-    {
-        for (int i = 0; i < _id_arr.size(); ++i)
-        {
-            event_handler->removeEventCallback(_ev_type_arr[i], _id_arr[i]);
-        }
-    }
+    // void delete_callbacks_by_ev_id()
+    // {
+    //     for (int i = 0; i < _id_arr.size(); ++i)
+    //     {
+    //         event_handler->removeEventCallback(_ev_type_arr[i], _id_arr[i]);
+    //     }
+    // }
 
     // unordered_map<int, uint8_t> _ev_id_map;
 
@@ -3833,7 +3836,7 @@ class window {
                 free(protocols_reply);
                 free(delete_reply);
 
-                window_ev_id_handler.delete_callbacks_by_ev_id();
+                // window_ev_id_handler.delete_callbacks_by_ev_id();
                 signal_manager->_window_signals.remove(this->_window);
                 signal_manager->_window_client_map.remove(this->_window);
             }
@@ -3965,19 +3968,19 @@ class window {
             }
 
         /* Event         */
-            template<typename Callback>
-            void on_expose_event(Callback&& callback)
-            {
-                EV_ID = event_handler->setEventCallback(XCB_EXPOSE, [this, callback](Ev ev)
-                {
-                    RE_CAST_EV(xcb_expose_event_t);
-                    if (e->window == _window)
-                    {
-                        callback();
-                    }
-                });
-                ADD_EV_ID_IWIN(XCB_EXPOSE);
-            }
+            // template<typename Callback>
+            // void on_expose_event(Callback&& callback)
+            // {
+            //     // EV_ID = event_handler->setEventCallback(XCB_EXPOSE, [this, callback](Ev ev)
+            //     // {
+            //     //     RE_CAST_EV(xcb_expose_event_t);
+            //     //     if (e->window == _window)
+            //     //     {
+            //     //         callback();
+            //     //     }
+            //     // });
+            //     // ADD_EV_ID_IWIN(XCB_EXPOSE);
+            // }
 
             // template<EV __signal_id> void
             // enable_on()
@@ -4029,33 +4032,33 @@ class window {
             //     }
             // }
 
-            template<typename Callback>
-            void on_button_press_event(Callback&& callback, bool __add_ev_id = true)
-            {
-                if (__add_ev_id)
-                {
-                    EV_ID = event_handler->setEventCallback(XCB_BUTTON_PRESS, [this, callback](Ev ev)
-                    {
-                        RE_CAST_EV(xcb_button_press_event_t);
-                        if (e->event == _window)
-                        {
-                            callback();
-                        }
-                    });
-                    ADD_EV_ID_IWIN(XCB_BUTTON_PRESS);
-                }
-                else
-                {
-                    event_handler->setEventCallback(XCB_BUTTON_PRESS, [this, callback](Ev ev)
-                    {
-                        RE_CAST_EV(xcb_button_press_event_t);
-                        if (e->event == _window)
-                        {
-                            callback();
-                        }
-                    });
-                }
-            }
+            // template<typename Callback>
+            // void on_button_press_event(Callback&& callback, bool __add_ev_id = true)
+            // {
+            //     if (__add_ev_id)
+            //     {
+            //         EV_ID = event_handler->setEventCallback(XCB_BUTTON_PRESS, [this, callback](Ev ev)
+            //         {
+            //             RE_CAST_EV(xcb_button_press_event_t);
+            //             if (e->event == _window)
+            //             {
+            //                 callback();
+            //             }
+            //         });
+            //         ADD_EV_ID_IWIN(XCB_BUTTON_PRESS);
+            //     }
+            //     else
+            //     {
+            //         event_handler->setEventCallback(XCB_BUTTON_PRESS, [this, callback](Ev ev)
+            //         {
+            //             RE_CAST_EV(xcb_button_press_event_t);
+            //             if (e->event == _window)
+            //             {
+            //                 callback();
+            //             }
+            //         });
+            //     }
+            // }
 
             // void emit_signal_on_ev(int __type)
             // {
@@ -4092,27 +4095,31 @@ class window {
             //     }
             // }
 
-            template<typename Callback>
-            void on_L_MOUSE_BUTTON_PRESS_event(Callback&& callback)
-            {
-                EV_ID = event_handler->setEventCallback(EV_CALL(XCB_BUTTON_PRESS)
-                {
-                    RE_CAST_EV(xcb_button_press_event_t);
-                    if (e->event == _window)
-                    {
-                        if (e->detail == L_MOUSE_BUTTON)
-                        {
-                            callback();
-                        }
-                    }
-                });
-                ADD_EV_ID_IWIN(XCB_BUTTON_PRESS);
-            }
+            // template<typename Callback>
+            // void on_L_MOUSE_BUTTON_PRESS_event(Callback&& callback)
+            // {
+            //     EV_ID = event_handler->setEventCallback(EV_CALL(XCB_BUTTON_PRESS)
+            //     {
+            //         RE_CAST_EV(xcb_button_press_event_t);
+            //         if (e->event == _window)
+            //         {
+            //             if (e->detail == L_MOUSE_BUTTON)
+            //             {
+            //                 callback();
+            //             }
+            //         }
+            //     });
+            //     ADD_EV_ID_IWIN(XCB_BUTTON_PRESS);
+            // }
 
-            void add_event_id(uint8_t __event_type, int __event_id)
-            {
-                window_ev_id_handler.add_ev_id_to_map(__event_id, __event_type);
-            }
+            // template<typename Callback>
+            // void add_event_id(int __event_id, Callback &&__callback)
+            // {
+            //     signal_manager->_window_signals.conect(_window, __event_id, [this](uint32_t __window)
+            //     {
+            //         if (__window != this->_window) return;
+            //     });
+            // }
 
         /* Experimental  */
             // template<typename Type>
@@ -5695,13 +5702,13 @@ class window {
                 CHECK_VOID_COOKIE();
             }
 
-            void draw_on_expose_event(const char *str , const int &text_color, const int &backround_color, const char *font_name, const int16_t &x, const int16_t &y)
-            {
-                on_expose_event([this, str, text_color, backround_color, font_name, x, y]()-> void
-                {
-                    draw_text(str, text_color, backround_color, font_name, x, y);
-                });
-            }
+            // void draw_on_expose_event(const char *str , const int &text_color, const int &backround_color, const char *font_name, const int16_t &x, const int16_t &y)
+            // {
+            //     on_expose_event([this, str, text_color, backround_color, font_name, x, y]()-> void
+            //     {
+            //         draw_text(str, text_color, backround_color, font_name, x, y);
+            //     });
+            // }
 
         /* Keys          */
             void grab_default_keys()
@@ -5902,7 +5909,7 @@ class window {
         uint8_t  _override_redirect = 0;
         pid_t    _pid = 0;
 
-        __window_ev_id_handler__ window_ev_id_handler;
+        // __window_ev_id_handler__ window_ev_id_handler;
 
         // typedef struct __border__ {
         
@@ -8912,28 +8919,6 @@ class __status_bar__ {
                 XCB_EVENT_MASK_EXPOSURE,
                 MAP
             );
-            signal_manager->_window_signals.conect(_time_date_window, EXPOSE, [this](uint32_t __window) -> void
-            {
-                long now(time({}));
-                char buf[80];
-                strftime(
-                    buf,
-                    size(buf),
-                    "%Y-%m-%d %H:%M:%S",
-                    localtime(&now)
-                );
-                
-                _time_date_window.draw_acc(string(buf));
-            });
-
-            // event_handler->setEventCallback(XCB_EXPOSE, [this](Ev ev)
-            // {
-            //     RE_CAST_EV(xcb_expose_event_t);
-            //     // if (e->window != this->_time_date_window) return; 
-            //     signal_manager->u32_map.emit(e->window, EXPOSE);
-            
-            // });
-
             _wifi_window.create_window(
                 _bar_window,
                 WIFI_WINDOW_X,
@@ -8982,14 +8967,6 @@ class __status_bar__ {
                 (int[]){ALL, 2, BLACK},
                 CURSOR::hand2
             );
-            signal_manager->_window_signals.conect(_audio_window, EXPOSE,
-            [this](uint32_t __window) -> void
-            {
-                if (__window != _audio_window) return;
-                _audio_window.draw_acc("Audio");
-            });
-
-            expose(_audio_window);
         }
 
         void show__(const uint32_t &__window)
@@ -9016,11 +8993,9 @@ class __status_bar__ {
                     DARK_GREY,
                     BUTTON_EVENT_MASK,
                     MAP,
-                    (int[3]){ALL, WIFI_DROPDOWN_BORDER, BLACK}
+                    (int[3]){ALL, WIFI_DROPDOWN_BORDER, BLACK},
+                    CURSOR::hand2
                 );
-                _wifi_close_window.set_pointer(CURSOR::hand2);
-                expose(_wifi_close_window);
-
                 _wifi_info_window.create_window(
                     _wifi_dropdown_window,
                     WIFI_INFO_WINDOW_X,
@@ -9032,7 +9007,6 @@ class __status_bar__ {
                     MAP,
                     (int[3]){ALL, WIFI_DROPDOWN_BORDER, BLACK}
                 );
-                expose(_wifi_info_window);
             }
             
             if (__window == _audio_dropdown_window)
@@ -9072,19 +9046,25 @@ class __status_bar__ {
 
         void setup_events__()
         {
-            event_handler->setEventCallback(EV_CALL(XCB_EXPOSE)
+            signal_manager->_window_signals.conect(this->_time_date_window, EXPOSE,
+            [this](uint32_t __window) -> void
             {
-                RE_CAST_EV(xcb_expose_event_t);
-                expose(e->window);
+                if (__window != this->_time_date_window) return;
+                this->_time_date_window.draw_acc(this->get_time_and_date__());
             });
             
-            _wifi_close_window.on_button_press_event([&]()-> void
+            signal_manager->_window_signals.conect(_wifi_close_window, L_MOUSE_BUTTON_EVENT,
+            [this](uint32_t __window) -> void
             {
-                hide__(_wifi_dropdown_window);
-            }, false);
+                if (__window != this->_wifi_close_window) return;
+                this->hide__(this->_wifi_dropdown_window);
+            });
 
-            _wifi_window.on_button_press_event([&]()-> void
+            signal_manager->_window_signals.conect(_wifi_window, L_MOUSE_BUTTON_EVENT,
+            [this](uint32_t __window) -> void
             {
+                if (__window != this->_wifi_window) return;
+
                 if (_wifi_dropdown_window.is_mapped())
                 {
                     hide__(_wifi_dropdown_window);
@@ -9098,10 +9078,18 @@ class __status_bar__ {
 
                     show__(_wifi_dropdown_window);
                 }
-            }, false);
+            });
 
-            _audio_window.on_button_press_event([&]()-> void
+            WS_conn(this->_audio_window, EXPOSE, W_callback
             {
+                if (__window != this->_audio_window) return;
+                this->_audio_window.draw("Audio");
+            });
+
+            WS_conn(_audio_window, L_MOUSE_BUTTON_EVENT, W_callback
+            {
+                if (__window != this->_audio_window) return;
+
                 if (_audio_dropdown_window.is_mapped())
                 {
                     hide__(_audio_dropdown_window);
@@ -9115,34 +9103,45 @@ class __status_bar__ {
 
                     show__(_audio_dropdown_window);
                 }
-            }, false);
-
-            event_handler->setEventCallback(EV_CALL(XCB_ENTER_NOTIFY)
-            {
-                RE_CAST_EV(xcb_enter_notify_event_t);
-                if (e->event == this->_audio_window)
-                {
-                    this->_audio_window.change_backround_color(WHITE);
-                }
-
-                if (e->event == this->_wifi_close_window)
-                {
-                    this->_wifi_close_window.change_backround_color(WHITE);
-                }
             });
 
-            event_handler->setEventCallback(EV_CALL(XCB_LEAVE_NOTIFY)
+            WS_conn(this->_audio_window, ENTER_NOTIFY, W_callback
             {
-                RE_CAST_EV(xcb_leave_notify_event_t);
-                if (e->event == this->_audio_window)
-                {
-                    this->_audio_window.change_backround_color(DARK_GREY);
-                }
+                if (__window != this->_audio_window) return;
+                this->_audio_window.change_backround_color(WHITE);
+            });
+            
+            WS_conn(this->_audio_window, LEAVE_NOTIFY, W_callback
+            {
+                if (__window != this->_audio_window) return;
+                this->_audio_window.change_backround_color(DARK_GREY);
+            });
 
-                if (e->event == this->_wifi_close_window)
-                {
-                    this->_wifi_close_window.change_backround_color(DARK_GREY);
-                }
+            WS_conn(this->_wifi_close_window, EXPOSE, W_callback
+            {
+                if (__window != this->_wifi_close_window) return;
+                this->_wifi_close_window.draw_acc("Close");
+            });
+
+            WS_conn(this->_wifi_close_window, ENTER_NOTIFY, W_callback
+            {
+                if (__window != this->_wifi_close_window) return;
+                this->_wifi_close_window.change_backround_color(WHITE);
+            });
+
+            WS_conn(this->_wifi_close_window, LEAVE_NOTIFY, W_callback
+            {
+                if (__window != this->_wifi_close_window) return;
+                this->_wifi_close_window.change_backround_color(DARK_GREY);
+            });
+
+            WS_conn(this->_wifi_info_window, EXPOSE, W_callback
+            {
+                string local_ip("Local ip: " + network->get_local_ip_info(__network__::LOCAL_IP));
+                this->_wifi_info_window.draw_text_auto_color(local_ip.c_str(), 4, 16, BLACK);
+
+                string local_interface("interface: " + network->get_local_ip_info(__network__::INTERFACE_FOR_LOCAL_IP));
+                this->_wifi_info_window.draw_text_auto_color(local_interface.c_str(), 4, 30, BLACK);
             });
         }
 
@@ -9185,41 +9184,6 @@ class __status_bar__ {
             create_windows__();
             setup_events__();
             setup_thread__(_time_date_window);
-        }
-
-        void expose(const uint32_t &__window)
-        {
-            if (__window == _time_date_window)
-            {
-                signal_manager->_window_signals.conect(_time_date_window, EXPOSE,
-                [this](uint32_t __window) -> void
-                {
-
-                    if (__window != this->_time_date_window) return;
-
-                    this->_time_date_window.draw_acc(this->get_time_and_date__());
-                });
-                // _time_date_window.draw(get_time_and_date__());
-            }
-
-            if (__window == _audio_window)
-            {
-                _audio_window.draw("Audio");
-            }
-
-            if (__window == _wifi_close_window)
-            {
-                _wifi_close_window.draw("Close");
-            }
-
-            if (__window == _wifi_info_window )
-            {
-                string local_ip("Local ip: " + network->get_local_ip_info(__network__::LOCAL_IP));
-                _wifi_info_window.draw_text_auto_color(local_ip.c_str(), 4, 16, BLACK);
-
-                string local_interface("interface: " + network->get_local_ip_info(__network__::INTERFACE_FOR_LOCAL_IP));
-                _wifi_info_window.draw_text_auto_color(local_interface.c_str(), 4, 30, BLACK);
-            }
         }
 
     // Constructor.
@@ -13400,18 +13364,18 @@ class resize_client {
                             case XCB_EXPOSE:
                             {
                                 RE_CAST_EV(xcb_expose_event_t);
-                                status_bar->expose(e->window);
-                                file_app->expose(e->window);
-                                system_settings->expose(e->window);
+                                WS_emit(e->window, EXPOSE);
+                                // file_app->expose(e->window);
+                                // system_settings->expose(e->window);
 
-                                client *c = wm->client_from_any_window(&e->window);
-                                if (c != nullptr)
-                                {
-                                    if (e->window == c->titlebar)
-                                    {
-                                        c->draw_title(TITLE_INTR_DRAW);
-                                    }
-                                }
+                                // client *c = wm->client_from_any_window(&e->window);
+                                // if (c != nullptr)
+                                // {
+                                //     if (e->window == c->titlebar)
+                                //     {
+                                //         c->draw_title(TITLE_INTR_DRAW);
+                                //     }
+                                // }
 
                                 break;
                             }
@@ -13571,7 +13535,7 @@ class resize_client {
                     case XCB_EXPOSE:
                     {
                         auto e = reinterpret_cast<const xcb_expose_event_t *>(ev);
-                        status_bar->expose(e->window);
+                        WS_emit(e->window, EXPOSE);
 
                         break;
                     }
