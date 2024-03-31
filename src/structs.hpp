@@ -5,6 +5,19 @@
 #include <xcb/xcb_ewmh.h>
 #include <xcb/xproto.h>
 
+template<typename T1, int V1>
+struct __array__ {
+    T1 _data[V1];
+
+    T1 &operator[](size_t index)
+    {
+        return _data[index];
+    }
+};
+
+template<typename T1, int V1>
+using array_t = __array__<T1, V1>;
+
 enum
 {
     N = 12, /* 
