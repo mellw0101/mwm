@@ -221,6 +221,8 @@ enum EV {
     L_MOUSE_BUTTON_EVENT              = 36,
     CLIENT_RESIZE                     = 42,
     KILL_SIGNAL                       = 39,
+    L_MOUSE_BUTTON_EVENT__ALT         = 43,
+    PROPERTY_NOTIFY                   = XCB_PROPERTY_NOTIFY
 };
 
 typedef enum {

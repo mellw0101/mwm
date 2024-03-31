@@ -543,7 +543,6 @@ namespace {
                 _data.erase(it);
             }
     };
-    
 
     /*
      *
@@ -2879,9 +2878,14 @@ class __event_handler__ {
             signal_manager->_window_signals.emit(e->event, ENTER_NOTIFY);
         }
 
-        template<uint8_t __event_id> static void handle_event(uint32_t);
-        template<> void handle_event<XCB_ENTER_NOTIFY>(uint32_t __window) { signal_manager->_window_signals.emit(__window, ENTER_NOTIFY); }
-        template<> void handle_event<XCB_LEAVE_NOTIFY>(uint32_t __window) { signal_manager->_window_signals.emit(__window, LEAVE_NOTIFY); }
+
+        template<uint8_t __event_id> static void handle_event(uint32_t __window) { WS_emit(__window, __event_id); }
+
+        // template<> void handle_event<XCB_ENTER_NOTIFY>(uint32_t __window)          { WS_emit(__window, ENTER_NOTIFY); }
+        // template<> void handle_event<XCB_LEAVE_NOTIFY>(uint32_t __window)          { WS_emit(__window, LEAVE_NOTIFY); }
+        // template<> void handle_event<L_MOUSE_BUTTON_EVENT>(uint32_t __window)      { WS_emit(__window, L_MOUSE_BUTTON_EVENT); }
+        // template<> void handle_event<L_MOUSE_BUTTON_EVENT__ALT>(uint32_t __window) { WS_emit(__window, L_MOUSE_BUTTON_EVENT__ALT); }
+        // template<> void handle_event<PROPERTY_NOTIFY>(uint32_t __window)           { WS_emit(__window, PROPERTY_NOTIFY); }
         #define HANDLE_EVENT(__type) thread(handle_event<__type>, e->event).detach()
 
         // Function that creates a separate thread for each event type
@@ -2893,7 +2897,19 @@ class __event_handler__ {
             {
                 case XCB_BUTTON_PRESS:
                 {
-                    thread(handleEvent<xcb_button_press_event_t>, (xcb_button_press_event_t*)ev).detach();
+                    RE_CAST_EV(xcb_button_press_event_t);
+                    if (e->detail == L_MOUSE_BUTTON)
+                    {
+                        if (e->state & ALT)
+                        {
+                            HANDLE_EVENT(L_MOUSE_BUTTON_EVENT__ALT);
+                        }
+                        else 
+                        {
+                            HANDLE_EVENT(L_MOUSE_BUTTON_EVENT);
+                        }
+                    }
+                
                     break;
                 }
 
@@ -3096,51 +3112,6 @@ class __event_handler__ {
 
 }; static __event_handler__ *event_handler(nullptr);
 using EventCallback = function<void(Ev)>;
-
-struct __window_ev_id_handler__ {
-
-    int _index;
-    Array<uint8_t, 40> _arr;
-
-    void add_ev_id_to_map(uint8_t __event, int __signal)
-    {
-        _arr[__event] = __signal;
-    }
-
-    // void delete_callbacks_by_ev_id()
-    // {
-    //     for (int i = 0; i < _id_arr.size(); ++i)
-    //     {
-    //         event_handler->removeEventCallback(_ev_type_arr[i], _id_arr[i]);
-    //     }
-    // }
-
-    // unordered_map<int, uint8_t> _ev_id_map;
-
-    // unordered_map<int, function<void()>> _signal_map;
-
-    // unordered_map<uint32_t, unordered_map<uint8_t, vector<EventCallback>>> windowCallbacks;/* Maps a window ID to a list of event types and their associated callbacks */
-    
-        // void add_callback(uint32_t __window, uint8_t __event_type, EventCallback __callback)/* Add a callback to a window for a specific event type */
-        // {
-        //     windowCallbacks[__window][__event_type].push_back(__callback);
-        // }
-        
-        // vector<EventCallback> &get_callbacks(uint32_t __window, uint8_t __event_type)/* Get callbacks for a specific window and event type */
-        // {
-        //     return windowCallbacks[__window][__event_type];
-        // }
-
-        // void clear_callbacks_for_window_event(uint32_t __window, uint8_t __event_type)/* Remove all callbacks associated with a window for a specific event type */
-        // {
-        //     windowCallbacks[__window][__event_type].clear();
-        // }
-
-        // void clear_all_callbacks_for_window(uint32_t __window)/* Optionally, remove callbacks for all events for a specific window */
-        // {
-        //     windowCallbacks[__window].clear();
-    // }
-};
 
 class Bitmap {
     private:
@@ -12498,6 +12469,8 @@ class mv_client {
                     {
                         RE_CAST_EV(xcb_expose_event_t);
                         WS_emit(e->window, EXPOSE);
+
+                        break;
                     }
                 }
 
@@ -14281,7 +14254,7 @@ class Events {
         void map_req_handler(const xcb_generic_event_t *&ev)
         {
             RE_CAST_EV(xcb_map_request_event_t);
-            client *c = signal_manager->_window_client_map.retrive(e->window); 
+            client *c = signal_manager->_window_client_map.retrive(e->window);
             if (c != nullptr) return;
             wm->manage_new_client(e->window);
         }
@@ -14290,7 +14263,7 @@ class Events {
         {
             RE_CAST_EV(xcb_button_press_event_t);
             client *c = signal_manager->_window_client_map.retrive(e->event);
-            if (c == nullptr) 
+            if (c == nullptr)
             {
                 c = wm->get_client_from_pointer();
                 if (c == nullptr) return;
