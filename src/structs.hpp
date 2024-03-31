@@ -15,17 +15,6 @@ using namespace std;
 
 template<typename T1, size_t Size>
 class __data_array_t__ {
-    private:
-    /* Methods */
-        constexpr void set_index__(size_t __index)
-        {
-            _index = __index;
-        }
-
-        typedef struct {
-            T1 _data[Size];
-        } data_t; 
-
     public:
     /* Variabels */
         static_assert(Size > 0, "Size must be greater than 0.");
@@ -71,8 +60,7 @@ class __data_array_t__ {
         constexpr const T1 &operator[](size_t index) const
         {
             assert(index < Size);
-            set_index__(index);
-            return _data[index];
+            return this->_data[index];
         }
 
     /* Methods */
@@ -122,63 +110,19 @@ class __data_array_t__ {
         : _index(0)
         { clear(); }
 
-        // Initializer from a C-style array
-        constexpr __data_array_t__(const T1 (&__input)[Size])
+        constexpr __data_array_t__(const T1 (&__data)[Size])
+        : _index(Size)
         {
-            clear();
-            _data[0] = *__input;
-            _index = Size; // Assuming _index should reflect the number of initialized elements
-        }        
-
-        // // Initializer from a C-style array
-        // constexpr __data_array_t__(const data_t &__data_t)
-        // {
-        //     for (size_t i = 0; i < Size; ++i)
-        //     {
-        //         this->_data[i] = __data_t._data[i];
-        //     }
-
-        //     _index = Size; // Assuming _index should reflect the number of initialized elements
-        // }
-
-        // // Initializer from a C-style array
-        // constexpr __data_array_t__(const T1 (&__data_arr_t)[Size])
-        // {
-        //     for (size_t i = 0; i < Size; ++i)
-        //     {
-        //         this->_data[i] = __data_arr_t[i];
-        //     }
-
-        //     _index = Size; // Assuming _index should reflect the number of initialized elements
-        // }
-
-        // // Initializer from a C-style array
-        // constexpr __data_array_t__(T1 (*__data_arr_t)[Size])
-        // {
-        //     for (size_t i = 0; i < Size; ++i)
-        //     {
-        //         this->_data[i] = __data_arr_t[i];
-        //     }
-
-        //     _index = Size; // Assuming _index should reflect the number of initialized elements
-        // }
-
-        // // Initializer from a C-style array
-        // constexpr __data_array_t__(T1 __data_arr_t[Size])
-        // {
-        //     for (size_t i = 0; i < Size; ++i)
-        //     {
-        //         this->_data[i] = __data_arr_t[i];
-        //     }
-
-        //     _index = Size; // Assuming _index should reflect the number of initialized elements
-        // }
+            this->clear();
+            for (size_t i = 0; i < Size; ++i)
+            {
+                this->_data[i] = __data[i];
+            }
+        }
 
 };
 template<typename T1, size_t Size>
 using Array = __data_array_t__<T1, Size>;
-
-
 
 #define FIRST_T(__name)  __MAKE_TYPE_FLAG__(__name, T1)
 #define SECOND_T(__name) __MAKE_TYPE_FLAG__(__name, T2)
