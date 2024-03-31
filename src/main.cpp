@@ -517,10 +517,8 @@ namespace {
             umap<uint32_t, umap<int, function<void(uint32_t)>>> _data;
 
             template<typename Callback>
-            void conect(uint32_t __window, int __signal_id, Callback &&callback)
+            void conect(uint32_t __window, uint8_t __signal_id, Callback &&callback)
             {
-                // auto it = _data[__window].find(__signal_id);
-                // if (it == _data[__window].end()) return;
                 _data[__window][__signal_id] = std::forward<Callback>(callback);
             }
 
@@ -2880,12 +2878,6 @@ class __event_handler__ {
 
 
         template<uint8_t __event_id> static void handle_event(uint32_t __window) { WS_emit(__window, __event_id); }
-
-        // template<> void handle_event<XCB_ENTER_NOTIFY>(uint32_t __window)          { WS_emit(__window, ENTER_NOTIFY); }
-        // template<> void handle_event<XCB_LEAVE_NOTIFY>(uint32_t __window)          { WS_emit(__window, LEAVE_NOTIFY); }
-        // template<> void handle_event<L_MOUSE_BUTTON_EVENT>(uint32_t __window)      { WS_emit(__window, L_MOUSE_BUTTON_EVENT); }
-        // template<> void handle_event<L_MOUSE_BUTTON_EVENT__ALT>(uint32_t __window) { WS_emit(__window, L_MOUSE_BUTTON_EVENT__ALT); }
-        // template<> void handle_event<PROPERTY_NOTIFY>(uint32_t __window)           { WS_emit(__window, PROPERTY_NOTIFY); }
         #define HANDLE_EVENT(__type) thread(handle_event<__type>, e->event).detach()
 
         // Function that creates a separate thread for each event type
@@ -2928,14 +2920,14 @@ class __event_handler__ {
                 case XCB_ENTER_NOTIFY:
                 {
                     RE_CAST_EV(xcb_enter_notify_event_t);
-                    thread(handle_event<XCB_ENTER_NOTIFY>, e->event).detach();
+                    HANDLE_EVENT(ENTER_NOTIFY);
                     break;
                 }
 
                 case XCB_LEAVE_NOTIFY:
                 {
                     RE_CAST_EV(xcb_leave_notify_event_t);
-                    HANDLE_EVENT(XCB_LEAVE_NOTIFY);
+                    HANDLE_EVENT(LEAVE_NOTIFY);
                     break;
                 }
             }

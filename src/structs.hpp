@@ -212,7 +212,7 @@ enum
      */
 };
 
-enum EV {
+enum EV : uint8_t {
     REMOVE_ALL                        = 0,
     EXPOSE                            = XCB_EXPOSE,
     EXPOSE_REQ                        = 40,
