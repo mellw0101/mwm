@@ -5658,7 +5658,7 @@ class window {
         uint8_t  _override_redirect = 0;
         pid_t    _pid = 0;
 
-        Array<uint32_t, 4> _border;
+        Array<uint32_t, 4> _border {{0, 0, 0, 0}};
 
     /* Methods     */
         /* Main       */
@@ -6694,7 +6694,6 @@ class client {
             }
     
     private:
-    Array<uint16_t, 2> _arr {{0, 0}};
     /* Methods     */
         void make_frame()
         {

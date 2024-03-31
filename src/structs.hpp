@@ -127,33 +127,8 @@ class __data_array_t__ {
         {
             clear();
             _data[0] = *__input;
-
-            // for (size_t i = 0; i < Size; ++i)
-            // {
-            //     this->_data[i] = __input[i];
-            // }
-
             _index = Size; // Assuming _index should reflect the number of initialized elements
-        }
-
-        // constexpr __data_array_t__ (__data_array_t__ &__input)
-        // : _index(0), _data(__input._data)
-        // { clear(); }
-
-        // constexpr __data_array_t__ (T1 (&__input)[Size])
-        // : _index(0)
-        // {
-        //     this->clear();
-        //     for (size_t i = 0; i < Size; ++i)
-        //     {
-        //         this->_data[i] = __input[i];
-        //         _index = i;
-        //     }
-
-        //     _index = Size;
-        // }
-
-        
+        }        
 
         // // Initializer from a C-style array
         // constexpr __data_array_t__(const data_t &__data_t)
