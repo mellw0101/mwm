@@ -5290,6 +5290,13 @@ class window {
                 set_backround_png(__file_name);
             }
 
+            void make_then_set_png(const string &__file_name, Array<Array<uint8_t, 20>, 20> &bitmap)
+            {
+                create_png_from_vector_bitmap(__file_name.c_str(), bitmap);
+                set_backround_png(__file_name);
+            }
+
+
             int get_current_backround_color() const
             {
                 return _color;
@@ -5816,6 +5823,65 @@ class window {
             
             /* Png    */
                 void create_png_from_vector_bitmap(const char *file_name, const vector<vector<bool>> &bitmap)
+                {
+                    int width = bitmap[0].size();
+                    int height = bitmap.size();
+
+                    FILE *fp = fopen(file_name, "wb");
+                    if (!fp)
+                    {
+                        log_error("Failed to open file: " + std::string(file_name));
+                        return;
+                    }
+
+                    png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+                    if (!png_ptr)
+                    {
+                        fclose(fp);
+                        log_error("Failed to create PNG write struct");
+                        return;
+                    }
+
+                    png_infop info_ptr = png_create_info_struct(png_ptr);
+                    if (!info_ptr)
+                    {
+                        fclose(fp);
+                        png_destroy_write_struct(&png_ptr, NULL);
+                        log_error("Failed to create PNG info struct");
+                        return;
+                    }
+
+                    if (setjmp(png_jmpbuf(png_ptr)))
+                    {
+                        fclose(fp);
+                        png_destroy_write_struct(&png_ptr, &info_ptr);
+                        log_error("Error during PNG creation");
+                        return;
+                    }
+
+                    png_init_io(png_ptr, fp);
+                    png_set_IHDR(png_ptr, info_ptr, width, height, 8, PNG_COLOR_TYPE_GRAY, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
+                    png_write_info(png_ptr, info_ptr);
+
+                    // Write bitmap to PNG
+                    png_bytep row = new png_byte[width];
+                    for (int y = 0; y < height; y++)
+                    {
+                        for (int x = 0; x < width; x++)
+                        {
+                            row[x] = bitmap[y][x] ? 0xFF : 0x00;
+                        }
+
+                        png_write_row(png_ptr, row);
+                    }
+
+                    delete[] row;
+                    png_write_end(png_ptr, NULL);
+                    fclose(fp);
+                    png_destroy_write_struct(&png_ptr, &info_ptr);
+                }
+
+                void create_png_from_vector_bitmap(const char *file_name, Array<Array<uint8_t, 20>, 20> &bitmap)
                 {
                     int width = bitmap[0].size();
                     int height = bitmap.size();
@@ -6776,7 +6842,7 @@ class client {
             
             );
             CONN_Win(close_button, ENTER_NOTIFY,
-            
+
                 if (__window != this->close_button) return;
                 this->close_button.change_border_color(WHITE);
             
@@ -6925,28 +6991,53 @@ class client {
         }
     
     /* Variables   */
-        vector<vector<bool>> CLOSE_BUTTON_BITMAP = {
-            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0},
-            {0,0,0,0,1,1,1,0,0,0,0,0,0,1,1,1,0,0,0,0},
-            {0,0,0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0,0,0},
-            {0,0,0,0,0,0,1,1,1,0,0,1,1,1,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,1,1,1,0,0,1,1,1,0,0,0,0,0,0},
-            {0,0,0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0,0,0},
-            {0,0,0,0,1,1,1,0,0,0,0,0,0,1,1,1,0,0,0,0},
-            {0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
-        };
+        Array<uint8_t, 20> _uint8_arr {{0, 0}};
+
+        Array<Array<uint8_t, 20>, 20> CLOSE_BUTTON_BITMAP {{
+            {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}},
+            {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}},
+            {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}},
+            {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}},
+            {{0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0}},
+            {{0,0,0,0,1,1,1,0,0,0,0,0,0,1,1,1,0,0,0,0}},
+            {{0,0,0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0,0,0}},
+            {{0,0,0,0,0,0,1,1,1,0,0,1,1,1,0,0,0,0,0,0}},
+            {{0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0}},
+            {{0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0}},
+            {{0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0}},
+            {{0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0}},
+            {{0,0,0,0,0,0,1,1,1,0,0,1,1,1,0,0,0,0,0,0}},
+            {{0,0,0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0,0,0}},
+            {{0,0,0,0,1,1,1,0,0,0,0,0,0,1,1,1,0,0,0,0}},
+            {{0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0}},
+            {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}},
+            {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}},
+            {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}},
+            {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}}
+        }};
+
+        // vector<vector<bool>> CLOSE_BUTTON_BITMAP = {
+        //     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        //     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        //     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        //     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        //     {0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0},
+        //     {0,0,0,0,1,1,1,0,0,0,0,0,0,1,1,1,0,0,0,0},
+        //     {0,0,0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0,0,0},
+        //     {0,0,0,0,0,0,1,1,1,0,0,1,1,1,0,0,0,0,0,0},
+        //     {0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0},
+        //     {0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0},
+        //     {0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0},
+        //     {0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0},
+        //     {0,0,0,0,0,0,1,1,1,0,0,1,1,1,0,0,0,0,0,0},
+        //     {0,0,0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0,0,0},
+        //     {0,0,0,0,1,1,1,0,0,0,0,0,0,1,1,1,0,0,0,0},
+        //     {0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0},
+        //     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        //     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        //     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        //     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
+        // };
 };
 
 class desktop {

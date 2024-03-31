@@ -1,178 +1,193 @@
 #ifndef STRUCTS_HPP
 #define STRUCTS_HPP
 #include "include.hpp"
+#include <X11/Xlib.h>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
-#include <type_traits>
+// #include <type_traits>
 #include <xcb/xcb_ewmh.h>
 #include <xcb/xproto.h>
 // #include <type_traits>
 
 using namespace std;
 
-typedef enum __array_type_flag__ {
-    
-    _uint32_t      = 1,
-    _int16_t       = 2,
-    _uint16_t      = 3,
-    _float         = 4,
-    _double        = 5,
-    _ptr           = 6,
-    _string        = 7,
-    _client        = 8,
-    _window        = 9,
-    _unknown       = 0
-
-} array_type_flag_t;
-typedef array_type_flag_t __ArrayTypeFlag;
-using ArrayType = __ArrayTypeFlag;
-#define IF_TYPE(__T2) if constexpr (is_same<T1, __T2>::value)
-template<typename T1>
-static ArrayType __make__type_flag__();
-template<> inline ArrayType __make__type_flag__<uint32_t>() { return _uint32_t; }
-template<> inline ArrayType __make__type_flag__<int16_t>()  { return _int16_t;  }
-template<> inline ArrayType __make__type_flag__<uint16_t>() { return _uint16_t; }
-template<> inline ArrayType __make__type_flag__<float>()    { return _float;    }
-template<> inline ArrayType __make__type_flag__<double>()   { return _double;   }
-template<> inline ArrayType __make__type_flag__<void *>()   { return _ptr;      }
-template<> inline ArrayType __make__type_flag__<string>()   { return _string;   }
-class client; template<> inline ArrayType __make__type_flag__<client *>() { return _client; }
-class window; template<> inline ArrayType __make__type_flag__<window *>() { return _window; }
-
-#define make_type_flag(__type) __make__type_flag__<__type>()
-template<typename T1>
-constexpr ArrayType type_flag() { return make_type_flag(T1); }
-#define __MAKE_TYPE_FLAG__(__name, __type) static constexpr ArrayType __name = type_flag<__type>()
-#define __data_array__TF __MAKE_TYPE_FLAG__(_array_type_flag, T1)
-
 template<typename T1, size_t Size>
-struct __data_array_t__ {
+class __data_array_t__ {
+    private:
+    /* Methods */
+        constexpr void set_index__(size_t __index)
+        {
+            _index = __index;
+        }
 
-    static_assert(Size > 0, "Size must be greater than 0.");
-    T1 _data[Size];
-    size_t _index;
+        typedef struct {
+            T1 _data[Size];
+        } data_t;
 
-    constexpr T1 &operator[](size_t index)
-    {
-        assert(index < Size);
-        return _data[index];
-    }
+    public:
+    /* Variabels */
+        static_assert(Size > 0, "Size must be greater than 0.");
+        T1 _data[Size];
+        size_t _index;
 
-    constexpr T1 &operator[](size_t index) const
-    {
-        assert(index < Size);
-        return _data[index];
-    }
+    /* Proxy */
+        typedef struct __proxy_data_t__ {
+            /* Vatiabels */
+                __data_array_t__& _arr;
+                size_t _index;
 
-    constexpr size_t size()
-    {
-        return Size;
-    }
+            /* Constructor */
+                constexpr __proxy_data_t__(__data_array_t__ &__arr, size_t __index)
+                : _arr(__arr), _index(__index) {}
 
-    constexpr size_t size() const
-    {
-        return Size;
-    }
+            /* Operators */
+                constexpr T1 &operator=(const T1 &__value)
+                {
+                    /* Assign the value to the actual array element */
+                    this->_arr._data[this->_index] = __value;
 
-    constexpr void add(T1 &__input)
-    {
-        this->_data[_index] = __input;
-        this->_index++;
-    }
+                    /* Update the current index in the main array */
+                    this->_arr._index = this->_index;
+                    
+                    /* Return the assigned value */
+                    return this->_arr._data[this->_index];
+                }
 
-    // constexpr __data_array_t__<T1, Size> &operator=(const __data_array_t__<T1, Size> &__other)
-    // {
-    //     if (this != &__other)
-    //     {
-    //         for (size_t i = 0; i < Size; ++i)
-    //         {
-    //             _data[i] = __other._data[i];
-    //         }
-    //     }
+                constexpr operator T1&() const
+                {
+                    return this->_arr._data[this->_index];
+                }
 
-    //     return *this;
-    // }
+        } Proxy;
 
-    // constexpr __data_array_t__<T1, Size> (const __data_array_t__<T1, Size> &__other)
-    // {
-    //     if (this != &__other)
-    //     {
-    //         for (size_t i = 0; i < Size; ++i)
-    //         {
-    //             this->_data[i] = __other._data[i];
-    //         }
-    //     }
+        constexpr T1 &operator[](size_t index)
+        {
+            assert(index < Size);
+            return Proxy(*this, index);
+        }
 
-    //     return *this;
-    // }
-
-    // constexpr T1 &operator=(T1 others[Size])
-    // {
-    //     _data = others;
-    // }
-
-    // constexpr T1 &operator=(T1 &other)
-    // {
-
-    // }
+        constexpr const T1 &operator[](size_t index) const
+        {
+            assert(index < Size);
+            set_index__(index);
+            return _data[index];
+        }
 
     /* Methods */
-        constexpr void clear_arr()
-        {
-            for (size_t i = 0; i < Size; ++i)
+        /* Size */
+            constexpr size_t size()
             {
-                if
-                constexpr (is_pointer<T1>::value)
-                {
-                   _data[i] = nullptr;
-                }
-                else if
-                constexpr (is_arithmetic<T1>::value)
-                {
-                    _data[i] = 0;
-                }
-                else
-                {
-                    _data[i] = '\0';
-                }
+                return _index;
+            }
+
+            constexpr size_t size() const
+            {
+                return _index;
+            }
+
+        /* Max Size */
+            constexpr size_t max_size()
+            {
+                return Size;
+            }
+
+            constexpr size_t max_size() const
+            {
+                return Size;
+            }
+
+        constexpr void add(const T1 &__input)
+        {
+            if (_index < Size)
+            {
+                _data[_index++] = __input;
             }
         }
 
+    /* Methods */
         constexpr void clear()
         {
             for (size_t i = 0; i < Size; ++i)
             {
                 _data[i] = T1{};
             }
-        }
 
-        constexpr void init_arr()
-        {
-            for (size_t i = 0; i < Size; ++i)
-            {
-                if
-                constexpr (is_pointer<T1>::value)
-                {
-                   _data[i] = nullptr;
-                }
-                else if
-                constexpr (is_arithmetic<T1>::value)
-                {
-                    _data[i] = 0;
-                }
-                else
-                {
-                    _data[i] = 0;
-                }
-            }
+            _index = 0;
         }
 
     /* Constructor */
-        __data_array_t__<T1, Size> () { clear(); }
+        constexpr __data_array_t__ ()
+        : _index(0)
+        { clear(); }
+
+        constexpr __data_array_t__ (__data_array_t__ &__input)
+        : _index(0), _data(__input._data)
+        { clear(); }
+
+        // constexpr __data_array_t__ (T1 (&__input)[Size])
+        // : _index(0)
+        // {
+        //     this->clear();
+        //     for (size_t i = 0; i < Size; ++i)
+        //     {
+        //         this->_data[i] = __input[i];
+        //         _index = i;
+        //     }
+
+        //     _index = Size;
+        // }
+
+        // // Initializer from a C-style array
+        // constexpr __data_array_t__(const T1 (&__input)[Size])
+        // {
+        //     for (size_t i = 0; i < Size; ++i)
+        //     {
+        //         this->_data[i] = __input[i];
+        //     }
+
+        //     _index = Size; // Assuming _index should reflect the number of initialized elements
+        // }
+
+        // Initializer from a C-style array
+        constexpr __data_array_t__(data_t (&__data_t)[Size])
+        {
+            for (size_t i = 0; i < Size; ++i)
+            {
+                this->_data[i] = __data_t._data[i];
+            }
+
+            _index = Size; // Assuming _index should reflect the number of initialized elements
+        }
+
+        // Initializer from a C-style array
+        constexpr __data_array_t__(const T1 (&__data_arr_t)[Size])
+        {
+            for (size_t i = 0; i < Size; ++i)
+            {
+                this->_data[i] = __data_arr_t[i];
+            }
+
+            _index = Size; // Assuming _index should reflect the number of initialized elements
+        }
+
+        // Initializer from a C-style array
+        constexpr __data_array_t__(T1 (&__data_arr_t)[Size])
+        {
+            if (this->_data != &__data_arr_t)
+            {
+                this->_data = __data_arr_t;
+                _index = Size; // Assuming _index should reflect the number of initialized elements
+            }
+
+            return *this;
+        }
+
 };
 template<typename T1, size_t Size>
 using Array = __data_array_t__<T1, Size>;
+
+
 
 #define FIRST_T(__name)  __MAKE_TYPE_FLAG__(__name, T1)
 #define SECOND_T(__name) __MAKE_TYPE_FLAG__(__name, T2)
@@ -180,9 +195,7 @@ template<typename T1, typename T2, size_t Size>
 struct __pair_array_t__ {
 
     Array<T1, Size> first;
-    FIRST_T(_first_t);
     Array<T2, Size> second;
-    SECOND_T(_second_t);
 
     typedef struct __proxy_accessor_t__ {
         /* Variabels    */
