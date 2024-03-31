@@ -161,26 +161,14 @@ class __data_array_t__ {
         }
 
         // Initializer from a C-style array
-        constexpr __data_array_t__(const T1 (&__data_arr_t)[Size])
+        constexpr __data_array_t__(const T1 (&__data_arr_t_1)[Size])
         {
             for (size_t i = 0; i < Size; ++i)
             {
-                this->_data[i] = __data_arr_t[i];
+                this->_data[i] = __data_arr_t_1[i];
             }
 
             _index = Size; // Assuming _index should reflect the number of initialized elements
-        }
-
-        // Initializer from a C-style array
-        constexpr __data_array_t__(T1 (&__data_arr_t)[Size])
-        {
-            if (this->_data != &__data_arr_t)
-            {
-                this->_data = __data_arr_t;
-                _index = Size; // Assuming _index should reflect the number of initialized elements
-            }
-
-            return *this;
         }
 
 };
