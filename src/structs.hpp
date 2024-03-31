@@ -122,7 +122,7 @@ class __data_array_t__ {
         { clear(); }
 
         // Initializer from a C-style array
-        constexpr __data_array_t__(const T1 (&__data_arr_t_1)[Size])
+        constexpr __data_array_t__(T1 (&__data_arr_t_1)[Size])
         {
             for (size_t i = 0; i < Size; ++i)
             {
