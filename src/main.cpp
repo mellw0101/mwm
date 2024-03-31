@@ -2871,50 +2871,53 @@ class __event_handler__ {
             signal_manager->_window_signals.emit(e->event, ENTER_NOTIFY);
         }
 
+        template<uint8_t __event_id> static void handle_event(uint32_t);
+        template<> void handle_event<XCB_ENTER_NOTIFY>(uint32_t __window) { signal_manager->_window_signals.emit(__window, ENTER_NOTIFY); }
+        template<> void handle_event<XCB_LEAVE_NOTIFY>(uint32_t __window) { signal_manager->_window_signals.emit(__window, LEAVE_NOTIFY); }
+        #define HANDLE_EVENT(__type) thread(handle_event<__type>, e->event).detach()
+
         // Function that creates a separate thread for each event type
         void processEvent(xcb_generic_event_t* ev)
         {
             uint8_t responseType = ev->response_type & ~0x80;
 
-            switch
-            (responseType)
+            switch (responseType)
             {
-                case
-                XCB_BUTTON_PRESS:
+                case XCB_BUTTON_PRESS:
                 {
                     thread(handleEvent<xcb_button_press_event_t>, (xcb_button_press_event_t*)ev).detach();
                     break;
                 }
 
-                case
-                XCB_EXPOSE:
+                case XCB_EXPOSE:
                 {
                     thread(handleEvent<xcb_expose_event_t>, (xcb_expose_event_t*)ev).detach();
                     break;
                 }
 
-                case
-                XCB_PROPERTY_NOTIFY:
+                case XCB_PROPERTY_NOTIFY:
                 {
                     thread(handleEvent<xcb_property_notify_event_t>, (xcb_property_notify_event_t*)ev).detach();
                     break;
                 }
 
-                case
-                XCB_ENTER_NOTIFY:
+                case XCB_ENTER_NOTIFY:
                 {
-                    MAKE_HANDLE_THREAD(xcb_enter_notify_event_t);
+                    RE_CAST_EV(xcb_enter_notify_event_t);
+                    thread(handle_event<XCB_ENTER_NOTIFY>, e->event).detach();
                     break;
                 }
 
-                case
-                XCB_LEAVE_NOTIFY:
+                case XCB_LEAVE_NOTIFY:
                 {
-                    MAKE_HANDLE_THREAD(xcb_leave_notify_event_t);
+                    RE_CAST_EV(xcb_leave_notify_event_t);
+                    HANDLE_EVENT(XCB_LEAVE_NOTIFY);
                     break;
                 }
             }
         }
+
+        // MAKE_HANDLE_THREAD(xcb_leave_notify_event_t);
 
         void end()
         {
