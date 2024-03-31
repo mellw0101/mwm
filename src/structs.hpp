@@ -51,42 +51,83 @@ struct __data_array_t__ {
 
     static_assert(Size > 0, "Size must be greater than 0.");
     T1 _data[Size];
+    size_t _index;
 
-    T1 &operator[](size_t index)
+    constexpr T1 &operator[](size_t index)
     {
         assert(index < Size);
         return _data[index];
     }
 
-    const T1 &operator[](size_t index) const
+    constexpr T1 &operator[](size_t index) const
     {
         assert(index < Size);
         return _data[index];
     }
 
-    size_t size()
+    constexpr size_t size()
     {
         return Size;
     }
 
-    size_t size() const
+    constexpr size_t size() const
     {
         return Size;
     }
 
-    /* Constructor */
-        constexpr void init_arr()
+    /* Methods */
+        constexpr void clear_arr()
         {
-            if constexpr (is_pointer<T1>::value)
+            for (size_t i = 0; i < Size; ++i)
             {
-                for (size_t i = 0; i < Size; ++i)
+                if
+                constexpr (is_pointer<T1>::value)
                 {
-                    _data[i] = nullptr;
+                   _data[i] = nullptr;
+                }
+                else if
+                constexpr (is_arithmetic<T1>::value)
+                {
+                    _data[i] = 0;
+                }
+                else
+                {
+                    _data[i] = '\0';
                 }
             }
         }
 
-        __data_array_t__<T1, Size> () { init_arr(); }
+        constexpr void clear()
+        {
+            for (size_t i = 0; i < Size; ++i)
+            {
+                _data[i] = T1{};
+            }
+        }
+
+        constexpr void init_arr()
+        {
+            for (size_t i = 0; i < Size; ++i)
+            {
+                if
+                constexpr (is_pointer<T1>::value)
+                {
+                   _data[i] = nullptr;
+                }
+                else if
+                constexpr (is_arithmetic<T1>::value)
+                {
+                    _data[i] = 0;
+                }
+                else
+                {
+                    _data[i] = 0;
+                }
+            }
+        }
+
+    /* Constructor */
+        __data_array_t__<T1, Size> () { clear(); }
 };
 template<typename T1, size_t Size>
 using Array = __data_array_t__<T1, Size>;

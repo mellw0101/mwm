@@ -3698,10 +3698,11 @@ class window {
                 if (__border_mask == ALL ) make_border_window(ALL,   __size, __color);
             }
 
-            #define CHANGE_BORDER_COLOR(__window) \
-                if (__window != 0) {                                 \
-                    change_back_pixel(get_color(__color), __window); \
-                    FLUSH_X();                                       \
+            #define CHANGE_BORDER_COLOR(__data) \
+                if (__data[0] != 0) {                                                                   \
+                    change_back_pixel(get_color(__color), __data[0]);                                   \
+                    clear_window((uint32_t[5]){__data[0], __data[1], __data[2], __data[3], __data[4]}); \
+                    FLUSH_X();                                                                          \
                 }
             ;
 
@@ -3709,31 +3710,31 @@ class window {
             {
                 if (__border_mask == 0)
                 {
-                    CHANGE_BORDER_COLOR(_border[0][0]);
-                    CHANGE_BORDER_COLOR(_border[1][0]);
-                    CHANGE_BORDER_COLOR(_border[2][0]);
-                    CHANGE_BORDER_COLOR(_border[3][0]);
+                    CHANGE_BORDER_COLOR(_border[0]);
+                    CHANGE_BORDER_COLOR(_border[1]);
+                    CHANGE_BORDER_COLOR(_border[2]);
+                    CHANGE_BORDER_COLOR(_border[3]);
                     return;
                 }
 
                 if (__border_mask & UP)
                 {
-                    CHANGE_BORDER_COLOR(_border[0][0]);
+                    CHANGE_BORDER_COLOR(_border[0]);
                 }
 
                 if (__border_mask & DOWN)
                 {
-                    CHANGE_BORDER_COLOR(_border[1][0]);
+                    CHANGE_BORDER_COLOR(_border[1]);
                 }
 
                 if (__border_mask & DOWN)
                 {
-                    CHANGE_BORDER_COLOR(_border[2][0]);
+                    CHANGE_BORDER_COLOR(_border[2]);
                 }
 
                 if (__border_mask & DOWN)
                 {
-                    CHANGE_BORDER_COLOR(_border[3][0]);
+                    CHANGE_BORDER_COLOR(_border[3])
                 }
             }
 
@@ -5965,16 +5966,16 @@ class window {
                 CHECK_VOID_COOKIE();
             }
 
-            void clear_window(uint32_t __window, int16_t __xy[2], uint16_t __wh[2])
+            void clear_window(uint32_t *__arr)
             {
                 VOID_COOKIE = xcb_clear_area(
                     conn, 
                     0,
-                    __window,
-                    __xy[0],
-                    __xy[1],
-                    __wh[0],
-                    __wh[1]
+                    __arr[0],
+                    __arr[1],
+                    __arr[2],
+                    __arr[3],
+                    __arr[4]
                 );
                 FLUSH_XWin();
                 CHECK_VOID_COOKIE();
@@ -6219,7 +6220,7 @@ class window {
                 CHECK_VOID_COOKIE();
             }
 
-            uint32_t get_color(const int &__color)
+            uint32_t get_color(int __color)
             {
                 uint32_t pixel = 0;
                 xcb_colormap_t colormap = screen->default_colormap;
@@ -6280,7 +6281,7 @@ class window {
                 return pixel;
             }
             
-            rgb_color_code rgb_code(const int &__color)
+            rgb_color_code rgb_code(int __color)
             {
                 rgb_color_code color;
                 uint8_t r;
@@ -6289,15 +6290,21 @@ class window {
                 
                 switch (__color)
                 {
-                    case COLOR::WHITE:
+                    case WHITE:
+                    {
                         r = 255; g = 255; b = 255;
                         break;
-                    case COLOR::BLACK:
+                    }
+                    case BLACK:
+                    {
                         r = 0; g = 0; b = 0;
                         break;
-                    case COLOR::RED:
+                    }
+                    case RED:
+                    {
                         r = 255; g = 0; b = 0;
                         break;
+                    }
                     case COLOR::GREEN:
                         r = 0; g = 255; b = 0;
                         break;
@@ -7090,6 +7097,13 @@ class client {
                 }
 
                 win.kill();
+            });
+
+            signal_manager->_window_signals.conect(this->close_button, ENTER_NOTIFY,
+            [this](uint32_t __window) -> void
+            {
+                if (__window != this->close_button) return;
+                this->close_button.change_border_color(WHITE);
             });
         }
     
