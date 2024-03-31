@@ -4,6 +4,7 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <type_traits>
 #include <xcb/xcb_ewmh.h>
 #include <xcb/xproto.h>
 // #include <type_traits>
@@ -46,14 +47,9 @@ constexpr ArrayType type_flag() { return make_type_flag(T1); }
 #define __data_array__TF __MAKE_TYPE_FLAG__(_array_type_flag, T1)
 
 template<typename T1, size_t Size>
-struct __data_array__ {
+struct __data_array_t__ {
 
-    static_assert(Size > 0, "Size must be greater than 0.");    
-    size_t _size;
-
-    __data_array__<T1, Size> () : _size(Size)
-    {}
-
+    static_assert(Size > 0, "Size must be greater than 0.");
     T1 _data[Size];
 
     T1 &operator[](size_t index)
@@ -68,12 +64,32 @@ struct __data_array__ {
         return _data[index];
     }
 
+    size_t size()
+    {
+        return Size;
+    }
+
+    size_t size() const
+    {
+        return Size;
+    }
+
+    /* Constructor */
+        constexpr void init_arr()
+        {
+            if constexpr (is_pointer<T1>::value)
+            {
+                for (size_t i = 0; i < Size; ++i)
+                {
+                    _data[i] = nullptr;
+                }
+            }
+        }
+
+        __data_array_t__<T1, Size> () { init_arr(); }
 };
 template<typename T1, size_t Size>
-using Array = __data_array__<T1, Size>;
-
-template<typename T1, size_t S1, size_t S2>
-using DArray = Array<Array<T1, S1>, S2>;
+using Array = __data_array_t__<T1, Size>;
 
 #define FIRST_T(__name)  __MAKE_TYPE_FLAG__(__name, T1)
 #define SECOND_T(__name) __MAKE_TYPE_FLAG__(__name, T2)

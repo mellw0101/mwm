@@ -3087,26 +3087,31 @@ class __event_handler__ {
 using EventCallback = function<void(Ev)>;
 
 struct __window_ev_id_handler__ {
+
+    int _index;
+    STATIC_CONSTEXPR(_ev_type_arr_size, 34);
+    Array<uint8_t, _ev_type_arr_size> _ev_type_arr;
+    STATIC_CONSTEXPR(_id_arr_size, 10);
+    Array<uint8_t, _id_arr_size> _id_arr;
+
     void add_ev_id_to_map(int __event_id, uint8_t __event_type)
     {
-        if (_ev_id_map.max_size() < 34) _ev_id_map.reserve(34);
-
-        _ev_id_map[__event_id] = __event_type;
+        _ev_type_arr[_index] = __event_type;
+        _id_arr[_index]      = __event_id;
+        ++_index;
     }
 
     void delete_callbacks_by_ev_id()
     {
-        if (_ev_id_map.empty()) return;
-
-        for (const auto &pair : _ev_id_map)
+        for (int i = 0; i < _id_arr.size(); ++i)
         {
-            event_handler->removeEventCallback(pair.second, pair.first);
+            event_handler->removeEventCallback(_ev_type_arr[i], _id_arr[i]);
         }
     }
 
-    unordered_map<int, uint8_t> _ev_id_map;
+    // unordered_map<int, uint8_t> _ev_id_map;
 
-    unordered_map<int, function<void()>> _signal_map;
+    // unordered_map<int, function<void()>> _signal_map;
 
     // unordered_map<uint32_t, unordered_map<uint8_t, vector<EventCallback>>> windowCallbacks;/* Maps a window ID to a list of event types and their associated callbacks */
     
@@ -3704,31 +3709,31 @@ class window {
             {
                 if (__border_mask == 0)
                 {
-                    CHANGE_BORDER_COLOR(_border._data[0][0]);
-                    CHANGE_BORDER_COLOR(_border._data[1][0]);
-                    CHANGE_BORDER_COLOR(_border._data[2][0]);
-                    CHANGE_BORDER_COLOR(_border._data[3][0]);
+                    CHANGE_BORDER_COLOR(_border[0][0]);
+                    CHANGE_BORDER_COLOR(_border[1][0]);
+                    CHANGE_BORDER_COLOR(_border[2][0]);
+                    CHANGE_BORDER_COLOR(_border[3][0]);
                     return;
                 }
 
                 if (__border_mask & UP)
                 {
-                    CHANGE_BORDER_COLOR(_border._data[0][0]);
+                    CHANGE_BORDER_COLOR(_border[0][0]);
                 }
 
                 if (__border_mask & DOWN)
                 {
-                    CHANGE_BORDER_COLOR(_border._data[1][0]);
+                    CHANGE_BORDER_COLOR(_border[1][0]);
                 }
 
                 if (__border_mask & DOWN)
                 {
-                    CHANGE_BORDER_COLOR(_border._data[2][0]);
+                    CHANGE_BORDER_COLOR(_border[2][0]);
                 }
 
                 if (__border_mask & DOWN)
                 {
-                    CHANGE_BORDER_COLOR(_border._data[3][0]);
+                    CHANGE_BORDER_COLOR(_border[3][0]);
                 }
             }
 
@@ -5902,13 +5907,14 @@ class window {
 
         __window_ev_id_handler__ window_ev_id_handler;
 
-        typedef struct __border__ {
+        // typedef struct __border__ {
         
-            DArray<uint32_t, 5, 4> _data;
 
-        } border_t;
+        // } border_t;
 
-        border_t _border;
+        Array<Array<uint32_t, 5>, 4> _border;
+
+        // border_t _border;
         // mutex _mtx;
 
         // vector<pair<uint8_t, int>> _event_vec;
@@ -6410,38 +6416,38 @@ class window {
 
                 if (__border == UP)
                 {
-                    _border._data[0][0] = window;
-                    _border._data[0][1] = __x;
-                    _border._data[0][2] = __y;
-                    _border._data[0][3] = __width;
-                    _border._data[0][4] = __height;
+                    _border[0][0] = window;
+                    _border[0][1] = __x;
+                    _border[0][2] = __y;
+                    _border[0][3] = __width;
+                    _border[0][4] = __height;
                 }
 
                 if (__border == DOWN)
                 {
-                    _border._data[1][0] = window;
-                    _border._data[1][1] = __x;
-                    _border._data[1][2] = __y;
-                    _border._data[1][3] = __width;
-                    _border._data[1][4] = __height;
+                    _border[1][0] = window;
+                    _border[1][1] = __x;
+                    _border[1][2] = __y;
+                    _border[1][3] = __width;
+                    _border[1][4] = __height;
                 }
 
                 if (__border == LEFT)
                 {
-                    _border._data[2][0] = window;
-                    _border._data[2][1] = __x;
-                    _border._data[2][2] = __y;
-                    _border._data[2][3] = __width;
-                    _border._data[2][4] = __height;
+                    _border[2][0] = window;
+                    _border[2][1] = __x;
+                    _border[2][2] = __y;
+                    _border[2][3] = __width;
+                    _border[2][4] = __height;
                 }
 
                 if (__border == RIGHT)
                 {
-                    _border._data[3][0] = window;
-                    _border._data[3][1] = __x;
-                    _border._data[3][2] = __y;
-                    _border._data[3][3] = __width;
-                    _border._data[3][4] = __height;
+                    _border[3][0] = window;
+                    _border[3][1] = __x;
+                    _border[3][2] = __y;
+                    _border[3][3] = __width;
+                    _border[3][4] = __height;
                 }
             }
 
