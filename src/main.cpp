@@ -5758,7 +5758,7 @@ class window {
         pid_t    _pid = 0;
 
         __window_ev_id_handler__ window_ev_id_handler;
-        mutex _mtx;
+        // mutex _mtx;
 
         // vector<pair<uint8_t, int>> _event_vec;
         // any      _storedValue;
