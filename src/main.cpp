@@ -7218,21 +7218,28 @@ class context_menu {
     // Methods.
         void init()
         {
-            event_handler->setEventCallback(EV_CALL(XCB_BUTTON_PRESS)
-            {
-                RE_CAST_EV(xcb_button_press_event_t);
-                if (e->detail == L_MOUSE_BUTTON)
-                {
-                    for (int i = 0; i < entries.size(); ++i)
-                    {
-                        if (e->event == entries[i].window)
-                        {
-                            signal_manager->_window_signals.emit(entries[i].window, L_MOUSE_BUTTON_EVENT);
-                        }
-                    }
+            // event_handler->setEventCallback(EV_CALL(XCB_BUTTON_PRESS)
+            // {
+            //     RE_CAST_EV(xcb_button_press_event_t);
+            //     if (e->detail == L_MOUSE_BUTTON)
+            //     {
+            //         for (int i = 0; i < entries.size(); ++i)
+            //         {
+            //             if (e->event == entries[i].window)
+            //             {
+            //                 signal_manager->_window_signals.emit(entries[i].window, L_MOUSE_BUTTON_EVENT);
+            //             }
+            //         }
 
-                    hide__();
-                }
+            //         hide__();
+            //     }
+            // });
+            signal_manager->_window_signals.conect(screen->root, L_MOUSE_BUTTON_EVENT,
+            [this](uint32_t __window) -> void
+            {
+                if (__window != screen->root) return;
+                
+                this->hide__();
             });
 
             event_handler->setEventCallback(EV_CALL(XCB_ENTER_NOTIFY)
