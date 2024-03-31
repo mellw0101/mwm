@@ -12493,9 +12493,14 @@ class mv_client {
 
                         break;
                     }
+
+                    case XCB_EXPOSE:
+                    {
+                        RE_CAST_EV(xcb_expose_event_t);
+                        WS_emit(e->window, EXPOSE);
+                    }
                 }
 
-                event_handler->processEvent(ev);
                 free(ev);
             }
         }
