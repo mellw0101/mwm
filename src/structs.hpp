@@ -81,41 +81,41 @@ struct __data_array_t__ {
         this->_index++;
     }
 
-    constexpr __data_array_t__<T1, Size> &operator=(const __data_array_t__<T1, Size> &__other)
-    {
-        if (this != &__other)
-        {
-            for (size_t i = 0; i < Size; ++i)
-            {
-                _data[i] = __other._data[i];
-            }
-        }
+    // constexpr __data_array_t__<T1, Size> &operator=(const __data_array_t__<T1, Size> &__other)
+    // {
+    //     if (this != &__other)
+    //     {
+    //         for (size_t i = 0; i < Size; ++i)
+    //         {
+    //             _data[i] = __other._data[i];
+    //         }
+    //     }
 
-        return *this;
-    }
+    //     return *this;
+    // }
 
-    constexpr __data_array_t__<T1, Size> (const __data_array_t__<T1, Size> &__other)
-    {
-        if (this != &__other)
-        {
-            for (size_t i = 0; i < Size; ++i)
-            {
-                this->_data[i] = __other._data[i];
-            }
-        }
+    // constexpr __data_array_t__<T1, Size> (const __data_array_t__<T1, Size> &__other)
+    // {
+    //     if (this != &__other)
+    //     {
+    //         for (size_t i = 0; i < Size; ++i)
+    //         {
+    //             this->_data[i] = __other._data[i];
+    //         }
+    //     }
 
-        return *this;
-    }
+    //     return *this;
+    // }
 
-    constexpr T1 &operator=(T1 others[Size])
-    {
-        _data = others;
-    }
+    // constexpr T1 &operator=(T1 others[Size])
+    // {
+    //     _data = others;
+    // }
 
-    constexpr T1 &operator=(T1 &other)
-    {
+    // constexpr T1 &operator=(T1 &other)
+    // {
 
-    }
+    // }
 
     /* Methods */
         constexpr void clear_arr()
