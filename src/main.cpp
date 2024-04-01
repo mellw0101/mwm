@@ -958,7 +958,8 @@ namespace {
     };
 }
 
-class __signal_manager__ {
+class __signal_manager__
+{
     /* Defines   */
         #define WS_conn signal_manager->_window_signals.conect
         #define WS_emit(_window, _event) signal_manager->_window_signals.emit(_window, _event)

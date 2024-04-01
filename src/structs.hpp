@@ -266,39 +266,39 @@ class client_border_decor;
 template<typename T1, typename T2>
 class __linked_dynamic_array_t;
 
-template<>
-class __linked_dynamic_array_t<client *, uint32_t *> {
-    public:
-    /* Variabels */
-        DynamicArray<uint32_t *> _window;
-        DynamicArray<client *> _client;
+// template<>
+// class __linked_dynamic_array_t<client *, uint32_t *> {
+//     public:
+//     /* Variabels */
+//         DynamicArray<uint32_t *> _window;
+//         DynamicArray<client *> _client;
 
-    /* Methods */
-        size_t add_client(client *__c, uint32_t *__w)
-        {
-            _client.push_back(__c);
-            _window.push_back(__w);
-            size_t c_size = size;
-            size++;
-            return c_size;
-        }
+//     /* Methods */
+//         size_t add_client(client *__c, uint32_t *__w)
+//         {
+//             _client.push_back(__c);
+//             _window.push_back(__w);
+//             size_t c_size = size;
+//             size++;
+//             return c_size;
+//         }
 
-        void remove_at(size_t __index)
-        {
-            _window.removeAt(__index);
-            _client.removeAt(__index);
-        }
+//         void remove_at(size_t __index)
+//         {
+//             _window.removeAt(__index);
+//             _client.removeAt(__index);
+//         }
 
-        // client *retrive_client(uint32_t __window)
-        // {
-        // }
+//         // client *retrive_client(uint32_t __window)
+//         // {
+//         // }
 
-    /* Constructor */
-        size_t size;
+//     /* Constructor */
+//         size_t size;
 
-        __linked_dynamic_array_t() {}
-};
-using ldClientWindowArray = __linked_dynamic_array_t<client *, uint32_t *>;
+//         __linked_dynamic_array_t() {}
+// };
+// using ldClientWindowArray = __linked_dynamic_array_t<client *, uint32_t *>;
 
 template<
     typename T0,
