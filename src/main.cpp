@@ -3428,11 +3428,6 @@ class window {
         window() {}
 
     /* Operators   */
-        operator const uint32_t&()
-        {
-            return _window;
-        }
-
         operator uint32_t() const
         {
             return _window;
@@ -3444,15 +3439,15 @@ class window {
             return *this;
         }
 
-        window& operator=(const window &other)
-        {
-            if (this != &other)
-            {
-                // Copy each member from 'other' to 'this'
-            }
+        // window& operator=(const window &other)
+        // {
+        //     if (this != &other)
+        //     {
+        //         // Copy each member from 'other' to 'this'
+        //     }
 
-            return *this;
-        }
+        //     return *this;
+        // }
 
         bool operator==(const window& other) const
         {
