@@ -6981,7 +6981,7 @@ class client {
             border.top.grab_button({ { L_MOUSE_BUTTON, NULL } });
             border.top.map();
 
-            border.bottom.create_default(frame, BORDER_SIZE, (height + TITLE_BAR_HEIGHT - BORDER_SIZE), width, BORDER_SIZE);
+            border.bottom.create_default(frame, BORDER_SIZE, (height - BORDER_SIZE), width, BORDER_SIZE);
             CWC(border.bottom);
             border.bottom.set_backround_color(BLACK);
             border.bottom.set_pointer(CURSOR::bottom_side);
