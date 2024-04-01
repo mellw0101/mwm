@@ -9083,7 +9083,7 @@ class __status_bar__ {
 
     public:
     // Variabels.
-        FixedDynamicArray<window, 8> _w;
+        FixedArray<window, 8> _w;
 
         typedef enum {
             _BAR,
@@ -9104,7 +9104,7 @@ class __status_bar__ {
         }
 
     // Constructor.
-        __status_bar__() {}
+        __status_bar__()  : _w({}) {}
 
 }; static __status_bar__ *status_bar(nullptr);
 

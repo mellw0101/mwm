@@ -13,10 +13,11 @@
 #include <functional>
 #include <limits>
 #include <type_traits>
+#include <valarray>
 #include <xcb/xcb_ewmh.h>
 #include <xcb/xproto.h>
 // #include <type_traits>
-#include <initializer_list> 
+#include <initializer_list>
 
 using namespace std;
 
@@ -59,8 +60,8 @@ template<typename T0, size_t Size = 20>
 class __fixed_array_t__ {
     public:
     /* Variabels */
-        T0 *data;
-        // T0 data[Size];
+        // T0 *data;
+        T0 data[Size];
 
     /* Methods */
         void fill(const T0& value)
@@ -90,16 +91,26 @@ class __fixed_array_t__ {
         }
 
         __fixed_array_t__(const T0 (&__data)[Size])
+        : data(new T0[Size])
         {
-            data = AllocArr<T0>(Size);
             fill(T0{});
             fill(__data);
         }
 
-        void delete_array()
+        template<typename Type = T0>
+        __fixed_array_t__(initializer_list<Type> init);
+
+
+        __fixed_array_t__(indirect_array<T0> init)
+        : data(new T0[Size])
         {
-            free(data);
+            for (auto &__init : init)
+            {
+                &data[__init] = &init[__init];
+            }
         }
+
+        __fixed_array_t__() : data(AllocArr<T0>(Size)) {}
 
 };
 template<typename T0, size_t n0 = 20>
