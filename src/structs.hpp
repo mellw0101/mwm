@@ -96,6 +96,11 @@ class __fixed_array_t__ {
             fill(__data);
         }
 
+        void delete_array()
+        {
+            free(data);
+        }
+
         // template<typename Type = T0>
         // __fixed_array_t__ (initializer_list<Type> __init);
 
@@ -110,7 +115,7 @@ class __fixed_array_t__ {
         //     }
         // }
 
-        ~__fixed_array_t__() { delete [] data; }
+        ~__fixed_array_t__() { free(data); }
 
 };
 template<typename T0, size_t n0 = 20>
