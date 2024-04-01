@@ -8813,7 +8813,7 @@ class __status_bar__ {
 
         void create_windows__()
         {
-            _bar_window.create_window(
+            _w[_BAR].create_window(
                 screen->root,
                 BAR_WINDOW_X,
                 BAR_WINDOW_Y,
@@ -8824,8 +8824,8 @@ class __status_bar__ {
                 MAP
             );
 
-            _time_date_window.create_window(
-                _bar_window,
+            _w[_TIME_DATE].create_window(
+                _w[_BAR],
                 TIME_DATE_WINDOW_X,
                 TIME_DATE_WINDOW_Y,
                 TIME_DATE_WINDOW_WIDTH,
@@ -8835,14 +8835,14 @@ class __status_bar__ {
                 MAP
             );
 
-            WS_conn(this->_time_date_window, EXPOSE, W_callback
+            WS_conn(this->_w[_TIME_DATE], EXPOSE, W_callback
             {
-                if (__window != this->_time_date_window) return;
-                this->_time_date_window.draw_acc(this->get_time_and_date__());
+                if (__window != this->_w[_TIME_DATE]) return;
+                this->_w[_TIME_DATE].draw_acc(this->get_time_and_date__());
             });
 
-            _wifi_window.create_window(
-                _bar_window,
+            _w[_WIFI].create_window(
+                _w[_BAR],
                 WIFI_WINDOW_X,
                 WIFI_WINDOW_Y,
                 WIFI_WINDOW_WIDTH,
@@ -8852,13 +8852,13 @@ class __status_bar__ {
                 MAP
             );
 
-            WS_conn(_wifi_window, L_MOUSE_BUTTON_EVENT, W_callback
+            WS_conn(_w[_WIFI], L_MOUSE_BUTTON_EVENT, W_callback
             {
-                if (__window != this->_wifi_window) return;
+                if (__window != this->_w[_WIFI]) return;
 
-                if (this->_wifi_dropdown_window.is_mapped())
+                if (this->_w[_WIFI_DROPWOWN].is_mapped())
                 {
-                    this->hide__(this->_wifi_dropdown_window);
+                    this->hide__(this->_w[_WIFI_DROPWOWN]);
                 }
                 else
                 {
@@ -8867,9 +8867,9 @@ class __status_bar__ {
                         this->hide__(this->_w[_AUDIO_DROPDOWN]);
                     }
 
-                    show__(this->_wifi_dropdown_window);
-                    this->_wifi_info_window.send_event(XCB_EVENT_MASK_EXPOSURE);
-                    this->_wifi_close_window.send_event(XCB_EVENT_MASK_EXPOSURE);
+                    show__(this->_w[_WIFI_DROPWOWN]);
+                    this->_w[_WIFI_INFO].send_event(XCB_EVENT_MASK_EXPOSURE);
+                    this->_w[_WIFI_CLOSE].send_event(XCB_EVENT_MASK_EXPOSURE);
                 }
             });
 
@@ -8895,11 +8895,11 @@ class __status_bar__ {
 
             string s = USER_PATH_PREFIX("/wifi.png");
             bitmap.exportToPng(s.c_str());
-            _wifi_window.set_backround_png(USER_PATH_PREFIX("/wifi.png"));
-            _wifi_window.set_pointer(CURSOR::hand2);
+            _w[_WIFI].set_backround_png(USER_PATH_PREFIX("/wifi.png"));
+            _w[_WIFI].set_pointer(CURSOR::hand2);
 
-            _audio_window.create_window(
-                _bar_window,
+            _w[_AUDIO].create_window(
+                _w[_BAR],
                 (WIFI_WINDOW_X - 50),
                 0,
                 50,
@@ -8911,17 +8911,17 @@ class __status_bar__ {
                 CURSOR::hand2
             );
             
-            WS_conn(this->_audio_window, EXPOSE, W_callback
+            WS_conn(this->_w[_AUDIO], EXPOSE, W_callback
             {
-                if (__window != this->_audio_window) return;
-                this->_audio_window.draw("Audio");
+                if (__window != this->_w[_AUDIO]) return;
+                this->_w[_AUDIO].draw("Audio");
             });
 
-            this->_audio_window.send_event(XCB_EVENT_MASK_EXPOSURE);
+            this->_w[_AUDIO].send_event(XCB_EVENT_MASK_EXPOSURE);
 
-            WS_conn(this->_audio_window, L_MOUSE_BUTTON_EVENT, W_callback
+            WS_conn(this->_w[_AUDIO], L_MOUSE_BUTTON_EVENT, W_callback
             {
-                if (__window != this->_audio_window) return;
+                if (__window != this->_w[_AUDIO]) return;
 
                 if (this->_w[_AUDIO_DROPDOWN].is_mapped())
                 {
@@ -8929,33 +8929,33 @@ class __status_bar__ {
                 }
                 else
                 {
-                    if (this->_wifi_dropdown_window.is_mapped())
+                    if (this->_w[_WIFI_DROPWOWN].is_mapped())
                     {
-                        this->hide__(this->_wifi_dropdown_window);
+                        this->hide__(this->_w[_WIFI_DROPWOWN]);
                     }
 
                     this->show__(this->_w[_AUDIO_DROPDOWN]);
                 }
             });
 
-            WS_conn(this->_audio_window, ENTER_NOTIFY, W_callback
+            WS_conn(this->_w[_AUDIO], ENTER_NOTIFY, W_callback
             {
-                if (__window != this->_audio_window) return;
-                this->_audio_window.change_backround_color(WHITE);
+                if (__window != this->_w[_AUDIO]) return;
+                this->_w[_AUDIO].change_backround_color(WHITE);
             });
             
-            WS_conn(this->_audio_window, LEAVE_NOTIFY, W_callback
+            WS_conn(this->_w[_AUDIO], LEAVE_NOTIFY, W_callback
             {
-                if (__window != this->_audio_window) return;
-                this->_audio_window.change_backround_color(DARK_GREY);
+                if (__window != this->_w[_AUDIO]) return;
+                this->_w[_AUDIO].change_backround_color(DARK_GREY);
             });
         }
 
         void show__(const uint32_t &__window)
         {
-            if (__window == _wifi_dropdown_window)
+            if (__window == _w[_WIFI_DROPWOWN])
             {
-                _wifi_dropdown_window.create_window(
+                _w[_WIFI_DROPWOWN].create_window(
                     screen->root,
                     WIFI_DROPDOWN_X,
                     WIFI_DROPDOWN_Y,
@@ -8967,8 +8967,8 @@ class __status_bar__ {
                     (int[3]){ALL, WIFI_DROPDOWN_BORDER, BLACK}
                 );
                 
-                _wifi_close_window.create_window(
-                    _wifi_dropdown_window,
+                _w[_WIFI_CLOSE].create_window(
+                    _w[_WIFI_DROPWOWN],
                     WIFI_CLOSE_WINDOW_X,
                     WIFI_CLOSE_WINDOW_Y,
                     WIFI_CLOSE_WINDOW_WIDTH,
@@ -8980,34 +8980,34 @@ class __status_bar__ {
                     CURSOR::hand2
                 );
 
-                WS_conn(this->_wifi_close_window, L_MOUSE_BUTTON_EVENT, W_callback
+                WS_conn(this->_w[_WIFI_CLOSE], L_MOUSE_BUTTON_EVENT, W_callback
                 {
-                    if (__window != this->_wifi_close_window) return;
-                    this->hide__(this->_wifi_dropdown_window);
+                    if (__window != this->_w[_WIFI_CLOSE]) return;
+                    this->hide__(this->_w[_WIFI_DROPWOWN]);
                 });
 
-                WS_conn(this->_wifi_close_window, EXPOSE, W_callback
+                WS_conn(this->_w[_WIFI_CLOSE], EXPOSE, W_callback
                 {
-                    if (__window != this->_wifi_close_window) return;
-                    this->_wifi_close_window.draw_acc("Close");
+                    if (__window != this->_w[_WIFI_CLOSE]) return;
+                    this->_w[_WIFI_CLOSE].draw_acc("Close");
                 });
 
-                this->_wifi_close_window.send_event(XCB_EVENT_MASK_EXPOSURE);
+                this->_w[_WIFI_CLOSE].send_event(XCB_EVENT_MASK_EXPOSURE);
 
-                WS_conn(this->_wifi_close_window, ENTER_NOTIFY, W_callback
+                WS_conn(this->_w[_WIFI_CLOSE], ENTER_NOTIFY, W_callback
                 {
-                    if (__window != this->_wifi_close_window) return;
-                    this->_wifi_close_window.change_backround_color(WHITE);
+                    if (__window != this->_w[_WIFI_CLOSE]) return;
+                    this->_w[_WIFI_CLOSE].change_backround_color(WHITE);
                 });
 
-                WS_conn(this->_wifi_close_window, LEAVE_NOTIFY, W_callback
+                WS_conn(this->_w[_WIFI_CLOSE], LEAVE_NOTIFY, W_callback
                 {
-                    if (__window != this->_wifi_close_window) return;
-                    this->_wifi_close_window.change_backround_color(DARK_GREY);
+                    if (__window != this->_w[_WIFI_CLOSE]) return;
+                    this->_w[_WIFI_CLOSE].change_backround_color(DARK_GREY);
                 });
 
-                _wifi_info_window.create_window(
-                    _wifi_dropdown_window,
+                _w[_WIFI_INFO].create_window(
+                    _w[_WIFI_DROPWOWN],
                     WIFI_INFO_WINDOW_X,
                     WIFI_INFO_WINDOW_Y,
                     WIFI_INFO_WINDOW_WIDTH,
@@ -9018,16 +9018,16 @@ class __status_bar__ {
                     (int[3]){ALL, WIFI_DROPDOWN_BORDER, BLACK}
                 );
 
-                WS_conn(this->_wifi_info_window, EXPOSE, W_callback
+                WS_conn(this->_w[_WIFI_INFO], EXPOSE, W_callback
                 {
                     string local_ip("Local ip: " + network->get_local_ip_info(__network__::LOCAL_IP));
-                    this->_wifi_info_window.draw_text_auto_color(local_ip.c_str(), 4, 16, BLACK);
+                    this->_w[_WIFI_INFO].draw_text_auto_color(local_ip.c_str(), 4, 16, BLACK);
 
                     string local_interface("interface: " + network->get_local_ip_info(__network__::INTERFACE_FOR_LOCAL_IP));
-                    this->_wifi_info_window.draw_text_auto_color(local_interface.c_str(), 4, 30, BLACK);
+                    this->_w[_WIFI_INFO].draw_text_auto_color(local_interface.c_str(), 4, 30, BLACK);
                 });
 
-                this->_wifi_info_window.send_event(XCB_EVENT_MASK_EXPOSURE);
+                this->_w[_WIFI_INFO].send_event(XCB_EVENT_MASK_EXPOSURE);
             }
             
             if (__window == _w[_AUDIO_DROPDOWN])
@@ -9048,14 +9048,14 @@ class __status_bar__ {
 
         void hide__(const uint32_t &__window)
         {
-            if (__window == _wifi_dropdown_window)
+            if (__window == _w[_WIFI_DROPWOWN])
             {
-                _wifi_close_window.unmap();
-                _wifi_close_window.kill();
-                _wifi_info_window.unmap();
-                _wifi_info_window.kill();
-                _wifi_dropdown_window.unmap();
-                _wifi_dropdown_window.kill();
+                _w[_WIFI_CLOSE].unmap();
+                _w[_WIFI_CLOSE].kill();
+                _w[_WIFI_INFO].unmap();
+                _w[_WIFI_INFO].kill();
+                _w[_WIFI_DROPWOWN].unmap();
+                _w[_WIFI_DROPWOWN].kill();
             }
 
             if (__window == _w[_AUDIO_DROPDOWN])
@@ -9073,7 +9073,7 @@ class __status_bar__ {
                 {
                     while (true)
                     {
-                        this->_time_date_window.send_event(XCB_EVENT_MASK_EXPOSURE);
+                        this->_w[_TIME_DATE].send_event(XCB_EVENT_MASK_EXPOSURE);
                         this_thread::sleep_for(chrono::seconds(1));
                     }
                 };
@@ -9097,16 +9097,11 @@ class __status_bar__ {
             _AUDIO_DROPDOWN
         } window_type_t;
 
-        window(_bar_window),
-            (_time_date_window), 
-            (_wifi_window), (_wifi_dropdown_window), (_wifi_close_window), (_wifi_info_window),
-            (_audio_window);
-
     // Methods.
         void init()
         {
             create_windows__();
-            setup_thread__(_time_date_window);
+            setup_thread__(_w[_TIME_DATE]);
         }
 
     // Constructor.
