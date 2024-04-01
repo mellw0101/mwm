@@ -3449,10 +3449,10 @@ class window {
             return *this;
         }
 
-        window *operator=(const window &&other)
-        {
-            
-            return &*this;
+        window& operator=(window &other)
+        {   
+            *this = other;
+            return *this;
         }
 
         bool operator==(const window& other) const
