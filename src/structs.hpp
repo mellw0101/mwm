@@ -4,7 +4,6 @@
 // #include "defenitions.hpp"
 #include "include.hpp"
 #include <X11/Xlib.h>
-#include <cassert>
 #include <cstddef>
 #include <cstdint>
 // #include <type_traits>
@@ -89,188 +88,216 @@ class __dynamic_array_t {
             data = newData;
             capacity = newCapacity;
         }
+
 };
 template<typename T1>
 using DynamicArray = __dynamic_array_t<T1>;
 
-template<typename T1, size_t Size>
-class __data_array_t__ {
+class client;
+template<typename T1, typename T2>
+class __linked_dynamic_array_t;
+
+template<>
+class __linked_dynamic_array_t<client *, uint32_t *> {
     public:
     /* Variabels */
-        static_assert(Size > 0, "Size must be greater than 0.");
-        T1 _data[Size];
-        size_t _index;
-
-    /* Proxy */
-        typedef struct __proxy_data_t__ {
-            /* Vatiabels */
-                __data_array_t__& _arr;
-                size_t _index;
-
-            /* Constructor */
-                constexpr __proxy_data_t__(__data_array_t__ &__arr, size_t __index)
-                : _arr(__arr), _index(__index) {}
-
-            /* Operators */
-                constexpr T1 &operator=(const T1 &__value)
-                {
-                    /* Assign the value to the actual array element */
-                    this->_arr._data[this->_index] = __value;
-
-                    /* Update the current index in the main array */
-                    this->_arr._index = this->_index;
-                    
-                    /* Return the assigned value */
-                    return this->_arr._data[this->_index];
-                }
-
-                constexpr operator T1&() const
-                {
-                    return this->_arr._data[this->_index];
-                }
-
-        } Proxy;
-
-        constexpr T1 &operator[](size_t index)
-        {
-            assert(index < Size);
-            return Proxy(*this, index);
-        }
-
-        constexpr const T1 &operator[](size_t index) const
-        {
-            assert(index < Size);
-            return this->_data[index];
-        }
+        DynamicArray<uint32_t *> _window;
+        DynamicArray<client *> _client;
 
     /* Methods */
-        /* Size */
-            constexpr size_t size()
-            {
-                return _index;
-            }
-
-            constexpr size_t size() const
-            {
-                return _index;
-            }
-
-        /* Max Size */
-            constexpr size_t max_size()
-            {
-                return Size;
-            }
-
-            constexpr size_t max_size() const
-            {
-                return Size;
-            }
-
-        constexpr void add(const T1 &__input)
+        void add_client(client *__c, uint32_t *__w)
         {
-            if (_index < Size)
-            {
-                _data[_index++] = __input;
-            }
-        }
-
-    /* Methods */
-        constexpr void clear()
-        {
-            for (size_t i = 0; i < Size; ++i)
-            {
-                _data[i] = T1{};
-            }
-
-            _index = 0;
+            _client.push_back(__c);
+            _window.push_back(__w);
+            size++;
         }
 
     /* Constructor */
-        constexpr __data_array_t__ ()
-        : _index(0)
-        { clear(); }
+        size_t size;
 
-        constexpr __data_array_t__(const T1 (&__data)[Size])
-        : _index(Size)
-        {
-            this->clear();
-            for (size_t i = 0; i < Size; ++i)
-            {
-                this->_data[i] = __data[i];
-            }
-        }
-
+        __linked_dynamic_array_t() {}
 };
+using ldClientWindowArray = __linked_dynamic_array_t<client *, uint32_t *>;
+
+
 // template<typename T1, size_t Size>
-// using Array = __data_array_t__<T1, Size>;
+// class __data_array_t__ {
+//     public:
+//     /* Variabels */
+//         static_assert(Size > 0, "Size must be greater than 0.");
+//         T1 _data[Size];
+//         size_t _index;
 
-#define FIRST_T(__name)  __MAKE_TYPE_FLAG__(__name, T1)
-#define SECOND_T(__name) __MAKE_TYPE_FLAG__(__name, T2)
-template<typename T1, typename T2, size_t Size>
-struct __pair_array_t__ {
+//     /* Proxy */
+//         typedef struct __proxy_data_t__ {
+//             /* Vatiabels */
+//                 __data_array_t__& _arr;
+//                 size_t _index;
 
-    Array<T1, Size> first;
-    Array<T2, Size> second;
+//             /* Constructor */
+//                 constexpr __proxy_data_t__(__data_array_t__ &__arr, size_t __index)
+//                 : _arr(__arr), _index(__index) {}
 
-    typedef struct __proxy_accessor_t__ {
-        /* Variabels    */
-            T1 &_first;
-            T2 &_second;
+//             /* Operators */
+//                 constexpr T1 &operator=(const T1 &__value)
+//                 {
+//                     /* Assign the value to the actual array element */
+//                     this->_arr._data[this->_index] = __value;
 
-        /* Constructors */
-            __proxy_accessor_t__(T1 &__first, T2 &__second)
-            : _first(__first), _second(__second) {}
+//                     /* Update the current index in the main array */
+//                     this->_arr._index = this->_index;
+                    
+//                     /* Return the assigned value */
+//                     return this->_arr._data[this->_index];
+//                 }
 
-        /* Implicit conversion operators */
-            operator T1&() { return _first; }
-            operator T2&() { return _second; }
+//                 constexpr operator T1&() const
+//                 {
+//                     return this->_arr._data[this->_index];
+//                 }
 
-    } proxy_accessor_t;
+//         } Proxy;
 
-    proxy_accessor_t operator[](size_t index)
-    {
-        return first[index], second[index];
-    }
+//         constexpr T1 &operator[](size_t index)
+//         {
+//             assert(index < Size);
+//             return Proxy(*this, index);
+//         }
 
-};
-template<typename T1, typename T2, size_t Size>
-using PairArray = __pair_array_t__<T1, T2, Size>;
+//         constexpr const T1 &operator[](size_t index) const
+//         {
+//             assert(index < Size);
+//             return this->_data[index];
+//         }
 
-template<typename T1, typename T2, typename T3, typename T4, size_t Size>
-struct __quad_array_t__ {
+//     /* Methods */
+//         /* Size */
+//             constexpr size_t size()
+//             {
+//                 return _index;
+//             }
 
-    Array<T1, Size> first;
-    Array<T2, Size> second;
-    Array<T3, Size> third;
-    Array<T4, Size> fourth;
+//             constexpr size_t size() const
+//             {
+//                 return _index;
+//             }
 
-    typedef struct __proxy_accessor_t__ {
-        /* Variabels    */
-            T1 &_first;
-            T2 &_second;
-            T3 &_third;
-            T4 &_fourth;
+//         /* Max Size */
+//             constexpr size_t max_size()
+//             {
+//                 return Size;
+//             }
 
-        /* Constructors */
-            __proxy_accessor_t__(T1 &__first, T2 &__second, T3 &__third, T4 &__fourth)
-            : _first(__first), _second(__second), _third(__third), _fourth(__fourth) {}
+//             constexpr size_t max_size() const
+//             {
+//                 return Size;
+//             }
 
-        /* Implicit conversion operators */
-            operator T1&() { return _first;  }
-            operator T2&() { return _second; }
-            operator T3&() { return _third;  }
-            operator T4&() { return _fourth; }
+//         constexpr void add(const T1 &__input)
+//         {
+//             if (_index < Size)
+//             {
+//                 _data[_index++] = __input;
+//             }
+//         }
 
-    } proxy_accessor_t;
+//     /* Methods */
+//         constexpr void clear()
+//         {
+//             for (size_t i = 0; i < Size; ++i)
+//             {
+//                 _data[i] = T1{};
+//             }
 
-    proxy_accessor_t operator[](size_t index)
-    {
-        return first[index], second[index], third[index], fourth[index];
-    }
+//             _index = 0;
+//         }
 
-};
-template<typename T1, typename T2, typename T3, typename T4, size_t Size>
-using QuadArray = __quad_array_t__<T1, T2, T3, T4, Size>;
+//     /* Constructor */
+//         constexpr __data_array_t__ ()
+//         : _index(0)
+//         { clear(); }
+
+//         constexpr __data_array_t__(const T1 (&__data)[Size])
+//         : _index(Size)
+//         {
+//             this->clear();
+//             for (size_t i = 0; i < Size; ++i)
+//             {
+//                 this->_data[i] = __data[i];
+//             }
+//         }
+
+// };
+// // template<typename T1, size_t Size>
+// // using Array = __data_array_t__<T1, Size>;
+
+// #define FIRST_T(__name)  __MAKE_TYPE_FLAG__(__name, T1)
+// #define SECOND_T(__name) __MAKE_TYPE_FLAG__(__name, T2)
+// template<typename T1, typename T2, size_t Size>
+// struct __pair_array_t__ {
+
+//     Array<T1, Size> first;
+//     Array<T2, Size> second;
+
+//     typedef struct __proxy_accessor_t__ {
+//         /* Variabels    */
+//             T1 &_first;
+//             T2 &_second;
+
+//         /* Constructors */
+//             __proxy_accessor_t__(T1 &__first, T2 &__second)
+//             : _first(__first), _second(__second) {}
+
+//         /* Implicit conversion operators */
+//             operator T1&() { return _first; }
+//             operator T2&() { return _second; }
+
+//     } proxy_accessor_t;
+
+//     proxy_accessor_t operator[](size_t index)
+//     {
+//         return first[index], second[index];
+//     }
+
+// };
+// template<typename T1, typename T2, size_t Size>
+// using PairArray = __pair_array_t__<T1, T2, Size>;
+
+// template<typename T1, typename T2, typename T3, typename T4, size_t Size>
+// struct __quad_array_t__ {
+
+//     Array<T1, Size> first;
+//     Array<T2, Size> second;
+//     Array<T3, Size> third;
+//     Array<T4, Size> fourth;
+
+//     typedef struct __proxy_accessor_t__ {
+//         /* Variabels    */
+//             T1 &_first;
+//             T2 &_second;
+//             T3 &_third;
+//             T4 &_fourth;
+
+//         /* Constructors */
+//             __proxy_accessor_t__(T1 &__first, T2 &__second, T3 &__third, T4 &__fourth)
+//             : _first(__first), _second(__second), _third(__third), _fourth(__fourth) {}
+
+//         /* Implicit conversion operators */
+//             operator T1&() { return _first;  }
+//             operator T2&() { return _second; }
+//             operator T3&() { return _third;  }
+//             operator T4&() { return _fourth; }
+
+//     } proxy_accessor_t;
+
+//     proxy_accessor_t operator[](size_t index)
+//     {
+//         return first[index], second[index], third[index], fourth[index];
+//     }
+
+// };
+// template<typename T1, typename T2, typename T3, typename T4, size_t Size>
+// using QuadArray = __quad_array_t__<T1, T2, T3, T4, Size>;
 
 enum
 {

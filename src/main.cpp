@@ -984,6 +984,8 @@ class __signal_manager__ {
         __window_signals__ _window_signals;
         __window_client_map__ _window_client_map;
 
+        ldClientWindowArray _client_window_arr;
+
     /* Methods   */
         template<typename Callback>
         void connect(const string &__signal_name, Callback &&callback) // Connect a slot to a signal
@@ -6437,6 +6439,26 @@ class client {
                 {
                     make_borders();
                 }
+
+                signal_manager->_client_window_arr.add_client(this,
+                (uint32_t[15])
+                {
+                    this->win,
+                    this->frame,
+                    this->titlebar,
+                    this->close_button,
+                    this->max_button,
+                    this->min_button,
+                    this->icon,
+                    border[left],
+                    border[right],
+                    border[top],
+                    border[bottom],
+                    border[top_left],
+                    border[top_right],
+                    border[bottom_left],
+                    border[bottom_right]
+                });
             }
         
             void raise()
