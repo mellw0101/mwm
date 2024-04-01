@@ -6977,7 +6977,7 @@ class client {
 
             border.right.create_window(
                 frame,
-                (width - BORDER_SIZE),
+                width,
                 BORDER_SIZE,
                 BORDER_SIZE,
                 (height + TITLE_BAR_HEIGHT),
