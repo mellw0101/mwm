@@ -6994,7 +6994,7 @@ class client {
                 frame,
                 BORDER_SIZE,
                 0,
-                (width + BORDER_SIZE),
+                width,
                 BORDER_SIZE,
                 BLACK,
                 NONE,
@@ -7008,7 +7008,7 @@ class client {
             border.bottom.create_window(
                 frame,
                 BORDER_SIZE,
-                (height - BORDER_SIZE),
+                (height + BORDER_SIZE),
                 (width - (BORDER_SIZE * 2)),
                 BORDER_SIZE,
                 BLACK,
