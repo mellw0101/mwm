@@ -2856,11 +2856,11 @@ class __event_handler__ {
             }
         }
 
-        std::mutex event_mutex;
+        mutex event_mutex;
 
         template<uint8_t __event_id> static void handle_event(uint32_t __window) { WS_emit(__window, __event_id); }
         template<> void handle_event<MAP_REQ>(uint32_t __window) { WS_emit_Win(screen->root, MAP_REQ, __window); }
-        #define HANDLE_EVENT(__type) thread(handle_event<__type>, e->event).detach()
+        #define HANDLE_EVENT(__type ) thread(handle_event<__type>, e->event ).detach()
         #define HANDLE_WINDOW(__type) thread(handle_event<__type>, e->window).detach()
         DynamicArray<uint32_t *> _window_arr;
 
@@ -3043,6 +3043,7 @@ class __event_handler__ {
             }
             
             loutI << "Total events in map" << total_events << loutEND;
+            loutI << "Total _window_arr size" << _window_arr.getSize() << loutEND;
         }
 
         void log_map_and_check_rehash()
