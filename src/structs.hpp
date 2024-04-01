@@ -101,6 +101,7 @@ class __fixed_array_t__ {
         __fixed_array_t__(initializer_list<Type> init);
 
 
+        template<>
         __fixed_array_t__(indirect_array<T0> init)
         : data(new T0[Size])
         {
