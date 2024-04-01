@@ -9082,10 +9082,9 @@ class __status_bar__ {
         }
 
     public:
-        // DynamicArray<window> _w;
-        DynamicArray<window> _w;
-
     // Variabels.
+        FixedDynamicArray<window, 8> _w;
+
         typedef enum {
             _BAR,
             _TIME_DATE,
@@ -9105,13 +9104,7 @@ class __status_bar__ {
         }
 
     // Constructor.
-        __status_bar__()
-        {
-            for (int i = 0; i < 8; ++i)
-            {
-                _w.push_back(window{});
-            }
-        }
+        __status_bar__() {}
 
 }; static __status_bar__ *status_bar(nullptr);
 

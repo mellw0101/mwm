@@ -105,11 +105,91 @@ class __fixed_array_t__ {
 template<typename T0, size_t n0 = 20>
 using FixedArray = __fixed_array_t__<T0, n0>;
 
+
+
 constexpr size_t size_t_MAX = numeric_limits<size_t>::max(); 
 
 template<typename T1>
 static constexpr T1 make_T_MAX() { return numeric_limits<T1>::max(); };
 
+template<typename T0, size_t Size>
+class __fixed_dynamic_array_t {
+    public:
+    /* Constructor */
+        __fixed_dynamic_array_t()
+        : data(new T0[Size]) {}
+
+        __fixed_dynamic_array_t(initializer_list<T0> init)
+        {
+            for (auto &value : init)
+            {
+                push_back(value);
+            }
+        }
+
+    /* Destructor  */
+        ~__fixed_dynamic_array_t() { delete[] data; }
+
+    /* operator    */
+        T0& operator[](size_t index) { return data[index]; }
+
+    /* Methods     */
+        size_t getSize() const { return Size; }
+        
+        const auto iter(T0 &__value)
+        {
+            return std::find(begin(), end(), __value);
+        }
+
+        template<typename Type = T0>
+        static size_t find(Type __value);
+
+        template<>
+        size_t find(T0 __value)
+        {
+            size_t i = 0;
+            while (i < Size && data[i] != __value) ++i;
+            if (i < Size) return i;
+            return size_t_MAX;
+        }
+
+        bool is_valid(size_t __index)
+        {
+            if constexpr (is_pointer_v<T0>)
+            {
+                if (data[__index] == nullptr) return false;
+            }
+            else
+            {
+                if (data[__index] == size_t_MAX) return false;
+            }
+        }
+
+        void removeAt(size_t __index)
+        {
+            if (__index >= Size) return;
+
+            if constexpr (is_pointer_v<T0>) 
+            {
+                data[__index] = nullptr;
+                return;
+            }
+            else
+            {
+                data[__index] = numeric_limits<T0>::max();
+            }
+        }
+
+        T0* begin() const { return &data[0];    }/* Return pointer to the first element */
+        T0* end()   const { return &data[Size]; }/* Return pointer past the last element */
+
+    private:
+    /* Variabels */
+        T0* data;
+
+};
+template<typename T1, size_t Size = 20>
+using FixedDynamicArray = __fixed_dynamic_array_t<T1, Size>;
 class window;
 class client;
 
