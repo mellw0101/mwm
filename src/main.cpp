@@ -3428,6 +3428,11 @@ class window {
         window() {}
 
     /* Operators   */
+        operator const uint32_t&()
+        {
+            return _window;
+        }
+
         operator uint32_t() const
         {
             return _window;
