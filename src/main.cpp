@@ -5707,9 +5707,8 @@ class window {
         xcb_pixmap_t   pixmap;
         string _name{};
         int _color = 0;
-
         uint32_t _min_width  = 200;
-        
+
         uint32_t _min_height = 100;
         uint8_t  _override_redirect = 0;
         pid_t    _pid = 0;
