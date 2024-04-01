@@ -147,7 +147,7 @@ class __dynamic_array_t {
         
         const auto iter(T0 &__value)
         {
-            return std::find(this->begin(), this->end(), &__value);
+            return std::find(begin(), end(), __value);
         }
         
         void push_back(T0 __value)
