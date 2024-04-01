@@ -3438,27 +3438,6 @@ class window {
             _window = new_window;
             return *this;
         }
-
-        window& operator=(const window &other)
-        {
-            if (this != &other)
-            {
-                // Copy each member from 'other' to 'this'
-            }
-
-            return *this;
-        }
-
-        window& operator=(window &other)
-        {   
-            *this = other;
-            return *this;
-        }
-
-        bool operator==(const window& other) const
-        {
-            return _window == other._window;
-        }
     
     /* Methods     */
         /* Create        */
