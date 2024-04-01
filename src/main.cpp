@@ -5713,7 +5713,7 @@ class window {
         uint8_t  _override_redirect = 0;
         pid_t    _pid = 0;
 
-        FixedArray<uint32_t> _border {0, 0, 0, 0};
+        FixedArray<uint32_t, 4> _border {0, 0, 0, 0};
 
     /* Methods     */
         /* Main       */

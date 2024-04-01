@@ -58,8 +58,8 @@ template<typename T0, size_t Size = 20>
 class __fixed_array_t__ {
     public:
     /* Variabels */
-        T0 data[Size]{T0{}};
-        // T0 *data;
+        // T0 data[Size]{T0{}};
+        T0 *data;
 
     /* Methods */
         void fill(const T0& value)
