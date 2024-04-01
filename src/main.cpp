@@ -2862,7 +2862,37 @@ class __event_handler__ {
         template<> void handle_event<MAP_REQ>(uint32_t __window) { WS_emit_Win(screen->root, MAP_REQ, __window); }
         #define HANDLE_EVENT(__type) thread(handle_event<__type>, e->event).detach()
         #define HANDLE_WINDOW(__type) thread(handle_event<__type>, e->window).detach()
-        
+        DynamicArray<uint32_t *> _window_arr;
+
+        size_t find_window(uint32_t __window)
+        {
+            for (size_t i = 0; i < _window_arr.getSize(); ++i)
+            {
+                if (_window_arr[i] == nullptr) continue;
+
+                if (__window == _window_arr[i][0]
+                ||  __window == _window_arr[i][1]
+                ||  __window == _window_arr[i][2]
+                ||  __window == _window_arr[i][3]
+                ||  __window == _window_arr[i][4]
+                ||  __window == _window_arr[i][5]
+                ||  __window == _window_arr[i][6]
+                ||  __window == _window_arr[i][7]
+                ||  __window == _window_arr[i][8]
+                ||  __window == _window_arr[i][9]
+                ||  __window == _window_arr[i][10]
+                ||  __window == _window_arr[i][11]
+                ||  __window == _window_arr[i][12]
+                ||  __window == _window_arr[i][13]
+                ||  __window == _window_arr[i][14]
+                ||  __window == _window_arr[i][15])
+                {
+                    return i;
+                }
+            }
+
+            return 0;
+        }
 
         // Function that creates a separate thread for each event type
         void processEvent(xcb_generic_event_t* ev)
@@ -6442,6 +6472,25 @@ class client {
 
                 signal_manager->_client_window_arr.add_client(this,
                 (uint32_t[15])
+                {
+                    this->win,
+                    this->frame,
+                    this->titlebar,
+                    this->close_button,
+                    this->max_button,
+                    this->min_button,
+                    this->icon,
+                    border[left],
+                    border[right],
+                    border[top],
+                    border[bottom],
+                    border[top_left],
+                    border[top_right],
+                    border[bottom_left],
+                    border[bottom_right]
+                });
+
+                event_handler->_window_arr.push_back((uint32_t[15])
                 {
                     this->win,
                     this->frame,
