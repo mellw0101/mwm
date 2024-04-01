@@ -6393,6 +6393,8 @@ class client {
         uint16_t desktop;
         pid_t pid;
 
+        mutex mtx;
+
     /* Methods     */
         /* Main     */
             void make_decorations()
