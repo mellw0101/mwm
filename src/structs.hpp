@@ -4,24 +4,61 @@
 // #include "defenitions.hpp"
 #include "include.hpp"
 #include <X11/Xlib.h>
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 // #include <type_traits>
 // #include <vector>
+#include <functional>
+#include <limits>
+#include <type_traits>
 #include <xcb/xcb_ewmh.h>
 #include <xcb/xproto.h>
 // #include <type_traits>
+#include <initializer_list> 
 
 using namespace std;
 
-template<typename T1 = int, size_t Size = 20>
-class Array {
+template<typename T0, typename T1 = T0, size_t Size>
+inline T0* allocate_aligned_memory(size_t num_elements = Size, size_t alignment = alignof(T1))
+{
+    // Calculate the size of the allocation
+    size_t size = num_elements * sizeof(T0);
+
+    // Ensure the size is a multiple of the alignment
+    if (size % alignment != 0)
+    {
+        // Adjust size to be a multiple of alignment
+        size += alignment - (size % alignment);
+    }
+
+    // Allocate the aligned memory
+    void* ptr = std::aligned_alloc(alignment, size);
+    
+    if (!ptr)
+    {
+        // If allocation failed, throw std::bad_alloc
+        throw std::bad_alloc();
+    }
+
+    // Return the allocated memory cast to the correct type
+    return static_cast<T0*>(ptr);
+}
+#define __alloc_aligned_memory__(__type, __align_type, __size) \
+    allocate_aligned_memory<__type, __align_type, __size>()
+
+#define AllocArr \
+    __alloc_aligned_memory__(T0, T0, Size)
+
+template<typename T0, size_t Size = 20>
+class __fixed_array_t__ {
     public:
     /* Variabels */
-        T1 data[Size]{T1{}};
+        // T1 data[Size]{T1{}};
+        T0 *data;
 
     /* Methods */
-        void fill(const T1& value)
+        void fill(const T0& value)
         {
             for (size_t i = 0; i < Size; ++i)
             {
@@ -29,7 +66,7 @@ class Array {
             }
         }
 
-        void fill(const T1 (&__value)[Size])
+        void fill(const T0 (&__value)[Size])
         {
             for (size_t i = 0; i < Size; ++i)
             {
@@ -37,58 +74,180 @@ class Array {
             }
         }
 
-        T1 &operator[](size_t index)
+        T0 &operator[](size_t index)
         {
             return data[index];
         }
 
-        const T1 &operator[](size_t index) const
+        const T0 &operator[](size_t index) const
         {
             return this->data[index];
         }
 
-        Array(const T1 (&__data)[Size])
+        __fixed_array_t__(const T0 (&__data)[Size])
         {
-            this->fill(T1{});
+            this->fill(T0{});
             this->fill(__data);
         }
 
+        template<typename Type = T0>
+        __fixed_array_t__ (initializer_list<Type> __init);
+
+        template<>
+        __fixed_array_t__ (initializer_list<T0> __init)
+        : data(AllocArr)
+        {
+            for (size_t i = 0; i < Size; ++i)
+            {
+                data[i] = __init[i];
+            }
+        }
+
 };
+template<typename T0, size_t n0 = 4>
+using FixedArray = __fixed_array_t__<T0, n0>;
+
+constexpr size_t size_t_MAX = numeric_limits<size_t>::max(); 
+
+template<typename T1>
+static constexpr T1 make_T_MAX() { return numeric_limits<T1>::max(); };
+
+class window;
+class client;
 
 template<typename T1>
 class __dynamic_array_t {
     public:
     /* Constructor */
         __dynamic_array_t()
-        : capacity(10), size(0), data(new T1[capacity]) {}
+        : capacity(10), size(0), data(new T1[capacity]) { if constexpr (!is_pointer_v<T1>) T_MAX[0] = make_T_MAX<T1>(); }
+
+        __dynamic_array_t(initializer_list<T1> init)
+        : capacity(init.size()), size(0), data(new T1[capacity])
+        {
+            if constexpr (!is_pointer_v<T1>) T_MAX[0] = make_T_MAX<T1>();
+
+            for (auto &value : init)
+            {
+                push_back(value);
+            }
+        }
 
     /* Destructor  */
         ~__dynamic_array_t() { delete[] data; }
 
-        void push_back(T1 value)
-        {
-            if (size >= capacity) resize(capacity * 2);
-            data[size++] = value;
-        }
-
+    /* operator    */
         T1& operator[](size_t index) { return data[index]; }
 
+    /* Methods     */
         size_t getSize() const { return size; }
+        
+        const auto iter(T1 &__value)
+        {
+            return std::find(this->begin(), this->end(), &__value);
+        }
+        
+        void push_back(T1 __value)
+        {
+            if (size >= capacity) resize(capacity * 2);
+            data[size++] = __value;
+        }
+
+        template<typename Type = T1>
+        static size_t find(Type __value);
+
+        template<>
+        size_t find(T1 __value)
+        {
+            size_t i = 0;
+            while (i < size && data[i] != __value) ++i;
+            if (i < size) return i;
+            return size_t_MAX;
+        }
+
+        bool is_valid(size_t __index)
+        {
+            if constexpr (is_pointer_v<T1>)
+            {
+                if (data[__index] == nullptr) return false;
+            }
+            else
+            {
+                if (data[__index] == size_t_MAX) return false;
+            }
+        }
+
+        void removeAt(size_t __index)
+        {
+            if (__index >= size) return;
+
+            if constexpr (is_pointer_v<T1>) 
+            {
+                data[__index] = nullptr;
+                return;
+            }
+            else
+            {
+                data[__index] = numeric_limits<T1>::max();
+            }
+        }
+
+        T1* begin() const { return &data[0];    }/* Return pointer to the first element */
+        T1* end()   const { return &data[size]; }/* Return pointer past the last element */
 
     private:
     /* Variabels */
         size_t capacity;
         size_t size;
         T1* data;
+        
+        T1* T_MAX = nullptr;
 
     /* Methods   */
-        void resize(std::size_t newCapacity)
+        void resize(size_t __new_capacity)
         {
-            T1* newData = new T1[newCapacity];
-            for (std::size_t i = 0; i < size; ++i) newData[i] = data[i];
-            delete[] data;
-            data = newData;
-            capacity = newCapacity;
+            T1* new_data = new T1[__new_capacity];
+            for (size_t i = 0; i < size; ++i) new_data[i] = data[i];
+            delete[]   data;
+            data     = new_data;
+            capacity = __new_capacity;
+        }
+
+        void sort()
+        {
+            bool swapped;
+
+            do
+            {
+                swapped = false;
+                for (size_t i = 1; i < size; ++i)
+                {
+                    if (data[i - 1] > data[i]) // Assuming T1 supports comparison
+                    {
+                        T1 temp = data[i - 1];
+                        data[i - 1] = data[i];
+                        data[i] = temp;
+                        swapped = true;
+                    }
+                }
+            }
+            while (swapped);
+        }
+
+        void remove(T1 __value)
+        {
+            size_t i = 0;
+            while (i < size && data[i] != __value) ++i; // Find the element
+
+            if (i < size) // If found
+            {
+                for (size_t j = i; j < size - 1; ++j)
+                {
+                    data[j] = data[j + 1]; // Shift elements
+                }
+
+                --size; // Decrease size
+            }
         }
 
 };
@@ -96,6 +255,8 @@ template<typename T1>
 using DynamicArray = __dynamic_array_t<T1>;
 
 class client;
+class window;
+class client_border_decor;
 template<typename T1, typename T2>
 class __linked_dynamic_array_t;
 
@@ -107,12 +268,24 @@ class __linked_dynamic_array_t<client *, uint32_t *> {
         DynamicArray<client *> _client;
 
     /* Methods */
-        void add_client(client *__c, uint32_t *__w)
+        size_t add_client(client *__c, uint32_t *__w)
         {
             _client.push_back(__c);
             _window.push_back(__w);
+            size_t c_size = size;
             size++;
+            return c_size;
         }
+
+        void remove_at(size_t __index)
+        {
+            _window.removeAt(__index);
+            _client.removeAt(__index);
+        }
+
+        // client *retrive_client(uint32_t __window)
+        // {
+        // }
 
     /* Constructor */
         size_t size;
@@ -121,6 +294,199 @@ class __linked_dynamic_array_t<client *, uint32_t *> {
 };
 using ldClientWindowArray = __linked_dynamic_array_t<client *, uint32_t *>;
 
+template<
+    typename T0,
+    typename T1,
+    typename T2 = T1,
+    typename T3 = T2,
+    typename T4 = T3,
+    typename T5 = T4,
+    typename T6 = T5,
+    typename T7 = T6,
+    typename T8 = T7,
+    typename T9 = T8,
+    typename T10 = T9,
+    typename T11 = T10,
+    typename T12 = T11,
+    typename T13 = T12,
+    typename T14 = T13,
+    typename T15 = T14>
+class __linked_super_array_t {
+    public:
+    /* Variabels */
+        DynamicArray<T0> data_0;
+        DynamicArray<T1> data_1;
+        DynamicArray<T2> data_2;
+        DynamicArray<T3> data_3;
+        DynamicArray<T4> data_4;
+        DynamicArray<T5> data_5;
+        DynamicArray<T6> data_6;
+        DynamicArray<T7> data_7;
+        DynamicArray<T8> data_8;
+        DynamicArray<T9> data_9;
+        DynamicArray<T10> data_10;
+        DynamicArray<T11> data_11;
+        DynamicArray<T12> data_12;
+        DynamicArray<T13> data_13;
+        DynamicArray<T14> data_14;
+        DynamicArray<T15> data_15;
+};
+template<
+    typename T0,
+    typename T1,
+    typename T2 = T1,
+    typename T3 = T2,
+    typename T4 = T3,
+    typename T5 = T4,
+    typename T6 = T5,
+    typename T7 = T6,
+    typename T8 = T7,
+    typename T9 = T8,
+    typename T10 = T9,
+    typename T11 = T10,
+    typename T12 = T11,
+    typename T13 = T12,
+    typename T14 = T13,
+    typename T15 = T14>
+using LinkedSuperArray = __linked_super_array_t<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>;
+
+template<typename T0, typename T1>
+class __linked_super_array_t<T0, T1, T1, T1, T1, T1, T1, T1, T1, T1, T1, T1, T1, T1, T1, T1>;
+
+template<>
+class __linked_super_array_t<client *, window> {
+    private:
+    /* Variabels */
+        size_t _size;
+        size_t _index;
+
+    public:
+    /* Variabels */
+        DynamicArray<client *> c;
+        DynamicArray<window *> win;
+        DynamicArray<window *> frame;
+        DynamicArray<window *> titlebar;
+        DynamicArray<window *> close_button;
+        DynamicArray<window *> max_button;
+        DynamicArray<window *> min_button;
+        DynamicArray<window *> icon;
+        DynamicArray<client_border_decor *> border;
+        DynamicArray<function<void()>*> function;
+
+    /* Methods   */
+        void push_back(
+
+            client *__c,
+            
+            window &__win,
+            window &__frame,
+            window &__titlebar,
+            window &__close_button,
+            window &__max_button,
+            window &__min_button,
+            window &__icon,
+            
+            client_border_decor &__b)
+
+        {
+            c.push_back(__c);
+            win.push_back(&__win);
+            frame.push_back(&__frame);
+            titlebar.push_back(&__titlebar);
+            close_button.push_back(&__close_button);
+            max_button.push_back(&__max_button);
+            min_button.push_back(&__min_button);
+            icon.push_back(&__icon);
+            border.push_back(&__b);
+
+            _size = c.getSize();
+        }
+
+        void remove(client* __c)
+        {
+            auto it = std::find(c.begin(), c.end(), __c);
+            if (it != c.end())
+            {
+                size_t index = std::distance(c.begin(), it);
+                // Assume dynamic arrays manage deletion if they own the objects
+                c.removeAt(index);
+                win.removeAt(index);
+                frame.removeAt(index);
+                titlebar.removeAt(index);
+                close_button.removeAt(index);
+                max_button.removeAt(index);
+                min_button.removeAt(index);
+                icon.removeAt(index);
+                border.removeAt(index);
+            }
+        }
+
+        typedef enum {
+            _WIN          = 1 << 0,
+            _FRAME        = 1 << 1,
+            _TITLEBAR     = 1 << 2,
+            _CLOSE_BUTTON = 1 << 3,
+            _MAX_BUTTON   = 1 << 4,
+            _MIN_BUTTON   = 1 << 5,
+            _ICON         = 1 << 6,
+            _ALL =
+                _WIN | _FRAME | _TITLEBAR | _CLOSE_BUTTON | _MAX_BUTTON | _MIN_BUTTON | _ICON
+        } client_window_t;
+        template<client_window_t c_window_t = _ALL>
+        client* get_client_from_window(window *__window)
+        {
+            auto find_client = [&](DynamicArray<window*>& arr) -> client *
+            {
+                auto it = arr.iter(__window);
+                if (it != arr.end())
+                {
+                    return c[arr.find(it)];
+                }
+
+                return static_cast<client*>(nullptr);
+            };
+
+            client* found_client = nullptr;
+            if constexpr (c_window_t & _WIN         ) if ((found_client = find_client(win))          != nullptr) return found_client;
+            if constexpr (c_window_t & _FRAME       ) if ((found_client = find_client(frame))        != nullptr) return found_client;
+            if constexpr (c_window_t & _TITLEBAR    ) if ((found_client = find_client(titlebar))     != nullptr) return found_client;
+            if constexpr (c_window_t & _CLOSE_BUTTON) if ((found_client = find_client(close_button)) != nullptr) return found_client;
+            if constexpr (c_window_t & _MAX_BUTTON  ) if ((found_client = find_client(max_button))   != nullptr) return found_client;
+            if constexpr (c_window_t & _MIN_BUTTON  ) if ((found_client = find_client(min_button))   != nullptr) return found_client;
+            if constexpr (c_window_t & _ICON        ) if ((found_client = find_client(icon))         != nullptr) return found_client;
+
+            return nullptr; // Window not found in any array
+        }
+
+        client *get_client_from_window_test(window *__window)
+        {
+            auto it = win.iter(__window);
+            if (it != win.end()) return c[win.find(it)];
+
+            it = frame.iter(__window);
+            if (it != frame.end()) return c[frame.find(it)];
+
+            it = titlebar.iter(__window);
+            if (it != titlebar.end()) return c[titlebar.find(it)];
+
+            it = close_button.iter(__window);
+            if (it != close_button.end()) return c[close_button.find(it)];
+
+            it = max_button.iter(__window);
+            if (it != max_button.end()) return c[max_button.find(it)];
+
+            it = min_button.iter(__window);
+            if (it != min_button.end()) return c[min_button.find(it)];
+
+            it = icon.iter(__window);
+            if (it != icon.end()) return c[icon.find(it)];
+
+            return nullptr;
+        }
+
+};
+template<typename T0, typename T1>
+using LinkedSuperArrayMap = __linked_super_array_t<T0, T1>;
 
 // template<typename T1, size_t Size>
 // class __data_array_t__ {

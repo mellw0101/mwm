@@ -986,6 +986,8 @@ class __signal_manager__ {
 
         ldClientWindowArray _client_window_arr;
 
+        LinkedSuperArrayMap<client *, window> _linked_super_arr;
+
     /* Methods   */
         template<typename Callback>
         void connect(const string &__signal_name, Callback &&callback) // Connect a slot to a signal
@@ -5726,7 +5728,7 @@ class window {
         uint8_t  _override_redirect = 0;
         pid_t    _pid = 0;
 
-        Array<uint32_t, 4> _border {{0, 0, 0, 0}};
+        FixedArray<uint32_t> _border {0, 0, 0, 0};
 
     /* Methods     */
         /* Main       */
@@ -9123,8 +9125,8 @@ class __status_bar__ {
 class Mwm_Animator {
     public:
     // Constructors And Destructor.
-        Mwm_Animator(const uint32_t &window)
-        : window(window) {}
+        Mwm_Animator(const uint32_t &__window)
+        : window(__window) {}
 
         Mwm_Animator(client *c)
         : c(c) {}
@@ -9306,7 +9308,7 @@ class Mwm_Animator {
     
     private:
     // variabels.
-        xcb_window_t window;
+        uint32_t window;
         client * c;
         thread(GAnimationThread);
         thread(XAnimationThread);
