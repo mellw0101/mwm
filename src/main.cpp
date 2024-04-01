@@ -958,8 +958,7 @@ namespace {
     };
 }
 
-class __signal_manager__
-{
+class __signal_manager__ {
     /* Defines   */
         #define WS_conn signal_manager->_window_signals.conect
         #define WS_emit(_window, _event) signal_manager->_window_signals.emit(_window, _event)
@@ -3433,6 +3432,12 @@ class window {
         {
             return _window;
         }
+
+        // window &operator=(xcb_window_t &window)
+        // {
+        //     _window = window;
+        //     return *this;
+        // }
     
         window& operator=(uint32_t new_window) // Overload the assignment operator for uint32_t
         { 
@@ -5720,7 +5725,7 @@ class window {
         uint8_t  _override_redirect = 0;
         pid_t    _pid = 0;
 
-        FixedArray<uint32_t, 4> _border {0, 0, 0, 0};
+        FixedArray<uint32_t, 4> _border {{0, 0, 0, 0}};
 
     /* Methods     */
         /* Main       */

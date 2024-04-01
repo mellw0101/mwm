@@ -94,19 +94,19 @@ class __fixed_array_t__ {
             this->fill(__data);
         }
 
-        template<typename Type = T0>
-        __fixed_array_t__ (initializer_list<Type> __init);
+        // template<typename Type = T0>
+        // __fixed_array_t__ (initializer_list<Type> __init);
 
-        template<>
-        __fixed_array_t__<T0> (initializer_list<T0> __init)
-        : data(fill(T0{}))
-        {
-            data = AllocArr<T0>(Size);
-            for (size_t i = 0; i < Size; ++i)
-            {
-                data[i] = __init[i];
-            }
-        }
+        // template<>
+        // __fixed_array_t__ (initializer_list<T0> __init)
+        // : data(fill(T0{}))
+        // {
+        //     data = AllocArr<T0>(Size);
+        //     for (size_t i = 0; i < Size; ++i)
+        //     {
+        //         data[i] = __init[i];
+        //     }
+        // }
 
         // ~__fixed_array_t__() { delete [] data; }
 
