@@ -2142,8 +2142,7 @@ class str
         bool is_null = false;
 };
 
-class fast_str_vector
-{
+class fast_str_vector {
     public:
     // operators.
         operator vector<str>() const
