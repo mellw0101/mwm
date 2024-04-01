@@ -59,8 +59,8 @@ template<typename T0, size_t Size = 20>
 class __fixed_array_t__ {
     public:
     /* Variabels */
-        T0 *data;
-        // T0 data[Size];
+        // T0 *data;
+        T0 data[Size];
 
     /* Methods */
         void fill(const T0& value)
@@ -100,22 +100,6 @@ class __fixed_array_t__ {
         {
             free(data);
         }
-
-        // template<typename Type = T0>
-        // __fixed_array_t__ (initializer_list<Type> __init);
-
-        // template<>
-        // __fixed_array_t__ (initializer_list<T0> __init)
-        // : data(fill(T0{}))
-        // {
-        //     data = AllocArr<T0>(Size);
-        //     for (size_t i = 0; i < Size; ++i)
-        //     {
-        //         data[i] = __init[i];
-        //     }
-        // }
-
-        // ~__fixed_array_t__() { free(data); }
 
 };
 template<typename T0, size_t n0 = 20>
