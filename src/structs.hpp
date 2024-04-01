@@ -1,18 +1,97 @@
 #ifndef STRUCTS_HPP
 #define STRUCTS_HPP
 // #include "defenitions.hpp"
-#include "defenitions.hpp"
+// #include "defenitions.hpp"
 #include "include.hpp"
 #include <X11/Xlib.h>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
 // #include <type_traits>
+// #include <vector>
 #include <xcb/xcb_ewmh.h>
 #include <xcb/xproto.h>
 // #include <type_traits>
 
 using namespace std;
+
+template<typename T1 = int, size_t Size = 20>
+class Array {
+    public:
+    /* Variabels */
+        T1 data[Size]{T1{}};
+
+    /* Methods */
+        void fill(const T1& value)
+        {
+            for (size_t i = 0; i < Size; ++i)
+            {
+                data[i] = value;
+            }
+        }
+
+        void fill(const T1 (&__value)[Size])
+        {
+            for (size_t i = 0; i < Size; ++i)
+            {
+                this->data[i] = __value[i];
+            }
+        }
+
+        T1 &operator[](size_t index)
+        {
+            return data[index];
+        }
+
+        const T1 &operator[](size_t index) const
+        {
+            return this->data[index];
+        }
+
+        Array(const T1 (&__data)[Size])
+        {
+            this->fill(T1{});
+            this->fill(__data);
+        }
+
+};
+
+template<typename T1>
+class __dynamic_array_t {
+    public:
+    /* Constructor */
+        __dynamic_array_t()
+        : capacity(10), size(0), data(new T1[capacity]) {}
+
+    /* Destructor  */
+        ~__dynamic_array_t() { delete[] data; }
+
+        void push_back(T1 value)
+        {
+            if (size >= capacity) resize(capacity * 2);
+            data[size++] = value;
+        }
+
+        T1& operator[](size_t index) { return data[index]; }
+
+        size_t getSize() const { return size; }
+
+    private:
+        size_t capacity;
+        size_t size;
+        T1* data;
+
+        void resize(std::size_t newCapacity)
+        {
+            T1* newData = new T1[newCapacity];
+            for (std::size_t i = 0; i < size; ++i) newData[i] = data[i];
+            delete[] data;
+            data = newData;
+            capacity = newCapacity;
+        }
+};
+template<typename T1>
+using DynamicArray = __dynamic_array_t<T1>;
 
 template<typename T1, size_t Size>
 class __data_array_t__ {
@@ -122,8 +201,8 @@ class __data_array_t__ {
         }
 
 };
-template<typename T1, size_t Size>
-using Array = __data_array_t__<T1, Size>;
+// template<typename T1, size_t Size>
+// using Array = __data_array_t__<T1, Size>;
 
 #define FIRST_T(__name)  __MAKE_TYPE_FLAG__(__name, T1)
 #define SECOND_T(__name) __MAKE_TYPE_FLAG__(__name, T2)

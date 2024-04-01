@@ -6346,17 +6346,43 @@ class client {
     public:
     /* Sub Classes */
         class client_border_decor {
+            /* Defines */
+                #define left 0
+                #define right 1
+                #define top 2
+                #define bottom 3
+                #define top_left 4
+                #define top_right 6
+                #define bottom_left 5
+                #define bottom_right 7
+            
             public:
-            /* Variables */
-                window left;
-                window right;
-                window top;
-                window bottom;
+            // /* Variables */
+            //     window left;
+            //     window right;
+            //     window top;
+            //     window bottom;
 
-                window top_left;
-                window top_right;
-                window bottom_left;
-                window bottom_right;
+            //     window top_left;
+            //     window top_right;
+            //     window bottom_left;
+            //     window bottom_right;
+            void create_arr()
+            {
+                for (int i = 0; i < 8; ++i)
+                {
+                    window w;
+                    border.push_back(w);
+                }
+            }
+
+            window &operator[](size_t index)
+            {
+                return border[index];
+            }
+
+            client_border_decor() { create_arr(); }
+            DynamicArray<window> border;
         };
 
         struct __atoms__ {
@@ -6452,14 +6478,14 @@ class client {
                 max_button.unmap();
                 min_button.unmap();
                 titlebar.unmap();
-                border.left.unmap();
-                border.right.unmap();
-                border.top.unmap();
-                border.bottom.unmap();
-                border.top_left.unmap();
-                border.top_right.unmap();
-                border.bottom_left.unmap();
-                border.bottom_right.unmap();
+                border[left].unmap();
+                border[right].unmap();
+                border[top].unmap();
+                border[bottom].unmap();
+                border[top_left].unmap();
+                border[top_right].unmap();
+                border[bottom_left].unmap();
+                border[bottom_right].unmap();
 
                 // vector<window> window_vec = {
                 //     win,
@@ -6494,14 +6520,14 @@ class client {
                 max_button.kill();
                 min_button.kill();
                 titlebar.kill();
-                border.left.kill();
-                border.right.kill();
-                border.top.kill();
-                border.bottom.kill();
-                border.top_left.kill();
-                border.top_right.kill();
-                border.bottom_left.kill();
-                border.bottom_right.kill();
+                border[left].kill();
+                border[right].kill();
+                border[top].kill();
+                border[bottom].kill();
+                border[top_left].kill();
+                border[top_right].kill();
+                border[bottom_left].kill();
+                border[bottom_right].kill();
                 frame.kill();
             }
 
@@ -6555,11 +6581,11 @@ class client {
                 close_button.x((width - BUTTON_SIZE - BORDER_SIZE));
                 max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
                 min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
-                border.right.x((width - BORDER_SIZE));
-                border.top.width((width - (BORDER_SIZE * 2)));
-                border.bottom.width((width - (BORDER_SIZE * 2)));
-                border.top_right.x((width - BORDER_SIZE));
-                border.bottom_right.x((width - BORDER_SIZE));
+                border[right].x((width - BORDER_SIZE));
+                border[top].width((width - (BORDER_SIZE * 2)));
+                border[bottom].width((width - (BORDER_SIZE * 2)));
+                border[top_right].x((width - BORDER_SIZE));
+                border[bottom_right].x((width - BORDER_SIZE));
                 xcb_flush(conn);
             }
         
@@ -6567,11 +6593,11 @@ class client {
             {
                 win.height((height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
                 frame.height(height);
-                border.left.height((height - (BORDER_SIZE * 2)));
-                border.right.height((height - (BORDER_SIZE * 2)));
-                border.bottom.y((height - BORDER_SIZE));
-                border.bottom_left.y((height - BORDER_SIZE));
-                border.bottom_right.y((height - BORDER_SIZE));
+                border[left].height((height - (BORDER_SIZE * 2)));
+                border[right].height((height - (BORDER_SIZE * 2)));
+                border[bottom].y((height - BORDER_SIZE));
+                border[bottom_left].y((height - BORDER_SIZE));
+                border[bottom_right].y((height - BORDER_SIZE));
             }
         
             void x_width(const uint32_t &x, const uint32_t &width)
@@ -6583,11 +6609,11 @@ class client {
                 close_button.x((width - BUTTON_SIZE - BORDER_SIZE));
                 max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
                 min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
-                border.right.x((width - BORDER_SIZE));
-                border.top.width((width - (BORDER_SIZE * 2)));
-                border.bottom.width((width - (BORDER_SIZE * 2)));
-                border.top_right.x((width - BORDER_SIZE));
-                border.bottom_right.x((width - BORDER_SIZE));
+                border[right].x((width - BORDER_SIZE));
+                border[top].width((width - (BORDER_SIZE * 2)));
+                border[bottom].width((width - (BORDER_SIZE * 2)));
+                border[top_right].x((width - BORDER_SIZE));
+                border[bottom_right].x((width - BORDER_SIZE));
                 xcb_flush(conn);
             }
         
@@ -6596,11 +6622,11 @@ class client {
                 win.height((height - TITLE_BAR_HEIGHT) - (BORDER_SIZE * 2));
                 xcb_flush(conn);
                 frame.y_height(y, height);
-                border.left.height((height - (BORDER_SIZE * 2)));
-                border.right.height((height - (BORDER_SIZE * 2)));
-                border.bottom.y((height - BORDER_SIZE));
-                border.bottom_left.y((height - BORDER_SIZE));
-                border.bottom_right.y((height - BORDER_SIZE));
+                border[left].height((height - (BORDER_SIZE * 2)));
+                border[right].height((height - (BORDER_SIZE * 2)));
+                border[bottom].y((height - BORDER_SIZE));
+                border[bottom_left].y((height - BORDER_SIZE));
+                border[bottom_right].y((height - BORDER_SIZE));
                 xcb_flush(conn);
             }
         
@@ -6612,13 +6638,13 @@ class client {
                 close_button.x((width - BUTTON_SIZE - BORDER_SIZE));
                 max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
                 min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
-                border.left.height((height - (BORDER_SIZE * 2)));
-                border.right.x_height((width - BORDER_SIZE), (height - (BORDER_SIZE * 2)));
-                border.top.width((width - (BORDER_SIZE * 2)));
-                border.bottom.y_width((height - BORDER_SIZE), (width - (BORDER_SIZE * 2)));
-                border.top_right.x((width - BORDER_SIZE));
-                border.bottom_left.y((height - BORDER_SIZE));
-                border.bottom_right.x_y((width - BORDER_SIZE), (height - BORDER_SIZE));
+                border[left].height((height - (BORDER_SIZE * 2)));
+                border[right].x_height((width - BORDER_SIZE), (height - (BORDER_SIZE * 2)));
+                border[top].width((width - (BORDER_SIZE * 2)));
+                border[bottom].y_width((height - BORDER_SIZE), (width - (BORDER_SIZE * 2)));
+                border[top_right].x((width - BORDER_SIZE));
+                border[bottom_left].y((height - BORDER_SIZE));
+                border[bottom_right].x_y((width - BORDER_SIZE), (height - BORDER_SIZE));
             }
         
             void y_width_height(const uint32_t &y, const uint32_t &width, const uint32_t &height)
@@ -6629,13 +6655,13 @@ class client {
                 close_button.x((width - BUTTON_SIZE - BORDER_SIZE));
                 max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
                 min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
-                border.left.height((height - (BORDER_SIZE * 2)));
-                border.right.x_height((width - BORDER_SIZE), (height - (BORDER_SIZE * 2)));
-                border.top.width((width - (BORDER_SIZE * 2)));
-                border.bottom.y_width((height - BORDER_SIZE), (width - (BORDER_SIZE * 2)));
-                border.top_right.x((width - BORDER_SIZE));
-                border.bottom_left.y((height - BORDER_SIZE));
-                border.bottom_right.x_y((width - BORDER_SIZE), (height - BORDER_SIZE));
+                border[left].height((height - (BORDER_SIZE * 2)));
+                border[right].x_height((width - BORDER_SIZE), (height - (BORDER_SIZE * 2)));
+                border[top].width((width - (BORDER_SIZE * 2)));
+                border[bottom].y_width((height - BORDER_SIZE), (width - (BORDER_SIZE * 2)));
+                border[top_right].x((width - BORDER_SIZE));
+                border[bottom_left].y((height - BORDER_SIZE));
+                border[bottom_right].x_y((width - BORDER_SIZE), (height - BORDER_SIZE));
             }
         
             void x_y_width_height(const uint32_t &x, const uint32_t &y, const uint32_t &width, const uint32_t &height)
@@ -6647,13 +6673,13 @@ class client {
                 close_button.x((width - BUTTON_SIZE - BORDER_SIZE));
                 max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
                 min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
-                border.left.height((height - (BORDER_SIZE * 2)));
-                border.right.x_height((width - BORDER_SIZE), (height - (BORDER_SIZE * 2)));
-                border.top.width((width - (BORDER_SIZE * 2)));
-                border.bottom.y_width((height - BORDER_SIZE), (width - (BORDER_SIZE * 2)));
-                border.top_right.x((width - BORDER_SIZE));
-                border.bottom_right.x_y((width - BORDER_SIZE), (height - BORDER_SIZE));
-                border.bottom_left.y((height - BORDER_SIZE));
+                border[left].height((height - (BORDER_SIZE * 2)));
+                border[right].x_height((width - BORDER_SIZE), (height - (BORDER_SIZE * 2)));
+                border[top].width((width - (BORDER_SIZE * 2)));
+                border[bottom].y_width((height - BORDER_SIZE), (width - (BORDER_SIZE * 2)));
+                border[top_right].x((width - BORDER_SIZE));
+                border[bottom_right].x_y((width - BORDER_SIZE), (height - BORDER_SIZE));
+                border[bottom_left].y((height - BORDER_SIZE));
                 xcb_flush(conn);
             }
         
@@ -6666,13 +6692,13 @@ class client {
                 close_button.x((width - BUTTON_SIZE - BORDER_SIZE));
                 max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
                 min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
-                border.left.height((height - (BORDER_SIZE * 2)));
-                border.right.x_height((width - BORDER_SIZE), (height - (BORDER_SIZE * 2)));
-                border.top.width((width - (BORDER_SIZE * 2)));
-                border.bottom.y_width((height - BORDER_SIZE), (width - (BORDER_SIZE * 2)));
-                border.top_right.x((width - BORDER_SIZE));
-                border.bottom_right.x_y((width - BORDER_SIZE), (height - BORDER_SIZE));
-                border.bottom_left.y((height - BORDER_SIZE));
+                border[left].height((height - (BORDER_SIZE * 2)));
+                border[right].x_height((width - BORDER_SIZE), (height - (BORDER_SIZE * 2)));
+                border[top].width((width - (BORDER_SIZE * 2)));
+                border[bottom].y_width((height - BORDER_SIZE), (width - (BORDER_SIZE * 2)));
+                border[top_right].x((width - BORDER_SIZE));
+                border[bottom_right].x_y((width - BORDER_SIZE), (height - BORDER_SIZE));
+                border[bottom_left].y((height - BORDER_SIZE));
                 xcb_flush(conn);
             }
         
@@ -6960,7 +6986,7 @@ class client {
     
         void make_borders()
         {
-            border.left.create_window(
+            border[left].create_window(
                 frame,
                 0,
                 BORDER_SIZE,
@@ -6972,10 +6998,10 @@ class client {
                 nullptr,
                 CURSOR::left_side
             );
-            CWC(border.left);
-            border.left.grab_button({ { L_MOUSE_BUTTON, NULL } });
+            CWC(border[left]);
+            border[left].grab_button({ { L_MOUSE_BUTTON, NULL } });
 
-            border.right.create_window(
+            border[right].create_window(
                 frame,
                 (width + BORDER_SIZE),
                 BORDER_SIZE,
@@ -6987,10 +7013,10 @@ class client {
                 nullptr,
                 CURSOR::right_side
             );
-            CWC(border.right);
-            border.right.grab_button({ { L_MOUSE_BUTTON, NULL } });
+            CWC(border[right]);
+            border[right].grab_button({ { L_MOUSE_BUTTON, NULL } });
 
-            border.top.create_window(
+            border[top].create_window(
                 frame,
                 BORDER_SIZE,
                 0,
@@ -7002,10 +7028,10 @@ class client {
                 nullptr,
                 CURSOR::top_side
             );
-            CWC(border.top);
-            border.top.grab_button({ { L_MOUSE_BUTTON, NULL } });
+            CWC(border[top]);
+            border[top].grab_button({ { L_MOUSE_BUTTON, NULL } });
 
-            border.bottom.create_window(
+            border[bottom].create_window(
                 frame,
                 BORDER_SIZE,
                 (height + BORDER_SIZE + TITLE_BAR_HEIGHT),
@@ -7017,10 +7043,10 @@ class client {
                 nullptr,
                 CURSOR::bottom_side
             );
-            CWC(border.bottom);
-            border.bottom.grab_button({ { L_MOUSE_BUTTON, NULL } });
+            CWC(border[bottom]);
+            border[bottom].grab_button({ { L_MOUSE_BUTTON, NULL } });
 
-            border.top_left.create_window(
+            border[top_left].create_window(
                 frame,
                 0,
                 0,
@@ -7032,10 +7058,10 @@ class client {
                 nullptr,
                 CURSOR::top_left_corner
             );
-            CWC(border.top_left);
-            border.top_left.grab_button({ { L_MOUSE_BUTTON, NULL } });
+            CWC(border[top_left]);
+            border[top_left].grab_button({ { L_MOUSE_BUTTON, NULL } });
 
-            border.top_right.create_window(
+            border[top_right].create_window(
                 frame,
                 (width + BORDER_SIZE),
                 0,
@@ -7047,10 +7073,10 @@ class client {
                 nullptr,
                 CURSOR::top_right_corner
             );
-            CWC(border.top_right);
-            border.top_right.grab_button({ { L_MOUSE_BUTTON, NULL } });
+            CWC(border[top_right]);
+            border[top_right].grab_button({ { L_MOUSE_BUTTON, NULL } });
 
-            border.bottom_left.create_window(
+            border[bottom_left].create_window(
                 frame,
                 0,
                 (height + TITLE_BAR_HEIGHT + BORDER_SIZE),
@@ -7062,10 +7088,10 @@ class client {
                 nullptr,
                 CURSOR::bottom_left_corner
             );
-            CWC(border.bottom_left);
-            border.bottom_left.grab_button({ { L_MOUSE_BUTTON, NULL } });
+            CWC(border[bottom_left]);
+            border[bottom_left].grab_button({ { L_MOUSE_BUTTON, NULL } });
 
-            border.bottom_right.create_window(
+            border[bottom_right].create_window(
                 frame,
                 (width + BORDER_SIZE),
                 (height + TITLE_BAR_HEIGHT + BORDER_SIZE),
@@ -7077,8 +7103,8 @@ class client {
                 nullptr,
                 CURSOR::bottom_right_corner
             );
-            CWC(border.bottom_right);
-            border.bottom_right.grab_button({ { L_MOUSE_BUTTON, NULL } });
+            CWC(border[bottom_right]);
+            border[bottom_right].grab_button({ { L_MOUSE_BUTTON, NULL } });
         }
 
         void set_icon_png()
@@ -7647,20 +7673,20 @@ class Window_Manager {
                 {
                     for (const auto &c:client_list)
                     {
-                        if (*window == c->win 
-                        ||  *window == c->frame 
-                        ||  *window == c->titlebar 
-                        ||  *window == c->close_button 
-                        ||  *window == c->max_button 
-                        ||  *window == c->min_button 
-                        ||  *window == c->border.left 
-                        ||  *window == c->border.right 
-                        ||  *window == c->border.top 
-                        ||  *window == c->border.bottom
-                        ||  *window == c->border.top_left
-                        ||  *window == c->border.top_right
-                        ||  *window == c->border.bottom_left
-                        ||  *window == c->border.bottom_right)
+                        if (*window == c->win
+                        ||  *window == c->frame
+                        ||  *window == c->titlebar
+                        ||  *window == c->close_button
+                        ||  *window == c->max_button
+                        ||  *window == c->min_button
+                        ||  *window == c->border[left]
+                        ||  *window == c->border[right]
+                        ||  *window == c->border[top]
+                        ||  *window == c->border[bottom]
+                        ||  *window == c->border[top_left]
+                        ||  *window == c->border[top_right]
+                        ||  *window == c->border[bottom_left]
+                        ||  *window == c->border[bottom_right])
                         {
                             return c;
                         }
@@ -14168,49 +14194,49 @@ class Events {
                     return;
                 }
                 
-                if (e->event == c->border.left)
+                if (e->event == c->border[left])
                 {
                     resize_client::border border(c, edge::LEFT);
                     return;
                 }
                 
-                if (e->event == c->border.right)
+                if (e->event == c->border[right])
                 {
                     resize_client::border border(c, edge::RIGHT);
                     return;
                 } 
                 
-                if (e->event == c->border.top)
+                if (e->event == c->border[top])
                 {
                     resize_client::border border(c, edge::TOP);
                     return;
                 }
                 
-                if (e->event == c->border.bottom)
+                if (e->event == c->border[bottom])
                 {
                     resize_client::border border(c, edge::BOTTOM_edge);
                     return;
                 }
                 
-                if (e->event == c->border.top_left)
+                if (e->event == c->border[top_left])
                 {
                     resize_client::border border(c, edge::TOP_LEFT);
                     return;
                 }
 
-                if (e->event == c->border.top_right)
+                if (e->event == c->border[top_right])
                 {
                     resize_client::border border(c, edge::TOP_RIGHT);
                     return;
                 }
                 
-                if (e->event == c->border.bottom_left)
+                if (e->event == c->border[bottom_left])
                 {
                     resize_client::border border(c, edge::BOTTOM_LEFT);
                     return;
                 }
 
-                if (e->event == c->border.bottom_right)
+                if (e->event == c->border[bottom_right])
                 {
                     resize_client::border border(c, edge::BOTTOM_RIGHT);
                     return;
