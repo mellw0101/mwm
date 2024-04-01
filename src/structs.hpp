@@ -19,47 +19,46 @@
 
 using namespace std;
 
-// template<typename Type>
-// inline Type* AllocArr(size_t __num_elements, size_t alignment = alignof(Type))
-// {
-//     size_t size = 0;
+template<typename Type>
+inline Type* AllocArr(size_t __num_elements, size_t alignment = alignof(Type))
+{
+    size_t size = 0;
 
-//     // Calculate the size of the allocation
-//     if constexpr (is_pointer_v<Type>)
-//     {
-//         size = __num_elements * sizeof(void*);
-//     }
-//     else 
-//     {
-//         size = __num_elements * sizeof(Type);
-//     }
+    // Calculate the size of the allocation
+    if constexpr (is_pointer_v<Type>)
+    {
+        size = __num_elements * sizeof(void*);
+    }
+    else 
+    {
+        size = __num_elements * sizeof(Type);
+    }
 
-//     // Ensure the size is a multiple of the alignment
-//     if (size % alignment != 0)
-//     {
-//         // Adjust size to be a multiple of alignment
-//         size += alignment - (size % alignment);
-//     }
+    // Ensure the size is a multiple of the alignment
+    if (size % alignment != 0)
+    {
+        // Adjust size to be a multiple of alignment
+        size += alignment - (size % alignment);
+    }
 
-//     // Allocate the aligned memory
-//     void* ptr = std::aligned_alloc(alignment, size);
+    // Allocate the aligned memory
+    void* ptr = std::aligned_alloc(alignment, size);
     
-//     if (!ptr)
-//     {
-//         // If allocation failed, throw std::bad_alloc
-//         throw std::bad_alloc();
-//     }
+    if (!ptr)
+    {
+        // If allocation failed, throw std::bad_alloc
+        throw std::bad_alloc();
+    }
 
-//     // Return the allocated memory cast to the correct type
-//     return static_cast<Type*>(ptr);
-// }
+    // Return the allocated memory cast to the correct type
+    return static_cast<Type*>(ptr);
+}
 
 template<typename T0, size_t Size = 20>
 class __fixed_array_t__ {
     public:
     /* Variabels */
-        T0 data[Size]{T0{}};
-        // T0 *data;
+        T0 *data;
 
     /* Methods */
         void fill(const T0& value)
@@ -99,6 +98,7 @@ class __fixed_array_t__ {
 
         template<>
         __fixed_array_t__ (initializer_list<T0> __init)
+        : data(AllocArr<T0>(__init.size()))
         {
             for (size_t i = 0; i < Size; ++i)
             {
