@@ -76,10 +76,12 @@ class __dynamic_array_t {
         size_t getSize() const { return size; }
 
     private:
+    /* Variabels */
         size_t capacity;
         size_t size;
         T1* data;
 
+    /* Methods   */
         void resize(std::size_t newCapacity)
         {
             T1* newData = new T1[newCapacity];
