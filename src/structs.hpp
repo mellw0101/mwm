@@ -110,7 +110,7 @@ class __fixed_array_t__ {
         //     }
         // }
 
-        // ~__fixed_array_t__() { delete [] data; }
+        ~__fixed_array_t__() { delete [] data; }
 
 };
 template<typename T0, size_t n0 = 20>
