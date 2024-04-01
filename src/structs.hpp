@@ -19,11 +19,20 @@
 
 using namespace std;
 
-template<typename T0, typename T1 = T0, size_t Size>
-inline T0* allocate_aligned_memory(size_t num_elements = Size, size_t alignment = alignof(T1))
+template<typename Type>
+inline Type* AllocArr(size_t __num_elements, size_t alignment = alignof(Type))
 {
+    size_t size = 0;
+
     // Calculate the size of the allocation
-    size_t size = num_elements * sizeof(T0);
+    if constexpr (is_pointer_v<Type>)
+    {
+        size = __num_elements * sizeof(void*);
+    }
+    else 
+    {
+        size = __num_elements * sizeof(Type);
+    }
 
     // Ensure the size is a multiple of the alignment
     if (size % alignment != 0)
@@ -42,13 +51,8 @@ inline T0* allocate_aligned_memory(size_t num_elements = Size, size_t alignment 
     }
 
     // Return the allocated memory cast to the correct type
-    return static_cast<T0*>(ptr);
+    return static_cast<Type*>(ptr);
 }
-#define __alloc_aligned_memory__(__type, __align_type, __size) \
-    allocate_aligned_memory<__type, __align_type, __size>()
-
-#define AllocArr \
-    __alloc_aligned_memory__(T0, T0, Size)
 
 template<typename T0, size_t Size = 20>
 class __fixed_array_t__ {
@@ -103,6 +107,8 @@ class __fixed_array_t__ {
             }
         }
 
+        ~__fixed_array_t__() { delete [] data; }
+
 };
 template<typename T0, size_t n0 = 4>
 using FixedArray = __fixed_array_t__<T0, n0>;
@@ -115,17 +121,17 @@ static constexpr T1 make_T_MAX() { return numeric_limits<T1>::max(); };
 class window;
 class client;
 
-template<typename T1>
+template<typename T0>
 class __dynamic_array_t {
     public:
     /* Constructor */
         __dynamic_array_t()
-        : capacity(10), size(0), data(new T1[capacity]) { if constexpr (!is_pointer_v<T1>) T_MAX[0] = make_T_MAX<T1>(); }
+        : capacity(10), size(0), data(AllocArr<T0>(capacity)) { if constexpr (!is_pointer_v<T0>) T_MAX[0] = make_T_MAX<T0>(); }
 
-        __dynamic_array_t(initializer_list<T1> init)
-        : capacity(init.size()), size(0), data(new T1[capacity])
+        __dynamic_array_t(initializer_list<T0> init)
+        : capacity(init.size()), size(0), data(AllocArr)
         {
-            if constexpr (!is_pointer_v<T1>) T_MAX[0] = make_T_MAX<T1>();
+            if constexpr (!is_pointer_v<T0>) T_MAX[0] = make_T_MAX<T0>();
 
             for (auto &value : init)
             {
@@ -137,27 +143,27 @@ class __dynamic_array_t {
         ~__dynamic_array_t() { delete[] data; }
 
     /* operator    */
-        T1& operator[](size_t index) { return data[index]; }
+        T0& operator[](size_t index) { return data[index]; }
 
     /* Methods     */
         size_t getSize() const { return size; }
         
-        const auto iter(T1 &__value)
+        const auto iter(T0 &__value)
         {
             return std::find(this->begin(), this->end(), &__value);
         }
         
-        void push_back(T1 __value)
+        void push_back(T0 __value)
         {
             if (size >= capacity) resize(capacity * 2);
             data[size++] = __value;
         }
 
-        template<typename Type = T1>
+        template<typename Type = T0>
         static size_t find(Type __value);
 
         template<>
-        size_t find(T1 __value)
+        size_t find(T0 __value)
         {
             size_t i = 0;
             while (i < size && data[i] != __value) ++i;
@@ -167,7 +173,7 @@ class __dynamic_array_t {
 
         bool is_valid(size_t __index)
         {
-            if constexpr (is_pointer_v<T1>)
+            if constexpr (is_pointer_v<T0>)
             {
                 if (data[__index] == nullptr) return false;
             }
@@ -181,32 +187,32 @@ class __dynamic_array_t {
         {
             if (__index >= size) return;
 
-            if constexpr (is_pointer_v<T1>) 
+            if constexpr (is_pointer_v<T0>) 
             {
                 data[__index] = nullptr;
                 return;
             }
             else
             {
-                data[__index] = numeric_limits<T1>::max();
+                data[__index] = numeric_limits<T0>::max();
             }
         }
 
-        T1* begin() const { return &data[0];    }/* Return pointer to the first element */
-        T1* end()   const { return &data[size]; }/* Return pointer past the last element */
+        T0* begin() const { return &data[0];    }/* Return pointer to the first element */
+        T0* end()   const { return &data[size]; }/* Return pointer past the last element */
 
     private:
     /* Variabels */
         size_t capacity;
         size_t size;
-        T1* data;
+        T0* data;
         
-        T1* T_MAX = nullptr;
+        T0* T_MAX = nullptr;
 
     /* Methods   */
         void resize(size_t __new_capacity)
         {
-            T1* new_data = new T1[__new_capacity];
+            T0* new_data = new T0[__new_capacity];
             for (size_t i = 0; i < size; ++i) new_data[i] = data[i];
             delete[]   data;
             data     = new_data;
@@ -224,7 +230,7 @@ class __dynamic_array_t {
                 {
                     if (data[i - 1] > data[i]) // Assuming T1 supports comparison
                     {
-                        T1 temp = data[i - 1];
+                        T0 temp = data[i - 1];
                         data[i - 1] = data[i];
                         data[i] = temp;
                         swapped = true;
@@ -234,7 +240,7 @@ class __dynamic_array_t {
             while (swapped);
         }
 
-        void remove(T1 __value)
+        void remove(T0 __value)
         {
             size_t i = 0;
             while (i < size && data[i] != __value) ++i; // Find the element
