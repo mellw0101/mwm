@@ -984,9 +984,9 @@ class __signal_manager__ {
         __window_signals__ _window_signals;
         __window_client_map__ _window_client_map;
 
-        ldClientWindowArray _client_window_arr;
+        // ldClientWindowArray _client_window_arr;
 
-        LinkedSuperArrayMap<client *, window> _linked_super_arr;
+        // LinkedSuperArrayMap<client *, window> _linked_super_arr;
 
     /* Methods   */
         template<typename Callback>
@@ -3438,6 +3438,12 @@ class window {
             _window = new_window;
             return *this;
         }
+
+        // const window operator&=(const uint32_t new_window) // Overload the assignment operator for uint32_t
+        // { 
+        //     _window = new_window;
+        //     return *this;
+        // }
     
     /* Methods     */
         /* Create        */
@@ -6458,44 +6464,44 @@ class client {
                     make_borders();
                 }
 
-                signal_manager->_client_window_arr.add_client(this,
-                (uint32_t[15])
-                {
-                    this->win,
-                    this->frame,
-                    this->titlebar,
-                    this->close_button,
-                    this->max_button,
-                    this->min_button,
-                    this->icon,
-                    border[left],
-                    border[right],
-                    border[top],
-                    border[bottom],
-                    border[top_left],
-                    border[top_right],
-                    border[bottom_left],
-                    border[bottom_right]
-                });
+                // signal_manager->_client_window_arr.add_client(this,
+                // (uint32_t[15])
+                // {
+                //     this->win,
+                //     this->frame,
+                //     this->titlebar,
+                //     this->close_button,
+                //     this->max_button,
+                //     this->min_button,
+                //     this->icon,
+                //     border[left],
+                //     border[right],
+                //     border[top],
+                //     border[bottom],
+                //     border[top_left],
+                //     border[top_right],
+                //     border[bottom_left],
+                //     border[bottom_right]
+                // });
 
-                event_handler->_window_arr.push_back((uint32_t[15])
-                {
-                    this->win,
-                    this->frame,
-                    this->titlebar,
-                    this->close_button,
-                    this->max_button,
-                    this->min_button,
-                    this->icon,
-                    border[left],
-                    border[right],
-                    border[top],
-                    border[bottom],
-                    border[top_left],
-                    border[top_right],
-                    border[bottom_left],
-                    border[bottom_right]
-                });
+                // event_handler->_window_arr.push_back((uint32_t[15])
+                // {
+                //     this->win,
+                //     this->frame,
+                //     this->titlebar,
+                //     this->close_button,
+                //     this->max_button,
+                //     this->min_button,
+                //     this->icon,
+                //     border[left],
+                //     border[right],
+                //     border[top],
+                //     border[bottom],
+                //     border[top_left],
+                //     border[top_right],
+                //     border[bottom_left],
+                //     border[bottom_right]
+                // });
             }
         
             void raise()
