@@ -6935,7 +6935,6 @@ class client {
         void make_min_button()
         {
             min_button.create_window(
-                
                 frame,
                 (width - (BUTTON_SIZE * 3) + BORDER_SIZE),
                 BORDER_SIZE,
@@ -6943,10 +6942,11 @@ class client {
                 BUTTON_SIZE,
                 GREEN,
                 BUTTON_EVENT_MASK,
-                MAP
-            
+                MAP,
+                nullptr
             );
             CWC(min_button);
+            FLUSH_X();
             min_button.grab_button({ { L_MOUSE_BUTTON, NULL } });
 
             Bitmap bitmap(20, 20);
