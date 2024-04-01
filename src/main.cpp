@@ -2872,6 +2872,11 @@ class __event_handler__ {
                             HANDLE_EVENT(L_MOUSE_BUTTON_EVENT);
                         }
                     }
+
+                    if (e->detail == R_MOUSE_BUTTON)
+                    {
+                        HANDLE_EVENT(R_MOUSE_BUTTON_EVENT);
+                    }
                 
                     break;
                 }
@@ -2880,6 +2885,7 @@ class __event_handler__ {
                 {
                     RE_CAST_EV(xcb_expose_event_t);
                     HANDLE_WINDOW(EXPOSE);
+
                     break;
                 }
 
@@ -2887,6 +2893,7 @@ class __event_handler__ {
                 {
                     RE_CAST_EV(xcb_property_notify_event_t);
                     HANDLE_WINDOW(PROPERTY_NOTIFY);
+
                     break;
                 }
 
@@ -2894,6 +2901,7 @@ class __event_handler__ {
                 {
                     RE_CAST_EV(xcb_enter_notify_event_t);
                     HANDLE_EVENT(ENTER_NOTIFY);
+
                     break;
                 }
 
@@ -2901,6 +2909,15 @@ class __event_handler__ {
                 {
                     RE_CAST_EV(xcb_leave_notify_event_t);
                     HANDLE_EVENT(LEAVE_NOTIFY);
+
+                    break;
+                }
+
+                case XCB_MAP_REQUEST:
+                {
+                    RE_CAST_EV(xcb_map_request_event_t);
+                    HANDLE_WINDOW(MAP_REQ);
+
                     break;
                 }
             }
@@ -5888,7 +5905,7 @@ class window {
                     FILE *fp = fopen(file_name, "wb");
                     if (!fp)
                     {
-                        log_error("Failed to open file: " + std::string(file_name));
+                        loutE << "Failed to open file:" << file_name << loutEND;
                         return;
                     }
 
@@ -6991,29 +7008,6 @@ class client {
         }
     
     /* Variables   */
-        // vector<vector<bool>> CLOSE_BUTTON_BITMAP = {
-        //     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        //     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        //     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        //     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        //     {0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0},
-        //     {0,0,0,0,1,1,1,0,0,0,0,0,0,1,1,1,0,0,0,0},
-        //     {0,0,0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0,0,0},
-        //     {0,0,0,0,0,0,1,1,1,0,0,1,1,1,0,0,0,0,0,0},
-        //     {0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0},
-        //     {0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0},
-        //     {0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0},
-        //     {0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0},
-        //     {0,0,0,0,0,0,1,1,1,0,0,1,1,1,0,0,0,0,0,0},
-        //     {0,0,0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0,0,0},
-        //     {0,0,0,0,1,1,1,0,0,0,0,0,0,1,1,1,0,0,0,0},
-        //     {0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0},
-        //     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        //     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        //     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        //     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
-        // };
-
         bool CLOSE_BUTTON_BITMAP[20][20] {
             {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
             {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
@@ -7356,10 +7350,6 @@ class Window_Manager {
         client *focused_client = nullptr;
         desktop *cur_d = nullptr;
 
-        // umap<uint32_t, client *> _window_clint_map;
-        // __window_client_map__ _window_client_map;
-        // UMapWithID<client *, client *> client_signals;
-    
     /* Methods     */
         /* Main         */
             void init()
@@ -7991,51 +7981,24 @@ class Window_Manager {
 
             void setup_events()
             {
-                event_handler->setEventCallback(EV_CALL(XCB_BUTTON_PRESS)
-                {
-                    RE_CAST_EV(xcb_button_press_event_t);
-                    signal_manager->_window_signals.emit(e->event, CLIENT_RESIZE);
-                    if (e->event != root) return;
-                    if (e->detail == R_MOUSE_BUTTON)
-                    {
-                        context_menu->show();
-                        return;
-                    }
-
-                    if (e->detail == L_MOUSE_BUTTON)
-                    {
-                        unfocus();
-                        return;
-                    }
-                });
-
+                CONN_Win(root, L_MOUSE_BUTTON_EVENT,
+                    if (__window != this->root) return;
+                    this->unfocus();                
+                );
+                CONN_Win(root, R_MOUSE_BUTTON_EVENT,
+                    if (__window != this->root) return;
+                    this->context_menu->show();
+                );
+                CONN_Win(root, MAP_REQ,
+                    client *c = signal_manager->_window_client_map.retrive(__window);
+                    if (c != nullptr) return;
+                    this->manage_new_client(__window);
+                );
+                
                 if (BORDER_SIZE == 0)
                 {
                     signal_manager->emit("SET_EV_CALLBACK__RESIZE_NO_BORDER");
                 }
-
-                // event_handler->setEventCallback(EV_CALL(XCB_EXPOSE)
-                // {
-                //     RE_CAST_EV(xcb_expose_event_t);
-                //     signal_manager->_window_signals.emit(e->window, EXPOSE);
-                // });
-
-                // event_handler->setEventCallback(EV_CALL(XCB_PROPERTY_NOTIFY)
-                // {
-                //     RE_CAST_EV(xcb_property_notify_event_t);
-                //     if (e->atom == ewmh->_NET_WM_NAME)
-                //     {
-                //         signal_manager->_window_signals.emit(e->window, EXPOSE_REQ);
-                //     }
-                // });
-
-                // event_handler->setEventCallback(EV_CALL(XCB_BUTTON_PRESS)
-                // {
-                //     RE_CAST_EV(xcb_button_press_event_t);
-                //     if (e->detail != L_MOUSE_BUTTON) return;
- 
-                //     signal_manager->_window_signals.emit(e->event, L_MOUSE_BUTTON_EVENT);
-                // });
             }
 
         /* Check  */
@@ -13849,7 +13812,7 @@ class Events {
         {
             event_handler->setEventCallback(EV_CALL(XCB_KEY_PRESS)         { key_press_handler(ev); });
             event_handler->setEventCallback(EV_CALL(XCB_MAP_NOTIFY)        { map_notify_handler(ev); });
-            event_handler->setEventCallback(EV_CALL(XCB_MAP_REQUEST)       { map_req_handler(ev); });
+            // event_handler->setEventCallback(EV_CALL(XCB_MAP_REQUEST)       { map_req_handler(ev); });
             event_handler->setEventCallback(EV_CALL(XCB_BUTTON_PRESS)      { button_press_handler(ev); });
             event_handler->setEventCallback(EV_CALL(XCB_CONFIGURE_REQUEST) { configure_request_handler(ev); });
             event_handler->setEventCallback(EV_CALL(XCB_FOCUS_IN)          { focus_in_handler(ev); });
@@ -14450,12 +14413,16 @@ class __signal_factory__ {
             resize_client::border border(c, edge::LEFT);
         };
 
-        
-
     public:
         void init()
         {
             signal_manager->connect("SET_EV_CALLBACK__RESIZE_NO_BORDER", _resize_cli_no_border_ev_);
+        }
+
+        template<typename Callback>
+        void make_sig(uint32_t __w, uint8_t __event_signal, Callback &&__callback)
+        {
+            WS_conn(__w, __event_signal, __callback);
         }
 
 };

@@ -1,6 +1,7 @@
 #ifndef STRUCTS_HPP
 #define STRUCTS_HPP
 // #include "defenitions.hpp"
+#include "defenitions.hpp"
 #include "include.hpp"
 #include <X11/Xlib.h>
 #include <cassert>
@@ -208,10 +209,12 @@ enum EV : uint8_t {
     ENTER_NOTIFY                      = XCB_ENTER_NOTIFY,
     LEAVE_NOTIFY                      = XCB_LEAVE_NOTIFY,
     L_MOUSE_BUTTON_EVENT              = 36,
+    R_MOUSE_BUTTON_EVENT              = 37,
     CLIENT_RESIZE                     = 42,
     KILL_SIGNAL                       = 39,
     L_MOUSE_BUTTON_EVENT__ALT         = 43,
-    PROPERTY_NOTIFY                   = XCB_PROPERTY_NOTIFY
+    PROPERTY_NOTIFY                   = XCB_PROPERTY_NOTIFY,
+    MAP_REQ                           = XCB_MAP_REQUEST
 };
 
 typedef enum {
