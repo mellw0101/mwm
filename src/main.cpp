@@ -6399,8 +6399,6 @@ class client {
         /* Main     */
             void make_decorations()
             {
-                lock_guard<mutex> lock(mtx);
-
                 make_frame();
                 set_icon_png();
                 make_titlebar();
@@ -7754,6 +7752,8 @@ class Window_Manager {
                     loutE << "could not make client" << loutEND;
                     return;
                 }
+                
+                lock_guard<mutex> lock(c->mtx);
 
                 c->win.get_override_redirect();
                 c->win.x_y_width_height(c->x, c->y, c->width, c->height);
