@@ -6367,21 +6367,21 @@ class client {
             //     window top_right;
             //     window bottom_left;
             //     window bottom_right;
-            void create_arr()
-            {
-                for (int i = 0; i < 8; ++i)
-                {
-                    window w;
-                    border.push_back(w);
-                }
-            }
+            // void create_arr()
+            // {
+            //     for (int i = 0; i < 8; ++i)
+            //     {
+            //         window w;
+            //         border.push_back(w);
+            //     }
+            // }
 
             window &operator[](size_t index)
             {
                 return border[index];
             }
 
-            client_border_decor() { create_arr(); }
+            // client_border_decor() { create_arr(); }
             DynamicArray<window> border;
         };
 
