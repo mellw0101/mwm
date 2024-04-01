@@ -6399,6 +6399,8 @@ class client {
         /* Main     */
             void make_decorations()
             {
+                lock_guard<mutex> lock(mtx);
+
                 make_frame();
                 set_icon_png();
                 make_titlebar();
