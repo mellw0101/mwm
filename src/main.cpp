@@ -6960,33 +6960,65 @@ class client {
     
         void make_borders()
         {
-            border.left.create_default(frame, 0, BORDER_SIZE, BORDER_SIZE, (height + TITLE_BAR_HEIGHT));
+            border.left.create_window(
+                frame,
+                0,
+                BORDER_SIZE,
+                BORDER_SIZE,
+                (height + TITLE_BAR_HEIGHT),
+                BLACK,
+                NONE,
+                MAP,
+                nullptr,
+                CURSOR::left_side
+            );
             CWC(border.left);
-            border.left.set_backround_color(BLACK);
-            border.left.set_pointer(CURSOR::left_side);
             border.left.grab_button({ { L_MOUSE_BUTTON, NULL } });
-            border.left.map();
 
-            border.right.create_default(frame, (width - BORDER_SIZE), BORDER_SIZE, BORDER_SIZE, (height + TITLE_BAR_HEIGHT));
+            border.right.create_window(
+                frame,
+                (width - BORDER_SIZE),
+                BORDER_SIZE,
+                BORDER_SIZE,
+                (height + TITLE_BAR_HEIGHT),
+                BLACK,
+                NONE,
+                MAP,
+                nullptr,
+                CURSOR::right_side
+            );
             CWC(border.right);
-            border.right.set_backround_color(BLACK);
-            border.right.set_pointer(CURSOR::right_side);
             border.right.grab_button({ { L_MOUSE_BUTTON, NULL } });
-            border.right.map();
 
-            border.top.create_default(frame, BORDER_SIZE, 0, width, BORDER_SIZE);
+            border.top.create_window(
+                frame,
+                BORDER_SIZE,
+                0,
+                width - (BORDER_SIZE * 2),
+                BORDER_SIZE,
+                BLACK,
+                NONE,
+                MAP,
+                nullptr,
+                CURSOR::top_side
+            );
             CWC(border.top);
-            border.top.set_backround_color(BLACK);
-            border.top.set_pointer(CURSOR::top_side);
             border.top.grab_button({ { L_MOUSE_BUTTON, NULL } });
-            border.top.map();
 
-            border.bottom.create_default(frame, BORDER_SIZE, (height - BORDER_SIZE), width, BORDER_SIZE);
+            border.bottom.create_window(
+                frame,
+                BORDER_SIZE,
+                (height - BORDER_SIZE),
+                (width - (BORDER_SIZE * 2)),
+                BORDER_SIZE,
+                BLACK,
+                NONE,
+                MAP,
+                nullptr,
+                CURSOR::bottom_side
+            );
             CWC(border.bottom);
-            border.bottom.set_backround_color(BLACK);
-            border.bottom.set_pointer(CURSOR::bottom_side);
             border.bottom.grab_button({ { L_MOUSE_BUTTON, NULL } });
-            border.bottom.map();
 
             border.top_left.create_default(frame, 0, 0, BORDER_SIZE, BORDER_SIZE);
             CWC(border.top_left);
