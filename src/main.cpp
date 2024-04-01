@@ -6994,7 +6994,7 @@ class client {
                 frame,
                 BORDER_SIZE,
                 0,
-                width - (BORDER_SIZE * 2),
+                (width + BORDER_SIZE),
                 BORDER_SIZE,
                 BLACK,
                 NONE,
