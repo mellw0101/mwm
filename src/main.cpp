@@ -3428,7 +3428,7 @@ class window {
         window() {}
 
     /* Operators   */
-        operator uint32_t() const
+        operator uint32_t()
         {
             return _window;
         }
@@ -10025,17 +10025,17 @@ class buttons
             return list.size() - 1;
         }
 
-        void run_action(const uint32_t & window)
-        {
-            for (const auto &button : list)
-            {
-                if (window == button.window)
-                {
-                    button.activate();
-                    return;
-                }
-            }
-        }
+        // void run_action(const uint32_t & window)
+        // {
+        //     for (const auto &button : list)
+        //     {
+        //         if (window == button.window)
+        //         {
+        //             button.activate();
+        //             return;
+        //         }
+        //     }
+        // }
 };
 
 class search_window {
