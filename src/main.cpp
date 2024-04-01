@@ -5214,96 +5214,97 @@ class window {
 
             void set_backround_png(const string &__imagePath)
             {
-                Imlib_Image image = imlib_load_image(__imagePath.c_str());
-                if (!image)
-                {
-                    loutE << "Failed to load image: " << __imagePath << endl;
-                    return;
-                }
+                set_backround_png(__imagePath.c_str());
+                // Imlib_Image image = imlib_load_image(__imagePath.c_str());
+                // if (!image)
+                // {
+                //     loutE << "Failed to load image: " << __imagePath << endl;
+                //     return;
+                // }
 
-                imlib_context_set_image(image);
-                int originalWidth = imlib_image_get_width();
-                int originalHeight = imlib_image_get_height();
+                // imlib_context_set_image(image);
+                // int originalWidth = imlib_image_get_width();
+                // int originalHeight = imlib_image_get_height();
 
-                // Calculate new size maintaining aspect ratio
-                double aspectRatio = (double)originalWidth / originalHeight;
-                int newHeight = _height;
-                int newWidth = (int)(newHeight * aspectRatio);
+                // // Calculate new size maintaining aspect ratio
+                // double aspectRatio = (double)originalWidth / originalHeight;
+                // int newHeight = _height;
+                // int newWidth = (int)(newHeight * aspectRatio);
 
-                if (newWidth > _width)
-                {
-                    newWidth = _width;
-                    newHeight = (int)(newWidth / aspectRatio);
-                }
+                // if (newWidth > _width)
+                // {
+                //     newWidth = _width;
+                //     newHeight = (int)(newWidth / aspectRatio);
+                // }
 
-                Imlib_Image scaledImage = imlib_create_cropped_scaled_image(
-                    0, 
-                    0, 
-                    originalWidth, 
-                    originalHeight, 
-                    newWidth, 
-                    newHeight
-                );
-                imlib_free_image(); // Free original image
-                imlib_context_set_image(scaledImage);
-                DATA32 *data = imlib_image_get_data(); // Get the scaled image data
+                // Imlib_Image scaledImage = imlib_create_cropped_scaled_image(
+                //     0, 
+                //     0, 
+                //     originalWidth, 
+                //     originalHeight, 
+                //     newWidth, 
+                //     newHeight
+                // );
+                // imlib_free_image(); // Free original image
+                // imlib_context_set_image(scaledImage);
+                // DATA32 *data = imlib_image_get_data(); // Get the scaled image data
                 
-                // Create an XCB image from the scaled data
-                xcb_image_t *xcb_image = xcb_image_create_native( 
-                    conn, 
-                    newWidth, 
-                    newHeight,
-                    XCB_IMAGE_FORMAT_Z_PIXMAP, 
-                    screen->root_depth, 
-                    NULL, 
-                    ~0, (uint8_t*)data
-                );
+                // // Create an XCB image from the scaled data
+                // xcb_image_t *xcb_image = xcb_image_create_native( 
+                //     conn, 
+                //     newWidth, 
+                //     newHeight,
+                //     XCB_IMAGE_FORMAT_Z_PIXMAP, 
+                //     screen->root_depth, 
+                //     NULL, 
+                //     ~0, (uint8_t*)data
+                // );
 
-                create_pixmap();
-                create_graphics_exposure_gc();
-                xcb_rectangle_t rect = {0, 0, _width, _height};
-                xcb_poly_fill_rectangle(
-                    conn, 
-                    pixmap, 
-                    _gc, 
-                    1, 
-                    &rect
-                );
+                // create_pixmap();
+                // create_graphics_exposure_gc();
+                // xcb_rectangle_t rect = {0, 0, _width, _height};
+                // xcb_poly_fill_rectangle(
+                //     conn, 
+                //     pixmap, 
+                //     _gc, 
+                //     1, 
+                //     &rect
+                // );
 
-                // Calculate position to center the image
-                int x(0), y(0);
-                if (newWidth != _width)
-                {
-                    x = (_width - newWidth) / 2;
-                }
-                if (newHeight != _height)
-                {
-                    y = (_height - newHeight) / 2;
-                }
+                // // Calculate position to center the image
+                // int x(0), y(0);
+                // if (newWidth != _width)
+                // {
+                //     x = (_width - newWidth) / 2;
+                // }
+                // if (newHeight != _height)
+                // {
+                //     y = (_height - newHeight) / 2;
+                // }
                 
-                xcb_image_put( // Put the scaled image onto the pixmap at the calculated position
-                    conn, 
-                    pixmap, 
-                    _gc,
-                    xcb_image, 
-                    x,
-                    y, 
-                    0
-                );
+                // xcb_image_put( // Put the scaled image onto the pixmap at the calculated position
+                //     conn, 
+                //     pixmap, 
+                //     _gc,
+                //     xcb_image, 
+                //     x,
+                //     y, 
+                //     0
+                // );
 
-                xcb_change_window_attributes( // Set the pixmap as the background of the window
-                    conn,
-                    _window,
-                    XCB_CW_BACK_PIXMAP,
-                    &pixmap
-                );
+                // xcb_change_window_attributes( // Set the pixmap as the background of the window
+                //     conn,
+                //     _window,
+                //     XCB_CW_BACK_PIXMAP,
+                //     &pixmap
+                // );
 
-                // Cleanup
-                xcb_free_gc(conn, _gc); // Free the GC
-                xcb_image_destroy(xcb_image);
-                imlib_free_image(); // Free scaled image
+                // // Cleanup
+                // xcb_free_gc(conn, _gc); // Free the GC
+                // xcb_image_destroy(xcb_image);
+                // imlib_free_image(); // Free scaled image
 
-                clear_window();
+                // clear_window();
             }
 
             void make_then_set_png(const char * file_name, const std::vector<std::vector<bool>> &bitmap)
@@ -6887,12 +6888,20 @@ class client {
     
         void make_max_button()
         {
-            max_button.create_default(frame, (width - (BUTTON_SIZE * 2) + BORDER_SIZE), BORDER_SIZE, BUTTON_SIZE, BUTTON_SIZE);
+            max_button.create_window(
+                
+                frame,
+                (width - (BUTTON_SIZE * 2) + BORDER_SIZE),
+                BORDER_SIZE,
+                BUTTON_SIZE,
+                BUTTON_SIZE,
+                RED,
+                BUTTON_EVENT_MASK,
+                MAP
+            
+            );
             CWC(max_button);
-            max_button.set_backround_color(RED);
-            max_button.apply_event_mask({XCB_EVENT_MASK_ENTER_WINDOW, XCB_EVENT_MASK_LEAVE_WINDOW});
             max_button.grab_button({ { L_MOUSE_BUTTON, NULL } });
-            max_button.map();
 
             Bitmap bitmap(20, 20);
             bitmap.modify(4, 4, 16, true);
@@ -6925,14 +6934,22 @@ class client {
     
         void make_min_button()
         {
-            min_button.create_default(frame, (width - (BUTTON_SIZE * 3) + BORDER_SIZE), BORDER_SIZE, BUTTON_SIZE, BUTTON_SIZE);
+            min_button.create_window(
+                
+                frame,
+                (width - (BUTTON_SIZE * 3) + BORDER_SIZE),
+                BORDER_SIZE,
+                BUTTON_SIZE,
+                BUTTON_SIZE,
+                GREEN,
+                BUTTON_EVENT_MASK,
+                MAP
+            
+            );
             CWC(min_button);
-            min_button.set_backround_color(GREEN);
-            min_button.apply_event_mask({XCB_EVENT_MASK_ENTER_WINDOW, XCB_EVENT_MASK_LEAVE_WINDOW});
             min_button.grab_button({ { L_MOUSE_BUTTON, NULL } });
-            min_button.map();
 
-            Bitmap bitmap(20, 20);            
+            Bitmap bitmap(20, 20);
             bitmap.modify(9, 4, 16, true);
             bitmap.modify(10, 4, 16, true);
             string s = USER_PATH_PREFIX("/min.png");
