@@ -5712,7 +5712,7 @@ class window {
         uint8_t  _override_redirect = 0;
         pid_t    _pid = 0;
 
-        FixedArray<uint32_t, 4> _border {{0, 0, 0, 0}};
+        FixedArray<uint32_t, 4> _border{0, 0, 0, 0};
 
     /* Methods     */
         /* Main       */
@@ -9083,7 +9083,7 @@ class __status_bar__ {
 
     public:
     // Variabels.
-        FixedArray<window, 8> _w;
+        FixedArray<window, 8> _w {(window[8]){}};
 
         typedef enum {
             _BAR,
@@ -9104,7 +9104,7 @@ class __status_bar__ {
         }
 
     // Constructor.
-        __status_bar__()  : _w({}) {}
+        __status_bar__() {}
 
 }; static __status_bar__ *status_bar(nullptr);
 
