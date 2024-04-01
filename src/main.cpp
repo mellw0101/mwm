@@ -6950,7 +6950,7 @@ class client {
             border.left.grab_button({ { L_MOUSE_BUTTON, NULL } });
             border.left.map();
 
-            border.right.create_default(frame, (width + BORDER_SIZE), BORDER_SIZE, BORDER_SIZE, (height + TITLE_BAR_HEIGHT));
+            border.right.create_default(frame, (width - BORDER_SIZE), BORDER_SIZE, BORDER_SIZE, (height + TITLE_BAR_HEIGHT));
             CWC(border.right);
             border.right.set_backround_color(BLACK);
             border.right.set_pointer(CURSOR::right_side);
@@ -7752,40 +7752,12 @@ class Window_Manager {
                     loutE << "could not make client" << loutEND;
                     return;
                 }
-                
-                lock_guard<mutex> lock(c->mtx);
 
                 c->win.get_override_redirect();
                 c->win.x_y_width_height(c->x, c->y, c->width, c->height);
                 FLUSH_X();
 
                 pid_manager->check_pid(c->win.get_pid());
-                c->setup_CLI_SIG(KILL, CLI_SIG
-                {
-                    if (!c->win.is_mapped())
-                    {
-                        c->kill();
-                    }
-
-                    c->win.kill();
-                });
-
-                // signal_manager->client_signals.connect(c, KILL, CLI_SIG
-                // {
-                //     if (!c->win.is_mapped())
-                //     {
-                //         c->kill();
-                //     }
-
-                //     c->win.kill();
-                // });
-
-                // c->win.print_window_states();
-                // xcb_atom_t atom;
-                // get_atom((char *)"_NET_WM_STATE", &atom);
-                // loutI << c->win.get_window_property(atom) << loutEND;
-
-                // c->win.property("_NET_WM_STATE");
 
                 c->win.map();
                 c->win.grab_button({
