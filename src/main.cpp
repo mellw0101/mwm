@@ -530,7 +530,16 @@ namespace {
                     it->second(__window);
                     FLUSH_X();
                 }
+            }
 
+            void emit(uint32_t __window, int __signal_id, uint32_t __w2)
+            {
+                auto it = _data[__window].find(__signal_id);
+                if (it != _data[__window].end())
+                {
+                    it->second(__w2);
+                    FLUSH_X();
+                }
             }
 
             void remove(uint32_t __window)
@@ -953,6 +962,7 @@ class __signal_manager__ {
     /* Defines   */
         #define WS_conn signal_manager->_window_signals.conect
         #define WS_emit(_window, _event) signal_manager->_window_signals.emit(_window, _event)
+        #define WS_emit_Win(_window, _event, _w2) signal_manager->_window_signals.emit(_window, _event, _w2)
         #define W_callback \
             [this](uint32_t __window)
 
@@ -2847,6 +2857,7 @@ class __event_handler__ {
         std::mutex event_mutex;
 
         template<uint8_t __event_id> static void handle_event(uint32_t __window) { WS_emit(__window, __event_id); }
+        template<> void handle_event<MAP_REQ>(uint32_t __window) { WS_emit_Win(screen->root, MAP_REQ, __window); }
         #define HANDLE_EVENT(__type) thread(handle_event<__type>, e->event).detach()
         #define HANDLE_WINDOW(__type) thread(handle_event<__type>, e->window).detach()
         
@@ -7983,7 +7994,7 @@ class Window_Manager {
             {
                 CONN_Win(root, L_MOUSE_BUTTON_EVENT,
                     if (__window != this->root) return;
-                    this->unfocus();                
+                    this->unfocus();
                 );
                 CONN_Win(root, R_MOUSE_BUTTON_EVENT,
                     if (__window != this->root) return;
