@@ -98,7 +98,7 @@ class __fixed_array_t__ {
         __fixed_array_t__ (initializer_list<Type> __init);
 
         template<>
-        __fixed_array_t__ (initializer_list<T0> __init)
+        __fixed_array_t__<T0> (initializer_list<T0> __init)
         : data(fill(T0{}))
         {
             data = AllocArr<T0>(Size);
