@@ -987,7 +987,7 @@ class __signal_manager__
 
         // ldClientWindowArray _client_window_arr;
 
-        // LinkedSuperArrayMap<client *, window> _linked_super_arr;
+        LinkedSuperArrayMap<client *, window> _linked_super_arr;
 
     /* Methods   */
         template<typename Callback>

@@ -98,7 +98,7 @@ class __fixed_array_t__ {
 
         template<>
         __fixed_array_t__ (initializer_list<T0> __init)
-        : data(AllocArr<T0>(__init.size()))
+        : data(AllocArr<T0>(Size))
         {
             for (size_t i = 0; i < Size; ++i)
             {
