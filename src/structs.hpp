@@ -104,10 +104,7 @@ class __fixed_array_t__ {
         __fixed_array_t__<T0>(indirect_array<T0> init)
         : data(new T0[Size])
         {
-            for (auto &__init : init)
-            {
-                &data[__init] = &init[__init];
-            }
+            fill(new T0);
         }
 
         __fixed_array_t__() : data(new T0[Size]) {}

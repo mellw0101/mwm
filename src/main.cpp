@@ -9083,7 +9083,7 @@ class __status_bar__ {
 
     public:
     // Variabels.
-        FixedArray<window, 8> _w {(window[8]){}};
+        FixedArray<window, 8> _w{{}};
 
         typedef enum {
             _BAR,
