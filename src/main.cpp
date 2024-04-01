@@ -3432,24 +3432,12 @@ class window {
         {
             return _window;
         }
-
-        // window &operator=(xcb_window_t &window)
-        // {
-        //     _window = window;
-        //     return *this;
-        // }
     
         window& operator=(uint32_t new_window) // Overload the assignment operator for uint32_t
         { 
             _window = new_window;
             return *this;
         }
-
-        // const window operator&=(const uint32_t new_window) // Overload the assignment operator for uint32_t
-        // { 
-        //     _window = new_window;
-        //     return *this;
-        // }
     
     /* Methods     */
         /* Create        */

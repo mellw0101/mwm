@@ -2,6 +2,7 @@
 #define STRUCTS_HPP
 // #include "defenitions.hpp"
 // #include "defenitions.hpp"
+// #include "defenitions.hpp"
 #include "include.hpp"
 #include <X11/Xlib.h>
 #include <algorithm>
@@ -58,8 +59,8 @@ template<typename T0, size_t Size = 20>
 class __fixed_array_t__ {
     public:
     /* Variabels */
-        // T0 *data;
-        T0 data[Size];
+        T0 *data;
+        // T0 data[Size];
 
     /* Methods */
         void fill(const T0& value)
@@ -90,8 +91,9 @@ class __fixed_array_t__ {
 
         __fixed_array_t__(const T0 (&__data)[Size])
         {
-            this->fill(T0{});
-            this->fill(__data);
+            data = AllocArr<T0>(Size);
+            fill(T0{});
+            fill(__data);
         }
 
         // template<typename Type = T0>
@@ -111,7 +113,7 @@ class __fixed_array_t__ {
         // ~__fixed_array_t__() { delete [] data; }
 
 };
-template<typename T0, size_t n0 = 4>
+template<typename T0, size_t n0 = 20>
 using FixedArray = __fixed_array_t__<T0, n0>;
 
 constexpr size_t size_t_MAX = numeric_limits<size_t>::max(); 
