@@ -3439,15 +3439,21 @@ class window {
             return *this;
         }
 
-        // window& operator=(const window &other)
-        // {
-        //     if (this != &other)
-        //     {
-        //         // Copy each member from 'other' to 'this'
-        //     }
+        window& operator=(const window &other)
+        {
+            if (this != &other)
+            {
+                // Copy each member from 'other' to 'this'
+            }
 
-        //     return *this;
-        // }
+            return *this;
+        }
+
+        window *operator=(const window &&other)
+        {
+            
+            return &*this;
+        }
 
         bool operator==(const window& other) const
         {
