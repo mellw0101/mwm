@@ -126,13 +126,11 @@ class __dynamic_array_t {
     public:
     /* Constructor */
         __dynamic_array_t()
-        : capacity(10), size(0), data(AllocArr<T0>(capacity)) { if constexpr (!is_pointer_v<T0>) T_MAX[0] = make_T_MAX<T0>(); }
+        : capacity(10), size(0), data(new T0[capacity]) {}
 
         __dynamic_array_t(initializer_list<T0> init)
-        : capacity(init.size()), size(0), data(AllocArr)
+        : capacity(init.size()), size(0)
         {
-            if constexpr (!is_pointer_v<T0>) T_MAX[0] = make_T_MAX<T0>();
-
             for (auto &value : init)
             {
                 push_back(value);
@@ -206,8 +204,6 @@ class __dynamic_array_t {
         size_t capacity;
         size_t size;
         T0* data;
-        
-        T0* T_MAX = nullptr;
 
     /* Methods   */
         void resize(size_t __new_capacity)
