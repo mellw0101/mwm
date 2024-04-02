@@ -2905,6 +2905,13 @@ class __event_handler__ {
 
             switch (responseType)
             {
+                case XCB_KEY_PRESS:
+                {
+                    RE_CAST_EV(xcb_key_press_event_t);
+                    if (e->detail == T && e->state & CTRL | ALT) HANDLE_EVENT(KEY_PRESS);
+                    // HANDLE_EVENT(KEY_PRESS);
+                }
+
                 case XCB_BUTTON_PRESS:
                 {
                     RE_CAST_EV(xcb_button_press_event_t);
@@ -2913,16 +2920,19 @@ class __event_handler__ {
                         if (e->state & ALT)
                         {
                             HANDLE_EVENT(L_MOUSE_BUTTON_EVENT__ALT);
+                            return;
                         }
                         else 
                         {
                             HANDLE_EVENT(L_MOUSE_BUTTON_EVENT);
+                            return;
                         }
                     }
 
                     if (e->detail == R_MOUSE_BUTTON)
                     {
                         HANDLE_EVENT(R_MOUSE_BUTTON_EVENT);
+                        return;
                     }
                 
                     break;
@@ -8175,6 +8185,7 @@ class Window_Manager {
                     if (c != nullptr) return;
                     this->manage_new_client(__window);
                 );
+                CONN_Win(root, TERM_KEY_PRESS, this->launcher.launch_child_process("konsole"););
                 
                 if (BORDER_SIZE == 0)
                 {
@@ -13863,6 +13874,7 @@ class tile {
         : c(c)
         {
             if (c->is_EWMH_fullscreen()) return;
+            
             switch (tile)
             {
                 case TILE::LEFT:

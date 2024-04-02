@@ -777,7 +777,9 @@ enum EV : uint8_t {
     KILL_SIGNAL                       = 39,
     L_MOUSE_BUTTON_EVENT__ALT         = 43,
     PROPERTY_NOTIFY                   = XCB_PROPERTY_NOTIFY,
-    MAP_REQ                           = XCB_MAP_REQUEST
+    MAP_REQ                           = XCB_MAP_REQUEST,
+    KEY_PRESS                         = XCB_KEY_PRESS,
+    TERM_KEY_PRESS                    = 44
 };
 
 typedef enum {
