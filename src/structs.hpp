@@ -788,7 +788,11 @@ enum EV : uint8_t {
     MOVE_TO_DESKTOP_4                 = 51,
     MOVE_TO_DESKTOP_5                 = 52,
     MOVE_TO_PREV_DESKTOP              = 53,
-    MOVE_TO_NEXT_DESKTOP              = 54
+    MOVE_TO_NEXT_DESKTOP              = 54,
+    TILE_RIGHT                        = 55,
+    TILE_LEFT                         = 56,
+    TILE_UP                           = 57,
+    TILE_DOWN                         = 58
 };
 
 typedef enum {
