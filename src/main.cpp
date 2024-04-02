@@ -3013,6 +3013,10 @@ class __event_handler__ {
         template<> void handle_event<MOVE_TO_DESKTOP_4>(uint32_t __window) { WS_emit(screen->root, MOVE_TO_DESKTOP_4); }
         template<> void handle_event<MOVE_TO_DESKTOP_5>(uint32_t __window) { WS_emit(screen->root, MOVE_TO_DESKTOP_5); }
 
+
+        template<> void handle_event<MOVE_TO_NEXT_DESKTOP>(uint32_t __window) { WS_emit(screen->root, MOVE_TO_NEXT_DESKTOP); }
+        template<> void handle_event<MOVE_TO_PREV_DESKTOP>(uint32_t __window) { WS_emit(screen->root, MOVE_TO_PREV_DESKTOP); }
+
         #define HANDLE_EVENT(__type ) thread(handle_event<__type>, e->event ).detach()
         #define HANDLE_WINDOW(__type) thread(handle_event<__type>, e->window).detach()
 
@@ -3116,6 +3120,13 @@ class __event_handler__ {
                             if (e->detail == key_codes.n_3) HANDLE_EVENT(MOVE_TO_DESKTOP_3);
                             if (e->detail == key_codes.n_4) HANDLE_EVENT(MOVE_TO_DESKTOP_4);
                             if (e->detail == key_codes.n_5) HANDLE_EVENT(MOVE_TO_DESKTOP_5);
+
+                            break;
+                        }
+                        case CTRL | SUPER:
+                        {
+                            if (e->detail == key_codes.r_arrow) HANDLE_EVENT(MOVE_TO_NEXT_DESKTOP);
+                            if (e->detail == key_codes.l_arrow) HANDLE_EVENT(MOVE_TO_PREV_DESKTOP);
 
                             break;
                         }
@@ -14254,6 +14265,9 @@ class Events {
             CONN_root(MOVE_TO_DESKTOP_3, W_callback -> void { change_desktop::teleport_to(3); });
             CONN_root(MOVE_TO_DESKTOP_4, W_callback -> void { change_desktop::teleport_to(4); });
             CONN_root(MOVE_TO_DESKTOP_5, W_callback -> void { change_desktop::teleport_to(5); });
+
+            CONN_root(MOVE_TO_NEXT_DESKTOP, W_callback -> void { change_desktop(conn).change_to(change_desktop::NEXT); });
+            CONN_root(MOVE_TO_PREV_DESKTOP, W_callback -> void { change_desktop(conn).change_to(change_desktop::PREV); });
         }
 
     private:
@@ -14261,73 +14275,6 @@ class Events {
         void key_press_handler(const xcb_generic_event_t *&ev)
         {
             RE_CAST_EV(xcb_key_press_event_t);
-            // if (e->detail == wm->key_codes.f11)
-            // {
-            //     client *c = signal_manager->_window_client_map.retrive(e->event);
-            //     max_win(c, max_win::EWMH_MAXWIN);
-            //     return;
-            // }
-            
-            // if (e->detail == wm->key_codes.n_1)
-            // {
-            //     switch (e->state)
-            //     {
-            //         case ALT:
-            //         {
-            //             change_desktop::teleport_to(1);
-            //             return;
-            //         }
-            //     }
-            // }
-            
-            // if (e->detail == wm->key_codes.n_2)
-            // {
-            //     switch (e->state)
-            //     {
-            //         case ALT:
-            //         {
-            //             change_desktop::teleport_to(2);
-            //             return;
-            //         }
-            //     }
-            // }
-            
-            // if (e->detail == wm->key_codes.n_3)
-            // {
-            //     switch (e->state)
-            //     {
-            //         case ALT:
-            //         {
-            //             change_desktop::teleport_to(3);
-            //             break;
-            //         }
-            //     }
-            // }
-            
-            // if (e->detail == wm->key_codes.n_4)
-            // {
-            //     switch (e->state)
-            //     {
-            //         case ALT:
-            //         {
-            //             change_desktop::teleport_to(4);
-            //             break;
-            //         }
-            //     }
-            // }
-            
-            // if (e->detail == wm->key_codes.n_5)
-            // {
-            //     switch (e->state)
-            //     {
-            //         case ALT:
-            //         {
-            //             change_desktop::teleport_to(5);
-            //             break;
-            //         }
-            //     }
-            // }
-            
             if (e->detail == wm->key_codes.r_arrow)
             {
                 switch (e->state)
@@ -14339,12 +14286,12 @@ class Events {
                         return;
                     }
                     
-                    case (CTRL + SUPER):
-                    {
-                        change_desktop change_desktop(conn);
-                        change_desktop.change_to(change_desktop::NEXT);
-                        return;
-                    }
+                    // case (CTRL + SUPER):
+                    // {
+                    //     change_desktop change_desktop(conn);
+                    //     change_desktop.change_to(change_desktop::NEXT);
+                    //     return;
+                    // }
 
                     case SUPER:
                     {
@@ -14366,12 +14313,12 @@ class Events {
                         return;
                     }
 
-                    case (CTRL + SUPER):
-                    {
-                        change_desktop change_desktop(conn);
-                        change_desktop.change_to(change_desktop::PREV);
-                        return;
-                    }
+                    // case (CTRL + SUPER):
+                    // {
+                    //     change_desktop change_desktop(conn);
+                    //     change_desktop.change_to(change_desktop::PREV);
+                    //     return;
+                    // }
                     
                     case SUPER:
                     {
