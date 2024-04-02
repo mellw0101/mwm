@@ -14032,17 +14032,11 @@ class Events {
         void key_press_handler(const xcb_generic_event_t *&ev)
         {
             RE_CAST_EV(xcb_key_press_event_t);
-            // if (e->detail == wm->key_codes.t)
-            // {
-            //     switch (e->state)
-            //     {
-            //         case (CTRL + ALT):
-            //         {
-            //             wm->launcher.launch_child_process("konsole");
-            //             return;
-            //         }
-            //     }
-            // }
+            if (e->detail == wm->key_codes.t && e->state & CTRL | ALT)
+            {
+                wm->launcher.launch_child_process("konsole");
+                return;
+            }
             
             if (e->detail == wm->key_codes.q)
             {
