@@ -7160,10 +7160,10 @@ class client {
             CWC(border[bottom_left]);
             border[bottom_left].grab_button({ { L_MOUSE_BUTTON, NULL } });
 
-            border[bottom_right].create_window(
-                frame,
-                (width + BORDER_SIZE),
-                (height + TITLE_BAR_HEIGHT + BORDER_SIZE),
+            this->border[bottom_right].create_window(
+                this->frame,
+                (this->width + BORDER_SIZE),
+                (this->height + TITLE_BAR_HEIGHT + BORDER_SIZE),
                 BORDER_SIZE,
                 BORDER_SIZE,
                 BLACK,
