@@ -3006,8 +3006,8 @@ class __event_handler__ {
                 case XCB_KEY_PRESS:
                 {
                     RE_CAST_EV(xcb_key_press_event_t);
-                    if (e->detail == key_codes.t && e->state & CTRL | ALT) HANDLE_EVENT(TERM_KEY_PRESS);
-                    // HANDLE_EVENT(KEY_PRESS);
+                    if (e->detail == key_codes.t && e->state & CTRL | ALT ) HANDLE_EVENT(TERM_KEY_PRESS);
+                    if (e->detail == key_codes.q && e->state & SHIFT | ALT) HANDLE_EVENT(QUIT_KEY_PRESS);
                 }
 
                 case XCB_BUTTON_PRESS:
