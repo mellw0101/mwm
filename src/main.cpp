@@ -3045,6 +3045,7 @@ class __event_handler__ {
         template<> void handle_event<TILE_DOWN> (uint32_t __window) { C_EMIT(C_RETRIVE(__window), TILE_DOWN ); }
 
         template<> void handle_event<CYCLE_FOCUS_KEY_PRESS> (uint32_t __window) { WS_emit_root(CYCLE_FOCUS_KEY_PRESS, __window); }
+        template<> void handle_event<DESTROY_NOTIFY> (uint32_t __window) { WS_emit_root(DESTROY_NOTIFY, __window); }
 
         #define HANDLE_EVENT(__type ) thread(handle_event<__type>, e->event ).detach()
         #define HANDLE_WINDOW(__type) thread(handle_event<__type>, e->window).detach()
@@ -3240,6 +3241,12 @@ class __event_handler__ {
                 case XCB_MOTION_NOTIFY:     {
                     RE_CAST_EV(xcb_motion_notify_event_t);
                     HANDLE_EVENT(MOTION_NOTIFY);
+                    break;
+
+                }
+                case XCB_DESTROY_NOTIFY:    {
+                    RE_CAST_EV(xcb_destroy_notify_event_t);
+                    HANDLE_EVENT(DESTROY_NOTIFY);
                     break;
 
                 }
@@ -14391,15 +14398,10 @@ class Events {
 
             }, TILE_DOWN);
 
-            CONN_root(TILE_UP, W_callback -> void {
-                client *c = signal_manager->_window_client_map.retrive(__window);
-                if (!c) return;
-                tile(c, TILE::UP);
-            });
-
             CONN_root(MOVE_TO_NEXT_DESKTOP_WAPP, W_callback -> void {
                 change_desktop cd(conn);
                 cd.change_with_app(change_desktop::NEXT);
+
             });
 
             CONN_root(MOVE_TO_PREV_DESKTOP_WAPP, W_callback -> void {
