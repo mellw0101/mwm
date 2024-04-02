@@ -938,22 +938,21 @@ namespace {
         public:
             umap<uint32_t, client *> _data;
 
-            void connect(uint32_t __window, client *__c)
-            {
+            void connect(uint32_t __window, client *__c) {
                 _data[__window] = __c;
+
             }
 
-            client *retrive(uint32_t __window)
-            {
+            client *retrive(uint32_t __window) {
                 auto it = _data.find(__window);
                 if (it == _data.end()) return nullptr;
-
                 return it->second;
+
             }
 
-            void remove(uint32_t __window)
-            {
+            void remove(uint32_t __window) {
                 _data.erase(__window);
+
             }
     };
 }
@@ -987,6 +986,9 @@ class __signal_manager__ {
 
         #define C_SIG(__c, __callback, __sig) \
             signal_manager->client_signals.connect(__c, __sig, [this](client *c) {__callback});
+
+        #define C_RETRIVE(__window) \
+            signal_manager->_window_client_map.retrive(__window)
 
     private:
     /* Variabels */
@@ -3031,10 +3033,15 @@ class __event_handler__ {
         template<> void handle_event<MOVE_TO_PREV_DESKTOP_WAPP>(uint32_t __window) { WS_emit_root(MOVE_TO_PREV_DESKTOP_WAPP, __window); }
 
 
-        template<> void handle_event<TILE_RIGHT>(uint32_t __window) { WS_emit_Win(screen->root, TILE_RIGHT, __window); }
-        template<> void handle_event<TILE_LEFT> (uint32_t __window) { WS_emit_Win(screen->root, TILE_LEFT,  __window); }
-        template<> void handle_event<TILE_UP>   (uint32_t __window) { WS_emit_Win(screen->root, TILE_UP,    __window); }
-        template<> void handle_event<TILE_DOWN> (uint32_t __window) { WS_emit_Win(screen->root, TILE_DOWN,  __window); }
+        // template<> void handle_event<TILE_RIGHT>(uint32_t __window) { WS_emit_Win(screen->root, TILE_RIGHT, __window); }
+        // template<> void handle_event<TILE_LEFT> (uint32_t __window) { WS_emit_Win(screen->root, TILE_LEFT,  __window); }
+        // template<> void handle_event<TILE_UP>   (uint32_t __window) { WS_emit_Win(screen->root, TILE_UP,    __window); }
+        // template<> void handle_event<TILE_DOWN> (uint32_t __window) { WS_emit_Win(screen->root, TILE_DOWN,  __window); }
+
+        template<> void handle_event<TILE_RIGHT>(uint32_t __window) { C_EMIT(C_RETRIVE(__window), TILE_RIGHT); }
+        template<> void handle_event<TILE_LEFT> (uint32_t __window) { C_EMIT(C_RETRIVE(__window), TILE_LEFT ); }
+        template<> void handle_event<TILE_UP>   (uint32_t __window) { C_EMIT(C_RETRIVE(__window), TILE_UP   ); }
+        template<> void handle_event<TILE_DOWN> (uint32_t __window) { C_EMIT(C_RETRIVE(__window), TILE_DOWN ); }
 
         template<> void handle_event<CYCLE_FOCUS_KEY_PRESS> (uint32_t __window) { WS_emit_root(CYCLE_FOCUS_KEY_PRESS, __window); }
 
@@ -3226,6 +3233,7 @@ class __event_handler__ {
                 case XCB_FOCUS_OUT:         {
                     RE_CAST_EV(xcb_focus_out_event_t);
                     HANDLE_EVENT(FOCUS_OUT);
+                    break;
 
                 }
 
@@ -7210,28 +7218,30 @@ class client {
                 XCB_EVENT_MASK_EXPOSURE,
                 MAP
             
-            );
-            CWC(titlebar);
+            ); CWC(titlebar);
 
             titlebar.grab_button({ { L_MOUSE_BUTTON, NULL } });
             draw_title(TITLE_REQ_DRAW);
             icon.raise();
 
-            CONN(EXPOSE,
-                if (__window != this->titlebar) return;
+            CONN(EXPOSE, if (__window == this->titlebar) {
                 this->titlebar.clear();
                 this->titlebar.draw_acc_16(this->win.get_net_wm_name());
-                FLUSH_X();,
+                FLUSH_X();
+            
+            }, this->titlebar);
 
-            this->titlebar);
-
-            CONN(PROPERTY_NOTIFY,
-                if (__window != this->win) return;
+            CONN(PROPERTY_NOTIFY, if (__window == this->win) {
                 this->titlebar.clear();
                 this->titlebar.draw_acc_16(this->win.get_net_wm_name_by_req());
-                FLUSH_X();,
+                FLUSH_X();
+                
+            }, this->win);
 
-            this->win);
+            CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->titlebar) {
+                C_EMIT(this, MOVE_CLIENT_MOUSE);
+                
+            }, this->titlebar);
         }
     
         void make_close_button()
@@ -7252,22 +7262,20 @@ class client {
             CWC(close_button);
             close_button.make_then_set_png(USER_PATH_PREFIX("/close.png"), CLOSE_BUTTON_BITMAP);
             
-            CONN(L_MOUSE_BUTTON_EVENT,
-                signal_manager->client_arr.send_c_sig(this, KILL_SIGNAL);
+            CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->close_button) {
+                C_EMIT(this, KILL_SIGNAL);
             
-            ,this->close_button);
+            }, this->close_button);
 
-            CONN(ENTER_NOTIFY,
-                if (__window != this->close_button) return;
+            CONN(ENTER_NOTIFY, if (__window == this->close_button) {
                 this->close_button.change_border_color(WHITE);
-            
-            ,this->close_button);
 
-            CONN(LEAVE_NOTIFY,
-                if (__window != this->close_button) return;
+            }, this->close_button);
+
+            CONN(LEAVE_NOTIFY, if (__window == this->close_button) {
                 this->close_button.change_border_color(BLACK);
 
-            ,this->close_button);
+            }, this->close_button);
         }
     
         void make_max_button()
@@ -7283,8 +7291,8 @@ class client {
                 MAP,
                 (int[3]) {ALL, 1, BLACK},
                 CURSOR::hand2
-            );
-            CWC(max_button);
+
+            ); CWC(max_button);
             max_button.grab_button({ { L_MOUSE_BUTTON, NULL } });
 
             Bitmap bitmap(20, 20);
@@ -7316,20 +7324,20 @@ class client {
 
             max_button.set_backround_png(USER_PATH_PREFIX("/max.png"));
 
-            CONN(L_MOUSE_BUTTON_EVENT,
-                signal_manager->client_arr.send_c_sig(this, BUTTON_MAXWIN_PRESS);
+            CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->max_button) {
+                C_EMIT(this, BUTTON_MAXWIN_PRESS);
 
-            ,this->max_button);
+            }, this->max_button);
 
-            CONN(ENTER_NOTIFY,
+            CONN(ENTER_NOTIFY, if (__window == this->max_button) {
                 this->max_button.change_border_color(WHITE);
+                
+            }, this->max_button);
 
-            ,this->max_button);
-
-            CONN(LEAVE_NOTIFY,
+            CONN(LEAVE_NOTIFY, if (__window == this->max_button) {
                 this->max_button.change_border_color(BLACK);
-            
-            ,this->max_button);
+
+            }, this->max_button);
         }
     
         void make_min_button()
@@ -7345,8 +7353,8 @@ class client {
                 MAP,
                 (int[3]) {ALL, 1, BLACK},
                 CURSOR::hand2
-            );
-            CWC(min_button);
+
+            ); CWC(min_button);
             FLUSH_X();
             min_button.grab_button({ { L_MOUSE_BUTTON, NULL } });
 
@@ -7358,14 +7366,16 @@ class client {
 
             min_button.set_backround_png(USER_PATH_PREFIX("/min.png"));
 
-            CONN_Win(min_button, ENTER_NOTIFY,
-                if (__window != this->min_button) return;
+            CONN(ENTER_NOTIFY, if (__window == this->min_button) {   
                 this->min_button.change_border_color(WHITE);
-            );
-            CONN_Win(min_button, LEAVE_NOTIFY,
-                if (__window != this->min_button) return;
+
+            }, this->min_button);
+
+            CONN(LEAVE_NOTIFY, if (__window == this->min_button) {
                 this->min_button.change_border_color(BLACK);
-            );
+
+            }, this->min_button);
+
         }
     
         void make_borders()
@@ -14313,6 +14323,9 @@ class tile {
 
 class Events {
     public:
+    /* Variabels */
+        pointer p;
+
     /* Constructor */
         Events() {}
     
@@ -14422,6 +14435,14 @@ class Events {
                 wm->focused_client = __c;
 
             }, MOVE_CLIENT_ALT);
+
+            C_SIGNAL(if (__c) {
+                __c->raise();
+                __c->focus();
+                mv_client mv(__c, this->p.x(), this->p.y());
+                wm->focused_client = __c;
+
+            }, MOVE_CLIENT_MOUSE);
 
             C_SIGNAL(if (__c) max_win(__c, max_win::BUTTON_MAXWIN);, BUTTON_MAXWIN_PRESS);
             C_SIGNAL(if (__c) max_win(__c, max_win::EWMH_MAXWIN);, EWMH_MAXWIN);
@@ -14575,33 +14596,33 @@ class Events {
 
             if (e->detail == L_MOUSE_BUTTON)
             {
-                if (e->event == c->win) {
-                    // switch (e->state)
-                    // {
-                    //     case ALT:
-                    //     {
-                    //         c->raise();
-                    //         mv_client mv(c, e->event_x, e->event_y + 20);
-                    //         c->focus();
-                    //         wm->focused_client = c;
-                    //         return;
-                    //     }
-                    // }
+                // if (e->event == c->win) {
+                //     // switch (e->state)
+                //     // {
+                //     //     case ALT:
+                //     //     {
+                //     //         c->raise();
+                //     //         mv_client mv(c, e->event_x, e->event_y + 20);
+                //     //         c->focus();
+                //     //         wm->focused_client = c;
+                //     //         return;
+                //     //     }
+                //     // }
 
-                    // c->raise();
-                    // c->focus();
-                    // wm->focused_client = c;
-                    return;
-                }
+                //     // c->raise();
+                //     // c->focus();
+                //     // wm->focused_client = c;
+                //     // return;
+                // }
                 
-                if (e->event == c->titlebar)
-                {
-                    c->raise();
-                    c->focus();
-                    mv_client mv(c, e->event_x, e->event_y);
-                    wm->focused_client = c;
-                    return;
-                }
+                // if (e->event == c->titlebar)
+                // {
+                //     c->raise();
+                //     c->focus();
+                //     mv_client mv(c, e->event_x, e->event_y);
+                //     wm->focused_client = c;
+                //     return;
+                // }
                 
                 if (e->event == c->border[left])
                 {

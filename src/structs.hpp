@@ -824,7 +824,7 @@ enum EV : uint8_t {
     DEBUG_KEY_PRESS                   = 62,
     BUTTON_MAXWIN_PRESS               = 63,
     FOCUS_CLIENT                      = 64,
-    MOVE_CLIENT                       = 65,
+    MOVE_CLIENT_MOUSE                 = 65,
     MOVE_CLIENT_ALT                   = 66
 };
 
@@ -854,7 +854,7 @@ class __c_func_arr__ {
                 case KILL_SIGNAL:         return 1;
                 case FOCUS_CLIENT:        return 2;
                 case MOVE_CLIENT_ALT:     return 3;
-                case MOVE_CLIENT:         return 4;
+                case MOVE_CLIENT_MOUSE:   return 4;
                 case TILE_LEFT:           return 5;
                 case TILE_RIGHT:          return 6;
                 case TILE_DOWN:           return 7;
