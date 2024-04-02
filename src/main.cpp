@@ -14034,7 +14034,8 @@ class Events {
             RE_CAST_EV(xcb_key_press_event_t);
             if (e->detail == wm->key_codes.t && e->state & CTRL | ALT)
             {
-                wm->launcher.launch_child_process("konsole");
+                // wm->launcher.launch_child_process("konsole");
+                WS_emit(screen->root, TERM_KEY_PRESS);
                 return;
             }
             
