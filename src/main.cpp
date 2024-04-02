@@ -3130,6 +3130,15 @@ class __event_handler__ {
 
                             break;
                         }
+                        case SUPER:
+                        {
+                            if (e->detail == key_codes.r_arrow) HANDLE_EVENT(TILE_RIGHT);
+                            if (e->detail == key_codes.l_arrow) HANDLE_EVENT(TILE_LEFT);
+                            if (e->detail == key_codes.u_arrow) HANDLE_EVENT(TILE_UP);
+                            if (e->detail == key_codes.d_arrow) HANDLE_EVENT(TILE_DOWN);
+                            
+                            break;
+                        }
                     }
 
                     if (e->detail == key_codes.f11) HANDLE_EVENT(EWMH_MAXWIN);
@@ -3182,7 +3191,6 @@ class __event_handler__ {
 
                     break;
                 }
-
                 case XCB_LEAVE_NOTIFY:
                 {
                     RE_CAST_EV(xcb_leave_notify_event_t);
@@ -3190,7 +3198,6 @@ class __event_handler__ {
 
                     break;
                 }
-
                 case XCB_MAP_REQUEST:
                 {
                     RE_CAST_EV(xcb_map_request_event_t);
@@ -14268,6 +14275,27 @@ class Events {
 
             CONN_root(MOVE_TO_NEXT_DESKTOP, W_callback -> void { change_desktop(conn).change_to(change_desktop::NEXT); });
             CONN_root(MOVE_TO_PREV_DESKTOP, W_callback -> void { change_desktop(conn).change_to(change_desktop::PREV); });
+
+            CONN_root(TILE_RIGHT, W_callback -> void {
+                client *c = signal_manager->_window_client_map.retrive(__window);
+                if (!c) return;
+                tile(c, TILE::RIGHT);
+            });
+            CONN_root(TILE_LEFT, W_callback -> void {
+                client *c = signal_manager->_window_client_map.retrive(__window);
+                if (!c) return;
+                tile(c, TILE::LEFT);
+            });
+            CONN_root(TILE_DOWN, W_callback -> void {
+                client *c = signal_manager->_window_client_map.retrive(__window);
+                if (!c) return;
+                tile(c, TILE::DOWN);
+            });
+            CONN_root(TILE_UP, W_callback -> void {
+                client *c = signal_manager->_window_client_map.retrive(__window);
+                if (!c) return;
+                tile(c, TILE::UP);
+            });
         }
 
     private:
@@ -14293,12 +14321,12 @@ class Events {
                     //     return;
                     // }
 
-                    case SUPER:
-                    {
-                        client *c = signal_manager->_window_client_map.retrive(e->event);
-                        tile(c, TILE::RIGHT);
-                        return;
-                    }
+                    // case SUPER:
+                    // {
+                    //     client *c = signal_manager->_window_client_map.retrive(e->event);
+                    //     tile(c, TILE::RIGHT);
+                    //     return;
+                    // }
                 }
             }
             
@@ -14320,40 +14348,40 @@ class Events {
                     //     return;
                     // }
                     
-                    case SUPER:
-                    {
-                        client *c = signal_manager->_window_client_map.retrive(e->event);
-                        tile(c, TILE::LEFT);
-                        return;
-                    }
+                    // case SUPER:
+                    // {
+                    //     client *c = signal_manager->_window_client_map.retrive(e->event);
+                    //     tile(c, TILE::LEFT);
+                    //     return;
+                    // }
                 }
             }
             
-            if (e->detail == wm->key_codes.d_arrow)
-            {
-                switch (e->state)
-                {
-                    case SUPER:
-                    {
-                        client *c = signal_manager->_window_client_map.retrive(e->event);
-                        tile(c, TILE::DOWN);
-                        return;
-                    }
-                }
-            }
+            // if (e->detail == wm->key_codes.d_arrow)
+            // {
+            //     switch (e->state)
+            //     {
+            //         case SUPER:
+            //         {
+            //             client *c = signal_manager->_window_client_map.retrive(e->event);
+            //             tile(c, TILE::DOWN);
+            //             return;
+            //         }
+            //     }
+            // }
 
-            if (e->detail == wm->key_codes.u_arrow)
-            {
-                switch (e->state)
-                {
-                    case SUPER:
-                    {
-                        client *c = signal_manager->_window_client_map.retrive(e->event);
-                        tile(c, TILE::UP);
-                        return;
-                    }
-                }
-            }
+            // if (e->detail == wm->key_codes.u_arrow)
+            // {
+            //     switch (e->state)
+            //     {
+            //         case SUPER:
+            //         {
+            //             client *c = signal_manager->_window_client_map.retrive(e->event);
+            //             tile(c, TILE::UP);
+            //             return;
+            //         }
+            //     }
+            // }
 
             if (e->detail == wm->key_codes.tab)
             {
