@@ -963,6 +963,7 @@ class __signal_manager__ {
         #define WS_conn signal_manager->_window_signals.conect
         #define WS_emit(_window, _event) signal_manager->_window_signals.emit(_window, _event)
         #define WS_emit_Win(_window, _event, _w2) signal_manager->_window_signals.emit(_window, _event, _w2)
+        #define WS_emit_root(_event, _w2) signal_manager->_window_signals.emit(screen->root, _event, _w2)
         #define W_callback \
             [this](uint32_t __window)
 
@@ -3022,6 +3023,8 @@ class __event_handler__ {
         template<> void handle_event<TILE_UP>   (uint32_t __window) { WS_emit_Win(screen->root, TILE_UP,    __window); }
         template<> void handle_event<TILE_DOWN> (uint32_t __window) { WS_emit_Win(screen->root, TILE_DOWN,  __window); }
 
+        template<> void handle_event<CYCLE_FOCUS_KEY_PRESS> (uint32_t __window) { WS_emit_root(CYCLE_FOCUS_KEY_PRESS, __window); }
+
         #define HANDLE_EVENT(__type ) thread(handle_event<__type>, e->event ).detach()
         #define HANDLE_WINDOW(__type) thread(handle_event<__type>, e->window).detach()
 
@@ -3125,6 +3128,8 @@ class __event_handler__ {
                             if (e->detail == key_codes.n_3) HANDLE_EVENT(MOVE_TO_DESKTOP_3);
                             if (e->detail == key_codes.n_4) HANDLE_EVENT(MOVE_TO_DESKTOP_4);
                             if (e->detail == key_codes.n_5) HANDLE_EVENT(MOVE_TO_DESKTOP_5);
+
+                            if (e->detail == key_codes.tab) HANDLE_EVENT(CYCLE_FOCUS_KEY_PRESS);
 
                             break;
                         }
@@ -8420,6 +8425,7 @@ class Window_Manager {
                 );
                 CONN_Win(root, TERM_KEY_PRESS, this->launcher.launch_child_process("konsole"););
                 CONN_Win(root, QUIT_KEY_PRESS, this->quit(0););
+                CONN_root(CYCLE_FOCUS_KEY_PRESS, W_callback -> void { this->cycle_focus(); });
                 
                 if (BORDER_SIZE == 0)
                 {

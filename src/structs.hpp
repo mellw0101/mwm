@@ -792,7 +792,8 @@ enum EV : uint8_t {
     TILE_RIGHT                        = 55,
     TILE_LEFT                         = 56,
     TILE_UP                           = 57,
-    TILE_DOWN                         = 58
+    TILE_DOWN                         = 58,
+    CYCLE_FOCUS_KEY_PRESS             = 59
 };
 
 typedef enum {
