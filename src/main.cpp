@@ -6973,7 +6973,6 @@ class client {
         void make_max_button()
         {
             max_button.create_window(
-                
                 frame,
                 (width - (BUTTON_SIZE * 2) + BORDER_SIZE),
                 BORDER_SIZE,
@@ -6981,8 +6980,9 @@ class client {
                 BUTTON_SIZE,
                 RED,
                 BUTTON_EVENT_MASK,
-                MAP
-            
+                MAP,
+                (int[3]) {ALL, 1, BLACK},
+                CURSOR::hand2
             );
             CWC(max_button);
             max_button.grab_button({ { L_MOUSE_BUTTON, NULL } });
@@ -7014,6 +7014,15 @@ class client {
             bitmap.exportToPng(s.c_str());
 
             max_button.set_backround_png(USER_PATH_PREFIX("/max.png"));
+
+            CONN_Win(max_button, ENTER_NOTIFY,
+                if (__window != this->max_button) return;
+                this->max_button.change_border_color(WHITE);
+            );
+            CONN_Win(max_button, LEAVE_NOTIFY,
+                if (__window != this->max_button) return;
+                this->max_button.change_border_color(BLACK);
+            );
         }
     
         void make_min_button()
@@ -7027,7 +7036,8 @@ class client {
                 GREEN,
                 BUTTON_EVENT_MASK,
                 MAP,
-                nullptr
+                (int[3]) {ALL, 1, BLACK},
+                CURSOR::hand2
             );
             CWC(min_button);
             FLUSH_X();
@@ -7040,6 +7050,15 @@ class client {
             bitmap.exportToPng(s.c_str());
 
             min_button.set_backround_png(USER_PATH_PREFIX("/min.png"));
+
+            CONN_Win(min_button, ENTER_NOTIFY,
+                if (__window != this->min_button) return;
+                this->min_button.change_border_color(WHITE);
+            );
+            CONN_Win(min_button, LEAVE_NOTIFY,
+                if (__window != this->min_button) return;
+                this->min_button.change_border_color(BLACK);
+            );
         }
     
         void make_borders()
