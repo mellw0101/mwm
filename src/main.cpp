@@ -2904,6 +2904,7 @@ class __event_handler__ {
 
         void run()
         {
+            key_codes.init();
             xcb_generic_event_t *ev;
             shouldContinue = true;
 
