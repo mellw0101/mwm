@@ -969,6 +969,9 @@ class __signal_manager__ {
         #define CONN_Win(__window, __event, __callback) \
             signal_manager->_window_signals.conect(this->__window, __event, W_callback {__callback})
 
+        #define CONN_root(__event, __callback) \
+            signal_manager->_window_signals.conect(screen->root, __event, __callback)
+
         #define CONN_Win2(window, __event, __ref, __callback) \
             signal_manager->_window_signals.conect(this->window, __event, [ref](uint32_t __window)  __callback)
 
@@ -2998,6 +3001,7 @@ class __event_handler__ {
 
         template<uint8_t __event_id> static void handle_event(uint32_t __window) { WS_emit(__window, __event_id); }
         template<> void handle_event<MAP_REQ>(uint32_t __window) { WS_emit_Win(screen->root, MAP_REQ, __window); }
+        template<> void handle_event<EWMH_MAXWIN>(uint32_t __window) { WS_emit_Win(screen->root, EWMH_MAXWIN, __window); }
         template<> void handle_event<TERM_KEY_PRESS>(uint32_t __window) { WS_emit_Win(screen->root, TERM_KEY_PRESS, 0); }
         template<> void handle_event<QUIT_KEY_PRESS>(uint32_t __window) { WS_emit_Win(screen->root, QUIT_KEY_PRESS, 0); }
         #define HANDLE_EVENT(__type ) thread(handle_event<__type>, e->event ).detach()
@@ -3089,10 +3093,15 @@ class __event_handler__ {
 
                             break;
                         }
-
                         case SHIFT | ALT:
                         {
                             if (e->detail == key_codes.q) HANDLE_EVENT(QUIT_KEY_PRESS);
+
+                            break;
+                        }
+                        case AnyModifier:
+                        {
+                            if (e->detail == key_codes.f11) HANDLE_EVENT(EWMH_MAXWIN);
 
                             break;
                         }
@@ -3100,7 +3109,6 @@ class __event_handler__ {
 
                     break;
                 }
-
                 case XCB_BUTTON_PRESS:
                 {
                     RE_CAST_EV(xcb_button_press_event_t);
@@ -3126,7 +3134,6 @@ class __event_handler__ {
                 
                     break;
                 }
-
                 case XCB_EXPOSE:
                 {
                     RE_CAST_EV(xcb_expose_event_t);
@@ -3134,7 +3141,6 @@ class __event_handler__ {
 
                     break;
                 }
-
                 case XCB_PROPERTY_NOTIFY:
                 {
                     RE_CAST_EV(xcb_property_notify_event_t);
@@ -3142,7 +3148,6 @@ class __event_handler__ {
 
                     break;
                 }
-
                 case XCB_ENTER_NOTIFY:
                 {
                     RE_CAST_EV(xcb_enter_notify_event_t);
@@ -14215,6 +14220,18 @@ class Events {
             // event_handler->setEventCallback(EV_CALL(XCB_ENTER_NOTIFY)      { enter_notify_handler(ev); });
             // event_handler->setEventCallback(EV_CALL(XCB_LEAVE_NOTIFY)      { leave_notify_handler(ev); });
             // event_handler->setEventCallback(EV_CALL(XCB_MOTION_NOTIFY)     { motion_notify_handler(ev); });
+
+            init_signals();
+        }
+
+        void init_signals()
+        {
+            CONN_root(EWMH_MAXWIN, [this](uint32_t __window) -> void
+            {
+                client *c = signal_manager->_window_client_map.retrive(__window);
+                if (!c) return;
+                max_win(c, max_win::EWMH_MAXWIN);
+            });
         }
 
     private:
@@ -14222,12 +14239,12 @@ class Events {
         void key_press_handler(const xcb_generic_event_t *&ev)
         {
             RE_CAST_EV(xcb_key_press_event_t);
-            if (e->detail == wm->key_codes.f11)
-            {
-                client *c = signal_manager->_window_client_map.retrive(e->event);
-                max_win(c, max_win::EWMH_MAXWIN);
-                return;
-            }
+            // if (e->detail == wm->key_codes.f11)
+            // {
+            //     client *c = signal_manager->_window_client_map.retrive(e->event);
+            //     max_win(c, max_win::EWMH_MAXWIN);
+            //     return;
+            // }
             
             if (e->detail == wm->key_codes.n_1)
             {

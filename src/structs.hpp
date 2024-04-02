@@ -780,7 +780,8 @@ enum EV : uint8_t {
     MAP_REQ                           = XCB_MAP_REQUEST,
     KEY_PRESS                         = XCB_KEY_PRESS,
     TERM_KEY_PRESS                    = 44,
-    QUIT_KEY_PRESS                    = 45
+    QUIT_KEY_PRESS                    = 45,
+    EWMH_MAXWIN                       = 46
 };
 
 typedef enum {
