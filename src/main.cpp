@@ -14542,11 +14542,11 @@ class Events {
                     return;
                 }
 
-                if (e->event == c->max_button)
-                {
-                    max_win(c, max_win::BUTTON_MAXWIN);
-                    return;
-                }
+                // if (e->event == c->max_button)
+                // {
+                //     max_win(c, max_win::BUTTON_MAXWIN);
+                //     return;
+                // }
                 
                 if (e->event == c->border[left])
                 {
