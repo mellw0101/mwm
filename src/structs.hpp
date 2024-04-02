@@ -801,6 +801,9 @@ enum EV : uint8_t {
     KEY_PRESS                         = XCB_KEY_PRESS,
     FOCUS_IN                          = XCB_FOCUS_IN,
     FOCUS_OUT                         = XCB_FOCUS_OUT,
+    KEY_RELESE                        = XCB_KEY_RELEASE,
+    BUTTON_RELEASE                    = XCB_BUTTON_RELEASE,
+    MOTION_NOTIFY                     = XCB_MOTION_NOTIFY,
     TERM_KEY_PRESS                    = 44,
     QUIT_KEY_PRESS                    = 45,
     EWMH_MAXWIN                       = 46,
@@ -851,6 +854,12 @@ class __c_func_arr__ {
                 case KILL_SIGNAL:         return 1;
                 case FOCUS_CLIENT:        return 2;
                 case MOVE_CLIENT_ALT:     return 3;
+                case MOVE_CLIENT:         return 4;
+                case TILE_LEFT:           return 5;
+                case TILE_RIGHT:          return 6;
+                case TILE_DOWN:           return 7;
+                case TILE_UP:             return 8;
+                case EWMH_MAXWIN:         return 9;
 
                 default: return make_T_MAX<uint8_t>();
 
@@ -860,7 +869,7 @@ class __c_func_arr__ {
 
     public:
     /* Variabels */
-        FixedArray<function<void(client *c)>, 4> func;
+        FixedArray<function<void(client *c)>, 10> func;
 
     /* Methods   */
         void send_c_sig(client *__c, int __sig) {

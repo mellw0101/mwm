@@ -3015,7 +3015,7 @@ class __event_handler__ {
 
         template<> void handle_event<MAP_REQ>(uint32_t __window) { WS_emit_Win(screen->root, MAP_REQ, __window); }
         template<> void handle_event<MAP_NOTIFY>(uint32_t __window) { WS_emit_Win(screen->root, MAP_NOTIFY, __window); }
-        template<> void handle_event<EWMH_MAXWIN>(uint32_t __window) { WS_emit_Win(screen->root, EWMH_MAXWIN, __window); }
+        template<> void handle_event<EWMH_MAXWIN>(uint32_t __window) { C_EMIT(signal_manager->_window_client_map.retrive(__window), EWMH_MAXWIN); }
         template<> void handle_event<TERM_KEY_PRESS>(uint32_t) { WS_emit_Win(screen->root, TERM_KEY_PRESS, 0); }
         template<> void handle_event<QUIT_KEY_PRESS>(uint32_t __window) { WS_emit_Win(screen->root, QUIT_KEY_PRESS, 0); }
         
@@ -14332,12 +14332,12 @@ class Events {
 
         void init_signals()
         {
-            CONN_root(EWMH_MAXWIN, [this](uint32_t __window) -> void
-            {
-                client *c = signal_manager->_window_client_map.retrive(__window);
-                if (!c) return;
-                max_win(c, max_win::EWMH_MAXWIN);
-            });
+            // CONN_root(EWMH_MAXWIN, [this](uint32_t __window) -> void
+            // {
+            //     client *c = signal_manager->_window_client_map.retrive(__window);
+            //     if (!c) return;
+            //     max_win(c, max_win::EWMH_MAXWIN);
+            // });
 
             CONN_root(MOVE_TO_DESKTOP_1, W_callback -> void { change_desktop::teleport_to(1); });
             CONN_root(MOVE_TO_DESKTOP_2, W_callback -> void { change_desktop::teleport_to(2); });
@@ -14348,22 +14348,23 @@ class Events {
             CONN_root(MOVE_TO_NEXT_DESKTOP, W_callback -> void { change_desktop(conn).change_to(change_desktop::NEXT); });
             CONN_root(MOVE_TO_PREV_DESKTOP, W_callback -> void { change_desktop(conn).change_to(change_desktop::PREV); });
 
-            CONN_root(TILE_RIGHT, W_callback -> void {
-                client *c = signal_manager->_window_client_map.retrive(__window);
-                if (!c) return;
-                tile(c, TILE::RIGHT);
+            C_SIGNAL(if (__c) {
+                tile(__c, TILE::LEFT);
 
-            });
-            CONN_root(TILE_LEFT, W_callback -> void {
-                client *c = signal_manager->_window_client_map.retrive(__window);
-                if (!c) return;
-                tile(c, TILE::LEFT);
-            });
-            CONN_root(TILE_DOWN, W_callback -> void {
-                client *c = signal_manager->_window_client_map.retrive(__window);
-                if (!c) return;
-                tile(c, TILE::DOWN);
-            });
+            }, TILE_LEFT);
+            C_SIGNAL(if (__c) {
+                tile(__c, TILE::RIGHT);
+
+            }, TILE_RIGHT);
+            C_SIGNAL(if (__c) {
+                tile(__c, TILE::UP);
+
+            }, TILE_UP);
+            C_SIGNAL(if (__c) {
+                tile(__c, TILE::DOWN);
+
+            }, TILE_DOWN);
+
             CONN_root(TILE_UP, W_callback -> void {
                 client *c = signal_manager->_window_client_map.retrive(__window);
                 if (!c) return;
@@ -14402,7 +14403,8 @@ class Events {
             }}, KILL_SIGNAL);
 
             C_SIGNAL(if (__c) {
-                
+
+
             }, FOCUS_CLIENT);
 
             C_SIGNAL(if (__c) {
@@ -14414,6 +14416,7 @@ class Events {
             }, MOVE_CLIENT_ALT);
 
             C_SIGNAL(if (__c) max_win(__c, max_win::BUTTON_MAXWIN);, BUTTON_MAXWIN_PRESS);
+            C_SIGNAL(if (__c) max_win(__c, max_win::EWMH_MAXWIN);, EWMH_MAXWIN);
         }
 
     private:
