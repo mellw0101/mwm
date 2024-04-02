@@ -14137,11 +14137,11 @@ class Events {
             //     return;
             // }
             
-            if (e->detail == wm->key_codes.q && e->state & SHIFT | ALT)
-            {
-                WS_emit(screen->root, QUIT_KEY_PRESS);
-                return;
-            }
+            // if (e->detail == wm->key_codes.q && e->state & SHIFT | ALT)
+            // {
+            //     WS_emit(screen->root, QUIT_KEY_PRESS);
+            //     return;
+            // }
             
             if (e->detail == wm->key_codes.f11)
             {
