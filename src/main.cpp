@@ -2961,7 +2961,8 @@ class __event_handler__ {
 
         template<uint8_t __event_id> static void handle_event(uint32_t __window) { WS_emit(__window, __event_id); }
         template<> void handle_event<MAP_REQ>(uint32_t __window) { WS_emit_Win(screen->root, MAP_REQ, __window); }
-        template<> void handle_event<TERM_KEY_PRESS>(uint32_t __window) { WS_emit_Win(screen->root, TERM_KEY_PRESS, __window); }
+        template<> void handle_event<TERM_KEY_PRESS>(uint32_t __window) { WS_emit_Win(screen->root, TERM_KEY_PRESS, 0); }
+        template<> void handle_event<QUIT_KEY_PRESS>(uint32_t __window) { WS_emit_Win(screen->root, QUIT_KEY_PRESS, 0); }
         #define HANDLE_EVENT(__type ) thread(handle_event<__type>, e->event ).detach()
         #define HANDLE_WINDOW(__type) thread(handle_event<__type>, e->window).detach()
         DynamicArray<uint32_t *> _window_arr;
