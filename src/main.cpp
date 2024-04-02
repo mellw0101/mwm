@@ -7477,7 +7477,7 @@ class client {
 
             border[bottom_right].create_window(
                 frame,
-                (width + BORDER_SIZE),
+                (width - BORDER_SIZE),
                 (height - BORDER_SIZE),
                 BORDER_SIZE,
                 BORDER_SIZE,
