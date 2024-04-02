@@ -14394,17 +14394,17 @@ class Events {
             //     }
             // }
 
-            if (e->detail == wm->key_codes.tab)
-            {
-                switch (e->state)
-                {
-                    case ALT:
-                    {
-                        wm->cycle_focus();
-                        return;
-                    }
-                }
-            }
+            // if (e->detail == wm->key_codes.tab)
+            // {
+            //     switch (e->state)
+            //     {
+            //         case ALT:
+            //         {
+            //             wm->cycle_focus();
+            //             return;
+            //         }
+            //     }
+            // }
 
             if (e->detail == wm->key_codes.k)
             {
