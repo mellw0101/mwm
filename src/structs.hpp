@@ -782,7 +782,11 @@ enum EV : uint8_t {
     TERM_KEY_PRESS                    = 44,
     QUIT_KEY_PRESS                    = 45,
     EWMH_MAXWIN                       = 46,
-    MOVE_TO_DESKTOP                   = 47
+    MOVE_TO_DESKTOP_1                 = 48,
+    MOVE_TO_DESKTOP_2                 = 49,
+    MOVE_TO_DESKTOP_3                 = 50,
+    MOVE_TO_DESKTOP_4                 = 51,
+    MOVE_TO_DESKTOP_5                 = 52
 };
 
 typedef enum {
