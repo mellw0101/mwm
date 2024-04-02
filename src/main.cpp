@@ -6405,7 +6405,7 @@ class client {
 
             // client_border_decor() { create_arr(); }
             // DynamicArray<window> border;
-            FixedArray<window, 6> border;
+            FixedArray<window, 8> border;
         };
 
         struct __atoms__ {
