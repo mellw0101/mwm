@@ -7418,6 +7418,7 @@ class client {
                 MAP,
                 nullptr,
                 CURSOR::bottom_side
+
             );
             CWC(border[bottom]);
             border[bottom].grab_button({ { L_MOUSE_BUTTON, NULL } });
@@ -7434,6 +7435,7 @@ class client {
                 MAP,
                 nullptr,
                 CURSOR::top_left_corner
+
             );
             CWC(border[top_left]);
             border[top_left].grab_button({ { L_MOUSE_BUTTON, NULL } });
@@ -7473,10 +7475,10 @@ class client {
             border[bottom_left].grab_button({ { L_MOUSE_BUTTON, NULL } });
             FLUSH_X();
 
-            this->border[bottom_right].create_window(
-                this->frame,
-                (this->width + BORDER_SIZE),
-                (this->height - BORDER_SIZE),
+            border[bottom_right].create_window(
+                frame,
+                (width + BORDER_SIZE),
+                (height - BORDER_SIZE),
                 BORDER_SIZE,
                 BORDER_SIZE,
                 BLACK,
