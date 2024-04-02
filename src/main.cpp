@@ -5020,91 +5020,91 @@ class window {
                     xcb_flush(conn);
                 }
                   
-                void x(const uint32_t &x)
+                void x(uint32_t x)
                 {
                     config_window(XCB_CONFIG_WINDOW_X, (uint32_t[1]){x});
                     update(x, _y, _width, _height);
                 }
 
-                void y(const uint32_t &y)
+                void y(uint32_t y)
                 {
                     config_window(XCB_CONFIG_WINDOW_Y, (uint32_t[1]){y});
                     update(_x, y, _width, _height);
                 }
 
-                void width(const uint32_t &width)
+                void width(uint32_t width)
                 {
                     config_window(XCB_CONFIG_WINDOW_WIDTH, (uint32_t[1]){width});
                     update(_x, _y, width, _height);
                 }
 
-                void height(const uint32_t &height)
+                void height(uint32_t height)
                 {
                     config_window(XCB_CONFIG_WINDOW_HEIGHT, (uint32_t[1]){height});
                     update(_x, _y, _width, height);
                 }
 
-                void x_y(const uint32_t & x, const uint32_t & y)
+                void x_y(uint32_t x, uint32_t y)
                 {
                     config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, (uint32_t[2]){x, y});
                     update(x, y, _width, _height);
                 }
 
-                void width_height(const uint32_t & width, const uint32_t & height)
+                void width_height(uint32_t width, uint32_t height)
                 {
                     config_window(XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, (uint32_t[4]){width, height});
                     update(_x, _y, width, height);
                 }
 
-                void x_y_width_height(const uint32_t & x, const uint32_t & y, const uint32_t & width, const uint32_t & height)
+                void x_y_width_height(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
                 {
                     config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, (uint32_t[4]){x, y, width, height});
                     update(x, y, width, height);
                 }
 
-                void x_width_height(const uint32_t & x, const uint32_t & width, const uint32_t & height)
+                void x_width_height(uint32_t x, uint32_t width, uint32_t height)
                 {
                     config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, (uint32_t[3]){x, width, height});
                     update(x, _y, width, height);
                 }
 
-                void y_width_height(const uint32_t & y, const uint32_t & width, const uint32_t & height)
+                void y_width_height(uint32_t y, uint32_t width, uint32_t height)
                 {
                     config_window(XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, (uint32_t[4]){y, width, height});
                     update(_x, y, width, height);
                 }
 
-                void x_width(const uint32_t & x, const uint32_t & width)
+                void x_width(uint32_t x, uint32_t width)
                 {
                     config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_WIDTH, (uint32_t[2]){x, width});
                     update(x, _y, width, _height);
                 }
 
-                void x_height(const uint32_t & x, const uint32_t & height)
+                void x_height(uint32_t x, uint32_t height)
                 {
                     config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_HEIGHT, (uint32_t[2]){x, height});
                     update(x, _y, _width, height);
                 }
 
-                void y_width(const uint32_t & y, const uint32_t & width)
+                void y_width(uint32_t y, uint32_t width)
                 {
                     config_window(XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH, (uint32_t[2]){y, width});
                     update(_x, y, width, _height);
                 }
 
-                void y_height(const uint32_t & y, const uint32_t & height)
+                void y_height(uint32_t y, uint32_t height)
                 {
                     config_window(XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT, (uint32_t[2]){y, height});
                     update(_x, y, _width, height);
                 }
 
-                void x_y_width(const uint32_t & x, const uint32_t & y, const uint32_t & width)
+                void x_y_width(uint32_t x, uint32_t y, uint32_t width)
                 {
                     config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH, (uint32_t[3]){x, y, width});
                     update(x, y, width, _height);
                 }
 
-                void x_y_height(const uint32_t & x, const uint32_t & y, const uint32_t & height)
+                void x_y_height(uint32_t x, uint32_t y, uint32_t height)
                 {
                     config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT, (uint32_t[3]){x, y, height});
                     update(x, y, _width, height);
@@ -5798,7 +5798,7 @@ class window {
                 );
             }
 
-            void config_window(const uint16_t &__mask, const void *__value) 
+            void config_window(uint16_t __mask, const void *__value) 
             {
                 VOID_COOKIE = xcb_configure_window(conn, _window, __mask, __value);
                 FLUSH_XWin();
@@ -6646,7 +6646,7 @@ class client {
                 win.width((width - (BORDER_SIZE * 2)));
                 xcb_flush(conn);
                 frame.width((width));
-                titlebar.width(width - (BUTTON_SIZE * 3));
+                titlebar.width(width - (BORDER_SIZE * 2));
                 close_button.x((width - BUTTON_SIZE - BORDER_SIZE));
                 max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
                 min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
@@ -6672,7 +6672,7 @@ class client {
             void x_width(const uint32_t &x, const uint32_t &width)
             {
                 win.width((width - (BORDER_SIZE * 2)));
-                frame.x_width(x, (width));
+                frame.x_width(x, width);
                 titlebar.width((width - (BORDER_SIZE * 2)));
                 close_button.x((width - BUTTON_SIZE - BORDER_SIZE));
                 max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
@@ -6702,7 +6702,7 @@ class client {
             {
                 frame.x_width_height(x, width, height);
                 win.width_height((width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
-                titlebar.width((width - (BORDER_SIZE * 2) - (BUTTON_SIZE * 6)));
+                titlebar.width((width - (BORDER_SIZE * 2)));
                 close_button.x((width - BUTTON_SIZE - BORDER_SIZE));
                 max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
                 min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
@@ -6719,7 +6719,7 @@ class client {
             {
                 frame.y_width_height(y, width, height);
                 win.width_height((width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
-                titlebar.width((width - BORDER_SIZE * 2) - (BUTTON_SIZE * 6));
+                titlebar.width((width - BORDER_SIZE * 2));
                 close_button.x((width - BUTTON_SIZE - BORDER_SIZE));
                 max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
                 min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
@@ -6737,7 +6737,7 @@ class client {
                 win.width_height((width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
                 xcb_flush(conn);
                 frame.x_y_width_height(x, y, width, height);
-                titlebar.width((width - (BORDER_SIZE * 2) - (BUTTON_SIZE * 6)));
+                titlebar.width((width - (BORDER_SIZE * 2)));
                 close_button.x((width - BUTTON_SIZE - BORDER_SIZE));
                 max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
                 min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
@@ -6756,7 +6756,7 @@ class client {
                 win.width_height((width - (BORDER_SIZE * 2)), (height - (BORDER_SIZE * 2) - TITLE_BAR_HEIGHT));
                 xcb_flush(conn);
                 frame.width_height(width, height);
-                titlebar.width((width - (BORDER_SIZE * 2) - (BUTTON_SIZE * 6)));
+                titlebar.width((width - (BORDER_SIZE * 2)));
                 close_button.x((width - BUTTON_SIZE - BORDER_SIZE));
                 max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
                 min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
@@ -6888,10 +6888,16 @@ class client {
     /* Methods     */
         void make_frame()
         {
-            frame.create_default(screen->root, (x - BORDER_SIZE), (y - TITLE_BAR_HEIGHT - BORDER_SIZE), (width + (BORDER_SIZE * 2)), (height + TITLE_BAR_HEIGHT + (BORDER_SIZE * 2)));
-            frame.set_backround_color(DARK_GREY);
+            frame.create_window(
+                screen->root,
+                (x - BORDER_SIZE),
+                (y - TITLE_BAR_HEIGHT - BORDER_SIZE),
+                (width + (BORDER_SIZE * 2)),
+                (height + TITLE_BAR_HEIGHT + (BORDER_SIZE * 2)),
+                DARK_GREY
+            );
             win.reparent(frame, BORDER_SIZE, (TITLE_BAR_HEIGHT + BORDER_SIZE));
-            frame.apply_event_mask({XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY});
+            frame.set_event_mask(XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY);
             frame.map();
             CWC(win);
             CWC(frame);
@@ -9570,6 +9576,7 @@ class Mwm_Animator {
                 }
 
                 c->x_y_width_height(currentX, currentY, currentWidth, currentHeight);
+                c->titlebar.send_event(XCB_EVENT_MASK_EXPOSURE);
                 thread_sleep(GAnimDuration);
             }
         }
@@ -9585,6 +9592,7 @@ class Mwm_Animator {
                 }
 
                 conf_client_x();
+                c->titlebar.send_event(XCB_EVENT_MASK_EXPOSURE);
                 thread_sleep(GAnimDuration);
             }
         }
