@@ -7380,7 +7380,7 @@ class client {
                 (width - BORDER_SIZE),
                 BORDER_SIZE,
                 BORDER_SIZE,
-                (height - BORDER_SIZE),
+                (height - (BORDER_SIZE * 2)),
                 BLACK,
                 NONE,
                 MAP,
@@ -7395,7 +7395,7 @@ class client {
                 frame,
                 BORDER_SIZE,
                 0,
-                width,
+                (width - (BORDER_SIZE * 2)),
                 BORDER_SIZE,
                 BLACK,
                 NONE,
@@ -7410,8 +7410,8 @@ class client {
             border[bottom].create_window(
                 frame,
                 BORDER_SIZE,
-                (height - BORDER_SIZE + TITLE_BAR_HEIGHT),
-                width,
+                (height - BORDER_SIZE),
+                (width  - (BORDER_SIZE * 2)),
                 BORDER_SIZE,
                 BLACK,
                 NONE,
@@ -7441,7 +7441,7 @@ class client {
 
             border[top_right].create_window(
                 frame,
-                (width + BORDER_SIZE),
+                (width - BORDER_SIZE),
                 0,
                 BORDER_SIZE,
                 BORDER_SIZE,
@@ -7450,6 +7450,7 @@ class client {
                 MAP,
                 nullptr,
                 CURSOR::top_right_corner
+
             );
             CWC(border[top_right]);
             border[top_right].grab_button({ { L_MOUSE_BUTTON, NULL } });
@@ -7458,7 +7459,7 @@ class client {
             border[bottom_left].create_window(
                 frame,
                 0,
-                (height + TITLE_BAR_HEIGHT + BORDER_SIZE),
+                (height - BORDER_SIZE),
                 BORDER_SIZE,
                 BORDER_SIZE,
                 BLACK,
@@ -7466,6 +7467,7 @@ class client {
                 MAP,
                 nullptr,
                 CURSOR::bottom_left_corner
+
             );
             CWC(border[bottom_left]);
             border[bottom_left].grab_button({ { L_MOUSE_BUTTON, NULL } });
@@ -7474,7 +7476,7 @@ class client {
             this->border[bottom_right].create_window(
                 this->frame,
                 (this->width + BORDER_SIZE),
-                (this->height + TITLE_BAR_HEIGHT + BORDER_SIZE),
+                (this->height - BORDER_SIZE),
                 BORDER_SIZE,
                 BORDER_SIZE,
                 BLACK,
@@ -7482,6 +7484,7 @@ class client {
                 MAP,
                 nullptr,
                 CURSOR::bottom_right_corner
+
             );
             CWC(border[bottom_right]);
             border[bottom_right].grab_button({ { L_MOUSE_BUTTON, NULL } });
