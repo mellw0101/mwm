@@ -985,6 +985,9 @@ class __signal_manager__ {
         #define CONNECT_window_client(__window, __c) signal_manager->_window_client_map.connect(__window, __c)
         #define CWC(__window) CONNECT_window_client(this->__window, this)
 
+        #define C_SIG(__c, __callback, __sig) \
+            signal_manager->client_signals.connect(__c, __sig, [this](client *c) {__callback});
+
     private:
     /* Variabels */
         unordered_map<string, vector<function<void()>>> signals;
@@ -996,6 +999,7 @@ class __signal_manager__ {
 
         __window_signals__ _window_signals;
         __window_client_map__ _window_client_map;
+        __c_func_arr__ client_arr;
 
         // ldClientWindowArray _client_window_arr;
 
@@ -6877,6 +6881,15 @@ class client {
             {
                 signal_manager->client_signals.connect(this, __signal_type_id, callback);
             }
+            
+            template<typename Callback>
+            void setup_C_SIG(int __signal_type_id, Callback &&callback)
+            {
+                C_SIG(this,
+                
+
+                ,BUTTON_MAXWIN_PRESS);
+            }
 
             void align()
             {
@@ -7292,8 +7305,8 @@ class client {
             max_button.set_backround_png(USER_PATH_PREFIX("/max.png"));
 
             CONN(L_MOUSE_BUTTON_EVENT,
-                WS_emit_root(BUTTON_MAXWIN_PRESS, this->max_button);
-            
+                signal_manager->client_arr.send_c_sig(this, BUTTON_MAXWIN_PRESS);
+
             ,this->max_button);
 
             CONN(ENTER_NOTIFY,
@@ -14360,13 +14373,8 @@ class Events {
                 event_handler->iter_and_log_map_size();
             });
 
-            CONN(BUTTON_MAXWIN_PRESS,
+            C_SIGNAL(if (__c) max_win(__c, max_win::BUTTON_MAXWIN); ,BUTTON_MAXWIN_PRESS);
 
-                client *c = signal_manager->_window_client_map.retrive(__window);
-                if (!c) return;
-                max_win(c, max_win::BUTTON_MAXWIN);
-
-            , screen->root);
         }
 
     private:

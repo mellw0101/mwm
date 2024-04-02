@@ -13,6 +13,7 @@
 #include <functional>
 #include <limits>
 #include <type_traits>
+#include <utility>
 #include <xcb/xcb_ewmh.h>
 #include <xcb/xproto.h>
 // #include <type_traits>
@@ -248,43 +249,62 @@ class __dynamic_array_t {
         static size_t find(Type __value);
 
         template<>
-        size_t find(T0 __value)
-        {
+        size_t find(T0 __value) {
             size_t i = 0;
             while (i < size && data[i] != __value) ++i;
             if (i < size) return i;
             return size_t_MAX;
+
         }
 
-        bool is_valid(size_t __index)
-        {
-            if constexpr (is_pointer_v<T0>)
-            {
-                if (data[__index] == nullptr) return false;
-            }
-            else
-            {
-                if (data[__index] == size_t_MAX) return false;
-            }
-        }
+        bool is_valid_at(size_t __index) const {
+            if constexpr (is_pointer_v<T0>) {
+                return is_valid(data[__index]);
+            } return is_valid(data[__index]);
+        
+        } /** @return @p 'true' if element at @p '__index' is valid */
 
-        void removeAt(size_t __index)
-        {
+        bool is_roten_at(size_t __index) const {
+            if constexpr (is_pointer_v<T0>) {
+                return is_roten(data[__index]);
+            } return is_roten(data[__index]);
+        
+        } /** @return @p 'true' if element at @p '__index' is roten */
+
+        void removeAt(size_t __index) {
             if (__index >= size) return;
 
-            if constexpr (is_pointer_v<T0>) 
-            {
+            if constexpr (is_pointer_v<T0>) {
                 data[__index] = nullptr;
                 return;
-            }
-            else
-            {
+            
+            } else {
                 data[__index] = numeric_limits<T0>::max();
             }
-        }
 
-        T0* begin() const { return &data[0];    }/* Return pointer to the first element */
-        T0* end()   const { return &data[size]; }/* Return pointer past the last element */
+        } /** @b remove element at @p '__index' */
+
+        T0* begin() const {
+            return &data[0];
+        
+        } /** @return pointer to the first element  */
+        
+        T0* end()   const {
+            return &data[size];
+            
+        } /** @return pointer past the last element */
+        
+        bool is_valid(T0 __input) const {
+            if constexpr (is_pointer_v<T0>) return (__input != nullptr);
+            return (__input != size_t_MAX);
+            
+        } /** @return true if a element is valid */
+
+        bool is_roten(T0 __input) const {
+            if constexpr (is_pointer_v<T0>) return (__input == nullptr);
+            return (__input == size_t_MAX);
+        
+        } /** @return true if a element is roten */
 
     private:
     /* Variabels */
@@ -755,7 +775,6 @@ using LinkedSuperArrayMap = __linked_super_array_t<T0, T1>;
 // };
 // template<typename T1, typename T2, typename T3, typename T4, size_t Size>
 // using QuadArray = __quad_array_t__<T1, T2, T3, T4, Size>;
-
 enum
 {
     N = 12, /* 
@@ -801,9 +820,47 @@ enum EV : uint8_t {
     BUTTON_MAXWIN_PRESS               = 63
 };
 
+typedef struct __client__data__t__{
+    client *c = nullptr;
+    __client__data__t__&operator=(client *const &__c) { this->c = __c; return *this; }
+
+    __client__data__t__(client *__c) : c(__c) {}
+    
+} client_data_t;
+
+class __c_func_arr__ {
+    /* Defines   */
+        #define C_SIGNAL(__cb, __sig) \
+            signal_manager->client_arr.add_func_to_sig([this](client *__c){__cb}, __sig)
+
+    public:
+    /* Variabels */
+        FixedArray<function<void(client *c)>, 1> func;
+        #define n_func 1
+        DynamicArray<uint8_t> sig{BUTTON_MAXWIN_PRESS};
+
+    /* Methods   */
+        void send_c_sig(client *const &__c, int __signal) {
+            size_t pos = sig.find(__signal);
+            if (pos >= n_func) return;
+            func[pos](__c);
+
+        }
+
+        template<typename Callback>
+        void add_func_to_sig(Callback &&__callback, int __sig) {
+            size_t pos = sig.find(__sig);
+            if (pos >= n_func) return;
+            func[pos] = std::forward<Callback>(__callback);
+
+        }
+
+};
+
 typedef enum {
     SET_EV_CALLBACK__RESIZE_NO_BORDER = 1,
     HIDE_DOCK                         = 2
+
 } enum_signal_t;
 
 enum SET_COLOR
