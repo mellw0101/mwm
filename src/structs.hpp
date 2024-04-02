@@ -804,6 +804,7 @@ enum EV : uint8_t {
     KEY_RELESE                        = XCB_KEY_RELEASE,
     BUTTON_RELEASE                    = XCB_BUTTON_RELEASE,
     MOTION_NOTIFY                     = XCB_MOTION_NOTIFY,
+    DESTROY_NOTIFY                    = XCB_DESTROY_NOTIFY,  
     TERM_KEY_PRESS                    = 44,
     QUIT_KEY_PRESS                    = 45,
     EWMH_MAXWIN                       = 46,
@@ -876,6 +877,59 @@ class __c_func_arr__ {
             uint8_t index = sig_to_index__(__sig);
             if (index == ERROR_STATE) return;
             func[index](__c);
+
+        }
+
+        template<typename Callback>
+        void add_func_to_sig(Callback &&__callback, uint8_t __sig) {
+            uint8_t index = sig_to_index__(__sig);
+            if (index == ERROR_STATE) return;
+            func[index] = std::forward<function<void(client *)>>(__callback);
+
+        }
+
+};
+
+class __root_func_arr__ {
+    /* Defines   */
+        #define ROOT_SIG(__cb, __sig) \
+            signal_manager->client_arr.add_func_to_sig([this](client *__c){__cb}, __sig)
+
+        #define ROOT_EMIT(__c, __sig) \
+            signal_manager->client_arr.send_c_sig(__c, __sig)
+
+    /* Variabels */
+        static constexpr uint8_t ERROR_STATE = make_T_MAX<uint8_t>();
+
+    /* Methods */
+        uint8_t sig_to_index__(uint8_t __sig) {
+            switch (__sig) {
+                case BUTTON_MAXWIN_PRESS: return 0;
+                case KILL_SIGNAL:         return 1;
+                case FOCUS_CLIENT:        return 2;
+                case MOVE_CLIENT_ALT:     return 3;
+                case MOVE_CLIENT_MOUSE:   return 4;
+                case TILE_LEFT:           return 5;
+                case TILE_RIGHT:          return 6;
+                case TILE_DOWN:           return 7;
+                case TILE_UP:             return 8;
+                case EWMH_MAXWIN:         return 9;
+
+                default: return make_T_MAX<uint8_t>();
+
+            }
+
+        }
+
+    public:
+    /* Variabels */
+        FixedArray<function<void(window &w)>, 10> func;
+
+    /* Methods   */
+        void send_root_sig(window &__w, int __sig) {
+            uint8_t index = sig_to_index__(__sig);
+            if (index == ERROR_STATE) return;
+            func[index](__w);
 
         }
 

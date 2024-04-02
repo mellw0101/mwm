@@ -3032,6 +3032,7 @@ class __event_handler__ {
         template<> void handle_event<MOVE_TO_NEXT_DESKTOP_WAPP>(uint32_t __window) { WS_emit_root(MOVE_TO_NEXT_DESKTOP_WAPP, __window); }
         template<> void handle_event<MOVE_TO_PREV_DESKTOP_WAPP>(uint32_t __window) { WS_emit_root(MOVE_TO_PREV_DESKTOP_WAPP, __window); }
 
+        template<> void handle_event<MOTION_NOTIFY>(uint32_t __window) { C_EMIT(C_RETRIVE(__window), MOTION_NOTIFY); }
 
         // template<> void handle_event<TILE_RIGHT>(uint32_t __window) { WS_emit_Win(screen->root, TILE_RIGHT, __window); }
         // template<> void handle_event<TILE_LEFT> (uint32_t __window) { WS_emit_Win(screen->root, TILE_LEFT,  __window); }
@@ -3233,6 +3234,12 @@ class __event_handler__ {
                 case XCB_FOCUS_OUT:         {
                     RE_CAST_EV(xcb_focus_out_event_t);
                     HANDLE_EVENT(FOCUS_OUT);
+                    break;
+
+                }
+                case XCB_MOTION_NOTIFY:     {
+                    RE_CAST_EV(xcb_motion_notify_event_t);
+                    HANDLE_EVENT(MOTION_NOTIFY);
                     break;
 
                 }
@@ -12774,13 +12781,13 @@ class mv_client {
                         break;
                     }
 
-                    // case XCB_EXPOSE:
-                    // {
-                    //     // RE_CAST_EV(xcb_expose_event_t);
-                    //     // WS_emit(e->window, EXPOSE);
+                    case XCB_EXPOSE:
+                    {
+                        // RE_CAST_EV(xcb_expose_event_t);
+                        // WS_emit(e->window, EXPOSE);
 
-                    //     break;
-                    // }
+                        break;
+                    }
                 }
                 free(ev);
 
@@ -14339,7 +14346,7 @@ class Events {
             event_handler->setEventCallback(EV_CALL(XCB_CONFIGURE_REQUEST) { configure_request_handler(ev); });
             // event_handler->setEventCallback(EV_CALL(XCB_FOCUS_IN)          { focus_in_handler(ev); });
             // event_handler->setEventCallback(EV_CALL(XCB_FOCUS_OUT)         { focus_out_handler(ev); });
-            event_handler->setEventCallback(EV_CALL(XCB_DESTROY_NOTIFY)    { destroy_notify_handler(ev); });
+            // event_handler->setEventCallback(EV_CALL(XCB_DESTROY_NOTIFY)    { destroy_notify_handler(ev); });
             // event_handler->setEventCallback(EV_CALL(XCB_UNMAP_NOTIFY)      { unmap_notify_handler(ev); });
             event_handler->setEventCallback(EV_CALL(XCB_REPARENT_NOTIFY)   { reparent_notify_handler(ev); });
             // event_handler->setEventCallback(EV_CALL(XCB_ENTER_NOTIFY)      { enter_notify_handler(ev); });
@@ -14398,11 +14405,13 @@ class Events {
             CONN_root(MOVE_TO_PREV_DESKTOP_WAPP, W_callback -> void {
                 change_desktop cd(conn);
                 cd.change_with_app(change_desktop::PREV);
+            
             });
 
             CONN_root(DEBUG_KEY_PRESS, W_callback -> void {
                 pid_manager->list_pids();
                 event_handler->iter_and_log_map_size();
+                
             });
 
             C_SIGNAL(if (__c) {int i = 0; while (true) {
@@ -14446,6 +14455,24 @@ class Events {
 
             C_SIGNAL(if (__c) max_win(__c, max_win::BUTTON_MAXWIN);, BUTTON_MAXWIN_PRESS);
             C_SIGNAL(if (__c) max_win(__c, max_win::EWMH_MAXWIN);, EWMH_MAXWIN);
+
+            CONN_root(DESTROY_NOTIFY, W_callback -> void {
+                client *c = C_RETRIVE(__window);
+                if (!c) return;
+                
+                if (c->atoms.is_modal) {
+                    client *c_trans = wm->client_from_any_window(&c->modal_data.transient_for);
+                    if (c_trans != nullptr) {
+                        c_trans->focus();
+                        wm->focused_client = c_trans;
+
+                    }
+
+                }
+                pid_manager->remove_pid(c->win.pid());
+                wm->send_sigterm_to_client(c);
+
+            });
         }
 
     private:
@@ -14700,41 +14727,41 @@ class Events {
             // loutI << WINDOW_ID_BY_INPUT(e->window) << " e->x" << e->x << " e->y" << e->y << " e->width" << e->width << "e->height" << e->height << '\n';
         }
 
-        void focus_in_handler(const xcb_generic_event_t *&ev)
-        {
-            RE_CAST_EV(xcb_focus_in_event_t);
-            GET_CLIENT_FROM_WINDOW(e->event);
+        // void focus_in_handler(const xcb_generic_event_t *&ev)
+        // {
+        //     RE_CAST_EV(xcb_focus_in_event_t);
+        //     GET_CLIENT_FROM_WINDOW(e->event);
 
-            c->win.ungrab_button({
-                { L_MOUSE_BUTTON, NULL }
-            });
+        //     c->win.ungrab_button({
+        //         { L_MOUSE_BUTTON, NULL }
+        //     });
 
-            c->raise();
-            c->win.set_active_EWMH_window();
-            wm->focused_client = c;
-        }
+        //     c->raise();
+        //     c->win.set_active_EWMH_window();
+        //     wm->focused_client = c;
+        // }
 
-        void focus_out_handler(const xcb_generic_event_t *&ev)
-        {
-            RE_CAST_EV(xcb_focus_out_event_t);
-            GET_CLIENT_FROM_WINDOW(e->event);
-            c->win.grab_button({
-                { L_MOUSE_BUTTON, NULL }
-            });
-        }
+        // void focus_out_handler(const xcb_generic_event_t *&ev)
+        // {
+        //     RE_CAST_EV(xcb_focus_out_event_t);
+        //     GET_CLIENT_FROM_WINDOW(e->event);
+        //     c->win.grab_button({
+        //         { L_MOUSE_BUTTON, NULL }
+        //     });
+        // }
 
         void destroy_notify_handler(const xcb_generic_event_t *&ev)
         {
             RE_CAST_EV(xcb_destroy_notify_event_t);
             GET_CLIENT_FROM_WINDOW(e->event);
-            if (c->atoms.is_modal)
-            {
+            if (c->atoms.is_modal) {
                 client *c_trans = wm->client_from_any_window(&c->modal_data.transient_for);
-                if (c_trans != nullptr)
-                {
+                if (c_trans != nullptr) {
                     c_trans->focus();
                     wm->focused_client = c_trans;
+
                 }
+
             }
             
             pid_manager->remove_pid(c->win.pid());
