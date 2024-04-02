@@ -2960,7 +2960,7 @@ class __event_handler__ {
 
         template<uint8_t __event_id> static void handle_event(uint32_t __window) { WS_emit(__window, __event_id); }
         template<> void handle_event<MAP_REQ>(uint32_t __window) { WS_emit_Win(screen->root, MAP_REQ, __window); }
-        template<> void handle_event<TERM_KEY_PRESS>(uint32_t __window) { WS_emit_Win(screen->root, TERM_KEY_PRESS, 0); }
+        template<> void handle_event<TERM_KEY_PRESS>(uint32_t __window) { WS_emit_Win(screen->root, TERM_KEY_PRESS, __window); }
         #define HANDLE_EVENT(__type ) thread(handle_event<__type>, e->event ).detach()
         #define HANDLE_WINDOW(__type) thread(handle_event<__type>, e->window).detach()
         DynamicArray<uint32_t *> _window_arr;
@@ -3005,7 +3005,7 @@ class __event_handler__ {
                 case XCB_KEY_PRESS:
                 {
                     RE_CAST_EV(xcb_key_press_event_t);
-                    if (e->detail == T && e->state & CTRL | ALT) HANDLE_EVENT(TERM_KEY_PRESS);
+                    if (e->detail == key_codes.t && e->state & CTRL | ALT) HANDLE_EVENT(TERM_KEY_PRESS);
                     // HANDLE_EVENT(KEY_PRESS);
                 }
 
