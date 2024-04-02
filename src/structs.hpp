@@ -779,7 +779,8 @@ enum EV : uint8_t {
     PROPERTY_NOTIFY                   = XCB_PROPERTY_NOTIFY,
     MAP_REQ                           = XCB_MAP_REQUEST,
     KEY_PRESS                         = XCB_KEY_PRESS,
-    TERM_KEY_PRESS                    = 44
+    TERM_KEY_PRESS                    = 44,
+    QUIT_KEY_PRESS                    = 45
 };
 
 typedef enum {

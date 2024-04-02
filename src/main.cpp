@@ -8186,6 +8186,7 @@ class Window_Manager {
                     this->manage_new_client(__window);
                 );
                 CONN_Win(root, TERM_KEY_PRESS, this->launcher.launch_child_process("konsole"););
+                CONN_Win(root, QUIT_KEY_PRESS, this->quit(0););
                 
                 if (BORDER_SIZE == 0)
                 {
@@ -14034,21 +14035,14 @@ class Events {
             RE_CAST_EV(xcb_key_press_event_t);
             if (e->detail == wm->key_codes.t && e->state & CTRL | ALT)
             {
-                // wm->launcher.launch_child_process("konsole");
                 WS_emit(screen->root, TERM_KEY_PRESS);
                 return;
             }
             
-            if (e->detail == wm->key_codes.q)
+            if (e->detail == wm->key_codes.q && e->state & SHIFT | ALT)
             {
-                switch (e->state)
-                {
-                    case (SHIFT + ALT):
-                    {
-                        wm->quit(0);
-                        return;
-                    }
-                }
+                WS_emit(screen->root, QUIT_KEY_PRESS);
+                return;
             }
             
             if (e->detail == wm->key_codes.f11)
