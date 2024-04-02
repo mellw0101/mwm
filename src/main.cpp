@@ -7227,7 +7227,7 @@ class client {
         {
             this->close_button.create_window(
                 frame,
-                (width - BUTTON_SIZE + BORDER_SIZE),
+                (width - BUTTON_SIZE - BORDER_SIZE),
                 BORDER_SIZE,
                 BUTTON_SIZE,
                 BUTTON_SIZE,
@@ -7263,7 +7263,7 @@ class client {
         {
             max_button.create_window(
                 frame,
-                (width - (BUTTON_SIZE * 2) + BORDER_SIZE),
+                (width - (BUTTON_SIZE * 2) - BORDER_SIZE),
                 BORDER_SIZE,
                 BUTTON_SIZE,
                 BUTTON_SIZE,
@@ -7325,7 +7325,7 @@ class client {
         {
             min_button.create_window(
                 frame,
-                (width - (BUTTON_SIZE * 3) + BORDER_SIZE),
+                (width - (BUTTON_SIZE * 3) - BORDER_SIZE),
                 BORDER_SIZE,
                 BUTTON_SIZE,
                 BUTTON_SIZE,
@@ -7377,7 +7377,7 @@ class client {
 
             border[right].create_window(
                 frame,
-                (width + BORDER_SIZE),
+                (width - BORDER_SIZE),
                 BORDER_SIZE,
                 BORDER_SIZE,
                 (height + TITLE_BAR_HEIGHT),
@@ -7410,7 +7410,7 @@ class client {
             border[bottom].create_window(
                 frame,
                 BORDER_SIZE,
-                (height + BORDER_SIZE + TITLE_BAR_HEIGHT),
+                (height - BORDER_SIZE + TITLE_BAR_HEIGHT),
                 width,
                 BORDER_SIZE,
                 BLACK,
