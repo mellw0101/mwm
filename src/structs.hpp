@@ -860,7 +860,7 @@ class __c_func_arr__ {
 
     public:
     /* Variabels */
-        FixedArray<function<void(client *c)>, 3> func;
+        FixedArray<function<void(client *c)>, 4> func;
 
     /* Methods   */
         void send_c_sig(client *__c, int __sig) {
