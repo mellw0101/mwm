@@ -817,7 +817,9 @@ enum EV : uint8_t {
     MOVE_TO_PREV_DESKTOP_WAPP         = 60,
     MOVE_TO_NEXT_DESKTOP_WAPP         = 61,
     DEBUG_KEY_PRESS                   = 62,
-    BUTTON_MAXWIN_PRESS               = 63
+    BUTTON_MAXWIN_PRESS               = 63,
+    FOCUS_IN                          = XCB_FOCUS_IN,
+    FOCUS_OUT                         = XCB_FOCUS_OUT
 };
 
 typedef struct __client__data__t__{
