@@ -517,9 +517,9 @@ namespace {
             umap<uint32_t, umap<int, function<void(uint32_t)>>> _data;
 
             template<typename Callback>
-            void conect(uint32_t __window, uint8_t __signal_id, Callback &&callback)
+            void conect(uint32_t __w, uint8_t __sig, Callback &&__cb)
             {
-                _data[__window][__signal_id] = std::forward<Callback>(callback);
+                _data[__w][__sig] = std::forward<Callback>(__cb);
             }
 
             void emit(uint32_t __window, int __signal_id)
@@ -969,8 +969,8 @@ class __signal_manager__ {
         #define CONN_Win(__window, __event, __callback) \
             signal_manager->_window_signals.conect(this->__window, __event, W_callback {__callback})
 
-        #define CONN(__event, __callback, __window) \
-            signal_manager->_window_signals.conect(__window, __event, W_callback {__callback})
+        #define CONN(__e, __cb, __w) \
+            signal_manager->_window_signals.conect(__w, __e, W_callback {__cb})
 
         #define SIG(__window, __callback, __event) \
             signal_manager->_window_signals.conect(__window, __event, __callback)
@@ -2965,46 +2965,46 @@ class __event_handler__ {
             {
                 ev = xcb_wait_for_event(conn);
                 if (!ev) continue;
-
                 processEvent(ev);
-                uint8_t responseType = ev->response_type & ~0x80;
-                switch (responseType)
-                {
-                    EV_LOOP(XCB_KEY_PRESS);
-                    EV_LOOP(XCB_KEY_RELEASE);
-                    EV_LOOP(XCB_BUTTON_PRESS);
-                    EV_LOOP(XCB_BUTTON_RELEASE);
-                    EV_LOOP(XCB_MOTION_NOTIFY);
-                    EV_LOOP(XCB_ENTER_NOTIFY);
-                    EV_LOOP(XCB_LEAVE_NOTIFY);
-                    EV_LOOP(XCB_FOCUS_IN);
-                    EV_LOOP(XCB_FOCUS_OUT);
-                    EV_LOOP(XCB_KEYMAP_NOTIFY);
-                    EV_LOOP(XCB_EXPOSE);
-                    EV_LOOP(XCB_GRAPHICS_EXPOSURE);
-                    EV_LOOP(XCB_NO_EXPOSURE);
-                    EV_LOOP(XCB_VISIBILITY_NOTIFY);
-                    EV_LOOP(XCB_CREATE_NOTIFY);
-                    EV_LOOP(XCB_DESTROY_NOTIFY);
-                    EV_LOOP(XCB_UNMAP_NOTIFY);
-                    EV_LOOP(XCB_MAP_NOTIFY);
-                    EV_LOOP(XCB_MAP_REQUEST);
-                    EV_LOOP(XCB_REPARENT_NOTIFY);
-                    EV_LOOP(XCB_CONFIGURE_NOTIFY);
-                    EV_LOOP(XCB_CONFIGURE_REQUEST);
-                    EV_LOOP(XCB_GRAVITY_NOTIFY);
-                    EV_LOOP(XCB_RESIZE_REQUEST);
-                    EV_LOOP(XCB_CIRCULATE_NOTIFY);
-                    EV_LOOP(XCB_CIRCULATE_REQUEST);
-                    EV_LOOP(XCB_PROPERTY_NOTIFY);
-                    EV_LOOP(XCB_SELECTION_CLEAR);
-                    EV_LOOP(XCB_SELECTION_REQUEST);
-                    EV_LOOP(XCB_SELECTION_NOTIFY);
-                    EV_LOOP(XCB_COLORMAP_NOTIFY);
-                    EV_LOOP(XCB_CLIENT_MESSAGE);
-                    EV_LOOP(XCB_MAPPING_NOTIFY);
-                    // EV_LOOP(XCB_GE_GENERIC);
-                }
+
+                // uint8_t responseType = ev->response_type & ~0x80;
+                // switch (responseType)
+                // {
+                //     EV_LOOP(XCB_KEY_PRESS);
+                //     EV_LOOP(XCB_KEY_RELEASE);
+                //     EV_LOOP(XCB_BUTTON_PRESS);
+                //     EV_LOOP(XCB_BUTTON_RELEASE);
+                //     EV_LOOP(XCB_MOTION_NOTIFY);
+                //     EV_LOOP(XCB_ENTER_NOTIFY);
+                //     EV_LOOP(XCB_LEAVE_NOTIFY);
+                //     EV_LOOP(XCB_FOCUS_IN);
+                //     EV_LOOP(XCB_FOCUS_OUT);
+                //     EV_LOOP(XCB_KEYMAP_NOTIFY);
+                //     EV_LOOP(XCB_EXPOSE);
+                //     EV_LOOP(XCB_GRAPHICS_EXPOSURE);
+                //     EV_LOOP(XCB_NO_EXPOSURE);
+                //     EV_LOOP(XCB_VISIBILITY_NOTIFY);
+                //     EV_LOOP(XCB_CREATE_NOTIFY);
+                //     EV_LOOP(XCB_DESTROY_NOTIFY);
+                //     EV_LOOP(XCB_UNMAP_NOTIFY);
+                //     EV_LOOP(XCB_MAP_NOTIFY);
+                //     EV_LOOP(XCB_MAP_REQUEST);
+                //     EV_LOOP(XCB_REPARENT_NOTIFY);
+                //     EV_LOOP(XCB_CONFIGURE_NOTIFY);
+                //     EV_LOOP(XCB_CONFIGURE_REQUEST);
+                //     EV_LOOP(XCB_GRAVITY_NOTIFY);
+                //     EV_LOOP(XCB_RESIZE_REQUEST);
+                //     EV_LOOP(XCB_CIRCULATE_NOTIFY);
+                //     EV_LOOP(XCB_CIRCULATE_REQUEST);
+                //     EV_LOOP(XCB_PROPERTY_NOTIFY);
+                //     EV_LOOP(XCB_SELECTION_CLEAR);
+                //     EV_LOOP(XCB_SELECTION_REQUEST);
+                //     EV_LOOP(XCB_SELECTION_NOTIFY);
+                //     EV_LOOP(XCB_COLORMAP_NOTIFY);
+                //     EV_LOOP(XCB_CLIENT_MESSAGE);
+                //     EV_LOOP(XCB_MAPPING_NOTIFY);
+                //     // EV_LOOP(XCB_GE_GENERIC);
+                // }
 
                 free(ev);
             }
@@ -3118,6 +3118,86 @@ class __event_handler__ {
             }
 
             return 0;
+        }
+
+        template<uint8_t __sig>
+        constexpr void p_sig(void *ev) {
+            if        constexpr (__sig == XCB_KEY_PRESS   ) {
+                RE_CAST_EV(xcb_key_press_event_t);
+                switch (e->state) {
+                    case    CTRL  | ALT          : {
+                        if (e->detail == key_codes.t) HANDLE_EVENT(TERM_KEY_PRESS);
+                        break;
+
+                    } case  SHIFT | CTRL | SUPER : {
+                        if (e->detail == key_codes.r_arrow) HANDLE_EVENT(MOVE_TO_NEXT_DESKTOP_WAPP);
+                        if (e->detail == key_codes.l_arrow) HANDLE_EVENT(MOVE_TO_PREV_DESKTOP_WAPP);
+                        break;
+
+                    } case  SHIFT | ALT          : {
+                        if (e->detail == key_codes.q) HANDLE_EVENT(QUIT_KEY_PRESS);
+                        break;
+
+                    } case  ALT                  : {
+                        if (e->detail == key_codes.n_1) HANDLE_EVENT(MOVE_TO_DESKTOP_1);
+                        if (e->detail == key_codes.n_2) HANDLE_EVENT(MOVE_TO_DESKTOP_2);
+                        if (e->detail == key_codes.n_3) HANDLE_EVENT(MOVE_TO_DESKTOP_3);
+                        if (e->detail == key_codes.n_4) HANDLE_EVENT(MOVE_TO_DESKTOP_4);
+                        if (e->detail == key_codes.n_5) HANDLE_EVENT(MOVE_TO_DESKTOP_5);
+                        if (e->detail == key_codes.tab) HANDLE_EVENT(CYCLE_FOCUS_KEY_PRESS);
+                        break;
+
+                    } case  CTRL  | SUPER        : {
+                        if (e->detail == key_codes.r_arrow) HANDLE_EVENT(MOVE_TO_NEXT_DESKTOP);
+                        if (e->detail == key_codes.l_arrow) HANDLE_EVENT(MOVE_TO_PREV_DESKTOP);
+                        break;
+
+                    } case  SUPER                : {
+                        if (e->detail == key_codes.r_arrow) HANDLE_EVENT(TILE_RIGHT);
+                        if (e->detail == key_codes.l_arrow) HANDLE_EVENT(TILE_LEFT);
+                        if (e->detail == key_codes.u_arrow) HANDLE_EVENT(TILE_UP);
+                        if (e->detail == key_codes.d_arrow) HANDLE_EVENT(TILE_DOWN);
+                        if (e->detail == key_codes.k) HANDLE_ROOT(DEBUG_KEY_PRESS);
+                        break;
+
+                    }
+                
+                }
+                if (e->detail == key_codes.f11) {
+                    HANDLE_EVENT(EWMH_MAXWIN);
+
+                }
+
+            } else if constexpr (__sig == XCB_BUTTON_PRESS) {
+                RE_CAST_EV(xcb_button_press_event_t);
+                switch (e->state) {
+                    case ALT  : {
+                        if (e->detail == L_MOUSE_BUTTON) {
+                            HANDLE_EVENT(L_MOUSE_BUTTON_EVENT__ALT);
+
+                        } else if (e->detail == R_MOUSE_BUTTON) {
+                            HANDLE_EVENT(R_MOUSE_BUTTON_EVENT__ALT);
+
+                        }
+
+                    } default : {
+                        if (e->detail == L_MOUSE_BUTTON) {
+                            HANDLE_EVENT(L_MOUSE_BUTTON_EVENT);
+
+                        } else if (e->detail == R_MOUSE_BUTTON) {
+                            HANDLE_EVENT(R_MOUSE_BUTTON_EVENT);
+
+                        }
+
+                    }
+
+                }
+
+            } else if constexpr (__sig == XCB_EXPOSE      ) {
+                RE_CAST_EV(xcb_expose_event_t);
+                HANDLE_WINDOW(EXPOSE);
+            }
+
         }
 
         // Function that creates a separate thread for each event type
@@ -7405,10 +7485,14 @@ class client {
                 MAP,
                 nullptr,
                 CURSOR::left_side
-            );
-            CWC(border[left]);
+
+            ); CWC(border[left]);
             border[left].grab_button({ { L_MOUSE_BUTTON, NULL } });
             FLUSH_X();
+            CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->border[left]) {
+                C_EMIT(this, RESIZE_CLIENT_BORDER_LEFT);
+
+            }, this->border[left]);
 
             border[right].create_window(
                 frame,
@@ -7421,10 +7505,14 @@ class client {
                 MAP,
                 nullptr,
                 CURSOR::right_side
-            );
-            CWC(border[right]);
+
+            ); CWC(border[right]);
             border[right].grab_button({ { L_MOUSE_BUTTON, NULL } });
             FLUSH_X();
+            CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->border[right]) {
+                C_EMIT(this, RESIZE_CLIENT_BORDER_RIGHT);
+
+            }, this->border[right]);
 
             border[top].create_window(
                 frame,
@@ -7437,10 +7525,14 @@ class client {
                 MAP,
                 nullptr,
                 CURSOR::top_side
-            );
-            CWC(border[top]);
+
+            ); CWC(border[top]);
             border[top].grab_button({ { L_MOUSE_BUTTON, NULL } });
             FLUSH_X();
+            CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->border[top]) {
+                C_EMIT(this, RESIZE_CLIENT_BORDER_TOP);
+
+            }, this->border[top]);
 
             border[bottom].create_window(
                 frame,
@@ -7454,10 +7546,13 @@ class client {
                 nullptr,
                 CURSOR::bottom_side
 
-            );
-            CWC(border[bottom]);
+            ); CWC(border[bottom]);
             border[bottom].grab_button({ { L_MOUSE_BUTTON, NULL } });
             FLUSH_X();
+            CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->border[bottom]) {
+                C_EMIT(this, RESIZE_CLIENT_BORDER_BOTTOM);
+
+            }, this->border[bottom]);
 
             border[top_left].create_window(
                 frame,
@@ -7475,6 +7570,10 @@ class client {
             CWC(border[top_left]);
             border[top_left].grab_button({ { L_MOUSE_BUTTON, NULL } });
             FLUSH_X();
+            CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->border[top_left]) {
+                C_EMIT(this, RESIZE_CLIENT_BORDER_TOP_LEFT);
+
+            }, this->border[top_left]);
 
             border[top_right].create_window(
                 frame,
@@ -7488,10 +7587,13 @@ class client {
                 nullptr,
                 CURSOR::top_right_corner
 
-            );
-            CWC(border[top_right]);
+            ); CWC(border[top_right]);
             border[top_right].grab_button({ { L_MOUSE_BUTTON, NULL } });
             FLUSH_X();
+            CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->border[top_right]) {
+                C_EMIT(this, RESIZE_CLIENT_BORDER_TOP_RIGHT);
+
+            }, this->border[top_right]);
 
             border[bottom_left].create_window(
                 frame,
@@ -7505,10 +7607,13 @@ class client {
                 nullptr,
                 CURSOR::bottom_left_corner
 
-            );
-            CWC(border[bottom_left]);
+            ); CWC(border[bottom_left]);
             border[bottom_left].grab_button({ { L_MOUSE_BUTTON, NULL } });
             FLUSH_X();
+            CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->border[bottom_left]) {
+                C_EMIT(this, RESIZE_CLIENT_BORDER_BOTTOM_LEFT);    
+
+            }, this->border[bottom_left]);            
 
             border[bottom_right].create_window(
                 frame,
@@ -7522,10 +7627,14 @@ class client {
                 nullptr,
                 CURSOR::bottom_right_corner
 
-            );
-            CWC(border[bottom_right]);
+            ); CWC(border[bottom_right]);
             border[bottom_right].grab_button({ { L_MOUSE_BUTTON, NULL } });
             FLUSH_X();
+            CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->border[bottom_right]) {
+                C_EMIT(this, RESIZE_CLIENT_BORDER_BOTTOM_RIGHT);
+                
+            }, this->border[bottom_right]);
+
         }
 
         void set_icon_png()
@@ -14349,13 +14458,13 @@ class Events {
             // event_handler->setEventCallback(EV_CALL(XCB_KEY_PRESS)         { key_press_handler(ev); });
             // event_handler->setEventCallback(EV_CALL(XCB_MAP_NOTIFY)        { map_notify_handler(ev); });
             // event_handler->setEventCallback(EV_CALL(XCB_MAP_REQUEST)       { map_req_handler(ev); });
-            event_handler->setEventCallback(EV_CALL(XCB_BUTTON_PRESS)      { button_press_handler(ev); });
-            event_handler->setEventCallback(EV_CALL(XCB_CONFIGURE_REQUEST) { configure_request_handler(ev); });
+            // event_handler->setEventCallback(EV_CALL(XCB_BUTTON_PRESS)      { button_press_handler(ev); });
+            // event_handler->setEventCallback(EV_CALL(XCB_CONFIGURE_REQUEST) { configure_request_handler(ev); });
             // event_handler->setEventCallback(EV_CALL(XCB_FOCUS_IN)          { focus_in_handler(ev); });
             // event_handler->setEventCallback(EV_CALL(XCB_FOCUS_OUT)         { focus_out_handler(ev); });
             // event_handler->setEventCallback(EV_CALL(XCB_DESTROY_NOTIFY)    { destroy_notify_handler(ev); });
             // event_handler->setEventCallback(EV_CALL(XCB_UNMAP_NOTIFY)      { unmap_notify_handler(ev); });
-            event_handler->setEventCallback(EV_CALL(XCB_REPARENT_NOTIFY)   { reparent_notify_handler(ev); });
+            // event_handler->setEventCallback(EV_CALL(XCB_REPARENT_NOTIFY)   { reparent_notify_handler(ev); });
             // event_handler->setEventCallback(EV_CALL(XCB_ENTER_NOTIFY)      { enter_notify_handler(ev); });
             // event_handler->setEventCallback(EV_CALL(XCB_LEAVE_NOTIFY)      { leave_notify_handler(ev); });
             // event_handler->setEventCallback(EV_CALL(XCB_MOTION_NOTIFY)     { motion_notify_handler(ev); });
@@ -14380,23 +14489,19 @@ class Events {
 
             CONN_root(MOVE_TO_NEXT_DESKTOP, W_callback -> void { change_desktop(conn).change_to(change_desktop::NEXT); });
             CONN_root(MOVE_TO_PREV_DESKTOP, W_callback -> void { change_desktop(conn).change_to(change_desktop::PREV); });
+            
+            CONN_root(FOCUS_CLIENT_FROM_POINTER, W_callback -> void {
+                client *c = wm->get_client_from_pointer();
+                if (c == nullptr) return;
+                loutI << "got client from pointer" << loutEND;
+                c->focus();
 
-            C_SIGNAL(if (__c) {
-                tile(__c, TILE::LEFT);
+            });
 
-            }, TILE_LEFT);
-            C_SIGNAL(if (__c) {
-                tile(__c, TILE::RIGHT);
-
-            }, TILE_RIGHT);
-            C_SIGNAL(if (__c) {
-                tile(__c, TILE::UP);
-
-            }, TILE_UP);
-            C_SIGNAL(if (__c) {
-                tile(__c, TILE::DOWN);
-
-            }, TILE_DOWN);
+            C_SIGNAL(if (__c) tile(__c, TILE::LEFT );, TILE_LEFT);
+            C_SIGNAL(if (__c) tile(__c, TILE::RIGHT);, TILE_RIGHT);
+            C_SIGNAL(if (__c) tile(__c, TILE::UP   );, TILE_UP);
+            C_SIGNAL(if (__c) tile(__c, TILE::DOWN );, TILE_DOWN);
 
             CONN_root(MOVE_TO_NEXT_DESKTOP_WAPP, W_callback -> void {
                 change_desktop cd(conn);
@@ -14447,16 +14552,21 @@ class Events {
 
             }, MOVE_CLIENT_ALT);
 
-            C_SIGNAL(if (__c) {
-                __c->raise();
-                __c->focus();
-                mv_client mv(__c, this->p.x(), this->p.y());
-                wm->focused_client = __c;
+            C_SIGNAL(if (__c) mv_client(__c, wm->pointer.x(), wm->pointer.y());, MOVE_CLIENT_MOUSE);
 
-            }, MOVE_CLIENT_MOUSE);
+            C_SIGNAL(if (__c) resize_client(__c, 0);, CLIENT_RESIZE_ALT);
 
             C_SIGNAL(if (__c) max_win(__c, max_win::BUTTON_MAXWIN);, BUTTON_MAXWIN_PRESS);
-            C_SIGNAL(if (__c) max_win(__c, max_win::EWMH_MAXWIN);, EWMH_MAXWIN);
+            C_SIGNAL(if (__c) max_win(__c, max_win::EWMH_MAXWIN  );, EWMH_MAXWIN        );
+
+            C_SIGNAL(if (__c) resize_client::border(__c, edge::LEFT        );, RESIZE_CLIENT_BORDER_LEFT        );
+            C_SIGNAL(if (__c) resize_client::border(__c, edge::RIGHT       );, RESIZE_CLIENT_BORDER_RIGHT       );
+            C_SIGNAL(if (__c) resize_client::border(__c, edge::TOP         );, RESIZE_CLIENT_BORDER_TOP         );
+            C_SIGNAL(if (__c) resize_client::border(__c, edge::BOTTOM_edge );, RESIZE_CLIENT_BORDER_BOTTOM      );
+            C_SIGNAL(if (__c) resize_client::border(__c, edge::TOP_LEFT    );, RESIZE_CLIENT_BORDER_TOP_LEFT    );
+            C_SIGNAL(if (__c) resize_client::border(__c, edge::TOP_RIGHT   );, RESIZE_CLIENT_BORDER_TOP_RIGHT   );
+            C_SIGNAL(if (__c) resize_client::border(__c, edge::BOTTOM_LEFT );, RESIZE_CLIENT_BORDER_BOTTOM_LEFT );
+            C_SIGNAL(if (__c) resize_client::border(__c, edge::BOTTOM_RIGHT);, RESIZE_CLIENT_BORDER_BOTTOM_RIGHT);
 
             CONN_root(DESTROY_NOTIFY, W_callback -> void {
                 client *c = C_RETRIVE(__window);
@@ -14475,232 +14585,246 @@ class Events {
                 wm->send_sigterm_to_client(c);
 
             });
+
+            CONN_root(REPARENT_NOTIFY, W_callback -> void {
+                client *c = C_RETRIVE(__window);
+                c->win.x(BORDER_SIZE);
+                c->win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
+                FLUSH_X();
+
+            });
+
+            CONN_root(CONF_REQ_WIDTH,  W_callback -> void { wm->data.width  = __window; });
+            CONN_root(CONF_REQ_HEIGHT, W_callback -> void { wm->data.height = __window; });
+            CONN_root(CONF_REQ_X,      W_callback -> void { wm->data.x      = __window; });
+            CONN_root(CONF_REQ_Y,      W_callback -> void { wm->data.y      = __window; });
+
         }
 
     private:
     /* Methods     */
-        void key_press_handler(const xcb_generic_event_t *&ev)
-        {
-            RE_CAST_EV(xcb_key_press_event_t);
-            // if (e->detail == wm->key_codes.r_arrow)
-            // {
-            //     switch (e->state)
-            //     {
-            //         case (SHIFT + CTRL + SUPER):
-            //         {
-            //             change_desktop cd(conn);
-            //             cd.change_with_app(change_desktop::NEXT);
-            //             return;
-            //         }
+        // void key_press_handler(const xcb_generic_event_t *&ev)
+        // {
+        //     RE_CAST_EV(xcb_key_press_event_t);
+        //     // if (e->detail == wm->key_codes.r_arrow)
+        //     // {
+        //     //     switch (e->state)
+        //     //     {
+        //     //         case (SHIFT + CTRL + SUPER):
+        //     //         {
+        //     //             change_desktop cd(conn);
+        //     //             cd.change_with_app(change_desktop::NEXT);
+        //     //             return;
+        //     //         }
                     
-            //         // case (CTRL + SUPER):
-            //         // {
-            //         //     change_desktop change_desktop(conn);
-            //         //     change_desktop.change_to(change_desktop::NEXT);
-            //         //     return;
-            //         // }
+        //     //         // case (CTRL + SUPER):
+        //     //         // {
+        //     //         //     change_desktop change_desktop(conn);
+        //     //         //     change_desktop.change_to(change_desktop::NEXT);
+        //     //         //     return;
+        //     //         // }
 
-            //         // case SUPER:
-            //         // {
-            //         //     client *c = signal_manager->_window_client_map.retrive(e->event);
-            //         //     tile(c, TILE::RIGHT);
-            //         //     return;
-            //         // }
-            //     }
-            // }
+        //     //         // case SUPER:
+        //     //         // {
+        //     //         //     client *c = signal_manager->_window_client_map.retrive(e->event);
+        //     //         //     tile(c, TILE::RIGHT);
+        //     //         //     return;
+        //     //         // }
+        //     //     }
+        //     // }
             
-            // if (e->detail == wm->key_codes.l_arrow)
-            // {
-            //     switch (e->state)
-            //     {
-            //         // case (SHIFT + CTRL + SUPER):
-            //         // {
+        //     // if (e->detail == wm->key_codes.l_arrow)
+        //     // {
+        //     //     switch (e->state)
+        //     //     {
+        //     //         // case (SHIFT + CTRL + SUPER):
+        //     //         // {
                         
-            //         //     return;
-            //         // }
+        //     //         //     return;
+        //     //         // }
 
-            //         // case (CTRL + SUPER):
-            //         // {
-            //         //     change_desktop change_desktop(conn);
-            //         //     change_desktop.change_to(change_desktop::PREV);
-            //         //     return;
-            //         // }
+        //     //         // case (CTRL + SUPER):
+        //     //         // {
+        //     //         //     change_desktop change_desktop(conn);
+        //     //         //     change_desktop.change_to(change_desktop::PREV);
+        //     //         //     return;
+        //     //         // }
                     
-            //         // case SUPER:
-            //         // {
-            //         //     client *c = signal_manager->_window_client_map.retrive(e->event);
-            //         //     tile(c, TILE::LEFT);
-            //         //     return;
-            //         // }
-            //     }
-            // }
+        //     //         // case SUPER:
+        //     //         // {
+        //     //         //     client *c = signal_manager->_window_client_map.retrive(e->event);
+        //     //         //     tile(c, TILE::LEFT);
+        //     //         //     return;
+        //     //         // }
+        //     //     }
+        //     // }
             
-            // if (e->detail == wm->key_codes.d_arrow)
-            // {
-            //     switch (e->state)
-            //     {
-            //         case SUPER:
-            //         {
-            //             client *c = signal_manager->_window_client_map.retrive(e->event);
-            //             tile(c, TILE::DOWN);
-            //             return;
-            //         }
-            //     }
-            // }
+        //     // if (e->detail == wm->key_codes.d_arrow)
+        //     // {
+        //     //     switch (e->state)
+        //     //     {
+        //     //         case SUPER:
+        //     //         {
+        //     //             client *c = signal_manager->_window_client_map.retrive(e->event);
+        //     //             tile(c, TILE::DOWN);
+        //     //             return;
+        //     //         }
+        //     //     }
+        //     // }
 
-            // if (e->detail == wm->key_codes.u_arrow)
-            // {
-            //     switch (e->state)
-            //     {
-            //         case SUPER:
-            //         {
-            //             client *c = signal_manager->_window_client_map.retrive(e->event);
-            //             tile(c, TILE::UP);
-            //             return;
-            //         }
-            //     }
-            // }
+        //     // if (e->detail == wm->key_codes.u_arrow)
+        //     // {
+        //     //     switch (e->state)
+        //     //     {
+        //     //         case SUPER:
+        //     //         {
+        //     //             client *c = signal_manager->_window_client_map.retrive(e->event);
+        //     //             tile(c, TILE::UP);
+        //     //             return;
+        //     //         }
+        //     //     }
+        //     // }
 
-            // if (e->detail == wm->key_codes.tab)
-            // {
-            //     switch (e->state)
-            //     {
-            //         case ALT:
-            //         {
-            //             wm->cycle_focus();
-            //             return;
-            //         }
-            //     }
-            // }
+        //     // if (e->detail == wm->key_codes.tab)
+        //     // {
+        //     //     switch (e->state)
+        //     //     {
+        //     //         case ALT:
+        //     //         {
+        //     //             wm->cycle_focus();
+        //     //             return;
+        //     //         }
+        //     //     }
+        //     // }
 
-            // if (e->detail == wm->key_codes.k)
-            // {
-            //     switch (e->state)
-            //     {
-            //         case SUPER:
-            //         {
-            //             pid_manager->list_pids();
-            //             event_handler->iter_and_log_map_size();
-            //             // wm->root.set_backround_png(USER_PATH_PREFIX("/mwm_png/galaxy16-17-3840x1200.png"));
-            //             // GET_CLIENT_FROM_WINDOW(e->event);
-            //             // c->kill();
-            //             // c->win.x(BORDER_SIZE);
-            //             // c->win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
-            //             // xcb_flush(conn);
+        //     // if (e->detail == wm->key_codes.k)
+        //     // {
+        //     //     switch (e->state)
+        //     //     {
+        //     //         case SUPER:
+        //     //         {
+        //     //             pid_manager->list_pids();
+        //     //             event_handler->iter_and_log_map_size();
+        //     //             // wm->root.set_backround_png(USER_PATH_PREFIX("/mwm_png/galaxy16-17-3840x1200.png"));
+        //     //             // GET_CLIENT_FROM_WINDOW(e->event);
+        //     //             // c->kill();
+        //     //             // c->win.x(BORDER_SIZE);
+        //     //             // c->win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
+        //     //             // xcb_flush(conn);
 
-            //             return;
-            //         }
-            //     }
-            // }
-        }
+        //     //             return;
+        //     //         }
+        //     //     }
+        //     // }
+        // }
 
-        void map_notify_handler(const xcb_generic_event_t *&ev)
-        {
-            RE_CAST_EV(xcb_map_notify_event_t);
-            client *c = signal_manager->_window_client_map.retrive(e->window);
-            if (!c) return;
-            c->update(); 
-        }
+        // void map_notify_handler(const xcb_generic_event_t *&ev)
+        // {
+        //     RE_CAST_EV(xcb_map_notify_event_t);
+        //     client *c = signal_manager->_window_client_map.retrive(e->window);
+        //     if (!c) return;
+        //     c->update(); 
+        // }
 
-        void map_req_handler(const xcb_generic_event_t *&ev)
-        {
-            RE_CAST_EV(xcb_map_request_event_t);
-            client *c = signal_manager->_window_client_map.retrive(e->window);
-            if (c != nullptr) return;
-            wm->manage_new_client(e->window);
-        }
+        // void map_req_handler(const xcb_generic_event_t *&ev)
+        // {
+        //     RE_CAST_EV(xcb_map_request_event_t);
+        //     client *c = signal_manager->_window_client_map.retrive(e->window);
+        //     if (c != nullptr) return;
+        //     wm->manage_new_client(e->window);
+        // }
 
         void button_press_handler(const xcb_generic_event_t *&ev)
         {
             RE_CAST_EV(xcb_button_press_event_t);
             client *c = signal_manager->_window_client_map.retrive(e->event);
-            if (c == nullptr)
-            {
-                c = wm->get_client_from_pointer();
-                if (c == nullptr) return;
-                loutI << "got client from pointer" << loutEND;
-                c->focus();
-                return;
-            }
+            if (c == nullptr) return;
+            // {
+            //     c = wm->get_client_from_pointer();
+            //     if (c == nullptr) return;
+            //     loutI << "got client from pointer" << loutEND;
+            //     c->focus();
+            //     return;
+            // }
 
-            if (e->detail == L_MOUSE_BUTTON)
-            {
-                // if (e->event == c->win) {
-                //     // switch (e->state)
-                //     // {
-                //     //     case ALT:
-                //     //     {
-                //     //         c->raise();
-                //     //         mv_client mv(c, e->event_x, e->event_y + 20);
-                //     //         c->focus();
-                //     //         wm->focused_client = c;
-                //     //         return;
-                //     //     }
-                //     // }
+            // if (e->detail == L_MOUSE_BUTTON)
+            // {
+            //     // if (e->event == c->win) {
+            //     //     // switch (e->state)
+            //     //     // {
+            //     //     //     case ALT:
+            //     //     //     {
+            //     //     //         c->raise();
+            //     //     //         mv_client mv(c, e->event_x, e->event_y + 20);
+            //     //     //         c->focus();
+            //     //     //         wm->focused_client = c;
+            //     //     //         return;
+            //     //     //     }
+            //     //     // }
 
-                //     // c->raise();
-                //     // c->focus();
-                //     // wm->focused_client = c;
-                //     // return;
-                // }
+            //     //     // c->raise();
+            //     //     // c->focus();
+            //     //     // wm->focused_client = c;
+            //     //     // return;
+            //     // }
                 
-                // if (e->event == c->titlebar)
-                // {
-                //     c->raise();
-                //     c->focus();
-                //     mv_client mv(c, e->event_x, e->event_y);
-                //     wm->focused_client = c;
-                //     return;
-                // }
+            //     // if (e->event == c->titlebar)
+            //     // {
+            //     //     c->raise();
+            //     //     c->focus();
+            //     //     mv_client mv(c, e->event_x, e->event_y);
+            //     //     wm->focused_client = c;
+            //     //     return;
+            //     // }
                 
-                if (e->event == c->border[left])
-                {
-                    resize_client::border border(c, edge::LEFT);
-                    return;
-                }
+            //     // if (e->event == c->border[left])
+            //     // {
+            //     //     resize_client::border border(c, edge::LEFT);
+            //     //     return;
+            //     // }
                 
-                if (e->event == c->border[right])
-                {
-                    resize_client::border border(c, edge::RIGHT);
-                    return;
-                } 
+            //     // if (e->event == c->border[right])
+            //     // {
+            //     //     resize_client::border border(c, edge::RIGHT);
+            //     //     return;
+            //     // } 
                 
-                if (e->event == c->border[top])
-                {
-                    resize_client::border border(c, edge::TOP);
-                    return;
-                }
+            //     // if (e->event == c->border[top])
+            //     // {
+            //     //     resize_client::border border(c, edge::TOP);
+            //     //     return;
+            //     // }
                 
-                if (e->event == c->border[bottom])
-                {
-                    resize_client::border border(c, edge::BOTTOM_edge);
-                    return;
-                }
+            //     // if (e->event == c->border[bottom])
+            //     // {
+            //     //     resize_client::border border(c, edge::BOTTOM_edge);
+            //     //     return;
+            //     // }
                 
-                if (e->event == c->border[top_left])
-                {
-                    resize_client::border border(c, edge::TOP_LEFT);
-                    return;
-                }
+            //     // if (e->event == c->border[top_left])
+            //     // {
+            //     //     resize_client::border border(c, edge::TOP_LEFT);
+            //     //     return;
+            //     // }
 
-                if (e->event == c->border[top_right])
-                {
-                    resize_client::border border(c, edge::TOP_RIGHT);
-                    return;
-                }
+            //     // if (e->event == c->border[top_right])
+            //     // {
+            //     //     resize_client::border border(c, edge::TOP_RIGHT);
+            //     //     return;
+            //     // }
                 
-                if (e->event == c->border[bottom_left])
-                {
-                    resize_client::border border(c, edge::BOTTOM_LEFT);
-                    return;
-                }
+            //     // if (e->event == c->border[bottom_left])
+            //     // {
+            //     //     resize_client::border border(c, edge::BOTTOM_LEFT);
+            //     //     return;
+            //     // }
 
-                if (e->event == c->border[bottom_right])
-                {
-                    resize_client::border border(c, edge::BOTTOM_RIGHT);
-                    return;
-                }
-            }
+            //     // if (e->event == c->border[bottom_right])
+            //     // {
+            //     //     resize_client::border border(c, edge::BOTTOM_RIGHT);
+            //     //     return;
+            //     // }
+            // }
 
             if (e->detail == R_MOUSE_BUTTON)
             {
@@ -14718,16 +14842,16 @@ class Events {
             }
         }
         
-        void configure_request_handler(const xcb_generic_event_t *&ev)
-        {
-            RE_CAST_EV(xcb_configure_request_event_t);
-            wm->data.width  = e->width;
-            wm->data.height = e->height;
-            wm->data.x      = e->x;
-            wm->data.y      = e->y;
+        // void configure_request_handler(const xcb_generic_event_t *&ev)
+        // {
+        //     RE_CAST_EV(xcb_configure_request_event_t);
+        //     wm->data.width  = e->width;
+        //     wm->data.height = e->height;
+        //     wm->data.x      = e->x;
+        //     wm->data.y      = e->y;
 
-            // loutI << WINDOW_ID_BY_INPUT(e->window) << " e->x" << e->x << " e->y" << e->y << " e->width" << e->width << "e->height" << e->height << '\n';
-        }
+        //     // loutI << WINDOW_ID_BY_INPUT(e->window) << " e->x" << e->x << " e->y" << e->y << " e->width" << e->width << "e->height" << e->height << '\n';
+        // }
 
         // void focus_in_handler(const xcb_generic_event_t *&ev)
         // {
@@ -14752,57 +14876,57 @@ class Events {
         //     });
         // }
 
-        void destroy_notify_handler(const xcb_generic_event_t *&ev)
-        {
-            RE_CAST_EV(xcb_destroy_notify_event_t);
-            GET_CLIENT_FROM_WINDOW(e->event);
-            if (c->atoms.is_modal) {
-                client *c_trans = wm->client_from_any_window(&c->modal_data.transient_for);
-                if (c_trans != nullptr) {
-                    c_trans->focus();
-                    wm->focused_client = c_trans;
+        // void destroy_notify_handler(const xcb_generic_event_t *&ev)
+        // {
+        //     RE_CAST_EV(xcb_destroy_notify_event_t);
+        //     GET_CLIENT_FROM_WINDOW(e->event);
+        //     if (c->atoms.is_modal) {
+        //         client *c_trans = wm->client_from_any_window(&c->modal_data.transient_for);
+        //         if (c_trans != nullptr) {
+        //             c_trans->focus();
+        //             wm->focused_client = c_trans;
 
-                }
+        //         }
 
-            }
+        //     }
             
-            pid_manager->remove_pid(c->win.pid());
-            wm->send_sigterm_to_client(c);
-        }
+        //     pid_manager->remove_pid(c->win.pid());
+        //     wm->send_sigterm_to_client(c);
+        // }
         
-        void unmap_notify_handler(const xcb_generic_event_t *&ev)
-        {
-            RE_CAST_EV(xcb_unmap_notify_event_t);
-            client *c = wm->client_from_window(&e->window);
-            if (c == nullptr) return;
+        // void unmap_notify_handler(const xcb_generic_event_t *&ev)
+        // {
+        //     RE_CAST_EV(xcb_unmap_notify_event_t);
+        //     client *c = wm->client_from_window(&e->window);
+        //     if (c == nullptr) return;
 
-            // loutI << WINDOW_ID_BY_INPUT(e->window) << '\n';
-        }
+        //     // loutI << WINDOW_ID_BY_INPUT(e->window) << '\n';
+        // }
         
-        void reparent_notify_handler(const xcb_generic_event_t *&ev)
-        {
-            RE_CAST_EV(xcb_reparent_notify_event_t);
-            GET_CLIENT_FROM_WINDOW(e->window);
+        // void reparent_notify_handler(const xcb_generic_event_t *&ev)
+        // {
+        //     RE_CAST_EV(xcb_reparent_notify_event_t);
+        //     GET_CLIENT_FROM_WINDOW(e->window);
 
-            c->win.x(BORDER_SIZE);
-            c->win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
-            xcb_flush(conn);
-        }
+        //     c->win.x(BORDER_SIZE);
+        //     c->win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
+        //     xcb_flush(conn);
+        // }
 
-        void enter_notify_handler(const xcb_generic_event_t *&ev)
-        {
-            RE_CAST_EV(xcb_enter_notify_event_t);
-        }
+        // void enter_notify_handler(const xcb_generic_event_t *&ev)
+        // {
+        //     RE_CAST_EV(xcb_enter_notify_event_t);
+        // }
 
-        void leave_notify_handler(const xcb_generic_event_t *&ev)
-        {
-            RE_CAST_EV(xcb_leave_notify_event_t);   
-        }
+        // void leave_notify_handler(const xcb_generic_event_t *&ev)
+        // {
+        //     RE_CAST_EV(xcb_leave_notify_event_t);   
+        // }
 
-        void motion_notify_handler(const xcb_generic_event_t *&ev)
-        {
-            RE_CAST_EV(xcb_motion_notify_event_t);
-        }
+        // void motion_notify_handler(const xcb_generic_event_t *&ev)
+        // {
+        //     RE_CAST_EV(xcb_motion_notify_event_t);
+        // }
 };
 
 class test {
@@ -14939,142 +15063,12 @@ class test {
         test() {}
 };
 
-class __signal_factory__ {
-    private:
-        function<void()> _resize_cli_no_border_ev_ = [&]() -> void
-        {
-            event_handler->setEventCallback(EV_CALL(XCB_BUTTON_PRESS)
-            {
-                client *c = wm->client_from_pointer(10);
-                if (c == nullptr) return;
-
-                RE_CAST_EV(xcb_button_press_event_t);
-                if (e->detail != L_MOUSE_BUTTON) return;
-                
-                c->raise();
-                c->focus();
-                resize_client::no_border border(c, 0, 0);
-                wm->focused_client = c;
-            });
-        };
-
-        function<void(uint32_t)> _resize_cli_border_left = [&](uint32_t __window) -> void
-        {
-            client *c = signal_manager->_window_client_map.retrive(__window);
-            if (!c) return;
-
-            resize_client::border border(c, edge::LEFT);
-        };
-
-    public:
-        void init()
-        {
-            signal_manager->connect("SET_EV_CALLBACK__RESIZE_NO_BORDER", _resize_cli_no_border_ev_);
-        }
-
-        template<typename Callback>
-        void make_sig(uint32_t __w, uint8_t __event_signal, Callback &&__callback)
-        {
-            WS_conn(__w, __event_signal, __callback);
-        }
-
-};
-
-namespace {
-    #define MAKE_CALLBACK(__name) function<void(uint32_t)> __name = [](uint32_t __window) -> void
-    #define MAKE_C(__name) \
-        template<typename Callback> \
-        Callback &&make_call
-
-    MAKE_CALLBACK(_resize_border_left_)
-    {
-        client *c = signal_manager->_window_client_map.retrive(__window);
-        if (!c) return;
-
-        resize_client::border(c, edge::LEFT);
-    };
-
-    MAKE_C(_border_left)(uint32_t __window)
-    {
-        client *c = signal_manager->_window_client_map.retrive(__window);
-        if (c == nullptr) return;
-
-        resize_client::border border(c, edge::LEFT);
-    }
-
-    MAKE_CALLBACK(_resize_border_right_)
-    {
-        client *c = signal_manager->_window_client_map.retrive(__window);
-        if (!c) return;
-
-        resize_client::border(c, edge::RIGHT);
-    };
-
-    MAKE_CALLBACK(_resize_border_top_)
-    {
-        client *c = signal_manager->_window_client_map.retrive(__window);
-        if (!c) return;
-
-        resize_client::border(c, edge::TOP);
-    };
-
-    MAKE_CALLBACK(_resize_border_bottom_)
-    {
-        client *c = signal_manager->_window_client_map.retrive(__window);
-        if (!c) return;
-
-        resize_client::border(c, edge::BOTTOM_edge);
-    };
-
-    MAKE_CALLBACK(_resize_border_top_left_)
-    {
-        client *c = signal_manager->_window_client_map.retrive(__window);
-        if (!c) return;
-
-        resize_client::border(c, edge::TOP_LEFT);
-    };
-
-    MAKE_CALLBACK(_resize_border_bottom_left_)
-    {
-        client *c = signal_manager->_window_client_map.retrive(__window);
-        if (!c) return;
-
-        resize_client::border(c, edge::BOTTOM_LEFT);
-    };
-
-    MAKE_CALLBACK(_resize_border_top_right_)
-    {
-        client *c = signal_manager->_window_client_map.retrive(__window);
-        if (!c) return;
-
-        resize_client::border(c, edge::TOP_RIGHT);
-    };
-
-    MAKE_CALLBACK(_resize_border_bottom_right_)
-    {
-        client *c = signal_manager->_window_client_map.retrive(__window);
-        if (!c) return;
-
-        resize_client::border(c, edge::BOTTOM_RIGHT);
-    };
-
-}
-
-template<typename Callback>
-void add_ev_to_window(uint32_t __window, int __signal_id, Callback &&__callback)
-{
-    signal_manager->_window_signals.conect(__window, __signal_id, std::forward<Callback>(__callback));
-}
-
 void setup_wm()
 {
     user = get_user_name();
     loutCUser(USER);
 
     NEW_CLASS(signal_manager, __signal_manager__) { signal_manager->init(); }
-    __signal_factory__ signal_factory;
-    signal_factory.init();
-
     NEW_CLASS(file_system, __file_system__      ) { file_system->init_check(); }
 
     crypro = new __crypto__;

@@ -790,11 +790,6 @@ enum EV : uint8_t {
     EXPOSE                            = XCB_EXPOSE,
     ENTER_NOTIFY                      = XCB_ENTER_NOTIFY,
     LEAVE_NOTIFY                      = XCB_LEAVE_NOTIFY,
-    L_MOUSE_BUTTON_EVENT              = 36,
-    R_MOUSE_BUTTON_EVENT              = 37,
-    CLIENT_RESIZE                     = 42,
-    KILL_SIGNAL                       = 39,
-    L_MOUSE_BUTTON_EVENT__ALT         = 43,
     PROPERTY_NOTIFY                   = XCB_PROPERTY_NOTIFY,
     MAP_REQ                           = XCB_MAP_REQUEST,
     MAP_NOTIFY                        = XCB_MAP_NOTIFY,
@@ -804,7 +799,16 @@ enum EV : uint8_t {
     KEY_RELESE                        = XCB_KEY_RELEASE,
     BUTTON_RELEASE                    = XCB_BUTTON_RELEASE,
     MOTION_NOTIFY                     = XCB_MOTION_NOTIFY,
-    DESTROY_NOTIFY                    = XCB_DESTROY_NOTIFY,  
+    DESTROY_NOTIFY                    = XCB_DESTROY_NOTIFY,
+    REPARENT_NOTIFY                   = XCB_REPARENT_NOTIFY,
+    CONFIGURE_REQUEST                 = XCB_CONFIGURE_REQUEST,
+    L_MOUSE_BUTTON_EVENT              = 36,
+    L_MOUSE_BUTTON_EVENT__ALT         = 37,
+    R_MOUSE_BUTTON_EVENT              = 38,
+    R_MOUSE_BUTTON_EVENT__ALT         = 39,
+    KILL_SIGNAL                       = 40,
+    CLIENT_RESIZE                     = 41,
+    CLIENT_RESIZE_ALT                 = 42,
     TERM_KEY_PRESS                    = 44,
     QUIT_KEY_PRESS                    = 45,
     EWMH_MAXWIN                       = 46,
@@ -826,7 +830,21 @@ enum EV : uint8_t {
     BUTTON_MAXWIN_PRESS               = 63,
     FOCUS_CLIENT                      = 64,
     MOVE_CLIENT_MOUSE                 = 65,
-    MOVE_CLIENT_ALT                   = 66
+    MOVE_CLIENT_ALT                   = 66,
+    CONF_REQ_WIDTH                    = 67,
+    CONF_REQ_HEIGHT                   = 68,
+    CONF_REQ_X                        = 69,
+    CONF_REQ_Y                        = 70,
+    FOCUS_CLIENT_FROM_POINTER         = 71,
+    RESIZE_CLIENT_BORDER_LEFT         = 72,
+    RESIZE_CLIENT_BORDER_RIGHT        = 73,
+    RESIZE_CLIENT_BORDER_TOP          = 74,
+    RESIZE_CLIENT_BORDER_BOTTOM       = 75,
+    RESIZE_CLIENT_BORDER_TOP_LEFT     = 76,
+    RESIZE_CLIENT_BORDER_TOP_RIGHT    = 77,
+    RESIZE_CLIENT_BORDER_BOTTOM_RIGHT = 78,
+    RESIZE_CLIENT_BORDER_BOTTOM_LEFT  = 79
+    
 };
 
 typedef struct __client__data__t__{
@@ -849,18 +867,27 @@ class __c_func_arr__ {
         static constexpr uint8_t ERROR_STATE = make_T_MAX<uint8_t>();
 
     /* Methods */
-        uint8_t sig_to_index__(uint8_t __sig) {
+        constexpr uint8_t sig_to_index__(uint8_t __sig) {
             switch (__sig) {
-                case BUTTON_MAXWIN_PRESS: return 0;
-                case KILL_SIGNAL:         return 1;
-                case FOCUS_CLIENT:        return 2;
-                case MOVE_CLIENT_ALT:     return 3;
-                case MOVE_CLIENT_MOUSE:   return 4;
-                case TILE_LEFT:           return 5;
-                case TILE_RIGHT:          return 6;
-                case TILE_DOWN:           return 7;
-                case TILE_UP:             return 8;
-                case EWMH_MAXWIN:         return 9;
+                case BUTTON_MAXWIN_PRESS:               return 0;
+                case KILL_SIGNAL:                       return 1;
+                case FOCUS_CLIENT:                      return 2;
+                case MOVE_CLIENT_ALT:                   return 3;
+                case MOVE_CLIENT_MOUSE:                 return 4;
+                case TILE_LEFT:                         return 5;
+                case TILE_RIGHT:                        return 6;
+                case TILE_DOWN:                         return 7;
+                case TILE_UP:                           return 8;
+                case EWMH_MAXWIN:                       return 9;
+                case RESIZE_CLIENT_BORDER_LEFT:         return 10;
+                case RESIZE_CLIENT_BORDER_RIGHT:        return 11;
+                case RESIZE_CLIENT_BORDER_TOP:          return 12;
+                case RESIZE_CLIENT_BORDER_BOTTOM:       return 13;
+                case RESIZE_CLIENT_BORDER_TOP_LEFT:     return 14;
+                case RESIZE_CLIENT_BORDER_TOP_RIGHT:    return 15;
+                case RESIZE_CLIENT_BORDER_BOTTOM_RIGHT: return 16;
+                case RESIZE_CLIENT_BORDER_BOTTOM_LEFT:  return 17;
+                case CLIENT_RESIZE:                     return 18;
 
                 default: return make_T_MAX<uint8_t>();
 
@@ -870,10 +897,10 @@ class __c_func_arr__ {
 
     public:
     /* Variabels */
-        FixedArray<function<void(client *c)>, 10> func;
+        FixedArray<function<void(client *c)>, 18> func;
 
     /* Methods   */
-        void send_c_sig(client *__c, int __sig) {
+        constexpr void send_c_sig(client *__c, int __sig) {
             uint8_t index = sig_to_index__(__sig);
             if (index == ERROR_STATE) return;
             func[index](__c);
@@ -881,7 +908,7 @@ class __c_func_arr__ {
         }
 
         template<typename Callback>
-        void add_func_to_sig(Callback &&__callback, uint8_t __sig) {
+        constexpr void add_func_to_sig(Callback &&__callback, uint8_t __sig) {
             uint8_t index = sig_to_index__(__sig);
             if (index == ERROR_STATE) return;
             func[index] = std::forward<function<void(client *)>>(__callback);
