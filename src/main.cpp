@@ -14250,9 +14250,9 @@ class Events {
                 max_win(c, max_win::EWMH_MAXWIN);
             });
 
-            CONN_root(MOVE_TO_DESKTOP, W_callback -> void {
-                change_desktop::teleport_to(__window);
-            });
+            // CONN_root(MOVE_TO_DESKTOP, W_callback -> void {
+            //     change_desktop::teleport_to(__window);
+            // });
         }
 
     private:
