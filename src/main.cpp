@@ -14373,25 +14373,21 @@ class Events {
                 event_handler->iter_and_log_map_size();
             });
 
-            C_SIGNAL(if (__c) {
-                int i = 0;
-                while (true) {
-                    if (!__c->win.is_mapped()) {
-                        __c->kill();
-                        break;
+            C_SIGNAL(if (__c) {int i = 0; while (true) {
+                if (!__c->win.is_mapped()) {
+                    __c->kill();
+                    break;
 
-                    } else if (!wm->window_exists(__c->win)) {
-                        __c->kill();
-                        break;
+                } else if (!wm->window_exists(__c->win)) {
+                    __c->kill();
+                    break;
 
-                    } else {
-                        __c->win.kill();
-
-                    }
+                } else {
+                    __c->win.kill();
 
                 }
-            
-            }, KILL_SIGNAL);
+
+            }}, KILL_SIGNAL);
 
             C_SIGNAL(if (__c) max_win(__c, max_win::BUTTON_MAXWIN);, BUTTON_MAXWIN_PRESS);
         }
