@@ -2777,6 +2777,99 @@ class Launcher {
         File file;
 };
 
+class __key_codes__ {
+    public:
+    // constructor and destructor.
+        __key_codes__() 
+        : keysyms(nullptr) {}
+
+        ~__key_codes__()
+        {
+            free(keysyms);
+        }
+
+    // methods.
+        void init()
+        {
+            keysyms = xcb_key_symbols_alloc(conn);
+            if (keysyms)
+            {
+                map<uint32_t, xcb_keycode_t *> key_map = {
+                    { A,            &a         },
+                    { B,            &b         },
+                    { C,            &c         },
+                    { D,            &d         },
+                    { E,            &e         },
+                    { F,            &f         },
+                    { G,            &g         },
+                    { H,            &h         },
+                    { I,            &i         },
+                    { J,            &j         },
+                    { K,            &k         },
+                    { L,            &l         },
+                    { M,            &m         },
+                    { _N,           &n         },
+                    { O,            &o         },
+                    { P,            &p         },
+                    { Q,            &q         },
+                    { R,            &r         },
+                    { S,            &s         },
+                    { T,            &t         },
+                    { U,            &u         },
+                    { V,            &v         },
+                    { W,            &w         },
+                    { _X,           &x         },
+                    { _Y,           &y         },
+                    { Z,            &z         },
+
+                    { SPACE_BAR,    &space_bar },
+                    { ENTER,        &enter     },
+                    { DELETE,       &_delete   },
+
+                    { F11,          &f11       },
+                    { N_1,          &n_1       },
+                    { N_2,          &n_2       },
+                    { N_3,          &n_3       },
+                    { N_4,          &n_4       },
+                    { N_5,          &n_5       },
+                    { R_ARROW,      &r_arrow   },
+                    { L_ARROW,      &l_arrow   },
+                    { U_ARROW,      &u_arrow   },
+                    { D_ARROW,      &d_arrow   },
+                    { TAB,          &tab       },
+                    { SUPER_L,      &super_l   },
+                    { MINUS,        &minus     },
+                    { UNDERSCORE,   &underscore}
+                };
+                
+                for (auto &pair : key_map)
+                {
+                    xcb_keycode_t * keycode = xcb_key_symbols_get_keycode(keysyms, pair.first);
+                    if (keycode)
+                    {
+                        *(pair.second) = *keycode;
+                        free(keycode);
+                    }
+                }
+            }
+        }
+
+    // variabels.
+        xcb_keycode_t
+            a{}, b{}, c{}, d{}, e{}, f{}, g{}, h{}, i{}, j{}, k{}, l{}, m{},
+            n{}, o{}, p{}, q{}, r{}, s{}, t{}, u{}, v{}, w{}, x{}, y{}, z{},
+            
+            space_bar{}, enter{},
+
+            f11{}, n_1{}, n_2{}, n_3{}, n_4{}, n_5{}, r_arrow{},
+            l_arrow{}, u_arrow{}, d_arrow{}, tab{}, _delete{},
+            super_l{}, minus{}, underscore{};
+
+    private:
+    // variabels.
+        xcb_key_symbols_t * keysyms;
+};
+
 using Ev = const xcb_generic_event_t *;
 class __event_handler__ {
     /* Defines   */
@@ -2803,6 +2896,9 @@ class __event_handler__ {
             thread(handleEvent<__event_type>, (__event_type*)ev).detach()
 
     public:
+    /* Variabels */
+        __key_codes__ key_codes;
+
     /* Methods   */
         using EventCallback = function<void(Ev)>;
 
@@ -2864,6 +2960,7 @@ class __event_handler__ {
 
         template<uint8_t __event_id> static void handle_event(uint32_t __window) { WS_emit(__window, __event_id); }
         template<> void handle_event<MAP_REQ>(uint32_t __window) { WS_emit_Win(screen->root, MAP_REQ, __window); }
+        template<> void handle_event<TERM_KEY_PRESS>(uint32_t __window) { WS_emit_Win(screen->root, TERM_KEY_PRESS, 0); }
         #define HANDLE_EVENT(__type ) thread(handle_event<__type>, e->event ).detach()
         #define HANDLE_WINDOW(__type) thread(handle_event<__type>, e->window).detach()
         DynamicArray<uint32_t *> _window_arr;
@@ -2908,7 +3005,7 @@ class __event_handler__ {
                 case XCB_KEY_PRESS:
                 {
                     RE_CAST_EV(xcb_key_press_event_t);
-                    if (e->detail == T && e->state & CTRL | ALT) HANDLE_EVENT(KEY_PRESS);
+                    if (e->detail == T && e->state & CTRL | ALT) HANDLE_EVENT(TERM_KEY_PRESS);
                     // HANDLE_EVENT(KEY_PRESS);
                 }
 
@@ -14033,11 +14130,11 @@ class Events {
         void key_press_handler(const xcb_generic_event_t *&ev)
         {
             RE_CAST_EV(xcb_key_press_event_t);
-            if (e->detail == wm->key_codes.t && e->state & CTRL | ALT)
-            {
-                WS_emit(screen->root, TERM_KEY_PRESS);
-                return;
-            }
+            // if (e->detail == wm->key_codes.t && e->state & CTRL | ALT)
+            // {
+            //     WS_emit(screen->root, TERM_KEY_PRESS);
+            //     return;
+            // }
             
             if (e->detail == wm->key_codes.q && e->state & SHIFT | ALT)
             {
