@@ -970,6 +970,12 @@ class __signal_manager__ {
         #define CONN_Win(__window, __event, __callback) \
             signal_manager->_window_signals.conect(this->__window, __event, W_callback {__callback})
 
+        #define CONN(__event, __callback, __window) \
+            signal_manager->_window_signals.conect(__window, __event, W_callback {__callback})
+
+        #define SIG(__window, __callback, __event) \
+            signal_manager->_window_signals.conect(__window, __event, __callback)
+
         #define CONN_root(__event, __callback) \
             signal_manager->_window_signals.conect(screen->root, __event, __callback)
 
@@ -3004,6 +3010,7 @@ class __event_handler__ {
         // template<uint8_t __event_id> void handle_event(uint32_t __window) { WS_emit(__window, __event_id); }
 
         template<> void handle_event<MAP_REQ>(uint32_t __window) { WS_emit_Win(screen->root, MAP_REQ, __window); }
+        template<> void handle_event<MAP_NOTIFY>(uint32_t __window) { WS_emit_Win(screen->root, MAP_NOTIFY, __window); }
         template<> void handle_event<EWMH_MAXWIN>(uint32_t __window) { WS_emit_Win(screen->root, EWMH_MAXWIN, __window); }
         template<> void handle_event<TERM_KEY_PRESS>(uint32_t) { WS_emit_Win(screen->root, TERM_KEY_PRESS, 0); }
         template<> void handle_event<QUIT_KEY_PRESS>(uint32_t __window) { WS_emit_Win(screen->root, QUIT_KEY_PRESS, 0); }
@@ -3016,6 +3023,8 @@ class __event_handler__ {
 
         template<> void handle_event<MOVE_TO_NEXT_DESKTOP>(uint32_t __window) { WS_emit(screen->root, MOVE_TO_NEXT_DESKTOP); }
         template<> void handle_event<MOVE_TO_PREV_DESKTOP>(uint32_t __window) { WS_emit(screen->root, MOVE_TO_PREV_DESKTOP); }
+        template<> void handle_event<MOVE_TO_NEXT_DESKTOP_WAPP>(uint32_t __window) { WS_emit_root(MOVE_TO_NEXT_DESKTOP_WAPP, __window); }
+        template<> void handle_event<MOVE_TO_PREV_DESKTOP_WAPP>(uint32_t __window) { WS_emit_root(MOVE_TO_PREV_DESKTOP_WAPP, __window); }
 
 
         template<> void handle_event<TILE_RIGHT>(uint32_t __window) { WS_emit_Win(screen->root, TILE_RIGHT, __window); }
@@ -3027,6 +3036,7 @@ class __event_handler__ {
 
         #define HANDLE_EVENT(__type ) thread(handle_event<__type>, e->event ).detach()
         #define HANDLE_WINDOW(__type) thread(handle_event<__type>, e->window).detach()
+        #define HANDLE_ROOT(__type) thread(handle_event<__type>, screen->root).detach()
 
         DynamicArray<uint32_t *> _window_arr;
 
@@ -3115,6 +3125,13 @@ class __event_handler__ {
 
                             break;
                         }
+                        case SHIFT | CTRL | SUPER:
+                        {
+                            if (e->detail == key_codes.r_arrow) HANDLE_EVENT(MOVE_TO_NEXT_DESKTOP_WAPP);
+                            if (e->detail == key_codes.l_arrow) HANDLE_EVENT(MOVE_TO_PREV_DESKTOP_WAPP);
+
+                            break;
+                        }
                         case SHIFT | ALT:
                         {
                             if (e->detail == key_codes.q) HANDLE_EVENT(QUIT_KEY_PRESS);
@@ -3146,6 +3163,8 @@ class __event_handler__ {
                             if (e->detail == key_codes.l_arrow) HANDLE_EVENT(TILE_LEFT);
                             if (e->detail == key_codes.u_arrow) HANDLE_EVENT(TILE_UP);
                             if (e->detail == key_codes.d_arrow) HANDLE_EVENT(TILE_DOWN);
+                            
+                            if (e->detail == key_codes.k) HANDLE_ROOT(DEBUG_KEY_PRESS);
                             
                             break;
                         }
@@ -3214,6 +3233,11 @@ class __event_handler__ {
                     HANDLE_WINDOW(MAP_REQ);
 
                     break;
+                }
+                case XCB_MAP_NOTIFY:
+                {
+                    RE_CAST_EV(xcb_map_notify_event_t);
+                    HANDLE_EVENT(MAP_NOTIFY);
                 }
             }
         }
@@ -7200,18 +7224,17 @@ class client {
             );
             CWC(close_button);
             close_button.make_then_set_png(USER_PATH_PREFIX("/close.png"), CLOSE_BUTTON_BITMAP);
-            CONN_Win(close_button, L_MOUSE_BUTTON_EVENT,
-            
-                if (__window != this->close_button) return;
+            CONN(L_MOUSE_BUTTON_EVENT,
 
                 if (!this->win.is_mapped())
                 {
                     this->kill();
                 }
-
+    
                 this->win.kill();
             
-            );
+            , this->close_button);
+
             CONN_Win(close_button, ENTER_NOTIFY,
                 if (__window != this->close_button) return;
                 this->close_button.change_border_color(WHITE);
@@ -7267,14 +7290,19 @@ class client {
 
             max_button.set_backround_png(USER_PATH_PREFIX("/max.png"));
 
-            CONN_Win(max_button, ENTER_NOTIFY,
+            CONN(L_MOUSE_BUTTON_EVENT,
+                WS_emit(this->max_button, BUTTON_MAXWIN_PRESS);
+            , this->max_button);
+
+            CONN(ENTER_NOTIFY,
                 if (__window != this->max_button) return;
                 this->max_button.change_border_color(WHITE);
-            );
-            CONN_Win(max_button, LEAVE_NOTIFY,
+            , this->max_button);
+
+            CONN(LEAVE_NOTIFY,
                 if (__window != this->max_button) return;
                 this->max_button.change_border_color(BLACK);
-            );
+            , this->max_button);
         }
     
         void make_min_button()
@@ -8422,6 +8450,11 @@ class Window_Manager {
                     client *c = signal_manager->_window_client_map.retrive(__window);
                     if (c != nullptr) return;
                     this->manage_new_client(__window);
+                );
+                CONN_Win(root, MAP_NOTIFY,
+                    client *c = signal_manager->_window_client_map.retrive(__window);
+                    if (!c) return;
+                    c->update(); 
                 );
                 CONN_Win(root, TERM_KEY_PRESS, this->launcher.launch_child_process("konsole"););
                 CONN_Win(root, QUIT_KEY_PRESS, this->quit(0););
@@ -14252,8 +14285,8 @@ class Events {
     /* Methods     */
         void setup()
         {
-            event_handler->setEventCallback(EV_CALL(XCB_KEY_PRESS)         { key_press_handler(ev); });
-            event_handler->setEventCallback(EV_CALL(XCB_MAP_NOTIFY)        { map_notify_handler(ev); });
+            // event_handler->setEventCallback(EV_CALL(XCB_KEY_PRESS)         { key_press_handler(ev); });
+            // event_handler->setEventCallback(EV_CALL(XCB_MAP_NOTIFY)        { map_notify_handler(ev); });
             // event_handler->setEventCallback(EV_CALL(XCB_MAP_REQUEST)       { map_req_handler(ev); });
             event_handler->setEventCallback(EV_CALL(XCB_BUTTON_PRESS)      { button_press_handler(ev); });
             event_handler->setEventCallback(EV_CALL(XCB_CONFIGURE_REQUEST) { configure_request_handler(ev); });
@@ -14307,6 +14340,29 @@ class Events {
                 if (!c) return;
                 tile(c, TILE::UP);
             });
+
+            CONN_root(MOVE_TO_NEXT_DESKTOP_WAPP, W_callback -> void {
+                change_desktop cd(conn);
+                cd.change_with_app(change_desktop::NEXT);
+            });
+
+            CONN_root(MOVE_TO_PREV_DESKTOP_WAPP, W_callback -> void {
+                change_desktop cd(conn);
+                cd.change_with_app(change_desktop::PREV);
+            });
+
+            CONN_root(DEBUG_KEY_PRESS, W_callback -> void {
+                pid_manager->list_pids();
+                event_handler->iter_and_log_map_size();
+            });
+
+            CONN(BUTTON_MAXWIN_PRESS,
+
+                client *c = signal_manager->_window_client_map.retrive(__window);
+                if (!c) return;
+                max_win(c, max_win::BUTTON_MAXWIN);
+
+            , screen->root);
         }
 
     private:
@@ -14314,59 +14370,58 @@ class Events {
         void key_press_handler(const xcb_generic_event_t *&ev)
         {
             RE_CAST_EV(xcb_key_press_event_t);
-            if (e->detail == wm->key_codes.r_arrow)
-            {
-                switch (e->state)
-                {
-                    case (SHIFT + CTRL + SUPER):
-                    {
-                        change_desktop cd(conn);
-                        cd.change_with_app(change_desktop::NEXT);
-                        return;
-                    }
+            // if (e->detail == wm->key_codes.r_arrow)
+            // {
+            //     switch (e->state)
+            //     {
+            //         case (SHIFT + CTRL + SUPER):
+            //         {
+            //             change_desktop cd(conn);
+            //             cd.change_with_app(change_desktop::NEXT);
+            //             return;
+            //         }
                     
-                    // case (CTRL + SUPER):
-                    // {
-                    //     change_desktop change_desktop(conn);
-                    //     change_desktop.change_to(change_desktop::NEXT);
-                    //     return;
-                    // }
+            //         // case (CTRL + SUPER):
+            //         // {
+            //         //     change_desktop change_desktop(conn);
+            //         //     change_desktop.change_to(change_desktop::NEXT);
+            //         //     return;
+            //         // }
 
-                    // case SUPER:
-                    // {
-                    //     client *c = signal_manager->_window_client_map.retrive(e->event);
-                    //     tile(c, TILE::RIGHT);
-                    //     return;
-                    // }
-                }
-            }
+            //         // case SUPER:
+            //         // {
+            //         //     client *c = signal_manager->_window_client_map.retrive(e->event);
+            //         //     tile(c, TILE::RIGHT);
+            //         //     return;
+            //         // }
+            //     }
+            // }
             
-            if (e->detail == wm->key_codes.l_arrow)
-            {
-                switch (e->state)
-                {
-                    case (SHIFT + CTRL + SUPER):
-                    {
-                        change_desktop cd(conn);
-                        cd.change_with_app(change_desktop::PREV);
-                        return;
-                    }
+            // if (e->detail == wm->key_codes.l_arrow)
+            // {
+            //     switch (e->state)
+            //     {
+            //         // case (SHIFT + CTRL + SUPER):
+            //         // {
+                        
+            //         //     return;
+            //         // }
 
-                    // case (CTRL + SUPER):
-                    // {
-                    //     change_desktop change_desktop(conn);
-                    //     change_desktop.change_to(change_desktop::PREV);
-                    //     return;
-                    // }
+            //         // case (CTRL + SUPER):
+            //         // {
+            //         //     change_desktop change_desktop(conn);
+            //         //     change_desktop.change_to(change_desktop::PREV);
+            //         //     return;
+            //         // }
                     
-                    // case SUPER:
-                    // {
-                    //     client *c = signal_manager->_window_client_map.retrive(e->event);
-                    //     tile(c, TILE::LEFT);
-                    //     return;
-                    // }
-                }
-            }
+            //         // case SUPER:
+            //         // {
+            //         //     client *c = signal_manager->_window_client_map.retrive(e->event);
+            //         //     tile(c, TILE::LEFT);
+            //         //     return;
+            //         // }
+            //     }
+            // }
             
             // if (e->detail == wm->key_codes.d_arrow)
             // {
@@ -14406,25 +14461,25 @@ class Events {
             //     }
             // }
 
-            if (e->detail == wm->key_codes.k)
-            {
-                switch (e->state)
-                {
-                    case SUPER:
-                    {
-                        pid_manager->list_pids();
-                        event_handler->iter_and_log_map_size();
-                        // wm->root.set_backround_png(USER_PATH_PREFIX("/mwm_png/galaxy16-17-3840x1200.png"));
-                        // GET_CLIENT_FROM_WINDOW(e->event);
-                        // c->kill();
-                        // c->win.x(BORDER_SIZE);
-                        // c->win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
-                        // xcb_flush(conn);
+            // if (e->detail == wm->key_codes.k)
+            // {
+            //     switch (e->state)
+            //     {
+            //         case SUPER:
+            //         {
+            //             pid_manager->list_pids();
+            //             event_handler->iter_and_log_map_size();
+            //             // wm->root.set_backround_png(USER_PATH_PREFIX("/mwm_png/galaxy16-17-3840x1200.png"));
+            //             // GET_CLIENT_FROM_WINDOW(e->event);
+            //             // c->kill();
+            //             // c->win.x(BORDER_SIZE);
+            //             // c->win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
+            //             // xcb_flush(conn);
 
-                        return;
-                    }
-                }
-            }
+            //             return;
+            //         }
+            //     }
+            // }
         }
 
         void map_notify_handler(const xcb_generic_event_t *&ev)

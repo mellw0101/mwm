@@ -778,6 +778,7 @@ enum EV : uint8_t {
     L_MOUSE_BUTTON_EVENT__ALT         = 43,
     PROPERTY_NOTIFY                   = XCB_PROPERTY_NOTIFY,
     MAP_REQ                           = XCB_MAP_REQUEST,
+    MAP_NOTIFY                        = XCB_MAP_NOTIFY,
     KEY_PRESS                         = XCB_KEY_PRESS,
     TERM_KEY_PRESS                    = 44,
     QUIT_KEY_PRESS                    = 45,
@@ -793,7 +794,11 @@ enum EV : uint8_t {
     TILE_LEFT                         = 56,
     TILE_UP                           = 57,
     TILE_DOWN                         = 58,
-    CYCLE_FOCUS_KEY_PRESS             = 59
+    CYCLE_FOCUS_KEY_PRESS             = 59,
+    MOVE_TO_PREV_DESKTOP_WAPP         = 60,
+    MOVE_TO_NEXT_DESKTOP_WAPP         = 61,
+    DEBUG_KEY_PRESS                   = 62,
+    BUTTON_MAXWIN_PRESS               = 63
 };
 
 typedef enum {
