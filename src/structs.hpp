@@ -57,7 +57,7 @@ inline Type* AllocArr(size_t __num_elements, size_t alignment = alignof(Type))
 }
 
 class window;
-template<typename T0, size_t Size = 20>
+template<typename T0, size_t Size>
 class __fixed_array_t__ {
     public:
     /* Variabels */
@@ -80,7 +80,7 @@ class __fixed_array_t__ {
         {
             for (size_t i = 0; i < Size; ++i)
             {
-                *this->data[(i * sizeof(T0))] = &__data[(i * sizeof(T0))];
+                this->data[(i * sizeof(T0))] = &__data[(i * sizeof(T0))];
             }
         }
 
