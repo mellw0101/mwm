@@ -7364,7 +7364,7 @@ class client {
                 0,
                 BORDER_SIZE,
                 BORDER_SIZE,
-                (height + TITLE_BAR_HEIGHT),
+                (height + TITLE_BAR_HEIGHT - BORDER_SIZE),
                 BLACK,
                 NONE,
                 MAP,
