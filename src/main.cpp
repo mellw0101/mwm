@@ -6897,7 +6897,7 @@ class client {
                 this->frame,
                 BORDER_SIZE,
                 BORDER_SIZE,
-                (this->width - (BUTTON_SIZE * 3)),
+                (this->width - (BORDER_SIZE * 2)),
                 TITLE_BAR_HEIGHT,
                 BLACK,
                 XCB_EVENT_MASK_EXPOSURE,
