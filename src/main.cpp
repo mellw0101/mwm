@@ -7193,19 +7193,21 @@ class client {
             draw_title(TITLE_REQ_DRAW);
             icon.raise();
 
-            CONN_Win(titlebar, EXPOSE,
+            CONN(EXPOSE,
                 if (__window != this->titlebar) return;
                 this->titlebar.clear();
                 this->titlebar.draw_acc_16(this->win.get_net_wm_name());
-                FLUSH_X();
-            );
+                FLUSH_X();,
 
-            CONN_Win(win, PROPERTY_NOTIFY,
+            this->titlebar);
+
+            CONN(PROPERTY_NOTIFY,
                 if (__window != this->win) return;
                 this->titlebar.clear();
                 this->titlebar.draw_acc_16(this->win.get_net_wm_name_by_req());
-                FLUSH_X();
-            );
+                FLUSH_X();,
+
+            this->win);
         }
     
         void make_close_button()
@@ -7224,25 +7226,24 @@ class client {
             );
             CWC(close_button);
             close_button.make_then_set_png(USER_PATH_PREFIX("/close.png"), CLOSE_BUTTON_BITMAP);
+            
             CONN(L_MOUSE_BUTTON_EVENT,
-
-                if (!this->win.is_mapped())
-                {
-                    this->kill();
-                }
-    
+                if (!this->win.is_mapped()) this->kill();
                 this->win.kill();
             
-            , this->close_button);
+            ,this->close_button);
 
-            CONN_Win(close_button, ENTER_NOTIFY,
+            CONN(ENTER_NOTIFY,
                 if (__window != this->close_button) return;
                 this->close_button.change_border_color(WHITE);
-            );
-            CONN_Win(close_button, LEAVE_NOTIFY,
+            
+            ,this->close_button);
+
+            CONN(LEAVE_NOTIFY,
                 if (__window != this->close_button) return;
                 this->close_button.change_border_color(BLACK);
-            );
+
+            ,this->close_button);
         }
     
         void make_max_button()
@@ -7291,18 +7292,21 @@ class client {
             max_button.set_backround_png(USER_PATH_PREFIX("/max.png"));
 
             CONN(L_MOUSE_BUTTON_EVENT,
-                WS_emit(this->max_button, BUTTON_MAXWIN_PRESS);
-            , this->max_button);
+                WS_emit_root(BUTTON_MAXWIN_PRESS, this->max_button);
+            
+            ,this->max_button);
 
             CONN(ENTER_NOTIFY,
                 if (__window != this->max_button) return;
                 this->max_button.change_border_color(WHITE);
-            , this->max_button);
+
+            ,this->max_button);
 
             CONN(LEAVE_NOTIFY,
-                if (__window != this->max_button) return;
+                // if (__window != this->max_button) return;
                 this->max_button.change_border_color(BLACK);
-            , this->max_button);
+            
+            ,this->max_button);
         }
     
         void make_min_button()
