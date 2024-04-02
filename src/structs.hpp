@@ -13,7 +13,6 @@
 #include <functional>
 #include <limits>
 #include <type_traits>
-#include <valarray>
 #include <xcb/xcb_ewmh.h>
 #include <xcb/xproto.h>
 // #include <type_traits>
@@ -56,12 +55,10 @@ inline Type* AllocArr(size_t __num_elements, size_t alignment = alignof(Type))
     return static_cast<Type*>(ptr);
 }
 
-class window;
 template<typename T0, size_t Size>
 class __fixed_array_t__ {
     public:
     /* Variabels */
-        // T0 *data;
         T0 data[Size];
 
     /* Methods */
@@ -75,52 +72,55 @@ class __fixed_array_t__ {
             return this->data[index];
         }
 
-        __fixed_array_t__(T0 __data[Size])
-        : data(new T0[Size])
+        __fixed_array_t__<T0, Size>()
+        : data{} {}
+
+        __fixed_array_t__<T0, Size>(T0 __data[Size])
+        : data{}
         {
-            for (size_t i = 0; i < Size; ++i)
-            {
-                this->data[(i * sizeof(T0))] = &__data[(i * sizeof(T0))];
-            }
+
         }
 
-        __fixed_array_t__()
-        : data(new T0[Size])
-        {
-            for (size_t i = 0; i < Size; ++i)
-            {
-                this->data[i] = sizeof(T0);
-            }
-        }
-
-        template<typename Type = T0>
-        __fixed_array_t__(initializer_list<Type> init);
+        // __fixed_array_t__<T0, Size>(const T0 __data)
+        // : data{*__data}
+        // {}
 
 
-        __fixed_array_t__<T0>(indirect_array<window> init)
-        : data(new T0[Size]) {}
 
-        // void fill(T0 &__value)
+        // __fixed_array_t__(const T0 &__data_ptr)
+        // :  data{} {}
+
+
+        // __fixed_array_t__(const T0 &__data_ptr)
+        // :  data{__data_ptr} {}
+
+
+        // __fixed_array_t__(T0 &__default)
+        // :  data{}
         // {
         //     for (size_t i = 0; i < Size; ++i)
         //     {
-        //         this->data[i] = __value;
+        //         data[i] = __default[i];
         //     }
         // }
 
-        // void fill_arr(T0 *__value)
+        // __fixed_array_t__(const T0 &__data_ptr)
+        // :  data{__data_ptr} {}
+
+        // __fixed_array_t__(const T0 * const &__test)
+        // :  data{__test}
         // {
-        //     for (;data[*__value] < Size; __value++)
-        //     {
-        //         data[*__value] = &__value[*__value];
-        //     }
+        //     // // if (this->data != &__data)
+
+        //     // for (size_t i = 0; i < Size; ++i)
+        //     // {
+        //     //     this->data[i] = __test[i];
+        //     // }
         // }
 
 };
 template<typename T0, size_t n0 = 20>
 using FixedArray = __fixed_array_t__<T0, n0>;
-
-
 
 constexpr size_t size_t_MAX = numeric_limits<size_t>::max(); 
 
