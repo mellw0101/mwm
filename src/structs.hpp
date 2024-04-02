@@ -799,6 +799,8 @@ enum EV : uint8_t {
     MAP_REQ                           = XCB_MAP_REQUEST,
     MAP_NOTIFY                        = XCB_MAP_NOTIFY,
     KEY_PRESS                         = XCB_KEY_PRESS,
+    FOCUS_IN                          = XCB_FOCUS_IN,
+    FOCUS_OUT                         = XCB_FOCUS_OUT,
     TERM_KEY_PRESS                    = 44,
     QUIT_KEY_PRESS                    = 45,
     EWMH_MAXWIN                       = 46,
@@ -818,8 +820,9 @@ enum EV : uint8_t {
     MOVE_TO_NEXT_DESKTOP_WAPP         = 61,
     DEBUG_KEY_PRESS                   = 62,
     BUTTON_MAXWIN_PRESS               = 63,
-    FOCUS_IN                          = XCB_FOCUS_IN,
-    FOCUS_OUT                         = XCB_FOCUS_OUT
+    FOCUS_CLIENT                      = 64,
+    MOVE_CLIENT                       = 65,
+    MOVE_CLIENT_ALT                   = 66
 };
 
 typedef struct __client__data__t__{
@@ -835,6 +838,9 @@ class __c_func_arr__ {
         #define C_SIGNAL(__cb, __sig) \
             signal_manager->client_arr.add_func_to_sig([this](client *__c){__cb}, __sig)
 
+        #define C_EMIT(__c, __sig) \
+            signal_manager->client_arr.send_c_sig(__c, __sig)
+
     /* Variabels */
         static constexpr uint8_t ERROR_STATE = make_T_MAX<uint8_t>();
 
@@ -843,6 +849,8 @@ class __c_func_arr__ {
             switch (__sig) {
                 case BUTTON_MAXWIN_PRESS: return 0;
                 case KILL_SIGNAL:         return 1;
+                case FOCUS_CLIENT:        return 2;
+                case MOVE_CLIENT_ALT:     return 3;
 
                 default: return make_T_MAX<uint8_t>();
 
@@ -852,7 +860,7 @@ class __c_func_arr__ {
 
     public:
     /* Variabels */
-        FixedArray<function<void(client *c)>, 2> func;
+        FixedArray<function<void(client *c)>, 3> func;
 
     /* Methods   */
         void send_c_sig(client *__c, int __sig) {

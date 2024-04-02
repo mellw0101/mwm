@@ -7182,6 +7182,11 @@ class client {
 
             }, this->win);
 
+            CONN(L_MOUSE_BUTTON_EVENT__ALT, if (__window == this->win) {
+                C_EMIT(this, MOVE_CLIENT_ALT);
+
+            }, this->win);
+
             frame.set_event_mask(XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY);
             frame.map();
             CWC(win);
@@ -7243,8 +7248,6 @@ class client {
             close_button.make_then_set_png(USER_PATH_PREFIX("/close.png"), CLOSE_BUTTON_BITMAP);
             
             CONN(L_MOUSE_BUTTON_EVENT,
-                // if (!this->win.is_mapped()) this->kill();
-                // this->win.kill();
                 signal_manager->client_arr.send_c_sig(this, KILL_SIGNAL);
             
             ,this->close_button);
@@ -14398,6 +14401,18 @@ class Events {
 
             }}, KILL_SIGNAL);
 
+            C_SIGNAL(if (__c) {
+                
+            }, FOCUS_CLIENT);
+
+            C_SIGNAL(if (__c) {
+                __c->raise();
+                mv_client mv(__c, m_pointer->x(), m_pointer->y() + 20);
+                __c->focus();
+                wm->focused_client = __c;
+
+            }, MOVE_CLIENT_ALT);
+
             C_SIGNAL(if (__c) max_win(__c, max_win::BUTTON_MAXWIN);, BUTTON_MAXWIN_PRESS);
         }
 
@@ -14551,17 +14566,17 @@ class Events {
             {
                 if (e->event == c->win)
                 {
-                    switch (e->state)
-                    {
-                        case ALT:
-                        {
-                            c->raise();
-                            mv_client mv(c, e->event_x, e->event_y + 20);
-                            c->focus();
-                            wm->focused_client = c;
-                            return;
-                        }
-                    }
+                    // switch (e->state)
+                    // {
+                    //     case ALT:
+                    //     {
+                    //         c->raise();
+                    //         mv_client mv(c, e->event_x, e->event_y + 20);
+                    //         c->focus();
+                    //         wm->focused_client = c;
+                    //         return;
+                    //     }
+                    // }
 
                     c->raise();
                     c->focus();
