@@ -5046,13 +5046,13 @@ class window {
 
                 void x_y(const uint32_t & x, const uint32_t & y)
                 {
-                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, {x, y});
+                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, (uint32_t[2]){x, y});
                     update(x, y, _width, _height);
                 }
 
                 void width_height(const uint32_t & width, const uint32_t & height)
                 {
-                    config_window(XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, {width, height});
+                    config_window(XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, (uint32_t[2]){width, height});
                     update(_x, _y, width, height);
                 }
 
@@ -5106,7 +5106,7 @@ class window {
 
                 void x_y_height(const uint32_t & x, const uint32_t & y, const uint32_t & height)
                 {
-                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT, {x, y, height});
+                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT, (uint32_t[3]){x, y, height});
                     update(x, y, _width, height);
                 }
 
@@ -5811,6 +5811,24 @@ class window {
                     _window,
                     mask,
                     values.data()
+                );
+                FLUSH_XWin();
+                CHECK_VOID_COOKIE();
+            }
+
+            void config_window(uint32_t mask, const FixedArray<uint32_t, 4> &values)
+            {
+                if (values[0] == 0)
+                {
+                    loutEWin << "values vector is empty" << loutEND;
+                    return;
+                }
+
+                VOID_COOKIE = xcb_configure_window(
+                    conn,
+                    _window,
+                    mask,
+                    values.data
                 );
                 FLUSH_XWin();
                 CHECK_VOID_COOKIE();
@@ -6665,7 +6683,6 @@ class client {
             void x_width(const uint32_t &x, const uint32_t &width)
             {
                 win.width((width - (BORDER_SIZE * 2)));
-                xcb_flush(conn);
                 frame.x_width(x, (width));
                 titlebar.width((width - (BORDER_SIZE * 2) - (BUTTON_SIZE * 6)));
                 close_button.x((width - BUTTON_SIZE - BORDER_SIZE));
