@@ -969,6 +969,9 @@ class __signal_manager__ {
         #define CONN_Win(__window, __event, __callback) \
             signal_manager->_window_signals.conect(this->__window, __event, W_callback {__callback})
 
+        #define CONN_Win2(window, __event, __ref, __callback) \
+            signal_manager->_window_signals.conect(this->window, __event, [ref](uint32_t __window)  __callback)
+
         #define CONNECT_window_client(__window, __c) signal_manager->_window_client_map.connect(__window, __c)
         #define CWC(__window) CONNECT_window_client(this->__window, this)
 
@@ -6401,7 +6404,8 @@ class client {
             }
 
             // client_border_decor() { create_arr(); }
-            DynamicArray<window> border;
+            // DynamicArray<window> border;
+            FixedArray<window, 6> border;
         };
 
         struct __atoms__ {
@@ -6906,28 +6910,23 @@ class client {
             icon.raise();
 
             CONN_Win(titlebar, EXPOSE,
-
                 if (__window != this->titlebar) return;
                 this->titlebar.clear();
                 this->titlebar.draw_acc_16(this->win.get_net_wm_name());
                 FLUSH_X();
-
             );
 
             CONN_Win(win, PROPERTY_NOTIFY,
-            
                 if (__window != this->win) return;
                 this->titlebar.clear();
                 this->titlebar.draw_acc_16(this->win.get_net_wm_name_by_req());
                 FLUSH_X();
-
             );
         }
     
         void make_close_button()
         {
             this->close_button.create_window(
-
                 frame,
                 (width - BUTTON_SIZE + BORDER_SIZE),
                 BORDER_SIZE,
@@ -6938,7 +6937,6 @@ class client {
                 MAP,
                 (int[]){ALL, 1, BLACK},
                 CURSOR::hand2
-
             );
             CWC(close_button);
             close_button.make_then_set_png(USER_PATH_PREFIX("/close.png"), CLOSE_BUTTON_BITMAP);
@@ -6955,16 +6953,12 @@ class client {
             
             );
             CONN_Win(close_button, ENTER_NOTIFY,
-
                 if (__window != this->close_button) return;
                 this->close_button.change_border_color(WHITE);
-            
             );
             CONN_Win(close_button, LEAVE_NOTIFY,
-
                 if (__window != this->close_button) return;
                 this->close_button.change_border_color(BLACK);
-
             );
         }
     
@@ -7185,7 +7179,6 @@ class client {
         void set_icon_png()
         {
             icon.create_window(
-
                 frame,
                 BORDER_SIZE,
                 BORDER_SIZE,
@@ -7194,7 +7187,6 @@ class client {
                 BLACK,
                 NONE,
                 MAP
-
             );
             CWC(icon);
 
@@ -8852,11 +8844,10 @@ class __status_bar__ {
                 MAP
             );
 
-            WS_conn(this->_w[_TIME_DATE], EXPOSE, W_callback
-            {
+            CONN_Win(_w[_TIME_DATE], EXPOSE,
                 if (__window != this->_w[_TIME_DATE]) return;
                 this->_w[_TIME_DATE].draw_acc(this->get_time_and_date__());
-            });
+            );
 
             _w[_WIFI].create_window(
                 _w[_BAR],
@@ -9096,7 +9087,6 @@ class __status_bar__ {
                 };
                 thread(__time__).detach();
             }
-
         }
 
     public:
