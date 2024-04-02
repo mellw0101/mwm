@@ -5076,7 +5076,7 @@ class window {
 
                 void x_width(const uint32_t & x, const uint32_t & width)
                 {
-                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_WIDTH, {x, width});
+                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_WIDTH, (uint32_t[2]){x, width});
                     update(x, _y, width, _height);
                 }
 
@@ -5100,13 +5100,13 @@ class window {
 
                 void x_y_width(const uint32_t & x, const uint32_t & y, const uint32_t & width)
                 {
-                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH, {x, y, width});
+                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH, (uint32_t[3]){x, y, width});
                     update(x, y, width, _height);
                 }
 
                 void x_y_height(const uint32_t & x, const uint32_t & y, const uint32_t & height)
                 {
-                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT, {x, y, height});
+                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT, (uint32_t[3]){x, y, height});
                     update(x, y, _width, height);
                 }
 
@@ -5796,6 +5796,13 @@ class window {
                         static_cast<const uint32_t &>(value)
                     }
                 );
+            }
+
+            void config_window(const uint16_t &__mask, const void *__value) 
+            {
+                VOID_COOKIE = xcb_configure_window(conn, _window, __mask, __value);
+                FLUSH_XWin();
+                CHECK_VOID_COOKIE();
             }
             
             void config_window(uint32_t mask, const vector<uint32_t> & values)
@@ -6666,7 +6673,7 @@ class client {
             {
                 win.width((width - (BORDER_SIZE * 2)));
                 frame.x_width(x, (width));
-                titlebar.width((width - (BORDER_SIZE * 2) - (BUTTON_SIZE * 6)));
+                titlebar.width((width - (BORDER_SIZE * 2)));
                 close_button.x((width - BUTTON_SIZE - BORDER_SIZE));
                 max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
                 min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
