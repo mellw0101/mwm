@@ -7069,6 +7069,7 @@ class client {
             );
             CWC(border[left]);
             border[left].grab_button({ { L_MOUSE_BUTTON, NULL } });
+            FLUSH_X();
 
             border[right].create_window(
                 frame,
@@ -7084,6 +7085,7 @@ class client {
             );
             CWC(border[right]);
             border[right].grab_button({ { L_MOUSE_BUTTON, NULL } });
+            FLUSH_X();
 
             border[top].create_window(
                 frame,
@@ -7099,6 +7101,7 @@ class client {
             );
             CWC(border[top]);
             border[top].grab_button({ { L_MOUSE_BUTTON, NULL } });
+            FLUSH_X();
 
             border[bottom].create_window(
                 frame,
@@ -7114,6 +7117,7 @@ class client {
             );
             CWC(border[bottom]);
             border[bottom].grab_button({ { L_MOUSE_BUTTON, NULL } });
+            FLUSH_X();
 
             border[top_left].create_window(
                 frame,
@@ -7129,6 +7133,7 @@ class client {
             );
             CWC(border[top_left]);
             border[top_left].grab_button({ { L_MOUSE_BUTTON, NULL } });
+            FLUSH_X();
 
             border[top_right].create_window(
                 frame,
@@ -7144,6 +7149,7 @@ class client {
             );
             CWC(border[top_right]);
             border[top_right].grab_button({ { L_MOUSE_BUTTON, NULL } });
+            FLUSH_X();
 
             border[bottom_left].create_window(
                 frame,
@@ -7159,6 +7165,7 @@ class client {
             );
             CWC(border[bottom_left]);
             border[bottom_left].grab_button({ { L_MOUSE_BUTTON, NULL } });
+            FLUSH_X();
 
             this->border[bottom_right].create_window(
                 this->frame,
@@ -7174,6 +7181,7 @@ class client {
             );
             CWC(border[bottom_right]);
             border[bottom_right].grab_button({ { L_MOUSE_BUTTON, NULL } });
+            FLUSH_X();
         }
 
         void set_icon_png()
