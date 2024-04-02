@@ -517,37 +517,36 @@ namespace {
             umap<uint32_t, umap<int, function<void(uint32_t)>>> _data;
 
             template<typename Callback>
-            void conect(uint32_t __w, uint8_t __sig, Callback &&__cb)
-            {
+            void conect(uint32_t __w, uint8_t __sig, Callback &&__cb) {
                 _data[__w][__sig] = std::forward<Callback>(__cb);
+
             }
 
-            void emit(uint32_t __window, int __signal_id)
-            {
-                auto it = _data[__window].find(__signal_id);
-                if (it != _data[__window].end())
-                {
-                    it->second(__window);
+            void emit(uint32_t __w, uint8_t __sig) {
+                auto it = _data[__w].find(__sig);
+                if (it != _data[__w].end()) {
+                    it->second(__w);
                     FLUSH_X();
+
                 }
+
             }
 
-            void emit(uint32_t __window, int __signal_id, uint32_t __w2)
-            {
-                auto it = _data[__window].find(__signal_id);
-                if (it != _data[__window].end())
-                {
+            void emit(uint32_t __w, uint8_t __sig, uint32_t __w2) {
+                auto it = _data[__w].find(__sig);
+                if (it != _data[__w].end()) {
                     it->second(__w2);
                     FLUSH_X();
+
                 }
+
             }
 
-            void remove(uint32_t __window)
-            {
-                auto it = _data.find(__window);
+            void remove(uint32_t __w) {
+                auto it = _data.find(__w);
                 if (it == _data.end()) return;
-
                 _data.erase(it);
+
             }
     };
 
@@ -3012,37 +3011,26 @@ class __event_handler__ {
 
         mutex event_mutex;
 
-        template<uint8_t __event_id> static void handle_event(uint32_t __window) { WS_emit(__window, __event_id); }
-        // template<uint8_t __event_id> void handle_event(uint32_t __window) { WS_emit(__window, __event_id); }
-
-        template<> void handle_event<MAP_REQ>(uint32_t __window) { WS_emit_Win(screen->root, MAP_REQ, __window); }
-        template<> void handle_event<MAP_NOTIFY>(uint32_t __window) { WS_emit_Win(screen->root, MAP_NOTIFY, __window); }
-        template<> void handle_event<EWMH_MAXWIN>(uint32_t __window) { C_EMIT(signal_manager->_window_client_map.retrive(__window), EWMH_MAXWIN); }
-        template<> void handle_event<TERM_KEY_PRESS>(uint32_t) { WS_emit_Win(screen->root, TERM_KEY_PRESS, 0); }
-        template<> void handle_event<QUIT_KEY_PRESS>(uint32_t __window) { WS_emit_Win(screen->root, QUIT_KEY_PRESS, 0); }
-        
-        template<> void handle_event<MOVE_TO_DESKTOP_1>(uint32_t __window) { WS_emit(screen->root, MOVE_TO_DESKTOP_1); }
-        template<> void handle_event<MOVE_TO_DESKTOP_2>(uint32_t __window) { WS_emit(screen->root, MOVE_TO_DESKTOP_2); }
-        template<> void handle_event<MOVE_TO_DESKTOP_3>(uint32_t __window) { WS_emit(screen->root, MOVE_TO_DESKTOP_3); }
-        template<> void handle_event<MOVE_TO_DESKTOP_4>(uint32_t __window) { WS_emit(screen->root, MOVE_TO_DESKTOP_4); }
-        template<> void handle_event<MOVE_TO_DESKTOP_5>(uint32_t __window) { WS_emit(screen->root, MOVE_TO_DESKTOP_5); }
-
-        template<> void handle_event<MOVE_TO_NEXT_DESKTOP>(uint32_t __window) { WS_emit(screen->root, MOVE_TO_NEXT_DESKTOP); }
-        template<> void handle_event<MOVE_TO_PREV_DESKTOP>(uint32_t __window) { WS_emit(screen->root, MOVE_TO_PREV_DESKTOP); }
-        template<> void handle_event<MOVE_TO_NEXT_DESKTOP_WAPP>(uint32_t __window) { WS_emit_root(MOVE_TO_NEXT_DESKTOP_WAPP, __window); }
-        template<> void handle_event<MOVE_TO_PREV_DESKTOP_WAPP>(uint32_t __window) { WS_emit_root(MOVE_TO_PREV_DESKTOP_WAPP, __window); }
-
-        template<> void handle_event<MOTION_NOTIFY>(uint32_t __window) { C_EMIT(C_RETRIVE(__window), MOTION_NOTIFY); }
-
-        // template<> void handle_event<TILE_RIGHT>(uint32_t __window) { WS_emit_Win(screen->root, TILE_RIGHT, __window); }
-        // template<> void handle_event<TILE_LEFT> (uint32_t __window) { WS_emit_Win(screen->root, TILE_LEFT,  __window); }
-        // template<> void handle_event<TILE_UP>   (uint32_t __window) { WS_emit_Win(screen->root, TILE_UP,    __window); }
-        // template<> void handle_event<TILE_DOWN> (uint32_t __window) { WS_emit_Win(screen->root, TILE_DOWN,  __window); }
-
-        template<> void handle_event<TILE_RIGHT>(uint32_t __window) { C_EMIT(C_RETRIVE(__window), TILE_RIGHT); }
-        template<> void handle_event<TILE_LEFT> (uint32_t __window) { C_EMIT(C_RETRIVE(__window), TILE_LEFT ); }
-        template<> void handle_event<TILE_UP>   (uint32_t __window) { C_EMIT(C_RETRIVE(__window), TILE_UP   ); }
-        template<> void handle_event<TILE_DOWN> (uint32_t __window) { C_EMIT(C_RETRIVE(__window), TILE_DOWN ); }
+        template<uint8_t __sig> static void handle_event(uint32_t __w) { WS_emit(__w, __sig); }
+        template<> void handle_event<MAP_REQ>                  (uint32_t __window) { WS_emit_Win (screen->root                , MAP_REQ, __window);    }
+        template<> void handle_event<MAP_NOTIFY>               (uint32_t __window) { WS_emit_Win (screen->root                , MAP_NOTIFY, __window); }
+        template<> void handle_event<EWMH_MAXWIN>              (uint32_t __window) { C_EMIT      (C_RETRIVE(__window)  , EWMH_MAXWIN);             }
+        template<> void handle_event<TERM_KEY_PRESS>           (uint32_t __window) { WS_emit_Win (screen->root                , TERM_KEY_PRESS, 0);    }
+        template<> void handle_event<QUIT_KEY_PRESS>           (uint32_t __window) { WS_emit_Win (screen->root                , QUIT_KEY_PRESS, 0);    }
+        template<> void handle_event<MOVE_TO_DESKTOP_1>        (uint32_t __window) { WS_emit     (screen->root                , MOVE_TO_DESKTOP_1);        }
+        template<> void handle_event<MOVE_TO_DESKTOP_2>        (uint32_t __window) { WS_emit     (screen->root                , MOVE_TO_DESKTOP_2);        }
+        template<> void handle_event<MOVE_TO_DESKTOP_3>        (uint32_t __window) { WS_emit     (screen->root                , MOVE_TO_DESKTOP_3);        }
+        template<> void handle_event<MOVE_TO_DESKTOP_4>        (uint32_t __window) { WS_emit     (screen->root                , MOVE_TO_DESKTOP_4);        }
+        template<> void handle_event<MOVE_TO_DESKTOP_5>        (uint32_t __window) { WS_emit     (screen->root                , MOVE_TO_DESKTOP_5);        }
+        template<> void handle_event<MOVE_TO_NEXT_DESKTOP>     (uint32_t __window) { WS_emit     (screen->root                , MOVE_TO_NEXT_DESKTOP);     }
+        template<> void handle_event<MOVE_TO_PREV_DESKTOP>     (uint32_t __window) { WS_emit     (screen->root                , MOVE_TO_PREV_DESKTOP);     }
+        template<> void handle_event<MOVE_TO_NEXT_DESKTOP_WAPP>(uint32_t __window) { WS_emit_root(MOVE_TO_NEXT_DESKTOP_WAPP , __window);                  }
+        template<> void handle_event<MOVE_TO_PREV_DESKTOP_WAPP>(uint32_t __window) { WS_emit_root(MOVE_TO_PREV_DESKTOP_WAPP , __window);                  }
+        template<> void handle_event<MOTION_NOTIFY>            (uint32_t __window) { C_EMIT      (C_RETRIVE(__window) , MOTION_NOTIFY);            }
+        template<> void handle_event<TILE_RIGHT>               (uint32_t __window) { C_EMIT      (C_RETRIVE(__window) , TILE_RIGHT);               }
+        template<> void handle_event<TILE_LEFT>                (uint32_t __window) { C_EMIT      (C_RETRIVE(__window) , TILE_LEFT );               }
+        template<> void handle_event<TILE_UP>                  (uint32_t __window) { C_EMIT      (C_RETRIVE(__window) , TILE_UP   );               }
+        template<> void handle_event<TILE_DOWN>                (uint32_t __window) { C_EMIT      (C_RETRIVE(__window) , TILE_DOWN );               }
 
         template<> void handle_event<CYCLE_FOCUS_KEY_PRESS> (uint32_t __window) { WS_emit_root(CYCLE_FOCUS_KEY_PRESS, __window); }
         template<> void handle_event<DESTROY_NOTIFY> (uint32_t __window) { WS_emit_root(DESTROY_NOTIFY, __window); }
