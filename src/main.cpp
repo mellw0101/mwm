@@ -7187,6 +7187,11 @@ class client {
 
             }, this->win);
 
+            CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->win) {
+                C_EMIT(this, FOCUS_CLIENT);
+
+            }, this->win);
+
             frame.set_event_mask(XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY);
             frame.map();
             CWC(win);
@@ -12752,22 +12757,23 @@ class mv_client {
                 
                     case XCB_BUTTON_RELEASE:
                     {
+                        RE_CAST_EV(xcb_button_release_event_t);
                         shouldContinue = false;
                         c->update();
 
                         break;
                     }
 
-                    case XCB_EXPOSE:
-                    {
-                        RE_CAST_EV(xcb_expose_event_t);
-                        WS_emit(e->window, EXPOSE);
+                    // case XCB_EXPOSE:
+                    // {
+                    //     // RE_CAST_EV(xcb_expose_event_t);
+                    //     // WS_emit(e->window, EXPOSE);
 
-                        break;
-                    }
+                    //     break;
+                    // }
                 }
-
                 free(ev);
+
             }
         }
 
@@ -14403,7 +14409,9 @@ class Events {
             }}, KILL_SIGNAL);
 
             C_SIGNAL(if (__c) {
-
+                __c->raise();
+                __c->focus();
+                wm->focused_client = __c;
 
             }, FOCUS_CLIENT);
 
@@ -14580,9 +14588,9 @@ class Events {
                     //     }
                     // }
 
-                    c->raise();
-                    c->focus();
-                    wm->focused_client = c;
+                    // c->raise();
+                    // c->focus();
+                    // wm->focused_client = c;
                     return;
                 }
                 
