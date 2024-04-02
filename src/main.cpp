@@ -7302,6 +7302,7 @@ class client {
             string s = USER_PATH_PREFIX("/max.png");
             bitmap.exportToPng(s.c_str());
 
+
             max_button.set_backround_png(USER_PATH_PREFIX("/max.png"));
 
             CONN(L_MOUSE_BUTTON_EVENT,
