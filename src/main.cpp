@@ -9079,6 +9079,7 @@ class __status_bar__ {
                 };
                 thread(__time__).detach();
             }
+
         }
 
     public:

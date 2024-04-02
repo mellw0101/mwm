@@ -98,10 +98,7 @@ class __fixed_array_t__ {
 
 
         __fixed_array_t__<T0>(indirect_array<window> init)
-        : data(new T0[Size])
-        {
-            fill(new T0);
-        }
+        : data(new T0[Size]) {}
 
         // void fill(T0 &__value)
         // {
