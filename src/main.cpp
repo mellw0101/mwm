@@ -2854,6 +2854,43 @@ class __key_codes__ {
             }
         }
 
+        constexpr uint8_t char_to_keycode__(int8_t c)
+        {
+            switch (c)
+            {
+                case 'a': return this->a;
+                case 'b': return this->b;
+                case 'c': return this->c;
+                case 'd': return this->d;
+                case 'e': return this->e;
+                case 'f': return this->f;
+                case 'g': return this->g;
+                case 'h': return this->h;
+                case 'i': return this->i;
+                case 'j': return this->j;
+                case 'k': return this->k;
+                case 'l': return this->l;
+                case 'm': return this->m;
+                case 'n': return this->n;
+                case 'o': return this->o;
+                case 'p': return this->p;
+                case 'q': return this->q;
+                case 'r': return this->r;
+                case 's': return this->s;
+                case 't': return this->t;
+                case 'u': return this->u;
+                case 'v': return this->v;
+                case 'w': return this->w;
+                case 'x': return this->x;
+                case 'y': return this->y;
+                case 'z': return this->z;
+                case '-': return this->minus;
+                case ' ': return this->space_bar;
+            }
+
+            return (uint8_t)0;
+        }
+
     // variabels.
         xcb_keycode_t
             a{}, b{}, c{}, d{}, e{}, f{}, g{}, h{}, i{}, j{}, k{}, l{}, m{},
@@ -2967,6 +3004,43 @@ class __event_handler__ {
         #define HANDLE_WINDOW(__type) thread(handle_event<__type>, e->window).detach()
         DynamicArray<uint32_t *> _window_arr;
 
+        constexpr uint8_t char_to_keycode__(int8_t c) const
+        {
+            switch (c)
+            {
+                case 'a': return this->key_codes.a;
+                case 'b': return this->key_codes.b;
+                case 'c': return this->key_codes.c;
+                case 'd': return this->key_codes.d;
+                case 'e': return this->key_codes.e;
+                case 'f': return this->key_codes.f;
+                case 'g': return this->key_codes.g;
+                case 'h': return this->key_codes.h;
+                case 'i': return this->key_codes.i;
+                case 'j': return this->key_codes.j;
+                case 'k': return this->key_codes.k;
+                case 'l': return this->key_codes.l;
+                case 'm': return this->key_codes.m;
+                case 'n': return this->key_codes.n;
+                case 'o': return this->key_codes.o;
+                case 'p': return this->key_codes.p;
+                case 'q': return this->key_codes.q;
+                case 'r': return this->key_codes.r;
+                case 's': return this->key_codes.s;
+                case 't': return this->key_codes.t;
+                case 'u': return this->key_codes.u;
+                case 'v': return this->key_codes.v;
+                case 'w': return this->key_codes.w;
+                case 'x': return this->key_codes.x;
+                case 'y': return this->key_codes.y;
+                case 'z': return this->key_codes.z;
+                case '-': return this->key_codes.minus;
+                case ' ': return this->key_codes.space_bar;
+            }
+
+            return (uint8_t)0;
+        }
+
         size_t find_window(uint32_t __window)
         {
             for (size_t i = 0; i < _window_arr.getSize(); ++i)
@@ -2998,7 +3072,7 @@ class __event_handler__ {
         }
 
         // Function that creates a separate thread for each event type
-        void processEvent(xcb_generic_event_t* ev)
+        constexpr void processEvent(xcb_generic_event_t* ev)
         {
             uint8_t responseType = ev->response_type & ~0x80;
 
@@ -3007,8 +3081,24 @@ class __event_handler__ {
                 case XCB_KEY_PRESS:
                 {
                     RE_CAST_EV(xcb_key_press_event_t);
-                    if (e->detail == key_codes.t && e->state & CTRL | ALT ) HANDLE_EVENT(TERM_KEY_PRESS);
-                    if (e->detail == key_codes.q && e->state & SHIFT | ALT) HANDLE_EVENT(QUIT_KEY_PRESS);
+                    switch (e->state)
+                    {
+                        case CTRL | ALT:
+                        {
+                            if (e->detail == key_codes.t) HANDLE_EVENT(TERM_KEY_PRESS);
+
+                            break;
+                        }
+
+                        case SHIFT | ALT:
+                        {
+                            if (e->detail == key_codes.q) HANDLE_EVENT(QUIT_KEY_PRESS);
+
+                            break;
+                        }
+                    }
+
+                    break;
                 }
 
                 case XCB_BUTTON_PRESS:
@@ -14132,18 +14222,6 @@ class Events {
         void key_press_handler(const xcb_generic_event_t *&ev)
         {
             RE_CAST_EV(xcb_key_press_event_t);
-            // if (e->detail == wm->key_codes.t && e->state & CTRL | ALT)
-            // {
-            //     WS_emit(screen->root, TERM_KEY_PRESS);
-            //     return;
-            // }
-            
-            // if (e->detail == wm->key_codes.q && e->state & SHIFT | ALT)
-            // {
-            //     WS_emit(screen->root, QUIT_KEY_PRESS);
-            //     return;
-            // }
-            
             if (e->detail == wm->key_codes.f11)
             {
                 client *c = signal_manager->_window_client_map.retrive(e->event);
