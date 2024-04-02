@@ -7310,13 +7310,11 @@ class client {
             ,this->max_button);
 
             CONN(ENTER_NOTIFY,
-                if (__window != this->max_button) return;
                 this->max_button.change_border_color(WHITE);
 
             ,this->max_button);
 
             CONN(LEAVE_NOTIFY,
-                // if (__window != this->max_button) return;
                 this->max_button.change_border_color(BLACK);
             
             ,this->max_button);
