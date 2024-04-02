@@ -56,6 +56,7 @@ inline Type* AllocArr(size_t __num_elements, size_t alignment = alignof(Type))
     return static_cast<Type*>(ptr);
 }
 
+class window;
 template<typename T0, size_t Size = 20>
 class __fixed_array_t__ {
     public:
@@ -64,22 +65,6 @@ class __fixed_array_t__ {
         T0 data[Size];
 
     /* Methods */
-        void fill(const T0& value)
-        {
-            for (size_t i = 0; i < Size; ++i)
-            {
-                data[i] = value;
-            }
-        }
-
-        void fill(const T0 (&__value)[Size])
-        {
-            for (size_t i = 0; i < Size; ++i)
-            {
-                this->data[i] = __value[i];
-            }
-        }
-
         T0 &operator[](size_t index)
         {
             return data[index];
@@ -90,24 +75,49 @@ class __fixed_array_t__ {
             return this->data[index];
         }
 
-        __fixed_array_t__(const T0 (&__data)[Size])
+        __fixed_array_t__(T0 __data[Size])
         : data(new T0[Size])
         {
-            fill(T0{});
-            fill(__data);
+            for (size_t i = 0; i < Size; ++i)
+            {
+                *this->data[(i * sizeof(T0))] = &__data[(i * sizeof(T0))];
+            }
+        }
+
+        __fixed_array_t__()
+        : data(new T0[Size])
+        {
+            for (size_t i = 0; i < Size; ++i)
+            {
+                this->data[i] = sizeof(T0);
+            }
         }
 
         template<typename Type = T0>
         __fixed_array_t__(initializer_list<Type> init);
 
 
-        __fixed_array_t__<T0>(indirect_array<T0> init)
+        __fixed_array_t__<T0>(indirect_array<window> init)
         : data(new T0[Size])
         {
             fill(new T0);
         }
 
-        __fixed_array_t__() : data(new T0[Size]) {}
+        // void fill(T0 &__value)
+        // {
+        //     for (size_t i = 0; i < Size; ++i)
+        //     {
+        //         this->data[i] = __value;
+        //     }
+        // }
+
+        // void fill_arr(T0 *__value)
+        // {
+        //     for (;data[*__value] < Size; __value++)
+        //     {
+        //         data[*__value] = &__value[*__value];
+        //     }
+        // }
 
 };
 template<typename T0, size_t n0 = 20>
