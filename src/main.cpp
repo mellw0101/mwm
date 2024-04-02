@@ -3000,12 +3000,23 @@ class __event_handler__ {
         mutex event_mutex;
 
         template<uint8_t __event_id> static void handle_event(uint32_t __window) { WS_emit(__window, __event_id); }
+        // template<uint8_t __event_id> void handle_event(uint32_t __window) { WS_emit(__window, __event_id); }
+        
+        template<uint8_t __ev_id>
+        void hand_ev(uint32_t __w, uint32_t __window) { WS_emit_Win(__w, __ev_id, __window); }
+
+        #define HAND_EV(__w, __sig, __data) \
+            thread(handle_event<__sig>, __w, __data).detach()
+
         template<> void handle_event<MAP_REQ>(uint32_t __window) { WS_emit_Win(screen->root, MAP_REQ, __window); }
         template<> void handle_event<EWMH_MAXWIN>(uint32_t __window) { WS_emit_Win(screen->root, EWMH_MAXWIN, __window); }
-        template<> void handle_event<TERM_KEY_PRESS>(uint32_t __window) { WS_emit_Win(screen->root, TERM_KEY_PRESS, 0); }
+        template<> void handle_event<TERM_KEY_PRESS>(uint32_t) { WS_emit_Win(screen->root, TERM_KEY_PRESS, 0); }
         template<> void handle_event<QUIT_KEY_PRESS>(uint32_t __window) { WS_emit_Win(screen->root, QUIT_KEY_PRESS, 0); }
         #define HANDLE_EVENT(__type ) thread(handle_event<__type>, e->event ).detach()
         #define HANDLE_WINDOW(__type) thread(handle_event<__type>, e->window).detach()
+        #define HANDLE_EV(__type, __connWin, __inputWin) \
+            thread(handle_event<__type>, __connWin, __inputWin).detach()
+
         DynamicArray<uint32_t *> _window_arr;
 
         constexpr uint8_t char_to_keycode__(int8_t c) const
@@ -3099,7 +3110,18 @@ class __event_handler__ {
 
                             break;
                         }
+                        case ALT:
+                        {
+                            if (e->detail == key_codes.n_1) HAND_EV(screen->root, MOVE_TO_DESKTOP, 1);
+                            if (e->detail == key_codes.n_2) HAND_EV(screen->root, MOVE_TO_DESKTOP, 2);
+                            if (e->detail == key_codes.n_3) HAND_EV(screen->root, MOVE_TO_DESKTOP, 3);
+                            if (e->detail == key_codes.n_4) HAND_EV(screen->root, MOVE_TO_DESKTOP, 4);
+                            if (e->detail == key_codes.n_5) HAND_EV(screen->root, MOVE_TO_DESKTOP, 5);
+
+                            break;
+                        }
                     }
+
                     if (e->detail == key_codes.f11) HANDLE_EVENT(EWMH_MAXWIN);
 
                     break;
@@ -14227,6 +14249,10 @@ class Events {
                 if (!c) return;
                 max_win(c, max_win::EWMH_MAXWIN);
             });
+
+            CONN_root(MOVE_TO_DESKTOP, W_callback -> void {
+                change_desktop::teleport_to(__window);
+            });
         }
 
     private:
@@ -14241,65 +14267,65 @@ class Events {
             //     return;
             // }
             
-            if (e->detail == wm->key_codes.n_1)
-            {
-                switch (e->state)
-                {
-                    case ALT:
-                    {
-                        change_desktop::teleport_to(1);
-                        return;
-                    }
-                }
-            }
+            // if (e->detail == wm->key_codes.n_1)
+            // {
+            //     switch (e->state)
+            //     {
+            //         case ALT:
+            //         {
+            //             change_desktop::teleport_to(1);
+            //             return;
+            //         }
+            //     }
+            // }
             
-            if (e->detail == wm->key_codes.n_2)
-            {
-                switch (e->state)
-                {
-                    case ALT:
-                    {
-                        change_desktop::teleport_to(2);
-                        return;
-                    }
-                }
-            }
+            // if (e->detail == wm->key_codes.n_2)
+            // {
+            //     switch (e->state)
+            //     {
+            //         case ALT:
+            //         {
+            //             change_desktop::teleport_to(2);
+            //             return;
+            //         }
+            //     }
+            // }
             
-            if (e->detail == wm->key_codes.n_3)
-            {
-                switch (e->state)
-                {
-                    case ALT:
-                    {
-                        change_desktop::teleport_to(3);
-                        break;
-                    }
-                }
-            }
+            // if (e->detail == wm->key_codes.n_3)
+            // {
+            //     switch (e->state)
+            //     {
+            //         case ALT:
+            //         {
+            //             change_desktop::teleport_to(3);
+            //             break;
+            //         }
+            //     }
+            // }
             
-            if (e->detail == wm->key_codes.n_4)
-            {
-                switch (e->state)
-                {
-                    case ALT:
-                    {
-                        change_desktop::teleport_to(4);
-                        break;
-                    }
-                }
-            }
+            // if (e->detail == wm->key_codes.n_4)
+            // {
+            //     switch (e->state)
+            //     {
+            //         case ALT:
+            //         {
+            //             change_desktop::teleport_to(4);
+            //             break;
+            //         }
+            //     }
+            // }
             
-            if (e->detail == wm->key_codes.n_5)
-            {
-                switch (e->state)
-                {
-                    case ALT:
-                    {
-                        change_desktop::teleport_to(5);
-                        break;
-                    }
-                }
-            }
+            // if (e->detail == wm->key_codes.n_5)
+            // {
+            //     switch (e->state)
+            //     {
+            //         case ALT:
+            //         {
+            //             change_desktop::teleport_to(5);
+            //             break;
+            //         }
+            //     }
+            // }
             
             if (e->detail == wm->key_codes.r_arrow)
             {

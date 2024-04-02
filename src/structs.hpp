@@ -781,7 +781,8 @@ enum EV : uint8_t {
     KEY_PRESS                         = XCB_KEY_PRESS,
     TERM_KEY_PRESS                    = 44,
     QUIT_KEY_PRESS                    = 45,
-    EWMH_MAXWIN                       = 46
+    EWMH_MAXWIN                       = 46,
+    MOVE_TO_DESKTOP                   = 47
 };
 
 typedef enum {
