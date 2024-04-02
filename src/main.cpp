@@ -3178,37 +3178,28 @@ class __event_handler__ {
 
                     break;
                 }
-                case XCB_BUTTON_PRESS:
-                {
+                case XCB_BUTTON_PRESS: {
                     RE_CAST_EV(xcb_button_press_event_t);
-                    if (e->detail == L_MOUSE_BUTTON)
-                    {
-                        if (e->state & ALT)
-                        {
+                    if (e->detail == L_MOUSE_BUTTON) {
+                        if (e->state & ALT) {
                             HANDLE_EVENT(L_MOUSE_BUTTON_EVENT__ALT);
-                            return;
-                        }
-                        else 
-                        {
-                            HANDLE_EVENT(L_MOUSE_BUTTON_EVENT);
-                            return;
-                        }
-                    }
 
-                    if (e->detail == R_MOUSE_BUTTON)
-                    {
+                        } else {
+                            HANDLE_EVENT(L_MOUSE_BUTTON_EVENT);
+
+                        }
+
+                    } else if (e->detail == R_MOUSE_BUTTON) {
                         HANDLE_EVENT(R_MOUSE_BUTTON_EVENT);
-                        return;
-                    }
-                
-                    break;
+
+                    } break;
+
                 }
-                case XCB_EXPOSE:
-                {
+                case XCB_EXPOSE:       {
                     RE_CAST_EV(xcb_expose_event_t);
                     HANDLE_WINDOW(EXPOSE);
-
                     break;
+
                 }
                 case XCB_PROPERTY_NOTIFY:
                 {
@@ -7180,6 +7171,7 @@ class client {
                 (width + (BORDER_SIZE * 2)),
                 (height + TITLE_BAR_HEIGHT + (BORDER_SIZE * 2)),
                 DARK_GREY
+
             );
             win.reparent(frame, BORDER_SIZE, (TITLE_BAR_HEIGHT + BORDER_SIZE));
             frame.set_event_mask(XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY);
@@ -7190,19 +7182,20 @@ class client {
     
         void make_titlebar()
         {
-            this->titlebar.create_window(
-                this->frame,
+            titlebar.create_window(
+                frame,
                 BORDER_SIZE,
                 BORDER_SIZE,
-                (this->width - (BORDER_SIZE * 2)),
+                (width - (BORDER_SIZE * 2)),
                 TITLE_BAR_HEIGHT,
                 BLACK,
                 XCB_EVENT_MASK_EXPOSURE,
                 MAP
+            
             );
             CWC(titlebar);
 
-            this->titlebar.grab_button({ { L_MOUSE_BUTTON, NULL } });
+            titlebar.grab_button({ { L_MOUSE_BUTTON, NULL } });
             draw_title(TITLE_REQ_DRAW);
             icon.raise();
 
@@ -7236,13 +7229,15 @@ class client {
                 MAP,
                 (int[]){ALL, 1, BLACK},
                 CURSOR::hand2
+
             );
             CWC(close_button);
             close_button.make_then_set_png(USER_PATH_PREFIX("/close.png"), CLOSE_BUTTON_BITMAP);
             
             CONN(L_MOUSE_BUTTON_EVENT,
-                if (!this->win.is_mapped()) this->kill();
-                this->win.kill();
+                // if (!this->win.is_mapped()) this->kill();
+                // this->win.kill();
+                signal_manager->client_arr.send_c_sig(this, KILL_SIGNAL);
             
             ,this->close_button);
 
@@ -7504,11 +7499,12 @@ class client {
                 BLACK,
                 NONE,
                 MAP
+            
             );
             CWC(icon);
 
-            this->win.make_png_from_icon();
-            this->icon.set_backround_png(PNG_HASH(this->win.get_icccm_class()));
+            win.make_png_from_icon();
+            icon.set_backround_png(PNG_HASH(win.get_icccm_class()));
         }
     
     /* Variables   */
@@ -14377,8 +14373,25 @@ class Events {
                 event_handler->iter_and_log_map_size();
             });
 
-            C_SIGNAL(if (__c) max_win(__c, max_win::BUTTON_MAXWIN); ,BUTTON_MAXWIN_PRESS);
+            C_SIGNAL(if (__c) {
+                int i = 0;
+                while (__c != nullptr) {
+                    if (!__c->win.is_mapped()) {
+                        __c->kill();
 
+                    } else if (!wm->window_exists(__c->win)) {
+                        __c->kill();
+
+                    } else {
+                        __c->win.kill();
+
+                    }
+
+                }
+            
+            }, KILL_SIGNAL);
+
+            C_SIGNAL(if (__c) max_win(__c, max_win::BUTTON_MAXWIN);, BUTTON_MAXWIN_PRESS);
         }
 
     private:
@@ -14557,12 +14570,6 @@ class Events {
                     wm->focused_client = c;
                     return;
                 }
-
-                // if (e->event == c->max_button)
-                // {
-                //     max_win(c, max_win::BUTTON_MAXWIN);
-                //     return;
-                // }
                 
                 if (e->event == c->border[left])
                 {

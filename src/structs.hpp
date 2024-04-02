@@ -840,6 +840,8 @@ class __c_func_arr__ {
         uint8_t sig_to_index__(uint8_t __sig) {
             switch (__sig) {
                 case BUTTON_MAXWIN_PRESS: return 0;
+                case KILL_SIGNAL:         return 1;
+
                 default: return make_T_MAX<uint8_t>();
 
             }
@@ -848,7 +850,7 @@ class __c_func_arr__ {
 
     public:
     /* Variabels */
-        FixedArray<function<void(client *c)>, 1> func;
+        FixedArray<function<void(client *c)>, 2> func;
 
     /* Methods   */
         void send_c_sig(client *__c, int __sig) {
