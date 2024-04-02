@@ -833,25 +833,36 @@ class __c_func_arr__ {
         #define C_SIGNAL(__cb, __sig) \
             signal_manager->client_arr.add_func_to_sig([this](client *__c){__cb}, __sig)
 
+    /* Variabels */
+        static constexpr uint8_t ERROR_STATE = make_T_MAX<uint8_t>();
+
+    /* Methods */
+        uint8_t sig_to_index__(uint8_t __sig) {
+            switch (__sig) {
+                case BUTTON_MAXWIN_PRESS: return 0;
+                default: return make_T_MAX<uint8_t>();
+
+            }
+
+        }
+
     public:
     /* Variabels */
         FixedArray<function<void(client *c)>, 1> func;
-        #define n_func 1
-        DynamicArray<uint8_t> sig{BUTTON_MAXWIN_PRESS};
 
     /* Methods   */
-        void send_c_sig(client *const &__c, int __signal) {
-            size_t pos = sig.find(__signal);
-            if (pos >= n_func) return;
-            func[pos](__c);
+        void send_c_sig(client *__c, int __sig) {
+            uint8_t index = sig_to_index__(__sig);
+            if (index == ERROR_STATE) return;
+            func[index](__c);
 
         }
 
         template<typename Callback>
-        void add_func_to_sig(Callback &&__callback, int __sig) {
-            size_t pos = sig.find(__sig);
-            if (pos >= n_func) return;
-            func[pos] = std::forward<Callback>(__callback);
+        void add_func_to_sig(Callback &&__callback, uint8_t __sig) {
+            uint8_t index = sig_to_index__(__sig);
+            if (index == ERROR_STATE) return;
+            func[index] = std::forward<function<void(client *)>>(__callback);
 
         }
 
