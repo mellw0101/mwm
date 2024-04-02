@@ -3013,9 +3013,14 @@ class __event_handler__ {
         template<> void handle_event<MOVE_TO_DESKTOP_4>(uint32_t __window) { WS_emit(screen->root, MOVE_TO_DESKTOP_4); }
         template<> void handle_event<MOVE_TO_DESKTOP_5>(uint32_t __window) { WS_emit(screen->root, MOVE_TO_DESKTOP_5); }
 
-
         template<> void handle_event<MOVE_TO_NEXT_DESKTOP>(uint32_t __window) { WS_emit(screen->root, MOVE_TO_NEXT_DESKTOP); }
         template<> void handle_event<MOVE_TO_PREV_DESKTOP>(uint32_t __window) { WS_emit(screen->root, MOVE_TO_PREV_DESKTOP); }
+
+
+        template<> void handle_event<TILE_RIGHT>(uint32_t __window) { WS_emit_Win(screen->root, TILE_RIGHT, __window); }
+        template<> void handle_event<TILE_LEFT> (uint32_t __window) { WS_emit_Win(screen->root, TILE_LEFT,  __window); }
+        template<> void handle_event<TILE_UP>   (uint32_t __window) { WS_emit_Win(screen->root, TILE_UP,    __window); }
+        template<> void handle_event<TILE_DOWN> (uint32_t __window) { WS_emit_Win(screen->root, TILE_DOWN,  __window); }
 
         #define HANDLE_EVENT(__type ) thread(handle_event<__type>, e->event ).detach()
         #define HANDLE_WINDOW(__type) thread(handle_event<__type>, e->window).detach()
