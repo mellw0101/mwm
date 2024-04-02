@@ -14564,8 +14564,7 @@ class Events {
 
             if (e->detail == L_MOUSE_BUTTON)
             {
-                if (e->event == c->win)
-                {
+                if (e->event == c->win) {
                     // switch (e->state)
                     // {
                     //     case ALT:
