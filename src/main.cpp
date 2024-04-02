@@ -6635,7 +6635,7 @@ class client {
                 win.width((width - (BORDER_SIZE * 2)));
                 xcb_flush(conn);
                 frame.width((width));
-                titlebar.width((width - (BORDER_SIZE * 2)) - (BUTTON_SIZE * 6));
+                titlebar.width(width - (BUTTON_SIZE * 3));
                 close_button.x((width - BUTTON_SIZE - BORDER_SIZE));
                 max_button.x((width - (BUTTON_SIZE * 2) - BORDER_SIZE));
                 min_button.x((width - (BUTTON_SIZE * 3) - BORDER_SIZE));
@@ -6890,16 +6890,14 @@ class client {
         void make_titlebar()
         {
             this->titlebar.create_window(
-
                 this->frame,
-                BORDER_SIZE + (BUTTON_SIZE * 3),
                 BORDER_SIZE,
-                (this->width - (BORDER_SIZE * 2)) - (BUTTON_SIZE * 6),
+                BORDER_SIZE,
+                (this->width - (BUTTON_SIZE * 3)),
                 TITLE_BAR_HEIGHT,
                 BLACK,
                 XCB_EVENT_MASK_EXPOSURE,
                 MAP
-
             );
             CWC(titlebar);
 
