@@ -5028,85 +5028,85 @@ class window {
 
                 void y(const uint32_t &y)
                 {
-                    config_window(XCB_CONFIG_WINDOW_Y, (uint32_t[1]){y});
+                    config_window(XCB_CONFIG_WINDOW_Y, y);
                     update(_x, y, _width, _height);
                 }
 
                 void width(const uint32_t &width)
                 {
-                    config_window(MWM_CONFIG_width, (uint32_t[1]){width});
+                    config_window(MWM_CONFIG_width, width);
                     update(_x, _y, width, _height);
                 }
 
                 void height(const uint32_t &height)
                 {
-                    config_window(XCB_CONFIG_WINDOW_HEIGHT, (uint32_t[1]){height});
+                    config_window(XCB_CONFIG_WINDOW_HEIGHT, height);
                     update(_x, _y, _width, height);
                 }
 
                 void x_y(const uint32_t & x, const uint32_t & y)
                 {
-                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, (uint32_t[2]){x, y});
+                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, {x, y});
                     update(x, y, _width, _height);
                 }
 
                 void width_height(const uint32_t & width, const uint32_t & height)
                 {
-                    config_window(XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, (uint32_t[2]){width, height});
+                    config_window(XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, {width, height});
                     update(_x, _y, width, height);
                 }
 
                 void x_y_width_height(const uint32_t & x, const uint32_t & y, const uint32_t & width, const uint32_t & height)
                 {
-                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, (uint32_t[4]){x, y, width, height});
+                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, {x, y, width, height});
                     update(x, y, width, height);
                 }
 
                 void x_width_height(const uint32_t & x, const uint32_t & width, const uint32_t & height)
                 {
-                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, (uint32_t[3]){x, width, height});
+                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, {x, width, height});
                     update(x, _y, width, height);
                 }
 
                 void y_width_height(const uint32_t & y, const uint32_t & width, const uint32_t & height)
                 {
-                    config_window(XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, (uint32_t[3]){y, width, height});
+                    config_window(XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, {y, width, height});
                     update(_x, y, width, height);
                 }
 
                 void x_width(const uint32_t & x, const uint32_t & width)
                 {
-                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_WIDTH, (uint32_t[2]){x, width});
+                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_WIDTH, {x, width});
                     update(x, _y, width, _height);
                 }
 
                 void x_height(const uint32_t & x, const uint32_t & height)
                 {
-                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_HEIGHT, (uint32_t[2]){x, height});
+                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_HEIGHT, {x, height});
                     update(x, _y, _width, height);
                 }
 
                 void y_width(const uint32_t & y, const uint32_t & width)
                 {
-                    config_window(XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH, (uint32_t[2]){y, width});
+                    config_window(XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH, {y, width});
                     update(_x, y, width, _height);
                 }
 
                 void y_height(const uint32_t & y, const uint32_t & height)
                 {
-                    config_window(XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT, (uint32_t[3]){y, height});
+                    config_window(XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT, {y, height});
                     update(_x, y, _width, height);
                 }
 
                 void x_y_width(const uint32_t & x, const uint32_t & y, const uint32_t & width)
                 {
-                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH, (uint32_t[3]){x, y, width});
+                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH, {x, y, width});
                     update(x, y, width, _height);
                 }
 
                 void x_y_height(const uint32_t & x, const uint32_t & y, const uint32_t & height)
                 {
-                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT, (uint32_t[3]){x, y, height});
+                    config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT, {x, y, height});
                     update(x, y, _width, height);
                 }
 
@@ -5811,24 +5811,6 @@ class window {
                     _window,
                     mask,
                     values.data()
-                );
-                FLUSH_XWin();
-                CHECK_VOID_COOKIE();
-            }
-
-            void config_window(uint32_t mask, const FixedArray<uint32_t, 4> &values)
-            {
-                if (values[0] == 0)
-                {
-                    loutEWin << "values vector is empty" << loutEND;
-                    return;
-                }
-
-                VOID_COOKIE = xcb_configure_window(
-                    conn,
-                    _window,
-                    mask,
-                    values.data
                 );
                 FLUSH_XWin();
                 CHECK_VOID_COOKIE();
