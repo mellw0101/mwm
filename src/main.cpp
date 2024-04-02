@@ -3099,13 +3099,8 @@ class __event_handler__ {
 
                             break;
                         }
-                        case AnyModifier:
-                        {
-                            if (e->detail == key_codes.f11) HANDLE_EVENT(EWMH_MAXWIN);
-
-                            break;
-                        }
                     }
+                    if (e->detail == key_codes.f11) HANDLE_EVENT(EWMH_MAXWIN);
 
                     break;
                 }
