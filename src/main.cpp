@@ -1,9 +1,11 @@
+#include <array>
 #include <cstdlib>
 #include <exception>
 #include <features.h>
 #include <iterator>
 // #include <numeric>
 // #include <optional>
+// #include <limits>
 #include <regex>
 #include <sstream>
 #include <stdio.h>
@@ -3010,7 +3012,8 @@ class __event_handler__ {
         template<uint8_t __sig>
         static void handle_event(uint32_t __w) { WS_emit(__w, __sig); }
         
-        template<> void handle_event<MAP_REQ>                  (uint32_t __window) { WS_emit_Win (screen->root                , MAP_REQ, __window);    }
+        template<> void handle_event<XCB_MAP_REQUEST>          (uint32_t __w)      { signal_manager->_window_signals.emit(screen->root, XCB_MAP_REQUEST, __w);}
+
         template<> void handle_event<MAP_NOTIFY>               (uint32_t __window) { WS_emit_Win (screen->root                , MAP_NOTIFY, __window); }
         template<> void handle_event<EWMH_MAXWIN>              (uint32_t __window) { C_EMIT      (C_RETRIVE(__window)  , EWMH_MAXWIN);             }
         template<> void handle_event<TERM_KEY_PRESS>           (uint32_t __window) { WS_emit_Win (screen->root                , TERM_KEY_PRESS, 0);    }
@@ -3186,17 +3189,20 @@ class __event_handler__ {
 
                 }
                 case XCB_ENTER_NOTIFY: {
-                    ev_to_sig<XCB_ENTER_NOTIFY>(ev);
+                    RE_CAST_EV(xcb_enter_notify_event_t);
+                    thread(handle_event<XCB_ENTER_NOTIFY>, e->event).detach();
                     break;
 
                 }
                 case XCB_LEAVE_NOTIFY:{
-                    ev_to_sig<XCB_LEAVE_NOTIFY>(ev);
+                    RE_CAST_EV(xcb_enter_notify_event_t);
+                    thread(handle_event<XCB_ENTER_NOTIFY>, e->event).detach();
                     break;
 
                 }
                 case XCB_MAP_REQUEST: {
-                    ev_to_sig<XCB_MAP_REQUEST>(ev);
+                    RE_CAST_EV(xcb_map_request_event_t);
+                    thread(handle_event<XCB_MAP_REQUEST>, e->window).detach();
                     break; 
 
                 }
@@ -3207,11 +3213,13 @@ class __event_handler__ {
 
                 }
                 case XCB_FOCUS_IN:  {
-                    ev_to_sig<XCB_FOCUS_IN>(ev);  break;
+                    RE_CAST_EV(xcb_focus_in_event_t);
+                    thread(handle_event<XCB_FOCUS_IN>, e->event).detach();
 
                 }
                 case XCB_FOCUS_OUT: {
-                    ev_to_sig<XCB_FOCUS_OUT>(ev); break;
+                    RE_CAST_EV(xcb_focus_out_event_t);
+                    thread(handle_event<XCB_FOCUS_IN>, e->event).detach();
 
                 }
                 case XCB_DESTROY_NOTIFY:    {
@@ -9981,8 +9989,7 @@ class __animate__ {
         }
 };
 
-void animate(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight, const int & duration)
-{
+void animate(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight, const int & duration) {
     Mwm_Animator anim(c->frame);
     anim.animate(
         c->x,
@@ -9994,12 +10001,11 @@ void animate(client * & c, const int & endX, const int & endY, const int & endWi
         endWidth, 
         endHeight, 
         duration
-    );
-    c->update();
-}
 
-void animate_client(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight, const int & duration)
-{
+    ); c->update();
+
+}
+void animate_client(client * & c, const int & endX, const int & endY, const int & endWidth, const int & endHeight, const int & duration) {
     Mwm_Animator client_anim(c);
     client_anim.animate_client(
         c->x,
@@ -10011,10 +10017,10 @@ void animate_client(client * & c, const int & endX, const int & endY, const int 
         endWidth,
         endHeight,
         duration
-    );
-    c->update();
-}
 
+    ); c->update();
+
+}
 class button
 {
     public:
@@ -14532,41 +14538,108 @@ class test {
     // Constructor.
         test() {}
 };
+class __threaded_event_handler__ {
+    public:
+        __threaded_event_handler__() {
+            /* event_handlers[XCB_EXPOSE] =  */
+            add_arr    (XCB_EXPOSE,       [this](xcb_generic_event_t *ev) -> void {
+                RE_CAST_EV(xcb_expose_event_t);
+                const auto _func_ = [this](uint32_t __w) -> void {
+                    signal_manager->_window_signals.emit(__w, XCB_EXPOSE);
 
+                }; thread(_func_, e->window).detach();
 
-// class __threaded_event_handler__ {
-//     public:
-//         __threaded_event_handler__() {
-//             // Initialize the event map
-//             eventMap[XCB_EXPOSE] = [this](xcb_generic_event_t* ev) { this->handle(reinterpret_cast<xcb_expose_event_t *>(ev)); };
-//             eventMap[XCB_BUTTON_PRESS] = [this](xcb_generic_event_t* ev) { this->handle(reinterpret_cast<xcb_button_press_event_t *>(ev)); };
-//             eventMap[XCB_KEY_PRESS] = [this](xcb_generic_event_t* ev) { this->handle(reinterpret_cast<xcb_key_press_event_t *>(ev)); };
-//             eventMap[XCB_KEY_PRESS] = [this](xcb_generic_event_t* ev) { this->handle(reinterpret_cast<xcb_key_press_event_t *>(ev)); };
-//             eventMap[XCB_KEY_PRESS] = [this](xcb_generic_event_t* ev) { this->handle(reinterpret_cast<xcb_key_press_event_t *>(ev)); };
-//             eventMap[XCB_KEY_PRESS] = [this](xcb_generic_event_t* ev) { this->handle(reinterpret_cast<xcb_key_press_event_t *>(ev)); };
-//             eventMap[XCB_KEY_PRESS] = [this](xcb_generic_event_t* ev) { this->handle(reinterpret_cast<xcb_key_press_event_t *>(ev)); };
+            }); add_arr(XCB_ENTER_NOTIFY, [this](xcb_generic_event_t *ev) -> void {
+                RE_CAST_EV(xcb_enter_notify_event_t);
+                const auto _func_ = [this](uint32_t __w) -> void {
+                    signal_manager->_window_signals.emit(__w, XCB_ENTER_NOTIFY);
 
-//         }
-//         void processEvent(xcb_generic_event_t* ev) {
-//             uint8_t responseType = ev->response_type & ~0x80;
-//             auto it = eventMap.find(responseType);
-//             if (it != eventMap.end()) {
-//                 it->second(ev);
+                }; thread(_func_, this, e->event).detach();
+
+            }); add_arr(XCB_LEAVE_NOTIFY, [this](xcb_generic_event_t *ev) -> void {
+                RE_CAST_EV(xcb_leave_notify_event_t);
+                const auto _func_ = [this](uint32_t __w) -> void {
+                    signal_manager->_window_signals.emit(__w, XCB_LEAVE_NOTIFY);
+
+                }; thread(_func_, this, e->event).detach();
+
+            }); add_arr(XCB_BUTTON_PRESS, [this](xcb_generic_event_t *ev) -> void {
+                RE_CAST_EV(xcb_button_press_event_t);
+                const auto _func_ = [this](uint32_t __w) -> void {
+                    signal_manager->_window_signals.emit(__w, XCB_BUTTON_PRESS);
+
+                }; thread(_func_, this, e->event).detach();
+
+            });
+        }
+        void run() {
+            xcb_generic_event_t *ev;
+            should_continue = true;
+
+            while (should_continue) {
+                if ((ev = xcb_wait_for_event(conn)) == nullptr) continue;;
+                uint8_t resTy = ev->response_type & ~80;
+                switch (resTy) {
+                    case XCB_EXPOSE: {
+                        event_handlers[XCB_EXPOSE](ev);
+
+                    }
                 
-//             }
+                } free(ev);
 
-//         }
+            }
 
-//     private:
-//         unordered_map<uint8_t, function<void(xcb_generic_event_t*)>> eventMap;
+        }
 
-//         template<typename EventType>
-//         constexpr void handle(EventType* e);
+    private:
+        bool should_continue;
+        #define SigArrSize 5
+        array<uint8_t, SigArrSize> sig_arr{XCB_EXPOSE, XCB_ENTER_NOTIFY, XCB_LEAVE_NOTIFY, XCB_BUTTON_PRESS};
+        std::array<std::function<void(xcb_generic_event_t*)>, 20> event_handlers;
 
-// };
+        template<typename Callback>
+        void add_arr(uint8_t __sig, Callback &&__callbk) {
+            event_handlers[__sig] = std::forward<Callback>(__callbk);
 
-void setup_wm()
-{
+        }
+        
+        template<size_t _index = 0>
+        static constexpr uint8_t sig_to_map(uint8_t __index) { return __index; };
+        // template<> static constexpr uint8_t sig_to_map(uint8_t __index) { return XCB_EXPOSE; };
+
+
+        template<> constexpr uint8_t sig_to_map<SigArrSize>      (uint8_t __index) { return  SigArrSize; }
+        template<> constexpr uint8_t sig_to_map<XCB_EXPOSE>      (uint8_t __index) { return 0; }
+        template<> constexpr uint8_t sig_to_map<XCB_ENTER_NOTIFY>(uint8_t __index) { return 1; }
+        template<> constexpr uint8_t sig_to_map<XCB_LEAVE_NOTIFY>(uint8_t __index) { return 2; }
+        template<> constexpr uint8_t sig_to_map<XCB_BUTTON_PRESS>(uint8_t __index) { return 3; }
+
+
+
+        template<uint8_t uint8>
+        constexpr uint8_t sig_to_map() { return uint8; };
+
+        // const uint8_t u8Arr[CURRENT_SIZE] = {XCB_EXPOSE};
+        // const function<void(xcb_generic_event_t *ev)> funcArr[CURRENT_SIZE] = {
+        //     {[this](xcb_generic_event_t *ev) -> void {
+        //         RE_CAST_EV(xcb_expose_event_t);
+        //         const auto &_func_ = [this](uint32_t __w) -> void {
+        //             signal_manager->_window_signals.emit(__w, u8Arr[0]);
+
+        //         }; thread(_func_, e->window).detach();
+
+        //     }}
+
+        // };
+        // template<typename EventType>
+        // constexpr void handle(EventType *ev) {
+        //     const auto &e = reinterpret_cast<EventType *>(ev);
+
+
+        // }
+
+};
+void setup_wm() {
     user = get_user_name();
     loutCUser(USER);
 
@@ -14591,21 +14664,19 @@ void setup_wm()
     NEW_CLASS(system_settings, __system_settings__) { system_settings->init(); }
     NEW_CLASS(dock,            __dock__           ) { dock->init(); }
     NEW_CLASS(pid_manager,     __pid_manager__    ) {}
-}
 
-int main()
-{
+}
+int main() {
     loutI << "\n\n          -- mwm starting --\n" << '\n';
 
     INIT_NET_LOG(ESP_SERVER);
     NET_LOG("Starting mwm.");
 
-    function<void()> audio_thread = [&]()-> void
-    {
+    function<void()> audio_thread = [&]()-> void {
         audio.init();
         audio.run();
-    };
-    thread(audio_thread).detach();
+
+    }; thread(audio_thread).detach();
 
     setup_wm();
     audio.list_sinks();
@@ -14617,4 +14688,5 @@ int main()
     event_handler->run();
     xcb_disconnect(conn);
     return 0;
+
 }

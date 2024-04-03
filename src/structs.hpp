@@ -786,7 +786,29 @@ enum
      */
 };
 
-static unordered_map<uint32_t, function<void(uint32_t)>> umap{{{},{}}, {}};
+// inline const function<void(uint32_t)> arr[2] = {
+//     {[](uint32_t __w) -> void {
+        
+        
+//     }},
+//     {}
+
+// };
+#define MWM_EXPOSE 1
+#define MWM_ENTER_NOTIFY
+#define MWM_LEAVE_NOTIFY
+#define MWM_PROPERTY_NOTIFY
+#define MWM_MAP_REQ
+#define MWM_MAP_NOTIFY
+#define MWM_KEY_PRESS
+#define MWM_FOCUS_IN
+#define MWM_FOCUS_OUT
+#define MWM_KEY_RELESE
+#define MWM_BUTTON_RELEASE
+#define MWM_MOTION_NOTIFY
+#define MWM_DESTROY_NOTIFY
+#define MWM_REPARENT_NOTIFY
+#define MWM_CONFIGURE_REQUEST
 
 enum EV : uint8_t {
     REMOVE_ALL                        = 0,
