@@ -900,21 +900,9 @@ class __c_func_arr__ {
 
         }
 
-        constexpr uint8_t sig_to_index_w_data__(uint8_t __sig) {
-            switch (__sig) {
-                case CLIENT_RESIZE:     return 0;
-                case MOVE_CLIENT_MOUSE: return 1;
-
-                default: return make_T_MAX<uint8_t>();
-
-            }
-
-        }
-
     public:
     /* Variabels */
         FixedArray<function<void(client *c)>, 18> func;
-        FixedArray<function<void(client *c, void *data)>, 2> func_w_data;
 
     /* Methods   */
         constexpr void send_c_sig(client *__c, int __sig) {
@@ -924,26 +912,11 @@ class __c_func_arr__ {
 
         }
 
-        constexpr void send_c_sig_w_data(client *__c, int __sig, void *data = nullptr) {
-            uint8_t index = sig_to_index_w_data__(__sig);
-            if (index == ERROR_STATE) return;
-            func_w_data[index](__c, data);
-
-        }
-
         template<typename Callback>
         constexpr void add_func_to_sig(Callback &&__callback, uint8_t __sig) {
             uint8_t index = sig_to_index__(__sig);
             if (index == ERROR_STATE) return;
             func[index] = std::forward<function<void(client *)>>(__callback);
-
-        }
-
-        template<typename Callback>
-        constexpr void add_func_to_sig_wdata(Callback &&__callback, uint8_t __sig) {
-            uint8_t index = sig_to_index__(__sig);
-            if (index == ERROR_STATE) return;
-            func_w_data[index] = std::forward<Callback>(__callback);
 
         }
 
