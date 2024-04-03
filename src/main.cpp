@@ -3196,7 +3196,7 @@ class __event_handler__ {
                 }
                 case XCB_LEAVE_NOTIFY:{
                     RE_CAST_EV(xcb_leave_notify_event_t);
-                    auto _func_ = [this, e]() -> void {
+                    const auto &_func_ = [&, this]() -> void {
                         signal_manager->_window_signals.emit(e->event, LEAVE_NOTIFY);
 
                     }; thread(_func_).detach();
