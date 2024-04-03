@@ -7832,6 +7832,7 @@ class context_menu {
         }
 
         context_menu() { create_dialog_win__(); }
+
 };
 
 class Window_Manager {
@@ -7863,8 +7864,7 @@ class Window_Manager {
 
     /* Methods     */
         /* Main         */
-            void init()
-            {
+            void init() {
                 _conn(nullptr, nullptr);
                 _setup();
                 _iter();
@@ -7893,19 +7893,17 @@ class Window_Manager {
                 context_menu->add_entry("code",                 [this]() -> void { launcher.launch_child_process("code"); });
 
                 setup_events(); 
-            }
 
-            void launch_program(char *program)
-            {
-                if (fork() == 0)
-                {
+            }
+            void launch_program(char *program) {
+                if (fork() == 0) {
                     setsid();
                     execvp(program, (char *[]) { program, nullptr });
-                }
-            }
 
-            void quit(const int &__status)
-            {
+                }
+
+            }
+            void quit(const int &__status) {
                 pid_manager->kill_all_pids();
                 xcb_flush(conn);
                 delete_client_vec(client_list);
@@ -7913,33 +7911,29 @@ class Window_Manager {
                 xcb_ewmh_connection_wipe(ewmh);
                 xcb_disconnect(conn);
                 exit(__status);
-            }
 
-            void get_atom(char *name, xcb_atom_t *atom)
-            {
+            }
+            void get_atom(char *name, xcb_atom_t *atom) {
                 xcb_intern_atom_reply_t *reply = xcb_intern_atom_reply(conn, xcb_intern_atom(conn, 0, strlen(name), name), NULL);
-                if (reply != NULL)
-                {
+                if (reply != NULL) {
                     *atom = reply->atom;
-                }
-                else
-                {
-                    *atom = XCB_NONE;
-                }
-                
-                free(reply);
-            }
 
-            void focus_none()
-            {
+                } else {
+                    *atom = XCB_NONE;
+
+                } free(reply);
+
+            }
+            void focus_none() {
                 VOID_COOKIE = xcb_set_input_focus(
                     conn,
                     XCB_NONE,
                     screen->root,
                     XCB_CURRENT_TIME
-                );
+
+                ); CHECK_VOID_COOKIE();
                 FLUSH_X();
-                CHECK_VOID_COOKIE();
+
             }
 
         /* Window       */
@@ -8046,23 +8040,18 @@ class Window_Manager {
                 }
 
             /* Fetch */
-                client *client_from_window(const xcb_window_t *window)
-                {
-                    for (const auto &c:client_list)
-                    {
-                        if (*window == c->win)
-                        {
+                client *client_from_window(const xcb_window_t *window) {
+                    for (const auto &c:client_list) {
+                        if (*window == c->win) {
                             return c;
+
                         }
-                    }
 
-                    return nullptr;
+                    } return nullptr;
+                
                 }
-
-                client *client_from_any_window(const xcb_window_t *window)
-                {
-                    for (const auto &c:client_list)
-                    {
+                client *client_from_any_window(const xcb_window_t *window) {
+                    for (const auto &c:client_list) {
                         if (*window == c->win
                         ||  *window == c->frame
                         ||  *window == c->titlebar
@@ -8076,21 +8065,18 @@ class Window_Manager {
                         ||  *window == c->border[top_left]
                         ||  *window == c->border[top_right]
                         ||  *window == c->border[bottom_left]
-                        ||  *window == c->border[bottom_right])
-                        {
+                        ||  *window == c->border[bottom_right]) {
                             return c;
+
                         }
-                    }
 
-                    return nullptr;
+                    } return nullptr;
+
                 }
-
-                client *client_from_pointer(const int &prox)
-                {
+                client *client_from_pointer(const int &prox) {
                     const uint32_t &x = pointer.x();
                     const uint32_t &y = pointer.y();
-                    for (const auto &c : cur_d->current_clients)
-                    {
+                    for (const auto &c : cur_d->current_clients) {
                         // LEFT EDGE OF CLIENT
                         if (x > c->x - prox && x <= c->x) return c;
                         
@@ -8102,61 +8088,54 @@ class Window_Manager {
                         
                         // BOTTOM EDGE OF CLIENT
                         if (y >= c->y + c->height && y < c->y + c->height + prox) return c;
-                    }
-                    
-                    return nullptr;
-                }
 
-                map<client *, edge> get_client_next_to_client(client *c, edge c_edge)
-                {
+                    } return nullptr;
+
+                }
+                map<client *, edge> get_client_next_to_client(client *c, edge c_edge) {
                     map<client *, edge> map;
-                    for (client *c2:cur_d->current_clients)
-                    {
+                    for (client *c2:cur_d->current_clients) {
                         if (c == c2) continue;
 
-                        if (c_edge == edge::LEFT)
-                        {
-                            if(c->x == c2->x + c2->width)
-                            {
+                        if (c_edge == edge::LEFT) {
+                            if(c->x == c2->x + c2->width) {
                                 map[c2] = edge::RIGHT;
                                 return map;
-                            }
-                        }
 
-                        if (c_edge == edge::RIGHT)
-                        {
-                            if (c->x + c->width == c2->x)
-                            {
+                            }
+
+                        }
+                        if (c_edge == edge::RIGHT) {
+                            if (c->x + c->width == c2->x) {
                                 map[c2] = edge::LEFT;
                                 return map;
-                            }
-                        }
 
-                        if (c_edge == edge::TOP)
-                        {
-                            if (c->y == c2->y + c2->height)
-                            {
+                            }
+
+                        }
+                        if (c_edge == edge::TOP) {
+                            if (c->y == c2->y + c2->height) {
                                 map[c2] = edge::BOTTOM_edge;
                                 return map;
-                            }
-                        }
 
-                        if (c_edge == edge::BOTTOM_edge)
-                        {
-                            if (c->y + c->height == c2->y)
-                            {
+                            }
+
+                        }
+                        if (c_edge == edge::BOTTOM_edge) {
+                            if (c->y + c->height == c2->y) {
                                 map[c2] = edge::TOP;
                                 return map;
+
                             }
+
                         }
-                    }
 
-                    map[nullptr] = edge::NONE;
+                    } map[nullptr] = edge::NONE;
+                    
                     return map;
-                }
 
-                edge get_client_edge_from_pointer(client *c, const int &prox)
-                {
+                }
+                edge get_client_edge_from_pointer(client *c, const int &prox) {
                     const uint32_t &x = pointer.x();
                     const uint32_t &y = pointer.y();
 
@@ -8164,96 +8143,83 @@ class Window_Manager {
                     const uint32_t &bottom_border = (c->y + c->height);
                     const uint32_t &left_border   = c->x;
                     const uint32_t &right_border  = (c->x + c->width);
-
-                    // TOP EDGE OF CLIENT
+ 
                     if (((y > top_border - prox) && (y <= top_border))
-                    && ((x > left_border + prox) && (x < right_border - prox)))
-                    {
+                    && ((x > left_border + prox) && (x < right_border - prox))) {
                         return edge::TOP;
-                    }
-                    
-                    // BOTTOM EDGE OF CLIENT
+
+                    } /* TOP EDGE OF CLIENT */
+
                     if (((y >= bottom_border) && (y < bottom_border + prox))
-                    && ((x > left_border + prox) && (x < right_border - prox)))
-                    {
+                    && ((x > left_border + prox) && (x < right_border - prox))) {
                         return edge::BOTTOM_edge;
-                    }
+
+                    } /* BOTTOM EDGE OF CLIENT */
                     
-                    // LEFT EDGE OF CLIENT
                     if (((x > left_border) - prox && (x <= left_border))
-                    && ((y > top_border + prox) && (y < bottom_border - prox)))
-                    {
+                    && ((y > top_border + prox) && (y < bottom_border - prox))) {
                         return edge::LEFT;
-                    }
+
+                    } /* LEFT EDGE OF CLIENT */
                     
-                    // RIGHT EDGE OF CLIENT
                     if (((x >= right_border) && (x < right_border + prox))
-                    && ((y > top_border + prox) && (y < bottom_border - prox)))
-                    {
+                    && ((y > top_border + prox) && (y < bottom_border - prox))) {
                         return edge::RIGHT;
-                    }
-                    
-                    // TOP LEFT CORNER OF CLIENT
+
+                    } /* RIGHT EDGE OF CLIENT */
+ 
                     if (((x > left_border - prox) && x < left_border + prox)
-                    && ((y > top_border - prox) && y < top_border + prox))
-                    {
+                    && ((y > top_border - prox) && y < top_border + prox)) {
                         return edge::TOP_LEFT;
-                    }
 
-                    // TOP RIGHT CORNER OF CLIENT
+                    } /* TOP LEFT CORNER OF CLIENT */
+
                     if (((x > right_border - prox) && x < right_border + prox)
-                    && ((y > top_border - prox) && y < top_border + prox))
-                    {
+                    && ((y > top_border - prox) && y < top_border + prox)) {
                         return edge::TOP_RIGHT;
-                    }
 
-                    // BOTTOM LEFT CORNER OF CLIENT
+                    } /* TOP RIGHT CORNER OF CLIENT */
+
                     if (((x > left_border - prox) && x < left_border + prox) 
-                    && ((y > bottom_border - prox) && y < bottom_border + prox))
-                    {
+                    && ((y > bottom_border - prox) && y < bottom_border + prox)) {
                         return edge::BOTTOM_LEFT;
-                    }
 
-                    // BOTTOM RIGHT CORNER OF CLIENT
+                    } /* BOTTOM LEFT CORNER OF CLIENT */
+
                     if (((x > right_border - prox) && x < right_border + prox)
-                    && ((y > bottom_border - prox) && y < bottom_border + prox))
-                    {
+                    && ((y > bottom_border - prox) && y < bottom_border + prox)) {
                         return edge::BOTTOM_RIGHT;
-                    }
+
+                    } /* BOTTOM RIGHT CORNER OF CLIENT */
 
                     return edge::NONE;
-                }
 
-                client *get_client_from_pointer()
-                {
+                }
+                client *get_client_from_pointer() {
                     const int16_t x = pointer.x();
                     const int16_t y = pointer.y();
 
-                    for (client *const &c : cur_d->current_clients)
-                    {
+                    for (client *const &c : cur_d->current_clients) {
                         if (x > c->x && x < c->x + c->width
-                        &&  y > c->y && y < c->y + c->height)
-                        {
+                        &&  y > c->y && y < c->y + c->height) {
                             return c;
-                        }
-                    }
 
-                    return nullptr;
+                        }
+
+                    } return nullptr;
+
                 }
 
-            void manage_new_client(const uint32_t &__window)
-            {
+            void manage_new_client(const uint32_t &__window) {
                 client *c = make_client(__window);
-                if (c == nullptr)
-                {
+                if (c == nullptr) {
                     loutE << "could not make client" << loutEND;
                     return;
-                }
 
+                }
                 c->win.get_override_redirect();
                 c->win.x_y_width_height(c->x, c->y, c->width, c->height);
                 FLUSH_X();
-
                 pid_manager->check_pid(c->win.get_pid());
 
                 c->win.map();
@@ -8263,8 +8229,7 @@ class Window_Manager {
                     { L_MOUSE_BUTTON, 0   }
                 });
 
-                if (!c->win.check_frameless_window_hint())
-                {
+                if (!c->win.check_frameless_window_hint()) {
                     c->make_decorations();
                     c->frame.set_event_mask(FRAME_EVENT_MASK);
                     c->win.set_event_mask(CLIENT_EVENT_MASK);
@@ -8273,13 +8238,11 @@ class Window_Manager {
                     focused_client = c;
                     check_client(c);
                     c->frame.grab_default_keys();
-                }
 
-                c->win.grab_default_keys();
+                } c->win.grab_default_keys();
+
             }
-
-            client *make_internal_client(window &window)
-            {
+            client *make_internal_client(window &window) {
                 client *c = new client;
 
                 c->win    = window;
@@ -8294,35 +8257,30 @@ class Window_Manager {
                 c->focus();
 
                 return c;
-            }
 
-            void send_sigterm_to_client(client *c)
-            {
+            }
+            void send_sigterm_to_client(client *c) {
                 c->kill();
                 remove_client(c);
+
             }
+            void remove_client(client *c) {
+                client_list.erase(remove(
+                    client_list.begin(),
+                    client_list.end(),
+                    c
 
-            void remove_client(client *c)
-            {
-                client_list.erase(
-                    remove(
-                        client_list.begin(),
-                        client_list.end(),
-                        c
-                    ), 
-                    client_list.end()
-                );
+                ), client_list.end());
 
-                cur_d->current_clients.erase(
-                    remove(
-                        cur_d->current_clients.begin(),
-                        cur_d->current_clients.end(),
-                        c
-                    ),
-                    cur_d->current_clients.end()
-                );
+                cur_d->current_clients.erase(remove(
+                    cur_d->current_clients.begin(),
+                    cur_d->current_clients.end(),
+                    c
+
+                ), cur_d->current_clients.end());
 
                 delete c;
+
             }
 
         /* Desktop      */
