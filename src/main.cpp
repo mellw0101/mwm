@@ -3013,10 +3013,10 @@ class __event_handler__ {
 
         mutex event_mutex;
         
-        template<uint32_t __sig, void *__data = nullptr>
-        static void handle_c_sig(client *__c, void *_data = __data) { C_EMIT_DATA(__c, __sig, _data); };
+        template<uint8_t __sig, typename Type = void, Type *__data = nullptr>
+        static void handle_c_sig(client *__c, Type *_data = __data) { C_EMIT_DATA(__c, __sig, _data); };
 
-        // template<> void handle_c_sig<MOTION_NOTIFY>(client *__c, void *__data) { C_EMIT_DATA(__c, MOTION_NOTIFY, __data); }
+        template<> void handle_c_sig<MOTION_NOTIFY>(client *__c, int16_t __data[2]) { C_EMIT_DATA(__c, MOTION_NOTIFY, __data); }
 
 
         template<uint8_t __sig>
@@ -3195,7 +3195,7 @@ class __event_handler__ {
 
             } else if constexpr (__sig == XCB_MOTION_NOTIFY) {
                 RE_CAST_EV(xcb_motion_notify_event_t);
-                thread(handle_c_sig<XCB_MOTION_NOTIFY>, C_RETRIVE(e->event), e).detach();
+                thread(handle_c_sig<XCB_MOTION_NOTIFY>, C_RETRIVE(e->event), (int16_t[2]) {e->event_x, e->event_y}).detach();
 
             }
 
@@ -3322,7 +3322,8 @@ class __event_handler__ {
                 }
                 case XCB_MOTION_NOTIFY:     {
                     RE_CAST_EV(xcb_motion_notify_event_t);
-                    HANDLE_EVENT(MOTION_NOTIFY);
+                    // HANDLE_EVENT(MOTION_NOTIFY);
+                    thread(handle_c_sig<MOTION_NOTIFY>, C_RETRIVE(e->event), (int16_t[2]){e->event_x, e->event_y}).detach();
                     break;
 
                 }
@@ -7452,7 +7453,7 @@ class client {
             }, this->win);
 
             CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->titlebar) {
-                C_EMIT(this, MOVE_CLIENT_MOUSE);
+                C_EMIT(&*this, MOVE_CLIENT_MOUSE);
                 
             }, this->titlebar);
         }
@@ -14667,7 +14668,7 @@ class Events {
 
             }, MOVE_CLIENT_ALT);
 
-            C_SIGNAL(if (__c) mv_client(__c, wm->pointer.x(), wm->pointer.y());, MOVE_CLIENT_MOUSE);
+            C_SIGNAL_WDATA(int16_t *data = RE_CAST(int16_t *, __data); if (__c) mv_client(__c, data[0], data[1]);, MOVE_CLIENT_MOUSE);
 
             C_SIGNAL(if (__c) resize_client(__c, 0);, CLIENT_RESIZE_ALT);
 
@@ -14682,6 +14683,12 @@ class Events {
             C_SIGNAL(if (__c) resize_client::border(__c, edge::TOP_RIGHT   );, RESIZE_CLIENT_BORDER_TOP_RIGHT   );
             C_SIGNAL(if (__c) resize_client::border(__c, edge::BOTTOM_LEFT );, RESIZE_CLIENT_BORDER_BOTTOM_LEFT );
             C_SIGNAL(if (__c) resize_client::border(__c, edge::BOTTOM_RIGHT);, RESIZE_CLIENT_BORDER_BOTTOM_RIGHT);
+
+            C_SIGNAL_WDATA(if (__c) {
+                int16_t *data = RE_CAST(int16_t *, __data);
+                __c->snap(data[0], data[1]);
+
+            }, CLIENT_RESIZE);
 
             CONN_root(DESTROY_NOTIFY, W_callback -> void {
                 client *c = C_RETRIVE(__window);
