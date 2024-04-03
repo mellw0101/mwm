@@ -7224,13 +7224,14 @@ class client {
             CWC(win);
             CWC(frame);
 
-            CONN(DESTROY_NOTIFY, if (__window == this->win) {
-                this->kill();
+            // CONN(DESTROY_NOTIFY, if (__window == this->win) {
+            //     this->kill();
 
-            }, this->win);
+            // }, this->win);
 
             CONN(DESTROY_NOTIFY, if (__window == this->win) {
                 if (!this->win.is_mapped()) this->kill();
+                this->win.kill();
 
             }, this->win);
 
@@ -14224,44 +14225,10 @@ class Events {
             C_SIGNAL(if (__c) resize_client::border(__c, edge::BOTTOM_LEFT );, RESIZE_CLIENT_BORDER_BOTTOM_LEFT );
             C_SIGNAL(if (__c) resize_client::border(__c, edge::BOTTOM_RIGHT);, RESIZE_CLIENT_BORDER_BOTTOM_RIGHT);
 
-            // CONN(DESTROY_NOTIFY, if (__window == this->) {
-            //     // client *c = C_RETRIVE(__window)
-                
-                
-            //     client *c = C_RETRIVE(__window);
-            //     if (c == nullptr) {
-            //         loutE << "c = nullptr" << loutEND;
-            //         return;
-
-            //     }
-            //     else {
-            //         loutI << "c != nullptr" << loutEND;
-            //     }
-            //     // if (c->atoms.is_modal) {
-            //     //     client *c_trans = C_RETRIVE(c->modal_data.transient_for);
-            //     //     if (!c_trans) return;
-
-            //     //     c_trans->focus();
-            //     //     wm->focused_client = c_trans;
-
-            //     // }
-            //     // pid_manager->remove_pid(c->win.pid());
-            //     // wm->send_sigterm_to_client(c);
-
-            // });
-
             CONN_root(CONF_REQ_WIDTH,  W_callback -> void { wm->data.width  = __window; });
             CONN_root(CONF_REQ_HEIGHT, W_callback -> void { wm->data.height = __window; });
             CONN_root(CONF_REQ_X,      W_callback -> void { wm->data.x      = __window; });
             CONN_root(CONF_REQ_Y,      W_callback -> void { wm->data.y      = __window; });
-
-            // C_SIGNAL(if (&*__c) {
-            //     // if (!__c->moving) return;
-            //     __c->snap(wm->pointer.x(), wm->pointer.y(), wm->cur_d->current_clients);
-            //     FLUSH_X();
-            //     __c->update();
-
-            // }, MOTION_NOTIFY);
 
         }
 
