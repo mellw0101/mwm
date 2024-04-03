@@ -3206,13 +3206,8 @@ class __event_handler__ {
                 }
                 case XCB_MAP_REQUEST: {
                     RE_CAST_EV(xcb_map_request_event_t);
-                    auto _func_ = [this, e]() -> void {
-                        signal_manager->_window_signals.emit(screen->root, MAP_REQ, e->window);
-
-                    }; thread(_func_).detach();
-
+                    thread(handle_event<XCB_MAP_REQUEST>, e->window).detach();
                     // HANDLE_WINDOW(XCB_MAP_REQUEST);
-                    // thread(handle_event<XCB_MAP_REQUEST>, e->window).detach();
                     break; 
 
                 }
