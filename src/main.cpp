@@ -14654,10 +14654,10 @@ class Events {
             }, FOCUS_CLIENT);
 
             C_SIGNAL(if (__c) {
-                __c->raise();
-                mv_client mv(__c, m_pointer->x(), m_pointer->y() + 20);
-                __c->focus();
-                wm->focused_client = __c;
+                // __c->raise();
+                // mv_client mv(__c, m_pointer->x(), m_pointer->y() + 20);
+                // __c->focus();
+                // wm->focused_client = __c;
 
             }, MOVE_CLIENT_ALT);
 
@@ -14710,7 +14710,7 @@ class Events {
 
             C_SIGNAL(if (&*__c) {
                 if (!__c->moving) return;
-                __c->snap(wm->pointer.x() - *&__c->x, wm->pointer.y() - *&__c->y);
+                __c->snap(wm->pointer.x(), wm->pointer.y());
                 FLUSH_X();
                 __c->update();
 
