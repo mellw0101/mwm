@@ -13000,12 +13000,12 @@ class mv_client {
 
                     }
 
-                    case XCB_EXPOSE: {
-                        RE_CAST_EV(xcb_expose_event_t);
-                        WS_emit(e->window, EXPOSE);
-                        break;
+                    // case XCB_EXPOSE: {
+                    //     RE_CAST_EV(xcb_expose_event_t);
+                    //     WS_emit(e->window, EXPOSE);
+                    //     break;
 
-                    }
+                    // }
                 }
                 free(ev);
 
@@ -14649,7 +14649,7 @@ class Events {
 
             }, MOVE_CLIENT_ALT);
 
-            C_SIGNAL(if (&*__c)  mv_client(&*__c, wm->pointer.x() - *&__c->x - BORDER_SIZE, wm->pointer.y() - *&__c->y - BORDER_SIZE);, MOVE_CLIENT_MOUSE);
+            C_SIGNAL(if (&*__c)  mv_client(__c, wm->pointer.x() - __c->x - BORDER_SIZE, wm->pointer.y() - __c->y - BORDER_SIZE);, MOVE_CLIENT_MOUSE);
 
             C_SIGNAL(if (__c) resize_client(__c, 0);, CLIENT_RESIZE_ALT);
 
