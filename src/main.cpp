@@ -7293,6 +7293,11 @@ class client {
 
             }, this->close_button);
 
+            CONN(DESTROY_NOTIFY, if (__window == this->close_button) {
+                this->kill();
+
+            }, this->close_button);
+
         }
         void make_max_button() {
             max_button.create_window(
@@ -14210,6 +14215,8 @@ class Events {
             C_SIGNAL(if (__c) resize_client::border(__c, edge::BOTTOM_RIGHT);, RESIZE_CLIENT_BORDER_BOTTOM_RIGHT);
 
             CONN_root(DESTROY_NOTIFY, W_callback -> void {
+                // client *c = C_RETRIVE(__window)
+                
                 // client *c = C_RETRIVE(__window);
                 // if (c == nullptr) return;
                 
