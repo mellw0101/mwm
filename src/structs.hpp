@@ -863,6 +863,9 @@ class __c_func_arr__ {
         #define C_EMIT(__c, __sig) \
             signal_manager->client_arr.send_c_sig(__c, __sig)
 
+        #define C_EMIT_DATA(__c, __sig, __data) \
+            signal_manager->client_arr.send_c_sig_w_data(__c, __sig, __data)
+
     /* Variabels */
         static constexpr uint8_t ERROR_STATE = make_T_MAX<uint8_t>();
 
@@ -887,8 +890,16 @@ class __c_func_arr__ {
                 case RESIZE_CLIENT_BORDER_TOP_RIGHT:    return 15;
                 case RESIZE_CLIENT_BORDER_BOTTOM_RIGHT: return 16;
                 case RESIZE_CLIENT_BORDER_BOTTOM_LEFT:  return 17;
-                case CLIENT_RESIZE:                     return 18;
 
+                default: return make_T_MAX<uint8_t>();
+
+            }
+
+        }
+
+        constexpr uint8_t sig_to_index_w_data__(uint8_t __sig) {
+            switch (__sig) {
+                case CLIENT_RESIZE: return 0;
                 default: return make_T_MAX<uint8_t>();
 
             }
@@ -898,12 +909,20 @@ class __c_func_arr__ {
     public:
     /* Variabels */
         FixedArray<function<void(client *c)>, 18> func;
+        FixedArray<function<void(client *c, void *data)>, 1> func_w_data;
 
     /* Methods   */
         constexpr void send_c_sig(client *__c, int __sig) {
             uint8_t index = sig_to_index__(__sig);
             if (index == ERROR_STATE) return;
             func[index](__c);
+
+        }
+
+        constexpr void send_c_sig_w_data(client *__c, int __sig, void *data = nullptr) {
+            uint8_t index = sig_to_index_w_data__(__sig);
+            if (index == ERROR_STATE) return;
+            func_w_data[index](__c, data);
 
         }
 

@@ -1004,6 +1004,8 @@ class __signal_manager__ {
 
         // ldClientWindowArray _client_window_arr;
 
+        DynamicArray<client *> fixed_client_arr;
+
         LinkedSuperArrayMap<client *, window> _linked_super_arr;
 
     /* Methods   */
@@ -3010,8 +3012,16 @@ class __event_handler__ {
         }
 
         mutex event_mutex;
+        
+        template<uint32_t __sig, void *__data = nullptr>
+        static void handle_c_sig(client *__c, void *_data = __data) { C_EMIT_DATA(__c, __sig, _data); };
 
-        template<uint8_t __sig> static void handle_event(uint32_t __w) { WS_emit(__w, __sig); }
+        // template<> void handle_c_sig<MOTION_NOTIFY>(client *__c, void *__data) { C_EMIT_DATA(__c, MOTION_NOTIFY, __data); }
+
+
+        template<uint8_t __sig>
+        static void handle_event(uint32_t __w) { WS_emit(__w, __sig); }
+        
         template<> void handle_event<MAP_REQ>                  (uint32_t __window) { WS_emit_Win (screen->root                , MAP_REQ, __window);    }
         template<> void handle_event<MAP_NOTIFY>               (uint32_t __window) { WS_emit_Win (screen->root                , MAP_NOTIFY, __window); }
         template<> void handle_event<EWMH_MAXWIN>              (uint32_t __window) { C_EMIT      (C_RETRIVE(__window)  , EWMH_MAXWIN);             }
@@ -3031,9 +3041,8 @@ class __event_handler__ {
         template<> void handle_event<TILE_LEFT>                (uint32_t __window) { C_EMIT      (C_RETRIVE(__window) , TILE_LEFT );               }
         template<> void handle_event<TILE_UP>                  (uint32_t __window) { C_EMIT      (C_RETRIVE(__window) , TILE_UP   );               }
         template<> void handle_event<TILE_DOWN>                (uint32_t __window) { C_EMIT      (C_RETRIVE(__window) , TILE_DOWN );               }
-
-        template<> void handle_event<CYCLE_FOCUS_KEY_PRESS> (uint32_t __window) { WS_emit_root(CYCLE_FOCUS_KEY_PRESS, __window); }
-        template<> void handle_event<DESTROY_NOTIFY> (uint32_t __window) { WS_emit_root(DESTROY_NOTIFY, __window); }
+        template<> void handle_event<CYCLE_FOCUS_KEY_PRESS>    (uint32_t __window) { WS_emit_root(CYCLE_FOCUS_KEY_PRESS    , __window);                  }
+        template<> void handle_event<DESTROY_NOTIFY>           (uint32_t __window) { WS_emit_root(DESTROY_NOTIFY           , __window);                  }
 
         #define HANDLE_EVENT(__type ) thread(handle_event<__type>, e->event ).detach()
         #define HANDLE_WINDOW(__type) thread(handle_event<__type>, e->window).detach()
@@ -3110,7 +3119,7 @@ class __event_handler__ {
 
         template<uint8_t __sig>
         constexpr void p_sig(void *ev) {
-            if        constexpr (__sig == XCB_KEY_PRESS   ) {
+            if        constexpr (__sig == XCB_KEY_PRESS    ) {
                 RE_CAST_EV(xcb_key_press_event_t);
                 switch (e->state) {
                     case    CTRL  | ALT          : {
@@ -3150,13 +3159,12 @@ class __event_handler__ {
 
                     }
                 
-                }
-                if (e->detail == key_codes.f11) {
+                } if (e->detail == key_codes.f11) {
                     HANDLE_EVENT(EWMH_MAXWIN);
 
                 }
 
-            } else if constexpr (__sig == XCB_BUTTON_PRESS) {
+            } else if constexpr (__sig == XCB_BUTTON_PRESS ) {
                 RE_CAST_EV(xcb_button_press_event_t);
                 switch (e->state) {
                     case ALT  : {
@@ -3181,9 +3189,14 @@ class __event_handler__ {
 
                 }
 
-            } else if constexpr (__sig == XCB_EXPOSE      ) {
+            } else if constexpr (__sig == XCB_EXPOSE       ) {
                 RE_CAST_EV(xcb_expose_event_t);
                 HANDLE_WINDOW(EXPOSE);
+
+            } else if constexpr (__sig == XCB_MOTION_NOTIFY) {
+                RE_CAST_EV(xcb_motion_notify_event_t);
+                thread(handle_c_sig<XCB_MOTION_NOTIFY>, C_RETRIVE(e->event), e).detach();
+
             }
 
         }
@@ -3236,9 +3249,10 @@ class __event_handler__ {
                             break;
 
                         }
-                    }
-                    if (e->detail == key_codes.f11) HANDLE_EVENT(EWMH_MAXWIN);
-                    break;
+                    } if (e->detail == key_codes.f11) {
+                        HANDLE_EVENT(EWMH_MAXWIN);
+
+                    } break;
 
                 }
                 case XCB_BUTTON_PRESS:      {
@@ -6985,6 +6999,123 @@ class client {
                 if (__mode & TITLE_REQ_DRAW ) { titlebar.draw_acc_16(win.get_net_wm_name_by_req()); }
                 if (__mode & TITLE_INTR_DRAW) { titlebar.draw_acc_16(win.get_net_wm_name()); }
             }
+
+            #define CLI_RIGHT  screen->width_in_pixels  - this->width
+            #define CLI_BOTTOM screen->height_in_pixels - this->height
+
+            void snap(int x, int y) {
+                for (client *const &c : signal_manager->fixed_client_arr) {
+                    if (c == this) continue;
+                    
+                    if (x > c->x + c->width - N && x < c->x + c->width + N
+                    &&  y + this->height > c->y && y < c->y + c->height) {
+                        if (y > c->y - NC && y < c->y + NC)                                                       {
+                            this->frame.x_y((c->x + c->width), c->y);
+                            return;
+
+                        } /* SNAP WINDOW TO 'RIGHT_TOP' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET */
+                        
+                        if (y + this->height > c->y + c->height - NC && y + this->height < c->y + c->height + NC) {
+                            this->frame.x_y((c->x + c->width), (c->y + c->height) - this->height);
+                            return;
+
+                        } /* SNAP WINDOW TO 'RIGHT_BOTTOM' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET */
+                        
+                        this->frame.x_y((c->x + c->width), y);
+                        return;
+
+                    } /* SNAP WINDOW TO 'RIGHT' BORDER OF 'NON_CONTROLLED' WINDOW */
+                    
+                    if (x + this->width > c->x - N && x + this->width < c->x + N
+                    &&  y + this->height > c->y && y < c->y + c->height) {
+                        if (y > c->y - NC && y < c->y + NC)                                                       {
+                            this->frame.x_y((c->x - this->width), c->y);
+                            return;
+
+                        } /* SNAP WINDOW TO 'LEFT_TOP' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET */
+                        
+                        if (y + this->height > c->y + c->height - NC && y + this->height < c->y + c->height + NC) {
+                            this->frame.x_y((c->x - this->width), (c->y + c->height) - this->height);
+                            return;
+
+                        } /* SNAP WINDOW TO 'LEFT_BOTTOM' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET */
+                        
+                        this->frame.x_y((c->x - this->width), y);
+                        return;
+
+                    } /* SNAP WINDOW TO 'LEFT' BORDER OF 'NON_CONTROLLED' WINDOW */
+                    
+                    if (y > c->y + c->height - N && y < c->y + c->height + N 
+                    &&  x + this->width > c->x && x < c->x + c->width)   {
+                        if (x > c->x - NC && x < c->x + NC)                                                   {
+                            this->frame.x_y(c->x, (c->y + c->height));
+                            return;
+
+                        } /* SNAP WINDOW TO 'BOTTOM_LEFT' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET */
+                        
+                        if (x + this->width > c->x + c->width - NC && x + this->width < c->x + c->width + NC) {
+                            this->frame.x_y(((c->x + c->width) - this->width), (c->y + c->height));
+                            return;
+
+                        } /* SNAP WINDOW TO 'BOTTOM_RIGHT' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET */
+                        
+                        this->frame.x_y(x, (c->y + c->height));
+                        return;
+
+                    } /* SNAP WINDOW TO 'BOTTOM' BORDER OF 'NON_CONTROLLED' WINDOW */
+                    
+                    if (y + this->height > c->y - N && y + this->height < c->y + N     
+                    &&  x + this->width > c->x && x < c->x + c->width)   {
+                        if (x > c->x - NC && x < c->x + NC)                                                       {
+                            this->frame.x_y(c->x, (c->y - this->height));
+                            return;
+
+                        } /* SNAP WINDOW TO 'TOP_LEFT' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET */
+                        
+                        if (x + this->width > c->x + c->width - NC && x + this->width < c->x + c->width + NC) {
+                            this->frame.x_y(((c->x + c->width) - this->width), (c->y - this->height));
+                            return;
+
+                        } /* SNAP WINDOW TO 'TOP_RIGHT' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET */
+                        
+                        this->frame.x_y(x, (c->y - this->height));
+                        return;
+
+                    } /* SNAP WINDOW TO 'TOP' BORDER OF 'NON_CONTROLLED' WINDOW */
+
+                } /* WINDOW TO WINDOW SNAPPING */
+
+                /* WINDOW TO EDGE OF SCREEN SNAPPING */
+                if        (((x < N) && (x > -N)) && ((y < N) && (y > -N)))                                          {
+                    this->frame.x_y(0, 0);
+
+                } else if  ((x < CLI_RIGHT + N && x > CLI_RIGHT - N) && (y < N && y > -N))                          {
+                    this->frame.x_y(CLI_RIGHT, 0);
+
+                } else if  ((y < CLI_BOTTOM + N && y > CLI_BOTTOM - N) && (x < N && x > -N))                        {
+                    this->frame.x_y(0, CLI_BOTTOM);
+
+                } else if  ((x < N) && (x > -N))                                                                    {
+                    this->frame.x_y(0, y);
+
+                } else if   (y < N && y > -N)                                                                       {
+                    this->frame.x_y(x, 0);
+
+                } else if  ((x < CLI_RIGHT + N && x > CLI_RIGHT - N) && (y < CLI_BOTTOM + N && y > CLI_BOTTOM - N)) {
+                    this->frame.x_y(CLI_RIGHT, CLI_BOTTOM);
+
+                } else if  ((x < CLI_RIGHT + N) && (x > CLI_RIGHT - N))                                             {
+                    this->frame.x_y(CLI_RIGHT, y);
+
+                } else if   (y < CLI_BOTTOM + N && y > CLI_BOTTOM - N)                                              {
+                    this->frame.x_y(x, CLI_BOTTOM);
+                    
+                } else {
+                    this->frame.x_y(x, y);
+
+                }
+
+            } /** @brief client to client snaping */
         
         /* Config   */
             void x_y(const uint32_t &x, const uint32_t &y)
@@ -12859,21 +12990,17 @@ class mv_client {
                 ev = xcb_wait_for_event(conn);
                 if (ev == nullptr) continue;
 
-                switch (ev->response_type & ~0x80)
-                {
-                    case XCB_MOTION_NOTIFY:
-                    {
-                        if (isTimeToRender())
-                        {
+                switch (ev->response_type & ~0x80) {
+                    case XCB_MOTION_NOTIFY: {
+                        if (isTimeToRender()) {
                             RE_CAST_EV(xcb_motion_notify_event_t);
                             int new_x = e->root_x - start_x - BORDER_SIZE;
                             int new_y = e->root_y - start_y - BORDER_SIZE;
-                        
                             snap(new_x, new_y);
                             FLUSH_X();
-                        }
+
+                        } break;
                         
-                        break;
                     }
                 
                     case XCB_BUTTON_RELEASE:
