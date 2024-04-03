@@ -14169,8 +14169,6 @@ class Events {
             });
 
             C_SIGNAL(if (__c) {int i = 0; while (true) {
-                if (!__c) break;
-
                 if (!__c->win.is_mapped()) {
                     __c->kill();
                     break;
