@@ -13,7 +13,7 @@
 #include <functional>
 #include <limits>
 #include <type_traits>
-#include <unordered_map>
+// #include <unordered_map>
 #include <utility>
 #include <xcb/xcb_ewmh.h>
 #include <xcb/xproto.h>
