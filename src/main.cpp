@@ -7212,15 +7212,13 @@ class client {
 
             }, this->win);
 
-            CONN(L_MOUSE_BUTTON_EVENT__ALT, if (__window == this->win) {
-                C_EMIT(this, MOVE_CLIENT_ALT);
-
-            }, this->win);
-
             CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->win) {
                 C_EMIT(this, FOCUS_CLIENT);
+                m_pointer->ungrab();
 
             }, this->win);
+
+            CONN(BUTTON_RELEASE, , this->win);
 
             frame.set_event_mask(XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY);
             frame.map();
