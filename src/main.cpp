@@ -7181,15 +7181,14 @@ class client {
             }
 
         /* Unset    */
-            void unset_EWMH_fullscreen_state()
-            {
+            void unset_EWMH_fullscreen_state() {
                 win.unset_EWMH_fullscreen_state();
+
             }
     
     private:
     /* Methods     */
-        void make_frame()
-        {
+        void make_frame() {
             frame.create_window(
                 screen->root,
                 (x - BORDER_SIZE),
@@ -7224,10 +7223,9 @@ class client {
             frame.map();
             CWC(win);
             CWC(frame);
-        }
-    
-        void make_titlebar()
-        {
+
+        }    
+        void make_titlebar() {
             titlebar.create_window(
                 frame,
                 BORDER_SIZE,
@@ -7262,10 +7260,9 @@ class client {
                 C_EMIT(this, MOVE_CLIENT_MOUSE);
                 
             }, this->titlebar);
+
         }
-    
-        void make_close_button()
-        {
+        void make_close_button() {
             this->close_button.create_window(
                 frame,
                 (width - BUTTON_SIZE - BORDER_SIZE),
@@ -7278,8 +7275,7 @@ class client {
                 (int[]){ALL, 1, BLACK},
                 CURSOR::hand2
 
-            );
-            CWC(close_button);
+            ); CWC(close_button);
             close_button.make_then_set_png(USER_PATH_PREFIX("/close.png"), CLOSE_BUTTON_BITMAP);
             
             CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->close_button) {
@@ -7296,10 +7292,9 @@ class client {
                 this->close_button.change_border_color(BLACK);
 
             }, this->close_button);
+
         }
-    
-        void make_max_button()
-        {
+        void make_max_button() {
             max_button.create_window(
                 frame,
                 (width - (BUTTON_SIZE * 2) - BORDER_SIZE),
@@ -7358,10 +7353,9 @@ class client {
                 this->max_button.change_border_color(BLACK);
 
             }, this->max_button);
+
         }
-    
-        void make_min_button()
-        {
+        void make_min_button() {
             min_button.create_window(
                 frame,
                 (width - (BUTTON_SIZE * 3) - BORDER_SIZE),
@@ -7397,9 +7391,7 @@ class client {
             }, this->min_button);
 
         }
-    
-        void make_borders()
-        {
+        void make_borders() {
             border[left].create_window(
                 frame,
                 0,
@@ -7419,6 +7411,7 @@ class client {
                 C_EMIT(this, RESIZE_CLIENT_BORDER_LEFT);
 
             }, this->border[left]);
+            CONN(BUTTON_RELEASE, m_pointer->ungrab();, this->border[left]);
 
             border[right].create_window(
                 frame,
@@ -7562,9 +7555,7 @@ class client {
             }, this->border[bottom_right]);
 
         }
-
-        void set_icon_png()
-        {
+        void set_icon_png() {
             icon.create_window(
                 frame,
                 BORDER_SIZE,
@@ -7580,6 +7571,7 @@ class client {
 
             win.make_png_from_icon();
             icon.set_backround_png(PNG_HASH(win.get_icccm_class()));
+
         }
     
     /* Variables   */
