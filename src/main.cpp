@@ -1121,29 +1121,27 @@ class __window_attr__ {
         uint32_t _window;
 
     /* Methods */
-        xcb_get_window_attributes_cookie_t
-        get_cookie__(uint32_t __window)
-        {
+        xcb_get_window_attributes_cookie_t get_cookie__(uint32_t __window) {
             return xcb_get_window_attributes(conn, __window);
-        }
 
-        void get_reply__()
-        {
+        }
+        void get_reply__() {
             reply = xcb_get_window_attributes_reply(conn, get_cookie__(_window), nullptr);  // Error handling omitted for brevity
+            
         }
     
     public:
         // Constructor
         __window_attr__(uint32_t __window) :
-        _window(__window)
-        {
+        _window(__window) {
             get_reply__();
+
         }
 
         // Destructor
-        ~__window_attr__()
-        {
+        ~__window_attr__() {
             free(reply);  // Free the allocated memory
+
         }
 
         // Deleted copy constructor and copy assignment operator to prevent copying
@@ -3160,7 +3158,8 @@ class __event_handler__ {
 
                         }
                     } if (e->detail == key_codes.f11) {
-                        HANDLE_EVENT(EWMH_MAXWIN);
+                        thread(emit, e->event, EWMH_MAXWIN).detach();
+                        // HANDLE_EVENT(EWMH_MAXWIN);
 
                     } break;
 
@@ -6362,6 +6361,7 @@ class window {
                 if (__border == DOWN ) _border[1] = window;
                 if (__border == LEFT ) _border[2] = window;
                 if (__border == RIGHT) _border[3] = window;
+
             }
             #define CREATE_UP_BORDER(__size, __color)    create_border_window(UP,    __color, 0, 0, _width, __size)
             #define CREATE_DOWN_BORDER(__size, __color)  create_border_window(DOWN,  __color, 0, (_height - __size), _width, __size)
@@ -7097,10 +7097,10 @@ class client {
 
             }, this->win);
 
-            // CONN(DESTROY_NOTIFY, if (__window == this->win) {
-            //     WS_emit(this->win, KILL_SIGNAL);
+            CONN(DESTROY_NOTIFY, if (__window == this->win) {
+                WS_emit(this->win, KILL_SIGNAL);
 
-            // }, this->win);
+            }, this->win);
 
         }    
         void make_titlebar() {
