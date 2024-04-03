@@ -3171,7 +3171,7 @@ class __event_handler__ {
                         }
 
                     } if (e->detail == key_codes.f11) {
-                        HANDLE_EVENT(EWMH_MAXWIN);
+                        // HANDLE_EVENT(EWMH_MAXWIN);
 
                     } return;
 
@@ -3202,70 +3202,70 @@ class __event_handler__ {
                 }
                 case XCB_EXPOSE:{
                     RE_CAST_EV(xcb_expose_event_t);
-                    HANDLE_WINDOW(EXPOSE);
+                    HANDLE_WINDOW(XCB_EXPOSE);
 
                     return;
 
                 }
                 case XCB_PROPERTY_NOTIFY:{
                     RE_CAST_EV(xcb_property_notify_event_t);
-                    thread(handle_event<PROPERTY_NOTIFY>, e->window).detach();
+                    HANDLE_WINDOW(XCB_PROPERTY_NOTIFY);
 
                     return;
 
                 }
                 case XCB_ENTER_NOTIFY:{
                     RE_CAST_EV(xcb_enter_notify_event_t);
-                    thread(handle_event<ENTER_NOTIFY>, e->event).detach();
-                    
+                    HANDLE_EVENT(XCB_ENTER_NOTIFY);
+
                     return;
 
                 }
                 case XCB_LEAVE_NOTIFY:{
                     RE_CAST_EV(xcb_leave_notify_event_t);
-                    thread(handle_event<LEAVE_NOTIFY>, e->event).detach();;
-                    
+                    HANDLE_EVENT(LEAVE_NOTIFY);
+
                     return;
 
                 }
                 case XCB_MAP_REQUEST: {
                     RE_CAST_EV(xcb_map_request_event_t);
-                    thread(handle_event<MAP_REQ>, e->window).detach();
+                    HANDLE_WINDOW(MAP_REQ);
 
                     return;
 
                 }
                 case XCB_MAP_NOTIFY:{
                     RE_CAST_EV(xcb_map_notify_event_t);
-                    thread(handle_event<MAP_NOTIFY>, e->window).detach();
+                    HANDLE_EVENT(MAP_NOTIFY);
 
                     return;
 
                 }
                 case XCB_FOCUS_IN:{
                     RE_CAST_EV(xcb_focus_in_event_t);
-                    thread(handle_event<FOCUS_IN>, e->event).detach();
+                    HANDLE_EVENT(FOCUS_IN);
 
                     return;
 
                 }
                 case XCB_FOCUS_OUT:{
                     RE_CAST_EV(xcb_focus_out_event_t);
-                    thread(emit, e->event, FOCUS_OUT).detach();
+                    HANDLE_EVENT(FOCUS_OUT);
 
                     return;
 
                 }
                 case XCB_DESTROY_NOTIFY:{
                     RE_CAST_EV(xcb_destroy_notify_event_t);
-                    thread(handle_event<DESTROY_NOTIFY>, e->window).detach();
+                    HANDLE_EVENT(FOCUS_OUT);
 
                     return;
 
                 }
                 case XCB_MOTION_NOTIFY:{
                     RE_CAST_EV(xcb_motion_notify_event_t);
-                    thread(handle_event<MOTION_NOTIFY>, e->event).detach();
+                    HANDLE_EVENT(MOTION_NOTIFY);
 
                     return;
 
