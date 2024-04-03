@@ -6447,7 +6447,6 @@ class window {
             }/* Converts a UTF-8 string to an array of xcb_char2b_t for xcb_image_text_16 */
 
 };
-
 class client {
     public:
     /* Sub Classes */
@@ -7444,7 +7443,6 @@ class client {
             {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
         };
 };
-
 class desktop {
     public:
     // Variabels
@@ -7455,8 +7453,8 @@ class desktop {
         const uint16_t y = 0;
         uint16_t width;
         uint16_t height;
-};
 
+};
 class Key_Codes {
     public:
     // constructor and destructor.
@@ -7469,68 +7467,62 @@ class Key_Codes {
         }
 
     // methods.
-        void init()
-        {
-            keysyms = xcb_key_symbols_alloc(conn);
-            if (keysyms)
-            {
-                map<uint32_t, xcb_keycode_t *> key_map = {
-                    { A,            &a         },
-                    { B,            &b         },
-                    { C,            &c         },
-                    { D,            &d         },
-                    { E,            &e         },
-                    { F,            &f         },
-                    { G,            &g         },
-                    { H,            &h         },
-                    { I,            &i         },
-                    { J,            &j         },
-                    { K,            &k         },
-                    { L,            &l         },
-                    { M,            &m         },
-                    { _N,           &n         },
-                    { O,            &o         },
-                    { P,            &p         },
-                    { Q,            &q         },
-                    { R,            &r         },
-                    { S,            &s         },
-                    { T,            &t         },
-                    { U,            &u         },
-                    { V,            &v         },
-                    { W,            &w         },
-                    { _X,           &x         },
-                    { _Y,           &y         },
-                    { Z,            &z         },
+        void init() { keysyms = xcb_key_symbols_alloc(conn);
+            if (keysyms) { map<uint32_t, xcb_keycode_t *> key_map = {
+                { A,            &a         },
+                { B,            &b         },
+                { C,            &c         },
+                { D,            &d         },
+                { E,            &e         },
+                { F,            &f         },
+                { G,            &g         },
+                { H,            &h         },
+                { I,            &i         },
+                { J,            &j         },
+                { K,            &k         },
+                { L,            &l         },
+                { M,            &m         },
+                { _N,           &n         },
+                { O,            &o         },
+                { P,            &p         },
+                { Q,            &q         },
+                { R,            &r         },
+                { S,            &s         },
+                { T,            &t         },
+                { U,            &u         },
+                { V,            &v         },
+                { W,            &w         },
+                { _X,           &x         },
+                { _Y,           &y         },
+                { Z,            &z         },
 
-                    { SPACE_BAR,    &space_bar },
-                    { ENTER,        &enter     },
-                    { DELETE,       &_delete   },
+                { SPACE_BAR,    &space_bar },
+                { ENTER,        &enter     },
+                { DELETE,       &_delete   },
 
-                    { F11,          &f11       },
-                    { N_1,          &n_1       },
-                    { N_2,          &n_2       },
-                    { N_3,          &n_3       },
-                    { N_4,          &n_4       },
-                    { N_5,          &n_5       },
-                    { R_ARROW,      &r_arrow   },
-                    { L_ARROW,      &l_arrow   },
-                    { U_ARROW,      &u_arrow   },
-                    { D_ARROW,      &d_arrow   },
-                    { TAB,          &tab       },
-                    { SUPER_L,      &super_l   },
-                    { MINUS,        &minus     },
-                    { UNDERSCORE,   &underscore}
-                };
-                
-                for (auto &pair : key_map)
-                {
-                    xcb_keycode_t * keycode = xcb_key_symbols_get_keycode(keysyms, pair.first);
-                    if (keycode)
-                    {
-                        *(pair.second) = *keycode;
-                        free(keycode);
-                    }
+                { F11,          &f11       },
+                { N_1,          &n_1       },
+                { N_2,          &n_2       },
+                { N_3,          &n_3       },
+                { N_4,          &n_4       },
+                { N_5,          &n_5       },
+                { R_ARROW,      &r_arrow   },
+                { L_ARROW,      &l_arrow   },
+                { U_ARROW,      &u_arrow   },
+                { D_ARROW,      &d_arrow   },
+                { TAB,          &tab       },
+                { SUPER_L,      &super_l   },
+                { MINUS,        &minus     },
+                { UNDERSCORE,   &underscore}
+
+            }; for (auto &pair : key_map) {
+                xcb_keycode_t * keycode = xcb_key_symbols_get_keycode(keysyms, pair.first);
+                if (keycode) { 
+                    *(pair.second) = *keycode;
+                    free(keycode);
+
                 }
+            }
             }
         }
 
@@ -7549,7 +7541,6 @@ class Key_Codes {
     // variabels.
         xcb_key_symbols_t * keysyms;
 };
-
 class Entry {
     public:
     /* Constructor */
@@ -7583,7 +7574,6 @@ class Entry {
         }
 
 };
-
 class context_menu {
     private:
     /* Variabels */
@@ -7669,7 +7659,6 @@ class context_menu {
         context_menu() { create_dialog_win__(); }
 
 };
-
 class Window_Manager {
     /* Defines     */
         #define INIT_NEW_WM(__inst, __class) \
@@ -8173,8 +8162,7 @@ class Window_Manager {
                 conn = xcb_connect(displayname, screenp);
                 check_conn();
 
-            }
-            void _ewmh() {
+            } void _ewmh() {
                 if (!(ewmh = static_cast<xcb_ewmh_connection_t *>(calloc(1, sizeof(xcb_ewmh_connection_t))))) {
                     loutE << "ewmh faild to initialize" << loutEND;
                     quit(1);
@@ -8187,20 +8175,16 @@ class Window_Manager {
 
                 }
 
-            }
-            void _setup() {
+            } void _setup() {
                 setup = xcb_get_setup(conn);
 
-            }
-            void _iter() {
+            } void _iter() {
                 iter = xcb_setup_roots_iterator(setup);
             
-            }
-            void _screen() {
+            } void _screen() {
                 screen = iter.data;
             
-            }
-            bool setSubstructureRedirectMask() {
+            } bool setSubstructureRedirectMask() {
                 xcb_void_cookie_t cookie = xcb_change_window_attributes_checked(
                     conn,
                     root,
@@ -8219,8 +8203,7 @@ class Window_Manager {
 
                 } return true;
             
-            }
-            void configure_root() {
+            } void configure_root() {
                 root.set_backround_color(DARK_GREY);
                 root.set_event_mask(ROOT_EVENT_MASK);
                 root.grab_keys({
@@ -8238,8 +8221,7 @@ class Window_Manager {
                 #endif
                 root.set_pointer(CURSOR::arrow);
 
-            }
-            void setup_events() {
+            } void setup_events() {
                 signal_manager->_window_signals.conect(root, MAP_REQ, [this](uint32_t __window) -> void {
                     client *c = signal_manager->_window_client_map.retrive(__window);
                     if (c == nullptr) {
@@ -8274,7 +8256,10 @@ class Window_Manager {
                 if (BORDER_SIZE == 0) {
                     signal_manager->emit("SET_EV_CALLBACK__RESIZE_NO_BORDER");
                     
-                }
+                } /* signal_manager->_window_signals.conect(screen->root, EWMH_MAXWIN, [this](uint32_t __w) -> void {
+                    client *c = signal_manager->_window_client_map.retrive(__w);
+                    if (c != nullptr)  
+                }); */
 
             }
 
@@ -14040,6 +14025,12 @@ class Events {
             CONN_root(CONF_REQ_HEIGHT, W_callback -> void { wm->data.height = __window; });
             CONN_root(CONF_REQ_X,      W_callback -> void { wm->data.x      = __window; });
             CONN_root(CONF_REQ_Y,      W_callback -> void { wm->data.y      = __window; });
+
+            signal_manager->_window_signals.conect(screen->root, EWMH_MAXWIN, [this](uint32_t __w) -> void {
+                client *c = signal_manager->_window_client_map.retrive(__w);
+                if (c != nullptr) C_EMIT(c, EWMH_MAXWIN); 
+
+            });
 
         }
 
