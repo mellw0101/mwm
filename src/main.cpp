@@ -3068,7 +3068,7 @@ class __event_handler__ {
         template<> void handle_event<TILE_UP>                  (uint32_t __window) { C_EMIT      (C_RETRIVE(__window) , TILE_UP   );               }
         template<> void handle_event<TILE_DOWN>                (uint32_t __window) { C_EMIT      (C_RETRIVE(__window) , TILE_DOWN );               }
         template<> void handle_event<CYCLE_FOCUS_KEY_PRESS>    (uint32_t __window) { WS_emit_root(CYCLE_FOCUS_KEY_PRESS    , __window);                  }
-        template<> void handle_event<DESTROY_NOTIFY>           (uint32_t __window) { WS_emit_root(DESTROY_NOTIFY           , __window);                  }
+        template<> void handle_event<DESTROY_NOTIFY>           (uint32_t __window) { WS_emit(__window, DESTROY_NOTIFY);                  }
 
         #define HANDLE_EVENT(__type ) thread(handle_event<__type>, e->event ).detach()
         #define HANDLE_WINDOW(__type) thread(handle_event<__type>, e->window).detach()
