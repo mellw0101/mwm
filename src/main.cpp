@@ -3173,7 +3173,7 @@ class __event_handler__ {
 
                 }
                 case XCB_EXPOSE: {
-                    ev_to_sig<XCB_EXPOSE>(ev);
+                    thread(expose, ev).detach();
                     break;
                 
                 }
