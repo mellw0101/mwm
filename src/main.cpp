@@ -1182,20 +1182,16 @@ class __crypto__ {
 
     public:
     /* Methods */
-        vector<unsigned long> hash_str_32_bit_fixed(const string &__input)
-        {
+        vector<unsigned long> hash_str_32_bit_fixed(const string &__input) {
             hash<string> hasher;
             auto hashedValue = hasher(__input);
-
             vector<unsigned long> hashSequence(32);
-            for (size_t i = 0; i < hashSequence.size(); ++i)
-            {
+            for (size_t i = 0; i < hashSequence.size(); ++i) {
                 hashSequence[i] = hashedValue ^ (hashedValue >> (i % (sizeof(size_t) * 8)));
-            }
 
-            return hashSequence;
+            } return hashSequence;
+
         }
-
         string hash_vec_to_str(const vector<unsigned long> &__hash_vec)
         {
             stringstream ss;
@@ -7089,8 +7085,6 @@ class client {
 
             frame.set_event_mask(XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY);
             frame.map();
-            CWC(win);
-            CWC(frame);
 
             CONN(KILL_SIGNAL, if (__window == this->win) { while (this->win.is_mapped())   this->win.kill();
                 while (this->frame.is_mapped()) this->kill();
@@ -7102,6 +7096,8 @@ class client {
 
             }, this->win);
 
+            CWC(frame);
+            CWC(win);
         }    
         void make_titlebar() {
             titlebar.create_window(
