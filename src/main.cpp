@@ -8003,14 +8003,16 @@ class context_menu {
     public:
     // Methods.
         void init() {
-            signal_manager->_window_signals.conect(screen->root, L_MOUSE_BUTTON_EVENT,
-            [this](uint32_t __window) -> void
-            {
-                if (__window == screen->root)
-                {
-                    this->hide__();
-                }
-            });
+            // signal_manager->_window_signals.conect(screen->root, L_MOUSE_BUTTON_EVENT,
+            // [this](uint32_t __window) -> void
+            // {
+            //     if (__window == screen->root)
+            //     {
+            //         this->hide__();
+            //     }
+
+            // });
+            CONN(L_MOUSE_BUTTON_EVENT, if (this->context_window.is_mapped()) this->hide__();, screen->root);
 
             event_handler->setEventCallback(EV_CALL(XCB_ENTER_NOTIFY) {
                 RE_CAST_EV(xcb_enter_notify_event_t);
