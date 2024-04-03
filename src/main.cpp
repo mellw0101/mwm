@@ -3313,12 +3313,6 @@ class __event_handler__ {
                     break;
 
                 }
-                // case XCB_MOTION_NOTIFY:     {
-                //     RE_CAST_EV(xcb_motion_notify_event_t);
-                //     HANDLE_EVENT(MOTION_NOTIFY);
-                //     break;
-
-                // }
                 case XCB_DESTROY_NOTIFY:    {
                     RE_CAST_EV(xcb_destroy_notify_event_t);
                     HANDLE_EVENT(DESTROY_NOTIFY);
