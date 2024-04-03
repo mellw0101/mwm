@@ -3171,7 +3171,7 @@ class __event_handler__ {
                         }
 
                     } if (e->detail == key_codes.f11) {
-                        // thread(handle_event<EWMH_MAXWIN>, e->event).detach();
+                        HANDLE_EVENT(EWMH_MAXWIN);
 
                     } return;
 
@@ -3190,11 +3190,10 @@ class __event_handler__ {
 
                     } else if (e->detail == R_MOUSE_BUTTON) {
                         if (e->state == ALT) {
-                            thread(emit, e->event, R_MOUSE_BUTTON_EVENT__ALT).detach();
-                            return;
+                            HANDLE_EVENT(L_MOUSE_BUTTON_EVENT);
                             
                         } else {
-                            thread(emit, e->event, R_MOUSE_BUTTON_EVENT).detach();
+                            HANDLE_EVENT(R_MOUSE_BUTTON_EVENT);
 
                         } return;
 
@@ -3203,8 +3202,8 @@ class __event_handler__ {
                 }
                 case XCB_EXPOSE:{
                     RE_CAST_EV(xcb_expose_event_t);
-                    thread(handle_event<EXPOSE>, e->window).detach();
-                
+                    HANDLE_WINDOW(EXPOSE);
+
                     return;
 
                 }
