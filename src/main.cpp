@@ -6490,14 +6490,12 @@ class client {
             // client_border_decor() { create_arr(); }
             // DynamicArray<window> border;
             FixedArray<window, 8> border;
-        };
 
-        struct __atoms__ {
+        };struct __atoms__ {
             bool is_modal = false;
             bool has_modal = false;
-        };
 
-        struct __modal_data__ {
+        };struct __modal_data__ {
             uint32_t transient_for = 0;
             uint32_t modal_window = 0;
         };
@@ -6523,12 +6521,9 @@ class client {
         size_pos tile_ogsize;
         size_pos max_ewmh_ogsize;
         size_pos max_button_ogsize;
-
         uint16_t desktop;
         pid_t pid;
-
         bool moving = false;
-
         mutex mtx;
 
     /* Methods     */
