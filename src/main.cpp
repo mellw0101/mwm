@@ -3062,7 +3062,7 @@ class __event_handler__ {
         template<> void handle_event<MOVE_TO_PREV_DESKTOP>     (uint32_t __window) { WS_emit     (screen->root                , MOVE_TO_PREV_DESKTOP);     }
         template<> void handle_event<MOVE_TO_NEXT_DESKTOP_WAPP>(uint32_t __window) { WS_emit_root(MOVE_TO_NEXT_DESKTOP_WAPP , __window);                  }
         template<> void handle_event<MOVE_TO_PREV_DESKTOP_WAPP>(uint32_t __window) { WS_emit_root(MOVE_TO_PREV_DESKTOP_WAPP , __window);                  }
-        template<> void handle_event<MOTION_NOTIFY>            (uint32_t __window) { C_EMIT      (C_RETRIVE(__window) , MOTION_NOTIFY);            }
+        template<> void handle_event<MOTION_NOTIFY>            (uint32_t __window) { WS_emit     (__window , MOTION_NOTIFY);            }
         template<> void handle_event<TILE_RIGHT>               (uint32_t __window) { C_EMIT      (C_RETRIVE(__window) , TILE_RIGHT);               }
         template<> void handle_event<TILE_LEFT>                (uint32_t __window) { C_EMIT      (C_RETRIVE(__window) , TILE_LEFT );               }
         template<> void handle_event<TILE_UP>                  (uint32_t __window) { C_EMIT      (C_RETRIVE(__window) , TILE_UP   );               }
@@ -7231,16 +7231,6 @@ class client {
 
             CONN(DESTROY_NOTIFY, if (__window == this->win) {
                 if (!this->win.is_mapped()) this->kill();
-                // if (c->atoms.is_modal) {
-                //     client *c_trans = C_RETRIVE(c->modal_data.transient_for);
-                //     if (!c_trans) return;
-
-                //     c_trans->focus();
-                //     wm->focused_client = c_trans;
-
-                // }
-                // pid_manager->remove_pid(c->win.pid());
-                // wm->send_sigterm_to_client(c);
 
             }, this->win);
 
@@ -14262,10 +14252,12 @@ class Events {
 
             CONN_root(REPARENT_NOTIFY, W_callback -> void {
                 client *c = C_RETRIVE(__window);
-                if (c == nullptr) return;
-                c->win.x(BORDER_SIZE);
-                c->win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
-                FLUSH_X();
+                if (c != nullptr) {
+                    c->win.x(BORDER_SIZE);
+                    c->win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
+                    FLUSH_X();
+
+                } loutE << "c = nullptr" << loutEND; return;
 
             });
 
