@@ -7739,7 +7739,7 @@ class Entry {
 
             );
             CONN(EXPOSE, if (__window == this->window) this->window.draw_acc(name);, this->window);
-            CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->window && this->action != nullptr) this->action();, this->window);
+            CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->window && this->action != nullptr) this->action(); WS_emit(window.parent(), HIDE_CONTEXT_MENU);, this->window);
             CONN(ENTER_NOTIFY, if (__window == this->window) this->window.change_backround_color(WHITE);, this->window);
             CONN(LEAVE_NOTIFY, if (__window == this->window) this->window.change_backround_color(BLACK);, this->window);
             window.grab_button({ { L_MOUSE_BUTTON, NULL } });
@@ -7769,7 +7769,7 @@ class context_menu {
                 XCB_EVENT_MASK_FOCUS_CHANGE | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY | XCB_EVENT_MASK_POINTER_MOTION,
                 RAISE
 
-            ); CONN_root(L_MOUSE_BUTTON_EVENT, [this](uint32_t __window) -> void { if (__window == screen->root) hide__();});
+            ); CONN(L_MOUSE_BUTTON_EVENT, WS_emit(this->context_window, HIDE_CONTEXT_MENU);, this->context_window);
 
         }
         void hide__() {
