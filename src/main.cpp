@@ -7754,7 +7754,6 @@ class context_menu {
         int16_t  _x = 0, _y = 0;
         uint32_t _width = 120, _height = 20;
 
-        window context_window;
         int border_size = 1;
         vector<Entry>(entries);
 
@@ -7793,6 +7792,8 @@ class context_menu {
         }
     
     public:
+        window context_window;
+    
         void show() {
             _x = m_pointer->x();
             _y = m_pointer->y();
@@ -7819,6 +7820,8 @@ class context_menu {
             context_window.map();
             context_window.raise();
             make_entries__();
+
+            CONN(HIDE_CONTEXT_MENU, this->hide__();, this->context_window);
         }
         void add_entry(string name, function<void()> action) {
             Entry entry;
@@ -8450,7 +8453,7 @@ class Window_Manager {
 
             }
             void setup_events() {
-                CONN_Win(root, L_MOUSE_BUTTON_EVENT, this->unfocus(););
+                CONN_Win(root, L_MOUSE_BUTTON_EVENT, this->unfocus(); WS_emit(this->context_menu->context_window, HIDE_CONTEXT_MENU););
                 CONN_Win(root, R_MOUSE_BUTTON_EVENT, this->context_menu->show(); );
                 CONN_Win(root, MAP_REQ,
                     client *c = signal_manager->_window_client_map.retrive(__window);
