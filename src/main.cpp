@@ -3100,50 +3100,50 @@ class __event_handler__ {
                         }
                         case (SHIFT + CTRL + SUPER): {
                             if (e->detail == key_codes.r_arrow) {
-                                thread(handle_event<MOVE_TO_NEXT_DESKTOP_WAPP>, e->event).detach();
+                                HANDLE_EVENT(MOVE_TO_NEXT_DESKTOP_WAPP);
 
                             } else if (e->detail == key_codes.l_arrow) {
-                                thread(handle_event<MOVE_TO_PREV_DESKTOP_WAPP>, e->event).detach();
+                                HANDLE_EVENT(MOVE_TO_PREV_DESKTOP_WAPP);
 
                             } return;
 
                         }
                         case (SHIFT + ALT): {
                             if (e->detail == key_codes.q) {
-                                thread(handle_event<QUIT_KEY_PRESS>, e->event).detach();
+                                HANDLE_EVENT(QUIT_KEY_PRESS);
 
                             } return;
 
                         }
                         case ALT: {
                             if (e->detail == key_codes.n_1) {
-                                thread(handle_event<MOVE_TO_DESKTOP_1>).detach();
+                                HANDLE_EVENT(MOVE_TO_DESKTOP_1);
 
                             } else if (e->detail == key_codes.n_2) {
-                                thread(handle_event<MOVE_TO_DESKTOP_2>).detach();
-                                
-                            } else if (e->detail == key_codes.n_3) {
-                                thread(handle_event<MOVE_TO_DESKTOP_3>).detach(); 
+                                HANDLE_EVENT(MOVE_TO_DESKTOP_2);
 
+                            } else if (e->detail == key_codes.n_3) {
+                                HANDLE_EVENT(MOVE_TO_DESKTOP_3);
+                                
                             } else if (e->detail == key_codes.n_4) {
-                                thread(handle_event<MOVE_TO_DESKTOP_4>).detach();
+                                HANDLE_EVENT(MOVE_TO_DESKTOP_4);
 
                             } else if (e->detail == key_codes.n_5) {
-                                thread(handle_event<MOVE_TO_DESKTOP_5>).detach();
-
+                                HANDLE_EVENT(MOVE_TO_DESKTOP_5);
+                                
                             } else if (e->detail == key_codes.tab) {
-                                thread(handle_event<CYCLE_FOCUS_KEY_PRESS>, e->event).detach();
+                                HANDLE_EVENT(CYCLE_FOCUS_KEY_PRESS);
 
                             } return;
 
                         }
                         case (CTRL + SUPER): {
                             if (e->detail == key_codes.r_arrow) {
-                                thread(handle_event<MOVE_TO_NEXT_DESKTOP>, e->event).detach();
+                                HANDLE_EVENT(MOVE_TO_NEXT_DESKTOP);
 
                             }
                             if (e->detail == key_codes.l_arrow) {
-                                thread(handle_event<MOVE_TO_PREV_DESKTOP>, e->event).detach();
+                                HANDLE_EVENT(MOVE_TO_PREV_DESKTOP);
 
                             }
                             
