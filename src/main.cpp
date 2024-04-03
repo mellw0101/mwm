@@ -8238,17 +8238,12 @@ class Window_Manager {
                     this->context_menu->show();
                 
                 );
-                // CONN_Win(root, XCB_MAP_REQUEST,
-                //     this->manage_new_client(__window);
-
-                // );
                 CONN_Win(root, MAP_NOTIFY,
                     client *c = signal_manager->_window_client_map.retrive(__window);
                     if (!c) return;
                     c->update();
 
                 );
-
                 CONN_Win(root, TERM_KEY_PRESS, this->launcher.launch_child_process("konsole"););
                 CONN_Win(root, QUIT_KEY_PRESS, this->quit(0););
                 CONN_root(CYCLE_FOCUS_KEY_PRESS, W_callback -> void { this->cycle_focus(); });
@@ -8311,13 +8306,11 @@ class Window_Manager {
 
                 }
 
-            }
-            void check_conn() {
+            } void check_conn() {
                 int status = xcb_connection_has_error(conn);
                 check_error(status);
             
-            }
-            int cookie_error(xcb_void_cookie_t cookie , const char *sender_function) {
+            } int cookie_error(xcb_void_cookie_t cookie , const char *sender_function) {
                 xcb_generic_error_t *err = xcb_request_check(conn, cookie);
                 uint8_t err_code = 0;
                 if (err) {
@@ -8326,8 +8319,7 @@ class Window_Manager {
 
                 } return err_code;
             
-            }
-            void check_error(xcb_void_cookie_t cookie , const char *sender_function, const char *err_msg) {
+            } void check_error(xcb_void_cookie_t cookie , const char *sender_function, const char *err_msg) {
                 xcb_generic_error_t * err = xcb_request_check(conn, cookie);
                 if (err) {
                     log_error_code(err_msg, err->error_code);
@@ -8346,8 +8338,7 @@ class Window_Manager {
                 } vec.clear();
                 vector<client *>().swap(vec);
             
-            }
-            void delete_desktop_vec(vector<desktop *> &vec) {
+            } void delete_desktop_vec(vector<desktop *> &vec) {
                 for (desktop *d : vec) {
                     delete_client_vec(d->current_clients);
                     delete d;
@@ -8355,19 +8346,15 @@ class Window_Manager {
                 } vec.clear();
                 vector<desktop *>().swap(vec);
                 
-            }
-            template <typename Type> 
-            static void delete_ptr_vector(vector<Type *>& vec) {
+            } template <typename Type> static void delete_ptr_vector(vector<Type *>& vec) {
                 for (Type *ptr : vec) {
                     delete ptr;
 
-                } vec.clear();
-                vector<Type *>().swap(vec);
+                } vec.clear(); vector<Type *>().swap(vec);
 
-            }
-            void remove_client_from_vector(client * c, vector<client *> &vec) {
+            } void remove_client_from_vector(client * c, vector<client *> &vec) {
                 if (c == nullptr) {
-                    log_error("client is nullptr.");
+                    loutE << "client is nullptr." << loutEND;
                     return;
 
                 } vec.erase(std::remove(
@@ -8376,7 +8363,6 @@ class Window_Manager {
                     c
                 
                 ), vec.end());
-
                 delete c;
 
             }
