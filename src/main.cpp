@@ -14660,7 +14660,7 @@ class Events {
 
             }, MOVE_CLIENT_ALT);
 
-            C_SIGNAL(if (__c) mv_client(&*__c, wm->pointer.x(), wm->pointer.y());, MOVE_CLIENT_MOUSE);
+            C_SIGNAL(if (__c) mv_client(&*__c, 200, 200);, MOVE_CLIENT_MOUSE);
 
             C_SIGNAL(if (__c) resize_client(__c, 0);, CLIENT_RESIZE_ALT);
 
