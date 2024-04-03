@@ -7224,9 +7224,8 @@ class client {
             CWC(win);
             CWC(frame);
 
-            CONN(KILL_SIGNAL, if (__window == this->win) {
-                while (this->win.is_mapped())   this->win.kill();
-                while (this->frame.is_mapped()) this->frame.kill();
+            CONN(KILL_SIGNAL, if (__window == this->win) { while (this->win.is_mapped())   this->win.kill();
+                while (this->frame.is_mapped()) this->kill();
 
             }, this->win);
 
