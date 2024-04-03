@@ -763,63 +763,57 @@ namespace {
 
         /* Methods */
             template<enum_signal_t __enum_signal, typename Callback>
-            void connect(Callback &&callback, uint32_t key)
-            {
-                if constexpr (__enum_signal == SET_EV_CALLBACK__RESIZE_NO_BORDER)
-                {
+            void connect(Callback &&callback, uint32_t key) {
+                if constexpr (__enum_signal == SET_EV_CALLBACK__RESIZE_NO_BORDER) {
                     signalMap[key].emplace_back(SET_EV_CALLBACK__RESIZE_NO_BORDER, std::forward<Callback>(callback));
+
+                } else if constexpr (__enum_signal == HIDE_DOCK) {
+                    signalMap[key].emplace_back(HIDE_DOCK, std::forward<Callback>(callback));
+
                 }
 
-                if constexpr (__enum_signal == HIDE_DOCK)
-                {
-                    signalMap[key].emplace_back(HIDE_DOCK, std::forward<Callback>(callback));
-                }
             }
 
             template<enum_signal_t __enum_signal>
-            void emit(uint32_t key)
-            {
+            void emit(uint32_t key) {
                 auto it = signalMap.find(key);
-                if (it != signalMap.end())
-                {
-                    for (auto &pair : it->second)
-                    {
-                        CONSTEXPR_TYPE(int , signal_id, __enum_signal);
-                        if (pair.first == signal_id)
-                        {
+                if (it != signalMap.end()) {
+                    for (auto &pair : it->second) {
+                        CONSTEXPR_TYPE(int , signal_id, __enum_signal); 
+                        if (pair.first == signal_id) {
                             pair.second();
+                            
                         }
+
                     }
+
                 }
+
             }
 
             template<int __event>
-            void remove(uint32_t __key)
-            {
+            void remove(uint32_t __key) {
                 auto key = signalMap.find(__key);
 
-                if
-                (key != signalMap.end())
-                {
-                    if
-                    constexpr (__event == 0)
-                    {
+                if (key != signalMap.end()) {
+                    if constexpr (__event == 0) {
                         signalMap.erase(key);
-                    }
-                    else
-                    {
-                        for
-                        (int i = 0; i < signalMap[__event].size(); ++i)
-                        {
-                            if
-                            constexpr (signalMap[__event][i].first == __event)
-                            {
+
+                    } else {
+                        for (int i = 0; i < signalMap[__event].size(); ++i) {
+                            if constexpr (signalMap[__event][i].first == __event) {
                                 remove_element_from_vec(signalMap[__event], i);
+                                
                             }
+
                         }
+
                     }
+
                 }
+
             }
+
     };
 
     template<> /* for windows to pass the window as well */
@@ -1240,17 +1234,10 @@ class __crypto__ {
 namespace fs = filesystem;
 class __file_system__ {
     /* Defines */
-        #define FS_ACC(__folder, __sub_path) \
-            file_system->accessor(__folder, __sub_path)
-
-        #define ICONFOLDER \
-            __file_system__::ICON_FOLDER
-
-        #define ICON_FOLDER_HASH(__class) \
-            FS_ACC(ICONFOLDER, HASH(__class))
-
-        #define PNG_HASH(__class) \
-            FS_ACC(ICONFOLDER, HASH(__class) + "/" + HASH("png"))
+        #define FS_ACC(__folder, __sub_path) file_system->accessor(__folder, __sub_path)
+        #define ICONFOLDER __file_system__::ICON_FOLDER
+        #define ICON_FOLDER_HASH(__class) FS_ACC(ICONFOLDER, HASH(__class))
+        #define PNG_HASH(__class) FS_ACC(ICONFOLDER, HASH(__class) + "/" + HASH("png"))
 
     private:
     /* Variabels */
@@ -1260,42 +1247,28 @@ class __file_system__ {
 
     public:
     /* Variabels */
-        string
-            config_folder = USER_PATH_PREFIX("/.config/mwm"),
-            icon_folder = config_folder + "/icons";
-
-        bool status;
-
+        string config_folder = USER_PATH_PREFIX("/.config/mwm"), icon_folder = config_folder + "/icons"; bool status;
         typedef enum : uint8_t {
             CONDIG_FOLDER,
             ICON_FOLDER
         } accessor_t;
     
     /* Methods */
-        void create(const string &__path, create_type_t __type = FOLDER)
-        {
-            if (__type == FOLDER)
-            {
+        void create(const string &__path, create_type_t __type = FOLDER) {
+            if (__type == FOLDER) {
                 bool create_bool = false;
 
-                if (!fs::exists(__path))
-                {
+                if (!fs::exists(__path)) {
                     loutI << "dir:" << loutPath(__path) << " does not exist creating dir" << '\n';    
-                    try 
-                    {
-                        create_bool = fs::create_directory(__path);   
-                    }
-                    catch (exception &__e)
-                    {
-                        loutE << "Failed to create dir:" << loutPath(__path) << " error: " << __e.what() << "\n";
-                        status = false;
-                    }
+                    try { create_bool = fs::create_directory(__path); 
+                    } catch (exception &__e) { loutE << "Failed to create dir:" << loutPath(__path) << " error: " << __e.what() << "\n"; status = false; }
 
-                    if (create_bool == true)
-                    {
+                    if (create_bool == true) {
                         loutI << "Successfully created dir:" << loutPath(__path) << '\n';
                         status = true;
+
                     }
+
                 }
 
                 if (!fs::is_directory(__path))
@@ -1335,31 +1308,24 @@ class __file_system__ {
                 }
             }
         }
-
-        void init_check()
-        {
+        void init_check() {
             create(config_folder);
             create(icon_folder);
-        }
 
-        bool check_status()
-        {
+        }
+        bool check_status() {
             return status;
+
         }
-
-        string accessor(accessor_t __folder, const string &__sub_path)
-        {
-            if (__folder == CONDIG_FOLDER)
-            {
+        string accessor(accessor_t __folder, const string &__sub_path)  {
+            if (__folder == CONDIG_FOLDER) {
                 return (config_folder + "/" + __sub_path);
-            }
-            
-            if (__folder == ICON_FOLDER)
-            {
-                return (icon_folder + "/" + __sub_path);
-            }
 
-            return string();
+            } else if (__folder == ICON_FOLDER) {
+                return (icon_folder + "/" + __sub_path);
+
+            } return string();
+
         }
 
 }; static __file_system__ *file_system(nullptr);
@@ -1481,16 +1447,14 @@ class __net_logger__ {
 #endif
 
 struct size_pos {
-    int16_t x, y;
-    uint16_t width, height;
-
-    void save(const int & x, const int & y, const int & width, const int & height)
-    {
+    void save(const int & x, const int & y, const int & width, const int & height) {
         this->x = x;
         this->y = y;
         this->width = width;
         this->height = height;
-    }
+
+    } int16_t x, y; uint16_t width, height;
+
 };
 
 class mxb {
@@ -1776,19 +1740,18 @@ class mxb {
 class pointer {
     public:
     /* Methods   */
-        int16_t x()
-        {
+        int16_t x() {
             xcb_query_pointer_cookie_t cookie = xcb_query_pointer(conn, screen->root);
             xcb_query_pointer_reply_t *reply = xcb_query_pointer_reply(conn, cookie, nullptr);
-            if (!reply)
-            {
+            if (!reply) {
                 loutE << "reply is nullptr" << loutEND;
                 return 0;
-            }
 
-            int16_t x = reply->root_x;
+            } int16_t x = reply->root_x;
+            
             free(reply);
             return x;
+
         }
 
         int16_t y()
@@ -3114,17 +3077,20 @@ class __event_handler__ {
                     switch (e->state) {
                         case (CTRL + ALT): {
                             if (e->detail == key_codes.t) HANDLE_EVENT(TERM_KEY_PRESS);
+                            
                             break;
 
                         }
                         case (SHIFT + CTRL + SUPER): {
                             if (e->detail == key_codes.r_arrow) HANDLE_EVENT(MOVE_TO_NEXT_DESKTOP_WAPP);
                             if (e->detail == key_codes.l_arrow) HANDLE_EVENT(MOVE_TO_PREV_DESKTOP_WAPP);
+                            
                             break;
 
                         }
-                        case SHIFT | ALT: {
+                        case (SHIFT + ALT): {
                             if (e->detail == key_codes.q) HANDLE_EVENT(QUIT_KEY_PRESS);
+                            
                             break;
 
                         }
@@ -3135,12 +3101,14 @@ class __event_handler__ {
                             if (e->detail == key_codes.n_4) HANDLE_EVENT(MOVE_TO_DESKTOP_4);
                             if (e->detail == key_codes.n_5) HANDLE_EVENT(MOVE_TO_DESKTOP_5);
                             if (e->detail == key_codes.tab) HANDLE_EVENT(CYCLE_FOCUS_KEY_PRESS);
+                            
                             break;
 
                         }
-                        case CTRL | SUPER: {
+                        case (CTRL + SUPER): {
                             if (e->detail == key_codes.r_arrow) HANDLE_EVENT(MOVE_TO_NEXT_DESKTOP);
                             if (e->detail == key_codes.l_arrow) HANDLE_EVENT(MOVE_TO_PREV_DESKTOP);
+                            
                             break;
 
                         }
@@ -3150,10 +3118,13 @@ class __event_handler__ {
                             if (e->detail == key_codes.u_arrow) HANDLE_EVENT(TILE_UP);
                             if (e->detail == key_codes.d_arrow) HANDLE_EVENT(TILE_DOWN);
                             if (e->detail == key_codes.k) HANDLE_ROOT(DEBUG_KEY_PRESS);
+                            
                             break;
 
                         }
-                    } if (e->detail == key_codes.f11) {
+
+                    }
+                    if (e->detail == key_codes.f11) {
                         thread(emit, e->event, EWMH_MAXWIN).detach();
                         // HANDLE_EVENT(EWMH_MAXWIN);
 
@@ -3203,7 +3174,7 @@ class __event_handler__ {
                 }
                 case XCB_MAP_REQUEST:       {
                     RE_CAST_EV(xcb_map_request_event_t);
-                    thread(handle_event<XCB_MAP_REQUEST>, e->window).detach();
+                    thread(emit, screen->root, MAP_REQ, e->window).detach();
                     // HANDLE_WINDOW(XCB_MAP_REQUEST);
                     break; 
 
@@ -3227,6 +3198,7 @@ class __event_handler__ {
                 case XCB_DESTROY_NOTIFY:    {
                     RE_CAST_EV(xcb_destroy_notify_event_t);
                     HANDLE_EVENT(DESTROY_NOTIFY);
+
                     break;
 
                 }
