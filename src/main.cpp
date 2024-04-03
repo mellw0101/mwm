@@ -943,14 +943,14 @@ namespace {
                 _data[__window] = __c;
 
             }
-
             client *retrive(uint32_t __window) {
                 auto it = _data.find(__window);
-                if (it == _data.end()) return nullptr;
-                return it->second;
+                if (it != _data.end()) {
+                    return it->second;
 
-            }
+                } return nullptr;
 
+            }/** @brief @returns @p 'client' from uint32_t */
             void remove(uint32_t __window) {
                 _data.erase(__window);
 
@@ -3012,10 +3012,11 @@ class __event_handler__ {
         template<uint8_t __sig>
         static void handle_event(uint32_t __w) { WS_emit(__w, __sig); }
         
-        template<> void handle_event<XCB_MAP_REQUEST>  (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, XCB_MAP_REQUEST, __w);}
-        template<> void handle_event<XCB_LEAVE_NOTIFY> (uint32_t __w) { signal_manager->_window_signals.emit(__w, XCB_LEAVE_NOTIFY);}
-        template<> void handle_event<XCB_EXPOSE>       (uint32_t __w) { signal_manager->_window_signals.emit(__w, XCB_EXPOSE);}
-        template<> void handle_event<XCB_MAP_NOTIFY>   (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, XCB_MAP_NOTIFY, __w);}
+        template<> void handle_event<XCB_MAP_REQUEST>    (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, XCB_MAP_REQUEST, __w);}
+        template<> void handle_event<XCB_LEAVE_NOTIFY>   (uint32_t __w) { signal_manager->_window_signals.emit(__w, XCB_LEAVE_NOTIFY);}
+        template<> void handle_event<XCB_EXPOSE>         (uint32_t __w) { signal_manager->_window_signals.emit(__w, XCB_EXPOSE);}
+        template<> void handle_event<XCB_MAP_NOTIFY>     (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, XCB_MAP_NOTIFY, __w);}
+        template<> void handle_event<XCB_PROPERTY_NOTIFY>(uint32_t __w) {}
  
         template<> void handle_event<EWMH_MAXWIN>              (uint32_t __window) { C_EMIT      (C_RETRIVE(__window)  , EWMH_MAXWIN);             }
         template<> void handle_event<TERM_KEY_PRESS>           (uint32_t __window) { WS_emit_Win (screen->root                , TERM_KEY_PRESS, 0);    }
@@ -3185,23 +3186,23 @@ class __event_handler__ {
                 }
                 case XCB_PROPERTY_NOTIFY:   {
                     RE_CAST_EV(xcb_property_notify_event_t);
-                    HANDLE_WINDOW(PROPERTY_NOTIFY);
+                    thread(this->lambda, e->window, XCB_PROPERTY_NOTIFY).detach();
                     break;
 
                 }
-                case XCB_ENTER_NOTIFY: {
+                case XCB_ENTER_NOTIFY:      {
                     RE_CAST_EV(xcb_enter_notify_event_t);
                     thread(handle_event<XCB_ENTER_NOTIFY>, e->event).detach();
                     break;
 
                 }
-                case XCB_LEAVE_NOTIFY:{
+                case XCB_LEAVE_NOTIFY:      {
                     RE_CAST_EV(xcb_leave_notify_event_t);
                     thread(handle_event<XCB_LEAVE_NOTIFY>, e->event).detach();;
                     break;
 
                 }
-                case XCB_MAP_REQUEST: {
+                case XCB_MAP_REQUEST:       {
                     RE_CAST_EV(xcb_map_request_event_t);
                     thread(handle_event<XCB_MAP_REQUEST>, e->window).detach();
                     // HANDLE_WINDOW(XCB_MAP_REQUEST);
@@ -3214,12 +3215,12 @@ class __event_handler__ {
                     break;
 
                 }
-                case XCB_FOCUS_IN:  {
+                case XCB_FOCUS_IN:          {
                     RE_CAST_EV(xcb_focus_in_event_t);
                     thread(handle_event<XCB_FOCUS_IN>, e->event).detach();
 
                 }
-                case XCB_FOCUS_OUT: {
+                case XCB_FOCUS_OUT:         {
                     RE_CAST_EV(xcb_focus_out_event_t);
                     thread(handle_event<XCB_FOCUS_IN>, e->event).detach();
 
@@ -3241,9 +3242,14 @@ class __event_handler__ {
             }
 
         }
+        static constexpr auto const &lambda = [](uint32_t __w, uint8_t __sig, uint32_t __w2) -> void {
+            signal_manager->_window_signals.emit(__w, __sig, __w2);
+
+        };
         static constexpr auto const &map_req = [](xcb_generic_event_t *ev) -> void {
             RE_CAST_EV(xcb_map_request_event_t);
             signal_manager->_window_signals.emit(screen->root, XCB_MAP_REQUEST, e->window);
+
 
         };
         static constexpr auto const &expose = [](xcb_generic_event_t *ev) -> void {
