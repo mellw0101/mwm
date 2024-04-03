@@ -7224,27 +7224,8 @@ class client {
             CWC(win);
             CWC(frame);
 
-            CONN(KILL_SIGNAL, if (__window == this->win) {
-                if (!this->win.is_mapped()) {
-                    this->kill();
-
-                }
-                else {
-                    this->win.kill();
-
-                }
-
-            }, this->win);
-
-            CONN(DESTROY_NOTIFY, if (__window == this->win) {
-                if (!this->win.is_mapped()) {
-                    this->kill();
-
-                }
-                else {
-                    this->win.kill();
-
-                }
+            CONN(KILL_SIGNAL, if (__window == this->win) { while (this->win.is_mapped()) this->win.kill();
+                this->kill();
 
             }, this->win);
 
