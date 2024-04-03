@@ -6585,34 +6585,28 @@ class client {
                 //     border[bottom_right]
                 // });
             
-            }
-            void raise() {
+            } void raise() {
                 frame.raise();
 
-            }        
-            void focus() {
+            } void focus() {
                 win.focus_input();
                 win.set_active_EWMH_window();
                 frame.raise();
 
-            }
-            void update() {
+            } void update() {
                 x = frame.x();
                 y = frame.y();
                 width = frame.width();
                 height = frame.height();
                 win.send_event(XCB_EVENT_MASK_STRUCTURE_NOTIFY, (uint32_t[]){(static_cast<uint32_t>(x) + BORDER_SIZE), (static_cast<uint32_t>(y) + (TITLE_BAR_HEIGHT + BORDER_SIZE)), win.width(), win.height()});
         
-            }
-            void map() {
+            } void map() {
                 frame.map();
         
-            }
-            void unmap() {
+            } void unmap() {
                 frame.unmap();
         
-            }
-            void kill() {
+            } void kill() {
                 frame.unmap();
                 win.unmap();
                 close_button.unmap();
@@ -6671,21 +6665,18 @@ class client {
                 border[bottom_right].kill();
                 frame.kill();
 
-            }
-            template<typename Callback>
+            } template<typename Callback>
             void setup_CLI_SIG(int __signal_type_id, Callback &&callback){
                 signal_manager->client_signals.connect(this, __signal_type_id, callback);
             
-            }
-            template<typename Callback>
+            } template<typename Callback>
             void setup_C_SIG(int __signal_type_id, Callback &&callback) {
                 C_SIG(this,
                 
 
                 ,BUTTON_MAXWIN_PRESS);
 
-            }
-            void align() {
+            } void align() {
                 win.x(BORDER_SIZE);
                 win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
                 FLUSH_X();
@@ -6819,16 +6810,13 @@ class client {
             void x_y(const uint32_t &x, const uint32_t &y) {
                 frame.x_y(x, y);
                 // frame.configure(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, (uint32_t[2]){x, y});
-            }
-            void _x(int16_t x) {
+            } void _x(int16_t x) {
                 frame.x(x);
         
-            }
-            void _y(int16_t y) {
+            } void _y(int16_t y) {
                 frame.y(y);
         
-            }
-            void _width(uint16_t width) {
+            } void _width(uint16_t width) {
                 win.width((width - (BORDER_SIZE * 2)));
                 xcb_flush(conn);
                 frame.width((width));
@@ -6843,8 +6831,7 @@ class client {
                 border[bottom_right].x((width - BORDER_SIZE));
                 xcb_flush(conn);
         
-            }
-            void _height(const uint32_t &height) {
+            } void _height(const uint32_t &height) {
                 win.height((height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
                 frame.height(height);
                 border[left].height((height - (BORDER_SIZE * 2)));
@@ -6853,8 +6840,7 @@ class client {
                 border[bottom_left].y((height - BORDER_SIZE));
                 border[bottom_right].y((height - BORDER_SIZE));
         
-            }
-            void x_width(const uint32_t &x, const uint32_t &width) {
+            } void x_width(const uint32_t &x, const uint32_t &width) {
                 win.width((width - (BORDER_SIZE * 2)));
                 frame.x_width(x, width);
                 titlebar.width((width - (BORDER_SIZE * 2)));
@@ -6868,8 +6854,7 @@ class client {
                 border[bottom_right].x((width - BORDER_SIZE));
                 xcb_flush(conn);
         
-            }
-            void y_height(const uint32_t & y, const uint32_t & height) {
+            } void y_height(const uint32_t & y, const uint32_t & height) {
                 win.height((height - TITLE_BAR_HEIGHT) - (BORDER_SIZE * 2));
                 xcb_flush(conn);
                 frame.y_height(y, height);
@@ -6880,8 +6865,7 @@ class client {
                 border[bottom_right].y((height - BORDER_SIZE));
                 xcb_flush(conn);
         
-            }
-            void x_width_height(const uint32_t &x, const uint32_t &width, const uint32_t &height) {
+            } void x_width_height(const uint32_t &x, const uint32_t &width, const uint32_t &height) {
                 frame.x_width_height(x, width, height);
                 win.width_height((width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
                 titlebar.width((width - (BORDER_SIZE * 2)));
@@ -6896,8 +6880,7 @@ class client {
                 border[bottom_left].y((height - BORDER_SIZE));
                 border[bottom_right].x_y((width - BORDER_SIZE), (height - BORDER_SIZE));
         
-            }
-            void y_width_height(const uint32_t &y, const uint32_t &width, const uint32_t &height) {
+            } void y_width_height(const uint32_t &y, const uint32_t &width, const uint32_t &height) {
                 frame.y_width_height(y, width, height);
                 win.width_height((width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
                 titlebar.width((width - BORDER_SIZE * 2));
@@ -6912,8 +6895,7 @@ class client {
                 border[bottom_left].y((height - BORDER_SIZE));
                 border[bottom_right].x_y((width - BORDER_SIZE), (height - BORDER_SIZE));
         
-            }
-            void x_y_width_height(const uint32_t &x, const uint32_t &y, const uint32_t &width, const uint32_t &height) {
+            } void x_y_width_height(const uint32_t &x, const uint32_t &y, const uint32_t &width, const uint32_t &height) {
                 win.width_height((width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
                 xcb_flush(conn);
                 frame.x_y_width_height(x, y, width, height);
@@ -6930,8 +6912,7 @@ class client {
                 border[bottom_left].y((height - BORDER_SIZE));
                 xcb_flush(conn);
         
-            }
-            void width_height(const uint32_t &width, const uint32_t &height) {
+            } void width_height(const uint32_t &width, const uint32_t &height) {
                 win.width_height((width - (BORDER_SIZE * 2)), (height - (BORDER_SIZE * 2) - TITLE_BAR_HEIGHT));
                 xcb_flush(conn);
                 frame.width_height(width, height);
@@ -6954,16 +6935,13 @@ class client {
             void save_ogsize() {
                 ogsize.save(x, y, width, height);
 
-            }
-            void save_tile_ogsize() {
+            } void save_tile_ogsize() {
                 tile_ogsize.save(x, y, width, height);
 
-            }
-            void save_max_ewmh_ogsize() {
+            } void save_max_ewmh_ogsize() {
                 max_ewmh_ogsize.save(x, y, width, height);
         
-            }
-            void save_max_button_ogsize() {
+            } void save_max_button_ogsize() {
                 max_button_ogsize.save(x, y, width, height);
 
             }
@@ -6972,12 +6950,10 @@ class client {
             bool is_active_EWMH_window() {
                 return win.is_active_EWMH_window();
         
-            }
-            bool is_EWMH_fullscreen() {
+            } bool is_EWMH_fullscreen() {
                 return win.is_EWMH_fullscreen();
         
-            }
-            bool is_button_max_win() {
+            } bool is_button_max_win() {
                 if (x      == -BORDER_SIZE
                 &&  y      == -BORDER_SIZE
                 &&  width  == (screen->width_in_pixels  + (BORDER_SIZE * 2))
@@ -6992,12 +6968,10 @@ class client {
             void set_active_EWMH_window() {
                 win.set_active_EWMH_window();
     
-            }
-            void set_EWMH_fullscreen_state() {
+            } void set_EWMH_fullscreen_state() {
                 win.set_EWMH_fullscreen_state();
 
-            }
-            void set_client_params() {
+            } void set_client_params() {
                 win.set_client_size_as_hints(&x, &y, &width, &height);
                 if (win.get_min_width()  > width
                 &&  win.get_min_height() > height) {
@@ -7008,16 +6982,14 @@ class client {
             }
 
         /* Get      */
-            void get_window_parameters()
-            {
+            void get_window_parameters() {
                 xcb_get_geometry_cookie_t cookie = xcb_get_geometry(conn, win);
                 xcb_get_geometry_reply_t *reply = xcb_get_geometry_reply(conn, cookie, nullptr);
-                if (reply == nullptr)
-                {
+                if (reply == nullptr) {
                     loutE << "Unable to get window geometry" << '\n';
                     return;
-                }
-            
+
+                }            
                 x      = reply->x;
                 y      = reply->y;
                 width  = reply->width;
@@ -7029,10 +7001,8 @@ class client {
                 // loutI << "reply->height" << reply->height << '\n';
 
                 free(reply);
-            }
 
-            void get_window_parameters_and_log()
-            {
+            } void get_window_parameters_and_log() {
                 xcb_get_geometry_cookie_t cookie = xcb_get_geometry(conn, win);
                 xcb_get_geometry_reply_t *reply = xcb_get_geometry_reply(conn, cookie, nullptr);
                 if (reply == nullptr)
@@ -7066,8 +7036,7 @@ class client {
                 (height + TITLE_BAR_HEIGHT + (BORDER_SIZE * 2)),
                 DARK_GREY
 
-            );
-            win.reparent(frame, BORDER_SIZE, (TITLE_BAR_HEIGHT + BORDER_SIZE));
+            ); win.reparent(frame, BORDER_SIZE, (TITLE_BAR_HEIGHT + BORDER_SIZE));
     
             CONN(FOCUS_IN, if (__window == this->win) {
                 this->win.ungrab_button({{L_MOUSE_BUTTON, NULL}});
@@ -7080,13 +7049,13 @@ class client {
 
             }, this->win);
 
-            CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->win) {
-                C_EMIT(this, FOCUS_CLIENT);
-                m_pointer->ungrab();
+            // CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->win) {
+            //     C_EMIT(this, FOCUS_CLIENT);
+            //     m_pointer->ungrab();
 
-            }, this->win);
+            // }, this->win);
 
-            CONN(BUTTON_RELEASE, , this->win);
+            // CONN(BUTTON_RELEASE, , this->win);
 
             frame.set_event_mask(XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY);
             frame.map();
@@ -7097,14 +7066,14 @@ class client {
             }, this->win);
 
             CONN(DESTROY_NOTIFY, if (__window == this->win) {
-                WS_emit(this->win, KILL_SIGNAL);
+                // WS_emit(this->win, KILL_SIGNAL);
 
             }, this->win);
 
             CWC(frame);
             CWC(win);
-        }    
-        void make_titlebar() {
+        
+        } void make_titlebar() {
             titlebar.create_window(
                 frame,
                 BORDER_SIZE,
@@ -7140,8 +7109,7 @@ class client {
                 
             }, this->titlebar);
 
-        }
-        void make_close_button() {
+        } void make_close_button() {
             this->close_button.create_window(
                 frame,
                 (width - BUTTON_SIZE - BORDER_SIZE),
@@ -7181,8 +7149,7 @@ class client {
 
             }, this->close_button);
 
-        }
-        void make_max_button() {
+        } void make_max_button() {
             max_button.create_window(
                 frame,
                 (width - (BUTTON_SIZE * 2) - BORDER_SIZE),
@@ -7242,8 +7209,7 @@ class client {
 
             }, this->max_button);
 
-        }
-        void make_min_button() {
+        } void make_min_button() {
             min_button.create_window(
                 frame,
                 (width - (BUTTON_SIZE * 3) - BORDER_SIZE),
@@ -7278,8 +7244,7 @@ class client {
 
             }, this->min_button);
 
-        }
-        void make_borders() {
+        } void make_borders() {
             border[left].create_window(
                 frame,
                 0,
@@ -7373,8 +7338,7 @@ class client {
                 nullptr,
                 CURSOR::top_left_corner
 
-            );
-            CWC(border[top_left]);
+            ); CWC(border[top_left]);
             border[top_left].grab_button({ { L_MOUSE_BUTTON, NULL } });
             FLUSH_X();
             CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->border[top_left]) {
@@ -7442,8 +7406,7 @@ class client {
                 
             }, this->border[bottom_right]);
 
-        }
-        void set_icon_png() {
+        } void set_icon_png() {
             icon.create_window(
                 frame,
                 BORDER_SIZE,
