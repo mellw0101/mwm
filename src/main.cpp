@@ -7439,11 +7439,6 @@ class client {
                 FLUSH_X();
                 
             }, this->win);
-
-            CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->titlebar) {
-                C_EMIT(&*this, MOVE_CLIENT_MOUSE);
-                
-            }, this->titlebar);
         }
     
         void make_close_button()
