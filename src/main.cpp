@@ -14199,8 +14199,6 @@ class Events {
 
             C_SIGNAL(if (&*__c)  mv_client(__c, wm->pointer.x() - __c->x - BORDER_SIZE, wm->pointer.y() - __c->y - BORDER_SIZE);, MOVE_CLIENT_MOUSE);
 
-            C_SIGNAL(if (__c) resize_client(__c, 0);, CLIENT_RESIZE_ALT);
-
             C_SIGNAL(if (__c) max_win(__c, max_win::BUTTON_MAXWIN);, BUTTON_MAXWIN_PRESS);
             C_SIGNAL(if (__c) max_win(__c, max_win::EWMH_MAXWIN  );, EWMH_MAXWIN        );
 
@@ -14215,11 +14213,10 @@ class Events {
 
             CONN_root(DESTROY_NOTIFY, W_callback -> void {
                 client *c = C_RETRIVE(__window);
-                if (!c) return;
+                if (c == nullptr) return;
                 
                 if (c->atoms.is_modal) {
-                    uint32_t transient_for = c->modal_data.transient_for;
-                    client *c_trans = C_RETRIVE(transient_for);
+                    client *c_trans = C_RETRIVE(c->modal_data.transient_for);
                     if (!c_trans) return;
 
                     c_trans->focus();
@@ -14233,6 +14230,7 @@ class Events {
 
             CONN_root(REPARENT_NOTIFY, W_callback -> void {
                 client *c = C_RETRIVE(__window);
+                if (c == nullptr) return;
                 c->win.x(BORDER_SIZE);
                 c->win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
                 FLUSH_X();
@@ -14251,13 +14249,6 @@ class Events {
                 __c->update();
 
             }, MOTION_NOTIFY);
-
-            // C_SIGNAL(if (&*__c) {
-            //     __c->update();
-            //     __c->moving = false;
-            //     wm->pointer.ungrab();
-
-            // }, XCB_BUTTON_RELEASE);
 
         }
 
