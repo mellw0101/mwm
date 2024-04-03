@@ -3034,7 +3034,7 @@ class __event_handler__ {
         template<> void handle_event<TILE_DOWN>                (uint32_t __window) { C_EMIT      (C_RETRIVE(__window) , TILE_DOWN );               }
         template<> void handle_event<CYCLE_FOCUS_KEY_PRESS>    (uint32_t __window) { WS_emit_root(CYCLE_FOCUS_KEY_PRESS    , __window);                  }
         template<> void handle_event<DESTROY_NOTIFY>           (uint32_t __window) { WS_emit(__window, DESTROY_NOTIFY);                  }
-        template<> void handle_event<EXPOSE>                   (uint32_t __w)      { signal_manager->_window_signals.emit(__w, EXPOSE);}
+        template<> void handle_event<EXPOSE>                   (uint32_t __w)      { signal_manager->_window_signals.emit(__w, EXPOSE); }
 
         #define HANDLE_EVENT(__type ) thread(handle_event<__type>, e->event ).detach()
         #define HANDLE_WINDOW(__type) thread(handle_event<__type>, e->window).detach()
@@ -3206,12 +3206,9 @@ class __event_handler__ {
                 }
                 case XCB_MAP_REQUEST: {
                     RE_CAST_EV(xcb_map_request_event_t);
-                    thread([&]() {
-                        signal_manager->_window_signals.emit(screen->root, XCB_MAP_REQUEST, e->window);
-
-                    }).detach();
+                    thread([&]() -> void {signal_manager->_window_signals.emit(screen->root, XCB_MAP_REQUEST, e->window);}).detach();
                     // HANDLE_WINDOW(XCB_MAP_REQUEST);
-                    // // thread(handle_event<XCB_MAP_REQUEST>, e->window).detach();
+                    thread(handle_event<XCB_MAP_REQUEST>, e->window).detach();
                     break; 
 
                 }
@@ -7854,45 +7851,39 @@ class Window_Manager {
 
         /* Client       */
             /* Focus */
-                void cycle_focus()
-                {
-                    if (focused_client == nullptr)
-                    {
+                void cycle_focus() {
+                    if (focused_client == nullptr) {
                         if (cur_d->current_clients.size() == 0) return;
-
-                        for (long i(0); i < cur_d->current_clients.size(); ++i)
-                        {
+                        for (long i(0); i < cur_d->current_clients.size(); ++i) {
                             if (cur_d->current_clients[i] == nullptr) continue;
                             
                             cur_d->current_clients[i]->focus();
                             focused_client = cur_d->current_clients[i];
                             
                             return;
+
                         }
+
                     }
-
-                    for (int i(0); i < cur_d->current_clients.size(); ++i)
-                    {
+                    for (int i(0); i < cur_d->current_clients.size(); ++i) {
                         if (cur_d->current_clients[i] == nullptr) continue;
-
-                        if (cur_d->current_clients[i] == focused_client)
-                        {
-                            if (i == (cur_d->current_clients.size() - 1))
-                            {
+                        if (cur_d->current_clients[i] == focused_client) {
+                            if (i == (cur_d->current_clients.size() - 1)) {
                                 cur_d->current_clients[0]->focus();
                                 focused_client = cur_d->current_clients[0];
                             
                                 return;
-                            }
 
+                            }
                             cur_d->current_clients[i + 1]->focus();
                             focused_client = cur_d->current_clients[i + 1];
 
                             return;
-                        }
 
-                        if (i == (cur_d->current_clients.size() - 1)) i = 0;
+                        } if (i == (cur_d->current_clients.size() - 1)) i = 0;
+
                     }
+
                 }
 
                 void unfocus()
@@ -8284,14 +8275,14 @@ class Window_Manager {
 
             }
             void setup_events() {
-                // signal_manager->_window_signals.conect(root, MAP_REQ, [this](uint32_t __window) -> void {
-                //     client *c = signal_manager->_window_client_map.retrive(__window);
-                //     if (c == nullptr) {
-                //         manage_new_client(__window);
+                signal_manager->_window_signals.conect(root, MAP_REQ, [this](uint32_t __window) -> void {
+                    client *c = signal_manager->_window_client_map.retrive(__window);
+                    if (c == nullptr) {
+                        manage_new_client(__window);
                         
-                //     }
+                    }
                     
-                // });
+                });
                 CONN_Win(root, L_MOUSE_BUTTON_EVENT,
                     this->unfocus();
 
@@ -8300,10 +8291,10 @@ class Window_Manager {
                     this->context_menu->show();
                 
                 );
-                CONN_Win(root, XCB_MAP_REQUEST,
-                    this->manage_new_client(__window);
+                // CONN_Win(root, XCB_MAP_REQUEST,
+                //     this->manage_new_client(__window);
 
-                );
+                // );
                 // CONN_Win(root, MAP_NOTIFY,
                 //     client *c = signal_manager->_window_client_map.retrive(__window);
                 //     if (!c) return;
