@@ -3012,9 +3012,11 @@ class __event_handler__ {
         template<uint8_t __sig>
         static void handle_event(uint32_t __w) { WS_emit(__w, __sig); }
         
-        template<> void handle_event<XCB_MAP_REQUEST>          (uint32_t __w)      { signal_manager->_window_signals.emit(screen->root, XCB_MAP_REQUEST, __w);}
-
-        template<> void handle_event<MAP_NOTIFY>               (uint32_t __window) { WS_emit_Win (screen->root                , MAP_NOTIFY, __window); }
+        template<> void handle_event<XCB_MAP_REQUEST>  (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, XCB_MAP_REQUEST, __w);}
+        template<> void handle_event<XCB_LEAVE_NOTIFY> (uint32_t __w) { signal_manager->_window_signals.emit(__w, XCB_LEAVE_NOTIFY);}
+        template<> void handle_event<XCB_EXPOSE>       (uint32_t __w) { signal_manager->_window_signals.emit(__w, XCB_EXPOSE);}
+        template<> void handle_event<XCB_MAP_NOTIFY>   (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, XCB_MAP_NOTIFY, __w);}
+ 
         template<> void handle_event<EWMH_MAXWIN>              (uint32_t __window) { C_EMIT      (C_RETRIVE(__window)  , EWMH_MAXWIN);             }
         template<> void handle_event<TERM_KEY_PRESS>           (uint32_t __window) { WS_emit_Win (screen->root                , TERM_KEY_PRESS, 0);    }
         template<> void handle_event<QUIT_KEY_PRESS>           (uint32_t __window) { WS_emit_Win (screen->root                , QUIT_KEY_PRESS, 0);    }
@@ -3034,7 +3036,6 @@ class __event_handler__ {
         template<> void handle_event<TILE_DOWN>                (uint32_t __window) { C_EMIT      (C_RETRIVE(__window) , TILE_DOWN );               }
         template<> void handle_event<CYCLE_FOCUS_KEY_PRESS>    (uint32_t __window) { WS_emit_root(CYCLE_FOCUS_KEY_PRESS    , __window);                  }
         template<> void handle_event<DESTROY_NOTIFY>           (uint32_t __window) { WS_emit(__window, DESTROY_NOTIFY);                  }
-        template<> void handle_event<EXPOSE>                   (uint32_t __w)      { signal_manager->_window_signals.emit(__w, EXPOSE); }
 
         #define HANDLE_EVENT(__type ) thread(handle_event<__type>, e->event ).detach()
         #define HANDLE_WINDOW(__type) thread(handle_event<__type>, e->window).detach()
@@ -3196,11 +3197,7 @@ class __event_handler__ {
                 }
                 case XCB_LEAVE_NOTIFY:{
                     RE_CAST_EV(xcb_leave_notify_event_t);
-                    const auto &_func_ = [&, this]() -> void {
-                        signal_manager->_window_signals.emit(e->event, LEAVE_NOTIFY);
-
-                    }; thread(_func_).detach();
-                    
+                    thread(handle_event<XCB_LEAVE_NOTIFY>, e->event).detach();;
                     break;
 
                 }
