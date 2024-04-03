@@ -3031,6 +3031,7 @@ class __event_handler__ {
         template<> void handle_event<TILE_DOWN>                (uint32_t __window) { C_EMIT      (C_RETRIVE(__window) , TILE_DOWN );               }
         template<> void handle_event<CYCLE_FOCUS_KEY_PRESS>    (uint32_t __window) { WS_emit_root(CYCLE_FOCUS_KEY_PRESS    , __window);                  }
         template<> void handle_event<DESTROY_NOTIFY>           (uint32_t __window) { WS_emit(__window, DESTROY_NOTIFY);                  }
+        template<> void handle_event<EXPOSE>                   (uint32_t __w)      { signal_manager->_window_signals.emit(__w, EXPOSE);}
 
         #define HANDLE_EVENT(__type ) thread(handle_event<__type>, e->event ).detach()
         #define HANDLE_WINDOW(__type) thread(handle_event<__type>, e->window).detach()
@@ -3173,7 +3174,8 @@ class __event_handler__ {
 
                 }
                 case XCB_EXPOSE: {
-                    thread(expose, ev).detach();
+                    RE_CAST_EV(xcb_expose_event_t);
+                    thread(handle_event<XCB_EXPOSE>, e->window).detach();
                     break;
                 
                 }
