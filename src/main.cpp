@@ -6934,11 +6934,10 @@ class client {
             }
         
         /* Size_pos */
-            void save_ogsize()
-            {
+            void save_ogsize() {
                 ogsize.save(x, y, width, height);
+
             }
-        
             void save_tile_ogsize()
             {
                 tile_ogsize.save(x, y, width, height);
@@ -7090,10 +7089,10 @@ class client {
 
             }, this->win);
 
-            CONN(DESTROY_NOTIFY, if (__window == this->win) {
-                WS_emit(this->win, KILL_SIGNAL);
+            // CONN(DESTROY_NOTIFY, if (__window == this->win) {
+            //     WS_emit(this->win, KILL_SIGNAL);
 
-            }, this->win);
+            // }, this->win);
 
         }    
         void make_titlebar() {
