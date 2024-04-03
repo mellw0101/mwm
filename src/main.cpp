@@ -7911,8 +7911,7 @@ class Entry {
         function<void()> action;
 
     /* Methods */
-        void make_window(uint32_t __parent, int16_t __x, int16_t __y, uint16_t __width, uint16_t __height)
-        {
+        void make_window(uint32_t __parent, int16_t __x, int16_t __y, uint16_t __width, uint16_t __height) {
             window.create_window(
                 __parent,
                 __x,
@@ -7922,32 +7921,34 @@ class Entry {
                 BLACK,
                 BUTTON_EVENT_MASK,
                 MAP
+
             );
+            // signal_manager->_window_signals.conect(this->window, EXPOSE,
+            // [this](uint32_t __window) -> void {
+            //     thread([&]() -> void {
 
-            signal_manager->_window_signals.conect(this->window, EXPOSE,
-            [this](uint32_t __window) -> void
-            {
-                thread([&]() -> void {
+            //         this->window.draw_acc(name);
+            //         FLUSH_X();
 
-                    this->window.draw_acc(name);
-                    FLUSH_X();
+            //     }).detach();
 
-                }).detach();
-            });
+            // });
+            CONN(EXPOSE, if (__window == this->window) this->window.draw_acc(name);, this->window);
+            CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->window && this->action != nullptr) this->action();, this->window);
+            CONN(ENTER_NOTIFY, if (__window == this->window) this->window.change_backround_color(WHITE);, this->window);
+            CONN(LEAVE_NOTIFY, if (__window == this->window) this->window.change_backround_color(BLACK);, this->window);
 
-            signal_manager->_window_signals.conect(window, L_MOUSE_BUTTON_EVENT,
-            [this](uint32_t __window) -> void
-            {
-                if (this->action == nullptr)
-                {
-                    loutE << WINDOW_ID_BY_INPUT(__window) << "action == nullptr" << loutEND;
-                    return; 
-                }
+            // signal_manager->_window_signals.conect(window, L_MOUSE_BUTTON_EVENT, 
+            // [this](uint32_t __window) -> void {
+            //     if (this->action == nullptr) {
+            //         loutE << WINDOW_ID_BY_INPUT(__window) << "action == nullptr" << loutEND;
+            //         return; 
                 
-                this->action();
-                FLUSH_X();
-            });
+            //     }
+            //     this->action();
+            //     FLUSH_X();
             
+            // });
             window.grab_button({ { L_MOUSE_BUTTON, NULL } });
         }
 
@@ -7964,8 +7965,7 @@ class context_menu {
         vector<Entry>(entries);
 
     /* Methods   */
-        void create_dialog_win__()
-        {
+        void create_dialog_win__() {
             context_window.create_window(
                 screen->root,
                 0,
@@ -7975,33 +7975,34 @@ class context_menu {
                 DARK_GREY,
                 XCB_EVENT_MASK_FOCUS_CHANGE | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY | XCB_EVENT_MASK_POINTER_MOTION,
                 RAISE
+
             );
+
         }
         
-        void hide__()
-        {
+        void hide__() {
             context_window.unmap();
             context_window.kill();
 
-            for (int i = 0; i < entries.size(); ++i)
-            {
+            for (int i = 0; i < entries.size(); ++i) {
                 entries[i].window.kill();
+
             }
+
         }
 
-        void make_entries__()
-        {
-            for (int i(0), y(0); i < entries.size(); ++i, y += _height)
-            {
+        void make_entries__() {
+            for (int i(0), y(0); i < entries.size(); ++i, y += _height) {
                 entries[i].make_window(context_window, 0, y, _width, _height);
                 signal_manager->_window_signals.emit(entries[i].window, EXPOSE);
+            
             }
+        
         }
     
     public:
     // Methods.
-        void init()
-        {
+        void init() {
             signal_manager->_window_signals.conect(screen->root, L_MOUSE_BUTTON_EVENT,
             [this](uint32_t __window) -> void
             {
@@ -8011,21 +8012,19 @@ class context_menu {
                 }
             });
 
-            event_handler->setEventCallback(EV_CALL(XCB_ENTER_NOTIFY)
-            {
+            event_handler->setEventCallback(EV_CALL(XCB_ENTER_NOTIFY) {
                 RE_CAST_EV(xcb_enter_notify_event_t);
-                if (e->event == screen->root)
-                {
+                if (e->event == screen->root) {
                     hide__();
-                }
 
-                for (int i = 0; i < entries.size(); ++i)
-                {
-                    if (e->event == entries[i].window)
-                    {
+                }
+                for (int i = 0; i < entries.size(); ++i) {
+                    if (e->event == entries[i].window) {
                         entries[i].window.change_backround_color(WHITE);
                     }
+
                 }
+
             });
 
             event_handler->setEventCallback(EV_CALL(XCB_LEAVE_NOTIFY)
@@ -8041,30 +8040,28 @@ class context_menu {
             });
         }
         
-        void show()
-        {
+        void show() {
             _x = m_pointer->x();
             _y = m_pointer->y();
             
-            for (int i(0), max_len(0); i < entries.size(); ++i)
-            {
-                if (entries[i].name.length() > max_len)
-                {
+            for (int i(0), max_len(0); i < entries.size(); ++i) {
+                if (entries[i].name.length() > max_len) {
                     max_len = entries[i].name.length();
                     _width = ((max_len + 2) * DEFAULT_FONT_WIDTH);
+                
                 }
+            
             }
 
             uint16_t new_height = (entries.size() * _height);
 
-            if (_y + new_height > screen->height_in_pixels)
-            {
+            if (_y + new_height > screen->height_in_pixels) {
                 _y = (screen->height_in_pixels - new_height);
-            }
 
-            if (_x + _width > screen->width_in_pixels)
-            {
+            }
+            if (_x + _width > screen->width_in_pixels) {
                 _x = (screen->width_in_pixels - _width);
+
             }
 
             context_window.x_y_width_height((_x - BORDER_SIZE), (_y - BORDER_SIZE), _width, new_height);
