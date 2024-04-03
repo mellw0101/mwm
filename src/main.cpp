@@ -7224,6 +7224,18 @@ class client {
             CWC(win);
             CWC(frame);
 
+            CONN(KILL_SIGNAL, if (__window == this->win) {
+                if (!this->win.is_mapped()) {
+                    this->kill();
+
+                }
+                else {
+                    this->win.kill();
+
+                }
+
+            }, this->win);
+
             CONN(DESTROY_NOTIFY, if (__window == this->win) {
                 if (!this->win.is_mapped()) {
                     this->kill();
@@ -7291,14 +7303,16 @@ class client {
             close_button.make_then_set_png(USER_PATH_PREFIX("/close.png"), CLOSE_BUTTON_BITMAP);
             
             CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->close_button) {
-                if (this->win.is_mapped()) {
-                    this->win.kill();
+                WS_emit(this->win, KILL_SIGNAL);
+                
+                // if (this->win.is_mapped()) {
+                //     this->win.kill();
 
-                }
-                else {
-                    this->kill();
+                // }
+                // else {
+                //     this->kill();
 
-                } 
+                // } 
             
             }, this->close_button);
 
