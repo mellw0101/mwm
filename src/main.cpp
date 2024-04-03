@@ -14575,13 +14575,6 @@ class Events {
 
         void init_signals()
         {
-            // CONN_root(EWMH_MAXWIN, [this](uint32_t __window) -> void
-            // {
-            //     client *c = signal_manager->_window_client_map.retrive(__window);
-            //     if (!c) return;
-            //     max_win(c, max_win::EWMH_MAXWIN);
-            // });
-
             CONN_root(MOVE_TO_DESKTOP_1, W_callback -> void { change_desktop::teleport_to(1); });
             CONN_root(MOVE_TO_DESKTOP_2, W_callback -> void { change_desktop::teleport_to(2); });
             CONN_root(MOVE_TO_DESKTOP_3, W_callback -> void { change_desktop::teleport_to(3); });
