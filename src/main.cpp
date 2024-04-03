@@ -14174,6 +14174,7 @@ class Events {
 
                 } else {
                     __c->win.kill();
+                    __c->kill();
 
                 }
 
