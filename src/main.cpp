@@ -14710,7 +14710,7 @@ class Events {
 
             C_SIGNAL(if (&*__c) {
                 if (!__c->moving) return;
-                __c->snap(__c->x - (__c->width- wm->pointer.x()), wm->pointer.y());
+                __c->snap(__c->x - (wm->pointer.x() - __c->width), wm->pointer.y());
                 FLUSH_X();
                 __c->update();
 
