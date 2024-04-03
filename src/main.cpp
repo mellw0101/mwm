@@ -14168,21 +14168,10 @@ class Events {
                 
             });
 
-            C_SIGNAL(if (__c) {int i = 0; while (true) {
-                if (!__c->win.is_mapped()) {
-                    __c->kill();
-                    break;
-
-                } else if (!wm->window_exists(__c->win)) {
-                    __c->kill();
-                    break;
-
-                } else {
-                    __c->win.kill();
-
-                }
-
-            }}, KILL_SIGNAL);
+            C_SIGNAL(if (__c) {while (__c->win.is_mapped()) { __c->win.kill(); } 
+                __c->kill(); }
+                
+            , KILL_SIGNAL);
 
             C_SIGNAL(if (__c) {
                 __c->raise();
