@@ -3195,7 +3195,7 @@ class __event_handler__ {
 
                 }
                 case XCB_LEAVE_NOTIFY:{
-                    RE_CAST_EV(xcb_enter_notify_event_t);
+                    RE_CAST_EV(xcb_leave_notify_event_t);
                     auto _func_ = [this, e]() -> void {
                         signal_manager->_window_signals.emit(e->event, LEAVE_NOTIFY);
 
