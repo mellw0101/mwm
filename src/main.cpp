@@ -14172,9 +14172,6 @@ class Events {
                 if (!__c->win.is_mapped()) {
                     __c->kill();
 
-                } else if (!wm->window_exists(__c->win)) {
-                    __c->kill();
-
                 } else {
                     __c->win.kill();
 
