@@ -14661,7 +14661,7 @@ class Events {
 
             }, MOVE_CLIENT_ALT);
 
-            C_SIGNAL(if (__c) {}/*  mv_client(&*__c, wm->pointer.x() - *&__c->x - BORDER_SIZE, wm->pointer.y() - *&__c->y - BORDER_SIZE); */, MOVE_CLIENT_MOUSE);
+            C_SIGNAL(if (&*__c) {__c->moving = true;} /*  mv_client(&*__c, wm->pointer.x() - *&__c->x - BORDER_SIZE, wm->pointer.y() - *&__c->y - BORDER_SIZE); */, MOVE_CLIENT_MOUSE);
 
             C_SIGNAL(if (__c) resize_client(__c, 0);, CLIENT_RESIZE_ALT);
 
@@ -14709,6 +14709,7 @@ class Events {
             CONN_root(CONF_REQ_Y,      W_callback -> void { wm->data.y      = __window; });
 
             C_SIGNAL(if (&*__c) {
+                if (!__c->moving) return;
                 __c->snap(wm->pointer.x() - *&__c->x, wm->pointer.y() - *&__c->y);
                 FLUSH_X();
                 __c->update();
