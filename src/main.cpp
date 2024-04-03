@@ -8014,32 +8014,32 @@ class context_menu {
             // });
             CONN(L_MOUSE_BUTTON_EVENT, if (this->context_window.is_mapped()) this->hide__();, screen->root);
 
-            event_handler->setEventCallback(EV_CALL(XCB_ENTER_NOTIFY) {
-                RE_CAST_EV(xcb_enter_notify_event_t);
-                if (e->event == screen->root) {
-                    hide__();
+            // event_handler->setEventCallback(EV_CALL(XCB_ENTER_NOTIFY) {
+            //     RE_CAST_EV(xcb_enter_notify_event_t);
+            //     if (e->event == screen->root) {
+            //         hide__();
 
-                }
-                for (int i = 0; i < entries.size(); ++i) {
-                    if (e->event == entries[i].window) {
-                        entries[i].window.change_backround_color(WHITE);
-                    }
+            //     }
+            //     for (int i = 0; i < entries.size(); ++i) {
+            //         if (e->event == entries[i].window) {
+            //             entries[i].window.change_backround_color(WHITE);
+            //         }
 
-                }
+            //     }
 
-            });
+            // });
 
-            event_handler->setEventCallback(EV_CALL(XCB_LEAVE_NOTIFY)
-            {
-                RE_CAST_EV(xcb_leave_notify_event_t);
-                for (int i = 0; i < entries.size(); ++i)
-                {
-                    if (e->event == entries[i].window)
-                    {
-                        entries[i].window.change_backround_color(BLACK);
-                    }
-                }
-            });
+            // event_handler->setEventCallback(EV_CALL(XCB_LEAVE_NOTIFY)
+            // {
+            //     RE_CAST_EV(xcb_leave_notify_event_t);
+            //     for (int i = 0; i < entries.size(); ++i)
+            //     {
+            //         if (e->event == entries[i].window)
+            //         {
+            //             entries[i].window.change_backround_color(BLACK);
+            //         }
+            //     }
+            // });
         }
         
         void show() {
