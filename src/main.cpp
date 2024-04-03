@@ -7976,10 +7976,9 @@ class context_menu {
                 XCB_EVENT_MASK_FOCUS_CHANGE | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY | XCB_EVENT_MASK_POINTER_MOTION,
                 RAISE
 
-            );
+            ); CONN(L_MOUSE_BUTTON_EVENT, if (this->context_window.is_mapped()) this->hide__();, screen->root);
 
         }
-        
         void hide__() {
             context_window.unmap();
             context_window.kill();
@@ -7990,7 +7989,6 @@ class context_menu {
             }
 
         }
-
         void make_entries__() {
             for (int i(0), y(0); i < entries.size(); ++i, y += _height) {
                 entries[i].make_window(context_window, 0, y, _width, _height);
@@ -8001,47 +7999,7 @@ class context_menu {
         }
     
     public:
-    // Methods.
-        void init() {
-            // signal_manager->_window_signals.conect(screen->root, L_MOUSE_BUTTON_EVENT,
-            // [this](uint32_t __window) -> void
-            // {
-            //     if (__window == screen->root)
-            //     {
-            //         this->hide__();
-            //     }
-
-            // });
-            CONN(L_MOUSE_BUTTON_EVENT, if (this->context_window.is_mapped()) this->hide__();, screen->root);
-
-            // event_handler->setEventCallback(EV_CALL(XCB_ENTER_NOTIFY) {
-            //     RE_CAST_EV(xcb_enter_notify_event_t);
-            //     if (e->event == screen->root) {
-            //         hide__();
-
-            //     }
-            //     for (int i = 0; i < entries.size(); ++i) {
-            //         if (e->event == entries[i].window) {
-            //             entries[i].window.change_backround_color(WHITE);
-            //         }
-
-            //     }
-
-            // });
-
-            // event_handler->setEventCallback(EV_CALL(XCB_LEAVE_NOTIFY)
-            // {
-            //     RE_CAST_EV(xcb_leave_notify_event_t);
-            //     for (int i = 0; i < entries.size(); ++i)
-            //     {
-            //         if (e->event == entries[i].window)
-            //         {
-            //             entries[i].window.change_backround_color(BLACK);
-            //         }
-            //     }
-            // });
-        }
-        
+    // Methods. 
         void show() {
             _x = m_pointer->x();
             _y = m_pointer->y();
@@ -8141,7 +8099,6 @@ class Window_Manager {
                 context_menu->add_entry("konsole",              [this]() -> void { launcher.program((char *) "konsole"); });
                 context_menu->add_entry("google-chrome-stable", [this]() -> void { launcher.launch_child_process("google-chrome-stable"); });
                 context_menu->add_entry("code",                 [this]() -> void { launcher.launch_child_process("code"); });
-                context_menu->init();
 
                 setup_events(); 
             }
@@ -12418,7 +12375,6 @@ class Dock {
                 launcher.program((char *) add_app_dialog_window.search_window.search_string.c_str());
             });
 
-            context_menu.init();
             configure_events();
         }
 
