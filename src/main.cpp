@@ -14710,9 +14710,7 @@ class Events {
             CONN_root(CONF_REQ_Y,      W_callback -> void { wm->data.y      = __window; });
 
             C_SIGNAL(if (&*__c) {
-                int16_t new_x = wm->pointer.x() - *&__c->x - BORDER_SIZE;
-                int16_t new_y = wm->pointer.y() - *&__c->y - BORDER_SIZE;
-                __c->snap(new_x, new_y);
+                __c->snap(*&__c->x, *&__c->y);
                 FLUSH_X();
                 __c->update();
 
