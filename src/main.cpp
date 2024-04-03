@@ -3009,7 +3009,9 @@ class __event_handler__ {
 
         }
 
-        static void emit(uint32_t __w, uint8_t __sig, uint32_t __w2) { signal_manager->_window_signals.emit(__w, __sig, __w2); }
+        static void emit(uint32_t __w, uint8_t __sig) { signal_manager->_window_signals.emit(__w, __sig); }        
+
+        static void emit_root(uint32_t __w, uint8_t __sig, uint32_t __w2 = 0) { signal_manager->_window_signals.emit(__w, __sig, __w2); }
 
         template<uint8_t __sig>
         static void handle_event(uint32_t __w) { WS_emit(__w, __sig); }
@@ -3182,13 +3184,13 @@ class __event_handler__ {
                 }
                 case XCB_EXPOSE:            {
                     RE_CAST_EV(xcb_expose_event_t);
-                    HANDLE_WINDOW(XCB_EXPOSE);
+                    thread(emit, e->window, EXPOSE).detach();
                     break;
                 
                 }
                 case XCB_PROPERTY_NOTIFY:   {
                     RE_CAST_EV(xcb_property_notify_event_t);
-                    thread(lambda, e->window, XCB_PROPERTY_NOTIFY).detach();
+                    thread(emit, e->window, PROPERTY_NOTIFY).detach();
                     break;
 
                 }
@@ -3200,7 +3202,7 @@ class __event_handler__ {
                 }
                 case XCB_LEAVE_NOTIFY:      {
                     RE_CAST_EV(xcb_leave_notify_event_t);
-                    thread(handle_event<XCB_LEAVE_NOTIFY>, e->event).detach();;
+                    thread(emit, e->event, LEAVE_NOTIFY).detach();;
                     break;
 
                 }
