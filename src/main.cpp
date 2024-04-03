@@ -956,6 +956,23 @@ namespace {
     };
 }
 
+namespace XCB {
+    bool is_mapped(uint32_t __window) {
+        xcb_get_window_attributes_cookie_t cookie = xcb_get_window_attributes(conn, __window);
+        xcb_get_window_attributes_reply_t *reply = xcb_get_window_attributes_reply(conn, cookie, nullptr);
+        if (reply == nullptr) {
+            loutE << "Unable to get window attributes" << loutEND;
+            return false;
+
+        }
+        uint8_t state = reply->map_state;
+        free(reply);
+        return (state == XCB_MAP_STATE_VIEWABLE);
+    
+    }
+
+}
+
 class __signal_manager__ {
     /* Defines   */
         #define WS_conn signal_manager->_window_signals.conect
@@ -4465,19 +4482,18 @@ class window {
                 return false;
             }
             
-            bool is_mapped()
-            {
+            bool is_mapped() {
                 xcb_get_window_attributes_cookie_t cookie = xcb_get_window_attributes(conn, _window);
                 xcb_get_window_attributes_reply_t *reply = xcb_get_window_attributes_reply(conn, cookie, nullptr);
-                if (reply == nullptr) 
-                {
+                if (reply == nullptr) {
                     loutEWin << "Unable to get window attributes" << '\n';
                     return false;
-                }
 
+                }
                 bool isMapped = (reply->map_state == XCB_MAP_STATE_VIEWABLE);
                 free(reply);
                 return isMapped;    
+
             }
 
             bool should_be_decorated()
@@ -7923,32 +7939,10 @@ class Entry {
                 MAP
 
             );
-            // signal_manager->_window_signals.conect(this->window, EXPOSE,
-            // [this](uint32_t __window) -> void {
-            //     thread([&]() -> void {
-
-            //         this->window.draw_acc(name);
-            //         FLUSH_X();
-
-            //     }).detach();
-
-            // });
             CONN(EXPOSE, if (__window == this->window) this->window.draw_acc(name);, this->window);
             CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->window && this->action != nullptr) this->action();, this->window);
             CONN(ENTER_NOTIFY, if (__window == this->window) this->window.change_backround_color(WHITE);, this->window);
             CONN(LEAVE_NOTIFY, if (__window == this->window) this->window.change_backround_color(BLACK);, this->window);
-
-            // signal_manager->_window_signals.conect(window, L_MOUSE_BUTTON_EVENT, 
-            // [this](uint32_t __window) -> void {
-            //     if (this->action == nullptr) {
-            //         loutE << WINDOW_ID_BY_INPUT(__window) << "action == nullptr" << loutEND;
-            //         return; 
-                
-            //     }
-            //     this->action();
-            //     FLUSH_X();
-            
-            // });
             window.grab_button({ { L_MOUSE_BUTTON, NULL } });
         }
 
@@ -8011,9 +8005,7 @@ class context_menu {
                 
                 }
             
-            }
-
-            uint16_t new_height = (entries.size() * _height);
+            } uint16_t new_height = (entries.size() * _height);
 
             if (_y + new_height > screen->height_in_pixels) {
                 _y = (screen->height_in_pixels - new_height);
@@ -8030,12 +8022,12 @@ class context_menu {
             make_entries__();
         }
 
-        void add_entry(string name, function<void()> action)
-        {
+        void add_entry(string name, function<void()> action) {
             Entry entry;
             entry.name = name;
             entry.action = action;
             entries.push_back(entry);
+
         }
     
     /* Consructor */
