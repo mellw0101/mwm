@@ -7439,6 +7439,11 @@ class client {
                 FLUSH_X();
                 
             }, this->win);
+
+            CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->titlebar) {
+                C_EMIT(&*this, MOVE_CLIENT_MOUSE);
+                
+            }, this->titlebar);
         }
     
         void make_close_button()
@@ -14697,13 +14702,13 @@ class Events {
             CONN_root(CONF_REQ_X,      W_callback -> void { wm->data.x      = __window; });
             CONN_root(CONF_REQ_Y,      W_callback -> void { wm->data.y      = __window; });
 
-            // C_SIGNAL(if (&*__c) {
-            //     if (!__c->moving) return;
-            //     __c->snap(wm->pointer.x() - ((__c->x + __c->width) - wm->pointer.x()), wm->pointer.y());
-            //     FLUSH_X();
-            //     __c->update();
+            C_SIGNAL(if (&*__c) {
+                if (!__c->moving) return;
+                __c->snap(wm->pointer.x() - ((__c->x + __c->width) - wm->pointer.x()), wm->pointer.y());
+                FLUSH_X();
+                __c->update();
 
-            // }, MOTION_NOTIFY);
+            }, MOTION_NOTIFY);
 
             // C_SIGNAL(if (&*__c) {
             //     __c->update();
