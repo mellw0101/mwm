@@ -14630,6 +14630,8 @@ class Events {
             });
 
             C_SIGNAL(if (__c) {int i = 0; while (true) {
+                if (!__c) break;
+
                 if (!__c->win.is_mapped()) {
                     __c->kill();
                     break;
@@ -14681,12 +14683,12 @@ class Events {
                 if (!c) return;
                 
                 if (c->atoms.is_modal) {
-                    client *c_trans = wm->client_from_any_window(&c->modal_data.transient_for);
-                    if (c_trans != nullptr) {
-                        c_trans->focus();
-                        wm->focused_client = c_trans;
+                    uint32_t transient_for = c->modal_data.transient_for;
+                    client *c_trans = C_RETRIVE(transient_for);
+                    if (!c_trans) return;
 
-                    }
+                    c_trans->focus();
+                    wm->focused_client = c_trans;
 
                 }
                 pid_manager->remove_pid(c->win.pid());
@@ -14706,6 +14708,15 @@ class Events {
             CONN_root(CONF_REQ_HEIGHT, W_callback -> void { wm->data.height = __window; });
             CONN_root(CONF_REQ_X,      W_callback -> void { wm->data.x      = __window; });
             CONN_root(CONF_REQ_Y,      W_callback -> void { wm->data.y      = __window; });
+
+            C_SIGNAL(if (&*__c) {
+                int16_t new_x = wm->pointer.x() - *&__c->x - BORDER_SIZE;
+                int16_t new_y = wm->pointer.y() - *&__c->y - BORDER_SIZE;
+                __c->snap(new_x, new_y);
+                FLUSH_X();
+                __c->update();
+
+            }, MOTION_NOTIFY);
 
         }
 

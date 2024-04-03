@@ -893,6 +893,7 @@ class __c_func_arr__ {
                 case RESIZE_CLIENT_BORDER_TOP_RIGHT:    return 15;
                 case RESIZE_CLIENT_BORDER_BOTTOM_RIGHT: return 16;
                 case RESIZE_CLIENT_BORDER_BOTTOM_LEFT:  return 17;
+                case MOTION_NOTIFY:                     return 18;
 
                 default: return make_T_MAX<uint8_t>();
 
@@ -902,7 +903,7 @@ class __c_func_arr__ {
 
     public:
     /* Variabels */
-        FixedArray<function<void(client *c)>, 18> func;
+        FixedArray<function<void(client *c)>, 19> func;
 
     /* Methods   */
         constexpr void send_c_sig(client *__c, int __sig) {
