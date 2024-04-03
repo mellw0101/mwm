@@ -6992,8 +6992,8 @@ class client {
             #define CLI_RIGHT  screen->width_in_pixels  - this->width
             #define CLI_BOTTOM screen->height_in_pixels - this->height
 
-            void snap(int x, int y) {
-                for (client *const &c : signal_manager->fixed_client_arr) {
+            void snap(int x, int y, const vector<client *> &__vec ) {
+                for (client *const &c : __vec) {
                     if (c == this) continue;
                     
                     if (x > c->x + c->width - N && x < c->x + c->width + N
@@ -14698,7 +14698,7 @@ class Events {
 
             C_SIGNAL(if (&*__c) {
                 // if (!__c->moving) return;
-                __c->snap(__c->x, __c->y);
+                __c->snap(wm->pointer.x(), wm->pointer.y(), wm->cur_d->current_clients);
                 FLUSH_X();
                 __c->update();
 
