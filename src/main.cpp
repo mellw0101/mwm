@@ -14227,9 +14227,16 @@ class Events {
             CONN_root(DESTROY_NOTIFY, W_callback -> void {
                 // client *c = C_RETRIVE(__window)
                 
-                // client *c = C_RETRIVE(__window);
-                // if (c == nullptr) return;
                 
+                client *c = C_RETRIVE(__window);
+                if (c == nullptr) {
+                    loutE << "c = nullptr" << loutEND;
+                    return;
+
+                }
+                else {
+                    loutI << "c != nullptr" << loutEND;
+                }
                 // if (c->atoms.is_modal) {
                 //     client *c_trans = C_RETRIVE(c->modal_data.transient_for);
                 //     if (!c_trans) return;
