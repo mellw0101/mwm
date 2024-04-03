@@ -7441,7 +7441,7 @@ class client {
             }, this->win);
 
             CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->titlebar) {
-                C_EMIT(&*this, MOVE_CLIENT_MOUSE);
+                C_EMIT(this, MOVE_CLIENT_MOUSE);
                 
             }, this->titlebar);
         }
