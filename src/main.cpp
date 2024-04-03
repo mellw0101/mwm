@@ -12977,10 +12977,8 @@ class mv_client {
             else                                                                                  c->frame.x_y(x, y);
         }
 
-        void run()
-        {
-            while (shouldContinue)
-            {
+        void run() {
+            while (shouldContinue) {
                 ev = xcb_wait_for_event(conn);
                 if (ev == nullptr) continue;
 
@@ -12993,11 +12991,9 @@ class mv_client {
                             snap(new_x, new_y);
                             FLUSH_X();
 
-                        }
-                        break;
+                        } break;
                         
                     }
-                
                     case XCB_BUTTON_RELEASE: {
                         shouldContinue = false;
                         c->update();
@@ -13005,30 +13001,20 @@ class mv_client {
 
                     }
 
-                    // case XCB_EXPOSE: {
-                    //     RE_CAST_EV(xcb_expose_event_t);
-                    //     WS_emit(e->window, EXPOSE);
-                    //     break;
-
-                    // }
-                }
-                free(ev);
+                } free(ev);
 
             }
         }
 
-        bool isTimeToRender()
-        {
+        bool isTimeToRender() {
             auto currentTime = chrono::high_resolution_clock::now();
             const chrono::duration<double, milli> elapsedTime = currentTime - lastUpdateTime;
-
-            if (elapsedTime.count() >= frameDuration)
-            {
+            if (elapsedTime.count() >= frameDuration) {
                 lastUpdateTime = currentTime;
                 return true;
-            }
 
-            return false;
+            } return false;
+
         }
 };
 
@@ -13354,14 +13340,13 @@ class resize_client {
          * AND NOW WITH THE 'retard_int' I CAN CALL IT LIKE THIS 'resize_client(c, 0)'
          * 
          */
-        resize_client(client * & c , int retard_int)
-        : c(c) {
+        resize_client(client * & c , int retard_int) : c(c) {
             if (c->win.is_EWMH_fullscreen()) return;
-
             pointer.grab();
             pointer.teleport(c->x + c->width, c->y + c->height);
             run();
             pointer.ungrab();
+
         }
 
     /* Subclasses  */
@@ -13556,16 +13541,11 @@ class resize_client {
         class border {
             public:
             /* Constructor */
-                border(client *&c, edge _edge) 
-                : c(c)
-                {
+                border(client *&c, edge _edge) : c(c) {
                     if (c->win.is_EWMH_fullscreen()) return;
-
                     map<client *, edge> map = wm->get_client_next_to_client(c, _edge);
-                    for (const auto &pair : map)
-                    {
-                        if (pair.first != nullptr)
-                        {
+                    for (const auto &pair : map) {
+                        if (pair.first != nullptr) {
                             c2 = pair.first;
                             c2_edge = pair.second;
                             pointer.grab();
@@ -13573,13 +13553,15 @@ class resize_client {
                             run_double(_edge);
                             pointer.ungrab();
                             return; 
-                        }
-                    }
 
+                        }
+
+                    }
                     pointer.grab();
                     teleport_mouse(_edge);
                     run(_edge);
                     pointer.ungrab();
+
                 }
 
             private:
@@ -13656,135 +13638,116 @@ class resize_client {
                     }
                 }
 
-                void resize_client(const uint32_t x, const uint32_t y, edge edge)
-                {
-                    switch (edge)
-                    {
-                        case edge::LEFT:
-                        {
+                void resize_client(const uint32_t x, const uint32_t y, edge edge) {
+                    switch (edge) {
+                        case edge::LEFT: {
                             c->x_width(x, (c->width + c->x - x));
                             break;
-                        }
 
-                        case edge::RIGHT:
-                        {
+                        }
+                        case edge::RIGHT: {
                             c->_width((x - c->x));
                             break;
-                        }
 
-                        case edge::TOP:
-                        {
+                        }
+                        case edge::TOP: {
                             c->y_height(y, (c->height + c->y - y));   
                             break;
-                        }
 
-                        case edge::BOTTOM_edge:
-                        {
+                        }
+                        case edge::BOTTOM_edge: {
                             c->_height((y - c->y));
                             break;
-                        }
 
-                        case edge::NONE:
-                        {
+                        }
+                        case edge::NONE: {
                             return;
-                        }
 
-                        case edge::TOP_LEFT:
-                        {
+                        }
+                        case edge::TOP_LEFT: {
                             c->x_y_width_height(x, y, (c->width + c->x - x), (c->height + c->y - y));
                             break;
-                        }
                         
-                        case edge::TOP_RIGHT:
-                        {
+                        }
+                        case edge::TOP_RIGHT: {
                             c->y_width_height(y, (x - c->x), (c->height + c->y - y));
                             break;
+                        
                         }
-
-                        case edge::BOTTOM_LEFT:
-                        {
+                        case edge::BOTTOM_LEFT: {
                             c->x_width_height(x, (c->width + c->x - x), (y - c->y));   
                             break;
-                        }
 
-                        case edge::BOTTOM_RIGHT:
-                        {
+                        }
+                        case edge::BOTTOM_RIGHT: {
                             c->width_height((x - c->x), (y - c->y));   
                             break;
+
                         }
+
                     }
+
                 }
                 
-                void resize_client(client *c, const uint32_t x, const uint32_t y, edge edge)
-                {
-                    switch (edge)
-                    {
-                        case edge::LEFT:
-                        {
+                void resize_client(client *c, const uint32_t x, const uint32_t y, edge edge) {
+                    switch (edge) {
+                        case edge::LEFT: {
                             c->x_width(x, (c->width + c->x - x));
                             break;
-                        }
 
-                        case edge::RIGHT:
-                        {
+                        }
+                        case edge::RIGHT: {
                             c->_width((x - c->x));
                             break;
+
                         }
-                        
-                        case edge::TOP:
-                        {
+                        case edge::TOP: {
                             c->y_height(y, (c->height + c->y - y));   
                             break;
-                        }
 
-                        case edge::BOTTOM_edge:
-                        {
+                        }
+                        case edge::BOTTOM_edge: {
                             c->_height((y - c->y));
                             break;
-                        }
 
-                        case edge::NONE:
-                        {
-                            return;
                         }
+                        case edge::NONE: {
+                            return;
                         
-                        case edge::TOP_LEFT:
-                        {
+                        }
+                        case edge::TOP_LEFT: {
                             c->x_y_width_height(x, y, (c->width + c->x - x), (c->height + c->y - y));
                             break;
-                        }
 
-                        case edge::TOP_RIGHT:
-                        {
+                        }
+                        case edge::TOP_RIGHT: {
                             c->y_width_height(y, (x - c->x), (c->height + c->y - y));
                             break;
-                        }
 
-                        case edge::BOTTOM_LEFT:
-                        {
+                        }
+                        case edge::BOTTOM_LEFT: {
                             c->x_width_height(x, (c->width + c->x - x), (y - c->y));   
                             break;
-                        }
 
-                        case edge::BOTTOM_RIGHT:
-                        {
+                        }
+                        case edge::BOTTOM_RIGHT: {
                             c->width_height((x - c->x), (y - c->y));   
                             break;
+                        
                         }
+
                     }
+
                 }
 
-                void snap(const uint32_t x, const uint32_t y, edge edge, const uint8_t & prox)
-                {
+                void snap(const uint32_t x, const uint32_t y, edge edge, const uint8_t & prox) {
                     uint16_t left_border(0), right_border(0), top_border(0), bottom_border(0);
 
-                    // if ((c->width + c->x - x ) <= c->win.get_min_width()  || (c->width + c->x - x ) > (screen->width_in_pixels * 2) ) return;
-                    // if ((c->height + c->y - y) <= c->win.get_min_height() || (c->height + c->y - y) > (screen->height_in_pixels * 2)) return; 
-                    
-                    for (client *const &c : wm->cur_d->current_clients)
-                    {
-                        if (c == this->c) continue;
+                    for (client *const &c : wm->cur_d->current_clients) {
+                        if (c == this->c) {
+                            continue;
 
+                        }
                         left_border = c->x;
                         right_border = (c->x + c->width);
                         top_border = c->y;
@@ -13792,186 +13755,142 @@ class resize_client {
 
                         if (edge != edge::RIGHT
                         &&  edge != edge::BOTTOM_RIGHT
-                        &&  edge != edge::TOP_RIGHT)
-                        {
+                        &&  edge != edge::TOP_RIGHT) {
                             if (x > right_border - prox && x < right_border + prox
-                            &&  y > top_border && y < bottom_border)
-                            {
+                            &&  y > top_border && y < bottom_border) {
                                 resize_client(right_border, y, edge);
                                 return;
-                            }
-                        }
 
+                            }
+
+                        }
                         if (edge != edge::LEFT
                         &&  edge != edge::TOP_LEFT
-                        &&  edge != edge::BOTTOM_LEFT)
-                        {
+                        &&  edge != edge::BOTTOM_LEFT) {
                             if (x > left_border - prox && x < left_border + prox
-                            &&  y > top_border && y < bottom_border)
-                            {
+                            &&  y > top_border && y < bottom_border) {
                                 resize_client(left_border, y, edge);
                                 return;
-                            }
-                        }
 
+                            }
+
+                        }
                         if (edge != edge::BOTTOM_edge 
                         &&  edge != edge::BOTTOM_LEFT 
-                        &&  edge != edge::BOTTOM_RIGHT)
-                        {
+                        &&  edge != edge::BOTTOM_RIGHT) {
                             if (y > bottom_border - prox && y < bottom_border + prox
-                            &&  x > left_border && x < right_border)
-                            {
+                            &&  x > left_border && x < right_border) {
                                 resize_client(x, bottom_border, edge);
                                 return;
-                            }
-                        }
 
+                            }
+
+                        }
                         if (edge != edge::TOP
                         &&  edge != edge::TOP_LEFT
-                        &&  edge != edge::TOP_RIGHT)
-                        {
+                        &&  edge != edge::TOP_RIGHT) {
                             if (y > top_border - prox && y < top_border + prox
-                            &&  x > left_border && x < right_border)
-                            {
+                            &&  x > left_border && x < right_border) {
                                 resize_client(x, top_border, edge);
                                 return;
-                            }
-                        }
-                    }
 
-                    resize_client(x, y, edge);
+                            }
+
+                        }
+
+                    } resize_client(x, y, edge);
+
                 }
 
-                void run(edge edge)
-                {
+                void run(edge edge) {
                     xcb_generic_event_t *ev;
                     bool shouldContinue = true;
-                    
-                    while (shouldContinue)
-                    {
+
+                    while (shouldContinue) {
                         if ((ev = xcb_wait_for_event(conn)) == nullptr) continue;
 
-                        switch (ev->response_type & ~0x80)
-                        {
-                            case XCB_MOTION_NOTIFY:
-                            {
-                                if (isTimeToRender())
-                                {
+                        switch (ev->response_type & ~0x80) {
+                            case XCB_MOTION_NOTIFY: {
+                                if (isTimeToRender()) {
                                     RE_CAST_EV(xcb_motion_notify_event_t);
                                     snap(e->root_x, e->root_y, edge, 12);
                                     c->update();
                                     xcb_flush(conn);
-                                }
 
-                                break;
+                                } break;
+
                             }
-
-                            case XCB_BUTTON_RELEASE:
-                            {
+                            case XCB_BUTTON_RELEASE: {
                                 shouldContinue = false;                        
                                 c->update();
                                 break;
+
                             }
-
-                            case XCB_EXPOSE:
-                            {
-                                RE_CAST_EV(xcb_expose_event_t);
-                                WS_emit(e->window, EXPOSE);
-                                // file_app->expose(e->window);
-                                // system_settings->expose(e->window);
-
-                                // client *c = wm->client_from_any_window(&e->window);
-                                // if (c != nullptr)
-                                // {
-                                //     if (e->window == c->titlebar)
-                                //     {
-                                //         c->draw_title(TITLE_INTR_DRAW);
-                                //     }
-                                // }
-
-                                break;
-                            }
-
-                            case XCB_CONFIGURE_NOTIFY:
-                            {
-                                RE_CAST_EV(xcb_configure_notify_event_t);
-                                file_app->configure(e->window, e->width, e->height);
-                                system_settings->configure(e->window, e->width, e->height);
-
-                                break;
-                            }
-
-                            case XCB_PROPERTY_NOTIFY:
-                            {
+                            case XCB_PROPERTY_NOTIFY: {
                                 RE_CAST_EV(xcb_property_notify_event_t);
                                 client *c = wm->client_from_any_window(&e->window);
-                                if (c != nullptr)
-                                {
+                                if (c) {
                                     if (e->atom   == ewmh->_NET_WM_NAME
-                                    &&  e->window == c->win)
-                                    {
+                                    &&  e->window == c->win) {
                                         c->draw_title(TITLE_REQ_DRAW);
+                                    
                                     }
-                                }
-
-                                break;
+                                
+                                } break;
+                            
                             }
-                        }
-
-                        free(ev);
+                        
+                        } free(ev);
+                    
                     }
+                
                 }
 
-                void run_double(edge edge, bool __double = false)
-                {
+                void run_double(edge edge, bool __double = false) {
                     xcb_generic_event_t *ev;
                     bool shouldContinue(true);
                     
-                    while (shouldContinue)
-                    {
+                    while (shouldContinue) {
                         ev = xcb_wait_for_event(conn);
                         if (ev == nullptr) continue;
 
-                        switch (ev->response_type & ~0x80)
-                        {
-                            case XCB_MOTION_NOTIFY:
-                            {
+                        switch (ev->response_type & ~0x80) {
+                            case XCB_MOTION_NOTIFY: {
                                 const auto *e = reinterpret_cast<const xcb_motion_notify_event_t *>(ev);
-                                if (isTimeToRender())
-                                {
+                                if (isTimeToRender()) {
                                     resize_client(c, e->root_x, e->root_y, edge);
                                     resize_client(c2, e->root_x, e->root_y, c2_edge);
                                     xcb_flush(conn);
-                                }
 
-                                break;
+                                } break;
+                            
                             }
-
-                            case XCB_BUTTON_RELEASE:
-                            {
+                            case XCB_BUTTON_RELEASE: {
                                 shouldContinue = false;                        
                                 c->update();
                                 c2->update();
                                 break;
-                            }
-                        }
 
-                        free(ev);
+                            }
+
+                        } free(ev);
+                    
                     }
+                
                 }
 
-                bool isTimeToRender()
-                {
+                bool isTimeToRender() {
                     const auto &currentTime = chrono::high_resolution_clock::now();
                     const chrono::duration<double, milli> & elapsedTime = currentTime - lastUpdateTime;
-                    if (elapsedTime.count() >= frameDuration)
-                    {
+
+                    if (elapsedTime.count() >= frameDuration) {
                         lastUpdateTime = currentTime; 
                         return true;
-                    }
+                    
+                    } return false;
 
-                    return false;
                 }
+
         };
 
     private:
