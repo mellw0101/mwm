@@ -12998,21 +12998,18 @@ class mv_client {
                         
                     }
                 
-                    case XCB_BUTTON_RELEASE:
-                    {
-                        RE_CAST_EV(xcb_button_release_event_t);
+                    case XCB_BUTTON_RELEASE: {
                         shouldContinue = false;
                         c->update();
-
                         break;
+
                     }
 
-                    case XCB_EXPOSE:
-                    {
-                        // RE_CAST_EV(xcb_expose_event_t);
-                        // WS_emit(e->window, EXPOSE);
-
+                    case XCB_EXPOSE: {
+                        RE_CAST_EV(xcb_expose_event_t);
+                        WS_emit(e->window, EXPOSE);
                         break;
+
                     }
                 }
                 free(ev);
@@ -14664,7 +14661,7 @@ class Events {
 
             }, MOVE_CLIENT_ALT);
 
-            C_SIGNAL(if (__c) {} /* mv_client(&*__c, wm->pointer.x() - *&__c->x - BORDER_SIZE, wm->pointer.y() - *&__c->y - BORDER_SIZE); */, MOVE_CLIENT_MOUSE);
+            C_SIGNAL(if (__c) {}/*  mv_client(&*__c, wm->pointer.x() - *&__c->x - BORDER_SIZE, wm->pointer.y() - *&__c->y - BORDER_SIZE); */, MOVE_CLIENT_MOUSE);
 
             C_SIGNAL(if (__c) resize_client(__c, 0);, CLIENT_RESIZE_ALT);
 
@@ -14712,7 +14709,6 @@ class Events {
             CONN_root(CONF_REQ_Y,      W_callback -> void { wm->data.y      = __window; });
 
             C_SIGNAL(if (&*__c) {
-                if (!__c->moving) return;
                 __c->snap(wm->pointer.x() - *&__c->x, wm->pointer.y() - *&__c->y);
                 FLUSH_X();
                 __c->update();
