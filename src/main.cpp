@@ -3077,7 +3077,7 @@ class __event_handler__ {
                     switch (e->state) {
                         case (CTRL + ALT): {
                             if (e->detail == key_codes.t) {
-                                HANDLE_EVENT(TERM_KEY_PRESS);
+                                thread(emit_root, screen->root, TERM_KEY_PRESS).detach();
 
                             } return;
 
@@ -3085,9 +3085,10 @@ class __event_handler__ {
                         case (SHIFT + CTRL + SUPER): {
                             if (e->detail == key_codes.r_arrow) {
                                 HANDLE_EVENT(MOVE_TO_NEXT_DESKTOP_WAPP);
+                                thread(emit_root, screen->root, MOVE_TO_NEXT_DESKTOP_WAPP, e->event).detach();
 
                             } else if (e->detail == key_codes.l_arrow) {
-                                HANDLE_EVENT(MOVE_TO_PREV_DESKTOP_WAPP);
+                                thread(emit_root, e->event, MOVE_TO_PREV_DESKTOP_WAPP, e->detail).detach();
 
                             } return;
 
@@ -3110,7 +3111,11 @@ class __event_handler__ {
 
                         }
                         case (CTRL + SUPER): {
-                            if (e->detail == key_codes.r_arrow) HANDLE_EVENT(MOVE_TO_NEXT_DESKTOP);
+                            if (e->detail == key_codes.r_arrow) {
+                                thread(emit_root, screen->root, MOVE_TO_NEXT_DESKTOP, e->event).detach();
+
+                            }
+                            HANDLE_EVENT(MOVE_TO_NEXT_DESKTOP);
                             if (e->detail == key_codes.l_arrow) HANDLE_EVENT(MOVE_TO_PREV_DESKTOP);
                             
                             break;
@@ -3137,8 +3142,7 @@ class __event_handler__ {
                         }
 
                     } if (e->detail == key_codes.f11) {
-                        thread(emit, e->event, EWMH_MAXWIN).detach();
-                        // HANDLE_EVENT(EWMH_MAXWIN);
+                        thread(emit_root, screen->root, EWMH_MAXWIN, e->state).detach();
 
                     } return;
 
@@ -3185,25 +3189,27 @@ class __event_handler__ {
                 case XCB_ENTER_NOTIFY:{
                     RE_CAST_EV(xcb_enter_notify_event_t);
                     thread(emit, e->event, ENTER_NOTIFY).detach();
-                    break;
+                    
+                    return;
 
                 }
                 case XCB_LEAVE_NOTIFY:{
                     RE_CAST_EV(xcb_leave_notify_event_t);
                     thread(emit, e->event, LEAVE_NOTIFY).detach();;
-                    break;
+                    
+                    return;
 
                 }
                 case XCB_MAP_REQUEST: {
                     RE_CAST_EV(xcb_map_request_event_t);
-                    thread(emit, screen->root, MAP_REQ, e->window).detach();
+                    thread(emit_root, screen->root, MAP_REQ, e->window).detach();
 
                     return;
 
                 }
                 case XCB_MAP_NOTIFY:{
                     RE_CAST_EV(xcb_map_notify_event_t);
-                    thread(emit, screen->root, MAP_NOTIFY, e->window).detach();
+                    thread(emit_root, screen->root, MAP_NOTIFY, e->window).detach();
 
                     return;
 
