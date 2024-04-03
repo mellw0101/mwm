@@ -2987,8 +2987,11 @@ class __event_handler__ {
         mutex event_mutex;
 
     /* Methods   */
-        using EventCallback = function<void(Ev)>;
+        constexpr int add(int a, int b) {
+            return a + b;
 
+        }
+        using EventCallback = function<void(Ev)>;
         void run() {
             key_codes.init();
             xcb_generic_event_t *ev;
@@ -3035,8 +3038,7 @@ class __event_handler__ {
 
         DynamicArray<uint32_t *> _window_arr;
 
-        constexpr uint8_t char_to_keycode__(int8_t c) const
-        {
+        constexpr uint8_t char_to_keycode__(int8_t c) const {
             switch (c)
             {
                 case 'a': return this->key_codes.a;
@@ -3071,11 +3073,8 @@ class __event_handler__ {
 
             return (uint8_t)0;
         }
-
-        size_t find_window(uint32_t __window)
-        {
-            for (size_t i = 0; i < _window_arr.getSize(); ++i)
-            {
+        size_t find_window(uint32_t __window) {
+            for (size_t i = 0; i < _window_arr.getSize(); ++i) {
                 if (_window_arr[i] == nullptr) continue;
 
                 if (__window == _window_arr[i][0]
@@ -3093,13 +3092,13 @@ class __event_handler__ {
                 ||  __window == _window_arr[i][12]
                 ||  __window == _window_arr[i][13]
                 ||  __window == _window_arr[i][14]
-                ||  __window == _window_arr[i][15])
-                {
+                ||  __window == _window_arr[i][15]) {
                     return i;
-                }
-            }
 
-            return 0;
+                }
+
+            } return 0;
+
         }
 
         // Function that creates a separate thread for each event type
@@ -3230,7 +3229,7 @@ class __event_handler__ {
         }
         static constexpr auto const &map_req = [](xcb_generic_event_t *ev) -> void {
             RE_CAST_EV(xcb_map_request_event_t);
-            signal_manager->_window_signals.emit(e->window, MAP_REQ);
+            signal_manager->_window_signals.emit(screen->root, XCB_MAP_REQUEST, e->window);
 
         };
         static constexpr auto const &expose = [](xcb_generic_event_t *ev) -> void {
@@ -8265,20 +8264,33 @@ class Window_Manager {
 
             }
             void setup_events() {
-                CONN_Win(root, L_MOUSE_BUTTON_EVENT, this->unfocus(); WS_emit(this->context_menu->context_window, HIDE_CONTEXT_MENU););
-                CONN_Win(root, R_MOUSE_BUTTON_EVENT, this->context_menu->show(); );
-                CONN_Win(root, MAP_REQ,
-                    client *c = signal_manager->_window_client_map.retrive(__window);
-                    if (c != nullptr) return;
+                // signal_manager->_window_signals.conect(root, MAP_REQ, [this](uint32_t __window) -> void {
+                //     client *c = signal_manager->_window_client_map.retrive(__window);
+                //     if (c == nullptr) {
+                //         manage_new_client(__window);
+                        
+                //     }
+                    
+                // });
+                CONN_Win(root, L_MOUSE_BUTTON_EVENT,
+                    this->unfocus();
+
+                );
+                CONN_Win(root, R_MOUSE_BUTTON_EVENT,
+                    this->context_menu->show();
+                
+                );
+                CONN_Win(root, XCB_MAP_REQUEST,
                     this->manage_new_client(__window);
 
                 );
-                CONN_Win(root, MAP_NOTIFY,
-                    client *c = signal_manager->_window_client_map.retrive(__window);
-                    if (!c) return;
-                    c->update();
+                // CONN_Win(root, MAP_NOTIFY,
+                //     client *c = signal_manager->_window_client_map.retrive(__window);
+                //     if (!c) return;
+                //     c->update();
 
-                );
+                // );
+
                 CONN_Win(root, TERM_KEY_PRESS, this->launcher.launch_child_process("konsole"););
                 CONN_Win(root, QUIT_KEY_PRESS, this->quit(0););
                 CONN_root(CYCLE_FOCUS_KEY_PRESS, W_callback -> void { this->cycle_focus(); });
@@ -14518,6 +14530,38 @@ class test {
     // Constructor.
         test() {}
 };
+
+
+// class __threaded_event_handler__ {
+//     public:
+//         __threaded_event_handler__() {
+//             // Initialize the event map
+//             eventMap[XCB_EXPOSE] = [this](xcb_generic_event_t* ev) { this->handle(reinterpret_cast<xcb_expose_event_t *>(ev)); };
+//             eventMap[XCB_BUTTON_PRESS] = [this](xcb_generic_event_t* ev) { this->handle(reinterpret_cast<xcb_button_press_event_t *>(ev)); };
+//             eventMap[XCB_KEY_PRESS] = [this](xcb_generic_event_t* ev) { this->handle(reinterpret_cast<xcb_key_press_event_t *>(ev)); };
+//             eventMap[XCB_KEY_PRESS] = [this](xcb_generic_event_t* ev) { this->handle(reinterpret_cast<xcb_key_press_event_t *>(ev)); };
+//             eventMap[XCB_KEY_PRESS] = [this](xcb_generic_event_t* ev) { this->handle(reinterpret_cast<xcb_key_press_event_t *>(ev)); };
+//             eventMap[XCB_KEY_PRESS] = [this](xcb_generic_event_t* ev) { this->handle(reinterpret_cast<xcb_key_press_event_t *>(ev)); };
+//             eventMap[XCB_KEY_PRESS] = [this](xcb_generic_event_t* ev) { this->handle(reinterpret_cast<xcb_key_press_event_t *>(ev)); };
+
+//         }
+//         void processEvent(xcb_generic_event_t* ev) {
+//             uint8_t responseType = ev->response_type & ~0x80;
+//             auto it = eventMap.find(responseType);
+//             if (it != eventMap.end()) {
+//                 it->second(ev);
+                
+//             }
+
+//         }
+
+//     private:
+//         unordered_map<uint8_t, function<void(xcb_generic_event_t*)>> eventMap;
+
+//         template<typename EventType>
+//         constexpr void handle(EventType* e);
+
+// };
 
 void setup_wm()
 {

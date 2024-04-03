@@ -13,6 +13,7 @@
 #include <functional>
 #include <limits>
 #include <type_traits>
+#include <unordered_map>
 #include <utility>
 #include <xcb/xcb_ewmh.h>
 #include <xcb/xproto.h>
@@ -784,6 +785,8 @@ enum
         THIS IS HOW FAR AWAY WINDOW TO WINDOW CORNER SNAPPING WILL HAPPEN 
      */
 };
+
+static unordered_map<uint32_t, function<void(uint32_t)>> umap{{{},{}}, {}};
 
 enum EV : uint8_t {
     REMOVE_ALL                        = 0,
