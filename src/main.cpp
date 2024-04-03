@@ -7225,32 +7225,16 @@ class client {
             CWC(frame);
 
             CONN(DESTROY_NOTIFY, if (__window == this->win) {
-                if (this->win.is_mapped()) {
-                    loutI << "this->win is mapped so killed win" << loutEND;
-                    this->win.kill();
+                if (!this->win.is_mapped()) {
+                    this->kill();
 
                 }
                 else {
-                    loutI << "this->win is not mapped so killed client" << loutEND;
-                    this->kill();
+                    this->win.kill();
 
                 }
 
             }, this->win);
-
-            CONN(DESTROY_NOTIFY, if (__window == this->frame) {
-                if (this->win.is_mapped()) {
-                    loutI << "from this->frame this->win is mapped so killed win" << loutEND;
-                    this->win.kill();
-
-                }
-                else {
-                    loutI << "from this->frane this->win is not mapped so killed client" << loutEND;
-                    this->kill();
-
-                }
-
-            }, this->frame);
 
         }    
         void make_titlebar() {
