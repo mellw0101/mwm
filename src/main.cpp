@@ -7830,7 +7830,6 @@ class context_menu {
             entries.push_back(entry);
 
         }
-
         context_menu() { create_dialog_win__(); }
 
 };
@@ -8869,16 +8868,13 @@ class __audio__ {
 
         static void success_cb(pa_context* c, int success, void* userdata)
         {
-            if (success)
-            {
+            if (success) {
                 // loutI << "Default sink changed successfully" << '\n';
-            }
-            else
-            {
+
+            } else {
                 // loutE << "Failed to change the default sink" << '\n';
 
             }
-
             // Signal the main loop to quit after attempting to change the default sink
             pa_mainloop_quit(reinterpret_cast<pa_mainloop*>(userdata), 0);
         }
@@ -14207,13 +14203,13 @@ class Events {
 
             }, FOCUS_CLIENT);
 
-            C_SIGNAL(if (__c) {
-                // __c->raise();
-                // mv_client mv(__c, m_pointer->x(), m_pointer->y() + 20);
-                // __c->focus();
-                // wm->focused_client = __c;
+            // C_SIGNAL(if (__c) {
+            //     // __c->raise();
+            //     // mv_client mv(__c, m_pointer->x(), m_pointer->y() + 20);
+            //     // __c->focus();
+            //     // wm->focused_client = __c;
 
-            }, MOVE_CLIENT_ALT);
+            // }, MOVE_CLIENT_ALT);
 
             C_SIGNAL(if (&*__c)  mv_client(__c, wm->pointer.x() - __c->x - BORDER_SIZE, wm->pointer.y() - __c->y - BORDER_SIZE);, MOVE_CLIENT_MOUSE);
 
