@@ -2966,9 +2966,9 @@ class __event_handler__ {
 
         }
 
-        static void emit(uint32_t __w, uint8_t __sig) { signal_manager->_window_signals.emit(__w, __sig); }        
+        static void emit(uint32_t __w, uint8_t __sig) { signal_manager->_window_signals.emit(__w, __sig); }
 
-        static void emit_root(uint32_t __w, uint8_t __sig, uint32_t __w2 = 0) { signal_manager->_window_signals.emit(__w, __sig, __w2); }
+        // static void emit_root(uint32_t __w, uint8_t __sig, uint32_t __w2 = 0) { signal_manager->_window_signals.emit(__w, __sig, __w2); }
 
         template<uint8_t __sig>
         static void handle_event(uint32_t __w) { WS_emit(__w, __sig); }
@@ -2976,21 +2976,37 @@ class __event_handler__ {
         template<> void handle_event<XCB_MAP_REQUEST>    (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, XCB_MAP_REQUEST, __w);}
         template<> void handle_event<XCB_LEAVE_NOTIFY>   (uint32_t __w) { signal_manager->_window_signals.emit(__w, XCB_LEAVE_NOTIFY);}
         template<> void handle_event<XCB_EXPOSE>         (uint32_t __w) { signal_manager->_window_signals.emit(__w, XCB_EXPOSE);}
+        template<> void handle_event<TERM_KEY_PRESS>     (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, TERM_KEY_PRESS, 0);}
         template<> void handle_event<XCB_MAP_NOTIFY>     (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, XCB_MAP_NOTIFY, __w);}
-        template<> void handle_event<XCB_PROPERTY_NOTIFY>(uint32_t __w) {}
+        template<> void handle_event<QUIT_KEY_PRESS>     (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, QUIT_KEY_PRESS, 0);}
+        template<> void handle_event<MOVE_TO_DESKTOP_1>  (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, MOVE_TO_DESKTOP_1);}
+        template<> void handle_event<MOVE_TO_DESKTOP_2>  (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, MOVE_TO_DESKTOP_2);}
+        template<> void handle_event<MOVE_TO_DESKTOP_3>  (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, MOVE_TO_DESKTOP_3);}
+        template<> void handle_event<MOVE_TO_DESKTOP_4>  (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, MOVE_TO_DESKTOP_4);}
+        template<> void handle_event<MOVE_TO_DESKTOP_5>  (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, MOVE_TO_DESKTOP_5);}
+        template<> void handle_event<MOVE_TO_NEXT_DESKTOP>(uint32_t __w) {signal_manager->_window_signals.emit(screen->root, MOVE_TO_NEXT_DESKTOP, __w);}
+        template<> void handle_event<MOVE_TO_PREV_DESKTOP>(uint32_t __w) {signal_manager->_window_signals.emit(screen->root, MOVE_TO_PREV_DESKTOP, __w);}
+        // template<> void handle_event<ROOT_SIG>           (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, XCB_MAP_NOTIFY, __w);}
+        template<> void handle_event<MOVE_TO_NEXT_DESKTOP_WAPP>(uint32_t __w) {  signal_manager->_window_signals.emit(screen->root, MOVE_TO_NEXT_DESKTOP_WAPP, __w);}
+        template<> void handle_event<MOVE_TO_PREV_DESKTOP_WAPP>(uint32_t __w) {  signal_manager->_window_signals.emit(screen->root, MOVE_TO_PREV_DESKTOP_WAPP, __w);}
+        // template<> void handle_event<TERM_KEY_PRESS>     (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, TERM_KEY_PRESS, 0); }
+        // template<> void handle_event<XCB_MAP_NOTIFY>     (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, XCB_MAP_NOTIFY, __w);}
+        // template<> void handle_event<ROOT_SIG>           (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, XCB_MAP_NOTIFY, __w);}
+        // template<> void handle_event<TERM_KEY_PRESS>     (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, TERM_KEY_PRESS, 0); }
+        // template<> void handle_event<XCB_MAP_NOTIFY>     (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, XCB_MAP_NOTIFY, __w);}
+        // template<> void handle_event<ROOT_SIG>           (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, XCB_MAP_NOTIFY, __w);}
+        // template<> void handle_event<XCB_PROPERTY_NOTIFY>(uint32_t __w) {}
  
-        template<> void handle_event<EWMH_MAXWIN>              (uint32_t __window) { C_EMIT      (C_RETRIVE(__window)  , EWMH_MAXWIN);             }
-        template<> void handle_event<TERM_KEY_PRESS>           (uint32_t __window) { WS_emit_Win (screen->root                , TERM_KEY_PRESS, 0);    }
-        template<> void handle_event<QUIT_KEY_PRESS>           (uint32_t __window) { WS_emit_Win (screen->root                , QUIT_KEY_PRESS, 0);    }
-        template<> void handle_event<MOVE_TO_DESKTOP_1>        (uint32_t __window) { WS_emit     (screen->root                , MOVE_TO_DESKTOP_1);        }
-        template<> void handle_event<MOVE_TO_DESKTOP_2>        (uint32_t __window) { WS_emit     (screen->root                , MOVE_TO_DESKTOP_2);        }
-        template<> void handle_event<MOVE_TO_DESKTOP_3>        (uint32_t __window) { WS_emit     (screen->root                , MOVE_TO_DESKTOP_3);        }
-        template<> void handle_event<MOVE_TO_DESKTOP_4>        (uint32_t __window) { WS_emit     (screen->root                , MOVE_TO_DESKTOP_4);        }
-        template<> void handle_event<MOVE_TO_DESKTOP_5>        (uint32_t __window) { WS_emit     (screen->root                , MOVE_TO_DESKTOP_5);        }
-        template<> void handle_event<MOVE_TO_NEXT_DESKTOP>     (uint32_t __window) { WS_emit     (screen->root                , MOVE_TO_NEXT_DESKTOP);     }
-        template<> void handle_event<MOVE_TO_PREV_DESKTOP>     (uint32_t __window) { WS_emit     (screen->root                , MOVE_TO_PREV_DESKTOP);     }
-        template<> void handle_event<MOVE_TO_NEXT_DESKTOP_WAPP>(uint32_t __window) { WS_emit_root(MOVE_TO_NEXT_DESKTOP_WAPP , __window);                  }
-        template<> void handle_event<MOVE_TO_PREV_DESKTOP_WAPP>(uint32_t __window) { WS_emit_root(MOVE_TO_PREV_DESKTOP_WAPP , __window);                  }
+        template<> void handle_event<EWMH_MAXWIN> (uint32_t __window) { C_EMIT      (C_RETRIVE(__window)  , EWMH_MAXWIN);             }
+        // template<> void handle_event<TERM_KEY_PRESS>           (uint32_t __window) { WS_emit_Win (screen->root                , TERM_KEY_PRESS, 0);    }
+        // // template<> void handle_event<QUIT_KEY_PRESS>           (uint32_t __window) { WS_emit_Win (screen->root                , QUIT_KEY_PRESS, 0);    }
+        // template<> void handle_event<MOVE_TO_DESKTOP_1>        (uint32_t __window) { WS_emit     (screen->root                , MOVE_TO_DESKTOP_1);        }
+        // template<> void handle_event<MOVE_TO_DESKTOP_2>        (uint32_t __window) { WS_emit     (screen->root                , MOVE_TO_DESKTOP_2);        }
+        // template<> void handle_event<MOVE_TO_DESKTOP_3>        (uint32_t __window) { WS_emit     (screen->root                , MOVE_TO_DESKTOP_3);        }
+        // template<> void handle_event<MOVE_TO_DESKTOP_4>        (uint32_t __window) { WS_emit     (screen->root                , MOVE_TO_DESKTOP_4);        }
+        // template<> void handle_event<MOVE_TO_DESKTOP_5>        (uint32_t __window) { WS_emit     (screen->root                , MOVE_TO_DESKTOP_5);        }
+        // template<> void handle_event<MOVE_TO_NEXT_DESKTOP_WAPP>(uint32_t __window) { WS_emit_root(MOVE_TO_NEXT_DESKTOP_WAPP , __window);                  }
+        // template<> void handle_event<MOVE_TO_PREV_DESKTOP_WAPP>(uint32_t __window) { WS_emit_root(MOVE_TO_PREV_DESKTOP_WAPP , __window);                  }
         template<> void handle_event<MOTION_NOTIFY>            (uint32_t __window) { WS_emit     (__window , MOTION_NOTIFY);            }
         template<> void handle_event<TILE_RIGHT>               (uint32_t __window) { C_EMIT      (C_RETRIVE(__window) , TILE_RIGHT);               }
         template<> void handle_event<TILE_LEFT>                (uint32_t __window) { C_EMIT      (C_RETRIVE(__window) , TILE_LEFT );               }
@@ -3077,49 +3093,59 @@ class __event_handler__ {
                     switch (e->state) {
                         case (CTRL + ALT): {
                             if (e->detail == key_codes.t) {
-                                thread(emit_root, screen->root, TERM_KEY_PRESS, 0).detach();
+                                thread(handle_event<TERM_KEY_PRESS>, e->event).detach();
 
                             } return;
 
                         }
                         case (SHIFT + CTRL + SUPER): {
                             if (e->detail == key_codes.r_arrow) {
-                                // HANDLE_EVENT(MOVE_TO_NEXT_DESKTOP_WAPP);
-                                thread(emit_root, screen->root, MOVE_TO_NEXT_DESKTOP_WAPP, e->event).detach();
+                                thread(handle_event<MOVE_TO_NEXT_DESKTOP_WAPP>, e->event).detach();
 
                             } else if (e->detail == key_codes.l_arrow) {
-                                thread(emit_root, screen->root, MOVE_TO_PREV_DESKTOP_WAPP, e->detail).detach();
+                                thread(handle_event<MOVE_TO_PREV_DESKTOP_WAPP>, e->event).detach();
 
                             } return;
 
                         }
                         case (SHIFT + ALT): {
                             if (e->detail == key_codes.q) {
-                                thread(emit_root, screen->root, QUIT_KEY_PRESS, 0).detach();
+                                thread(handle_event<QUIT_KEY_PRESS>, e->event).detach();
 
-                            }
-                            
-                            return;
+                            } return;
 
                         }
                         case ALT: {
-                            if (e->detail == key_codes.n_1) thread(emit, screen->root, MOVE_TO_DESKTOP_1);
-                            if (e->detail == key_codes.n_2) thread(emit, screen->root, MOVE_TO_DESKTOP_2);
-                            if (e->detail == key_codes.n_3) thread(emit, screen->root, MOVE_TO_DESKTOP_3);
-                            if (e->detail == key_codes.n_4) thread(emit, screen->root, MOVE_TO_DESKTOP_4);
-                            if (e->detail == key_codes.n_5) thread(emit, screen->root, MOVE_TO_DESKTOP_5);
-                            if (e->detail == key_codes.tab) thread(emit_root, CYCLE_FOCUS_KEY_PRESS, e->event);
-                            
-                            return;
+                            if (e->detail == key_codes.n_1) {
+                                thread(handle_event<MOVE_TO_DESKTOP_1>).detach();
+
+                            } else if (e->detail == key_codes.n_2) {
+                                thread(handle_event<MOVE_TO_DESKTOP_2>).detach();
+                                
+                            } else if (e->detail == key_codes.n_3) {
+                                thread(handle_event<MOVE_TO_DESKTOP_3>).detach(); 
+
+                            } else if (e->detail == key_codes.n_4) {
+                                thread(handle_event<MOVE_TO_DESKTOP_4>).detach();
+
+                            } else if (e->detail == key_codes.n_5) {
+                                thread(handle_event<MOVE_TO_DESKTOP_5>).detach();
+
+                            } else if (e->detail == key_codes.tab) {
+                                thread(handle_event<CYCLE_FOCUS_KEY_PRESS>, e->event).detach();
+
+                            } return;
 
                         }
                         case (CTRL + SUPER): {
                             if (e->detail == key_codes.r_arrow) {
-                                thread(emit_root, screen->root, MOVE_TO_NEXT_DESKTOP, e->event).detach();
+                                thread(handle_event<MOVE_TO_NEXT_DESKTOP>, e->event).detach();
 
                             }
-                            HANDLE_EVENT(MOVE_TO_NEXT_DESKTOP);
-                            if (e->detail == key_codes.l_arrow) HANDLE_EVENT(MOVE_TO_PREV_DESKTOP);
+                            if (e->detail == key_codes.l_arrow) {
+                                thread(handle_event<MOVE_TO_PREV_DESKTOP>, e->event).detach();
+
+                            }
                             
                             break;
 
@@ -3145,7 +3171,7 @@ class __event_handler__ {
                         }
 
                     } if (e->detail == key_codes.f11) {
-                        thread(emit_root, screen->root, EWMH_MAXWIN, e->state).detach();
+                        // thread(handle_event<EWMH_MAXWIN>, e->event).detach();
 
                     } return;
 
@@ -3177,49 +3203,49 @@ class __event_handler__ {
                 }
                 case XCB_EXPOSE:{
                     RE_CAST_EV(xcb_expose_event_t);
-                    thread(emit, e->window, EXPOSE).detach();
+                    thread(handle_event<EXPOSE>, e->window).detach();
                 
                     return;
 
                 }
                 case XCB_PROPERTY_NOTIFY:{
                     RE_CAST_EV(xcb_property_notify_event_t);
-                    thread(emit, e->window, PROPERTY_NOTIFY).detach();
+                    thread(handle_event<PROPERTY_NOTIFY>, e->window).detach();
 
                     return;
 
                 }
                 case XCB_ENTER_NOTIFY:{
                     RE_CAST_EV(xcb_enter_notify_event_t);
-                    thread(emit, e->event, ENTER_NOTIFY).detach();
+                    thread(handle_event<ENTER_NOTIFY>, e->event).detach();
                     
                     return;
 
                 }
                 case XCB_LEAVE_NOTIFY:{
                     RE_CAST_EV(xcb_leave_notify_event_t);
-                    thread(emit, e->event, LEAVE_NOTIFY).detach();;
+                    thread(handle_event<LEAVE_NOTIFY>, e->event).detach();;
                     
                     return;
 
                 }
                 case XCB_MAP_REQUEST: {
                     RE_CAST_EV(xcb_map_request_event_t);
-                    thread(emit_root, screen->root, MAP_REQ, e->window).detach();
+                    thread(handle_event<MAP_REQ>, e->window).detach();
 
                     return;
 
                 }
                 case XCB_MAP_NOTIFY:{
                     RE_CAST_EV(xcb_map_notify_event_t);
-                    thread(emit_root, screen->root, MAP_NOTIFY, e->window).detach();
+                    thread(handle_event<MAP_NOTIFY>, e->window).detach();
 
                     return;
 
                 }
                 case XCB_FOCUS_IN:{
                     RE_CAST_EV(xcb_focus_in_event_t);
-                    thread(emit, e->event, FOCUS_IN).detach();
+                    thread(handle_event<FOCUS_IN>, e->event).detach();
 
                     return;
 
@@ -3233,14 +3259,14 @@ class __event_handler__ {
                 }
                 case XCB_DESTROY_NOTIFY:{
                     RE_CAST_EV(xcb_destroy_notify_event_t);
-                    thread(emit, e->window, DESTROY_NOTIFY).detach();
+                    thread(handle_event<DESTROY_NOTIFY>, e->window).detach();
 
                     return;
 
                 }
                 case XCB_MOTION_NOTIFY:{
                     RE_CAST_EV(xcb_motion_notify_event_t);
-                    thread(emit, e->event, MOTION_NOTIFY).detach();
+                    thread(handle_event<MOTION_NOTIFY>, e->event).detach();
 
                     return;
 

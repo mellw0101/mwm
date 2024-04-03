@@ -869,8 +869,8 @@ enum EV : uint8_t {
     RESIZE_CLIENT_BORDER_TOP_RIGHT    = 77,
     RESIZE_CLIENT_BORDER_BOTTOM_RIGHT = 78,
     RESIZE_CLIENT_BORDER_BOTTOM_LEFT  = 79,
-    HIDE_CONTEXT_MENU                 = 80
-    
+    HIDE_CONTEXT_MENU                 = 80,
+    ROOT_SIG                          = 81
 };
 
 typedef struct __client__data__t__{
