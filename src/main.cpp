@@ -3009,6 +3009,8 @@ class __event_handler__ {
 
         }
 
+        static void emit(uint32_t __w, uint8_t __sig, uint32_t __w2) { signal_manager->_window_signals.emit(__w, __sig, __w2); }
+
         template<uint8_t __sig>
         static void handle_event(uint32_t __w) { WS_emit(__w, __sig); }
         
@@ -3186,7 +3188,7 @@ class __event_handler__ {
                 }
                 case XCB_PROPERTY_NOTIFY:   {
                     RE_CAST_EV(xcb_property_notify_event_t);
-                    thread(this->lambda, e->window, XCB_PROPERTY_NOTIFY).detach();
+                    thread(lambda, e->window, XCB_PROPERTY_NOTIFY).detach();
                     break;
 
                 }
@@ -3242,7 +3244,7 @@ class __event_handler__ {
             }
 
         }
-        static constexpr auto const &lambda = [](uint32_t __w, uint8_t __sig, uint32_t __w2) -> void {
+        static constexpr auto lambda = [](uint32_t __w, uint8_t __sig, uint32_t __w2) -> void {
             signal_manager->_window_signals.emit(__w, __sig, __w2);
 
         };
