@@ -3077,37 +3077,40 @@ class __event_handler__ {
                     switch (e->state) {
                         case (CTRL + ALT): {
                             if (e->detail == key_codes.t) {
-                                thread(emit_root, screen->root, TERM_KEY_PRESS).detach();
+                                thread(emit_root, screen->root, TERM_KEY_PRESS, 0).detach();
 
                             } return;
 
                         }
                         case (SHIFT + CTRL + SUPER): {
                             if (e->detail == key_codes.r_arrow) {
-                                HANDLE_EVENT(MOVE_TO_NEXT_DESKTOP_WAPP);
+                                // HANDLE_EVENT(MOVE_TO_NEXT_DESKTOP_WAPP);
                                 thread(emit_root, screen->root, MOVE_TO_NEXT_DESKTOP_WAPP, e->event).detach();
 
                             } else if (e->detail == key_codes.l_arrow) {
-                                thread(emit_root, e->event, MOVE_TO_PREV_DESKTOP_WAPP, e->detail).detach();
+                                thread(emit_root, screen->root, MOVE_TO_PREV_DESKTOP_WAPP, e->detail).detach();
 
                             } return;
 
                         }
                         case (SHIFT + ALT): {
-                            if (e->detail == key_codes.q) HANDLE_EVENT(QUIT_KEY_PRESS);
+                            if (e->detail == key_codes.q) {
+                                thread(emit_root, screen->root, QUIT_KEY_PRESS, 0).detach();
+
+                            }
                             
-                            break;
+                            return;
 
                         }
                         case ALT: {
-                            if (e->detail == key_codes.n_1) HANDLE_EVENT(MOVE_TO_DESKTOP_1);
-                            if (e->detail == key_codes.n_2) HANDLE_EVENT(MOVE_TO_DESKTOP_2);
-                            if (e->detail == key_codes.n_3) HANDLE_EVENT(MOVE_TO_DESKTOP_3);
-                            if (e->detail == key_codes.n_4) HANDLE_EVENT(MOVE_TO_DESKTOP_4);
-                            if (e->detail == key_codes.n_5) HANDLE_EVENT(MOVE_TO_DESKTOP_5);
-                            if (e->detail == key_codes.tab) HANDLE_EVENT(CYCLE_FOCUS_KEY_PRESS);
+                            if (e->detail == key_codes.n_1) thread(emit, screen->root, MOVE_TO_DESKTOP_1);
+                            if (e->detail == key_codes.n_2) thread(emit, screen->root, MOVE_TO_DESKTOP_2);
+                            if (e->detail == key_codes.n_3) thread(emit, screen->root, MOVE_TO_DESKTOP_3);
+                            if (e->detail == key_codes.n_4) thread(emit, screen->root, MOVE_TO_DESKTOP_4);
+                            if (e->detail == key_codes.n_5) thread(emit, screen->root, MOVE_TO_DESKTOP_5);
+                            if (e->detail == key_codes.tab) thread(emit_root, CYCLE_FOCUS_KEY_PRESS, e->event);
                             
-                            break;
+                            return;
 
                         }
                         case (CTRL + SUPER): {
