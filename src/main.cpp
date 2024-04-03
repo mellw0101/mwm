@@ -7224,6 +7224,16 @@ class client {
             CWC(win);
             CWC(frame);
 
+            CONN(DESTROY_NOTIFY, if (__window == this->win) {
+                this->kill();
+
+            }, this->win);
+
+            CONN(DESTROY_NOTIFY, if (__window == this->frame) {
+                this->kill();
+
+            }, this->frame);
+
         }    
         void make_titlebar() {
             titlebar.create_window(
