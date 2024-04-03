@@ -14209,19 +14209,19 @@ class Events {
             C_SIGNAL(if (__c) resize_client::border(__c, edge::BOTTOM_RIGHT);, RESIZE_CLIENT_BORDER_BOTTOM_RIGHT);
 
             CONN_root(DESTROY_NOTIFY, W_callback -> void {
-                client *c = C_RETRIVE(__window);
-                if (c == nullptr) return;
+                // client *c = C_RETRIVE(__window);
+                // if (c == nullptr) return;
                 
-                if (c->atoms.is_modal) {
-                    client *c_trans = C_RETRIVE(c->modal_data.transient_for);
-                    if (!c_trans) return;
+                // if (c->atoms.is_modal) {
+                //     client *c_trans = C_RETRIVE(c->modal_data.transient_for);
+                //     if (!c_trans) return;
 
-                    c_trans->focus();
-                    wm->focused_client = c_trans;
+                //     c_trans->focus();
+                //     wm->focused_client = c_trans;
 
-                }
-                pid_manager->remove_pid(c->win.pid());
-                wm->send_sigterm_to_client(c);
+                // }
+                // pid_manager->remove_pid(c->win.pid());
+                // wm->send_sigterm_to_client(c);
 
             });
 
