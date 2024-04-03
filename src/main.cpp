@@ -3093,12 +3093,11 @@ class __event_handler__ {
                     switch (e->state) {
                         case (CTRL + ALT): {
                             if (e->detail == key_codes.t) {
-                                thread(handle_event<TERM_KEY_PRESS>, e->event).detach();
+                                HANDLE_EVENT(TERM_KEY_PRESS);
 
                             } return;
 
-                        }
-                        case (SHIFT + CTRL + SUPER): {
+                        } case (SHIFT + CTRL + SUPER): {
                             if (e->detail == key_codes.r_arrow) {
                                 HANDLE_EVENT(MOVE_TO_NEXT_DESKTOP_WAPP);
 
@@ -3107,15 +3106,13 @@ class __event_handler__ {
 
                             } return;
 
-                        }
-                        case (SHIFT + ALT): {
+                        } case (SHIFT + ALT): {
                             if (e->detail == key_codes.q) {
                                 HANDLE_EVENT(QUIT_KEY_PRESS);
 
                             } return;
 
-                        }
-                        case ALT: {
+                        } case ALT: {
                             if (e->detail == key_codes.n_1) {
                                 HANDLE_EVENT(MOVE_TO_DESKTOP_1);
 
@@ -3136,21 +3133,16 @@ class __event_handler__ {
 
                             } return;
 
-                        }
-                        case (CTRL + SUPER): {
+                        } case (CTRL + SUPER): {
                             if (e->detail == key_codes.r_arrow) {
                                 HANDLE_EVENT(MOVE_TO_NEXT_DESKTOP);
 
-                            }
-                            if (e->detail == key_codes.l_arrow) {
+                            } else if (e->detail == key_codes.l_arrow) {
                                 HANDLE_EVENT(MOVE_TO_PREV_DESKTOP);
 
-                            }
-                            
-                            break;
+                            } break;
 
-                        }
-                        case SUPER: {
+                        } case SUPER: {
                             if (e->detail == key_codes.r_arrow) {
                                 HANDLE_EVENT(TILE_RIGHT);
 
@@ -3175,22 +3167,20 @@ class __event_handler__ {
 
                     } return;
 
-                }
-                case XCB_BUTTON_PRESS:{
+                } case XCB_BUTTON_PRESS:{
                     RE_CAST_EV(xcb_button_press_event_t);
                     if (e->detail == L_MOUSE_BUTTON) {
                         if (e->state == ALT) {
-                            thread(emit, e->event, L_MOUSE_BUTTON_EVENT__ALT).detach();
-                            return;
+                            HANDLE_EVENT(L_MOUSE_BUTTON_EVENT__ALT);
 
                         } else {
-                            thread(emit, e->event, L_MOUSE_BUTTON_EVENT).detach();
+                            HANDLE_EVENT(L_MOUSE_BUTTON_EVENT);
 
                         } return;
 
                     } else if (e->detail == R_MOUSE_BUTTON) {
                         if (e->state == ALT) {
-                            HANDLE_EVENT(L_MOUSE_BUTTON_EVENT);
+                            HANDLE_EVENT(R_MOUSE_BUTTON_EVENT__ALT);
                             
                         } else {
                             HANDLE_EVENT(R_MOUSE_BUTTON_EVENT);
@@ -3199,71 +3189,61 @@ class __event_handler__ {
 
                     } return;
 
-                }
-                case XCB_EXPOSE:{
+                } case XCB_EXPOSE:{
                     RE_CAST_EV(xcb_expose_event_t);
                     HANDLE_WINDOW(XCB_EXPOSE);
 
                     return;
 
-                }
-                case XCB_PROPERTY_NOTIFY:{
+                } case XCB_PROPERTY_NOTIFY:{
                     RE_CAST_EV(xcb_property_notify_event_t);
                     HANDLE_WINDOW(XCB_PROPERTY_NOTIFY);
 
                     return;
 
-                }
-                case XCB_ENTER_NOTIFY:{
+                } case XCB_ENTER_NOTIFY:{
                     RE_CAST_EV(xcb_enter_notify_event_t);
                     HANDLE_EVENT(XCB_ENTER_NOTIFY);
 
                     return;
 
-                }
-                case XCB_LEAVE_NOTIFY:{
+                } case XCB_LEAVE_NOTIFY:{
                     RE_CAST_EV(xcb_leave_notify_event_t);
                     HANDLE_EVENT(LEAVE_NOTIFY);
 
                     return;
 
-                }
-                case XCB_MAP_REQUEST: {
+                } case XCB_MAP_REQUEST: {
                     RE_CAST_EV(xcb_map_request_event_t);
                     HANDLE_WINDOW(MAP_REQ);
 
                     return;
 
-                }
-                case XCB_MAP_NOTIFY:{
+                } case XCB_MAP_NOTIFY:{
                     RE_CAST_EV(xcb_map_notify_event_t);
                     HANDLE_EVENT(MAP_NOTIFY);
 
                     return;
 
-                }
-                case XCB_FOCUS_IN:{
+                } case XCB_FOCUS_IN:{
                     RE_CAST_EV(xcb_focus_in_event_t);
                     HANDLE_EVENT(FOCUS_IN);
 
                     return;
 
-                }
-                case XCB_FOCUS_OUT:{
+                } case XCB_FOCUS_OUT:{
                     RE_CAST_EV(xcb_focus_out_event_t);
                     HANDLE_EVENT(FOCUS_OUT);
 
                     return;
 
-                }
-                case XCB_DESTROY_NOTIFY:{
+                } case XCB_DESTROY_NOTIFY:{
                     RE_CAST_EV(xcb_destroy_notify_event_t);
                     HANDLE_EVENT(FOCUS_OUT);
 
                     return;
 
-                }
-                case XCB_MOTION_NOTIFY:{
+                } case XCB_MOTION_NOTIFY:{
                     RE_CAST_EV(xcb_motion_notify_event_t);
                     HANDLE_EVENT(MOTION_NOTIFY);
 
@@ -6975,64 +6955,56 @@ class client {
                 ogsize.save(x, y, width, height);
 
             }
-            void save_tile_ogsize()
-            {
+            void save_tile_ogsize() {
                 tile_ogsize.save(x, y, width, height);
+
             }
-        
-            void save_max_ewmh_ogsize()
-            {
+            void save_max_ewmh_ogsize() {
                 max_ewmh_ogsize.save(x, y, width, height);
-            }
         
-            void save_max_button_ogsize()
-            {
+            }
+            void save_max_button_ogsize() {
                 max_button_ogsize.save(x, y, width, height);
+
             }
         
         /* Check    */
-            bool is_active_EWMH_window()
-            {
+            bool is_active_EWMH_window() {
                 return win.is_active_EWMH_window();
-            }
         
-            bool is_EWMH_fullscreen()
-            {
+            }
+            bool is_EWMH_fullscreen() {
                 return win.is_EWMH_fullscreen();
-            }
         
-            bool is_button_max_win()
-            {
+            }
+            bool is_button_max_win() {
                 if (x      == -BORDER_SIZE
                 &&  y      == -BORDER_SIZE
                 &&  width  == (screen->width_in_pixels  + (BORDER_SIZE * 2))
-                &&  height == (screen->height_in_pixels + (BORDER_SIZE * 2)))
-                {
+                &&  height == (screen->height_in_pixels + (BORDER_SIZE * 2))) {
                     return true;
-                }
 
-                return false;
+                } return false;
+
             }
         
         /* Set      */
-            void set_active_EWMH_window()
-            {
+            void set_active_EWMH_window() {
                 win.set_active_EWMH_window();
-            }
     
-            void set_EWMH_fullscreen_state()
-            {
-                win.set_EWMH_fullscreen_state();
             }
+            void set_EWMH_fullscreen_state() {
+                win.set_EWMH_fullscreen_state();
 
-            void set_client_params()
-            {
+            }
+            void set_client_params() {
                 win.set_client_size_as_hints(&x, &y, &width, &height);
                 if (win.get_min_width()  > width
-                &&  win.get_min_height() > height)
-                {
+                &&  win.get_min_height() > height) {
                     get_window_parameters();
+
                 }
+
             }
 
         /* Get      */
