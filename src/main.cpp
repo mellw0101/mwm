@@ -12988,7 +12988,8 @@ class mv_client {
                             snap(new_x, new_y);
                             FLUSH_X();
 
-                        } break;
+                        }
+                        break;
                         
                     }
                 
@@ -14696,8 +14697,8 @@ class Events {
             CONN_root(CONF_REQ_Y,      W_callback -> void { wm->data.y      = __window; });
 
             C_SIGNAL(if (&*__c) {
-                if (!__c->moving) return;
-                __c->snap(wm->pointer.x() - ((__c->x + __c->width) - wm->pointer.x()), wm->pointer.y());
+                // if (!__c->moving) return;
+                // __c->snap(wm->pointer.x() - ((__c->x + __c->width) - wm->pointer.x()), wm->pointer.y());
                 FLUSH_X();
                 __c->update();
 
