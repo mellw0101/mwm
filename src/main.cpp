@@ -14250,17 +14250,6 @@ class Events {
 
             // });
 
-            CONN_root(REPARENT_NOTIFY, W_callback -> void {
-                client *c = C_RETRIVE(__window);
-                if (c != nullptr) {
-                    c->win.x(BORDER_SIZE);
-                    c->win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
-                    FLUSH_X();
-
-                } loutE << "c = nullptr" << loutEND; return;
-
-            });
-
             CONN_root(CONF_REQ_WIDTH,  W_callback -> void { wm->data.width  = __window; });
             CONN_root(CONF_REQ_HEIGHT, W_callback -> void { wm->data.height = __window; });
             CONN_root(CONF_REQ_X,      W_callback -> void { wm->data.x      = __window; });
