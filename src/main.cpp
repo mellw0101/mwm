@@ -3206,9 +3206,13 @@ class __event_handler__ {
                 }
                 case XCB_MAP_REQUEST: {
                     RE_CAST_EV(xcb_map_request_event_t);
-                    thread([&]() -> void {signal_manager->_window_signals.emit(screen->root, XCB_MAP_REQUEST, e->window);}).detach();
+                    auto _func_ = [this, e]() -> void {
+                        signal_manager->_window_signals.emit(screen->root, MAP_REQ, e->window);
+
+                    }; thread(_func_).detach();
+
                     // HANDLE_WINDOW(XCB_MAP_REQUEST);
-                    thread(handle_event<XCB_MAP_REQUEST>, e->window).detach();
+                    // thread(handle_event<XCB_MAP_REQUEST>, e->window).detach();
                     break; 
 
                 }
@@ -8278,7 +8282,7 @@ class Window_Manager {
                 signal_manager->_window_signals.conect(root, MAP_REQ, [this](uint32_t __window) -> void {
                     client *c = signal_manager->_window_client_map.retrive(__window);
                     if (c == nullptr) {
-                        manage_new_client(__window);
+                        this->manage_new_client(__window);
                         
                     }
                     
@@ -8295,12 +8299,12 @@ class Window_Manager {
                 //     this->manage_new_client(__window);
 
                 // );
-                // CONN_Win(root, MAP_NOTIFY,
-                //     client *c = signal_manager->_window_client_map.retrive(__window);
-                //     if (!c) return;
-                //     c->update();
+                CONN_Win(root, MAP_NOTIFY,
+                    client *c = signal_manager->_window_client_map.retrive(__window);
+                    if (!c) return;
+                    c->update();
 
-                // );
+                );
 
                 CONN_Win(root, TERM_KEY_PRESS, this->launcher.launch_child_process("konsole"););
                 CONN_Win(root, QUIT_KEY_PRESS, this->quit(0););
