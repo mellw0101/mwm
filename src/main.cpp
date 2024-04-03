@@ -3072,20 +3072,24 @@ class __event_handler__ {
         constexpr void processEvent(xcb_generic_event_t* ev) {
             uint8_t responseType = ev->response_type & ~0x80;
             switch (responseType) {
-                case XCB_KEY_PRESS:         {
+                case XCB_KEY_PRESS:{
                     RE_CAST_EV(xcb_key_press_event_t);
                     switch (e->state) {
                         case (CTRL + ALT): {
-                            if (e->detail == key_codes.t) HANDLE_EVENT(TERM_KEY_PRESS);
-                            
-                            break;
+                            if (e->detail == key_codes.t) {
+                                HANDLE_EVENT(TERM_KEY_PRESS);
+
+                            } return;
 
                         }
                         case (SHIFT + CTRL + SUPER): {
-                            if (e->detail == key_codes.r_arrow) HANDLE_EVENT(MOVE_TO_NEXT_DESKTOP_WAPP);
-                            if (e->detail == key_codes.l_arrow) HANDLE_EVENT(MOVE_TO_PREV_DESKTOP_WAPP);
-                            
-                            break;
+                            if (e->detail == key_codes.r_arrow) {
+                                HANDLE_EVENT(MOVE_TO_NEXT_DESKTOP_WAPP);
+
+                            } else if (e->detail == key_codes.l_arrow) {
+                                HANDLE_EVENT(MOVE_TO_PREV_DESKTOP_WAPP);
+
+                            } return;
 
                         }
                         case (SHIFT + ALT): {
@@ -3113,100 +3117,123 @@ class __event_handler__ {
 
                         }
                         case SUPER: {
-                            if (e->detail == key_codes.r_arrow) HANDLE_EVENT(TILE_RIGHT);
-                            if (e->detail == key_codes.l_arrow) HANDLE_EVENT(TILE_LEFT);
-                            if (e->detail == key_codes.u_arrow) HANDLE_EVENT(TILE_UP);
-                            if (e->detail == key_codes.d_arrow) HANDLE_EVENT(TILE_DOWN);
-                            if (e->detail == key_codes.k) HANDLE_ROOT(DEBUG_KEY_PRESS);
+                            if (e->detail == key_codes.r_arrow) {
+                                HANDLE_EVENT(TILE_RIGHT);
+
+                            } else if (e->detail == key_codes.l_arrow) {
+                                HANDLE_EVENT(TILE_LEFT);
+
+                            } else if (e->detail == key_codes.u_arrow) {
+                                HANDLE_EVENT(TILE_UP);
+
+                            } else if (e->detail == key_codes.d_arrow) {
+                                HANDLE_EVENT(TILE_DOWN);
+
+                            } else if (e->detail == key_codes.k) {
+                                HANDLE_ROOT(DEBUG_KEY_PRESS);
                             
-                            break;
+                            } return;
 
                         }
 
-                    }
-                    if (e->detail == key_codes.f11) {
+                    } if (e->detail == key_codes.f11) {
                         thread(emit, e->event, EWMH_MAXWIN).detach();
                         // HANDLE_EVENT(EWMH_MAXWIN);
 
-                    } break;
+                    } return;
 
                 }
-                case XCB_BUTTON_PRESS:      {
+                case XCB_BUTTON_PRESS:{
                     RE_CAST_EV(xcb_button_press_event_t);
                     if (e->detail == L_MOUSE_BUTTON) {
-                        if (e->state & ALT) {
-                            HANDLE_EVENT(L_MOUSE_BUTTON_EVENT__ALT);
+                        if (e->state == ALT) {
+                            thread(emit, e->event, L_MOUSE_BUTTON_EVENT__ALT).detach();
+                            return;
 
                         } else {
-                            HANDLE_EVENT(L_MOUSE_BUTTON_EVENT);
+                            thread(emit, e->event, L_MOUSE_BUTTON_EVENT).detach();
 
-                        }
+                        } return;
 
                     } else if (e->detail == R_MOUSE_BUTTON) {
-                        HANDLE_EVENT(R_MOUSE_BUTTON_EVENT);
+                        if (e->state == ALT) {
+                            thread(emit, e->event, R_MOUSE_BUTTON_EVENT__ALT).detach();
+                            return;
+                            
+                        } else {
+                            thread(emit, e->event, R_MOUSE_BUTTON_EVENT).detach();
 
-                    } break;
+                        } return;
+
+                    } return;
 
                 }
-                case XCB_EXPOSE:            {
+                case XCB_EXPOSE:{
                     RE_CAST_EV(xcb_expose_event_t);
                     thread(emit, e->window, EXPOSE).detach();
-                    break;
                 
+                    return;
+
                 }
-                case XCB_PROPERTY_NOTIFY:   {
+                case XCB_PROPERTY_NOTIFY:{
                     RE_CAST_EV(xcb_property_notify_event_t);
                     thread(emit, e->window, PROPERTY_NOTIFY).detach();
-                    break;
+
+                    return;
 
                 }
-                case XCB_ENTER_NOTIFY:      {
+                case XCB_ENTER_NOTIFY:{
                     RE_CAST_EV(xcb_enter_notify_event_t);
-                    thread(handle_event<XCB_ENTER_NOTIFY>, e->event).detach();
+                    thread(emit, e->event, ENTER_NOTIFY).detach();
                     break;
 
                 }
-                case XCB_LEAVE_NOTIFY:      {
+                case XCB_LEAVE_NOTIFY:{
                     RE_CAST_EV(xcb_leave_notify_event_t);
                     thread(emit, e->event, LEAVE_NOTIFY).detach();;
                     break;
 
                 }
-                case XCB_MAP_REQUEST:       {
+                case XCB_MAP_REQUEST: {
                     RE_CAST_EV(xcb_map_request_event_t);
                     thread(emit, screen->root, MAP_REQ, e->window).detach();
-                    // HANDLE_WINDOW(XCB_MAP_REQUEST);
-                    break; 
+
+                    return;
 
                 }
-                case XCB_MAP_NOTIFY:        {
+                case XCB_MAP_NOTIFY:{
                     RE_CAST_EV(xcb_map_notify_event_t);
-                    HANDLE_EVENT(MAP_NOTIFY);
-                    break;
+                    thread(emit, screen->root, MAP_NOTIFY, e->window).detach();
+
+                    return;
 
                 }
-                case XCB_FOCUS_IN:          {
+                case XCB_FOCUS_IN:{
                     RE_CAST_EV(xcb_focus_in_event_t);
-                    thread(handle_event<XCB_FOCUS_IN>, e->event).detach();
+                    thread(emit, e->event, FOCUS_IN).detach();
+
+                    return;
 
                 }
-                case XCB_FOCUS_OUT:         {
+                case XCB_FOCUS_OUT:{
                     RE_CAST_EV(xcb_focus_out_event_t);
-                    thread(handle_event<XCB_FOCUS_IN>, e->event).detach();
+                    thread(emit, e->event, FOCUS_OUT).detach();
+
+                    return;
 
                 }
-                case XCB_DESTROY_NOTIFY:    {
+                case XCB_DESTROY_NOTIFY:{
                     RE_CAST_EV(xcb_destroy_notify_event_t);
-                    HANDLE_EVENT(DESTROY_NOTIFY);
+                    thread(emit, e->window, DESTROY_NOTIFY).detach();
 
-                    break;
+                    return;
 
                 }
-                case XCB_MOTION_NOTIFY:     {
+                case XCB_MOTION_NOTIFY:{
                     RE_CAST_EV(xcb_motion_notify_event_t);
-                    HANDLE_EVENT(MOTION_NOTIFY);
+                    thread(emit, e->event, MOTION_NOTIFY).detach();
 
-                    break;
+                    return;
 
                 }
 
