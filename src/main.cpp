@@ -3112,12 +3112,12 @@ class __event_handler__ {
                 case XCB_KEY_PRESS:         {
                     RE_CAST_EV(xcb_key_press_event_t);
                     switch (e->state) {
-                        case CTRL | ALT: {
+                        case (CTRL + ALT): {
                             if (e->detail == key_codes.t) HANDLE_EVENT(TERM_KEY_PRESS);
                             break;
 
                         }
-                        case SHIFT | CTRL | SUPER: {
+                        case (SHIFT + CTRL + SUPER): {
                             if (e->detail == key_codes.r_arrow) HANDLE_EVENT(MOVE_TO_NEXT_DESKTOP_WAPP);
                             if (e->detail == key_codes.l_arrow) HANDLE_EVENT(MOVE_TO_PREV_DESKTOP_WAPP);
                             break;
