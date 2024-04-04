@@ -2955,23 +2955,21 @@ class __event_handler__ {
         #define HANDLE_WINDOW(__type) thread(handle_event<__type>, e->window   ).detach()
         #define HANDLE_ROOT(__type)   thread(handle_event<__type>, screen->root).detach()
 
-        template<uint8_t>
-        static void handle_ev(xcb_generic_event_t *ev) { return; };
-            template<> void handle_ev<MWM_EXPOSE>(xcb_generic_event_t *ev) {
-                RE_CAST_EV(xcb_expose_event_t);
+        template<typename Type>
+        static void handle_ev(Type *e);
+            template<> void handle_ev(xcb_expose_event_t *e) {
                 HANDLE_WINDOW(MWM_EXPOSE);
         
             }
-            template<> void handle_ev<MWM_ENTER_NOTIFY>(xcb_generic_event_t *ev) {
-                RE_CAST_EV(xcb_enter_notify_event_t);
+            template<> void handle_ev(xcb_enter_notify_event_t *e) {
                 HANDLE_EVENT(MWM_ENTER_NOTIFY);
 
             }
-            template<> void handle_ev<MWM_LEAVE_NOTIFY>(xcb_generic_event_t *ev) {
-                RE_CAST_EV(xcb_leave_notify_event_t);
-                HANDLE_EVENT(MWM_LEAVE_NOTIFY);
+            // template<> void handle_ev(xcb_generic_event_t *ev) {
+            //     RE_CAST_EV(xcb_leave_notify_event_t);
+            //     HANDLE_EVENT(MWM_LEAVE_NOTIFY);
 
-            }
+            // }
         
         /* Specializations for event types */
 
@@ -2985,7 +2983,8 @@ class __event_handler__ {
                 }
                 switch (res) {
                     case MWM_EXPOSE :{
-                        thread(handle_ev<MWM_EXPOSE>, ev).detach();
+                        RE_CAST_EV(xcb_expose_event_t);
+                        thread(handle_ev<xcb_expose_event_t>, e).detach();
                         break;
 
                     }
