@@ -2974,7 +2974,6 @@ class __event_handler__ {
             }
         
         /* Specializations for event types */
-        #define HANDLE_ev(__type) thread(handle_ev<__type>, ev).detach();
 
         using EventCallback = function<void(Ev)>;
         void run() {
@@ -2986,17 +2985,19 @@ class __event_handler__ {
                 }
                 switch (res) {
                     case MWM_EXPOSE :{
-                        HANDLE_ev(MWM_EXPOSE);
+                        thread(handle_ev<MWM_EXPOSE>, ev).detach();
                         return;
 
                     }
                     case MWM_ENTER_NOTIFY :{
-                        HANDLE_ev(MWM_ENTER_NOTIFY);
+                        RE_CAST_EV(xcb_enter_notify_event_t);
+                        thread(handle_event<XCB_ENTER_NOTIFY>, e->event).detach();
                         return;
                         
                     }
                     case MWM_LEAVE_NOTIFY :{
-                        HANDLE_ev(MWM_LEAVE_NOTIFY);
+                        RE_CAST_EV(xcb_leave_notify_event_t);
+                        thread(handle_event<XCB_LEAVE_NOTIFY>, e->event).detach();
                         return;
                         
                     }
