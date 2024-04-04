@@ -2975,7 +2975,7 @@ class __event_handler__ {
                 switch (res) {
                     case MWM_EXPOSE :{
                         RE_CAST_EV(xcb_expose_event_t);
-                        thread(handle_ev<MWM_EXPOSE>, e->window).detach();
+                        thread(handle_event<MWM_EXPOSE>, e->window).detach();
                         break;
 
                     }
