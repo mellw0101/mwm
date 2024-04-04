@@ -2924,7 +2924,7 @@ class __event_handler__ {
         template<uint8_t __sig>
         static void handle_event(uint32_t __w) { WS_emit(__w, __sig); }
             handle_template(XCB_MAP_REQUEST)  { Emit(screen->root, XCB_MAP_REQUEST, __w); }
-            handle_template(MWM_EXPOSE)       { Emit(__w,          XCB_EXPOSE);               }
+            // handle_template(MWM_EXPOSE)       { Emit(__w,          XCB_EXPOSE);               }
             handle_template(MWM_ENTER_NOTIFY) { Emit(__w,          XCB_ENTER_NOTIFY);         }
             handle_template(MWM_LEAVE_NOTIFY) { Emit(__w,          XCB_LEAVE_NOTIFY);         }
             // template<> void handle_event<XCB_ENTER_NOTIFY>         (uint32_t __w) { Emit(__w,          XCB_ENTER_NOTIFY);}
@@ -2949,27 +2949,18 @@ class __event_handler__ {
             template<> void handle_event<TILE_DOWN>                (uint32_t __w) { C_EMIT      (C_RETRIVE(__w) , TILE_DOWN );               }
             template<> void handle_event<CYCLE_FOCUS_KEY_PRESS>    (uint32_t __w) { WS_emit_root(CYCLE_FOCUS_KEY_PRESS    , __w);                  }
             template<> void handle_event<DESTROY_NOTIFY>           (uint32_t __w) { WS_emit(__w, DESTROY_NOTIFY);                  }
-            // template<> void handle_event<XCB_EXPOSE>               (uint32_t __w) { Emit(__w,          XCB_EXPOSE);}
+            template<> void handle_event<XCB_EXPOSE>               (uint32_t __w) { Emit(__w,          XCB_EXPOSE);}
 
         #define HANDLE_EVENT(__type ) thread(handle_event<__type>, e->event    ).detach()
         #define HANDLE_WINDOW(__type) thread(handle_event<__type>, e->window   ).detach()
         #define HANDLE_ROOT(__type)   thread(handle_event<__type>, screen->root).detach()
 
-        template<typename Type>
-        static void handle_ev(Type *e);
-            template<> void handle_ev<xcb_expose_event_t>(xcb_expose_event_t *e) {
-                HANDLE_WINDOW(MWM_EXPOSE);
+        template<uint8_t Sig, typename... Args>
+        static void handle_ev(Args ...args);
+            template<> void handle_ev<MWM_EXPOSE>(uint32_t __w) {
+                thread(handle_event<XCB_EXPOSE>, __w).detach();
         
             }
-            template<> void handle_ev(xcb_enter_notify_event_t *e) {
-                HANDLE_EVENT(MWM_ENTER_NOTIFY);
-
-            }
-            // template<> void handle_ev(xcb_generic_event_t *ev) {
-            //     RE_CAST_EV(xcb_leave_notify_event_t);
-            //     HANDLE_EVENT(MWM_LEAVE_NOTIFY);
-
-            // }
         
         /* Specializations for event types */
 
@@ -2984,7 +2975,7 @@ class __event_handler__ {
                 switch (res) {
                     case MWM_EXPOSE :{
                         RE_CAST_EV(xcb_expose_event_t);
-                        thread(handle_ev<xcb_expose_event_t>, e).detach();
+                        thread(handle_ev<MWM_EXPOSE>, e->window).detach();
                         break;
 
                     }
