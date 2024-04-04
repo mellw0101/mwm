@@ -2957,7 +2957,7 @@ class __event_handler__ {
 
         template<typename Type>
         static void handle_ev(Type *e);
-            template<> void handle_ev(xcb_expose_event_t *e) {
+            template<> void handle_ev<xcb_expose_event_t>(xcb_expose_event_t *e) {
                 HANDLE_WINDOW(MWM_EXPOSE);
         
             }
