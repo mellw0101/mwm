@@ -3281,56 +3281,56 @@ class __event_handler__ {
             }}
         };
         Signal<> ev_arr[13] = {
-            reg_static_callB([this]() -> void { return; }, this->_ev),
+            reg_static_callB([this]() -> void { return; }),
             reg_static_callB([this]() -> void {
                 auto *const &e = (const xcb_expose_event_t *)this->_ev;
                 HANDLE(XCB_EXPOSE, e->window);
                 free(_ev);
 
-            }, this->_ev),
+            }),
             reg_static_callB([this]() -> void {
                 auto e = (const xcb_enter_notify_event_t *)this->_ev;
                 thread(handle_event<XCB_ENTER_NOTIFY>, e->event).detach();
                 free(_ev);
 
-            }, this->_ev),
+            }),
             reg_static_callB([this]() -> void {
                 auto e = (const xcb_leave_notify_event_t *)this->_ev;
                 thread(handle_event<XCB_LEAVE_NOTIFY>, e->event).detach();
                 free(_ev);
             
-            }, this->_ev),
+            }),
             reg_static_callB([this]() -> void {
                 auto *const &e = (const xcb_focus_in_event_t *)this->_ev;
                 HANDLE(XCB_FOCUS_IN, e->event);
                 free(_ev);
             
-            }, this->_ev),
+            }),
             reg_static_callB([this]() -> void {
                 auto *const &e = (const xcb_focus_out_event_t *)this->_ev;
                 HANDLE(XCB_FOCUS_IN, e->event);
                 free(_ev);
             
-            }, this->_ev),
+            }),
             reg_static_callB([this]() -> void {
                 auto e = (const xcb_destroy_notify_event_t *)this->_ev;
                 HANDLE(DESTROY_NOTIF_EV, e->event);
                 HANDLE(DESTROY_NOTIF_W, e->window);
                 free(_ev);
 
-            }, this->_ev),
+            }),
             reg_static_callB([this]() -> void {
                 auto *const &e = (const xcb_map_request_event_t *)this->_ev;
                 HANDLE(XCB_MAP_REQUEST, e->window);
                 free(_ev);
 
-            }, this->_ev),
+            }),
             reg_static_callB([this]() -> void {
                 auto const e = (xcb_motion_notify_event_t *)this->_ev;
                 HANDLE(XCB_MOTION_NOTIFY, e->event);
                 free(_ev);
             
-            }, this->_ev),
+            }),
             reg_static_callB([this]() -> void {
                 auto const e = (const xcb_key_press_event_t *)this->_ev;
                 switch (e->state) {
@@ -3410,7 +3410,7 @@ class __event_handler__ {
 
                 } free(_ev);
             
-            }, this->_ev),
+            }),
             reg_static_callB([this]() -> void {
                 auto e = (const xcb_button_press_event_t *)this->_ev;
                 if (e->detail == L_MOUSE_BUTTON)        {
@@ -3433,19 +3433,19 @@ class __event_handler__ {
 
                 } free(_ev);
             
-            }, this->_ev),
+            }),
             reg_static_callB([this]() -> void {
                 auto *const &e = (const xcb_map_notify_event_t *)this->_ev;
                 HANDLE(XCB_MAP_NOTIFY, e->event);
                 free(_ev);
 
-            }, this->_ev),
+            }),
             reg_static_callB([this]() -> void {
                 auto e = (const xcb_property_notify_event_t *)this->_ev;
                 HANDLE(XCB_PROPERTY_NOTIFY, e->window);
                 free(_ev);
 
-            }, this->_ev),
+            }),
 
         };
 
