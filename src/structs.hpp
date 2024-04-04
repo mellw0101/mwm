@@ -812,6 +812,12 @@ enum
 #define MOVE_TO_DESKTOP_3         50
 #define MOVE_TO_DESKTOP_4         51
 #define MOVE_TO_DESKTOP_5         52
+#define MOVE_TO_PREV_DESKTOP      53
+#define MOVE_TO_NEXT_DESKTOP      54
+#define CYCLE_FOCUS_KEY_PRESS     59
+#define MOVE_TO_PREV_DESKTOP_WAPP 60
+#define MOVE_TO_NEXT_DESKTOP_WAPP 61
+#define EWMH_MAXWIN_SIGNAL        46
 #define ROOT_SIGNAL               99
 
 enum EV : uint8_t {
@@ -836,12 +842,6 @@ enum EV : uint8_t {
     KILL_SIGNAL                       = 40,
     CLIENT_RESIZE                     = 41,
     CLIENT_RESIZE_ALT                 = 42,
-    EWMH_MAXWIN                       = 46,
-    MOVE_TO_PREV_DESKTOP              = 53,
-    MOVE_TO_NEXT_DESKTOP              = 54,
-    CYCLE_FOCUS_KEY_PRESS             = 59,
-    MOVE_TO_PREV_DESKTOP_WAPP         = 60,
-    MOVE_TO_NEXT_DESKTOP_WAPP         = 61,
     BUTTON_MAXWIN_PRESS               = 63,
     FOCUS_CLIENT                      = 64,
     MOVE_CLIENT_MOUSE                 = 65,
@@ -899,7 +899,7 @@ class __c_func_arr__ {
                 case TILE_RIGHT:                        return 5;
                 case TILE_DOWN:                         return 6;
                 case TILE_UP:                           return 7;
-                case EWMH_MAXWIN:                       return 8;
+                case EWMH_MAXWIN_SIGNAL:                return 8;
                 case RESIZE_CLIENT_BORDER_LEFT:         return 9;
                 case RESIZE_CLIENT_BORDER_RIGHT:        return 10;
                 case RESIZE_CLIENT_BORDER_TOP:          return 11;
@@ -960,7 +960,7 @@ class __root_func_arr__ {
                 case TILE_RIGHT:          return 6;
                 case TILE_DOWN:           return 7;
                 case TILE_UP:             return 8;
-                case EWMH_MAXWIN:         return 9;
+                case EWMH_MAXWIN_SIGNAL:  return 9;
 
                 default: return make_T_MAX<uint8_t>();
 

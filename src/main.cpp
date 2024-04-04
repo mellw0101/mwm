@@ -2926,22 +2926,23 @@ class __event_handler__ {
             handle_template(ROOT_SIGNAL)               { Emit(screen->root, __w); }
             handle_template(XCB_MAP_REQUEST)           { Emit(screen->root, XCB_MAP_REQUEST, __w); }
             handle_template(XCB_MAP_NOTIFY)            { Emit(screen->root, XCB_MAP_NOTIFY,  __w); }
-            // handle_template(TERM_KEY_PRESS)            { Emit(screen->root, TERM_KEY_PRESS, 0); }
-            handle_template(QUIT_KEY_PRESS)            { Emit(screen->root, QUIT_KEY_PRESS, 0); }
-            handle_template(MOVE_TO_DESKTOP_1)         { Emit(screen->root, MOVE_TO_DESKTOP_1); }
-            handle_template(MOVE_TO_DESKTOP_2)         { Emit(screen->root, MOVE_TO_DESKTOP_2); }
-            handle_template(MOVE_TO_DESKTOP_3)         { Emit(screen->root, MOVE_TO_DESKTOP_3); }
-            handle_template(MOVE_TO_DESKTOP_4)         { Emit(screen->root, MOVE_TO_DESKTOP_4); }
-            handle_template(MOVE_TO_DESKTOP_5)         { Emit(screen->root, MOVE_TO_DESKTOP_5); }
-            handle_template(MOVE_TO_NEXT_DESKTOP)      { Emit(screen->root, MOVE_TO_NEXT_DESKTOP, __w); }
-            handle_template(MOVE_TO_PREV_DESKTOP)      { Emit(screen->root, MOVE_TO_PREV_DESKTOP, __w); }
             handle_template(MOVE_TO_NEXT_DESKTOP_WAPP) { Emit(screen->root, MOVE_TO_NEXT_DESKTOP_WAPP, __w); }
             handle_template(MOVE_TO_PREV_DESKTOP_WAPP) { Emit(screen->root, MOVE_TO_PREV_DESKTOP_WAPP, __w); }
-            handle_template(TILE_RIGHT)                { C_EMIT(C_RETRIVE(__w) , TILE_RIGHT); }
-            handle_template(TILE_LEFT)                 { C_EMIT(C_RETRIVE(__w) , TILE_LEFT ); }
-            handle_template(TILE_UP)                   { C_EMIT(C_RETRIVE(__w) , TILE_UP   ); }
-            handle_template(TILE_DOWN)                 { C_EMIT(C_RETRIVE(__w) , TILE_DOWN ); }
+            handle_template(TILE_RIGHT)                { C_EMIT(C_RETRIVE(__w), TILE_RIGHT); }
+            handle_template(TILE_LEFT)                 { C_EMIT(C_RETRIVE(__w), TILE_LEFT ); }
+            handle_template(TILE_UP)                   { C_EMIT(C_RETRIVE(__w), TILE_UP   ); }
+            handle_template(TILE_DOWN)                 { C_EMIT(C_RETRIVE(__w), TILE_DOWN ); }
 
+            // handle_template(EWMH_MAXWIN_SIGNAL)        { C_EMIT(C_RETRIVE(__w), EWMH_MAXWIN_SIGNAL); }
+            // handle_template(MOVE_TO_NEXT_DESKTOP)      { Emit(screen->root, MOVE_TO_NEXT_DESKTOP, __w); }
+            // handle_template(MOVE_TO_PREV_DESKTOP)      { Emit(screen->root, MOVE_TO_PREV_DESKTOP, __w); }
+            // handle_template(QUIT_KEY_PRESS)            { Emit(screen->root, QUIT_KEY_PRESS, 0); }
+            // handle_template(MOVE_TO_DESKTOP_1)         { Emit(screen->root, MOVE_TO_DESKTOP_1); }
+            // handle_template(MOVE_TO_DESKTOP_2)         { Emit(screen->root, MOVE_TO_DESKTOP_2); }
+            // handle_template(MOVE_TO_DESKTOP_3)         { Emit(screen->root, MOVE_TO_DESKTOP_3); }
+            // handle_template(MOVE_TO_DESKTOP_4)         { Emit(screen->root, MOVE_TO_DESKTOP_4); }
+            // handle_template(MOVE_TO_DESKTOP_5)         { Emit(screen->root, MOVE_TO_DESKTOP_5); }
+            // handle_template(TERM_KEY_PRESS)            { Emit(screen->root, TERM_KEY_PRESS, 0); }
             // handle_template(XCB_EXPOSE)        { Emit(__w,          XCB_EXPOSE);               }
             // handle_template(XCB_ENTER_NOTIFY)  { Emit(__w,          XCB_ENTER_NOTIFY);         }
             // handle_template(XCB_LEAVE_NOTIFY)  { Emit(__w,          XCB_LEAVE_NOTIFY);         }
@@ -2954,14 +2955,14 @@ class __event_handler__ {
             // template<> void handle_event<XCB_ENTER_NOTIFY>         (uint32_t __w) { Emit(__w,          XCB_ENTER_NOTIFY);}
             // template<> void handle_event<XCB_LEAVE_NOTIFY>         (uint32_t __w) { Emit(__w,          XCB_LEAVE_NOTIFY);}
             // template<> void handle_event<XCB_MAP_NOTIFY>           (uint32_t __w) { Emit(screen->root, XCB_MAP_NOTIFY, __w);}
-            template<> void handle_event<EWMH_MAXWIN>              (uint32_t __w) { C_EMIT      (C_RETRIVE(__w)  , EWMH_MAXWIN);             }
-            template<> void handle_event<CYCLE_FOCUS_KEY_PRESS>    (uint32_t __w) { WS_emit_root(CYCLE_FOCUS_KEY_PRESS    , __w);                  }
+            // template<> void handle_event<CYCLE_FOCUS_KEY_PRESS>    (uint32_t __w) { WS_emit_root(CYCLE_FOCUS_KEY_PRESS    , __w);                  }
             template<> void handle_event<DESTROY_NOTIFY>           (uint32_t __w) { WS_emit(__w, DESTROY_NOTIFY);                  }
             // template<> void handle_event<XCB_EXPOSE>               (uint32_t __w) { Emit(__w,          XCB_EXPOSE);}
 
         #define HANDLE_EVENT(__type ) thread(handle_event<__type>, e->event    ).detach()
         #define HANDLE_WINDOW(__type) thread(handle_event<__type>, e->window   ).detach()
         #define HANDLE_ROOT(__type)   thread(handle_event<__type>, screen->root).detach()
+        #define HANDLE(__type)   thread(handle_event<__type>, screen->root).detach()
 
         using EventCallback = function<void(Ev)>;
         void run() {
@@ -2969,27 +2970,27 @@ class __event_handler__ {
                 MWM_Ev res = map_ev_to_enum(ev->response_type & ~0x80);
                 switch (res) {
                     case   MWM_Ev::EXPOSE         :{
-                        RE_CAST_EV(xcb_expose_event_t);
+                        auto e = (const xcb_expose_event_t *)ev;
                         thread(handle_event<XCB_EXPOSE>, e->window).detach();
                         break;
 
                     } case MWM_Ev::ENTER_NOTIFY   :{
-                        RE_CAST_EV(xcb_enter_notify_event_t);
+                        auto e = (const xcb_enter_notify_event_t *)ev;
                         thread(handle_event<XCB_ENTER_NOTIFY>, e->event).detach();
                         break;
                         
                     } case MWM_Ev::LEAVE_NOTIFY   :{
-                        RE_CAST_EV(xcb_leave_notify_event_t);
+                        auto e = (const xcb_leave_notify_event_t *)ev;
                         thread(handle_event<XCB_LEAVE_NOTIFY>, e->event).detach();
                         break;
                         
                     } case MWM_Ev::FOCUS_IN       :{
-                        RE_CAST_EV(xcb_focus_in_event_t);
+                        auto e = (const xcb_focus_in_event_t *)ev;
                         thread(handle_event<XCB_FOCUS_IN>, e->event).detach();
                         break;
                         
                     } case MWM_Ev::FOCUS_OUT      :{
-                        RE_CAST_EV(xcb_focus_out_event_t);
+                        auto e = (xcb_focus_out_event_t *)ev;
                         thread(handle_event<XCB_FOCUS_OUT>, e->event).detach();
                         break;
                         
@@ -3016,50 +3017,50 @@ class __event_handler__ {
                                 if (e->detail == key_codes.t) {
                                     thread(handle_event<ROOT_SIGNAL>, TERM_KEY_PRESS).detach();
 
-                                } break;
+                                } /* Terminal keybinding */ break;
 
                             } case SHIFT + CTRL + SUPER :{
                                 if (e->detail == key_codes.r_arrow) {
-                                    HANDLE_EVENT(MOVE_TO_NEXT_DESKTOP_WAPP);
+                                    thread(handle_event<MOVE_TO_NEXT_DESKTOP_WAPP>, e->event).detach();
 
                                 } else if (e->detail == key_codes.l_arrow) {
-                                    HANDLE_EVENT(MOVE_TO_PREV_DESKTOP_WAPP);
+                                    thread(handle_event<MOVE_TO_PREV_DESKTOP_WAPP>, e->event).detach();
 
                                 } break;
 
                             } case SHIFT + ALT          :{
                                 if (e->detail == key_codes.q) {
-                                    HANDLE_EVENT(QUIT_KEY_PRESS);
+                                    thread(handle_event<ROOT_SIGNAL>, QUIT_KEY_PRESS).detach();
 
-                                } break;
+                                } /* Quit keybinding */ break;
 
                             } case ALT                  :{
                                 if (e->detail == key_codes.n_1) {
-                                    HANDLE_EVENT(MOVE_TO_DESKTOP_1);
+                                    thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_1).detach();
 
                                 } else if (e->detail == key_codes.n_2) {
-                                    HANDLE_EVENT(MOVE_TO_DESKTOP_2);
+                                    thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_2).detach();
 
                                 } else if (e->detail == key_codes.n_3) {
-                                    HANDLE_EVENT(MOVE_TO_DESKTOP_3);
+                                    thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_3).detach();
                                     
                                 } else if (e->detail == key_codes.n_4) {
-                                    HANDLE_EVENT(MOVE_TO_DESKTOP_4);
+                                    thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_4).detach();
 
                                 } else if (e->detail == key_codes.n_5) {
-                                    HANDLE_EVENT(MOVE_TO_DESKTOP_5);
+                                    thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_5).detach();
                                     
                                 } else if (e->detail == key_codes.tab) {
-                                    HANDLE_EVENT(CYCLE_FOCUS_KEY_PRESS);
+                                    thread(handle_event<ROOT_SIGNAL>, CYCLE_FOCUS_KEY_PRESS).detach();
 
                                 } break;
 
                             } case CTRL  + SUPER        :{
                                 if (e->detail == key_codes.r_arrow) {
-                                    HANDLE_EVENT(MOVE_TO_NEXT_DESKTOP);
+                                    thread(handle_event<ROOT_SIGNAL>, MOVE_TO_NEXT_DESKTOP).detach();
 
                                 } else if (e->detail == key_codes.l_arrow) {
-                                    HANDLE_EVENT(MOVE_TO_PREV_DESKTOP);
+                                    thread(handle_event<ROOT_SIGNAL>, MOVE_TO_PREV_DESKTOP).detach();
 
                                 } break;
 
@@ -3077,17 +3078,16 @@ class __event_handler__ {
                                     HANDLE_EVENT(TILE_DOWN);
 
                                 } else if (e->detail == key_codes.k)       {
-                                    HANDLE_ROOT(DEBUG_KEY_PRESS);
+                                    thread(handle_event<ROOT_SIGNAL>, DEBUG_KEY_PRESS).detach();
                                 
                                 } break;
 
                             }
 
-                        } /* if (e->detail == key_codes.f11) {
-                            HANDLE_EVENT(EWMH_MAXWIN);
+                        } if (e->detail == key_codes.f11) {
+                            HANDLE_EVENT(EWMH_MAXWIN_SIGNAL);
 
-                        } */
-                        break;
+                        } break;
 
                     } case MWM_Ev::BUTTON_PRESS   :{
                         auto const e = (const xcb_button_press_event_t *)ev;
@@ -3121,7 +3121,7 @@ class __event_handler__ {
                         thread(handle_event<XCB_PROPERTY_NOTIFY>, e->window).detach();
                         break;
 
-                    } case MWM_Ev::NO_Ev         :{
+                    } case MWM_Ev::NO_Ev          :{
                         break;
                         
                     }
@@ -13627,7 +13627,7 @@ class max_win {
     /* Variabels   */
         typedef enum {
             BUTTON_MAXWIN,
-            EWMH_MAXWIN 
+            EWMH_MAXWIN
         } max_win_type;
 
     /* Constructor */
@@ -14128,7 +14128,7 @@ class Events {
             C_SIGNAL(if (&*__c)  mv_client(__c, wm->pointer.x() - __c->x - BORDER_SIZE, wm->pointer.y() - __c->y - BORDER_SIZE);, MOVE_CLIENT_MOUSE);
 
             C_SIGNAL(if (__c) max_win(__c, max_win::BUTTON_MAXWIN);, BUTTON_MAXWIN_PRESS);
-            C_SIGNAL(if (__c) max_win(__c, max_win::EWMH_MAXWIN  );, EWMH_MAXWIN        );
+            C_SIGNAL(if (__c) max_win(__c, max_win::EWMH_MAXWIN  );, EWMH_MAXWIN_SIGNAL );
 
             C_SIGNAL(if (__c) resize_client::border(__c, edge::LEFT        );, RESIZE_CLIENT_BORDER_LEFT        );
             C_SIGNAL(if (__c) resize_client::border(__c, edge::RIGHT       );, RESIZE_CLIENT_BORDER_RIGHT       );
@@ -14144,9 +14144,9 @@ class Events {
             CONN_root(CONF_REQ_X,      W_callback -> void { wm->data.x      = __window; });
             CONN_root(CONF_REQ_Y,      W_callback -> void { wm->data.y      = __window; });
 
-            signal_manager->_window_signals.conect(screen->root, EWMH_MAXWIN, [this](uint32_t __w) -> void {
+            signal_manager->_window_signals.conect(screen->root, EWMH_MAXWIN_SIGNAL, [this](uint32_t __w) -> void {
                 client *c = signal_manager->_window_client_map.retrive(__w);
-                if (c != nullptr) C_EMIT(c, EWMH_MAXWIN); 
+                if (c != nullptr) C_EMIT(c, EWMH_MAXWIN_SIGNAL);
 
             });
 
