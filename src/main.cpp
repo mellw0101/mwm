@@ -2919,6 +2919,63 @@ class __event_handler__ {
 
         }
 
+        #define Emit signal_manager->_window_signals.emit
+        #define handle_template(__type) template<> void handle_event<__type>          (uint32_t __w)
+        template<uint8_t __sig>
+        static void handle_event(uint32_t __w) { WS_emit(__w, __sig); }
+            handle_template(XCB_MAP_REQUEST)  { Emit(screen->root, XCB_MAP_REQUEST, __w); }
+            handle_template(MWM_EXPOSE)       { Emit(__w,          XCB_EXPOSE);               }
+            handle_template(MWM_ENTER_NOTIFY) { Emit(__w,          XCB_ENTER_NOTIFY);         }
+            handle_template(MWM_LEAVE_NOTIFY) { Emit(__w,          XCB_LEAVE_NOTIFY);         }
+            // template<> void handle_event<XCB_ENTER_NOTIFY>         (uint32_t __w) { Emit(__w,          XCB_ENTER_NOTIFY);}
+            // template<> void handle_event<XCB_LEAVE_NOTIFY>         (uint32_t __w) { Emit(__w,          XCB_LEAVE_NOTIFY);}
+            template<> void handle_event<TERM_KEY_PRESS>           (uint32_t __w) { Emit(screen->root, TERM_KEY_PRESS, 0);}
+            template<> void handle_event<XCB_MAP_NOTIFY>           (uint32_t __w) { Emit(screen->root, XCB_MAP_NOTIFY, __w);}
+            template<> void handle_event<QUIT_KEY_PRESS>           (uint32_t __w) { Emit(screen->root, QUIT_KEY_PRESS, 0);}
+            template<> void handle_event<MOVE_TO_DESKTOP_1>        (uint32_t __w) { Emit(screen->root, MOVE_TO_DESKTOP_1);}
+            template<> void handle_event<MOVE_TO_DESKTOP_2>        (uint32_t __w) { Emit(screen->root, MOVE_TO_DESKTOP_2);}
+            template<> void handle_event<MOVE_TO_DESKTOP_3>        (uint32_t __w) { Emit(screen->root, MOVE_TO_DESKTOP_3);}
+            template<> void handle_event<MOVE_TO_DESKTOP_4>        (uint32_t __w) { Emit(screen->root, MOVE_TO_DESKTOP_4);}
+            template<> void handle_event<MOVE_TO_DESKTOP_5>        (uint32_t __w) { Emit(screen->root, MOVE_TO_DESKTOP_5);}
+            template<> void handle_event<MOVE_TO_NEXT_DESKTOP>     (uint32_t __w) { Emit(screen->root, MOVE_TO_NEXT_DESKTOP, __w);}
+            template<> void handle_event<MOVE_TO_PREV_DESKTOP>     (uint32_t __w) { Emit(screen->root, MOVE_TO_PREV_DESKTOP, __w);}
+            template<> void handle_event<MOVE_TO_NEXT_DESKTOP_WAPP>(uint32_t __w) { Emit(screen->root, MOVE_TO_NEXT_DESKTOP_WAPP, __w);}
+            template<> void handle_event<MOVE_TO_PREV_DESKTOP_WAPP>(uint32_t __w) { Emit(screen->root, MOVE_TO_PREV_DESKTOP_WAPP, __w);}
+            template<> void handle_event<EWMH_MAXWIN>              (uint32_t __w) { C_EMIT      (C_RETRIVE(__w)  , EWMH_MAXWIN);             }
+            template<> void handle_event<MOTION_NOTIFY>            (uint32_t __w) { WS_emit     (__w , MOTION_NOTIFY);            }
+            template<> void handle_event<TILE_RIGHT>               (uint32_t __w) { C_EMIT      (C_RETRIVE(__w) , TILE_RIGHT);               }
+            template<> void handle_event<TILE_LEFT>                (uint32_t __w) { C_EMIT      (C_RETRIVE(__w) , TILE_LEFT );               }
+            template<> void handle_event<TILE_UP>                  (uint32_t __w) { C_EMIT      (C_RETRIVE(__w) , TILE_UP   );               }
+            template<> void handle_event<TILE_DOWN>                (uint32_t __w) { C_EMIT      (C_RETRIVE(__w) , TILE_DOWN );               }
+            template<> void handle_event<CYCLE_FOCUS_KEY_PRESS>    (uint32_t __w) { WS_emit_root(CYCLE_FOCUS_KEY_PRESS    , __w);                  }
+            template<> void handle_event<DESTROY_NOTIFY>           (uint32_t __w) { WS_emit(__w, DESTROY_NOTIFY);                  }
+            // template<> void handle_event<XCB_EXPOSE>               (uint32_t __w) { Emit(__w,          XCB_EXPOSE);}
+
+        #define HANDLE_EVENT(__type ) thread(handle_event<__type>, e->event    ).detach()
+        #define HANDLE_WINDOW(__type) thread(handle_event<__type>, e->window   ).detach()
+        #define HANDLE_ROOT(__type)   thread(handle_event<__type>, screen->root).detach()
+
+        template<uint8_t __sig>
+        static void handle_ev(xcb_generic_event_t *ev) {}
+            template<> void handle_ev<MWM_EXPOSE>(xcb_generic_event_t *ev) {
+                RE_CAST_EV(xcb_expose_event_t);
+                HANDLE_WINDOW(MWM_EXPOSE);
+        
+            }
+            template<> void handle_ev<MWM_ENTER_NOTIFY>(xcb_generic_event_t *ev) {
+                RE_CAST_EV(xcb_enter_notify_event_t);
+                HANDLE_EVENT(MWM_ENTER_NOTIFY);
+
+            }
+            template<> void handle_ev<MWM_LEAVE_NOTIFY>(xcb_generic_event_t *ev) {
+                RE_CAST_EV(xcb_leave_notify_event_t);
+                HANDLE_EVENT(MWM_LEAVE_NOTIFY);
+
+            }
+        
+        /* Specializations for event types */
+        #define HANDLE_ev(__type) thread(handle_ev<__type>, ev).detach();
+
         using EventCallback = function<void(Ev)>;
         void run() {
             main_loop.connect([this](xcb_generic_event_t *ev) -> void {
@@ -2926,20 +2983,20 @@ class __event_handler__ {
                 if (res == uint8_t_MAX) {
                     return;
 
-                } switch (res) {
-                    case   MWM_EXPOSE :{
-                        RE_CAST_EV(xcb_expose_event_t);
-                        thread(handle_event<XCB_EXPOSE>, e->window).detach();
+                }
+                switch (res) {
+                    case MWM_EXPOSE :{
+                        HANDLE_ev(MWM_EXPOSE);
                         return;
 
-                    } case MWM_ENTER_NOTIFY :{
-                        RE_CAST_EV(xcb_enter_notify_event_t);
-                        thread(handle_event<XCB_ENTER_NOTIFY>, e->event).detach();
+                    }
+                    case MWM_ENTER_NOTIFY :{
+                        HANDLE_ev(MWM_ENTER_NOTIFY);
                         return;
                         
-                    } case MWM_LEAVE_NOTIFY :{
-                        RE_CAST_EV(xcb_leave_notify_event_t);
-                        thread(handle_event<XCB_LEAVE_NOTIFY>, e->event).detach();
+                    }
+                    case MWM_LEAVE_NOTIFY :{
+                        HANDLE_ev(MWM_LEAVE_NOTIFY);
                         return;
                         
                     }
@@ -2973,39 +3030,6 @@ class __event_handler__ {
 
         }
 
-        #define Emit signal_manager->_window_signals.emit
-        #define handle_template(__type) template<> void handle_event<__type>          (uint32_t __w)
-        template<uint8_t __sig>
-        static void handle_event(uint32_t __w) { WS_emit(__w, __sig); }
-            handle_template(XCB_MAP_REQUEST)                                      { Emit(screen->root, XCB_MAP_REQUEST, __w); }
-            template<> void handle_event<XCB_ENTER_NOTIFY>         (uint32_t __w) { Emit(__w,          XCB_ENTER_NOTIFY);}
-            template<> void handle_event<XCB_LEAVE_NOTIFY>         (uint32_t __w) { Emit(__w,          XCB_LEAVE_NOTIFY);}
-            template<> void handle_event<XCB_EXPOSE>               (uint32_t __w) { Emit(__w,          XCB_EXPOSE);}
-            handle_template(MWM_EXPOSE)                                           { Emit(__w, EXPOSE); }
-            template<> void handle_event<TERM_KEY_PRESS>           (uint32_t __w) { Emit(screen->root, TERM_KEY_PRESS, 0);}
-            template<> void handle_event<XCB_MAP_NOTIFY>           (uint32_t __w) { Emit(screen->root, XCB_MAP_NOTIFY, __w);}
-            template<> void handle_event<QUIT_KEY_PRESS>           (uint32_t __w) { Emit(screen->root, QUIT_KEY_PRESS, 0);}
-            template<> void handle_event<MOVE_TO_DESKTOP_1>        (uint32_t __w) { Emit(screen->root, MOVE_TO_DESKTOP_1);}
-            template<> void handle_event<MOVE_TO_DESKTOP_2>        (uint32_t __w) { Emit(screen->root, MOVE_TO_DESKTOP_2);}
-            template<> void handle_event<MOVE_TO_DESKTOP_3>        (uint32_t __w) { Emit(screen->root, MOVE_TO_DESKTOP_3);}
-            template<> void handle_event<MOVE_TO_DESKTOP_4>        (uint32_t __w) { Emit(screen->root, MOVE_TO_DESKTOP_4);}
-            template<> void handle_event<MOVE_TO_DESKTOP_5>        (uint32_t __w) { Emit(screen->root, MOVE_TO_DESKTOP_5);}
-            template<> void handle_event<MOVE_TO_NEXT_DESKTOP>     (uint32_t __w) { Emit(screen->root, MOVE_TO_NEXT_DESKTOP, __w);}
-            template<> void handle_event<MOVE_TO_PREV_DESKTOP>     (uint32_t __w) { Emit(screen->root, MOVE_TO_PREV_DESKTOP, __w);}
-            template<> void handle_event<MOVE_TO_NEXT_DESKTOP_WAPP>(uint32_t __w) { Emit(screen->root, MOVE_TO_NEXT_DESKTOP_WAPP, __w);}
-            template<> void handle_event<MOVE_TO_PREV_DESKTOP_WAPP>(uint32_t __w) { Emit(screen->root, MOVE_TO_PREV_DESKTOP_WAPP, __w);}
-            template<> void handle_event<EWMH_MAXWIN>              (uint32_t __w) { C_EMIT      (C_RETRIVE(__w)  , EWMH_MAXWIN);             }
-            template<> void handle_event<MOTION_NOTIFY>            (uint32_t __w) { WS_emit     (__w , MOTION_NOTIFY);            }
-            template<> void handle_event<TILE_RIGHT>               (uint32_t __w) { C_EMIT      (C_RETRIVE(__w) , TILE_RIGHT);               }
-            template<> void handle_event<TILE_LEFT>                (uint32_t __w) { C_EMIT      (C_RETRIVE(__w) , TILE_LEFT );               }
-            template<> void handle_event<TILE_UP>                  (uint32_t __w) { C_EMIT      (C_RETRIVE(__w) , TILE_UP   );               }
-            template<> void handle_event<TILE_DOWN>                (uint32_t __w) { C_EMIT      (C_RETRIVE(__w) , TILE_DOWN );               }
-            template<> void handle_event<CYCLE_FOCUS_KEY_PRESS>    (uint32_t __w) { WS_emit_root(CYCLE_FOCUS_KEY_PRESS    , __w);                  }
-            template<> void handle_event<DESTROY_NOTIFY>           (uint32_t __w) { WS_emit(__w, DESTROY_NOTIFY);                  }
-
-        #define HANDLE_EVENT(__type ) thread(handle_event<__type>, e->event    ).detach()
-        #define HANDLE_WINDOW(__type) thread(handle_event<__type>, e->window   ).detach()
-        #define HANDLE_ROOT(__type)   thread(handle_event<__type>, screen->root).detach()
 
         DynamicArray<uint32_t *> _window_arr;
 
