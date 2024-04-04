@@ -2900,7 +2900,7 @@ class __event_handler__ {
         __key_codes__ key_codes;
         mutex event_mutex;
         Signal<xcb_generic_event_t *> main_loop;
-        xcb_generic_event_t *_ev;
+        static xcb_generic_event_t *_ev;
 
     /* Methods   */
         constexpr int add(int a, int b) {
@@ -3097,7 +3097,7 @@ class __event_handler__ {
             shouldContinue = true;
 
             while (shouldContinue) {
-                _ev = xcb_wait_for_event(conn);
+                this->_ev = xcb_wait_for_event(conn);
                 if (!_ev) continue;
                 uint8_t res = get_ev(_ev->response_type & ~80);
                 ev_arr[res].emit();
@@ -3282,14 +3282,14 @@ class __event_handler__ {
         };
         Signal<> ev_arr[13] = {
             reg_static_callB([this]() -> void {  free(this->_ev); return; }),
-            reg_static_callB([this]() -> void {
-                const auto *e = (const xcb_expose_event_t *)this->_ev;
+            reg_static_callB([&, this]() -> void {
+                const auto *e = (const xcb_expose_event_t *)_ev;
                 HANDLE(XCB_EXPOSE, e->window);
-                free(this->_ev);
+                free(_ev);
 
             }),
             reg_static_callB([this]() -> void {
-                const auto *e = (const xcb_enter_notify_event_t *)this->_ev;
+                const auto *e = (const xcb_enter_notify_event_t *)_ev;
                 thread(handle_event<XCB_ENTER_NOTIFY>, e->event).detach();
                 free(this->_ev);
 
@@ -3303,7 +3303,7 @@ class __event_handler__ {
             reg_static_callB([this]() -> void {
                 const auto *e = (const xcb_focus_in_event_t *)this->_ev;
                 HANDLE(XCB_FOCUS_IN, e->event);
-                free(_ev);
+                free(this->_ev);
             
             }),
             reg_static_callB([this]() -> void {
@@ -3326,7 +3326,7 @@ class __event_handler__ {
 
             }),
             reg_static_callB([this]() -> void {
-                const auto *e = (xcb_motion_notify_event_t *)this->_ev;
+                const auto *e = (const xcb_motion_notify_event_t *)this->_ev;
                 HANDLE(XCB_MOTION_NOTIFY, e->event);
                 free(this->_ev);
             
@@ -3436,7 +3436,7 @@ class __event_handler__ {
             }),
             reg_static_callB([this]() -> void {
                 const auto *e = (const xcb_map_notify_event_t *)this->_ev;
-                HANDLE(XCB_MAP_NOTIFY, e->event);
+                HANDLE(XCB_MAP_NOTIFY, e->window);
                 free(this->_ev);
 
             }),
