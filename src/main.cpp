@@ -2923,7 +2923,8 @@ class __event_handler__ {
         #define handle_template(__type) template<> void handle_event<__type> (uint32_t __w)
         template<uint8_t __sig>
         static void handle_event(uint32_t __w) { Emit(__w, __sig);                             }
-            handle_template(XCB_MAP_REQUEST)   { Emit(screen->root, XCB_MAP_REQUEST, __w); }
+            handle_template(XCB_MAP_REQUEST) { Emit(screen->root, XCB_MAP_REQUEST, __w); }
+            handle_template(XCB_MAP_NOTIFY)  { Emit(screen->root, XCB_MAP_NOTIFY,  __w); }
             // handle_template(XCB_EXPOSE)        { Emit(__w,          XCB_EXPOSE);               }
             // handle_template(XCB_ENTER_NOTIFY)  { Emit(__w,          XCB_ENTER_NOTIFY);         }
             // handle_template(XCB_LEAVE_NOTIFY)  { Emit(__w,          XCB_LEAVE_NOTIFY);         }
@@ -2936,7 +2937,7 @@ class __event_handler__ {
             // template<> void handle_event<XCB_ENTER_NOTIFY>         (uint32_t __w) { Emit(__w,          XCB_ENTER_NOTIFY);}
             // template<> void handle_event<XCB_LEAVE_NOTIFY>         (uint32_t __w) { Emit(__w,          XCB_LEAVE_NOTIFY);}
             template<> void handle_event<TERM_KEY_PRESS>           (uint32_t __w) { Emit(screen->root, TERM_KEY_PRESS, 0);}
-            template<> void handle_event<XCB_MAP_NOTIFY>           (uint32_t __w) { Emit(screen->root, XCB_MAP_NOTIFY, __w);}
+            // template<> void handle_event<XCB_MAP_NOTIFY>           (uint32_t __w) { Emit(screen->root, XCB_MAP_NOTIFY, __w);}
             template<> void handle_event<QUIT_KEY_PRESS>           (uint32_t __w) { Emit(screen->root, QUIT_KEY_PRESS, 0);}
             template<> void handle_event<MOVE_TO_DESKTOP_1>        (uint32_t __w) { Emit(screen->root, MOVE_TO_DESKTOP_1);}
             template<> void handle_event<MOVE_TO_DESKTOP_2>        (uint32_t __w) { Emit(screen->root, MOVE_TO_DESKTOP_2);}
@@ -3084,6 +3085,7 @@ class __event_handler__ {
                             HANDLE_EVENT(EWMH_MAXWIN);
 
                         } */
+                        break;
 
                     } case MWM_Ev::BUTTON_PRESS   :{
                         RE_CAST_EV(xcb_button_press_event_t);
@@ -3109,7 +3111,7 @@ class __event_handler__ {
 
                     } case MWM_Ev::MAP_NOTIF      :{
                         RE_CAST_EV(xcb_map_notify_event_t);
-                        HANDLE_WINDOW(XCB_MAP_NOTIFY);
+                        thread(handle_event<XCB_MAP_NOTIFY>, e->event).detach();
                         break;
 
                     } case MWM_Ev::PROPERTY_NOTIF :{
