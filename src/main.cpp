@@ -2979,9 +2979,11 @@ class __event_handler__ {
                         
                     } case MWM_Ev::FOCUS_IN     :{
                         RE_CAST_EV(xcb_focus_in_event_t);
+                        thread(handle_event<XCB_FOCUS_IN>, e->event);
                         
                     } case MWM_Ev::FOCUS_OUT: {
-
+                        RE_CAST_EV(xcb_focus_out_event_t);
+                        thread(handle_event<XCB_FOCUS_OUT>, e->event);
                         
                     } case MWM_Ev::NO_Ev: {
                         return;
@@ -3222,7 +3224,7 @@ class __event_handler__ {
 
                     return;
 
-                } case XCB_FOCUS_IN:{
+                } /* case XCB_FOCUS_IN:{
                     RE_CAST_EV(xcb_focus_in_event_t);
                     HANDLE_EVENT(FOCUS_IN);
 
@@ -3234,7 +3236,7 @@ class __event_handler__ {
 
                     return;
 
-                } case XCB_DESTROY_NOTIFY:{
+                } */ case XCB_DESTROY_NOTIFY:{
                     RE_CAST_EV(xcb_destroy_notify_event_t);
                     HANDLE_EVENT(FOCUS_OUT);
 
