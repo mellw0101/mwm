@@ -2962,7 +2962,7 @@ class __event_handler__ {
         #define HANDLE_EVENT(__type ) thread(handle_event<__type>, e->event    ).detach()
         #define HANDLE_WINDOW(__type) thread(handle_event<__type>, e->window   ).detach()
         #define HANDLE_ROOT(__type)   thread(handle_event<__type>, screen->root).detach()
-        #define HANDLE(__type)   thread(handle_event<__type>, screen->root).detach()
+        #define HANDLE(__type, __w)   thread(handle_event<__type>, __w         ).detach()
 
         using EventCallback = function<void(Ev)>;
         void run() {
@@ -3085,7 +3085,7 @@ class __event_handler__ {
                             }
 
                         } if (e->detail == key_codes.f11) {
-                            HANDLE_EVENT(EWMH_MAXWIN_SIGNAL);
+                            HANDLE(EWMH_MAXWIN_SIGNAL, e->event);
 
                         } break;
 
