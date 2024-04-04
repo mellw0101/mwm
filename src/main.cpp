@@ -3101,7 +3101,6 @@ class __event_handler__ {
                 if (!_ev) continue;
                 uint8_t res = get_ev(_ev->response_type & ~80);
                 ev_arr[res].emit();
-                free(_ev);
 
             }
 
