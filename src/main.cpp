@@ -2922,16 +2922,16 @@ class __event_handler__ {
         #define Emit signal_manager->_window_signals.emit
         #define handle_template(__type) template<> void handle_event<__type> (uint32_t __w)
         template<uint8_t __sig>
-        static void handle_event(uint32_t __w) { WS_emit(__w, __sig); }
+        static void handle_event(uint32_t __w) { Emit(__w, __sig);                             }
             handle_template(XCB_MAP_REQUEST)   { Emit(screen->root, XCB_MAP_REQUEST, __w); }
-            handle_template(XCB_EXPOSE)        { Emit(__w,          XCB_EXPOSE);               }
-            handle_template(XCB_ENTER_NOTIFY)  { Emit(__w,          XCB_ENTER_NOTIFY);         }
-            handle_template(XCB_LEAVE_NOTIFY)  { Emit(__w,          XCB_LEAVE_NOTIFY);         }
-            handle_template(DESTROY_NOTIF_EV)  { Emit(__w,          DESTROY_NOTIF_EV);         }
-            handle_template(DESTROY_NOTIF_W )  { Emit(__w,          DESTROY_NOTIF_W);          }
-            handle_template(XCB_MOTION_NOTIFY) { Emit(__w ,         XCB_MOTION_NOTIFY);        }
-            handle_template(XCB_FOCUS_IN)      { Emit(__w,          XCB_FOCUS_IN);             }
-            handle_template(XCB_FOCUS_OUT)     { Emit(__w,          XCB_FOCUS_OUT);            }
+            // handle_template(XCB_EXPOSE)        { Emit(__w,          XCB_EXPOSE);               }
+            // handle_template(XCB_ENTER_NOTIFY)  { Emit(__w,          XCB_ENTER_NOTIFY);         }
+            // handle_template(XCB_LEAVE_NOTIFY)  { Emit(__w,          XCB_LEAVE_NOTIFY);         }
+            // handle_template(DESTROY_NOTIF_EV)  { Emit(__w,          DESTROY_NOTIF_EV);         }
+            // handle_template(DESTROY_NOTIF_W )  { Emit(__w,          DESTROY_NOTIF_W);          }
+            // handle_template(XCB_MOTION_NOTIFY) { Emit(__w,          XCB_MOTION_NOTIFY);        }
+            // handle_template(XCB_FOCUS_IN)      { Emit(__w,          XCB_FOCUS_IN);             }
+            // handle_template(XCB_FOCUS_OUT)     { Emit(__w,          XCB_FOCUS_OUT);            }
             
             // template<> void handle_event<XCB_ENTER_NOTIFY>         (uint32_t __w) { Emit(__w,          XCB_ENTER_NOTIFY);}
             // template<> void handle_event<XCB_LEAVE_NOTIFY>         (uint32_t __w) { Emit(__w,          XCB_LEAVE_NOTIFY);}
@@ -2965,47 +2965,159 @@ class __event_handler__ {
             main_loop.connect([this](xcb_generic_event_t *ev) -> void {
                 MWM_Ev res = map_ev_to_enum(ev->response_type & ~0x80);
                 switch (res) {
-                    case   MWM_Ev::EXPOSE        :{
+                    case   MWM_Ev::EXPOSE         :{
                         RE_CAST_EV(xcb_expose_event_t);
                         thread(handle_event<XCB_EXPOSE>, e->window).detach();
                         break;
 
-                    } case MWM_Ev::ENTER_NOTIFY  :{
+                    } case MWM_Ev::ENTER_NOTIFY   :{
                         RE_CAST_EV(xcb_enter_notify_event_t);
                         thread(handle_event<XCB_ENTER_NOTIFY>, e->event).detach();
                         break;
                         
-                    } case MWM_Ev::LEAVE_NOTIFY  :{
+                    } case MWM_Ev::LEAVE_NOTIFY   :{
                         RE_CAST_EV(xcb_leave_notify_event_t);
                         thread(handle_event<XCB_LEAVE_NOTIFY>, e->event).detach();
                         break;
                         
-                    } case MWM_Ev::FOCUS_IN      :{
+                    } case MWM_Ev::FOCUS_IN       :{
                         RE_CAST_EV(xcb_focus_in_event_t);
                         thread(handle_event<XCB_FOCUS_IN>, e->event).detach();
                         break;
                         
-                    } case MWM_Ev::FOCUS_OUT     :{
+                    } case MWM_Ev::FOCUS_OUT      :{
                         RE_CAST_EV(xcb_focus_out_event_t);
                         thread(handle_event<XCB_FOCUS_OUT>, e->event).detach();
                         break;
                         
-                    } case MWM_Ev::DESTROY_NOTIF :{
+                    } case MWM_Ev::DESTROY_NOTIF  :{
                         RE_CAST_EV(xcb_destroy_notify_event_t);
                         thread(handle_event<DESTROY_NOTIF_EV>, e->event).detach();
                         thread(handle_event<DESTROY_NOTIF_W>, e->window).detach();
                         break;
 
-                    } case MWM_Ev::MAP_REQ       :{
+                    } case MWM_Ev::MAP_REQ        :{
                         RE_CAST_EV(xcb_map_request_event_t);
                         thread(handle_event<XCB_MAP_REQUEST>, e->window).detach();
                         break;
 
-                    } case MWM_Ev::MOTION_NOTIFY :{
+                    } case MWM_Ev::MOTION_NOTIFY  :{
                         RE_CAST_EV(xcb_motion_notify_event_t);
                         thread(handle_event<XCB_MOTION_NOTIFY>, e->event).detach();
                         break;
                         
+                    } case MWM_Ev::KEY_PRESS      :{
+                        RE_CAST_EV(xcb_key_press_event_t);
+                        switch (e->state) {
+                            case   CTRL  + ALT          :{
+                                if (e->detail == key_codes.t) {
+                                    HANDLE_EVENT(TERM_KEY_PRESS);
+
+                                } break;
+
+                            } case SHIFT + CTRL + SUPER :{
+                                if (e->detail == key_codes.r_arrow) {
+                                    HANDLE_EVENT(MOVE_TO_NEXT_DESKTOP_WAPP);
+
+                                } else if (e->detail == key_codes.l_arrow) {
+                                    HANDLE_EVENT(MOVE_TO_PREV_DESKTOP_WAPP);
+
+                                } break;
+
+                            } case SHIFT + ALT          :{
+                                if (e->detail == key_codes.q) {
+                                    HANDLE_EVENT(QUIT_KEY_PRESS);
+
+                                } break;
+
+                            } case ALT                  :{
+                                if (e->detail == key_codes.n_1) {
+                                    HANDLE_EVENT(MOVE_TO_DESKTOP_1);
+
+                                } else if (e->detail == key_codes.n_2) {
+                                    HANDLE_EVENT(MOVE_TO_DESKTOP_2);
+
+                                } else if (e->detail == key_codes.n_3) {
+                                    HANDLE_EVENT(MOVE_TO_DESKTOP_3);
+                                    
+                                } else if (e->detail == key_codes.n_4) {
+                                    HANDLE_EVENT(MOVE_TO_DESKTOP_4);
+
+                                } else if (e->detail == key_codes.n_5) {
+                                    HANDLE_EVENT(MOVE_TO_DESKTOP_5);
+                                    
+                                } else if (e->detail == key_codes.tab) {
+                                    HANDLE_EVENT(CYCLE_FOCUS_KEY_PRESS);
+
+                                } break;
+
+                            } case CTRL  + SUPER        :{
+                                if (e->detail == key_codes.r_arrow) {
+                                    HANDLE_EVENT(MOVE_TO_NEXT_DESKTOP);
+
+                                } else if (e->detail == key_codes.l_arrow) {
+                                    HANDLE_EVENT(MOVE_TO_PREV_DESKTOP);
+
+                                } break;
+
+                            } case SUPER                :{
+                                if (e->detail == key_codes.r_arrow)        {
+                                    HANDLE_EVENT(TILE_RIGHT);
+
+                                } else if (e->detail == key_codes.l_arrow) {
+                                    HANDLE_EVENT(TILE_LEFT);
+
+                                } else if (e->detail == key_codes.u_arrow) {
+                                    HANDLE_EVENT(TILE_UP);
+
+                                } else if (e->detail == key_codes.d_arrow) {
+                                    HANDLE_EVENT(TILE_DOWN);
+
+                                } else if (e->detail == key_codes.k)       {
+                                    HANDLE_ROOT(DEBUG_KEY_PRESS);
+                                
+                                } break;
+
+                            }
+
+                        } /* if (e->detail == key_codes.f11) {
+                            HANDLE_EVENT(EWMH_MAXWIN);
+
+                        } */
+
+                    } case MWM_Ev::BUTTON_PRESS   :{
+                        RE_CAST_EV(xcb_button_press_event_t);
+                        if (e->detail == L_MOUSE_BUTTON)        {
+                            if (e->state == ALT) {
+                                HANDLE_EVENT(L_MOUSE_BUTTON_EVENT__ALT);
+
+                            } else {
+                                HANDLE_EVENT(L_MOUSE_BUTTON_EVENT);
+
+                            } break;
+
+                        } else if (e->detail == R_MOUSE_BUTTON) {
+                            if (e->state == ALT) {
+                                HANDLE_EVENT(R_MOUSE_BUTTON_EVENT__ALT);
+                                
+                            } else {
+                                HANDLE_EVENT(R_MOUSE_BUTTON_EVENT);
+
+                            } break;
+
+                        } break;
+
+                    } case MWM_Ev::MAP_NOTIF      :{
+                        RE_CAST_EV(xcb_property_notify_event_t);
+                        HANDLE_WINDOW(XCB_PROPERTY_NOTIFY);
+                        break;
+
+                    } case MWM_Ev::PROPERTY_NOTIF :{
+                        RE_CAST_EV(xcb_property_notify_event_t);
+                        HANDLE_WINDOW(XCB_PROPERTY_NOTIFY);
+
+                        break;
+
                     } case MWM_Ev::NO_Ev         :{
                         break;
                         
@@ -3108,7 +3220,7 @@ class __event_handler__ {
         constexpr void processEvent(xcb_generic_event_t* ev) {
             uint8_t responseType = ev->response_type & ~0x80;
             switch (responseType) {
-                case XCB_KEY_PRESS:{
+                /* case XCB_KEY_PRESS:{
                     RE_CAST_EV(xcb_key_press_event_t);
                     switch (e->state) {
                         case (CTRL + ALT): {
@@ -3187,7 +3299,7 @@ class __event_handler__ {
 
                     } return;
 
-                } case XCB_BUTTON_PRESS:{
+                }  *//* case XCB_BUTTON_PRESS:{
                     RE_CAST_EV(xcb_button_press_event_t);
                     if (e->detail == L_MOUSE_BUTTON) {
                         if (e->state == ALT) {
@@ -3209,7 +3321,7 @@ class __event_handler__ {
 
                     } return;
 
-                }/* case XCB_EXPOSE:{
+                } *//* case XCB_EXPOSE:{
                     RE_CAST_EV(xcb_expose_event_t);
                     HANDLE_WINDOW(XCB_EXPOSE);
 
@@ -3239,13 +3351,13 @@ class __event_handler__ {
 
                     return;
 
-                }  */case XCB_MAP_NOTIFY:{
+                }  *//* case XCB_MAP_NOTIFY:{
                     RE_CAST_EV(xcb_map_notify_event_t);
                     HANDLE_EVENT(MAP_NOTIFY);
 
                     return;
 
-                } /* case XCB_FOCUS_IN:{
+                }  *//* case XCB_FOCUS_IN:{
                     RE_CAST_EV(xcb_focus_in_event_t);
                     HANDLE_EVENT(FOCUS_IN);
 

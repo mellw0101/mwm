@@ -25,17 +25,25 @@ static array<function<void(uint32_t)>, NUM_EVENTS> eventHandlers{};
 #define Ev6 17
 #define Ev7 20
 #define Ev8 6
+#define Ev9 2
+#define Ev10 4
+#define Ev11 19
+#define Ev12 28 /* <- XCB_PROPERTY_NOTIFY */
 
 enum class MWM_Ev : const uint8_t {
-    NO_Ev         = 255,
-    EXPOSE        = 1,
-    ENTER_NOTIFY  = 2,
-    LEAVE_NOTIFY  = 3,
-    FOCUS_IN      = 4,
-    FOCUS_OUT     = 5,
-    DESTROY_NOTIF = 6,
-    MAP_REQ       = 7,
-    MOTION_NOTIFY = 8
+    NO_Ev          = 255,
+    EXPOSE         = 1,
+    ENTER_NOTIFY   = 2,
+    LEAVE_NOTIFY   = 3,
+    FOCUS_IN       = 4,
+    FOCUS_OUT      = 5,
+    DESTROY_NOTIF  = 6,
+    MAP_REQ        = 7,
+    MOTION_NOTIFY  = 8,
+    KEY_PRESS      = 9,
+    BUTTON_PRESS   = 10,
+    MAP_NOTIF      = 11,
+    PROPERTY_NOTIF = 12
 
 };
 
@@ -70,14 +78,18 @@ constexpr uint8_t MapEventToCode(uint8_t eventCode) {
 }
 constexpr MWM_Ev map_ev_to_enum(uint8_t eventCode) {
     switch (eventCode) {
-        case Ev1: return MWM_Ev::EXPOSE;
-        case Ev2: return MWM_Ev::ENTER_NOTIFY;
-        case Ev3: return MWM_Ev::LEAVE_NOTIFY;
-        case Ev4: return MWM_Ev::FOCUS_IN;
-        case Ev5: return MWM_Ev::FOCUS_OUT;
-        case Ev6: return MWM_Ev::DESTROY_NOTIF;
-        case Ev7: return MWM_Ev::MAP_REQ;
-        case Ev8: return MWM_Ev::MOTION_NOTIFY;
+        case Ev1:  return MWM_Ev::EXPOSE;
+        case Ev2:  return MWM_Ev::ENTER_NOTIFY;
+        case Ev3:  return MWM_Ev::LEAVE_NOTIFY;
+        case Ev4:  return MWM_Ev::FOCUS_IN;
+        case Ev5:  return MWM_Ev::FOCUS_OUT;
+        case Ev6:  return MWM_Ev::DESTROY_NOTIF;
+        case Ev7:  return MWM_Ev::MAP_REQ;
+        case Ev8:  return MWM_Ev::MOTION_NOTIFY;
+        case Ev9:  return MWM_Ev::KEY_PRESS;
+        case Ev10: return MWM_Ev::BUTTON_PRESS;
+        case Ev11: return MWM_Ev::MAP_NOTIF;
+        case Ev12: return MWM_Ev::PROPERTY_NOTIF;
         
         default: {
             return MWM_Ev::NO_Ev;
