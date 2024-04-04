@@ -796,29 +796,52 @@ enum
 
 // };
 
-#define L_MOUSE_BUTTON_EVENT      36
-#define L_MOUSE_BUTTON_EVENT__ALT 37
-#define QUIT_KEY_PRESS            45
-#define TERM_KEY_PRESS            44
-#define TILE_RIGHT                55
-#define TILE_LEFT                 56
-#define TILE_UP                   57
-#define TILE_DOWN                 58
-#define DESTROY_NOTIF_EV          82
-#define DESTROY_NOTIF_W           83
-#define DEBUG_KEY_PRESS           62
-#define MOVE_TO_DESKTOP_1         48
-#define MOVE_TO_DESKTOP_2         49
-#define MOVE_TO_DESKTOP_3         50
-#define MOVE_TO_DESKTOP_4         51
-#define MOVE_TO_DESKTOP_5         52
-#define MOVE_TO_PREV_DESKTOP      53
-#define MOVE_TO_NEXT_DESKTOP      54
-#define CYCLE_FOCUS_KEY_PRESS     59
-#define MOVE_TO_PREV_DESKTOP_WAPP 60
-#define MOVE_TO_NEXT_DESKTOP_WAPP 61
-#define EWMH_MAXWIN_SIGNAL        46
-#define ROOT_SIGNAL               99
+#define L_MOUSE_BUTTON_EVENT              36
+#define L_MOUSE_BUTTON_EVENT__ALT         37
+#define QUIT_KEY_PRESS                    45
+#define TERM_KEY_PRESS                    44
+#define TILE_RIGHT                        55
+#define TILE_LEFT                         56
+#define TILE_UP                           57
+#define TILE_DOWN                         58
+#define DESTROY_NOTIF_EV                  82
+#define DESTROY_NOTIF_W                   83
+#define DEBUG_KEY_PRESS                   62
+#define MOVE_TO_DESKTOP_1                 48
+#define MOVE_TO_DESKTOP_2                 49
+#define MOVE_TO_DESKTOP_3                 50
+#define MOVE_TO_DESKTOP_4                 51
+#define MOVE_TO_DESKTOP_5                 52
+#define MOVE_TO_PREV_DESKTOP              53
+#define MOVE_TO_NEXT_DESKTOP              54
+#define CYCLE_FOCUS_KEY_PRESS             59
+#define MOVE_TO_PREV_DESKTOP_WAPP         60
+#define MOVE_TO_NEXT_DESKTOP_WAPP         61
+#define EWMH_MAXWIN_SIGNAL                46
+#define R_MOUSE_BUTTON_EVENT              38
+#define R_MOUSE_BUTTON_EVENT__ALT         39
+#define KILL_SIGNAL                       40
+#define CLIENT_RESIZE                     41
+#define CLIENT_RESIZE_ALT                 42
+#define BUTTON_MAXWIN_PRESS               63
+#define FOCUS_CLIENT                      64
+#define MOVE_CLIENT_MOUSE                 65
+#define MOVE_CLIENT_ALT                   66
+#define CONF_REQ_WIDTH                    67
+#define CONF_REQ_HEIGHT                   68
+#define CONF_REQ_X                        69
+#define CONF_REQ_Y                        70
+#define FOCUS_CLIENT_FROM_POINTER         71
+#define RESIZE_CLIENT_BORDER_LEFT         72
+#define RESIZE_CLIENT_BORDER_RIGHT        73
+#define RESIZE_CLIENT_BORDER_TOP          74
+#define RESIZE_CLIENT_BORDER_BOTTOM       75
+#define RESIZE_CLIENT_BORDER_TOP_LEFT     76
+#define RESIZE_CLIENT_BORDER_TOP_RIGHT    77
+#define RESIZE_CLIENT_BORDER_BOTTOM_RIGHT 78
+#define RESIZE_CLIENT_BORDER_BOTTOM_LEFT  79
+#define HIDE_CONTEXT_MENU                 80
+#define ROOT_SIGNAL                       99
 
 enum EV : uint8_t {
     REMOVE_ALL                        = 0,
@@ -837,30 +860,7 @@ enum EV : uint8_t {
     DESTROY_NOTIFY                    = XCB_DESTROY_NOTIFY,
     REPARENT_NOTIFY                   = XCB_REPARENT_NOTIFY,
     CONFIGURE_REQUEST                 = XCB_CONFIGURE_REQUEST,
-    R_MOUSE_BUTTON_EVENT              = 38,
-    R_MOUSE_BUTTON_EVENT__ALT         = 39,
-    KILL_SIGNAL                       = 40,
-    CLIENT_RESIZE                     = 41,
-    CLIENT_RESIZE_ALT                 = 42,
-    BUTTON_MAXWIN_PRESS               = 63,
-    FOCUS_CLIENT                      = 64,
-    MOVE_CLIENT_MOUSE                 = 65,
-    MOVE_CLIENT_ALT                   = 66,
-    CONF_REQ_WIDTH                    = 67,
-    CONF_REQ_HEIGHT                   = 68,
-    CONF_REQ_X                        = 69,
-    CONF_REQ_Y                        = 70,
-    FOCUS_CLIENT_FROM_POINTER         = 71,
-    RESIZE_CLIENT_BORDER_LEFT         = 72,
-    RESIZE_CLIENT_BORDER_RIGHT        = 73,
-    RESIZE_CLIENT_BORDER_TOP          = 74,
-    RESIZE_CLIENT_BORDER_BOTTOM       = 75,
-    RESIZE_CLIENT_BORDER_TOP_LEFT     = 76,
-    RESIZE_CLIENT_BORDER_TOP_RIGHT    = 77,
-    RESIZE_CLIENT_BORDER_BOTTOM_RIGHT = 78,
-    RESIZE_CLIENT_BORDER_BOTTOM_LEFT  = 79,
-    HIDE_CONTEXT_MENU                 = 80,
-    ROOT_SIG                          = 81
+
 };
 
 typedef struct __client__data__t__{
