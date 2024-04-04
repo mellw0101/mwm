@@ -76,6 +76,42 @@ constexpr uint8_t MapEventToCode(uint8_t eventCode) {
     }
 
 }
+#define MWM_Ev_NO_Ev          0
+#define MWM_Ev_EXPOSE         1
+#define MWM_Ev_ENTER_NOTIFY   2
+#define MWM_Ev_LEAVE_NOTIFY   3
+#define MWM_Ev_FOCUS_IN       4
+#define MWM_Ev_FOCUS_OUT      5
+#define MWM_Ev_DESTROY_NOTIF  6
+#define MWM_Ev_MAP_REQ        7
+#define MWM_Ev_MOTION_NOTIFY  8
+#define MWM_Ev_KEY_PRESS      9
+#define MWM_Ev_BUTTON_PRESS   10
+#define MWM_Ev_MAP_NOTIF      11
+#define MWM_Ev_PROPERTY_NOTIF 12
+constexpr uint8_t get_ev(uint8_t eventCode) {
+    switch (eventCode) {
+        case Ev1:  return MWM_Ev_EXPOSE;
+        case Ev2:  return MWM_Ev_ENTER_NOTIFY;
+        case Ev3:  return MWM_Ev_LEAVE_NOTIFY;
+        case Ev4:  return MWM_Ev_FOCUS_IN;
+        case Ev5:  return MWM_Ev_FOCUS_OUT;
+        case Ev6:  return MWM_Ev_DESTROY_NOTIF;
+        case Ev7:  return MWM_Ev_MAP_REQ;
+        case Ev8:  return MWM_Ev_MOTION_NOTIFY;
+        case Ev9:  return MWM_Ev_KEY_PRESS;
+        case Ev10: return MWM_Ev_BUTTON_PRESS;
+        case Ev11: return MWM_Ev_MAP_NOTIF;
+        case Ev12: return MWM_Ev_PROPERTY_NOTIF;
+        
+        default: {
+            return MWM_Ev_NO_Ev;
+
+        }
+
+    }
+
+}
 constexpr MWM_Ev map_ev_to_enum(uint8_t eventCode) {
     switch (eventCode) {
         case Ev1:  return MWM_Ev::EXPOSE;

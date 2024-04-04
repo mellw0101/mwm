@@ -3099,8 +3099,8 @@ class __event_handler__ {
             while (shouldContinue) {
                 _ev = xcb_wait_for_event(conn);
                 if (!_ev) continue;
-
-                // main_loop.emit(ev);
+                uint8_t res = get_ev(_ev->response_type & ~80);
+                ev_arr[res].emit();
                 free(_ev);
 
             }
