@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <array>
 #include "functional"
+// #include "structs.hpp"
 
 using namespace std;
 
@@ -18,12 +19,16 @@ static array<function<void(uint32_t)>, NUM_EVENTS> eventHandlers{};
 #define Ev1 12
 #define Ev2 7
 #define Ev3 8
+#define Ev4 9
+#define Ev5 10
 
 enum class MWM_Ev : const uint8_t {
     NO_Ev = 255,
     EXPOSE = 1,
     ENTER_NOTIFY = 2,
-    LEAVE_NOTIFY = 3
+    LEAVE_NOTIFY = 3,
+    FOCUS_IN     = 4,
+    FOCUS_OUT    = 5
 
 };
 
@@ -63,6 +68,7 @@ constexpr MWM_Ev map_ev_to_enum(uint8_t eventCode) {
         case Ev1: return MWM_Ev::EXPOSE;
         case Ev2: return MWM_Ev::ENTER_NOTIFY;
         case Ev3: return MWM_Ev::LEAVE_NOTIFY;
+
         
         default: {
             return MWM_Ev::NO_Ev;

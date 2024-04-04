@@ -2924,9 +2924,12 @@ class __event_handler__ {
         template<uint8_t __sig>
         static void handle_event(uint32_t __w) { WS_emit(__w, __sig); }
             handle_template(XCB_MAP_REQUEST)  { Emit(screen->root, XCB_MAP_REQUEST, __w); }
-            handle_template(MWM_EXPOSE)       { Emit(__w,          XCB_EXPOSE);               }
-            handle_template(MWM_ENTER_NOTIFY) { Emit(__w,          XCB_ENTER_NOTIFY);         }
-            handle_template(MWM_LEAVE_NOTIFY) { Emit(__w,          XCB_LEAVE_NOTIFY);         }
+            handle_template(XCB_EXPOSE)       { Emit(__w,          XCB_EXPOSE);               }
+            handle_template(XCB_ENTER_NOTIFY) { Emit(__w,          XCB_ENTER_NOTIFY);         }
+            handle_template(XCB_LEAVE_NOTIFY) { Emit(__w,          XCB_LEAVE_NOTIFY);         }
+            
+            // handle_template(MWM_ENTER_NOTIFY) { Emit(__w,          XCB_ENTER_NOTIFY);         }
+            // handle_template(MWM_LEAVE_NOTIFY) { Emit(__w,          XCB_LEAVE_NOTIFY);         }
             // template<> void handle_event<XCB_ENTER_NOTIFY>         (uint32_t __w) { Emit(__w,          XCB_ENTER_NOTIFY);}
             // template<> void handle_event<XCB_LEAVE_NOTIFY>         (uint32_t __w) { Emit(__w,          XCB_LEAVE_NOTIFY);}
             template<> void handle_event<TERM_KEY_PRESS>           (uint32_t __w) { Emit(screen->root, TERM_KEY_PRESS, 0);}
@@ -2959,29 +2962,31 @@ class __event_handler__ {
         void run() {
             main_loop.connect([this](xcb_generic_event_t *ev) -> void {
                 MWM_Ev res = map_ev_to_enum(ev->response_type & ~0x80); switch (res) {
-                    case MWM_Ev::EXPOSE :{
+                    case   MWM_Ev::EXPOSE       :{
                         RE_CAST_EV(xcb_expose_event_t);
-                        thread(handle_event<MWM_EXPOSE>, e->window).detach();
+                        thread(handle_event<XCB_EXPOSE>, e->window).detach();
                         break;
 
-                    }
-                    case MWM_Ev::ENTER_NOTIFY :{
+                    } case MWM_Ev::ENTER_NOTIFY :{
                         RE_CAST_EV(xcb_enter_notify_event_t);
                         thread(handle_event<XCB_ENTER_NOTIFY>, e->event).detach();
                         return;
                         
-                    }
-                    case MWM_Ev::LEAVE_NOTIFY :{
+                    } case MWM_Ev::LEAVE_NOTIFY :{
                         RE_CAST_EV(xcb_leave_notify_event_t);
                         thread(handle_event<XCB_LEAVE_NOTIFY>, e->event).detach();
                         return;
                         
-                    }
-                    case MWM_Ev::NO_Ev: {
+                    } case MWM_Ev::FOCUS_IN     :{
+                        RE_CAST_EV(xcb_focus_in_event_t);
+                        
+                    } case MWM_Ev::FOCUS_OUT: {
+
+                        
+                    } case MWM_Ev::NO_Ev: {
                         return;
                         
                     }
-                    
                 
                 }
 
@@ -6764,13 +6769,16 @@ class client {
             void x_y(const uint32_t &x, const uint32_t &y) {
                 frame.x_y(x, y);
                 // frame.configure(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, (uint32_t[2]){x, y});
-            } void _x(int16_t x) {
+            }
+            void _x(int16_t x) {
                 frame.x(x);
         
-            } void _y(int16_t y) {
+            }
+            void _y(int16_t y) {
                 frame.y(y);
         
-            } void _width(uint16_t width) {
+            }
+            void _width(uint16_t width) {
                 win.width((width - (BORDER_SIZE * 2)));
                 xcb_flush(conn);
                 frame.width((width));
@@ -6785,7 +6793,8 @@ class client {
                 border[bottom_right].x((width - BORDER_SIZE));
                 xcb_flush(conn);
         
-            } void _height(const uint32_t &height) {
+            }
+            void _height(const uint32_t &height) {
                 win.height((height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
                 frame.height(height);
                 border[left].height((height - (BORDER_SIZE * 2)));
@@ -6794,7 +6803,8 @@ class client {
                 border[bottom_left].y((height - BORDER_SIZE));
                 border[bottom_right].y((height - BORDER_SIZE));
         
-            } void x_width(const uint32_t &x, const uint32_t &width) {
+            }
+            void x_width(const uint32_t &x, const uint32_t &width) {
                 win.width((width - (BORDER_SIZE * 2)));
                 frame.x_width(x, width);
                 titlebar.width((width - (BORDER_SIZE * 2)));
@@ -6808,7 +6818,8 @@ class client {
                 border[bottom_right].x((width - BORDER_SIZE));
                 xcb_flush(conn);
         
-            } void y_height(const uint32_t & y, const uint32_t & height) {
+            }
+            void y_height(const uint32_t & y, const uint32_t & height) {
                 win.height((height - TITLE_BAR_HEIGHT) - (BORDER_SIZE * 2));
                 xcb_flush(conn);
                 frame.y_height(y, height);
@@ -6819,7 +6830,8 @@ class client {
                 border[bottom_right].y((height - BORDER_SIZE));
                 xcb_flush(conn);
         
-            } void x_width_height(const uint32_t &x, const uint32_t &width, const uint32_t &height) {
+            }
+            void x_width_height(const uint32_t &x, const uint32_t &width, const uint32_t &height) {
                 frame.x_width_height(x, width, height);
                 win.width_height((width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
                 titlebar.width((width - (BORDER_SIZE * 2)));
@@ -6834,7 +6846,8 @@ class client {
                 border[bottom_left].y((height - BORDER_SIZE));
                 border[bottom_right].x_y((width - BORDER_SIZE), (height - BORDER_SIZE));
         
-            } void y_width_height(const uint32_t &y, const uint32_t &width, const uint32_t &height) {
+            }
+            void y_width_height(const uint32_t &y, const uint32_t &width, const uint32_t &height) {
                 frame.y_width_height(y, width, height);
                 win.width_height((width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
                 titlebar.width((width - BORDER_SIZE * 2));
@@ -6849,7 +6862,8 @@ class client {
                 border[bottom_left].y((height - BORDER_SIZE));
                 border[bottom_right].x_y((width - BORDER_SIZE), (height - BORDER_SIZE));
         
-            } void x_y_width_height(const uint32_t &x, const uint32_t &y, const uint32_t &width, const uint32_t &height) {
+            }
+            void x_y_width_height(const uint32_t &x, const uint32_t &y, const uint32_t &width, const uint32_t &height) {
                 win.width_height((width - (BORDER_SIZE * 2)), (height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
                 xcb_flush(conn);
                 frame.x_y_width_height(x, y, width, height);
@@ -6866,7 +6880,8 @@ class client {
                 border[bottom_left].y((height - BORDER_SIZE));
                 xcb_flush(conn);
         
-            } void width_height(const uint32_t &width, const uint32_t &height) {
+            }
+            void width_height(const uint32_t &width, const uint32_t &height) {
                 win.width_height((width - (BORDER_SIZE * 2)), (height - (BORDER_SIZE * 2) - TITLE_BAR_HEIGHT));
                 xcb_flush(conn);
                 frame.width_height(width, height);
@@ -6963,7 +6978,8 @@ class client {
 
                 free(reply);
 
-            } void get_window_parameters_and_log() {
+            }
+            void get_window_parameters_and_log() {
                 xcb_get_geometry_cookie_t cookie = xcb_get_geometry(conn, win);
                 xcb_get_geometry_reply_t *reply = xcb_get_geometry_reply(conn, cookie, nullptr);
                 if (reply == nullptr)
@@ -7034,7 +7050,8 @@ class client {
             CWC(frame);
             CWC(win);
         
-        } void make_titlebar() {
+        }
+        void make_titlebar() {
             titlebar.create_window(
                 frame,
                 BORDER_SIZE,
@@ -7070,7 +7087,8 @@ class client {
                 
             }, this->titlebar);
 
-        } void make_close_button() {
+        }
+        void make_close_button() {
             this->close_button.create_window(
                 frame,
                 (width - BUTTON_SIZE - BORDER_SIZE),
@@ -7110,7 +7128,8 @@ class client {
 
             }, this->close_button);
 
-        } void make_max_button() {
+        }
+        void make_max_button() {
             max_button.create_window(
                 frame,
                 (width - (BUTTON_SIZE * 2) - BORDER_SIZE),
@@ -7170,7 +7189,8 @@ class client {
 
             }, this->max_button);
 
-        } void make_min_button() {
+        }
+        void make_min_button() {
             min_button.create_window(
                 frame,
                 (width - (BUTTON_SIZE * 3) - BORDER_SIZE),
@@ -7205,7 +7225,8 @@ class client {
 
             }, this->min_button);
 
-        } void make_borders() {
+        }
+        void make_borders() {
             border[left].create_window(
                 frame,
                 0,
@@ -7367,7 +7388,8 @@ class client {
                 
             }, this->border[bottom_right]);
 
-        } void set_icon_png() {
+        }
+        void set_icon_png() {
             icon.create_window(
                 frame,
                 BORDER_SIZE,
