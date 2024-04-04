@@ -15,28 +15,6 @@
 #include <initializer_list>
 #include "data.hpp"
 
-template<uint8_t __sig>
-static void handle_ev(xcb_generic_event_t *ev) {}
-
-// Specializations for event types
-template<>
-void handle_ev<MWM_EXPOSE>(xcb_generic_event_t *ev) {
-
-
-    // Specialized handling for XCB_EXPOSE events
-}
-
-template<>
-void handle_ev<MWM_ENTER_NOTIFY>(xcb_generic_event_t *ev) {
-    // Specialized handling for XCB_ENTER_NOTIFY events
-}
-
-template<>
-void handle_ev<MWM_LEAVE_NOTIFY>(xcb_generic_event_t *ev) {
-    // Specialized handling for XCB_ENTER_NOTIFY events
-}
-
-
 using namespace std;
 
 struct SimplifiedEvent {
