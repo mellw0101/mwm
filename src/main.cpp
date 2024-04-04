@@ -2911,9 +2911,6 @@ class __event_handler__ {
         __key_codes__ key_codes;
         mutex event_mutex;
         Signal<xcb_generic_event_t *> main_loop;
-        
-
-
 
     /* Methods   */
         constexpr int add(int a, int b) {
