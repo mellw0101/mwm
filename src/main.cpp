@@ -3108,14 +3108,13 @@ class __event_handler__ {
                         } break;
 
                     } case MWM_Ev::MAP_NOTIF      :{
-                        RE_CAST_EV(xcb_property_notify_event_t);
-                        HANDLE_WINDOW(XCB_PROPERTY_NOTIFY);
+                        RE_CAST_EV(xcb_map_notify_event_t);
+                        HANDLE_WINDOW(XCB_MAP_NOTIFY);
                         break;
 
                     } case MWM_Ev::PROPERTY_NOTIF :{
                         RE_CAST_EV(xcb_property_notify_event_t);
                         HANDLE_WINDOW(XCB_PROPERTY_NOTIFY);
-
                         break;
 
                     } case MWM_Ev::NO_Ev         :{
