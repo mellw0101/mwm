@@ -2958,13 +2958,7 @@ class __event_handler__ {
         using EventCallback = function<void(Ev)>;
         void run() {
             main_loop.connect([this](xcb_generic_event_t *ev) -> void {
-                // uint8_t res = MapEventToCode(ev->response_type & ~0x80);
-                // if (res == uint8_t_MAX) {
-                //     return;
-
-                // }
-                MWM_Ev res = map_ev_to_enum(ev->response_type & ~0x80);
-                switch (res) {
+                MWM_Ev res = map_ev_to_enum(ev->response_type & ~0x80); switch (res) {
                     case MWM_Ev::EXPOSE :{
                         RE_CAST_EV(xcb_expose_event_t);
                         thread(handle_event<MWM_EXPOSE>, e->window).detach();
@@ -3720,11 +3714,10 @@ class window {
         window() {}
 
     /* Operators   */
-        operator uint32_t()
-        {
+        operator uint32_t() {
             return _window;
-        }
-    
+
+        }    
         window& operator=(uint32_t new_window) // Overload the assignment operator for uint32_t
         { 
             _window = new_window;
@@ -4256,6 +4249,7 @@ class window {
                 bool is_frameless = false;
                 xcb_atom_t property;
                 get_atom((char *)"_MOTIF_WM_HINTS", &property);
+                
                 xcb_get_property_cookie_t cookie = xcb_get_property(conn, 0, _window, property, XCB_ATOM_ANY, 0, sizeof(motif_wm_hints) / 4);
                 xcb_get_property_reply_t* reply = xcb_get_property_reply(conn, cookie, NULL);
                 if (reply) {
@@ -4458,11 +4452,13 @@ class window {
                                 return {};
                             
                             } *__width = width;
+
                             uint32_t height = data[i++]; if (__height == nullptr) {
                                 loutEWin << "icon data is invalid" << loutEND;
                                 return {};
                                 
                             } *__height = height;
+
                             uint32_t size = width * height;
 
                             loutIWin << "width"  << width  << loutEND;
@@ -6443,11 +6439,13 @@ class client {
             // DynamicArray<window> border;
             FixedArray<window, 8> border;
 
-        };struct __atoms__ {
+        };
+        struct __atoms__ {
             bool is_modal = false;
             bool has_modal = false;
 
-        };struct __modal_data__ {
+        };
+        struct __modal_data__ {
             uint32_t transient_for = 0;
             uint32_t modal_window = 0;
         };
@@ -6532,28 +6530,34 @@ class client {
                 //     border[bottom_right]
                 // });
             
-            } void raise() {
+            }
+            void raise() {
                 frame.raise();
 
-            } void focus() {
+            }
+            void focus() {
                 win.focus_input();
                 win.set_active_EWMH_window();
                 frame.raise();
 
-            } void update() {
+            }
+            void update() {
                 x = frame.x();
                 y = frame.y();
                 width = frame.width();
                 height = frame.height();
                 win.send_event(XCB_EVENT_MASK_STRUCTURE_NOTIFY, (uint32_t[]){(static_cast<uint32_t>(x) + BORDER_SIZE), (static_cast<uint32_t>(y) + (TITLE_BAR_HEIGHT + BORDER_SIZE)), win.width(), win.height()});
         
-            } void map() {
+            }
+            void map() {
                 frame.map();
         
-            } void unmap() {
+            }
+            void unmap() {
                 frame.unmap();
         
-            } void kill() {
+            }
+            void kill() {
                 frame.unmap();
                 win.unmap();
                 close_button.unmap();
@@ -6612,18 +6616,21 @@ class client {
                 border[bottom_right].kill();
                 frame.kill();
 
-            } template<typename Callback>
+            }
+            template<typename Callback>
             void setup_CLI_SIG(int __signal_type_id, Callback &&callback){
                 signal_manager->client_signals.connect(this, __signal_type_id, callback);
             
-            } template<typename Callback>
+            }
+            template<typename Callback>
             void setup_C_SIG(int __signal_type_id, Callback &&callback) {
                 C_SIG(this,
                 
 
                 ,BUTTON_MAXWIN_PRESS);
 
-            } void align() {
+            }
+            void align() {
                 win.x(BORDER_SIZE);
                 win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
                 FLUSH_X();
@@ -6882,13 +6889,16 @@ class client {
             void save_ogsize() {
                 ogsize.save(x, y, width, height);
 
-            } void save_tile_ogsize() {
+            }
+            void save_tile_ogsize() {
                 tile_ogsize.save(x, y, width, height);
 
-            } void save_max_ewmh_ogsize() {
+            }
+            void save_max_ewmh_ogsize() {
                 max_ewmh_ogsize.save(x, y, width, height);
         
-            } void save_max_button_ogsize() {
+            }
+            void save_max_button_ogsize() {
                 max_button_ogsize.save(x, y, width, height);
 
             }
@@ -6897,10 +6907,12 @@ class client {
             bool is_active_EWMH_window() {
                 return win.is_active_EWMH_window();
         
-            } bool is_EWMH_fullscreen() {
+            }
+            bool is_EWMH_fullscreen() {
                 return win.is_EWMH_fullscreen();
         
-            } bool is_button_max_win() {
+            }
+            bool is_button_max_win() {
                 if (x      == -BORDER_SIZE
                 &&  y      == -BORDER_SIZE
                 &&  width  == (screen->width_in_pixels  + (BORDER_SIZE * 2))
@@ -6915,10 +6927,12 @@ class client {
             void set_active_EWMH_window() {
                 win.set_active_EWMH_window();
     
-            } void set_EWMH_fullscreen_state() {
+            }
+            void set_EWMH_fullscreen_state() {
                 win.set_EWMH_fullscreen_state();
 
-            } void set_client_params() {
+            }
+            void set_client_params() {
                 win.set_client_size_as_hints(&x, &y, &width, &height);
                 if (win.get_min_width()  > width
                 &&  win.get_min_height() > height) {
@@ -6996,11 +7010,11 @@ class client {
 
             }, this->win);
 
-            // CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->win) {
-            //     C_EMIT(this, FOCUS_CLIENT);
-            //     m_pointer->ungrab();
+            CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->win) {
+                this->focus();
+                this->win.focus_input();
 
-            // }, this->win);
+            }, this->win);
 
             // CONN(BUTTON_RELEASE, , this->win);
 
@@ -8117,7 +8131,8 @@ class Window_Manager {
                 conn = xcb_connect(displayname, screenp);
                 check_conn();
 
-            } void _ewmh() {
+            }
+            void _ewmh() {
                 if (!(ewmh = static_cast<xcb_ewmh_connection_t *>(calloc(1, sizeof(xcb_ewmh_connection_t))))) {
                     loutE << "ewmh faild to initialize" << loutEND;
                     quit(1);
@@ -8130,16 +8145,20 @@ class Window_Manager {
 
                 }
 
-            } void _setup() {
+            }
+            void _setup() {
                 setup = xcb_get_setup(conn);
 
-            } void _iter() {
+            }
+            void _iter() {
                 iter = xcb_setup_roots_iterator(setup);
             
-            } void _screen() {
+            }
+            void _screen() {
                 screen = iter.data;
             
-            } bool setSubstructureRedirectMask() {
+            }
+            bool setSubstructureRedirectMask() {
                 xcb_void_cookie_t cookie = xcb_change_window_attributes_checked(
                     conn,
                     root,
@@ -8158,7 +8177,8 @@ class Window_Manager {
 
                 } return true;
             
-            } void configure_root() {
+            }
+            void configure_root() {
                 root.set_backround_color(DARK_GREY);
                 root.set_event_mask(ROOT_EVENT_MASK);
                 root.grab_keys({
@@ -8176,7 +8196,8 @@ class Window_Manager {
                 #endif
                 root.set_pointer(CURSOR::arrow);
 
-            } void setup_events() {
+            }
+            void setup_events() {
                 signal_manager->_window_signals.conect(root, MAP_REQ, [this](uint32_t __window) -> void {
                     client *c = signal_manager->_window_client_map.retrive(__window);
                     if (c == nullptr) {
