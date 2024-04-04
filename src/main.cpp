@@ -2970,23 +2970,25 @@ class __event_handler__ {
                     } case MWM_Ev::ENTER_NOTIFY :{
                         RE_CAST_EV(xcb_enter_notify_event_t);
                         thread(handle_event<XCB_ENTER_NOTIFY>, e->event).detach();
-                        return;
+                        break;
                         
                     } case MWM_Ev::LEAVE_NOTIFY :{
                         RE_CAST_EV(xcb_leave_notify_event_t);
                         thread(handle_event<XCB_LEAVE_NOTIFY>, e->event).detach();
-                        return;
+                        break;
                         
                     } case MWM_Ev::FOCUS_IN     :{
                         RE_CAST_EV(xcb_focus_in_event_t);
-                        thread(handle_event<XCB_FOCUS_IN>, e->event);
+                        thread(handle_event<XCB_FOCUS_IN>, e->event).detach();
+                        break;
                         
                     } case MWM_Ev::FOCUS_OUT: {
                         RE_CAST_EV(xcb_focus_out_event_t);
-                        thread(handle_event<XCB_FOCUS_OUT>, e->event);
+                        thread(handle_event<XCB_FOCUS_OUT>, e->event).detach();
+                        break;
                         
                     } case MWM_Ev::NO_Ev: {
-                        return;
+                        break;
                         
                     }
                 
