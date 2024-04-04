@@ -31,7 +31,7 @@ static array<function<void(uint32_t)>, NUM_EVENTS> eventHandlers{};
 #define Ev12 28 /* <- XCB_PROPERTY_NOTIFY */
 
 enum class MWM_Ev : const uint8_t {
-    NO_Ev          = 255,
+    NO_Ev          = 0,
     EXPOSE         = 1,
     ENTER_NOTIFY   = 2,
     LEAVE_NOTIFY   = 3,
@@ -194,6 +194,23 @@ void registerCallback(Func&& func, Args&&... args) {
 
 } /* Usage -> */// registerCallback([](int x){ /* do something with x */ }, 42);
 
+template<typename Func, typename... Args>
+auto reg_static_callB(Func&& func, Args&&... args) {
+    // Assuming a hypothetical register function that takes a std::function
+    return std::bind(std::forward<Func>(func), std::forward<Args>(args)...);
+    // register callback
+
+} /* Usage -> */// registerCallback([](int x){ /* do something with x */ }, 42);
+
+template<typename Func, typename... BoundArgs>
+auto reg_callB(Func&& func, BoundArgs&&... boundArgs) {
+    // Return a lambda that captures bound arguments and accepts additional arguments at call time.
+    return [func = std::forward<Func>(func), ...boundArgs = std::forward<BoundArgs>(boundArgs)]
+           (auto&&... callArgs) mutable -> decltype(auto) {
+        return func(std::forward<BoundArgs>(boundArgs)..., std::forward<decltype(callArgs)>(callArgs)...);
+    };
+}
+
 #include <vector>
 #include <memory>
 #include <functional>
@@ -210,7 +227,9 @@ class TypedCallable : public AnyCallable {
         TypedCallable(Func f) : func(std::move(f)) {}
         void call() override {
             func(); // Invoke the stored callable
+
         }
+
     private:
         Func func;
     
@@ -257,7 +276,6 @@ class Signal {
         }/* Emit the signal, invoking the callback with perfect forwarding */
 
 };
-
 
 
 #endif/*__DATA_HPP__*/
