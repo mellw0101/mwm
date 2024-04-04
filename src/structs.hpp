@@ -796,6 +796,24 @@ enum
 
 // };
 
+#define L_MOUSE_BUTTON_EVENT      36
+#define L_MOUSE_BUTTON_EVENT__ALT 37
+#define QUIT_KEY_PRESS            45
+#define TERM_KEY_PRESS            44
+#define TILE_RIGHT                55
+#define TILE_LEFT                 56
+#define TILE_UP                   57
+#define TILE_DOWN                 58
+#define DESTROY_NOTIF_EV          82
+#define DESTROY_NOTIF_W           83
+#define DEBUG_KEY_PRESS           62
+#define MOVE_TO_DESKTOP_1         48
+#define MOVE_TO_DESKTOP_2         49
+#define MOVE_TO_DESKTOP_3         50
+#define MOVE_TO_DESKTOP_4         51
+#define MOVE_TO_DESKTOP_5         52
+#define ROOT_SIGNAL               99
+
 enum EV : uint8_t {
     REMOVE_ALL                        = 0,
     EXPOSE                            = XCB_EXPOSE,
@@ -813,31 +831,17 @@ enum EV : uint8_t {
     DESTROY_NOTIFY                    = XCB_DESTROY_NOTIFY,
     REPARENT_NOTIFY                   = XCB_REPARENT_NOTIFY,
     CONFIGURE_REQUEST                 = XCB_CONFIGURE_REQUEST,
-    L_MOUSE_BUTTON_EVENT              = 36,
-    L_MOUSE_BUTTON_EVENT__ALT         = 37,
     R_MOUSE_BUTTON_EVENT              = 38,
     R_MOUSE_BUTTON_EVENT__ALT         = 39,
     KILL_SIGNAL                       = 40,
     CLIENT_RESIZE                     = 41,
     CLIENT_RESIZE_ALT                 = 42,
-    TERM_KEY_PRESS                    = 44,
-    QUIT_KEY_PRESS                    = 45,
     EWMH_MAXWIN                       = 46,
-    MOVE_TO_DESKTOP_1                 = 48,
-    MOVE_TO_DESKTOP_2                 = 49,
-    MOVE_TO_DESKTOP_3                 = 50,
-    MOVE_TO_DESKTOP_4                 = 51,
-    MOVE_TO_DESKTOP_5                 = 52,
     MOVE_TO_PREV_DESKTOP              = 53,
     MOVE_TO_NEXT_DESKTOP              = 54,
-    TILE_RIGHT                        = 55,
-    TILE_LEFT                         = 56,
-    TILE_UP                           = 57,
-    TILE_DOWN                         = 58,
     CYCLE_FOCUS_KEY_PRESS             = 59,
     MOVE_TO_PREV_DESKTOP_WAPP         = 60,
     MOVE_TO_NEXT_DESKTOP_WAPP         = 61,
-    DEBUG_KEY_PRESS                   = 62,
     BUTTON_MAXWIN_PRESS               = 63,
     FOCUS_CLIENT                      = 64,
     MOVE_CLIENT_MOUSE                 = 65,
@@ -856,9 +860,7 @@ enum EV : uint8_t {
     RESIZE_CLIENT_BORDER_BOTTOM_RIGHT = 78,
     RESIZE_CLIENT_BORDER_BOTTOM_LEFT  = 79,
     HIDE_CONTEXT_MENU                 = 80,
-    ROOT_SIG                          = 81,
-    DESTROY_NOTIF_EV                  = 82,
-    DESTROY_NOTIF_W                   = 83
+    ROOT_SIG                          = 81
 };
 
 typedef struct __client__data__t__{
