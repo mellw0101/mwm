@@ -3412,7 +3412,7 @@ class __event_handler__ {
             
             }),
             reg_static_callB([this]() -> void {
-                auto e = (const xcb_button_press_event_t *)this->_ev;
+                auto const e = (const xcb_button_press_event_t *)this->_ev;
                 if (e->detail == L_MOUSE_BUTTON)        {
                     if (e->state == ALT) {
                         HANDLE(L_MOUSE_BUTTON_EVENT__ALT, e->event);
