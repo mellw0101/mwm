@@ -175,15 +175,14 @@ using Callback = std::function<void(T)>;
 template<typename... Args>
 auto makeCallback(Args&&... args) -> std::function<void(Args...)> {
     return [...args = std::forward<Args>(args)]() {
-        // Use args...
-        
+
     };
 
 } /* Usage -> ' auto myCallback = makeCallback(1, 2.0, "test"); ' */
 #define DEFINE_CALLBACK(name, ...) \
-    auto name = [__VA_ARGS__](auto&&... args) -> void { \
+    auto name = [__VA_ARGS__](auto&&... args) -> void /* { \
         // Implementation using args and __VA_ARGS__ \
-    };
+    }; */
 
 /* Usage -> ' DEFINE_CALLBACK(myCallback, int a, float b) ' */
 
@@ -205,7 +204,6 @@ class AnyCallable {
         virtual void call() = 0; // Define a common interface
 
 };
-
 template<typename Func>
 class TypedCallable : public AnyCallable {
     public:
@@ -217,7 +215,6 @@ class TypedCallable : public AnyCallable {
         Func func;
     
 };
-
 class CallableVector {
     public:
         template<typename Fu>
@@ -237,27 +234,27 @@ class CallableVector {
         std::vector<std::unique_ptr<AnyCallable>> callables;
         
 };
-
 // A simple Signal class that accepts callbacks with varying parameters
 template<typename... Args>
 class Signal {
+    private:
+        function<void(Args...)> callback;
+
     public:
+        template<typename Callback>
+        Signal(Callback &&__callback) : callback(__callback) {}
+        Signal() {}
+
         template<typename Fu>
         void connect(Fu&& f) {
-            // Store the callback; for simplicity, we're directly storing it without a container
             callback = std::forward<Fu>(f);
 
         }/* Register a callback */
-
-        // Emit the signal, invoking the callback with perfect forwarding
         template<typename... CallArgs>
         void emit(CallArgs&&... args) {
             callback(std::forward<CallArgs>(args)...);
 
-        }
-
-    private:
-        function<void(Args...)> callback;
+        }/* Emit the signal, invoking the callback with perfect forwarding */
 
 };
 

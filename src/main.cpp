@@ -2917,7 +2917,6 @@ class __event_handler__ {
             return a + b;
 
         }
-
         #define Emit signal_manager->_window_signals.emit
         #define handle_template(__type) template<> void handle_event<__type> (uint32_t __w)
         template<uint8_t __sig>
@@ -2940,38 +2939,38 @@ class __event_handler__ {
 
         using EventCallback = function<void(Ev)>;
         void run() {
-            main_loop.connect([this](xcb_generic_event_t *ev) -> void {
+            main_loop.connect([this](const xcb_generic_event_t *ev) -> void {
                 MWM_Ev res = map_ev_to_enum(ev->response_type & ~0x80);
                 switch (res) {
                     case   MWM_Ev::EXPOSE         :{
-                        auto e = (const xcb_expose_event_t *)ev;
-                        thread(handle_event<XCB_EXPOSE>, e->window).detach();
+                        const auto *e = (const xcb_expose_event_t *)ev;
+                        HANDLE(XCB_EXPOSE, e->window);
                         break;
 
                     } case MWM_Ev::ENTER_NOTIFY   :{
-                        auto e = (const xcb_enter_notify_event_t *)ev;
-                        thread(handle_event<XCB_ENTER_NOTIFY>, e->event).detach();
+                        const auto *e = (const xcb_enter_notify_event_t *)ev;
+                        HANDLE(XCB_ENTER_NOTIFY, e->event);
                         break;
                         
                     } case MWM_Ev::LEAVE_NOTIFY   :{
-                        auto e = (const xcb_leave_notify_event_t *)ev;
-                        thread(handle_event<XCB_LEAVE_NOTIFY>, e->event).detach();
+                        const auto *e = (const xcb_leave_notify_event_t *)ev;
+                        HANDLE(XCB_LEAVE_NOTIFY, e->event);
                         break;
                         
                     } case MWM_Ev::FOCUS_IN       :{
-                        auto e = (const xcb_focus_in_event_t *)ev;
-                        thread(handle_event<XCB_FOCUS_IN>, e->event).detach();
+                        const auto *e = (const xcb_focus_in_event_t *)ev;
+                        HANDLE(XCB_FOCUS_IN, e->event);
                         break;
                         
                     } case MWM_Ev::FOCUS_OUT      :{
-                        auto e = (xcb_focus_out_event_t *)ev;
-                        thread(handle_event<XCB_FOCUS_OUT>, e->event).detach();
+                        const auto *e = (const xcb_focus_out_event_t *)ev;
+                        HANDLE(XCB_FOCUS_OUT, e->event);
                         break;
                         
                     } case MWM_Ev::DESTROY_NOTIF  :{
-                        auto e = (xcb_destroy_notify_event_t *)ev;
-                        thread(handle_event<DESTROY_NOTIF_EV>, e->event).detach();
-                        thread(handle_event<DESTROY_NOTIF_W>, e->window).detach();
+                        const auto *e = (const xcb_destroy_notify_event_t *)ev;
+                        HANDLE(DESTROY_NOTIF_EV, e->event);
+                        HANDLE(DESTROY_NOTIF_W, e->window);
                         break;
 
                     } case MWM_Ev::MAP_REQ        :{
@@ -2980,12 +2979,12 @@ class __event_handler__ {
                         break;
 
                     } case MWM_Ev::MOTION_NOTIFY  :{
-                        auto const e = (xcb_motion_notify_event_t *)ev;
+                        auto const *e = (const xcb_motion_notify_event_t *)ev;
                         HANDLE_EVENT(XCB_MOTION_NOTIFY);
                         break;
                         
                     } case MWM_Ev::KEY_PRESS      :{
-                        auto const e = (const xcb_key_press_event_t *)ev;
+                        const auto *e = (const xcb_key_press_event_t *)ev;
                         switch (e->state) {
                             case   CTRL  + ALT          :{
                                 if (e->detail == key_codes.t) {
@@ -3064,7 +3063,7 @@ class __event_handler__ {
                         } break;
 
                     } case MWM_Ev::BUTTON_PRESS   :{
-                        auto e = (xcb_button_press_event_t *)ev;
+                        const auto *e = (const xcb_button_press_event_t *)ev;
                         if (e->detail == L_MOUSE_BUTTON)        {
                             if (e->state == ALT) {
                                 HANDLE(L_MOUSE_BUTTON_EVENT__ALT, e->event);
@@ -3086,12 +3085,12 @@ class __event_handler__ {
                         } break;
 
                     } case MWM_Ev::MAP_NOTIF      :{
-                        auto e = (xcb_map_notify_event_t *)ev;
+                        const auto *e = (const xcb_map_notify_event_t *)ev;
                         HANDLE(XCB_MAP_NOTIFY, e->event);
                         break;
 
                     } case MWM_Ev::PROPERTY_NOTIF :{
-                        auto e = (xcb_property_notify_event_t *)ev;
+                        const auto *e = (const xcb_property_notify_event_t *)ev;
                         HANDLE(XCB_PROPERTY_NOTIFY, e->window);
                         break;
 
@@ -3111,7 +3110,7 @@ class __event_handler__ {
             while (shouldContinue) {
                 ev = xcb_wait_for_event(conn);
                 if (!ev) continue;
-                arr[0](ev);
+                main_loop.emit(ev);
                 free(ev);
 
             }

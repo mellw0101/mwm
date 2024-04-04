@@ -841,6 +841,7 @@ enum
 #define RESIZE_CLIENT_BORDER_BOTTOM_RIGHT 78
 #define RESIZE_CLIENT_BORDER_BOTTOM_LEFT  79
 #define HIDE_CONTEXT_MENU                 80
+#define CLIENT_SIGNAL                     98
 #define ROOT_SIGNAL                       99
 
 enum EV : uint8_t {
