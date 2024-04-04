@@ -2918,17 +2918,30 @@ class __event_handler__ {
             return a + b;
 
         }
+
         using EventCallback = function<void(Ev)>;
         void run() {
             main_loop.connect([this](xcb_generic_event_t *ev) -> void {
                 uint8_t res = MapEventToCode(ev->response_type & ~0x80);
-                switch (res) {
-                    case MWM_EXPOSE: {
+                if (res == uint8_t_MAX) {
+                    return;
+
+                } switch (res) {
+                    case   MWM_EXPOSE :{
                         RE_CAST_EV(xcb_expose_event_t);
                         thread(handle_event<XCB_EXPOSE>, e->window).detach();
-
                         return;
 
+                    } case MWM_ENTER_NOTIFY :{
+                        RE_CAST_EV(xcb_enter_notify_event_t);
+                        thread(handle_event<XCB_ENTER_NOTIFY>, e->event).detach();
+                        return;
+                        
+                    } case MWM_LEAVE_NOTIFY :{
+                        RE_CAST_EV(xcb_leave_notify_event_t);
+                        thread(handle_event<XCB_LEAVE_NOTIFY>, e->event).detach();
+                        return;
+                        
                     }
                 
                 }
@@ -2965,8 +2978,10 @@ class __event_handler__ {
         template<uint8_t __sig>
         static void handle_event(uint32_t __w) { WS_emit(__w, __sig); }
             handle_template(XCB_MAP_REQUEST)                                      { Emit(screen->root, XCB_MAP_REQUEST, __w); }
+            template<> void handle_event<XCB_ENTER_NOTIFY>         (uint32_t __w) { Emit(__w,          XCB_ENTER_NOTIFY);}
             template<> void handle_event<XCB_LEAVE_NOTIFY>         (uint32_t __w) { Emit(__w,          XCB_LEAVE_NOTIFY);}
             template<> void handle_event<XCB_EXPOSE>               (uint32_t __w) { Emit(__w,          XCB_EXPOSE);}
+            handle_template(MWM_EXPOSE)                                           { Emit(__w, EXPOSE); }
             template<> void handle_event<TERM_KEY_PRESS>           (uint32_t __w) { Emit(screen->root, TERM_KEY_PRESS, 0);}
             template<> void handle_event<XCB_MAP_NOTIFY>           (uint32_t __w) { Emit(screen->root, XCB_MAP_NOTIFY, __w);}
             template<> void handle_event<QUIT_KEY_PRESS>           (uint32_t __w) { Emit(screen->root, QUIT_KEY_PRESS, 0);}
@@ -3172,7 +3187,7 @@ class __event_handler__ {
 
                     return;
 
-                } case XCB_ENTER_NOTIFY:{
+                }/*  case XCB_ENTER_NOTIFY:{
                     RE_CAST_EV(xcb_enter_notify_event_t);
                     HANDLE_EVENT(XCB_ENTER_NOTIFY);
 
@@ -3184,7 +3199,7 @@ class __event_handler__ {
 
                     return;
 
-                } case XCB_MAP_REQUEST: {
+                } */ case XCB_MAP_REQUEST: {
                     RE_CAST_EV(xcb_map_request_event_t);
                     HANDLE_WINDOW(MAP_REQ);
 
