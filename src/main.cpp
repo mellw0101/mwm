@@ -2927,6 +2927,8 @@ class __event_handler__ {
             handle_template(XCB_EXPOSE)       { Emit(__w,          XCB_EXPOSE);               }
             handle_template(XCB_ENTER_NOTIFY) { Emit(__w,          XCB_ENTER_NOTIFY);         }
             handle_template(XCB_LEAVE_NOTIFY) { Emit(__w,          XCB_LEAVE_NOTIFY);         }
+            handle_template(DESTROY_NOTIF_EV) { Emit(__w,          DESTROY_NOTIF_EV);         }
+            handle_template(DESTROY_NOTIF_W ) { Emit(__w,          DESTROY_NOTIF_W);          }
             
             // handle_template(MWM_ENTER_NOTIFY) { Emit(__w,          XCB_ENTER_NOTIFY);         }
             // handle_template(MWM_LEAVE_NOTIFY) { Emit(__w,          XCB_LEAVE_NOTIFY);         }
@@ -2962,32 +2964,37 @@ class __event_handler__ {
         void run() {
             main_loop.connect([this](xcb_generic_event_t *ev) -> void {
                 MWM_Ev res = map_ev_to_enum(ev->response_type & ~0x80); switch (res) {
-                    case   MWM_Ev::EXPOSE       :{
+                    case   MWM_Ev::EXPOSE        :{
                         RE_CAST_EV(xcb_expose_event_t);
                         thread(handle_event<XCB_EXPOSE>, e->window).detach();
                         break;
 
-                    } case MWM_Ev::ENTER_NOTIFY :{
+                    } case MWM_Ev::ENTER_NOTIFY  :{
                         RE_CAST_EV(xcb_enter_notify_event_t);
                         thread(handle_event<XCB_ENTER_NOTIFY>, e->event).detach();
                         break;
                         
-                    } case MWM_Ev::LEAVE_NOTIFY :{
+                    } case MWM_Ev::LEAVE_NOTIFY  :{
                         RE_CAST_EV(xcb_leave_notify_event_t);
                         thread(handle_event<XCB_LEAVE_NOTIFY>, e->event).detach();
                         break;
                         
-                    } case MWM_Ev::FOCUS_IN     :{
+                    } case MWM_Ev::FOCUS_IN      :{
                         RE_CAST_EV(xcb_focus_in_event_t);
                         thread(handle_event<XCB_FOCUS_IN>, e->event).detach();
                         break;
                         
-                    } case MWM_Ev::FOCUS_OUT: {
+                    } case MWM_Ev::FOCUS_OUT     :{
                         RE_CAST_EV(xcb_focus_out_event_t);
                         thread(handle_event<XCB_FOCUS_OUT>, e->event).detach();
                         break;
                         
-                    } case MWM_Ev::NO_Ev: {
+                    } case MWM_Ev::DESTROY_NOTIF :{
+                        RE_CAST_EV(xcb_destroy_notify_event_t);
+                        thread(handle_event<DESTROY_NOTIF_EV>, e->event).detach();
+                        thread(handle_event<DESTROY_NOTIF_W>, e->window).detach();
+
+                    } case MWM_Ev::NO_Ev         :{
                         break;
                         
                     }
@@ -3238,13 +3245,13 @@ class __event_handler__ {
 
                     return;
 
-                } */ case XCB_DESTROY_NOTIFY:{
+                } *//*  case XCB_DESTROY_NOTIFY:{
                     RE_CAST_EV(xcb_destroy_notify_event_t);
                     HANDLE_EVENT(FOCUS_OUT);
 
                     return;
 
-                } case XCB_MOTION_NOTIFY:{
+                } */case XCB_MOTION_NOTIFY:{
                     RE_CAST_EV(xcb_motion_notify_event_t);
                     HANDLE_EVENT(MOTION_NOTIFY);
 

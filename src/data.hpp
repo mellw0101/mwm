@@ -21,14 +21,16 @@ static array<function<void(uint32_t)>, NUM_EVENTS> eventHandlers{};
 #define Ev3 8
 #define Ev4 9
 #define Ev5 10
+#define Ev6 17
 
 enum class MWM_Ev : const uint8_t {
-    NO_Ev = 255,
-    EXPOSE = 1,
-    ENTER_NOTIFY = 2,
-    LEAVE_NOTIFY = 3,
-    FOCUS_IN     = 4,
-    FOCUS_OUT    = 5
+    NO_Ev         = 255,
+    EXPOSE        = 1,
+    ENTER_NOTIFY  = 2,
+    LEAVE_NOTIFY  = 3,
+    FOCUS_IN      = 4,
+    FOCUS_OUT     = 5,
+    DESTROY_NOTIF = 6
 
 };
 
@@ -45,8 +47,6 @@ enum class MWM_Ev : const uint8_t {
 #define MWM_BUTTON_RELEASE
 #define MWM_MOTION_NOTIFY
 #define MWM_DESTROY_NOTIFY
-#define MWM_REPARENT_NOTIFY
-#define MWM_CONFIGURE_REQUEST
 
 static constexpr uint8_t uint8_t_MAX = 255; 
 constexpr uint8_t MapEventToCode(uint8_t eventCode) {
@@ -68,6 +68,9 @@ constexpr MWM_Ev map_ev_to_enum(uint8_t eventCode) {
         case Ev1: return MWM_Ev::EXPOSE;
         case Ev2: return MWM_Ev::ENTER_NOTIFY;
         case Ev3: return MWM_Ev::LEAVE_NOTIFY;
+        case Ev4: return MWM_Ev::FOCUS_IN;
+        case Ev5: return MWM_Ev::FOCUS_OUT;
+        case Ev6: return MWM_Ev::DESTROY_NOTIF;
 
         
         default: {
