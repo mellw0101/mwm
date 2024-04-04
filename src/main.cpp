@@ -2932,8 +2932,8 @@ class __event_handler__ {
             handle_template(TILE_LEFT)                 { C_EMIT(C_RETRIVE(__w), TILE_LEFT ); }
             handle_template(TILE_UP)                   { C_EMIT(C_RETRIVE(__w), TILE_UP   ); }
             handle_template(TILE_DOWN)                 { C_EMIT(C_RETRIVE(__w), TILE_DOWN ); }
+            handle_template(EWMH_MAXWIN_SIGNAL)        { C_EMIT(C_RETRIVE(__w), EWMH_MAXWIN_SIGNAL); }
 
-            // handle_template(EWMH_MAXWIN_SIGNAL)        { C_EMIT(C_RETRIVE(__w), EWMH_MAXWIN_SIGNAL); }
             // handle_template(MOVE_TO_NEXT_DESKTOP)      { Emit(screen->root, MOVE_TO_NEXT_DESKTOP, __w); }
             // handle_template(MOVE_TO_PREV_DESKTOP)      { Emit(screen->root, MOVE_TO_PREV_DESKTOP, __w); }
             // handle_template(QUIT_KEY_PRESS)            { Emit(screen->root, QUIT_KEY_PRESS, 0); }
@@ -8376,9 +8376,11 @@ class Window_Manager {
                 if (BORDER_SIZE == 0) {
                     signal_manager->emit("SET_EV_CALLBACK__RESIZE_NO_BORDER");
                     
-                } /* signal_manager->_window_signals.conect(screen->root, EWMH_MAXWIN, [this](uint32_t __w) -> void {
+                } /* signal_manager->_window_signals.conect(screen->root, EWMH_MAXWIN_SIGNAL, [this](uint32_t __w) -> void {
                     client *c = signal_manager->_window_client_map.retrive(__w);
-                    if (c != nullptr)  
+                    if (c != nullptr) {
+
+                    }
                 }); */
 
             }
@@ -14116,20 +14118,9 @@ class Events {
                 wm->focused_client = __c;
 
             }, FOCUS_CLIENT);
-
-            // C_SIGNAL(if (__c) {
-            //     // __c->raise();
-            //     // mv_client mv(__c, m_pointer->x(), m_pointer->y() + 20);
-            //     // __c->focus();
-            //     // wm->focused_client = __c;
-
-            // }, MOVE_CLIENT_ALT);
-
             C_SIGNAL(if (&*__c)  mv_client(__c, wm->pointer.x() - __c->x - BORDER_SIZE, wm->pointer.y() - __c->y - BORDER_SIZE);, MOVE_CLIENT_MOUSE);
-
             C_SIGNAL(if (__c) max_win(__c, max_win::BUTTON_MAXWIN);, BUTTON_MAXWIN_PRESS);
             C_SIGNAL(if (__c) max_win(__c, max_win::EWMH_MAXWIN  );, EWMH_MAXWIN_SIGNAL );
-
             C_SIGNAL(if (__c) resize_client::border(__c, edge::LEFT        );, RESIZE_CLIENT_BORDER_LEFT        );
             C_SIGNAL(if (__c) resize_client::border(__c, edge::RIGHT       );, RESIZE_CLIENT_BORDER_RIGHT       );
             C_SIGNAL(if (__c) resize_client::border(__c, edge::TOP         );, RESIZE_CLIENT_BORDER_TOP         );
@@ -14144,11 +14135,11 @@ class Events {
             CONN_root(CONF_REQ_X,      W_callback -> void { wm->data.x      = __window; });
             CONN_root(CONF_REQ_Y,      W_callback -> void { wm->data.y      = __window; });
 
-            signal_manager->_window_signals.conect(screen->root, EWMH_MAXWIN_SIGNAL, [this](uint32_t __w) -> void {
-                client *c = signal_manager->_window_client_map.retrive(__w);
-                if (c != nullptr) C_EMIT(c, EWMH_MAXWIN_SIGNAL);
+            // signal_manager->_window_signals.conect(screen->root, EWMH_MAXWIN_SIGNAL, [this](uint32_t __w) -> void {
+            //     client *c = signal_manager->_window_client_map.retrive(__w);
+            //     if (c != nullptr) C_EMIT(c, EWMH_MAXWIN_SIGNAL);
 
-            });
+            // });
 
         }
 
