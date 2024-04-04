@@ -3135,7 +3135,7 @@ class __event_handler__ {
                 ev = xcb_wait_for_event(conn);
                 if (!ev) continue;
                 main_loop.emit(ev);
-                processEvent(ev);
+                // processEvent(ev);
                 free(ev);
 
             }
@@ -3327,13 +3327,13 @@ class __event_handler__ {
 
                     return;
 
-                } */case XCB_PROPERTY_NOTIFY:{
+                } *//* case XCB_PROPERTY_NOTIFY:{
                     RE_CAST_EV(xcb_property_notify_event_t);
                     HANDLE_WINDOW(XCB_PROPERTY_NOTIFY);
 
                     return;
 
-                }/*  case XCB_ENTER_NOTIFY:{
+                } *//*  case XCB_ENTER_NOTIFY:{
                     RE_CAST_EV(xcb_enter_notify_event_t);
                     HANDLE_EVENT(XCB_ENTER_NOTIFY);
 
