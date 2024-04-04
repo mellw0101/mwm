@@ -2955,8 +2955,8 @@ class __event_handler__ {
         #define HANDLE_WINDOW(__type) thread(handle_event<__type>, e->window   ).detach()
         #define HANDLE_ROOT(__type)   thread(handle_event<__type>, screen->root).detach()
 
-        template<uint8_t __sig>
-        static void handle_ev(xcb_generic_event_t *ev);
+        template<uint8_t>
+        static void handle_ev(xcb_generic_event_t *ev) { return; };
             template<> void handle_ev<MWM_EXPOSE>(xcb_generic_event_t *ev) {
                 RE_CAST_EV(xcb_expose_event_t);
                 HANDLE_WINDOW(MWM_EXPOSE);
@@ -2986,7 +2986,7 @@ class __event_handler__ {
                 switch (res) {
                     case MWM_EXPOSE :{
                         thread(handle_ev<MWM_EXPOSE>, ev).detach();
-                        return;
+                        break;
 
                     }
                     case MWM_ENTER_NOTIFY :{
