@@ -2994,6 +2994,7 @@ class __event_handler__ {
                         RE_CAST_EV(xcb_destroy_notify_event_t);
                         thread(handle_event<DESTROY_NOTIF_EV>, e->event).detach();
                         thread(handle_event<DESTROY_NOTIF_W>, e->window).detach();
+                        break;
 
                     } case MWM_Ev::MAP_REQ       :{
                         RE_CAST_EV(xcb_map_request_event_t);
