@@ -2920,7 +2920,7 @@ class __event_handler__ {
         }
 
         #define Emit signal_manager->_window_signals.emit
-        #define handle_template(__type) template<> void handle_event<__type>          (uint32_t __w)
+        #define handle_template(__type) template<> void handle_event<__type> (uint32_t __w)
         template<uint8_t __sig>
         static void handle_event(uint32_t __w) { WS_emit(__w, __sig); }
             handle_template(XCB_MAP_REQUEST)  { Emit(screen->root, XCB_MAP_REQUEST, __w); }
@@ -2955,42 +2955,39 @@ class __event_handler__ {
         #define HANDLE_WINDOW(__type) thread(handle_event<__type>, e->window   ).detach()
         #define HANDLE_ROOT(__type)   thread(handle_event<__type>, screen->root).detach()
 
-        template<uint8_t Sig, typename... Args>
-        static void handle_ev(Args ...args);
-            template<> void handle_ev<MWM_EXPOSE>(uint32_t __w) {
-                thread(handle_event<XCB_EXPOSE>, __w).detach();
-        
-            }
-        
-        /* Specializations for event types */
-
         using EventCallback = function<void(Ev)>;
         void run() {
             main_loop.connect([this](xcb_generic_event_t *ev) -> void {
-                uint8_t res = MapEventToCode(ev->response_type & ~0x80);
-                if (res == uint8_t_MAX) {
-                    return;
+                // uint8_t res = MapEventToCode(ev->response_type & ~0x80);
+                // if (res == uint8_t_MAX) {
+                //     return;
 
-                }
+                // }
+                MWM_Ev res = map_ev_to_enum(ev->response_type & ~0x80);
                 switch (res) {
-                    case MWM_EXPOSE :{
+                    case MWM_Ev::EXPOSE :{
                         RE_CAST_EV(xcb_expose_event_t);
                         thread(handle_event<MWM_EXPOSE>, e->window).detach();
                         break;
 
                     }
-                    case MWM_ENTER_NOTIFY :{
+                    case MWM_Ev::ENTER_NOTIFY :{
                         RE_CAST_EV(xcb_enter_notify_event_t);
                         thread(handle_event<XCB_ENTER_NOTIFY>, e->event).detach();
                         return;
                         
                     }
-                    case MWM_LEAVE_NOTIFY :{
+                    case MWM_Ev::LEAVE_NOTIFY :{
                         RE_CAST_EV(xcb_leave_notify_event_t);
                         thread(handle_event<XCB_LEAVE_NOTIFY>, e->event).detach();
                         return;
                         
                     }
+                    case MWM_Ev::NO_Ev: {
+                        return;
+                        
+                    }
+                    
                 
                 }
 
