@@ -2923,15 +2923,16 @@ class __event_handler__ {
         #define handle_template(__type) template<> void handle_event<__type> (uint32_t __w)
         template<uint8_t __sig>
         static void handle_event(uint32_t __w) { WS_emit(__w, __sig); }
-            handle_template(XCB_MAP_REQUEST)  { Emit(screen->root, XCB_MAP_REQUEST, __w); }
-            handle_template(XCB_EXPOSE)       { Emit(__w,          XCB_EXPOSE);               }
-            handle_template(XCB_ENTER_NOTIFY) { Emit(__w,          XCB_ENTER_NOTIFY);         }
-            handle_template(XCB_LEAVE_NOTIFY) { Emit(__w,          XCB_LEAVE_NOTIFY);         }
-            handle_template(DESTROY_NOTIF_EV) { Emit(__w,          DESTROY_NOTIF_EV);         }
-            handle_template(DESTROY_NOTIF_W ) { Emit(__w,          DESTROY_NOTIF_W);          }
+            handle_template(XCB_MAP_REQUEST)   { Emit(screen->root, XCB_MAP_REQUEST, __w); }
+            handle_template(XCB_EXPOSE)        { Emit(__w,          XCB_EXPOSE);               }
+            handle_template(XCB_ENTER_NOTIFY)  { Emit(__w,          XCB_ENTER_NOTIFY);         }
+            handle_template(XCB_LEAVE_NOTIFY)  { Emit(__w,          XCB_LEAVE_NOTIFY);         }
+            handle_template(DESTROY_NOTIF_EV)  { Emit(__w,          DESTROY_NOTIF_EV);         }
+            handle_template(DESTROY_NOTIF_W )  { Emit(__w,          DESTROY_NOTIF_W);          }
+            handle_template(XCB_MOTION_NOTIFY) { Emit(__w ,         XCB_MOTION_NOTIFY);        }
+            handle_template(XCB_FOCUS_IN)      { Emit(__w,          XCB_FOCUS_IN);             }
+            handle_template(XCB_FOCUS_OUT)     { Emit(__w,          XCB_FOCUS_OUT);            }
             
-            // handle_template(MWM_ENTER_NOTIFY) { Emit(__w,          XCB_ENTER_NOTIFY);         }
-            // handle_template(MWM_LEAVE_NOTIFY) { Emit(__w,          XCB_LEAVE_NOTIFY);         }
             // template<> void handle_event<XCB_ENTER_NOTIFY>         (uint32_t __w) { Emit(__w,          XCB_ENTER_NOTIFY);}
             // template<> void handle_event<XCB_LEAVE_NOTIFY>         (uint32_t __w) { Emit(__w,          XCB_LEAVE_NOTIFY);}
             template<> void handle_event<TERM_KEY_PRESS>           (uint32_t __w) { Emit(screen->root, TERM_KEY_PRESS, 0);}
@@ -2947,7 +2948,6 @@ class __event_handler__ {
             template<> void handle_event<MOVE_TO_NEXT_DESKTOP_WAPP>(uint32_t __w) { Emit(screen->root, MOVE_TO_NEXT_DESKTOP_WAPP, __w);}
             template<> void handle_event<MOVE_TO_PREV_DESKTOP_WAPP>(uint32_t __w) { Emit(screen->root, MOVE_TO_PREV_DESKTOP_WAPP, __w);}
             template<> void handle_event<EWMH_MAXWIN>              (uint32_t __w) { C_EMIT      (C_RETRIVE(__w)  , EWMH_MAXWIN);             }
-            template<> void handle_event<MOTION_NOTIFY>            (uint32_t __w) { WS_emit     (__w , MOTION_NOTIFY);            }
             template<> void handle_event<TILE_RIGHT>               (uint32_t __w) { C_EMIT      (C_RETRIVE(__w) , TILE_RIGHT);               }
             template<> void handle_event<TILE_LEFT>                (uint32_t __w) { C_EMIT      (C_RETRIVE(__w) , TILE_LEFT );               }
             template<> void handle_event<TILE_UP>                  (uint32_t __w) { C_EMIT      (C_RETRIVE(__w) , TILE_UP   );               }
@@ -2963,7 +2963,8 @@ class __event_handler__ {
         using EventCallback = function<void(Ev)>;
         void run() {
             main_loop.connect([this](xcb_generic_event_t *ev) -> void {
-                MWM_Ev res = map_ev_to_enum(ev->response_type & ~0x80); switch (res) {
+                MWM_Ev res = map_ev_to_enum(ev->response_type & ~0x80);
+                switch (res) {
                     case   MWM_Ev::EXPOSE        :{
                         RE_CAST_EV(xcb_expose_event_t);
                         thread(handle_event<XCB_EXPOSE>, e->window).detach();
@@ -2994,6 +2995,16 @@ class __event_handler__ {
                         thread(handle_event<DESTROY_NOTIF_EV>, e->event).detach();
                         thread(handle_event<DESTROY_NOTIF_W>, e->window).detach();
 
+                    } case MWM_Ev::MAP_REQ       :{
+                        RE_CAST_EV(xcb_map_request_event_t);
+                        thread(handle_event<XCB_MAP_REQUEST>, e->window).detach();
+                        break;
+
+                    } case MWM_Ev::MOTION_NOTIFY :{
+                        RE_CAST_EV(xcb_motion_notify_event_t);
+                        thread(handle_event<XCB_MOTION_NOTIFY>, e->event).detach();
+                        break;
+                        
                     } case MWM_Ev::NO_Ev         :{
                         break;
                         
@@ -3221,13 +3232,13 @@ class __event_handler__ {
 
                     return;
 
-                } */ case XCB_MAP_REQUEST: {
+                } */ /* case XCB_MAP_REQUEST: {
                     RE_CAST_EV(xcb_map_request_event_t);
                     HANDLE_WINDOW(MAP_REQ);
 
                     return;
 
-                } case XCB_MAP_NOTIFY:{
+                }  */case XCB_MAP_NOTIFY:{
                     RE_CAST_EV(xcb_map_notify_event_t);
                     HANDLE_EVENT(MAP_NOTIFY);
 
@@ -7117,15 +7128,6 @@ class client {
             
             CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->close_button) {
                 WS_emit(this->win, KILL_SIGNAL);
-                
-                // if (this->win.is_mapped()) {
-                //     this->win.kill();
-
-                // }
-                // else {
-                //     this->kill();
-
-                // } 
             
             }, this->close_button);
 

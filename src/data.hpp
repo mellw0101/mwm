@@ -5,6 +5,7 @@
 #include <array>
 #include "functional"
 // #include "structs.hpp"
+// #include "structs.hpp"
 
 using namespace std;
 
@@ -22,6 +23,8 @@ static array<function<void(uint32_t)>, NUM_EVENTS> eventHandlers{};
 #define Ev4 9
 #define Ev5 10
 #define Ev6 17
+#define Ev7 20
+#define Ev8 6
 
 enum class MWM_Ev : const uint8_t {
     NO_Ev         = 255,
@@ -30,7 +33,9 @@ enum class MWM_Ev : const uint8_t {
     LEAVE_NOTIFY  = 3,
     FOCUS_IN      = 4,
     FOCUS_OUT     = 5,
-    DESTROY_NOTIF = 6
+    DESTROY_NOTIF = 6,
+    MAP_REQ       = 7,
+    MOTION_NOTIFY = 8
 
 };
 
@@ -71,7 +76,8 @@ constexpr MWM_Ev map_ev_to_enum(uint8_t eventCode) {
         case Ev4: return MWM_Ev::FOCUS_IN;
         case Ev5: return MWM_Ev::FOCUS_OUT;
         case Ev6: return MWM_Ev::DESTROY_NOTIF;
-
+        case Ev7: return MWM_Ev::MAP_REQ;
+        case Ev8: return MWM_Ev::MOTION_NOTIFY;
         
         default: {
             return MWM_Ev::NO_Ev;
