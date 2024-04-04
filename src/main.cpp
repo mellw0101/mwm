@@ -950,21 +950,33 @@ namespace {
 
             }
     };
-}
 
+}
 namespace XCB {
-    inline xcb_get_geometry_cookie_t          g_cok(uint32_t __w)                                        { return xcb_get_geometry(conn, __w);                             }
-    inline xcb_get_geometry_reply_t          *g_r(xcb_get_geometry_cookie_t __cok)                       { return xcb_get_geometry_reply(conn, __cok, nullptr);           }
-    inline xcb_get_window_attributes_cookie_t attributes_cookie(uint32_t __w)                            { return xcb_get_window_attributes(conn, __w);                      }
-    inline xcb_get_window_attributes_reply_t *attributes_reply(xcb_get_window_attributes_cookie_t __cok) { return xcb_get_window_attributes_reply(conn, __cok, nullptr);  }
-    inline xcb_intern_atom_cookie_t           atom_cok(const char *__s) {
+    inline xcb_get_geometry_cookie_t g_cok(uint32_t __w) {
+        return xcb_get_geometry(conn, __w);                             
+        
+    }
+    inline xcb_get_geometry_reply_t *g_r(xcb_get_geometry_cookie_t __cok) {
+        return xcb_get_geometry_reply(conn, __cok, nullptr);           
+        
+    }
+    inline xcb_get_window_attributes_cookie_t attributes_cookie(uint32_t __w) {
+        return xcb_get_window_attributes(conn, __w);                      
+        
+    }    
+    inline xcb_get_window_attributes_reply_t *attributes_reply(xcb_get_window_attributes_cookie_t __cok) {
+        return xcb_get_window_attributes_reply(conn, __cok, nullptr);  
+        
+    }    
+    inline xcb_intern_atom_cookie_t atom_cok(const char *__s) {
         if (strcmp(__s, "_NET_WM_STATE")) {
             return xcb_intern_atom(conn, 1, 12, __s);
 
         } return {};
             
     }
-    inline xcb_intern_atom_reply_t*           atom_r(xcb_intern_atom_cookie_t __atom_cok) {
+    inline xcb_intern_atom_reply_t* atom_r(xcb_intern_atom_cookie_t __atom_cok) {
         return xcb_intern_atom_reply(conn, __atom_cok, NULL);
     
     }
@@ -983,7 +995,6 @@ namespace XCB {
     }
 
 }
-
 class __signal_manager__ {
     /* Defines   */
         #define WS_conn signal_manager->_window_signals.conect
@@ -1038,73 +1049,64 @@ class __signal_manager__ {
 
     /* Methods   */
         template<typename Callback>
-        void connect(const string &__signal_name, Callback &&callback) // Connect a slot to a signal
-        {
+        void connect(const string &__signal_name, Callback &&callback) {
             signals[__signal_name].emplace_back(std::forward<Callback>(callback));
-        }
 
+        }/* Connect a slot to a signal  */
         template<typename Callback>
-        void connect_window(uint32_t __window, const string &__function, Callback &&callback) // Connect a slot to a signal
-        {
+        void connect_window(uint32_t __window, const string &__function, Callback &&callback) {
             signals[to_string(__window) + "__" + __function].emplace_back(std::forward<Callback>(callback));
-        }
 
+        }/* Connect a slot to a signal */
         template<typename Callback>
-        void connect_client(uint32_t __frame_window_id, int __client_signal, Callback &&callback) // Connect a slot to a signal
-        {
+        void connect_client(uint32_t __frame_window_id, int __client_signal, Callback &&callback) {
             client_signal_map[__frame_window_id].emplace_back(__client_signal, std::forward<Callback>(callback));
-        }
 
-        void emit(const string &__signal_name) // Emit a signal, calling all connected slots
-        {
+        }/* Connect a slot to a signal */
+        void emit(const string &__signal_name) {
             auto it = signals.find(__signal_name);
-            if (it != signals.end())
-            {
-                for (auto& slot : it->second)
-                {
+            if (it != signals.end()) {
+                for (auto& slot : it->second) {
                     slot();
                 }
-            }
-        }
 
-        void emit_window(uint32_t __window, const string &__function) // Emit a signal, calling all connected slots
-        {
+            }
+
+        }/* Emit a signal, calling all connected slots */
+        void emit_window(uint32_t __window, const string &__function) {
             auto it = signals.find(to_string(__window) + "__" + __function);
-            if (it != signals.end())
-            {
-                for (auto& slot : it->second)
-                {
+            if (it != signals.end()) {
+                for (auto& slot : it->second) {
                     slot();
-                }
-            }
-        }
 
-        void emit_client(uint32_t __frame_window_id, int __client_signal)
-        {
+                }
+
+            }
+
+        }/* Emit a signal, calling all connected slots */
+        void emit_client(uint32_t __frame_window_id, int __client_signal) {
             auto it = client_signal_map.find(__frame_window_id);
-            if (it == client_signal_map.end())
-            {
+            if (it == client_signal_map.end()) {
                 loutE << "client could not be found frame_window_id:" << __frame_window_id << loutEND;
                 return;
-            }
-            
-            for (const auto &pair : it->second)
-            {
-                if (pair.first == __client_signal)
-                {
+
+            }            
+            for (const auto &pair : it->second) {
+                if (pair.first == __client_signal) {
                     pair.second();
+
                 }
+
             }
-        }
 
-        void remove_client(uint32_t __frame_window_id)
-        {
+        }
+        void remove_client(uint32_t __frame_window_id) {
             client_signal_map.erase(__frame_window_id);
-        }
 
-        void init()
-        {
+        }
+        void init() {
             signals.reserve(40);
+
         }
 
 }; static __signal_manager__ *signal_manager(nullptr);
@@ -2434,7 +2436,6 @@ class File {
 };
 
 extern char **environ;
-
 class __pid_manager__ {
     private:
     /* Structs     */
@@ -2448,260 +2449,231 @@ class __pid_manager__ {
 
     /* Methods     */
         /* Pid Info    */
-            string pid_status__(pid_t __pid) 
-            {
+            string pid_status__(pid_t __pid) {
                 string line_str = "/proc/" + to_string(__pid) + "/status";
-                ifstream file;
-                file.open(line_str);
+                ifstream file; file.open(line_str);
                 string var;
                 stringstream buffer;
-                while (getline(file, var))
-                {
+                while (getline(file, var)) {
                     buffer << var << '\n';
-                }
 
-                string result;
-                result = buffer.str();
+                } string result; result = buffer.str();
+                
                 loutI << result << '\n';
                 file.close();
                 return string();
-            }
 
-            string get_process_name_by_pid__(pid_t pid) 
-            {
+            }
+            string get_process_name_by_pid__(pid_t pid) {
                 string path = "/proc/" + std::to_string(pid) + "/comm";
                 ifstream commFile(path);
                 string name;
 
-                if (commFile.good())
-                {
+                if (commFile.good()) {
                     getline(commFile, name);
                     return name;
-                }
-                else
-                {
+                
+                } else {
                     return "Process not found";
-                }
-            }
 
-            string pid_cmd_line__(pid_t __pid) 
-            {
+                }
+
+            }
+            string pid_cmd_line__(pid_t __pid) {
                 string line_str = "/proc/" + to_string(__pid) + "/cmdline";
                 ifstream file;
                 file.open(line_str);
                 string var;
                 stringstream buffer;
-                while (getline(file, var))
-                {
+                while (getline(file, var)) {
                     buffer << var << '\n';
-                }
+                
+                } string result; result = buffer.str();
 
-                string result;
-                result = buffer.str();
                 loutI << result << '\n';
                 string test = result;
                 ifstream iss(test);
                 string token;
+
                 vector<string> parts;
-                while (getline(iss, token, ' '))
-                {
+                while (getline(iss, token, ' ')) {
                     parts.push_back(token);
+
                 }
-                
-                if (parts.size() == 1)
-                {
+                if (parts.size() == 1) {
                     file.close();
                     return "mainPid";
+
                 }
-
                 file.close();
+                
                 return string();
-            }
 
-            string get_correct_process_name__(const string &__launchName)
-            {
+            }
+            string get_correct_process_name__(const string &__launchName) {
                 DIR* dir;
                 struct dirent* ent;
                 string path;
                 string line;
 
                 vector<string> parts;
-                for (int i(0), start(0); i < __launchName.length(); ++i)
-                {
-                    if (__launchName[i] == '-')
-                    {
+                for (int i(0), start(0); i < __launchName.length(); ++i) {
+                    if (__launchName[i] == '-') {
                         string s = __launchName.substr(start, i - start);
                         parts.push_back(s);
                         start = i + 1;
-                    }
 
-                    if (i == (__launchName.length() - 1))
-                    {
+                    }
+                    if (i == (__launchName.length() - 1)) {
                         string s = __launchName.substr(start, i - start);
                         parts.push_back(s);
-                    }
-                }
 
-                for (int i = 0; i < parts.size(); ++i)
-                {
-                    if ((dir = opendir("/proc")) != NULL)
-                    {
-                        while ((ent = readdir(dir)) != NULL)
-                        {
-                            if (ent->d_type == DT_DIR) // Check if the directory is a PID
-                            {
+                    }
+
+                }
+                for (int i = 0; i < parts.size(); ++i) {
+                    if ((dir = opendir("/proc")) != NULL) {
+                        while ((ent = readdir(dir)) != NULL) {
+                            if (ent->d_type == DT_DIR) {
                                 path = std::string("/proc/") + ent->d_name + "/comm";
                                 std::ifstream comm(path.c_str());
-                                if (comm.good())
-                                {
+                                if (comm.good()) {
                                     getline(comm, line);
-                                    if (line == parts[i])
-                                    {
+                                    if (line == parts[i]) {
                                         return parts[i];
+
                                     }
+
                                 }
-                            }
-                        }
-                        closedir(dir);
+
+                            }/* Check if the directory is a PID */
+
+                        } closedir(dir);
+
                     }
-                }
 
-                return string();
+                } return string();
+
             }
-
-            bool is_process_running__(const pid_t __pid)
-            {
+            bool is_process_running__(const pid_t __pid) {
                 struct stat statBuf;
                 string procPath = "/proc/" + to_string(__pid);
                 return stat(procPath.c_str(), &statBuf) == 0;
             }
 
         /* Pid Killing */
-            bool send_signal__(const pid_t pid, int signal)
-            {
+            bool send_signal__(const pid_t pid, int signal) {
                 return kill(pid, signal) == 0;
-            }
 
-            bool send_sigterm__(pid_t __pid, const string &__name)
-            {
-                if (kill(__pid, SIGTERM) == -1)
-                {
+            }
+            bool send_sigterm__(pid_t __pid, const string &__name) {
+                if (kill(__pid, SIGTERM) == -1) {
                     loutE << ERRNO_MSG("Error sending SIGTERM") << " Process " << __name << __pid << loutEND;
                     return false;
+
                 }
 
                 int status;
                 pid_t result = waitpid(__pid, &status, 0); // Wait for the process to change state
-                if (result == -1)
-                {
+                if (result == -1) {
                     loutE << ERRNO_MSG("Error waiting for process") << " Process " << __name << __pid << loutEND;
                     return false;
-                }
-
-                if (!is_process_running__(__pid)) // Check if the child exited normally
-                {
+                    
+                } 
+                if (!is_process_running__(__pid))/* Check if the child exited normally */ {
                     loutI << "Process " << __name << __pid << " terminated successfully with exit status " << WEXITSTATUS(status) << loutEND;
                     return true;
-                }
-                else
-                {
+
+                } else {
                     loutI << "Process " << __name << __pid << " did not terminate successfully." << loutEND;
                     return false;
-                }
-            }
 
-            void send_sigkill__(pid_t __pid, const string &__name)
-            {
-                if (send_signal__(__pid, SIGKILL))
-                {
+                }
+
+            }
+            void send_sigkill__(pid_t __pid, const string &__name) {
+                if (send_signal__(__pid, SIGKILL)) {
                     loutI << "SIGKILL signal sent to process " << __name << __pid << " for forceful termination." << loutEND;
-                }
-                else
-                {
-                    loutE << "Failed to send SIGKILL to process " << __name << __pid << loutEND;
-                }
-            }
 
-            void kill_pid__(pid_t __pid, const string &__name)
-            {
-                if (is_process_running__(__pid))
-                {
-                    if (!send_sigterm__(__pid, __name))
-                    {
+                } else {
+                    loutE << "Failed to send SIGKILL to process " << __name << __pid << loutEND;
+
+                }
+
+            }
+            void kill_pid__(pid_t __pid, const string &__name) {
+                if (is_process_running__(__pid)) {
+                    if (!send_sigterm__(__pid, __name)) {
                         loutI << "Process " << __name << __pid << " still running forcefully killing" << loutEND;
                         send_sigkill__(__pid, __name);
+
                     }
+
                 }
+
             }
 
-        void check_vec__()
-        {
-            for (int i = 0; i < _pid_vec.size(); ++i)
-            {
-                if (!is_process_running__(_pid_vec[i].pid))
-                {
+        void check_vec__() {
+            for (int i = 0; i < _pid_vec.size(); ++i) {
+                if (!is_process_running__(_pid_vec[i].pid)) {
                     remove_element_from_vec(_pid_vec, i);
+
                 }
+
             }
+
         }
 
     public:
     /* Methods     */
-        void add_pid(pid_t __pid)
-        {
+        void add_pid(pid_t __pid) {
             _pid_vec.push_back({__pid, get_process_name_by_pid__(__pid)});
             check_vec__();
-        }
 
-        void kill_all_pids()
-        {
-            for (pid_data_t pid_data : _pid_vec)
-            {
+        }
+        void kill_all_pids() {
+            for (pid_data_t pid_data : _pid_vec) {
                 if (pid_data.name == "code") continue;
                 kill_pid__(pid_data.pid, pid_data.name);
-            }
-        }
 
-        void check_pid(pid_t __pid)
-        {
+            }
+
+        }
+        void check_pid(pid_t __pid) {
             if (__pid == 0) return;
 
             bool found = false;
-            for (int i = 0; i < _pid_vec.size(); ++i)
-            {
-                if (__pid == _pid_vec[i].pid)
-                {
+            for (int i = 0; i < _pid_vec.size(); ++i) {
+                if (__pid == _pid_vec[i].pid) {
                     found = true;
                     break;
-                }
-            }
 
-            if (!found)
-            {
+                }
+
+            }
+            if (!found) {
                 add_pid(__pid);
-            }
-        }
 
-        void remove_pid(pid_t __pid)
-        {
-            for (int i = 0; i < _pid_vec.size(); ++i)
-            {
-                if (_pid_vec[i].pid == __pid)
-                {
+            }
+
+        }
+        void remove_pid(pid_t __pid) {
+            for (int i = 0; i < _pid_vec.size(); ++i) {
+                if (_pid_vec[i].pid == __pid) {
                     remove_element_from_vec(_pid_vec, i);
+
                 }
+
             }
+
         }
-
-        void list_pids()
-        {
+        void list_pids() {
             check_vec__();
-            for (int i = 0; i < _pid_vec.size(); ++i)
-            {
+            for (int i = 0; i < _pid_vec.size(); ++i) {
                 loutI << "pid" << _pid_vec[i].pid << " name: " << _pid_vec[i].name << '\n';
-            }
 
-            loutI << "Total running pids" << _pid_vec.size() << loutEND;
+            } loutI << "Total running pids" << _pid_vec.size() << loutEND;
+
         }
 
     /* Constructor */
@@ -2712,24 +2684,19 @@ class __pid_manager__ {
 class Launcher {
     public:
     /* Methods   */
-        int program(char *program)
-        {
-            if (!file.check_if_binary_exists(program))
-            {
+        int program(char *program) {
+            if (!file.check_if_binary_exists(program)) {
                 return 1;
-            }
 
-            if (fork() == 0)
-            {
+            }
+            if (fork() == 0) {
                 setsid();
                 execvp(program, (char *[]) { program, NULL });
-            }
 
-            return 0;
+            } return 0;
+
         }
-
-        int launch_child_process(const char *command)
-        {
+        int launch_child_process(const char *command) {
             pid_t pid;
             posix_spawnattr_t attr;
 
@@ -2742,20 +2709,18 @@ class Launcher {
             int result = posix_spawn(&pid, command_path.c_str(), NULL, &attr, argv, environ);
             posix_spawnattr_destroy(&attr);
 
-            if (result == 0)
-            {
+            if (result == 0) {
                 pid_manager->add_pid(pid);
                 return 0;
-            }
-            else
-            {
+
+            } else {
                 loutErrno("posix_spawn failed");
                 return result;
-            }
-        }
 
-        static int static_launch_child_process(const char *command)
-        {
+            }
+
+        }
+        static int static_launch_child_process(const char *command) {
             pid_t pid;
             posix_spawnattr_t attr;
 
@@ -2768,16 +2733,16 @@ class Launcher {
             int result = posix_spawn(&pid, command_path.c_str(), NULL, &attr, argv, environ);
             posix_spawnattr_destroy(&attr);
 
-            if (result == 0)
-            {
+            if (result == 0) {
                 pid_manager->add_pid(pid);
                 return 0;
-            }
-            else
-            {
+
+            } else {
                 loutErrno("posix_spawn failed");
                 return result;
+
             }
+
         }
     
     private:
@@ -2966,64 +2931,52 @@ class __event_handler__ {
 
         }
 
-        static void emit(uint32_t __w, uint8_t __sig) { signal_manager->_window_signals.emit(__w, __sig); }
+        SimplifiedEvent convert_ev(xcb_generic_event_t* event) {
+            SimplifiedEvent se;
+            se.eventType = event->response_type & ~0x80; // Mask to get event type
+            // Extract window ID from event; the method depends on the specific event type
+            // For example, for a mouse event:
+            xcb_button_press_event_t* bp = (xcb_button_press_event_t*)event;
+            se.windowID = bp->event;
+            return se;
 
-        // static void emit_root(uint32_t __w, uint8_t __sig, uint32_t __w2 = 0) { signal_manager->_window_signals.emit(__w, __sig, __w2); }
+        }
 
         template<uint8_t __sig>
         static void handle_event(uint32_t __w) { WS_emit(__w, __sig); }
         
-        template<> void handle_event<XCB_MAP_REQUEST>    (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, XCB_MAP_REQUEST, __w);}
-        template<> void handle_event<XCB_LEAVE_NOTIFY>   (uint32_t __w) { signal_manager->_window_signals.emit(__w, XCB_LEAVE_NOTIFY);}
-        template<> void handle_event<XCB_EXPOSE>         (uint32_t __w) { signal_manager->_window_signals.emit(__w, XCB_EXPOSE);}
-        template<> void handle_event<TERM_KEY_PRESS>     (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, TERM_KEY_PRESS, 0);}
-        template<> void handle_event<XCB_MAP_NOTIFY>     (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, XCB_MAP_NOTIFY, __w);}
-        template<> void handle_event<QUIT_KEY_PRESS>     (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, QUIT_KEY_PRESS, 0);}
-        template<> void handle_event<MOVE_TO_DESKTOP_1>  (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, MOVE_TO_DESKTOP_1);}
-        template<> void handle_event<MOVE_TO_DESKTOP_2>  (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, MOVE_TO_DESKTOP_2);}
-        template<> void handle_event<MOVE_TO_DESKTOP_3>  (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, MOVE_TO_DESKTOP_3);}
-        template<> void handle_event<MOVE_TO_DESKTOP_4>  (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, MOVE_TO_DESKTOP_4);}
-        template<> void handle_event<MOVE_TO_DESKTOP_5>  (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, MOVE_TO_DESKTOP_5);}
-        template<> void handle_event<MOVE_TO_NEXT_DESKTOP>(uint32_t __w) {signal_manager->_window_signals.emit(screen->root, MOVE_TO_NEXT_DESKTOP, __w);}
-        template<> void handle_event<MOVE_TO_PREV_DESKTOP>(uint32_t __w) {signal_manager->_window_signals.emit(screen->root, MOVE_TO_PREV_DESKTOP, __w);}
-        // template<> void handle_event<ROOT_SIG>           (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, XCB_MAP_NOTIFY, __w);}
+        template<> void handle_event<XCB_MAP_REQUEST>          (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, XCB_MAP_REQUEST, __w);}
+        template<> void handle_event<XCB_LEAVE_NOTIFY>         (uint32_t __w) { signal_manager->_window_signals.emit(__w, XCB_LEAVE_NOTIFY);}
+        template<> void handle_event<XCB_EXPOSE>               (uint32_t __w) { signal_manager->_window_signals.emit(__w, XCB_EXPOSE);}
+        template<> void handle_event<TERM_KEY_PRESS>           (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, TERM_KEY_PRESS, 0);}
+        template<> void handle_event<XCB_MAP_NOTIFY>           (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, XCB_MAP_NOTIFY, __w);}
+        template<> void handle_event<QUIT_KEY_PRESS>           (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, QUIT_KEY_PRESS, 0);}
+        template<> void handle_event<MOVE_TO_DESKTOP_1>        (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, MOVE_TO_DESKTOP_1);}
+        template<> void handle_event<MOVE_TO_DESKTOP_2>        (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, MOVE_TO_DESKTOP_2);}
+        template<> void handle_event<MOVE_TO_DESKTOP_3>        (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, MOVE_TO_DESKTOP_3);}
+        template<> void handle_event<MOVE_TO_DESKTOP_4>        (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, MOVE_TO_DESKTOP_4);}
+        template<> void handle_event<MOVE_TO_DESKTOP_5>        (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, MOVE_TO_DESKTOP_5);}
+        template<> void handle_event<MOVE_TO_NEXT_DESKTOP>     (uint32_t __w) {signal_manager->_window_signals.emit(screen->root, MOVE_TO_NEXT_DESKTOP, __w);}
+        template<> void handle_event<MOVE_TO_PREV_DESKTOP>     (uint32_t __w) {signal_manager->_window_signals.emit(screen->root, MOVE_TO_PREV_DESKTOP, __w);}
         template<> void handle_event<MOVE_TO_NEXT_DESKTOP_WAPP>(uint32_t __w) {  signal_manager->_window_signals.emit(screen->root, MOVE_TO_NEXT_DESKTOP_WAPP, __w);}
         template<> void handle_event<MOVE_TO_PREV_DESKTOP_WAPP>(uint32_t __w) {  signal_manager->_window_signals.emit(screen->root, MOVE_TO_PREV_DESKTOP_WAPP, __w);}
-        // template<> void handle_event<TERM_KEY_PRESS>     (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, TERM_KEY_PRESS, 0); }
-        // template<> void handle_event<XCB_MAP_NOTIFY>     (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, XCB_MAP_NOTIFY, __w);}
-        // template<> void handle_event<ROOT_SIG>           (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, XCB_MAP_NOTIFY, __w);}
-        // template<> void handle_event<TERM_KEY_PRESS>     (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, TERM_KEY_PRESS, 0); }
-        // template<> void handle_event<XCB_MAP_NOTIFY>     (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, XCB_MAP_NOTIFY, __w);}
-        // template<> void handle_event<ROOT_SIG>           (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, XCB_MAP_NOTIFY, __w);}
-        // template<> void handle_event<XCB_PROPERTY_NOTIFY>(uint32_t __w) {}
- 
-        template<> void handle_event<EWMH_MAXWIN> (uint32_t __window) { C_EMIT      (C_RETRIVE(__window)  , EWMH_MAXWIN);             }
-        // template<> void handle_event<TERM_KEY_PRESS>           (uint32_t __window) { WS_emit_Win (screen->root                , TERM_KEY_PRESS, 0);    }
-        // // template<> void handle_event<QUIT_KEY_PRESS>           (uint32_t __window) { WS_emit_Win (screen->root                , QUIT_KEY_PRESS, 0);    }
-        // template<> void handle_event<MOVE_TO_DESKTOP_1>        (uint32_t __window) { WS_emit     (screen->root                , MOVE_TO_DESKTOP_1);        }
-        // template<> void handle_event<MOVE_TO_DESKTOP_2>        (uint32_t __window) { WS_emit     (screen->root                , MOVE_TO_DESKTOP_2);        }
-        // template<> void handle_event<MOVE_TO_DESKTOP_3>        (uint32_t __window) { WS_emit     (screen->root                , MOVE_TO_DESKTOP_3);        }
-        // template<> void handle_event<MOVE_TO_DESKTOP_4>        (uint32_t __window) { WS_emit     (screen->root                , MOVE_TO_DESKTOP_4);        }
-        // template<> void handle_event<MOVE_TO_DESKTOP_5>        (uint32_t __window) { WS_emit     (screen->root                , MOVE_TO_DESKTOP_5);        }
-        // template<> void handle_event<MOVE_TO_NEXT_DESKTOP_WAPP>(uint32_t __window) { WS_emit_root(MOVE_TO_NEXT_DESKTOP_WAPP , __window);                  }
-        // template<> void handle_event<MOVE_TO_PREV_DESKTOP_WAPP>(uint32_t __window) { WS_emit_root(MOVE_TO_PREV_DESKTOP_WAPP , __window);                  }
-        template<> void handle_event<MOTION_NOTIFY>            (uint32_t __window) { WS_emit     (__window , MOTION_NOTIFY);            }
-        template<> void handle_event<TILE_RIGHT>               (uint32_t __window) { C_EMIT      (C_RETRIVE(__window) , TILE_RIGHT);               }
-        template<> void handle_event<TILE_LEFT>                (uint32_t __window) { C_EMIT      (C_RETRIVE(__window) , TILE_LEFT );               }
-        template<> void handle_event<TILE_UP>                  (uint32_t __window) { C_EMIT      (C_RETRIVE(__window) , TILE_UP   );               }
-        template<> void handle_event<TILE_DOWN>                (uint32_t __window) { C_EMIT      (C_RETRIVE(__window) , TILE_DOWN );               }
-        template<> void handle_event<CYCLE_FOCUS_KEY_PRESS>    (uint32_t __window) { WS_emit_root(CYCLE_FOCUS_KEY_PRESS    , __window);                  }
-        template<> void handle_event<DESTROY_NOTIFY>           (uint32_t __window) { WS_emit(__window, DESTROY_NOTIFY);                  }
+        template<> void handle_event<EWMH_MAXWIN>              (uint32_t __w) { C_EMIT      (C_RETRIVE(__w)  , EWMH_MAXWIN);             }
+        template<> void handle_event<MOTION_NOTIFY>            (uint32_t __w) { WS_emit     (__w , MOTION_NOTIFY);            }
+        template<> void handle_event<TILE_RIGHT>               (uint32_t __w) { C_EMIT      (C_RETRIVE(__w) , TILE_RIGHT);               }
+        template<> void handle_event<TILE_LEFT>                (uint32_t __w) { C_EMIT      (C_RETRIVE(__w) , TILE_LEFT );               }
+        template<> void handle_event<TILE_UP>                  (uint32_t __w) { C_EMIT      (C_RETRIVE(__w) , TILE_UP   );               }
+        template<> void handle_event<TILE_DOWN>                (uint32_t __w) { C_EMIT      (C_RETRIVE(__w) , TILE_DOWN );               }
+        template<> void handle_event<CYCLE_FOCUS_KEY_PRESS>    (uint32_t __w) { WS_emit_root(CYCLE_FOCUS_KEY_PRESS    , __w);                  }
+        template<> void handle_event<DESTROY_NOTIFY>           (uint32_t __w) { WS_emit(__w, DESTROY_NOTIFY);                  }
 
-        #define HANDLE_EVENT(__type ) thread(handle_event<__type>, e->event ).detach()
-        #define HANDLE_WINDOW(__type) thread(handle_event<__type>, e->window).detach()
-        #define HANDLE_ROOT(__type) thread(handle_event<__type>, screen->root).detach()
+        #define HANDLE_EVENT(__type ) thread(handle_event<__type>, e->event    ).detach()
+        #define HANDLE_WINDOW(__type) thread(handle_event<__type>, e->window   ).detach()
+        #define HANDLE_ROOT(__type)   thread(handle_event<__type>, screen->root).detach()
 
         DynamicArray<uint32_t *> _window_arr;
 
         constexpr uint8_t char_to_keycode__(int8_t c) const {
-            switch (c)
-            {
+            switch (c) {
                 case 'a': return this->key_codes.a;
                 case 'b': return this->key_codes.b;
                 case 'c': return this->key_codes.c;
@@ -3052,9 +3005,9 @@ class __event_handler__ {
                 case 'z': return this->key_codes.z;
                 case '-': return this->key_codes.minus;
                 case ' ': return this->key_codes.space_bar;
-            }
 
-            return (uint8_t)0;
+            } return (uint8_t)0;
+
         }
         size_t find_window(uint32_t __window) {
             for (size_t i = 0; i < _window_arr.getSize(); ++i) {
@@ -3083,7 +3036,6 @@ class __event_handler__ {
             } return 0;
 
         }
-
         // Function that creates a separate thread for each event type
         constexpr void processEvent(xcb_generic_event_t* ev) {
             uint8_t responseType = ev->response_type & ~0x80;
@@ -3254,74 +3206,28 @@ class __event_handler__ {
             }
 
         }
-        static constexpr auto lambda = [](uint32_t __w, uint8_t __sig, uint32_t __w2) -> void {
-            signal_manager->_window_signals.emit(__w, __sig, __w2);
-
-        };
-        static constexpr auto const &map_req = [](xcb_generic_event_t *ev) -> void {
-            RE_CAST_EV(xcb_map_request_event_t);
-            signal_manager->_window_signals.emit(screen->root, XCB_MAP_REQUEST, e->window);
-
-
-        };
-        static constexpr auto const &expose = [](xcb_generic_event_t *ev) -> void {
-            RE_CAST_EV(xcb_expose_event_t);
-            signal_manager->_window_signals.emit(e->window, XCB_EXPOSE);
-
-        };
-        static constexpr auto const &focus_in = [](xcb_generic_event_t *ev) -> void {
-            RE_CAST_EV(xcb_focus_in_event_t);
-            signal_manager->_window_signals.emit(e->event, XCB_FOCUS_IN);
-
-        };
-        static constexpr auto const &focus_out = [](xcb_generic_event_t *ev) -> void {
-            RE_CAST_EV(xcb_focus_out_event_t);
-            signal_manager->_window_signals.emit(e->event, XCB_FOCUS_OUT);
-
-        };
-        static constexpr auto const &enter_notif = [](xcb_generic_event_t *ev) -> void {
-            RE_CAST_EV(xcb_enter_notify_event_t);
-            signal_manager->_window_signals.emit(e->event, XCB_ENTER_NOTIFY);
-
-        };
-        static constexpr auto const &leave_notif = [](xcb_generic_event_t *ev) -> void {
-            RE_CAST_EV(xcb_leave_notify_event_t);
-            signal_manager->_window_signals.emit(e->event, XCB_LEAVE_NOTIFY);
-
-        };
-        static constexpr auto const &button_press = [](xcb_generic_event_t *ev) -> void {
-            RE_CAST_EV(xcb_button_press_event_t);
-            signal_manager->_window_signals.emit(e->event, XCB_BUTTON_PRESS);
-
-        };
-        static constexpr auto const &button_release = [](xcb_generic_event_t *ev) -> void {
-            RE_CAST_EV(xcb_button_release_event_t);
-            signal_manager->_window_signals.emit(e->event, XCB_BUTTON_RELEASE);
-
-        };
-
         template<uint8_t __sig>
         constexpr void ev_to_sig(xcb_generic_event_t *ev) {
             if constexpr (__sig == XCB_MAP_REQUEST) {
-                thread(map_req, ev).detach();
+                // thread(map_req, ev).detach();
                 
             } else if constexpr (__sig == XCB_BUTTON_PRESS) {
-                thread(button_press, ev).detach();
+                // thread(button_press, ev).detach();
 
             } else if constexpr (__sig == XCB_FOCUS_IN    ) {
-                thread(focus_in, ev).detach();
+                // thread(focus_in, ev).detach();
 
             } else if constexpr (__sig == XCB_FOCUS_OUT   ) {
-                thread(focus_out, ev).detach();
+                // thread(focus_out, ev).detach();
 
             } else if constexpr (__sig == XCB_EXPOSE      ) {
-                thread(expose, ev).detach();
+                // thread(expose, ev).detach();
                 
             } else if constexpr (__sig == XCB_LEAVE_NOTIFY) {
-                thread(leave_notif, ev).detach();
+                // thread(leave_notif, ev).detach();
                 
             } else if constexpr (__sig == XCB_ENTER_NOTIFY) {
-                thread(enter_notif, ev).detach();
+                // thread(enter_notif, ev).detach();
                 
             }
 
@@ -7761,46 +7667,48 @@ class Window_Manager {
             }
 
         /* Window       */
-            bool window_exists(uint32_t __window)
-            {
+            bool window_exists(uint32_t __window) {
                 xcb_generic_error_t *err;
                 free(xcb_query_tree_reply(conn, xcb_query_tree(conn, __window), &err));
 
-                if (err != NULL)
-                {
+                if (err != NULL) {
                     free(err);
                     return false;
-                }
 
-                return true;
+                } return true;
+
             }
-
-            void window_stack(const uint32_t &__window1, const uint32_t &__window2, const uint32_t &__mode)
-            {
+            void window_stack(uint32_t __window1, uint32_t __window2, uint32_t __mode) {
                 if (__window2 == XCB_NONE) return;
                 
                 uint16_t mask = XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE;
                 uint32_t values[] = {__window2, __mode};
+                
                 xcb_configure_window(conn, __window1, mask, values);
+                
             }
+            void window_above(const uint32_t &__window1, const uint32_t &__window2) {
+                window_stack(
+                    __window1,
+                    __window2,
+                    XCB_STACK_MODE_ABOVE
 
-            // stack '__window1' above '__window2'
-            void window_above(const uint32_t &__window1, const uint32_t &__window2)
-            {
-                window_stack(__window1, __window2, XCB_STACK_MODE_ABOVE);
-            }
+                );
 
-            // stack '__window1' below '__window2'
-            void window_below(const uint32_t &__window1, const uint32_t &__window2)
-            {
-                window_stack(__window1, __window2, XCB_STACK_MODE_BELOW);
-            }
+            }/* stack '__window1' above '__window2' */
+            void window_below(const uint32_t &__window1, const uint32_t &__window2) {
+                window_stack(
+                    __window1,
+                    __window2,
+                    XCB_STACK_MODE_BELOW
+                
+                );
 
-            void unmap_window(uint32_t __window)
-            {
-                VOID_COOKIE = xcb_unmap_window(conn, __window);
+            }/* stack '__window1' below '__window2' */
+            void unmap_window(uint32_t __window) {
+                VOID_COOKIE = xcb_unmap_window(conn, __window); CHECK_VOID_COOKIE();
                 FLUSH_X();
-                CHECK_VOID_COOKIE();
+
             }
 
         /* Client       */
@@ -8306,11 +8214,13 @@ class Window_Manager {
 
                 }
 
-            } void check_conn() {
+            }
+            void check_conn() {
                 int status = xcb_connection_has_error(conn);
                 check_error(status);
             
-            } int cookie_error(xcb_void_cookie_t cookie , const char *sender_function) {
+            }
+            int cookie_error(xcb_void_cookie_t cookie , const char *sender_function) {
                 xcb_generic_error_t *err = xcb_request_check(conn, cookie);
                 uint8_t err_code = 0;
                 if (err) {
@@ -8319,7 +8229,8 @@ class Window_Manager {
 
                 } return err_code;
             
-            } void check_error(xcb_void_cookie_t cookie , const char *sender_function, const char *err_msg) {
+            }
+            void check_error(xcb_void_cookie_t cookie , const char *sender_function, const char *err_msg) {
                 xcb_generic_error_t * err = xcb_request_check(conn, cookie);
                 if (err) {
                     log_error_code(err_msg, err->error_code);
@@ -8338,7 +8249,8 @@ class Window_Manager {
                 } vec.clear();
                 vector<client *>().swap(vec);
             
-            } void delete_desktop_vec(vector<desktop *> &vec) {
+            }
+            void delete_desktop_vec(vector<desktop *> &vec) {
                 for (desktop *d : vec) {
                     delete_client_vec(d->current_clients);
                     delete d;
@@ -8346,13 +8258,16 @@ class Window_Manager {
                 } vec.clear();
                 vector<desktop *>().swap(vec);
                 
-            } template <typename Type> static void delete_ptr_vector(vector<Type *>& vec) {
+            }
+            template <typename Type>
+            static void delete_ptr_vector(vector<Type *>& vec) {
                 for (Type *ptr : vec) {
                     delete ptr;
 
                 } vec.clear(); vector<Type *>().swap(vec);
 
-            } void remove_client_from_vector(client * c, vector<client *> &vec) {
+            }
+            void remove_client_from_vector(client * c, vector<client *> &vec) {
                 if (c == nullptr) {
                     loutE << "client is nullptr." << loutEND;
                     return;

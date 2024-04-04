@@ -1,26 +1,26 @@
 #ifndef STRUCTS_HPP
 #define STRUCTS_HPP
-// #include "defenitions.hpp"
-// #include "defenitions.hpp"
-// #include "defenitions.hpp"
 #include "include.hpp"
 #include <X11/Xlib.h>
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
-// #include <type_traits>
-// #include <vector>
 #include <functional>
 #include <limits>
 #include <type_traits>
-// #include <unordered_map>
 #include <utility>
 #include <xcb/xcb_ewmh.h>
 #include <xcb/xproto.h>
-// #include <type_traits>
 #include <initializer_list>
+#include "data.hpp"
 
 using namespace std;
+
+struct SimplifiedEvent {
+    uint32_t windowID; // Essential: Identifies the target window
+    uint8_t  eventType; // Optional: Identifies the type of event
+
+};
 
 template<typename Type>
 inline Type* AllocArr(size_t __num_elements, size_t alignment = alignof(Type))
@@ -794,21 +794,6 @@ enum
 //     {}
 
 // };
-#define MWM_EXPOSE 1
-#define MWM_ENTER_NOTIFY
-#define MWM_LEAVE_NOTIFY
-#define MWM_PROPERTY_NOTIFY
-#define MWM_MAP_REQ
-#define MWM_MAP_NOTIFY
-#define MWM_KEY_PRESS
-#define MWM_FOCUS_IN
-#define MWM_FOCUS_OUT
-#define MWM_KEY_RELESE
-#define MWM_BUTTON_RELEASE
-#define MWM_MOTION_NOTIFY
-#define MWM_DESTROY_NOTIFY
-#define MWM_REPARENT_NOTIFY
-#define MWM_CONFIGURE_REQUEST
 
 enum EV : uint8_t {
     REMOVE_ALL                        = 0,
