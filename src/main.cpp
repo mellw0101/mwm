@@ -446,17 +446,6 @@ namespace { // Tools
 class client;
 class window;
 
-STATIC_DECLARIATION(_resize_border_left_);
-STATIC_DECLARIATION(_resize_border_right_);
-STATIC_DECLARIATION(_resize_border_top_);
-STATIC_DECLARIATION(_resize_border_bottom_);
-STATIC_DECLARIATION(_resize_border_top_left_);
-STATIC_DECLARIATION(_resize_border_bottom_left_);
-STATIC_DECLARIATION(_resize_border_top_right_);
-STATIC_DECLARIATION(_resize_border_bottom_right_);
-
-static function<void(uint32_t)> _resize_cli_border_left;
-
 template<typename Callback>
 static void add_ev_to_window(uint32_t __window, int __signal_id, Callback &&__callback);
 
@@ -3616,7 +3605,7 @@ class __event_handler__ {
             }
 
         };
-        
+
         DynamicArray<uint32_t *> _window_arr;
 
         constexpr uint8_t char_to_keycode__(int8_t c) const {
