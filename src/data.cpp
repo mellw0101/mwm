@@ -37,7 +37,7 @@ constexpr uint8_t MapEventToCode(uint32_t eventCode) {
         case LEAVE_NOTIFY: return MWM_LEAVE_NOTIFY;
 
         default: {
-            return 0;
+            return 255;
 
         }
 

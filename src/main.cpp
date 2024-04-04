@@ -82,9 +82,10 @@
 // #include <any>
 
 #include "Log.hpp"
+#include "data.hpp"
 Logger logger;
-#include "defenitions.hpp"
 #include "structs.hpp"
+#include "defenitions.hpp"
 
 static xcb_connection_t * conn;
 static xcb_ewmh_connection_t * ewmh; 
@@ -2909,6 +2910,8 @@ class __event_handler__ {
     /* Variabels */
         __key_codes__ key_codes;
         mutex event_mutex;
+        Signal<xcb_generic_event_t *> main_loop;
+
 
     /* Methods   */
         constexpr int add(int a, int b) {
@@ -2917,6 +2920,21 @@ class __event_handler__ {
         }
         using EventCallback = function<void(Ev)>;
         void run() {
+            main_loop.connect([this](xcb_generic_event_t *ev) -> void {
+                uint8_t res = MapEventToCode(ev->response_type & ~0x80);
+                switch (res) {
+                    case MWM_EXPOSE: {
+                        RE_CAST_EV(xcb_expose_event_t);
+                        thread(handle_event<XCB_EXPOSE>, e->window).detach();
+
+                        return;
+
+                    }
+                
+                }
+
+            });
+
             key_codes.init();
             xcb_generic_event_t *ev;
             shouldContinue = true;
@@ -2924,13 +2942,13 @@ class __event_handler__ {
             while (shouldContinue) {
                 ev = xcb_wait_for_event(conn);
                 if (!ev) continue;
+                main_loop.emit(ev);
                 processEvent(ev);
                 free(ev);
 
             }
 
         }
-
         SimplifiedEvent convert_ev(xcb_generic_event_t* event) {
             SimplifiedEvent se;
             se.eventType = event->response_type & ~0x80; // Mask to get event type
@@ -2942,32 +2960,33 @@ class __event_handler__ {
 
         }
 
+        #define Emit signal_manager->_window_signals.emit
+        #define handle_template(__type) template<> void handle_event<__type>          (uint32_t __w)
         template<uint8_t __sig>
         static void handle_event(uint32_t __w) { WS_emit(__w, __sig); }
-        
-        template<> void handle_event<XCB_MAP_REQUEST>          (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, XCB_MAP_REQUEST, __w);}
-        template<> void handle_event<XCB_LEAVE_NOTIFY>         (uint32_t __w) { signal_manager->_window_signals.emit(__w, XCB_LEAVE_NOTIFY);}
-        template<> void handle_event<XCB_EXPOSE>               (uint32_t __w) { signal_manager->_window_signals.emit(__w, XCB_EXPOSE);}
-        template<> void handle_event<TERM_KEY_PRESS>           (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, TERM_KEY_PRESS, 0);}
-        template<> void handle_event<XCB_MAP_NOTIFY>           (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, XCB_MAP_NOTIFY, __w);}
-        template<> void handle_event<QUIT_KEY_PRESS>           (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, QUIT_KEY_PRESS, 0);}
-        template<> void handle_event<MOVE_TO_DESKTOP_1>        (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, MOVE_TO_DESKTOP_1);}
-        template<> void handle_event<MOVE_TO_DESKTOP_2>        (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, MOVE_TO_DESKTOP_2);}
-        template<> void handle_event<MOVE_TO_DESKTOP_3>        (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, MOVE_TO_DESKTOP_3);}
-        template<> void handle_event<MOVE_TO_DESKTOP_4>        (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, MOVE_TO_DESKTOP_4);}
-        template<> void handle_event<MOVE_TO_DESKTOP_5>        (uint32_t __w) { signal_manager->_window_signals.emit(screen->root, MOVE_TO_DESKTOP_5);}
-        template<> void handle_event<MOVE_TO_NEXT_DESKTOP>     (uint32_t __w) {signal_manager->_window_signals.emit(screen->root, MOVE_TO_NEXT_DESKTOP, __w);}
-        template<> void handle_event<MOVE_TO_PREV_DESKTOP>     (uint32_t __w) {signal_manager->_window_signals.emit(screen->root, MOVE_TO_PREV_DESKTOP, __w);}
-        template<> void handle_event<MOVE_TO_NEXT_DESKTOP_WAPP>(uint32_t __w) {  signal_manager->_window_signals.emit(screen->root, MOVE_TO_NEXT_DESKTOP_WAPP, __w);}
-        template<> void handle_event<MOVE_TO_PREV_DESKTOP_WAPP>(uint32_t __w) {  signal_manager->_window_signals.emit(screen->root, MOVE_TO_PREV_DESKTOP_WAPP, __w);}
-        template<> void handle_event<EWMH_MAXWIN>              (uint32_t __w) { C_EMIT      (C_RETRIVE(__w)  , EWMH_MAXWIN);             }
-        template<> void handle_event<MOTION_NOTIFY>            (uint32_t __w) { WS_emit     (__w , MOTION_NOTIFY);            }
-        template<> void handle_event<TILE_RIGHT>               (uint32_t __w) { C_EMIT      (C_RETRIVE(__w) , TILE_RIGHT);               }
-        template<> void handle_event<TILE_LEFT>                (uint32_t __w) { C_EMIT      (C_RETRIVE(__w) , TILE_LEFT );               }
-        template<> void handle_event<TILE_UP>                  (uint32_t __w) { C_EMIT      (C_RETRIVE(__w) , TILE_UP   );               }
-        template<> void handle_event<TILE_DOWN>                (uint32_t __w) { C_EMIT      (C_RETRIVE(__w) , TILE_DOWN );               }
-        template<> void handle_event<CYCLE_FOCUS_KEY_PRESS>    (uint32_t __w) { WS_emit_root(CYCLE_FOCUS_KEY_PRESS    , __w);                  }
-        template<> void handle_event<DESTROY_NOTIFY>           (uint32_t __w) { WS_emit(__w, DESTROY_NOTIFY);                  }
+            handle_template(XCB_MAP_REQUEST)                                      { Emit(screen->root, XCB_MAP_REQUEST, __w); }
+            template<> void handle_event<XCB_LEAVE_NOTIFY>         (uint32_t __w) { Emit(__w,          XCB_LEAVE_NOTIFY);}
+            template<> void handle_event<XCB_EXPOSE>               (uint32_t __w) { Emit(__w,          XCB_EXPOSE);}
+            template<> void handle_event<TERM_KEY_PRESS>           (uint32_t __w) { Emit(screen->root, TERM_KEY_PRESS, 0);}
+            template<> void handle_event<XCB_MAP_NOTIFY>           (uint32_t __w) { Emit(screen->root, XCB_MAP_NOTIFY, __w);}
+            template<> void handle_event<QUIT_KEY_PRESS>           (uint32_t __w) { Emit(screen->root, QUIT_KEY_PRESS, 0);}
+            template<> void handle_event<MOVE_TO_DESKTOP_1>        (uint32_t __w) { Emit(screen->root, MOVE_TO_DESKTOP_1);}
+            template<> void handle_event<MOVE_TO_DESKTOP_2>        (uint32_t __w) { Emit(screen->root, MOVE_TO_DESKTOP_2);}
+            template<> void handle_event<MOVE_TO_DESKTOP_3>        (uint32_t __w) { Emit(screen->root, MOVE_TO_DESKTOP_3);}
+            template<> void handle_event<MOVE_TO_DESKTOP_4>        (uint32_t __w) { Emit(screen->root, MOVE_TO_DESKTOP_4);}
+            template<> void handle_event<MOVE_TO_DESKTOP_5>        (uint32_t __w) { Emit(screen->root, MOVE_TO_DESKTOP_5);}
+            template<> void handle_event<MOVE_TO_NEXT_DESKTOP>     (uint32_t __w) { Emit(screen->root, MOVE_TO_NEXT_DESKTOP, __w);}
+            template<> void handle_event<MOVE_TO_PREV_DESKTOP>     (uint32_t __w) { Emit(screen->root, MOVE_TO_PREV_DESKTOP, __w);}
+            template<> void handle_event<MOVE_TO_NEXT_DESKTOP_WAPP>(uint32_t __w) { Emit(screen->root, MOVE_TO_NEXT_DESKTOP_WAPP, __w);}
+            template<> void handle_event<MOVE_TO_PREV_DESKTOP_WAPP>(uint32_t __w) { Emit(screen->root, MOVE_TO_PREV_DESKTOP_WAPP, __w);}
+            template<> void handle_event<EWMH_MAXWIN>              (uint32_t __w) { C_EMIT      (C_RETRIVE(__w)  , EWMH_MAXWIN);             }
+            template<> void handle_event<MOTION_NOTIFY>            (uint32_t __w) { WS_emit     (__w , MOTION_NOTIFY);            }
+            template<> void handle_event<TILE_RIGHT>               (uint32_t __w) { C_EMIT      (C_RETRIVE(__w) , TILE_RIGHT);               }
+            template<> void handle_event<TILE_LEFT>                (uint32_t __w) { C_EMIT      (C_RETRIVE(__w) , TILE_LEFT );               }
+            template<> void handle_event<TILE_UP>                  (uint32_t __w) { C_EMIT      (C_RETRIVE(__w) , TILE_UP   );               }
+            template<> void handle_event<TILE_DOWN>                (uint32_t __w) { C_EMIT      (C_RETRIVE(__w) , TILE_DOWN );               }
+            template<> void handle_event<CYCLE_FOCUS_KEY_PRESS>    (uint32_t __w) { WS_emit_root(CYCLE_FOCUS_KEY_PRESS    , __w);                  }
+            template<> void handle_event<DESTROY_NOTIFY>           (uint32_t __w) { WS_emit(__w, DESTROY_NOTIFY);                  }
 
         #define HANDLE_EVENT(__type ) thread(handle_event<__type>, e->event    ).detach()
         #define HANDLE_WINDOW(__type) thread(handle_event<__type>, e->window   ).detach()
@@ -3141,13 +3160,13 @@ class __event_handler__ {
 
                     } return;
 
-                } case XCB_EXPOSE:{
+                }/* case XCB_EXPOSE:{
                     RE_CAST_EV(xcb_expose_event_t);
                     HANDLE_WINDOW(XCB_EXPOSE);
 
                     return;
 
-                } case XCB_PROPERTY_NOTIFY:{
+                } */case XCB_PROPERTY_NOTIFY:{
                     RE_CAST_EV(xcb_property_notify_event_t);
                     HANDLE_WINDOW(XCB_PROPERTY_NOTIFY);
 
@@ -3305,23 +3324,24 @@ class __event_handler__ {
 
             // Check post-insertion stats
             auto postInsertionCapacity = eventCallbacks.bucket_count();
+            
             if (postInsertionCapacity != preInsertionCapacity) {
-                // If the capacity has changed, a rehash occurred
-                std::cout << "Rehash occurred. Previous capacity: " << preInsertionCapacity
-                        << ", New capacity: " << postInsertionCapacity << std::endl;
-            }
+                std::cout << "Rehash occurred. Previous capacity: " << preInsertionCapacity << ", New capacity: " << postInsertionCapacity << std::endl;
 
-            // Optionally, log the size change for information
+            }/* If the capacity has changed, a rehash occurred */
+
             if (eventCallbacks.size() != preInsertionSize) {
-                std::cout << "Size before insertion: " << preInsertionSize
-                        << ", Size after insertion: " << eventCallbacks.size() << std::endl;
-            }
+                std::cout << "Size before insertion: " << preInsertionSize << ", Size after insertion: " << eventCallbacks.size() << std::endl;
+
+            }/* Optionally, log the size change for information */
+
         }
         void check_and_adjust_vec_capacity(uint8_t eventType) {
-            if (eventCallbacks[eventType].capacity() < 30)
-            {
+            if (eventCallbacks[eventType].capacity() < 30) {
                 eventCallbacks[eventType].reserve(100);
+
             }
+
         }
         void init_map() {
             eventCallbacks.reserve(34);
@@ -3362,9 +3382,9 @@ class __event_handler__ {
                 XCB_MAPPING_NOTIFY
             };
 
-            for (int i = 0; i < event_type_keys.size(); ++i)
-            {
+            for (int i = 0; i < event_type_keys.size(); ++i) {
                 eventCallbacks[event_type_keys[i]].reserve(100);
+
             }
         }
 

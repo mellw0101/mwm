@@ -33,14 +33,15 @@ static array<function<void(uint32_t)>, NUM_EVENTS> eventHandlers{};
 #define MWM_REPARENT_NOTIFY
 #define MWM_CONFIGURE_REQUEST
 
-constexpr uint8_t MapEventToCode(uint32_t eventCode) {
+static constexpr uint8_t uint8_t_MAX = 255; 
+constexpr uint8_t MapEventToCode(uint8_t eventCode) {
     switch (eventCode) {
-        case Ev1:           return MWM_EXPOSE;
-        case Ev2:            return MWM_ENTER_NOTIFY;
-        case Ev3:            return MWM_LEAVE_NOTIFY;
+        case Ev1: return MWM_EXPOSE;
+        case Ev2: return MWM_ENTER_NOTIFY;
+        case Ev3: return MWM_LEAVE_NOTIFY;
         
         default: {
-            return 0;
+            return uint8_t_MAX;
 
         }
 
@@ -148,20 +149,22 @@ void registerCallback(Func&& func, Args&&... args) {
 #include <functional>
 
 class AnyCallable {
-public:
-    virtual ~AnyCallable() = default;
-    virtual void call() = 0; // Define a common interface
+    public:
+        virtual ~AnyCallable() = default;
+        virtual void call() = 0; // Define a common interface
+
 };
 
 template<typename Func>
 class TypedCallable : public AnyCallable {
-public:
-    TypedCallable(Func f) : func(std::move(f)) {}
-    void call() override {
-        func(); // Invoke the stored callable
-    }
-private:
-    Func func;
+    public:
+        TypedCallable(Func f) : func(std::move(f)) {}
+        void call() override {
+            func(); // Invoke the stored callable
+        }
+    private:
+        Func func;
+    
 };
 
 class CallableVector {
@@ -188,13 +191,12 @@ class CallableVector {
 template<typename... Args>
 class Signal {
     public:
-        // Register a callback
         template<typename Fu>
         void connect(Fu&& f) {
             // Store the callback; for simplicity, we're directly storing it without a container
             callback = std::forward<Fu>(f);
 
-        }
+        }/* Register a callback */
 
         // Emit the signal, invoking the callback with perfect forwarding
         template<typename... CallArgs>
@@ -204,7 +206,7 @@ class Signal {
         }
 
     private:
-        std::function<void(Args...)> callback;
+        function<void(Args...)> callback;
 
 };
 
