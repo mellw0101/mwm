@@ -3281,7 +3281,7 @@ class __event_handler__ {
             }}
         };
         Signal<> ev_arr[13] = {
-            reg_static_callB([this]() -> void { return; }),
+            reg_static_callB([this]() -> void { return; free(_ev); }),
             reg_static_callB([this]() -> void {
                 auto *const &e = (const xcb_expose_event_t *)this->_ev;
                 HANDLE(XCB_EXPOSE, e->window);
