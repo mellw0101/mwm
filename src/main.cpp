@@ -3115,8 +3115,8 @@ class __event_handler__ {
                         break;
 
                     } case MWM_Ev::PROPERTY_NOTIF :{
-                        RE_CAST_EV(xcb_property_notify_event_t);
-                        HANDLE_WINDOW(XCB_PROPERTY_NOTIFY);
+                        auto const e = (xcb_property_notify_event_t *)ev;
+                        thread(handle_event<XCB_PROPERTY_NOTIFY>, e->window).detach();
                         break;
 
                     } case MWM_Ev::NO_Ev         :{
@@ -3136,7 +3136,6 @@ class __event_handler__ {
                 ev = xcb_wait_for_event(conn);
                 if (!ev) continue;
                 main_loop.emit(ev);
-                // processEvent(ev);
                 free(ev);
 
             }
@@ -3152,7 +3151,6 @@ class __event_handler__ {
             return se;
 
         }
-
 
         DynamicArray<uint32_t *> _window_arr;
 
