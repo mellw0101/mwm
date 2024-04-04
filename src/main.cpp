@@ -7053,8 +7053,8 @@ class client {
 
             }, this->win);
 
-            CONN(DESTROY_NOTIFY, if (__window == this->win) {
-                // WS_emit(this->win, KILL_SIGNAL);
+            CONN(DESTROY_NOTIF_EV, if (__window == this->win) {
+                WS_emit(this->win, KILL_SIGNAL);
 
             }, this->win);
 
