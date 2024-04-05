@@ -15092,7 +15092,7 @@ void setup_wm() {
     NEW_CLASS(pid_manager,     __pid_manager__    ) {}
 
     xcb = connect_to_server(conn);
-    if ((xcb->check_conn() & ~(1ULL << X_CONN_ERROR))) {
+    if ((xcb->check_conn() & (1ULL << X_CONN_ERROR)) != 0) {
         loutE << "x not connected" << loutEND;
         
     }
