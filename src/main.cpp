@@ -2927,163 +2927,7 @@ class __event_handler__ {
         #define HANDLE_WINDOW(__type) thread(handle_event<__type>, e->window   ).detach()
         #define HANDLE_ROOT(__type)   thread(handle_event<__type>, screen->root).detach()
         #define HANDLE(__type, __w)   thread(handle_event<__type>, __w         ).detach()
-        unordered_map<uint8_t, Signal<xcb_generic_event_t *>> ev_map {{
-            {XCB_EXPOSE,         [this](xcb_generic_event_t *ev) -> void {
-                const xcb_expose_event_t *e = (const xcb_expose_event_t *)ev;
-                HANDLE(XCB_EXPOSE, e->window);
-                
-            }},
-            {XCB_ENTER_NOTIFY,   [this](xcb_generic_event_t *ev) -> void {
-                const xcb_enter_notify_event_t *e = (const xcb_enter_notify_event_t *)ev;
-                HANDLE(XCB_ENTER_NOTIFY, e->event);
 
-            }},
-            {XCB_LEAVE_NOTIFY,   [this](xcb_generic_event_t *ev) -> void {
-                const auto *e = (const xcb_leave_notify_event_t *)ev;
-                HANDLE(XCB_LEAVE_NOTIFY, e->event);
-
-            }},
-            {XCB_FOCUS_IN,       [this](xcb_generic_event_t *ev) -> void { 
-                const auto *e = (const xcb_focus_in_event_t *)ev;
-                HANDLE(XCB_FOCUS_IN, e->event);
-
-            }},
-            {XCB_FOCUS_OUT,      [](xcb_generic_event_t *ev) -> void {
-                const xcb_focus_out_event_t *e = (const xcb_focus_out_event_t *)ev;
-                HANDLE(XCB_FOCUS_OUT, e->event);
-                
-            }},
-            {XCB_DESTROY_NOTIFY, [](xcb_generic_event_t *ev) -> void {
-                const auto *e = (const xcb_destroy_notify_event_t *)ev;
-                HANDLE(DESTROY_NOTIF_EV, e->event);
-                HANDLE(DESTROY_NOTIF_W, e->window);
-
-            }},
-            {XCB_MAP_REQUEST, [](xcb_generic_event_t *ev) -> void {
-                auto e = (xcb_map_request_event_t *)ev;
-                HANDLE(XCB_MAP_REQUEST, e->window);
-
-            }},
-            {XCB_MOTION_NOTIFY, [](xcb_generic_event_t *ev) -> void { 
-                auto const *e = (const xcb_motion_notify_event_t *)ev;
-                HANDLE_EVENT(XCB_MOTION_NOTIFY);
-
-            }},
-            {XCB_KEY_PRESS, [this](xcb_generic_event_t *ev) -> void {
-                const auto *e = (const xcb_key_press_event_t *)ev;
-                switch (e->state) {
-                    case   CTRL  + ALT          :{
-                        if (e->detail == key_codes.t) {
-                            thread(handle_event<ROOT_SIGNAL>, TERM_KEY_PRESS).detach();
-
-                        } /* Terminal keybinding */ break;
-
-                    } case SHIFT + CTRL + SUPER :{
-                        if (e->detail == key_codes.r_arrow) {
-                            thread(handle_event<MOVE_TO_NEXT_DESKTOP_WAPP>, e->event).detach();
-
-                        } else if (e->detail == key_codes.l_arrow) {
-                            thread(handle_event<MOVE_TO_PREV_DESKTOP_WAPP>, e->event).detach();
-
-                        } break;
-
-                    } case SHIFT + ALT          :{
-                        if (e->detail == key_codes.q) {
-                            thread(handle_event<ROOT_SIGNAL>, QUIT_KEY_PRESS).detach();
-
-                        } /* Quit keybinding */ break;
-
-                    } case ALT                  :{
-                        if (e->detail == key_codes.n_1) {
-                            thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_1).detach();
-
-                        } else if (e->detail == key_codes.n_2) {
-                            thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_2).detach();
-
-                        } else if (e->detail == key_codes.n_3) {
-                            thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_3).detach();
-                            
-                        } else if (e->detail == key_codes.n_4) {
-                            thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_4).detach();
-
-                        } else if (e->detail == key_codes.n_5) {
-                            thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_5).detach();
-                            
-                        } else if (e->detail == key_codes.tab) {
-                            thread(handle_event<ROOT_SIGNAL>, CYCLE_FOCUS_KEY_PRESS).detach();
-
-                        } break;
-
-                    } case CTRL  + SUPER        :{
-                        if (e->detail == key_codes.r_arrow) {
-                            thread(handle_event<ROOT_SIGNAL>, MOVE_TO_NEXT_DESKTOP).detach();
-
-                        } else if (e->detail == key_codes.l_arrow) {
-                            thread(handle_event<ROOT_SIGNAL>, MOVE_TO_PREV_DESKTOP).detach();
-
-                        } break;
-
-                    } case SUPER                :{
-                        if (e->detail == key_codes.r_arrow)        {
-                            HANDLE_EVENT(TILE_RIGHT);
-
-                        } else if (e->detail == key_codes.l_arrow) {
-                            HANDLE_EVENT(TILE_LEFT);
-
-                        } else if (e->detail == key_codes.u_arrow) {
-                            HANDLE_EVENT(TILE_UP);
-
-                        } else if (e->detail == key_codes.d_arrow) {
-                            HANDLE_EVENT(TILE_DOWN);
-
-                        } else if (e->detail == key_codes.k)       {
-                            thread(handle_event<ROOT_SIGNAL>, DEBUG_KEY_PRESS).detach();
-                        
-                        } break;
-
-                    }
-
-                } if (e->detail == key_codes.f11) {
-                    HANDLE(EWMH_MAXWIN_SIGNAL, e->event);
-
-                }
-
-            }},
-            {XCB_BUTTON_PRESS, [](xcb_generic_event_t *ev) -> void {
-                const auto *e = (const xcb_button_press_event_t *)ev;
-                if (e->detail == L_MOUSE_BUTTON)        {
-                    if (e->state == ALT) {
-                        HANDLE(L_MOUSE_BUTTON_EVENT__ALT, e->event);
-
-                    } else {
-                        HANDLE(L_MOUSE_BUTTON_EVENT, e->event);
-
-                    }
-
-                } else if (e->detail == R_MOUSE_BUTTON) {
-                    if (e->state == ALT) {
-                        HANDLE_EVENT(R_MOUSE_BUTTON_EVENT__ALT);
-                        
-                    } else {
-                        HANDLE_EVENT(R_MOUSE_BUTTON_EVENT);
-
-                    }
-
-                }
-
-            }},
-            {XCB_MAP_NOTIFY, [](xcb_generic_event_t *ev) -> void {
-                const auto *e = (const xcb_map_notify_event_t *)ev;
-                HANDLE(XCB_MAP_NOTIFY, e->event);
-
-            }},
-            {XCB_PROPERTY_NOTIFY, [](xcb_generic_event_t *ev) -> void { 
-                const auto *e = (const xcb_property_notify_event_t *)ev;
-                HANDLE(XCB_PROPERTY_NOTIFY, e->window);
-
-            }}
-
-        }, {}};
         using EventCallback = function<void(Ev)>;
         void run() {
             main_loop = [this](const xcb_generic_event_t *ev) -> void {
@@ -5962,8 +5806,7 @@ class window {
 
         /* Draw          */
             #define AUTO -16
-            void draw(const string &__str, int __text_color = WHITE, int __backround_color = AUTO, int16_t __x = AUTO, int16_t __y = AUTO, const char *__font_name = DEFAULT_FONT)
-            {
+            void draw(const string &__str, int __text_color = WHITE, int __backround_color = AUTO, int16_t __x = AUTO, int16_t __y = AUTO, const char *__font_name = DEFAULT_FONT) {
                 get_font(__font_name);
                 if (__backround_color == AUTO) __backround_color = _color;
                 if (__backround_color == WHITE) __text_color = BLACK;
@@ -5981,10 +5824,9 @@ class window {
                 );
                 FLUSH_XWin();
                 CHECK_VOID_COOKIE();
-            }
 
-            void draw_text(const char *str , const int &text_color, const int &backround_color, const char *font_name, const int16_t &x, const int16_t &y)
-            {
+            }
+            void draw_text(const char *str , const int &text_color, const int &backround_color, const char *font_name, const int16_t &x, const int16_t &y) {
                 get_font(font_name);
                 create_font_gc(text_color, backround_color, font);
                 VOID_COOKIE = xcb_image_text_8(
@@ -5998,10 +5840,9 @@ class window {
                 );
                 FLUSH_XWin();
                 CHECK_VOID_COOKIE();
-            }
 
-            void draw_text_auto_color(const char *__str, int16_t __x, int16_t __y, int __text_color = WHITE, int __backround_color = 0, const char *__font_name = DEFAULT_FONT)
-            {
+            }
+            void draw_text_auto_color(const char *__str, int16_t __x, int16_t __y, int __text_color = WHITE, int __backround_color = 0, const char *__font_name = DEFAULT_FONT) {
                 get_font(__font_name);
                 if (__backround_color == 0) __backround_color = _color;
                 create_font_gc(__text_color, __backround_color, font);
@@ -6016,8 +5857,8 @@ class window {
                 );
                 FLUSH_XWin();
                 CHECK_VOID_COOKIE();
-            }
 
+            }
             /**
              *
              * @brief Function that draws text on a window auto centering and coloring(FOLLOWS WINDOWS BACKROUND COLOR)
@@ -6032,8 +5873,7 @@ class window {
              *       ALSO IF YOU ONLY WANT AUTO COLOR NOT CENTERING USE 'draw_text_auto_color' FUNCTION
              *
              */
-            void draw_acc(const string &__str, int __text_color = WHITE, int __backround_color = 0, const char *__font_name = DEFAULT_FONT)
-            {
+            void draw_acc(const string &__str, int __text_color = WHITE, int __backround_color = 0, const char *__font_name = DEFAULT_FONT) {
                 get_font(__font_name);
                 if (__backround_color == 0) __backround_color = _color;
                 if (__backround_color == WHITE) __text_color = BLACK;
@@ -6049,10 +5889,9 @@ class window {
                 );
                 FLUSH_XWin();
                 CHECK_VOID_COOKIE();
-            }
 
-            void draw_text_16(const char *str, const int &text_color, const int &background_color, const char *font_name, const int16_t &x, const int16_t &y)
-            {
+            }
+            void draw_text_16(const char *str, const int &text_color, const int &background_color, const char *font_name, const int16_t &x, const int16_t &y) {
                 get_font(font_name); // Your existing function to set the font
                 create_font_gc(text_color, background_color, font); // Your existing function to create a GC with the font
 
@@ -6071,10 +5910,9 @@ class window {
 
                 xcb_flush(conn);
                 free(char2b_str);
-            }
 
-            void draw_text_16_auto_color(const char *__str, const int16_t &__x, const int16_t &__y, const int &__text_color = WHITE, const int &__background_color = 0, const char *__font_name = DEFAULT_FONT)
-            {
+            }
+            void draw_text_16_auto_color(const char *__str, const int16_t &__x, const int16_t &__y, const int &__text_color = WHITE, const int &__background_color = 0, const char *__font_name = DEFAULT_FONT) {
                 get_font(__font_name); // Your existing function to set the font
                 int bg_color;
                 if (__background_color == 0) bg_color = _color;
@@ -6091,14 +5929,14 @@ class window {
                     __x,
                     __y,
                     char2b_str
+
                 );
 
                 xcb_flush(conn);
                 free(char2b_str);
-            }
 
-            void draw_acc_16(const string &__str, int __text_color = WHITE, int __background_color = 0, const char *__font_name = DEFAULT_FONT)
-            {
+            }
+            void draw_acc_16(const string &__str, int __text_color = WHITE, int __background_color = 0, const char *__font_name = DEFAULT_FONT) {
                 get_font(__font_name);
                 if (__background_color == 0) __background_color = _color;
                 if (__background_color == WHITE) __text_color = BLACK;
@@ -6118,10 +5956,11 @@ class window {
                     x,
                     y,
                     char2b_str
-                );
+
+                ); CHECK_VOID_COOKIE();
                 FLUSH_XWin();
                 free(char2b_str);
-                CHECK_VOID_COOKIE();
+
             }
 
         /* Keys          */
@@ -6862,7 +6701,7 @@ class window {
         
         /* Borders    */
             void create_border_window(BORDER __border, int __color, uint32_t __x, uint32_t __y, uint32_t __width, uint32_t __height) {
-                uint32_t window; 
+                uint32_t window;
                 if ((window = xcb_generate_id(conn)) == -1) {
                     loutEWin << "Failed to create border window: " << WINDOW_ID_BY_INPUT(window) << loutEND;
                     return; 
@@ -6883,7 +6722,8 @@ class window {
                     this->_value_mask,
                     this->_value_list
 
-                ); CHECK_VOID_COOKIE(); FLUSH_XWin();
+                ); CHECK_VOID_COOKIE();
+                FLUSH_XWin();
 
                 change_back_pixel(get_color(__color), window);
                 VOID_cookie = xcb_map_window(conn, window); CHECK_VOID_COOKIE(); FLUSH_XWin();
