@@ -2973,6 +2973,8 @@ class __event_handler__ {
             handle_template(ROOT_SIGNAL)               { Emit(screen->root, __w); }
             handle_template(XCB_MAP_REQUEST)           { Emit(screen->root, XCB_MAP_REQUEST, __w); }
             handle_template(XCB_MAP_NOTIFY)            { Emit(screen->root, XCB_MAP_NOTIFY,  __w); }
+            handle_template(MOVE_TO_NEXT_DESKTOP)      { Emit(screen->root, MOVE_TO_NEXT_DESKTOP, __w); }
+            handle_template(MOVE_TO_PREV_DESKTOP)      { Emit(screen->root, MOVE_TO_PREV_DESKTOP, __w); }
             handle_template(MOVE_TO_NEXT_DESKTOP_WAPP) { Emit(screen->root, MOVE_TO_NEXT_DESKTOP_WAPP, __w); }
             handle_template(MOVE_TO_PREV_DESKTOP_WAPP) { Emit(screen->root, MOVE_TO_PREV_DESKTOP_WAPP, __w); }
             handle_template(TILE_RIGHT)                { C_EMIT(C_RETRIVE(__w), TILE_RIGHT); }
