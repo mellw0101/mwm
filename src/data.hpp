@@ -3,6 +3,8 @@
 #include <X11/X.h>
 #include <cstdint>
 #include <array>
+#include <utility>
+#include <xcb/xcb.h>
 #include "functional"
 // #include "structs.hpp"
 // #include "structs.hpp"
@@ -289,28 +291,40 @@ class CallableVector {
         std::vector<std::unique_ptr<AnyCallable>> callables;
         
 };
+
 // A simple Signal class that accepts callbacks with varying parameters
 template<typename... Args>
 class Signal {
     private:
-        function<void(Args...)> callback;
+        function<void(Args...)> cb;
 
     public:
-        template<typename Callback>
-        Signal(Callback &&__callback) : callback(__callback) {}
+        template<typename Cb>
+        Signal(Cb &&__cb) : cb(std::forward<Cb>(__cb)) {}
         Signal() {}
 
         template<typename Fu>
         void connect(Fu&& f) {
-            callback = std::forward<Fu>(f);
+            cb = std::forward<Fu>(f);
 
         }/* Register a callback */
-        template<typename... CallArgs>
-        void emit(CallArgs&&... args) {
-            callback(std::forward<CallArgs>(args)...);
+        
+        template<typename... CbArgs>/**
+         *
+         * Emit the signal, invoking the callback with perfect forwarding
+         *
+         */
+        void emit(CbArgs&&... args) {
+            cb(std::forward<CbArgs>(args)...);
 
-        }/* Emit the signal, invoking the callback with perfect forwarding */
+        }
 
+        template<typename ...A>
+        void operator()(A &&...a) {
+            cb(std::forward<A>(a)...);
+            
+        }
+        
 };
 
 

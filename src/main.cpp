@@ -2901,6 +2901,7 @@ class __event_handler__ {
         mutex event_mutex;
         xcb_generic_event_t *ev{};
         Signal<xcb_generic_event_t *> main_loop;
+        
 
     /* Methods   */
         constexpr int add(int a, int b) {
@@ -2926,19 +2927,175 @@ class __event_handler__ {
         #define HANDLE_WINDOW(__type) thread(handle_event<__type>, e->window   ).detach()
         #define HANDLE_ROOT(__type)   thread(handle_event<__type>, screen->root).detach()
         #define HANDLE(__type, __w)   thread(handle_event<__type>, __w         ).detach()
+        unordered_map<uint8_t, Signal<xcb_generic_event_t *>> ev_map {{
+            {XCB_EXPOSE, [](xcb_generic_event_t *ev) -> void {
+                const xcb_expose_event_t *e = (const xcb_expose_event_t *)ev;
+                HANDLE(XCB_EXPOSE, e->window);
+                
+            }},
+            {XCB_ENTER_NOTIFY, [](xcb_generic_event_t *ev) -> void {
+                const xcb_enter_notify_event_t *e = (const xcb_enter_notify_event_t *)ev;
+                HANDLE(XCB_ENTER_NOTIFY, e->event);
 
+            }},
+            {XCB_LEAVE_NOTIFY, [](xcb_generic_event_t *ev) -> void {
+                const auto *e = (const xcb_leave_notify_event_t *)ev;
+                HANDLE(XCB_LEAVE_NOTIFY, e->event);
+
+            }},
+            {XCB_FOCUS_IN, [](xcb_generic_event_t *ev) -> void { 
+                const auto *e = (const xcb_focus_in_event_t *)ev;
+                HANDLE(XCB_LEAVE_NOTIFY, e->event);
+
+            }},
+            {XCB_FOCUS_OUT, [](xcb_generic_event_t *ev) -> void {
+                const xcb_focus_out_event_t *e = (const xcb_focus_out_event_t *)ev;
+                HANDLE(XCB_FOCUS_OUT, e->event);
+                
+            }},
+            {XCB_DESTROY_NOTIFY, [](xcb_generic_event_t *ev) -> void {
+                const auto *e = (const xcb_destroy_notify_event_t *)ev;
+                HANDLE(DESTROY_NOTIF_EV, e->event);
+                HANDLE(DESTROY_NOTIF_W, e->window);
+
+            }},
+            {XCB_MAP_REQUEST, [](xcb_generic_event_t *ev) -> void {
+                auto e = (xcb_map_request_event_t *)ev;
+                HANDLE(XCB_MAP_REQUEST, e->window);
+
+            }},
+            {XCB_MOTION_NOTIFY, [](xcb_generic_event_t *ev) -> void { 
+                auto const *e = (const xcb_motion_notify_event_t *)ev;
+                HANDLE_EVENT(XCB_MOTION_NOTIFY);
+
+            }},
+            {XCB_KEY_PRESS, [this](xcb_generic_event_t *ev) -> void {
+                const auto *e = (const xcb_key_press_event_t *)ev;
+                switch (e->state) {
+                    case   CTRL  + ALT          :{
+                        if (e->detail == key_codes.t) {
+                            thread(handle_event<ROOT_SIGNAL>, TERM_KEY_PRESS).detach();
+
+                        } /* Terminal keybinding */ break;
+
+                    } case SHIFT + CTRL + SUPER :{
+                        if (e->detail == key_codes.r_arrow) {
+                            thread(handle_event<MOVE_TO_NEXT_DESKTOP_WAPP>, e->event).detach();
+
+                        } else if (e->detail == key_codes.l_arrow) {
+                            thread(handle_event<MOVE_TO_PREV_DESKTOP_WAPP>, e->event).detach();
+
+                        } break;
+
+                    } case SHIFT + ALT          :{
+                        if (e->detail == key_codes.q) {
+                            thread(handle_event<ROOT_SIGNAL>, QUIT_KEY_PRESS).detach();
+
+                        } /* Quit keybinding */ break;
+
+                    } case ALT                  :{
+                        if (e->detail == key_codes.n_1) {
+                            thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_1).detach();
+
+                        } else if (e->detail == key_codes.n_2) {
+                            thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_2).detach();
+
+                        } else if (e->detail == key_codes.n_3) {
+                            thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_3).detach();
+                            
+                        } else if (e->detail == key_codes.n_4) {
+                            thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_4).detach();
+
+                        } else if (e->detail == key_codes.n_5) {
+                            thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_5).detach();
+                            
+                        } else if (e->detail == key_codes.tab) {
+                            thread(handle_event<ROOT_SIGNAL>, CYCLE_FOCUS_KEY_PRESS).detach();
+
+                        } break;
+
+                    } case CTRL  + SUPER        :{
+                        if (e->detail == key_codes.r_arrow) {
+                            thread(handle_event<ROOT_SIGNAL>, MOVE_TO_NEXT_DESKTOP).detach();
+
+                        } else if (e->detail == key_codes.l_arrow) {
+                            thread(handle_event<ROOT_SIGNAL>, MOVE_TO_PREV_DESKTOP).detach();
+
+                        } break;
+
+                    } case SUPER                :{
+                        if (e->detail == key_codes.r_arrow)        {
+                            HANDLE_EVENT(TILE_RIGHT);
+
+                        } else if (e->detail == key_codes.l_arrow) {
+                            HANDLE_EVENT(TILE_LEFT);
+
+                        } else if (e->detail == key_codes.u_arrow) {
+                            HANDLE_EVENT(TILE_UP);
+
+                        } else if (e->detail == key_codes.d_arrow) {
+                            HANDLE_EVENT(TILE_DOWN);
+
+                        } else if (e->detail == key_codes.k)       {
+                            thread(handle_event<ROOT_SIGNAL>, DEBUG_KEY_PRESS).detach();
+                        
+                        } break;
+
+                    }
+
+                } if (e->detail == key_codes.f11) {
+                    HANDLE(EWMH_MAXWIN_SIGNAL, e->event);
+
+                }
+
+            }},
+            {XCB_BUTTON_PRESS, [](xcb_generic_event_t *ev) -> void {
+                const auto *e = (const xcb_button_press_event_t *)ev;
+                if (e->detail == L_MOUSE_BUTTON)        {
+                    if (e->state == ALT) {
+                        HANDLE(L_MOUSE_BUTTON_EVENT__ALT, e->event);
+
+                    } else {
+                        HANDLE(L_MOUSE_BUTTON_EVENT, e->event);
+
+                    }
+
+                } else if (e->detail == R_MOUSE_BUTTON) {
+                    if (e->state == ALT) {
+                        HANDLE_EVENT(R_MOUSE_BUTTON_EVENT__ALT);
+                        
+                    } else {
+                        HANDLE_EVENT(R_MOUSE_BUTTON_EVENT);
+
+                    }
+
+                }
+
+            }},
+            {XCB_MAP_NOTIFY, [](xcb_generic_event_t *ev) -> void {
+                const auto *e = (const xcb_map_notify_event_t *)ev;
+                HANDLE(XCB_MAP_NOTIFY, e->event);
+
+            }},
+            {XCB_PROPERTY_NOTIFY, [](xcb_generic_event_t *ev) -> void { 
+                const auto *e = (const xcb_property_notify_event_t *)ev;
+                HANDLE(XCB_PROPERTY_NOTIFY, e->window);
+
+            }}
+
+        }, {}};
         using EventCallback = function<void(Ev)>;
         void run() {
             main_loop = [this](const xcb_generic_event_t *ev) -> void {
                 MWM_Ev res = map_ev_to_enum(ev->response_type & ~0x80);
                 switch (res) {
                     case   MWM_Ev::EXPOSE         :{
-                        const xcb_expose_event_t *const &e = (const xcb_expose_event_t *)ev;
+                        const xcb_expose_event_t *e = (const xcb_expose_event_t *)ev;
                         HANDLE(XCB_EXPOSE, e->window);
                         break;
 
                     } case MWM_Ev::ENTER_NOTIFY   :{
-                        const auto *e = (const xcb_enter_notify_event_t *)ev;
+                        const xcb_enter_notify_event_t *e = (const xcb_enter_notify_event_t *)ev;
                         HANDLE(XCB_ENTER_NOTIFY, e->event);
                         break;
                         
@@ -3102,7 +3259,8 @@ class __event_handler__ {
                 if (!ev) continue;
                 uint8_t res = get_ev(ev->response_type & ~80);
                 if (res == 0) continue;
-                main_loop.emit(ev);
+                // main_loop(ev);
+                ev_map[res](ev);
                 free(ev);
 
             }
