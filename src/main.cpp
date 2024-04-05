@@ -15092,15 +15092,15 @@ void setup_wm() {
     NEW_CLASS(dock,            __dock__           ) { dock->init(); }
     NEW_CLASS(pid_manager,     __pid_manager__    ) {}
 
-    x = connect_to_server(conn);
-    if ((x->check_conn() &= ~(1ULL << X_CONN_ERROR)) != 0) {
-        loutE << "x not connected" << loutEND;
+    // x = connect_to_server(conn);
+    // if ((x->check_conn() &= ~(1ULL << X_CONN_ERROR)) != 0) {
+    //     loutE << "x not connected" << loutEND;
         
-    }
-    else {
-        loutI << "x succesfully connected" << loutEND;
+    // }
+    // else {
+    //     loutI << "x succesfully connected" << loutEND;
         
-    }
+    // }
 
 }
 int main() {
