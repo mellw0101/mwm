@@ -6790,7 +6790,7 @@ class window {
 
             }
             xcb_char2b_t *convert_to_char2b(const char *input, int *len) {
-                size_t utf8_len = strlen(input);
+                size_t utf8_len = slen(input);
                 size_t max_chars = utf8_len; // Maximum possible number of characters (all 1-byte)
 
                 xcb_char2b_t *char2b = (xcb_char2b_t *)malloc(max_chars * sizeof(xcb_char2b_t));
