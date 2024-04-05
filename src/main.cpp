@@ -3087,25 +3087,22 @@ class __event_handler__ {
                     } case MWM_Ev::NO_Ev          :{
                         break;
                         
-                    }
-                
+                    }                
                 }
-
             };
 
             key_codes.init();
             shouldContinue = true;
-            const xcb_generic_event_t *ev;
+            xcb_generic_event_t *ev;
 
             while (shouldContinue) {
                 ev = xcb_wait_for_event(conn);
                 if (!ev) continue;
-                chrono::microseconds execTime;
-                ScopeTimer st(__func__, execTime, ev->response_type & ~80);
+                // chrono::microseconds execTime;
+                // ScopeTimer st(__func__, execTime, ev->response_type & ~80);
                 main_loop(ev);
-
+                free(ev);
             }
-
         }
         SimplifiedEvent convert_ev(xcb_generic_event_t* event) {
             SimplifiedEvent se;

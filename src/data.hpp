@@ -407,8 +407,34 @@ class ScopeTimer {
         }
 
 };
+/* 
+class AtomicSignal {
+    public:
+        static void encodeInstruction(std::atomic<uint64_t>& var, uint64_t instruction) {
+            var.store(instruction);
+        }
 
+        static uint64_t decodeInstruction(const std::atomic<uint64_t>& var) {
+            return var.load();
+        }
 
+        // Example of a more complex encoding/decoding that uses two atomic variables
+        static void encodeComplexInstruction(std::atomic<uint64_t>& var1, std::atomic<uint64_t>& var2, uint64_t instructionPart1, uint64_t instructionPart2) {
+            var1.store(instructionPart1);
+            var2.store(instructionPart2);
+        }
 
+        // Imagine this being called by worker threads to perform actions based on the encoded instructions
+        static void executeBasedOnInstruction(const std::atomic<uint64_t>& instructionVar) {
+            uint64_t instruction = decodeInstruction(instructionVar);
+
+            // Decode and execute the instruction
+            // This is a simplistic representation; your actual decoding logic can be much more complex
+            if (instruction & 0x1) { // Example condition
+                // Perform action based on the instruction
+            }
+        }
+};
+ */
 #endif/*__DATA_HPP__*/
 
