@@ -3,7 +3,14 @@
 #include "Log.hpp"
 #include <xcb/xcb.h>
 #include <xcb/xproto.h>
+#include <xcb/xcb_ewmh.h>
 // #include "tools.hpp"
+
+static xcb_connection_t * conn;
+static xcb_ewmh_connection_t * ewmh;
+static const xcb_setup_t * setup;
+static xcb_screen_iterator_t iter;
+static xcb_screen_t * screen;
 
 
 // namespace tools {
@@ -87,8 +94,8 @@
 //         return conn;
 //     }
     
-namespace { static xcb_connection_t *conn; };
-// };
+// namespace { xcb_connection_t *conn; };
+// // };
 
 namespace xcb {
 
@@ -128,7 +135,7 @@ namespace xcb {
     // }
 
     uint32_t gen_Xid() {
-        uint32_t w;
+        uint32_t w = 0;
         if ((w = xcb_generate_id(conn)) == -1) {
             loutE << "failed to generate Xid" << loutEND;
 
