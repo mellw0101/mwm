@@ -157,6 +157,12 @@ class void_err_t {
     error_detected; \
 } while(0)
 
+#define lambda(__refrence, ...)  do { \
+    [__refrence](...) {\
+        \
+    } \
+} while(0)
+
 #define CHECK_BIT_E(__flags, ...)  do { \
     bool error_detected = false; \
     unsigned long __bits[] = { __VA_ARGS__ }; \

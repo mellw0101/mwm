@@ -249,6 +249,27 @@ auto reg_callB(Func&& func, BoundArgs&&... boundArgs) {
     };
 }
 
+#include <cstdlib> // For malloc and free
+#include <new>     // For placement new
+
+template<typename T>
+class MallocAllocator {
+public:
+    // Allocates memory for one object of type T using malloc
+    static T* allocate() {
+        void* ptr = std::malloc(sizeof(T)); // Allocate raw memory
+        if (!ptr) throw std::bad_alloc();   // Check for allocation failure
+        return new(ptr) T();                // Use placement new to construct the object
+    }
+
+    // Deallocates memory for one object of type T
+    static void deallocate(T* ptr) {
+        if (!ptr) return;
+        ptr->~T();    // Call the destructor explicitly
+        std::free(ptr); // Free the memory
+    }
+};
+
 #include <vector>
 #include <memory>
 #include <functional>

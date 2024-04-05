@@ -447,15 +447,6 @@ namespace { // Tools
         }
     }
 }
-
-#define STATIC_DECLARIATION(__name) static function<void(uint32_t)> __name
-
-class client;
-class window;
-
-template<typename Callback>
-static void add_ev_to_window(uint32_t __window, int __signal_id, Callback &&__callback);
-
 namespace {
     enum {
         KILL = 1,
@@ -949,58 +940,6 @@ namespace {
     };
 
 }
-// namespace xcb {
-//     xcb_intern_atom_cookie_t intern_atom_cookie(xcb_connection_t *__c, const char *__name) {
-//         return xcb_intern_atom(
-//             __c,
-//             0,
-//             slen(__name),
-//             __name
-            
-//         );
-
-//     }
-//     xcb_intern_atom_reply_t *intern_atom_reply(xcb_connection_t *__c, xcb_intern_atom_cookie_t __cookie) {
-//         return xcb_intern_atom_reply(__c, __cookie, nullptr);
-
-//     }
-//     xcb_atom_t intern_atom(xcb_connection_t *__c, const char *__name) {
-//         xcb_intern_atom_reply_t *rep = intern_atom_reply(__c, intern_atom_cookie(__c, __name));
-//         if (!rep) {
-//             loutE << "rep = nullptr could not get intern_atom_reply" << loutEND;
-//             return XCB_ATOM_NONE;
-        
-//         } xcb_atom_t atom(rep->atom);
-//         free(rep);
-//         return atom;
-
-//     }
-//     bool window_exists(xcb_connection_t *__c, uint32_t __w) {
-//         xcb_generic_error_t *err;
-//         free(xcb_query_tree_reply(__c, xcb_query_tree(__c, __w), &err));
-//         if (err != NULL) {
-//             free(err);
-//             return false;
-
-//         }
-//         return true;
-
-//     }
-//     uint32_t gen_Xid() {
-//         return xcb_generate_id(conn);
-
-//     }
-//     void window_stack(xcb_connection_t *__c, uint32_t __window1, uint32_t __window2, uint32_t __mode) {
-//         if (__window2 == XCB_NONE) return;
-        
-//         uint16_t mask = XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE;
-//         uint32_t values[] = {__window2, __mode};
-        
-//         xcb_configure_window(__c, __window1, mask, values);
-        
-//     }
-
-// }
 namespace XCB {
     inline xcb_get_geometry_cookie_t g_cok(uint32_t __w) {
         return xcb_get_geometry(conn, __w);                             
@@ -3160,6 +3099,7 @@ class __event_handler__ {
 
             while (shouldContinue) {
                 ev = xcb_wait_for_event(conn);
+                if (!ev) continue;
                 chrono::microseconds execTime;
                 ScopeTimer st(__func__, execTime, ev->response_type & ~80);
                 main_loop(ev);
@@ -6785,9 +6725,9 @@ class client {
             //     }
             // }
 
-            window &operator[](size_t index)
-            {
+            window &operator[](size_t index) {
                 return border[index];
+
             }
 
             // client_border_decor() { create_arr(); }
@@ -14827,107 +14767,6 @@ class test {
     // Constructor.
         test() {}
 };
-// class __threaded_event_handler__ {
-//     public:
-//         __threaded_event_handler__() {
-//             /* event_handlers[XCB_EXPOSE] =  */
-//             add_arr    (XCB_EXPOSE,       [this](xcb_generic_event_t *ev) -> void {
-//                 RE_CAST_EV(xcb_expose_event_t);
-//                 const auto _func_ = [this](uint32_t __w) -> void {
-//                     signal_manager->_window_signals.emit(__w, XCB_EXPOSE);
-
-//                 }; thread(_func_, e->window).detach();
-
-//             }); add_arr(XCB_ENTER_NOTIFY, [this](xcb_generic_event_t *ev) -> void {
-//                 RE_CAST_EV(xcb_enter_notify_event_t);
-//                 auto _func_ = [this](uint32_t __w) -> void {
-//                     signal_manager->_window_signals.emit(__w, XCB_ENTER_NOTIFY);
-
-//                 }; thread(_func_, this, e->event).detach();
-
-//             }); add_arr(XCB_LEAVE_NOTIFY, [this](xcb_generic_event_t *ev) -> void {
-//                 RE_CAST_EV(xcb_leave_notify_event_t);
-//                 auto _func_ = [this](uint32_t __w) -> void {
-//                     signal_manager->_window_signals.emit(__w, XCB_LEAVE_NOTIFY);
-
-//                 }; thread(_func_, this, e->event).detach();
-
-//             }); add_arr(XCB_BUTTON_PRESS, [this](xcb_generic_event_t *ev) -> void {
-//                 RE_CAST_EV(xcb_button_press_event_t);
-//                 auto _func_ = [this](uint32_t __w) -> void {
-//                     signal_manager->_window_signals.emit(__w, XCB_BUTTON_PRESS);
-
-//                 }; thread(_func_, this, e->event).detach();
-
-//             });
-//         }
-//         void run() {
-//             xcb_generic_event_t *ev;
-//             should_continue = true;
-
-//             while (should_continue) {
-//                 if ((ev = xcb_wait_for_event(conn)) == nullptr) continue;;
-//                 uint8_t resTy = ev->response_type & ~80;
-//                 switch (resTy) {
-//                     case XCB_EXPOSE: {
-//                         event_handlers[XCB_EXPOSE](ev);
-
-//                     }
-                
-//                 } free(ev);
-
-//             }
-
-//         }
-
-//     private:
-//         bool should_continue;
-//         #define SigArrSize 5
-//         array<uint8_t, SigArrSize> sig_arr{XCB_EXPOSE, XCB_ENTER_NOTIFY, XCB_LEAVE_NOTIFY, XCB_BUTTON_PRESS};
-//         std::array<std::function<void(xcb_generic_event_t*)>, 20> event_handlers;
-
-//         template<typename Callback>
-//         void add_arr(uint8_t __sig, Callback &&__callbk) {
-//             event_handlers[__sig] = std::forward<Callback>(__callbk);
-
-//         }
-        
-//         template<size_t _index = 0>
-//         static constexpr uint8_t sig_to_map(uint8_t __index) { return __index; };
-//         // template<> static constexpr uint8_t sig_to_map(uint8_t __index) { return XCB_EXPOSE; };
-
-
-//         template<> constexpr uint8_t sig_to_map<SigArrSize>      (uint8_t __index) { return  SigArrSize; }
-//         template<> constexpr uint8_t sig_to_map<XCB_EXPOSE>      (uint8_t __index) { return 0; }
-//         template<> constexpr uint8_t sig_to_map<XCB_ENTER_NOTIFY>(uint8_t __index) { return 1; }
-//         template<> constexpr uint8_t sig_to_map<XCB_LEAVE_NOTIFY>(uint8_t __index) { return 2; }
-//         template<> constexpr uint8_t sig_to_map<XCB_BUTTON_PRESS>(uint8_t __index) { return 3; }
-
-
-
-//         template<uint8_t uint8>
-//         constexpr uint8_t sig_to_map() { return uint8; };
-
-//         // const uint8_t u8Arr[CURRENT_SIZE] = {XCB_EXPOSE};
-//         // const function<void(xcb_generic_event_t *ev)> funcArr[CURRENT_SIZE] = {
-//         //     {[this](xcb_generic_event_t *ev) -> void {
-//         //         RE_CAST_EV(xcb_expose_event_t);
-//         //         const auto &_func_ = [this](uint32_t __w) -> void {
-//         //             signal_manager->_window_signals.emit(__w, u8Arr[0]);
-
-//         //         }; thread(_func_, e->window).detach();
-
-//         //     }}
-
-//         // };
-//         // template<typename EventType>
-//         // constexpr void handle(EventType *ev) {
-//         //     const auto &e = reinterpret_cast<EventType *>(ev);
-
-
-//         // }
-
-// };
 void setup_wm() {
     user = get_user_name();
     loutCUser(USER);
