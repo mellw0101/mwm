@@ -654,18 +654,17 @@ class lout {
 			return *this;
 		}
 
-		lout& operator<<(const FuncNameWrapper& funcName)
-		{
+		lout& operator<<(const FuncNameWrapper& funcName) {
 			currentFunction = funcName.value;
 			return *this;
-		}
 
+		}
 		lout& operator<<(const line_obj_t &__line)
 		{
 			current_line = __line.line;
 			return *this;
-		}
 
+		}
 		/**
 		 *
 		 * TODO: Add this into the logMessage function to append it to the log message
@@ -675,61 +674,52 @@ class lout {
 		{
 			current_file = __name.value;
 			return *this;
-		}
 
+		}
         lout& operator<<(const window_obj_t &__window)
         {
             buffer << "[" << log_BLUE << "WINDOW_ID" << log_RESET << ":" << loutNUM(__window.value) << "] ";
             return *this;
-        }
 
-		lout& operator<<(ostream& (*pf)(ostream&))
-		{
-			if (pf == static_cast<std::ostream& (*)(std::ostream&)>(std::endl))
-			{
+        }
+		lout& operator<<(ostream& (*pf)(ostream&)) {
+			if (pf == static_cast<std::ostream& (*)(std::ostream&)>(std::endl)) {
 				logMessage();
 				buffer = std::ostringstream(); // Reset the buffer for new messages
 				// Reset log level and function as well if desired
-			}
 
-			return *this;
+			} return *this;
+
 		}
-
-        lout& operator<<(char c)
-        {
-            if (c == '\n')
-            {
+        lout& operator<<(char c) {
+            if (c == '\n') {
                 logMessage();
 				buffer = std::ostringstream(); // Reset the buffer for new messages
-            }
-            else
-            {
+
+            } else {
                 buffer << c;
-            }
 
-            return *this;
+            } return *this;
+
         }
-
-		lout& operator<<(const errno_msg_t &__errno)
-		{
+		lout& operator<<(const errno_msg_t &__errno) {
 			buffer << __errno.value;
 			return *this;
-		}
 		
+		}
         template<typename T>
         typename enable_if<is_arithmetic<T>::value, lout&>::type
-        operator<<(T value)
-        {
+        operator<<(T value) {
             buffer << loutNUM(value);
             return *this;
-        }
 
+        }
         template<typename T>
         typename enable_if<!is_arithmetic<T>::value, lout&>::type
-        operator<<(const T& message)
-        {
+        operator<<(const T& message) {
             buffer << message;
             return *this;
+
         }
 
 		// lout& err(const string &__err_msg)

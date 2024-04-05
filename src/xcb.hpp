@@ -5,9 +5,13 @@
 #include <cstdlib>
 #include <vector>
 #include "tools.hpp"
+#include "Log.hpp"
 using namespace std;
 #define X_CONN_ERROR 1
 #define X_REQ_ERROR 2
+#define X_ID_GEN_ERROR 3
+#define X_CREATE_ERR 4
+#define X_W_CREATION_ERR 5
 
 #include <xcb/xcb.h>
 
@@ -72,10 +76,62 @@ class XcbHelper {
         // Other methods...
 };
 
+typedef struct __err__64__t__ {
+    typedef enum : int {
+        wCreationErr = 1 << 0,
+
+        
+    } err_flag_t;
+    
+} err64_t;
+
 #define CHECK_VCOOKIE(cookie) do { \
     xcb_generic_error_t* error = xcb_request_check(conn, cookie); \
     if (error) { \
         fprintf(stderr, "XCB request failed with error code %d\n", error->error_code); \
+        free(error); \
+    } \
+} while (0)
+
+class void_err_t {
+    private:
+        xcb_generic_error_t *err;
+        xcb_connection_t *conn;
+
+    public:
+        // Constructor takes the connection and the cookie
+        void_err_t(xcb_connection_t* __conn, xcb_void_cookie_t cookie)
+        : conn(__conn), err(nullptr) {
+            checkErr(cookie);
+
+        }
+        ~void_err_t() {
+            if (err) {
+                free(err);/* Free the error pointer if it's not NULL */
+
+            }
+
+        }
+
+        void checkErr(xcb_void_cookie_t cookie) {
+            err = xcb_request_check(conn, cookie);
+            if (err) {
+                loutE << "XCB Error occurred. Error code: " << err->error_code << loutEND;
+
+            }
+
+        }
+        bool hasErr() const {
+            return err != nullptr;
+
+        }
+
+};
+
+#define V_COKE(cookie, ...) do { \
+    void_err_t e(conn, cookie); \
+    if (error) { \
+        loutE << ERRNO_MSG(__VA_ARGS__) << loutEND; \
         free(error); \
     } \
 } while (0)
@@ -89,15 +145,16 @@ class xcb {
 
         uint64_t _flags = 0xffffffffffffffff;
         vector<uint32_t> _xid_vec;
+        // void_err_t void_err;
 
-        bool is_flag_set(unsigned int __f);
-        void set_flag(unsigned int __f);
-        void clear_flag(unsigned int position);
-        void toggle_flag(unsigned int position);
         void check_error();
-        
 
     public:
+        bool is_flag_set(unsigned int __f);
+        void set_flag(unsigned int __f);
+        void clear_flag(unsigned int __f);
+        void toggle_flag(unsigned int __f);
+
         xcb_intern_atom_cookie_t intern_atom_cookie(const char *__name);
         xcb_intern_atom_reply_t *intern_atom_reply(xcb_intern_atom_cookie_t __cookie);
         xcb_atom_t intern_atom(const char *__name);
@@ -110,14 +167,15 @@ class xcb {
         void create_w(uint32_t __pw, uint32_t __w, int16_t __x, int16_t __y,
                       uint16_t __width, uint16_t __height);
 
+        
+
         xcb(xcb_connection_t *__conn, xcb_screen_t *__s);
 
-}; static xcb *xcb(nullptr);
+};
+static xcb *xcb(nullptr);
 
 inline class xcb *connect_to_server(xcb_connection_t *__conn, xcb_screen_t *__s) {
     return new class xcb(__conn, __s);
     
 }
-
-
 #endif/* XCB__HPP */

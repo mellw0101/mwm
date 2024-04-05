@@ -1,4 +1,5 @@
 #include "xcb.hpp"
+// #include "data.hpp"
 #include "tools.hpp"
 #include "Log.hpp"
 #include <cstdint>
@@ -48,7 +49,16 @@ uint32_t xcb::gen_Xid() {
     
     }
     uint32_t w = xcb_generate_id(_conn);
-    if (w != -1) _xid_vec.push_back(w);
+    if (w == -1) {
+        set_flag(X_ID_GEN_ERROR);
+        loutE << "Failed to generate Xid" << loutEND;
+
+    }
+    else {
+        clear_flag(X_ID_GEN_ERROR);
+        
+    }
+    _xid_vec.push_back(w);
     return w;
 
 }
@@ -118,7 +128,15 @@ void xcb::create_w(uint32_t __pw, uint32_t __w, int16_t __x, int16_t __y,
         nullptr
 
     ); check_error();
-    
+    if ((_flags & 1ULL << X_REQ_ERROR) != 0) {
+        loutE << "window creation failed" << loutEND;
+        _flags |= 1ULL << X_W_CREATION_ERR;
+          
+    } else {
+        _flags &= ~(1ULL << X_W_CREATION_ERR);
+        
+    }
+
 }
 void xcb::check_error() {
     _error = xcb_request_check(_conn, _cookie);
@@ -126,8 +144,7 @@ void xcb::check_error() {
         loutE << ERRNO_MSG("XCB Error occurred. Error code:") << _error->error_code << loutEND;
         _flags |= 1ULL << X_REQ_ERROR; /* Set bit to true */
     
-    }
-    else {
+    } else {
         _flags &= ~(1ULL << X_REQ_ERROR); /* Set bit to false */
         
     }
