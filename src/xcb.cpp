@@ -127,7 +127,6 @@ namespace xcb {
 
     // }
 
-    
     uint32_t gen_Xid(xcb_connection_t *__c) {
         uint32_t w;
         if ((w = xcb_generate_id(__c)) == -1) {
