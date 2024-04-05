@@ -2,6 +2,6 @@
 #define TOOLS_HPP
 #include <cstddef>
 
-size_t slen(const char *s);
+size_t slen(const char *__s);
 
 #endif/* TOOLS_HPP */
