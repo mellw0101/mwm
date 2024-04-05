@@ -4482,7 +4482,39 @@ class window {
                 signal_manager->_window_signals.remove(w);
                 signal_manager->_window_client_map.remove(w);
 
-            }            
+            }
+            void kill_test() {
+                uint32_t w = this->_window;
+
+                xcb_intern_atom_cookie_t protocols_cookie = xcb_intern_atom(conn, 1, slen("WM_PROTOCOLS"), "WM_PROTOCOLS");
+                xcb_intern_atom_reply_t *protocols_reply = xcb_intern_atom_reply(conn, protocols_cookie, nullptr);
+
+                xcb_intern_atom_cookie_t delete_cookie = xcb_intern_atom(conn, 0, 16, "WM_DELETE_WINDOW");
+                xcb_intern_atom_reply_t *delete_reply = xcb_intern_atom_reply(conn, delete_cookie, nullptr);
+
+                if (protocols_reply == nullptr) {
+                    loutE << "protocols reply is null" << loutEND;
+                    free(protocols_reply);
+                    free(delete_reply);
+                    return;
+
+                }
+                if (delete_reply == nullptr) {
+                    loutE << "delete reply is null" << loutEND;
+                    free(protocols_reply);
+                    free(delete_reply);
+                    return;
+
+                }
+                send_event(KILL_WINDOW, (uint32_t[]){32, protocols_reply->atom, delete_reply->atom});
+                
+                free(protocols_reply);
+                free(delete_reply);
+
+                signal_manager->_window_signals.remove(w);
+                signal_manager->_window_client_map.remove(w);
+
+            }    
             void clear() {
                 VOID_COOKIE = xcb_clear_area(
                     conn, 

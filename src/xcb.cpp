@@ -7,6 +7,8 @@
 #include "tools.hpp"
 #include "xcb.hpp"
 
+xcb_connection_t *conn = nullptr;
+
 namespace xcb {
     xcb_intern_atom_cookie_t intern_atom_cookie(xcb_connection_t *__c, const char *__name) {
         return xcb_intern_atom(
