@@ -3158,6 +3158,7 @@ class __event_handler__ {
             while (shouldContinue) {
                 ev = xcb_wait_for_event(conn);
                 main_loop(ev);
+
             }
 
         }
@@ -3336,155 +3337,6 @@ class __event_handler__ {
                 
             }}
         };
-        Signal<xcb_generic_event_t *> ev_arr[13] = {
-            [](xcb_generic_event_t *ev) -> void {
-                return;
-
-            }, [](xcb_generic_event_t *ev) -> void {
-                const auto *e = (const xcb_expose_event_t *)ev;
-                HANDLE(XCB_EXPOSE, e->window);
-
-            }, [](xcb_generic_event_t *ev) -> void {
-                const auto *e = (const xcb_enter_notify_event_t *)ev;
-                thread(handle_event<XCB_ENTER_NOTIFY>, e->event).detach();
-
-            }, [](xcb_generic_event_t *ev) -> void {
-                const auto *e = (const xcb_leave_notify_event_t *)ev;
-                thread(handle_event<XCB_LEAVE_NOTIFY>, e->event).detach();
-            
-            }, [](xcb_generic_event_t *ev) -> void {
-                const auto *e = (const xcb_focus_in_event_t *)ev;
-                HANDLE(XCB_FOCUS_IN, e->event);
-            
-            }, [](xcb_generic_event_t *ev) -> void {
-                const auto *e = (const xcb_focus_out_event_t *)ev;
-                HANDLE(XCB_FOCUS_IN, e->event);
-            
-            }, [](xcb_generic_event_t *ev) -> void {
-                const auto *e = (const xcb_destroy_notify_event_t *)ev;
-                HANDLE(DESTROY_NOTIF_EV, e->event);
-                HANDLE(DESTROY_NOTIF_W, e->window);
-
-            }, [](xcb_generic_event_t *ev) -> void {
-                const auto *e = (const xcb_map_request_event_t *)ev;
-                HANDLE(XCB_MAP_REQUEST, e->window);
-
-            }, [](xcb_generic_event_t *ev) -> void {
-                const auto *e = (const xcb_motion_notify_event_t *)ev;
-                HANDLE(XCB_MOTION_NOTIFY, e->event);
-            
-            }, [this](xcb_generic_event_t *ev) -> void {
-                const auto *e = (const xcb_key_press_event_t *)ev;
-                switch (e->state) {
-                    case   CTRL  + ALT          :{
-                        if (e->detail == key_codes.t) {
-                            thread(handle_event<ROOT_SIGNAL>, TERM_KEY_PRESS).detach();
-
-                        } /* Terminal keybinding */ break;
-
-                    } case SHIFT + CTRL + SUPER :{
-                        if (e->detail == key_codes.r_arrow) {
-                            thread(handle_event<MOVE_TO_NEXT_DESKTOP_WAPP>, e->event).detach();
-
-                        } else if (e->detail == key_codes.l_arrow) {
-                            thread(handle_event<MOVE_TO_PREV_DESKTOP_WAPP>, e->event).detach();
-
-                        } break;
-
-                    } case SHIFT + ALT          :{
-                        if (e->detail == key_codes.q) {
-                            thread(handle_event<ROOT_SIGNAL>, QUIT_KEY_PRESS).detach();
-
-                        } /* Quit keybinding */ break;
-
-                    } case ALT                  :{
-                        if (e->detail == key_codes.n_1) {
-                            thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_1).detach();
-
-                        } else if (e->detail == key_codes.n_2) {
-                            thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_2).detach();
-
-                        } else if (e->detail == key_codes.n_3) {
-                            thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_3).detach();
-                            
-                        } else if (e->detail == key_codes.n_4) {
-                            thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_4).detach();
-
-                        } else if (e->detail == key_codes.n_5) {
-                            thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_5).detach();
-                            
-                        } else if (e->detail == key_codes.tab) {
-                            thread(handle_event<ROOT_SIGNAL>, CYCLE_FOCUS_KEY_PRESS).detach();
-
-                        } break;
-
-                    } case CTRL  + SUPER        :{
-                        if (e->detail == key_codes.r_arrow) {
-                            thread(handle_event<ROOT_SIGNAL>, MOVE_TO_NEXT_DESKTOP).detach();
-
-                        } else if (e->detail == key_codes.l_arrow) {
-                            thread(handle_event<ROOT_SIGNAL>, MOVE_TO_PREV_DESKTOP).detach();
-
-                        } break;
-
-                    } case SUPER                :{
-                        if (e->detail == key_codes.r_arrow)        {
-                            HANDLE_EVENT(TILE_RIGHT);
-
-                        } else if (e->detail == key_codes.l_arrow) {
-                            HANDLE_EVENT(TILE_LEFT);
-
-                        } else if (e->detail == key_codes.u_arrow) {
-                            HANDLE_EVENT(TILE_UP);
-
-                        } else if (e->detail == key_codes.d_arrow) {
-                            HANDLE_EVENT(TILE_DOWN);
-
-                        } else if (e->detail == key_codes.k)       {
-                            thread(handle_event<ROOT_SIGNAL>, DEBUG_KEY_PRESS).detach();
-                        
-                        } break;
-
-                    }
-
-                } if (e->detail == key_codes.f11) {
-                    HANDLE(EWMH_MAXWIN_SIGNAL, e->event);
-
-                }
-            
-            }, [](xcb_generic_event_t *ev) -> void {
-                const auto *e = (const xcb_button_press_event_t *)ev;
-                if (e->detail == L_MOUSE_BUTTON)        {
-                    if (e->state == ALT) {
-                        HANDLE(L_MOUSE_BUTTON_EVENT__ALT, e->event);
-
-                    } else {
-                        HANDLE(L_MOUSE_BUTTON_EVENT, e->event);
-
-                    }
-
-                } else if (e->detail == R_MOUSE_BUTTON) {
-                    if (e->state == ALT) {
-                        HANDLE(R_MOUSE_BUTTON_EVENT__ALT, e->event);
-                        
-                    } else {
-                        HANDLE(R_MOUSE_BUTTON_EVENT, e->event);
-
-                    }
-
-                }
-            
-            }, [](xcb_generic_event_t *ev) -> void {
-                const auto *e = (const xcb_map_notify_event_t *)ev;
-                HANDLE(XCB_MAP_NOTIFY, e->window);
-
-            }, [](xcb_generic_event_t *ev) -> void {
-                const auto *e = (const xcb_property_notify_event_t *)ev;
-                HANDLE(XCB_PROPERTY_NOTIFY, e->window);
-
-            }, 
-        };
-
         DynamicArray<uint32_t *> _window_arr;
 
         constexpr uint8_t char_to_keycode__(int8_t c) const {
@@ -6796,26 +6648,6 @@ class window {
 
                 }
                 xcb->create_w(_window, window, __x, __y, __width, __height);
-                uint64_t err = xcb->check_conn();
-                CHECK_BIT_E(err, X_W_CREATION_ERR, XCB_CONFIG_WINDOW_HEIGHT); 
-
-                // VOID_COOKIE = xcb_create_window(
-                //     conn,
-                //     this->_depth,
-                //     window,
-                //     this->_window,
-                //     __x,
-                //     __y,
-                //     __width,
-                //     __height,
-                //     0,
-                //     this->__class,
-                //     this->_visual,
-                //     this->_value_mask,
-                //     this->_value_list
-
-                // ); CHECK_VOID_COOKIE();
-                // FLUSH_XWin();
 
                 change_back_pixel(get_color(__color), window);
                 VOID_COOKIE = xcb_map_window(conn, window); CHECK_VOID_COOKIE(); FLUSH_XWin();
@@ -6831,8 +6663,20 @@ class window {
             #define CREATE_DOWN_BORDER(__size, __color)  create_border_window(DOWN,  __color, 0, (_height - __size), _width, __size)
             #define CREATE_LEFT_BORDER(__size, __color)  create_border_window(LEFT,  __color, 0, 0, __size, _height)
             #define CREATE_RIGHT_BORDER(__size, __color) create_border_window(RIGHT, __color, (_width - __size), 0, __size, _height)
+            #define Create_Border(__flag, __color, ...)  do { \
+                unsigned int __bits[] = { __VA_ARGS__ }; \
+                create_border_window( \
+                    __flag, \
+                    __color, \
+                    __bits[0], \
+                    __bits[1], \
+                    __bits[2], \
+                    __bits[3]); \
+                \
+            } while(0)
             void make_border_window(int __border, const uint32_t &__size, const int &__color) {
                 if (__border & UP   ) CREATE_UP_BORDER(__size, __color);
+                Create_Border(UP, __color, 0, 0, _width, __size);
                 if (__border & DOWN ) CREATE_DOWN_BORDER(__size, __color);
                 if (__border & LEFT ) CREATE_LEFT_BORDER(__size, __color);
                 if (__border & RIGHT) CREATE_RIGHT_BORDER(__size, __color);
