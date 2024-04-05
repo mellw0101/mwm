@@ -3,6 +3,7 @@
 #include "Log.hpp"
 #include <cstdint>
 #include <xcb/xcb.h>
+#include <xcb/xproto.h>
 
 xcb_intern_atom_cookie_t xcb::intern_atom_cookie(const char *__name) {
     return xcb_intern_atom(
@@ -46,7 +47,9 @@ uint32_t xcb::gen_Xid() {
         return -1;
     
     }
-    return xcb_generate_id(_conn);
+    uint32_t w = xcb_generate_id(_conn);
+    if (w != -1) _xid_vec.push_back(w);
+    return w;
 
 }
 void xcb::window_stack(uint32_t __window1, uint32_t __window2, uint32_t __mode) {
@@ -74,15 +77,15 @@ void xcb::toggle_flag(unsigned int __f) {
     _flags ^= 1ULL << __f;
 
 }
-xcb::xcb(xcb_connection_t *__conn) : _conn(__conn) {
+xcb::xcb(xcb_connection_t *__conn, xcb_screen_t *__s) : _conn(__conn), _s(__s) {
     if (xcb_connection_has_error(_conn)) {
         loutE << "could not connect to the exisiting 'xcb_connection_t *'" << loutEND;
+        _flags |= 1ULL << X_CONN_ERROR;
         _conn = nullptr;
-        set_flag(X_CONN_ERROR);
     
     }
     else {
-        clear_flag(X_CONN_ERROR);
+        _flags &= ~(1ULL << X_CONN_ERROR);
         loutI << "success x is now connected to the server" << loutEND;
         
     }
@@ -95,4 +98,38 @@ xcb::xcb(xcb_connection_t *__conn) : _conn(__conn) {
 uint64_t &xcb::check_conn() {
     return _flags;
     
+}
+void xcb::create_w(uint32_t __pw, uint32_t __w, int16_t __x, int16_t __y,
+                      uint16_t __width, uint16_t __height) {
+    // Create the window
+    _cookie = xcb_create_window(
+        _conn,
+        24,
+        __w,
+        __pw,
+        __x,
+        __y,
+        __width,
+        __height,
+        0,
+        XCB_WINDOW_CLASS_INPUT_OUTPUT,
+        _s->root_visual,
+        0,
+        nullptr
+
+    ); check_error();
+    
+}
+void xcb::check_error() {
+    _error = xcb_request_check(_conn, _cookie);
+    if (_error) {
+        loutE << ERRNO_MSG("XCB Error occurred. Error code:") << _error->error_code << loutEND;
+        _flags |= 1ULL << X_REQ_ERROR; /* Set bit to true */
+    
+    }
+    else {
+        _flags &= ~(1ULL << X_REQ_ERROR); /* Set bit to false */
+        
+    }
+
 }

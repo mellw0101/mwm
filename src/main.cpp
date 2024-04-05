@@ -6795,26 +6795,28 @@ class window {
                     return; 
 
                 }
-                VOID_COOKIE = xcb_create_window(
-                    conn,
-                    this->_depth,
-                    window,
-                    this->_window,
-                    __x,
-                    __y,
-                    __width,
-                    __height,
-                    0,
-                    this->__class,
-                    this->_visual,
-                    this->_value_mask,
-                    this->_value_list
+                xcb->create_w(_window, window, __x, __y, __width, __height);
 
-                ); CHECK_VOID_COOKIE();
-                FLUSH_XWin();
+                // VOID_COOKIE = xcb_create_window(
+                //     conn,
+                //     this->_depth,
+                //     window,
+                //     this->_window,
+                //     __x,
+                //     __y,
+                //     __width,
+                //     __height,
+                //     0,
+                //     this->__class,
+                //     this->_visual,
+                //     this->_value_mask,
+                //     this->_value_list
+
+                // ); CHECK_VOID_COOKIE();
+                // FLUSH_XWin();
 
                 change_back_pixel(get_color(__color), window);
-                VOID_cookie = xcb_map_window(conn, window); CHECK_VOID_COOKIE(); FLUSH_XWin();
+                VOID_COOKIE = xcb_map_window(conn, window); CHECK_VOID_COOKIE(); FLUSH_XWin();
 
                 if (__border == UP   ) _border[0] = window;
                 if (__border == DOWN ) _border[1] = window;
@@ -8169,7 +8171,7 @@ class Window_Manager {
                 _setup();
                 _iter();
                 _screen();
-                xcb = connect_to_server(conn);
+                xcb = connect_to_server(conn, screen);
                 if ((xcb->check_conn() & (1ULL << X_CONN_ERROR)) != 0) {
                     loutE << "x not connected" << loutEND;
                     
@@ -8223,7 +8225,7 @@ class Window_Manager {
 
             }
             void get_atom(char *name, xcb_atom_t *atom) {
-                xcb_intern_atom_reply_t *reply = xcb_intern_atom_reply(conn, xcb_intern_atom(conn, 0, strlen(name), name), NULL);
+                xcb_intern_atom_reply_t *reply = xcb_intern_atom_reply(conn, xcb_intern_atom(conn, 0, slen(name), name), NULL);
                 if (reply != NULL) {
                     *atom = reply->atom;
 
@@ -8326,7 +8328,6 @@ class Window_Manager {
                     }
 
                 }
-
                 void unfocus()
                 {
                     window(tmp);
