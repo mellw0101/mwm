@@ -7348,10 +7348,12 @@ class client {
 
             }, this->win);
 
-            CONN(DESTROY_NOTIF_W, {
-                this->kill();
+            CONN(DESTROY_NOTIF_EV, {
+                if (!this->win.is_mapped()) {
+                    this->kill();
+                }
 
-            }, this->frame);
+            }, this->win);
 
             CWC(frame);
             CWC(win);
