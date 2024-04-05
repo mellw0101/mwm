@@ -4473,7 +4473,8 @@ class window {
                     free(delete_reply);
                     return;
 
-                } send_event(KILL_WINDOW, (uint32_t[]){32, protocols_reply->atom, delete_reply->atom});
+                }
+                send_event(KILL_WINDOW, (uint32_t[]){32, protocols_reply->atom, delete_reply->atom});
                 
                 free(protocols_reply);
                 free(delete_reply);
