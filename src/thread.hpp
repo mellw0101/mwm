@@ -1,6 +1,6 @@
-#include <future>
+/* #include <future>
 #include <mutex>
-#include <queue>
+#include <queue> */
 #include <thread>
 #include <vector>
 using namespace std;
@@ -135,7 +135,7 @@ class TimedDataSender {
         std::function<void()> task_; // The task to be performed
 };
 
-#include <vector>
+/* #include <vector>
 #include <queue>
 #include <thread>
 #include <mutex>
@@ -198,7 +198,7 @@ class ThreadPool {
         std::mutex queueMutex;
         std::condition_variable condition;
         bool stop;
-};
+}; */
 
 class root_thread {
     private:
