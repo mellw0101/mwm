@@ -2945,7 +2945,7 @@ class __event_handler__ {
             }},
             {XCB_FOCUS_IN, [](xcb_generic_event_t *ev) -> void { 
                 const auto *e = (const xcb_focus_in_event_t *)ev;
-                HANDLE(XCB_LEAVE_NOTIFY, e->event);
+                HANDLE(XCB_FOCUS_IN, e->event);
 
             }},
             {XCB_FOCUS_OUT, [](xcb_generic_event_t *ev) -> void {
@@ -3257,10 +3257,10 @@ class __event_handler__ {
             while (shouldContinue) {
                 ev = xcb_wait_for_event(conn);
                 if (!ev) continue;
-                uint8_t res = get_ev(ev->response_type & ~80);
-                if (res == 0) continue;
+                // uint8_t res = get_ev(ev->response_type & ~80);
+                // if (res == 0) continue;
                 // main_loop(ev);
-                ev_map[res](ev);
+                ev_map[ev->response_type & ~80](ev);
                 free(ev);
 
             }
