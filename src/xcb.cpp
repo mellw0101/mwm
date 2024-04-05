@@ -42,6 +42,7 @@ bool nX::window_exists(uint32_t __w) {
 
 }
 uint32_t nX::gen_Xid() {
+    if (_flags & (1ULL << X_CONN_ERROR)) return 0;
     return xcb_generate_id(_conn);
 
 }
@@ -78,6 +79,7 @@ nX::nX(xcb_connection_t *__conn) : _conn(__conn) {
     
     }
     else {
+        clear_flag(X_CONN_ERROR);
         loutI << "success x is now connected to the server" << loutEND;
         
     }

@@ -8,8 +8,8 @@
 
 class nX {
     private:
-        xcb_connection_t *_conn = nullptr;
-        uint64_t _flags = 0;
+        xcb_connection_t *_conn;
+        uint64_t _flags = 0xffffffffffffffff;
 
         bool is_flag_set(unsigned int __f);
         void set_flag(unsigned int __f);
@@ -26,11 +26,10 @@ class nX {
         void window_stack(uint32_t __window1, uint32_t __window2, uint32_t __mode);
 
         uint64_t &check_conn();
-        operator uint64_t&() { return _flags; }
 
         nX(xcb_connection_t *__conn);
 
-}; static nX *nX(nullptr);
+};
 
 inline class nX *connect_to_server(xcb_connection_t *__conn) {
     return new class nX(__conn);

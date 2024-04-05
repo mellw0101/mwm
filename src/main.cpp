@@ -96,6 +96,7 @@ static xcb_ewmh_connection_t * ewmh;
 static const xcb_setup_t * setup;
 static xcb_screen_iterator_t iter;
 static xcb_screen_t * screen;
+static nX *nX = nullptr; 
 
 // #include "xcb.hpp"
 
@@ -6790,7 +6791,7 @@ class window {
         /* Borders    */
             void create_border_window(BORDER __border, int __color, uint32_t __x, uint32_t __y, uint32_t __width, uint32_t __height) {
                 uint32_t window = nX->gen_Xid();
-                // if (window == -1) return;
+                if (window == 0) return;
                 /* if ((window = xcb_generate_id(conn)) == -1) {
                     loutEWin << "Failed to create border window: " << WINDOW_ID_BY_INPUT(window) << loutEND;
                     return; 
@@ -15093,7 +15094,7 @@ void setup_wm() {
     NEW_CLASS(pid_manager,     __pid_manager__    ) {}
 
     nX = connect_to_server(conn);
-    if ((nX->check_conn() &= ~(1ULL << X_CONN_ERROR)) != 0) {
+    if ((nX->check_conn() & ~(1ULL << X_CONN_ERROR)) != 0) {
         loutE << "x not connected" << loutEND;
         
     }
