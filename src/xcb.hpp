@@ -93,7 +93,7 @@ namespace xcb {
     xcb_intern_atom_reply_t *intern_atom_reply(xcb_connection_t *__c, xcb_intern_atom_cookie_t __cookie);
     xcb_atom_t intern_atom(const char *__name);
     bool window_exists(xcb_connection_t *__c, uint32_t __w);
-    uint32_t gen_Xid(xcb_connection_t *__c);
+    uint32_t gen_Xid();
     void window_stack(xcb_connection_t *__c, uint32_t __window1, uint32_t __window2, uint32_t __mode);
 
 }

@@ -46,7 +46,7 @@ namespace xcb {
         return true;
 
     }
-    uint32_t gen_Xid(xcb_connection_t *__c) {
+    uint32_t gen_Xid(xcb_connection_t *__c = conn) {
         uint32_t w = xcb_generate_id(__c);
         return (window_exists(__c, w)) ? w : XCB_NONE;
 
