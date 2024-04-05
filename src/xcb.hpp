@@ -5,7 +5,7 @@
 #include <xcb/xproto.h>
 #include <xcb/xcb_ewmh.h>
 
-// static xcb_connection_t * conn;
+// static xcb_connection_t * conn = nullptr;
 // static xcb_ewmh_connection_t * ewmh;
 // static const xcb_setup_t * setup;
 // static xcb_screen_iterator_t iter;
@@ -89,12 +89,16 @@
 // } using namespace tools;
 
 namespace xcb {
+    namespace {
+        xcb_connection_t *conn;
+    
+    }
 //     uint32_t gen_Xid();
 //     xcb_intern_atom_cookie_t intern_atom_cookie(const char *__name);
 //     xcb_intern_atom_reply_t *intern_atom_reply(xcb_intern_atom_cookie_t __cookie);
 //     xcb_atom_t intern_atom(const char *__name);
     
-    uint32_t gen_Xid(xcb_connection_t *__c);
+    uint32_t gen_Xid();
 
 }
 

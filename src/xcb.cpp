@@ -4,7 +4,8 @@
 #include <xcb/xcb.h>
 #include <xcb/xproto.h>
 #include <xcb/xcb_ewmh.h>
-#include "tools.hpp"
+// #include "tools.hpp"
+#include "xcb.hpp"
 
 
 // namespace tools {
@@ -128,14 +129,34 @@ namespace xcb {
 
     // }
 
-    uint32_t gen_Xid(xcb_connection_t *__c) {
+    uint32_t gen_Xid() {
         uint32_t w = 0;
-        if ((w = xcb_generate_id(__c)) == -1) {
+        if ((w = xcb_generate_id(conn)) == -1) {
             loutE << "failed to generate Xid" << loutEND;
 
         }
-        return w;
+        return (!w) ? XCB_NONE : w;
 
+    }
+    bool window_exists(xcb_connection_t *__c, uint32_t __window) {
+        xcb_generic_error_t *err;
+        free(xcb_query_tree_reply(__c, xcb_query_tree(__c, __window), &err));
+        if (err != NULL) {
+            free(err);
+            return false;
+
+        }
+        return true;
+
+    }
+    void window_stack(xcb_connection_t *__c, uint32_t __window1, uint32_t __window2, uint32_t __mode) {
+        if (__window2 == XCB_NONE) return;
+        
+        uint16_t mask = XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE;
+        uint32_t values[] = {__window2, __mode};
+        
+        xcb_configure_window(__c, __window1, mask, values);
+        
     }
 
 }
