@@ -2929,11 +2929,11 @@ class __event_handler__ {
 
         using EventCallback = function<void(Ev)>;
         void run() {
-            main_loop.connect([this](const xcb_generic_event_t *ev) -> void {
+            main_loop = [this](const xcb_generic_event_t *ev) -> void {
                 MWM_Ev res = map_ev_to_enum(ev->response_type & ~0x80);
                 switch (res) {
                     case   MWM_Ev::EXPOSE         :{
-                        const auto *e = (const xcb_expose_event_t *)ev;
+                        const xcb_expose_event_t *const &e = (const xcb_expose_event_t *)ev;
                         HANDLE(XCB_EXPOSE, e->window);
                         break;
 
@@ -3091,7 +3091,7 @@ class __event_handler__ {
                 
                 }
 
-            });
+            };
 
             key_codes.init();
             shouldContinue = true;
