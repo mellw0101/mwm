@@ -6,7 +6,7 @@
 #include "tools.hpp"
 
 
-namespace tools {
+// namespace tools {
     // size_t slen(const char *__s) {
     //     size_t i(0); for(; __s[i]; ++i){} return i;
         
@@ -79,53 +79,63 @@ namespace tools {
 
     } */
 
-} using namespace tools;
-struct conn_t {
-    static xcb_connection_t *conn;
+// } using namespace tools;
+// struct conn_t {
+//     static xcb_connection_t *conn;
 
-    operator xcb_connection_t*(){
-        return conn;
-    }
+//     operator xcb_connection_t*(){
+//         return conn;
+//     }
     
-};
+// };
 
 namespace xcb {
-    namespace { static xcb_connection_t *conn; };
+    // namespace { static xcb_connection_t *conn; };
 
-    uint32_t gen_Xid() {
+    // uint32_t gen_Xid() {
+    //     uint32_t w;
+    //     if ((w = xcb_generate_id(conn)) == -1) {
+    //         loutE << "failed to generate Xid" << loutEND;
+
+    //     }
+    //     return w;
+
+    // }
+    // xcb_intern_atom_cookie_t intern_atom_cookie(const char *__name) {
+    //     return xcb_intern_atom(
+    //         conn,
+    //         0,
+    //         slen(__name),
+    //         __name
+            
+    //     );
+
+    // }
+    // xcb_intern_atom_reply_t *intern_atom_reply(xcb_intern_atom_cookie_t __cookie) {
+    //     return xcb_intern_atom_reply(conn, __cookie, nullptr);
+
+    // }
+    // xcb_atom_t intern_atom(const char *__name) {
+    //     xcb_intern_atom_reply_t *rep = intern_atom_reply(intern_atom_cookie(__name));
+    //     if (!rep) {
+    //         loutE << "rep = nullptr could not get intern_atom_reply" << loutEND;
+    //         return XCB_ATOM_NONE;
+        
+    //     } xcb_atom_t atom(rep->atom);
+    //     free(rep);
+    //     return atom;
+
+    // }
+
+    
+    uint32_t gen_Xid(xcb_connection_t *__c) {
         uint32_t w;
-        if ((w = xcb_generate_id(conn))== -1) {
+        if ((w = xcb_generate_id(__c)) == -1) {
             loutE << "failed to generate Xid" << loutEND;
 
         }
         return w;
 
     }
-    xcb_intern_atom_cookie_t intern_atom_cookie(const char *__name) {
-        return xcb_intern_atom(
-            conn,
-            0,
-            slen(__name),
-            __name
-            
-        );
-
-    }
-    xcb_intern_atom_reply_t *intern_atom_reply(xcb_intern_atom_cookie_t __cookie) {
-        return xcb_intern_atom_reply(conn, __cookie, nullptr);
-
-    }
-    xcb_atom_t intern_atom(const char *__name) {
-        xcb_intern_atom_reply_t *rep = intern_atom_reply(intern_atom_cookie(__name));
-        if (!rep) {
-            loutE << "rep = nullptr could not get intern_atom_reply" << loutEND;
-            return XCB_ATOM_NONE;
-        
-        } xcb_atom_t atom(rep->atom);
-        free(rep);
-        return atom;
-
-    }
-    
 
 }
