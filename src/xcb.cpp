@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <xcb/xcb.h>
 
-xcb_intern_atom_cookie_t nX::intern_atom_cookie(const char *__name) {
+xcb_intern_atom_cookie_t xcb::intern_atom_cookie(const char *__name) {
     return xcb_intern_atom(
         _conn,
         0,
@@ -14,11 +14,11 @@ xcb_intern_atom_cookie_t nX::intern_atom_cookie(const char *__name) {
     );
 
 }
-xcb_intern_atom_reply_t *nX::intern_atom_reply(xcb_intern_atom_cookie_t __cookie) {
+xcb_intern_atom_reply_t *xcb::intern_atom_reply(xcb_intern_atom_cookie_t __cookie) {
     return xcb_intern_atom_reply(_conn, __cookie, nullptr);
 
 }
-xcb_atom_t nX::intern_atom(const char *__name) {
+xcb_atom_t xcb::intern_atom(const char *__name) {
     xcb_intern_atom_reply_t *rep = intern_atom_reply(intern_atom_cookie(__name));
     if (!rep) {
         loutE << "rep = nullptr could not get intern_atom_reply" << loutEND;
@@ -30,7 +30,7 @@ xcb_atom_t nX::intern_atom(const char *__name) {
     return atom;
 
 }
-bool nX::window_exists(uint32_t __w) {
+bool xcb::window_exists(uint32_t __w) {
     xcb_generic_error_t *err;
     free(xcb_query_tree_reply(_conn, xcb_query_tree(_conn, __w), &err));
     if (err != NULL) {
@@ -41,12 +41,12 @@ bool nX::window_exists(uint32_t __w) {
     return true;
 
 }
-uint32_t nX::gen_Xid() {
+uint32_t xcb::gen_Xid() {
     if (_flags & (1ULL << X_CONN_ERROR)) return 0;
     return xcb_generate_id(_conn);
 
 }
-void nX::window_stack(uint32_t __window1, uint32_t __window2, uint32_t __mode) {
+void xcb::window_stack(uint32_t __window1, uint32_t __window2, uint32_t __mode) {
     if (__window2 == XCB_NONE) return;
     
     uint16_t mask = XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE;
@@ -55,23 +55,23 @@ void nX::window_stack(uint32_t __window1, uint32_t __window2, uint32_t __mode) {
     xcb_configure_window(_conn, __window1, mask, values);
     
 }
-bool nX::is_flag_set(unsigned int __f) {
+bool xcb::is_flag_set(unsigned int __f) {
     return (_flags & (1ULL << __f)) != 0;
 
 }
-void nX::set_flag(unsigned int __f) {
+void xcb::set_flag(unsigned int __f) {
     _flags |= 1ULL << __f;
 
 }
-void nX::clear_flag(unsigned int __f) {
+void xcb::clear_flag(unsigned int __f) {
     _flags &= ~(1ULL << __f);
 
 }
-void nX::toggle_flag(unsigned int __f) {
+void xcb::toggle_flag(unsigned int __f) {
     _flags ^= 1ULL << __f;
 
 }
-nX::nX(xcb_connection_t *__conn) : _conn(__conn) {
+xcb::xcb(xcb_connection_t *__conn) : _conn(__conn) {
     if (xcb_connection_has_error(_conn)) {
         loutE << "could not connect to the exisiting 'xcb_connection_t *'" << loutEND;
         _conn = nullptr;
@@ -89,7 +89,7 @@ nX::nX(xcb_connection_t *__conn) : _conn(__conn) {
 //     return new class x(__conn);
     
 // }
-uint64_t &nX::check_conn() {
+uint64_t &xcb::check_conn() {
     return _flags;
     
 }

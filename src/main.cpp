@@ -96,7 +96,6 @@ static xcb_ewmh_connection_t * ewmh;
 static const xcb_setup_t * setup;
 static xcb_screen_iterator_t iter;
 static xcb_screen_t * screen;
-static nX *nX = nullptr; 
 
 // #include "xcb.hpp"
 
@@ -949,58 +948,58 @@ namespace {
     };
 
 }
-namespace xcb {
-    xcb_intern_atom_cookie_t intern_atom_cookie(xcb_connection_t *__c, const char *__name) {
-        return xcb_intern_atom(
-            __c,
-            0,
-            slen(__name),
-            __name
+// namespace xcb {
+//     xcb_intern_atom_cookie_t intern_atom_cookie(xcb_connection_t *__c, const char *__name) {
+//         return xcb_intern_atom(
+//             __c,
+//             0,
+//             slen(__name),
+//             __name
             
-        );
+//         );
 
-    }
-    xcb_intern_atom_reply_t *intern_atom_reply(xcb_connection_t *__c, xcb_intern_atom_cookie_t __cookie) {
-        return xcb_intern_atom_reply(__c, __cookie, nullptr);
+//     }
+//     xcb_intern_atom_reply_t *intern_atom_reply(xcb_connection_t *__c, xcb_intern_atom_cookie_t __cookie) {
+//         return xcb_intern_atom_reply(__c, __cookie, nullptr);
 
-    }
-    xcb_atom_t intern_atom(xcb_connection_t *__c, const char *__name) {
-        xcb_intern_atom_reply_t *rep = intern_atom_reply(__c, intern_atom_cookie(__c, __name));
-        if (!rep) {
-            loutE << "rep = nullptr could not get intern_atom_reply" << loutEND;
-            return XCB_ATOM_NONE;
+//     }
+//     xcb_atom_t intern_atom(xcb_connection_t *__c, const char *__name) {
+//         xcb_intern_atom_reply_t *rep = intern_atom_reply(__c, intern_atom_cookie(__c, __name));
+//         if (!rep) {
+//             loutE << "rep = nullptr could not get intern_atom_reply" << loutEND;
+//             return XCB_ATOM_NONE;
         
-        } xcb_atom_t atom(rep->atom);
-        free(rep);
-        return atom;
+//         } xcb_atom_t atom(rep->atom);
+//         free(rep);
+//         return atom;
 
-    }
-    bool window_exists(xcb_connection_t *__c, uint32_t __w) {
-        xcb_generic_error_t *err;
-        free(xcb_query_tree_reply(__c, xcb_query_tree(__c, __w), &err));
-        if (err != NULL) {
-            free(err);
-            return false;
+//     }
+//     bool window_exists(xcb_connection_t *__c, uint32_t __w) {
+//         xcb_generic_error_t *err;
+//         free(xcb_query_tree_reply(__c, xcb_query_tree(__c, __w), &err));
+//         if (err != NULL) {
+//             free(err);
+//             return false;
 
-        }
-        return true;
+//         }
+//         return true;
 
-    }
-    uint32_t gen_Xid() {
-        return xcb_generate_id(conn);
+//     }
+//     uint32_t gen_Xid() {
+//         return xcb_generate_id(conn);
 
-    }
-    void window_stack(xcb_connection_t *__c, uint32_t __window1, uint32_t __window2, uint32_t __mode) {
-        if (__window2 == XCB_NONE) return;
+//     }
+//     void window_stack(xcb_connection_t *__c, uint32_t __window1, uint32_t __window2, uint32_t __mode) {
+//         if (__window2 == XCB_NONE) return;
         
-        uint16_t mask = XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE;
-        uint32_t values[] = {__window2, __mode};
+//         uint16_t mask = XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE;
+//         uint32_t values[] = {__window2, __mode};
         
-        xcb_configure_window(__c, __window1, mask, values);
+//         xcb_configure_window(__c, __window1, mask, values);
         
-    }
+//     }
 
-}
+// }
 namespace XCB {
     inline xcb_get_geometry_cookie_t g_cok(uint32_t __w) {
         return xcb_get_geometry(conn, __w);                             
@@ -6790,13 +6789,12 @@ class window {
         
         /* Borders    */
             void create_border_window(BORDER __border, int __color, uint32_t __x, uint32_t __y, uint32_t __width, uint32_t __height) {
-                uint32_t window = nX->gen_Xid();
-                if (window == 0) return;
-                /* if ((window = xcb_generate_id(conn)) == -1) {
+                uint32_t window;
+                if ((window = xcb_generate_id(conn)) == -1) {
                     loutEWin << "Failed to create border window: " << WINDOW_ID_BY_INPUT(window) << loutEND;
                     return; 
 
-                } */
+                }
                 VOID_COOKIE = xcb_create_window(
                     conn,
                     this->_depth,
@@ -15093,8 +15091,8 @@ void setup_wm() {
     NEW_CLASS(dock,            __dock__           ) { dock->init(); }
     NEW_CLASS(pid_manager,     __pid_manager__    ) {}
 
-    nX = connect_to_server(conn);
-    if ((nX->check_conn() & ~(1ULL << X_CONN_ERROR)) != 0) {
+    xcb = connect_to_server(conn);
+    if ((xcb->check_conn() & ~(1ULL << X_CONN_ERROR)) != 0) {
         loutE << "x not connected" << loutEND;
         
     }
