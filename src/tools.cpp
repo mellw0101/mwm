@@ -1,4 +1,5 @@
 #include "tools.hpp"
+#include <cstddef>
 
 namespace /* slen */ {
     /* size_t slen(const char *__s) {
@@ -76,21 +77,21 @@ namespace /* slen */ {
 
     // }
 
+    /* 
+    size_t slen(const char *__s) {
+        for (; *__s; ++__s);
+        return __s - &__s[*__s];
+
+    } */
+
 }
 /**
 * @p '__s'
 * @brief function that @return's len of a 'const char *'
 */
 size_t slen(const char *__s) {
-    for (; *__s; ++__s);
-    return __s - &__s[*__s];
-
-}
-
-/** NOTE: Works!! ->
-size_t slen(const char *__s) {
     size_t i(0);
     for(; __s[i]; ++i){}
     return i;
     
-} <- */
+}
