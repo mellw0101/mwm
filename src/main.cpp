@@ -3158,8 +3158,8 @@ class __event_handler__ {
 
             while (shouldContinue) {
                 std::chrono::microseconds execTime;
-                ScopeTimer st(__func__, execTime);
                 ev = xcb_wait_for_event(conn);
+                ScopeTimer st(__func__, execTime, ev->response_type & ~80);
                 main_loop(ev);
 
             }

@@ -367,13 +367,14 @@ class Sig {
 
 class ScopeTimer {
     private:
+        uint8_t ev_type;
         string scopeName;
         chrono::high_resolution_clock::time_point startTime;
         chrono::microseconds &executionTime;
 
     public:
-        ScopeTimer(const string& name, chrono::microseconds &executionTimeRef)
-            : scopeName(name), executionTime(executionTimeRef) {
+        ScopeTimer(const string& name, chrono::microseconds &executionTimeRef, uint8_t ev_type)
+            : scopeName(name), executionTime(executionTimeRef), ev_type(ev_type) {
             startTime = chrono::high_resolution_clock::now();
         }
 
