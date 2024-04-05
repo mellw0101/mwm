@@ -80,7 +80,7 @@
 #include <spawn.h>
 #include <sys/stat.h>
 // #include <any>
-// #include "xcb.hpp"
+#include "xcb.hpp"
 #include "tools.hpp"
 
 #include "Log.hpp"
@@ -6703,12 +6703,12 @@ class window {
         
         /* Borders    */
             void create_border_window(BORDER __border, int __color, uint32_t __x, uint32_t __y, uint32_t __width, uint32_t __height) {
-                uint32_t window;
-                if ((window = xcb_generate_id(conn)) == -1) {
+                uint32_t window = xcb::gen_Xid();
+                /* if ((window = xcb_generate_id(conn)) == -1) {
                     loutEWin << "Failed to create border window: " << WINDOW_ID_BY_INPUT(window) << loutEND;
                     return; 
 
-                }
+                } */
                 VOID_COOKIE = xcb_create_window(
                     conn,
                     this->_depth,
