@@ -6,6 +6,7 @@
 // #include <numeric>
 // #include <optional>
 // #include <limits>
+#include <ratio>
 #include <regex>
 #include <sstream>
 #include <stdio.h>
@@ -3156,6 +3157,8 @@ class __event_handler__ {
             const xcb_generic_event_t *ev;
 
             while (shouldContinue) {
+                std::chrono::microseconds execTime;
+                ScopeTimer st(__func__, execTime);
                 ev = xcb_wait_for_event(conn);
                 main_loop(ev);
 

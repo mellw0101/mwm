@@ -327,6 +327,64 @@ class Signal {
         
 };
 
+template<typename ReturnType, typename... Args>
+class Sig {
+    private:
+        function<ReturnType(Args...)> cb;
+
+    public:
+        template<typename Cb>
+        Sig(Cb &&__cb) : cb(std::forward<Cb>(__cb)) {}
+        Sig() {}
+
+        template<typename Fu>
+        void connect(Fu&& f) {
+            cb = std::forward<Fu>(f);
+
+        }/* Register a callback */
+
+        template<typename... CbArgs>/**
+         *
+         * Emit the signal, invoking the callback with perfect forwarding
+         *
+         */
+        void emit(CbArgs&&... args) {
+            cb(std::forward<CbArgs>(args)...);
+
+        }
+
+        template<typename ...A>
+        void operator()(A &&...a) {
+            cb(std::forward<A>(a)...);
+            
+        }
+        
+};
+
+#define FUNC_TIMER_SIGNAL 145
+#include <chrono>
+#include "Log.hpp"
+
+class ScopeTimer {
+    private:
+        string scopeName;
+        chrono::high_resolution_clock::time_point startTime;
+        chrono::microseconds &executionTime;
+
+    public:
+        ScopeTimer(const string& name, chrono::microseconds &executionTimeRef)
+            : scopeName(name), executionTime(executionTimeRef) {
+            startTime = chrono::high_resolution_clock::now();
+        }
+
+        ~ScopeTimer() {
+            auto endTime = chrono::high_resolution_clock::now();
+            executionTime = chrono::duration_cast<chrono::microseconds>(endTime - startTime);
+            loutI << scopeName << " executed in " << executionTime.count() << " microseconds." << loutEND;
+        }
+};
+
+
 
 #endif/*__DATA_HPP__*/
 

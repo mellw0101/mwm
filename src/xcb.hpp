@@ -1,6 +1,7 @@
 #ifndef XCB__HPP
 #define XCB__HPP
 
+#include <atomic>
 #include <cstdint>
 #include <cstdlib>
 #include <vector>
@@ -76,14 +77,16 @@ class XcbHelper {
         // Other methods...
 };
 
-typedef struct __err__64__t__ {
-    typedef enum : int {
-        wCreationErr = 1 << 0,
-
-        
-    } err_flag_t;
+typedef struct ___256__bit__data__t__ {
+    uint64_t *data;
     
-} err64_t;
+} _256__bit__data__t;
+
+// Function to initialize the data
+inline void init_256_bit_data(_256__bit__data__t *obj) {
+    obj->data = (uint64_t*) malloc(4 * sizeof(uint64_t)); // Allocate memory for 256 bits
+    // Make sure to check for malloc failure in production code
+}
 
 #define CHECK_VCOOKIE(cookie) do { \
     xcb_generic_error_t* error = xcb_request_check(conn, cookie); \
