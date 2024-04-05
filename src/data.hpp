@@ -376,13 +376,15 @@ class ScopeTimer {
         ScopeTimer(const string& name, chrono::microseconds &executionTimeRef, uint8_t ev_type)
             : scopeName(name), executionTime(executionTimeRef), ev_type(ev_type) {
             startTime = chrono::high_resolution_clock::now();
-        }
 
+        }
         ~ScopeTimer() {
             auto endTime = chrono::high_resolution_clock::now();
             executionTime = chrono::duration_cast<chrono::microseconds>(endTime - startTime);
-            loutI << scopeName << " executed in " << executionTime.count() << " microseconds 'ev type':" << loutEND;
+            loutI << scopeName << " executed in " << executionTime.count() << " microseconds" << loutEND;
+
         }
+
 };
 
 

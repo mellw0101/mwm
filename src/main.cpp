@@ -3157,8 +3157,8 @@ class __event_handler__ {
             const xcb_generic_event_t *ev;
 
             while (shouldContinue) {
-                std::chrono::microseconds execTime;
                 ev = xcb_wait_for_event(conn);
+                chrono::microseconds execTime;
                 ScopeTimer st(__func__, execTime, ev->response_type & ~80);
                 main_loop(ev);
 
@@ -8577,6 +8577,7 @@ class Window_Manager {
                 });
                 CONN_Win(root, L_MOUSE_BUTTON_EVENT,
                     this->unfocus();
+                    if (this->context_menu->context_window.is_mapped()) Emit(this->context_menu->context_window, HIDE_CONTEXT_MENU); 
 
                 );
                 CONN_Win(root, R_MOUSE_BUTTON_EVENT,
