@@ -80,7 +80,6 @@
 #include <spawn.h>
 #include <sys/stat.h>
 // #include <any>
-#include "xcb.hpp"
 #include "tools.hpp"
 
 #include "Log.hpp"
@@ -89,11 +88,13 @@ Logger logger;
 #include "structs.hpp"
 #include "defenitions.hpp"
 
-// static xcb_connection_t * conn;
-// static xcb_ewmh_connection_t * ewmh;
-// static const xcb_setup_t * setup;
-// static xcb_screen_iterator_t iter;
-// static xcb_screen_t * screen;
+static xcb_connection_t * conn;
+static xcb_ewmh_connection_t * ewmh;
+static const xcb_setup_t * setup;
+static xcb_screen_iterator_t iter;
+static xcb_screen_t * screen;
+
+#include "xcb.hpp"
 
 #define DEFAULT_FONT "7x14"
 #define DEFAULT_FONT_WIDTH 7
