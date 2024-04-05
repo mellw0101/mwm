@@ -2899,6 +2899,7 @@ class __event_handler__ {
     /* Variabels */
         __key_codes__ key_codes;
         mutex event_mutex;
+        xcb_generic_event_t *ev{};
         Signal<xcb_generic_event_t *> main_loop;
 
     /* Methods   */
@@ -3094,14 +3095,14 @@ class __event_handler__ {
 
             key_codes.init();
             shouldContinue = true;
-            xcb_generic_event_t *ev = new xcb_generic_event_t;
+            // xcb_generic_event_t *ev = new xcb_generic_event_t;
 
             while (shouldContinue) {
                 ev = xcb_wait_for_event(conn);
                 if (!ev) continue;
                 uint8_t res = get_ev(ev->response_type & ~80);
                 if (res == 0) continue;
-                ev_arr[res].emit(ev);
+                main_loop.emit(ev);
                 free(ev);
 
             }
