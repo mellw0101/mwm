@@ -90,7 +90,7 @@ struct conn_t {
 };
 
 namespace xcb {
-    namespace { xcb_connection_t *conn; };
+    namespace { static xcb_connection_t *conn; };
 
     uint32_t gen_Xid() {
         uint32_t w;
