@@ -6797,7 +6797,7 @@ class window {
                 }
                 xcb->create_w(_window, window, __x, __y, __width, __height);
                 uint64_t err = xcb->check_conn();
-                if (CHECK_BIT_E(err, X_W_CREATION_ERR, XCB_CONFIG_WINDOW_HEIGHT)) 
+                CHECK_BIT_E(err, X_W_CREATION_ERR, XCB_CONFIG_WINDOW_HEIGHT); 
 
                 // VOID_COOKIE = xcb_create_window(
                 //     conn,
