@@ -94,7 +94,7 @@ namespace xcb {
 //     xcb_intern_atom_reply_t *intern_atom_reply(xcb_intern_atom_cookie_t __cookie);
 //     xcb_atom_t intern_atom(const char *__name);
     
-    uint32_t gen_Xid();
+    uint32_t gen_Xid(xcb_connection_t *__c);
 
 }
 
