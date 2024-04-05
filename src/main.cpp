@@ -80,6 +80,7 @@
 #include <spawn.h>
 #include <sys/stat.h>
 // #include <any>
+#include "tools.hpp"
 
 #include "Log.hpp"
 #include "data.hpp"
@@ -14390,7 +14391,7 @@ class Events {
                 wm->focused_client = __c;
 
             }, FOCUS_CLIENT);
-            C_SIGNAL(if (&*__c)  mv_client(__c, wm->pointer.x() - __c->x - BORDER_SIZE, wm->pointer.y() - __c->y - BORDER_SIZE);, MOVE_CLIENT_MOUSE);
+            C_SIGNAL(if (__c)  mv_client(__c, wm->pointer.x() - __c->x - BORDER_SIZE, wm->pointer.y() - __c->y - BORDER_SIZE);, MOVE_CLIENT_MOUSE);
             C_SIGNAL(if (__c) max_win(__c, max_win::BUTTON_MAXWIN);, BUTTON_MAXWIN_PRESS);
             C_SIGNAL(if (__c) max_win(__c, max_win::EWMH_MAXWIN  );, EWMH_MAXWIN_SIGNAL );
             C_SIGNAL(if (__c) resize_client::border(__c, edge::LEFT        );, RESIZE_CLIENT_BORDER_LEFT        );

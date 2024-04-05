@@ -28,7 +28,7 @@ CFLAGS =	-std=c++20 						\
 
 CXXFLAGS = ${CFLAGS}
 
-LIBS = 	-lxcb 			\
+LIBS    = -lxcb         \
 		-lxcb-keysyms	\
 		-lxcb-cursor 	\
 		-lxcb-icccm 	\
@@ -49,7 +49,7 @@ LIBS = 	-lxcb 			\
 		-liw			\
 		-lpulse
 
-LDFLAGS = 	${LIBS} 		\
+LDFLAGS = ${LIBS}       \
 			-flto 			\
 			-O2 			\
 			-march=native 	\
@@ -57,12 +57,12 @@ LDFLAGS = 	${LIBS} 		\
 
 # -std=c++20
 
-cc = clang
+cc  = clang
 CXX = clang++
 
-SRC = 	src/main.cpp
+SRC = src/main.cpp src/tools.cpp src/xcb.cpp
 
-OBJ = $(SRC:../src/%.cpp=%.o)
+OBJ  = $(SRC:../src/%.cpp=%.o)
 DEPS = $(OBJ:.o=.d)
 
 all: test
