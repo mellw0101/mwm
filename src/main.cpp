@@ -6796,6 +6796,8 @@ class window {
 
                 }
                 xcb->create_w(_window, window, __x, __y, __width, __height);
+                uint64_t err = xcb->check_conn();
+                CHECK_BIT_E(err, X_W_CREATION_ERR, XCB_CONFIG_WINDOW_HEIGHT);
 
                 // VOID_COOKIE = xcb_create_window(
                 //     conn,
@@ -6817,6 +6819,7 @@ class window {
 
                 change_back_pixel(get_color(__color), window);
                 VOID_COOKIE = xcb_map_window(conn, window); CHECK_VOID_COOKIE(); FLUSH_XWin();
+                CHECK_BITFLAG_ERR(xcb->check_conn(), X_W_CREATION_ERR);
 
                 if (__border == UP   ) _border[0] = window;
                 if (__border == DOWN ) _border[1] = window;

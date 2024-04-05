@@ -128,19 +128,62 @@ class void_err_t {
 
 };
 
-#define V_COKE(cookie, ...) do { \
-    void_err_t e(conn, cookie); \
-    if (error) { \
+#define V_COKE( ...) do { \
+    _err = xcb_request_check(_conn, _cookie); \
+    if (_err) { \
         loutE << ERRNO_MSG(__VA_ARGS__) << loutEND; \
-        free(error); \
+        free(_err); \
     } \
 } while (0)
+
+#define CHECK_BITFLAG_ERR(__flags, __BITVALUE, ...) do { \
+    if (__BITVALUE) { \
+        \
+    } \
+} while (0)
+
+#define CHECK_BIT_ERR(__flags, __BITVALUE, ...)  do { \
+    bool error_detected = false; \
+    unsigned long __bits[] = { __VA_ARGS__ }; \
+    for (size_t i = 0; i < sizeof(__bits) / sizeof(__bits[0]); ++i) { \
+        if ((__flags & __bits[i]) == __BITVALUE) { \
+            error_detected = true; \
+            break; \
+        } \
+    } \
+    error_detected; \
+} while(0)
+
+#define CHECK_BIT_E(__flags, ...)  do { \
+    bool error_detected = false; \
+    unsigned long __bits[] = { __VA_ARGS__ }; \
+    for (size_t i = 0; i < sizeof(__bits) / sizeof(__bits[0]); ++i) { \
+        if ((__flags & __bits[i]) != 0) { \
+            error_detected = true; \
+            break; \
+        } \
+    } \
+    error_detected; \
+} while(0)
+
+#define CHECK_E(__flags, ...) [this](__flags, ...) -> bool { \
+    bool error_detected = false; \
+    unsigned long __bits[] = { __VA_ARGS__ }; \
+    for (size_t i = 0; i < sizeof(__bits) / sizeof(__bits[0]); ++i) { \
+        if ((__flags & __bits[i]) != 0) { \
+            error_detected = true; \
+            break; \
+        } \
+    } \
+    error_detected; \
+    return error_detected; \
+} 
 
 class xcb {
     private:
         xcb_connection_t *_conn;
         xcb_screen_t * _s;
-        xcb_generic_error_t* _error;
+        xcb_generic_error_t* _err;
         xcb_void_cookie_t _cookie;
 
         uint64_t _flags = 0xffffffffffffffff;
@@ -162,6 +205,7 @@ class xcb {
         uint32_t gen_Xid();
         void window_stack(uint32_t __window1, uint32_t __window2, uint32_t __mode);
         inline bool check_req_err() { return ((_flags & (1ULL << X_REQ_ERROR)) != 0); }
+        void mapW(uint32_t __w);
 
         uint64_t &check_conn();
         void create_w(uint32_t __pw, uint32_t __w, int16_t __x, int16_t __y,

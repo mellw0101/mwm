@@ -139,9 +139,9 @@ void xcb::create_w(uint32_t __pw, uint32_t __w, int16_t __x, int16_t __y,
 
 }
 void xcb::check_error() {
-    _error = xcb_request_check(_conn, _cookie);
-    if (_error) {
-        loutE << ERRNO_MSG("XCB Error occurred. Error code:") << _error->error_code << loutEND;
+    _err = xcb_request_check(_conn, _cookie);
+    if (_err) {
+        loutE << ERRNO_MSG("XCB Error occurred. Error code:") << _err->error_code << loutEND;
         _flags |= 1ULL << X_REQ_ERROR; /* Set bit to true */
     
     } else {
@@ -149,4 +149,10 @@ void xcb::check_error() {
         
     }
 
+}
+void xcb::mapW(uint32_t __w) {
+    _cookie = xcb_map_window(_conn, __w);
+    V_COKE("window map failed");
+    xcb_flush(_conn);
+    
 }
