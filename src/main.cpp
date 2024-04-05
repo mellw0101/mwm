@@ -6790,7 +6790,7 @@ class window {
         /* Borders    */
             void create_border_window(BORDER __border, int __color, uint32_t __x, uint32_t __y, uint32_t __width, uint32_t __height) {
                 uint32_t window;
-                if ((window = xcb_generate_id(conn)) == -1) {
+                if ((window = xcb->gen_Xid()) == -1) {
                     loutEWin << "Failed to create border window: " << WINDOW_ID_BY_INPUT(window) << loutEND;
                     return; 
 
@@ -8169,6 +8169,15 @@ class Window_Manager {
                 _setup();
                 _iter();
                 _screen();
+                xcb = connect_to_server(conn);
+                if ((xcb->check_conn() & (1ULL << X_CONN_ERROR)) != 0) {
+                    loutE << "x not connected" << loutEND;
+                    
+                }
+                else {
+                    loutI << "x succesfully connected" << loutEND;
+                    
+                }
                 
                 root = screen->root;
                 root.width(screen->width_in_pixels);
@@ -15090,16 +15099,6 @@ void setup_wm() {
     NEW_CLASS(system_settings, __system_settings__) { system_settings->init(); }
     NEW_CLASS(dock,            __dock__           ) { dock->init(); }
     NEW_CLASS(pid_manager,     __pid_manager__    ) {}
-
-    xcb = connect_to_server(conn);
-    if ((xcb->check_conn() & (1ULL << X_CONN_ERROR)) != 0) {
-        loutE << "x not connected" << loutEND;
-        
-    }
-    else {
-        loutI << "x succesfully connected" << loutEND;
-        
-    }
 
 }
 int main() {

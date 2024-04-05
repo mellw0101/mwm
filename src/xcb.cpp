@@ -42,7 +42,10 @@ bool xcb::window_exists(uint32_t __w) {
 
 }
 uint32_t xcb::gen_Xid() {
-    if (_flags & (1ULL << X_CONN_ERROR)) return 0;
+    if (_flags & (1ULL << X_CONN_ERROR)) {
+        return -1;
+    
+    }
     return xcb_generate_id(_conn);
 
 }
