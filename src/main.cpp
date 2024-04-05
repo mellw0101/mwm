@@ -3256,12 +3256,7 @@ class __event_handler__ {
 
             while (shouldContinue) {
                 ev = xcb_wait_for_event(conn);
-                if (!ev) continue;
-                uint8_t res = get_ev(ev->response_type & ~80);
-                if (res == 0) continue;
-                // main_loop(ev);
-                res = ev->response_type & ~80;
-                ev_map[res](ev);
+                main_loop(ev);
                 free(ev);
 
             }
