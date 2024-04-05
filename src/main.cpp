@@ -87,6 +87,7 @@
 Logger logger;
 #include "structs.hpp"
 #include "defenitions.hpp"
+#include "tools.hpp"
 
 static xcb_connection_t * conn;
 static xcb_ewmh_connection_t * ewmh;
@@ -983,8 +984,7 @@ namespace xcb {
 
     }
     uint32_t gen_Xid() {
-        uint32_t w = xcb_generate_id(conn);
-        return (window_exists(conn, w)) ? w : XCB_NONE;
+        return xcb_generate_id(conn);
 
     }
     void window_stack(xcb_connection_t *__c, uint32_t __window1, uint32_t __window2, uint32_t __mode) {

@@ -1,9 +1,9 @@
 #ifndef XCB__HPP
 #define XCB__HPP
-#include <cstdint>
-#include <xcb/xcb.h>
-#include <xcb/xproto.h>
-#include <xcb/xcb_ewmh.h>
+// #include <cstdint>
+// #include <xcb/xcb.h>
+// #include <xcb/xproto.h>
+// #include <xcb/xcb_ewmh.h>
 
 // static xcb_connection_t * conn = nullptr;
 // static xcb_ewmh_connection_t * ewmh;
@@ -88,14 +88,14 @@
 
 // } using namespace tools;
 
-namespace xcb {
-    xcb_intern_atom_cookie_t intern_atom_cookie(xcb_connection_t *__c, const char *__name);
-    xcb_intern_atom_reply_t *intern_atom_reply(xcb_connection_t *__c, xcb_intern_atom_cookie_t __cookie);
-    xcb_atom_t intern_atom(const char *__name);
-    bool window_exists(xcb_connection_t *__c, uint32_t __w);
-    uint32_t gen_Xid();
-    void window_stack(xcb_connection_t *__c, uint32_t __window1, uint32_t __window2, uint32_t __mode);
+// namespace xcb {
+//     xcb_intern_atom_cookie_t intern_atom_cookie(xcb_connection_t *__c, const char *__name);
+//     xcb_intern_atom_reply_t *intern_atom_reply(xcb_connection_t *__c, xcb_intern_atom_cookie_t __cookie);
+//     xcb_atom_t intern_atom(const char *__name);
+//     bool window_exists(xcb_connection_t *__c, uint32_t __w);
+//     uint32_t gen_Xid();
+//     void window_stack(xcb_connection_t *__c, uint32_t __window1, uint32_t __window2, uint32_t __mode);
 
-}
+// }
 
 #endif/* XCB__HPP */
