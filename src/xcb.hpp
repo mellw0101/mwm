@@ -90,7 +90,7 @@
 
 namespace xcb {
     namespace {
-        xcb_connection_t *conn;
+        static xcb_connection_t *conn;
     
     }
 //     uint32_t gen_Xid();
