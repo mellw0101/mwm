@@ -3282,7 +3282,7 @@ class __event_handler__ {
             }}
         };
         Signal<xcb_generic_event_t *> ev_arr[13] = {
-            []() -> void {
+            [](xcb_generic_event_t *ev) -> void {
                 return;
 
             }, [](xcb_generic_event_t *ev) -> void {
