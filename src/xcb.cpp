@@ -129,9 +129,9 @@ namespace xcb {
 
     // }
 
-    uint32_t gen_Xid() {
+    uint32_t gen_Xid(xcb_connection_t *__c) {
         uint32_t w = 0;
-        if ((w = xcb_generate_id(conn)) == -1) {
+        if ((w = xcb_generate_id(__c)) == -1) {
             loutE << "failed to generate Xid" << loutEND;
 
         }
