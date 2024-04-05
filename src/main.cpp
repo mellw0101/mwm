@@ -84,6 +84,8 @@
 
 #include "Log.hpp"
 #include "data.hpp"
+#include "xcb.hpp"
+#include "xcb.hpp"
 Logger logger;
 #include "structs.hpp"
 #include "defenitions.hpp"
@@ -2955,7 +2957,6 @@ class __event_handler__ {
     /* Variabels */
         __key_codes__ key_codes;
         mutex event_mutex;
-        xcb_generic_event_t *ev{};
         Signal<xcb_generic_event_t *> main_loop;
         
 
@@ -3152,13 +3153,11 @@ class __event_handler__ {
 
             key_codes.init();
             shouldContinue = true;
-            // xcb_generic_event_t *ev = new xcb_generic_event_t;
+            const xcb_generic_event_t *ev;
 
             while (shouldContinue) {
                 ev = xcb_wait_for_event(conn);
                 main_loop(ev);
-                free(ev);
-
             }
 
         }
@@ -15092,6 +15091,16 @@ void setup_wm() {
     NEW_CLASS(system_settings, __system_settings__) { system_settings->init(); }
     NEW_CLASS(dock,            __dock__           ) { dock->init(); }
     NEW_CLASS(pid_manager,     __pid_manager__    ) {}
+
+    x = connect_to_server(conn);
+    if ((x->check_conn() &= ~(1ULL << X_CONN_ERROR)) != 0) {
+        loutE << "x not connected" << loutEND;
+        
+    }
+    else {
+        loutI << "x succesfully connected" << loutEND;
+        
+    }
 
 }
 int main() {
