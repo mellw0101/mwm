@@ -2928,27 +2928,27 @@ class __event_handler__ {
         #define HANDLE_ROOT(__type)   thread(handle_event<__type>, screen->root).detach()
         #define HANDLE(__type, __w)   thread(handle_event<__type>, __w         ).detach()
         unordered_map<uint8_t, Signal<xcb_generic_event_t *>> ev_map {{
-            {XCB_EXPOSE, [](xcb_generic_event_t *ev) -> void {
+            {XCB_EXPOSE,         [this](xcb_generic_event_t *ev) -> void {
                 const xcb_expose_event_t *e = (const xcb_expose_event_t *)ev;
                 HANDLE(XCB_EXPOSE, e->window);
                 
             }},
-            {XCB_ENTER_NOTIFY, [](xcb_generic_event_t *ev) -> void {
+            {XCB_ENTER_NOTIFY,   [this](xcb_generic_event_t *ev) -> void {
                 const xcb_enter_notify_event_t *e = (const xcb_enter_notify_event_t *)ev;
                 HANDLE(XCB_ENTER_NOTIFY, e->event);
 
             }},
-            {XCB_LEAVE_NOTIFY, [](xcb_generic_event_t *ev) -> void {
+            {XCB_LEAVE_NOTIFY,   [this](xcb_generic_event_t *ev) -> void {
                 const auto *e = (const xcb_leave_notify_event_t *)ev;
                 HANDLE(XCB_LEAVE_NOTIFY, e->event);
 
             }},
-            {XCB_FOCUS_IN, [](xcb_generic_event_t *ev) -> void { 
+            {XCB_FOCUS_IN,       [this](xcb_generic_event_t *ev) -> void { 
                 const auto *e = (const xcb_focus_in_event_t *)ev;
                 HANDLE(XCB_FOCUS_IN, e->event);
 
             }},
-            {XCB_FOCUS_OUT, [](xcb_generic_event_t *ev) -> void {
+            {XCB_FOCUS_OUT,      [](xcb_generic_event_t *ev) -> void {
                 const xcb_focus_out_event_t *e = (const xcb_focus_out_event_t *)ev;
                 HANDLE(XCB_FOCUS_OUT, e->event);
                 
@@ -3257,8 +3257,8 @@ class __event_handler__ {
             while (shouldContinue) {
                 ev = xcb_wait_for_event(conn);
                 if (!ev) continue;
-                // uint8_t res = get_ev(ev->response_type & ~80);
-                // if (res == 0) continue;
+                uint8_t res = get_ev(ev->response_type & ~80);
+                if (res == 0) continue;
                 // main_loop(ev);
                 ev_map[ev->response_type & ~80](ev);
                 free(ev);
