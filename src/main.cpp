@@ -3154,16 +3154,16 @@ class __event_handler__ {
 
             key_codes.init();
             shouldContinue = true;
-            const xcb_generic_event_t *ev;
+            xcb_generic_event_t *ev;
 
             while (shouldContinue) {
-                chrono::microseconds execTime;
                 ev = xcb_wait_for_event(conn);
                 uint8_t res = ev->response_type & ~80;
+                chrono::microseconds execTime;
                 ScopeTimer st(__func__, execTime, res);
                 switch (res) {
                     case   XCB_EXPOSE         :{
-                        const xcb_expose_event_t *e = (const xcb_expose_event_t *)ev;
+                        auto e = (const xcb_expose_event_t *)ev;
                         HANDLE(XCB_EXPOSE, e->window);
                         break;
 
@@ -3316,7 +3316,7 @@ class __event_handler__ {
 
                     }
                 
-                }
+                } free(ev);
 
             }
 
