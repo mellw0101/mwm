@@ -93,11 +93,12 @@ namespace xcb {
     namespace { xcb_connection_t *conn; };
 
     uint32_t gen_Xid() {
-        uint32_t w = xcb_generate_id(conn);
-        if (w == UINT32_MAX) {
+        uint32_t w;
+        if ((w = xcb_generate_id(conn))== -1) {
             loutE << "failed to generate Xid" << loutEND;
 
-        } return w;
+        }
+        return w;
 
     }
     xcb_intern_atom_cookie_t intern_atom_cookie(const char *__name) {
