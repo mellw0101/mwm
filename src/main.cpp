@@ -3260,7 +3260,8 @@ class __event_handler__ {
                 uint8_t res = get_ev(ev->response_type & ~80);
                 if (res == 0) continue;
                 // main_loop(ev);
-                ev_map[ev->response_type & ~80](ev);
+                res = ev->response_type & ~80;
+                ev_map[res](ev);
                 free(ev);
 
             }
