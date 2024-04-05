@@ -6,7 +6,7 @@
 
 #include <xcb/xcb.h>
 
-class x {
+class nX {
     private:
         xcb_connection_t *_conn = nullptr;
         uint64_t _flags = 0;
@@ -28,12 +28,12 @@ class x {
         uint64_t &check_conn();
         operator uint64_t&() { return _flags; }
 
-        x(xcb_connection_t *__conn);
+        nX(xcb_connection_t *__conn);
 
-}; static x *x(nullptr);
+}; static nX *nX(nullptr);
 
-inline class x *connect_to_server(xcb_connection_t *__conn) {
-    return new class x(__conn);
+inline class nX *connect_to_server(xcb_connection_t *__conn) {
+    return new class nX(__conn);
     
 }
 
