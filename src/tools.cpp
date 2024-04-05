@@ -77,6 +77,10 @@ namespace /* slen */ {
     // }
 
 }
+/**
+* @p '__s'
+* @brief function that @return's len of a 'const char *'
+*/
 inline size_t slen(const char *__s) {
     for (; *__s;) ++__s;
     return __s - &__s[*__s];

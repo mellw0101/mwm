@@ -81,6 +81,7 @@
 #include <sys/stat.h>
 // #include <any>
 #include "tools.hpp"
+#include "xcb.hpp"
 
 #include "Log.hpp"
 #include "data.hpp"
@@ -89,7 +90,7 @@ Logger logger;
 #include "defenitions.hpp"
 
 static xcb_connection_t * conn;
-static xcb_ewmh_connection_t * ewmh; 
+static xcb_ewmh_connection_t * ewmh;
 static const xcb_setup_t * setup;
 static xcb_screen_iterator_t iter;
 static xcb_screen_t * screen;
@@ -6465,7 +6466,7 @@ class window {
                 VOID_COOKIE = xcb_open_font(
                     conn, 
                     font, 
-                    strlen(font_name),
+                    slen(font_name),
                     font_name
 
                 ); CHECK_VOID_COOKIE();
