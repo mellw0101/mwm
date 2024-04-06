@@ -219,7 +219,6 @@ auto enqueueTask(ThreadPoolType& pool, Func&& func, Args&&... args) -> std::futu
 
 class ThreadPool {
     public:
-        ThreadPool() {}
         ThreadPool(size_t threads) : stop(false) {
             for(size_t i = 0; i < threads; ++i) {
                 workers.emplace_back([this] {

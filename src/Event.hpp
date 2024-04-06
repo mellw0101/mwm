@@ -8,6 +8,7 @@
 #include <xcb/xcb.h>
 #include <xcb/xproto.h>
 #include "xcb.hpp"
+#include "thread.hpp"
 
 #define lambdA(__Ref, __Param, ...) do { \
     [__Ref](__Param) __VA_ARGS__ \
@@ -65,15 +66,16 @@ class loop_data_t {
         // Optionally, methods to manipulate state and event
 };
 
-/* // Initialize the static instance pointer to nullptr
+// Initialize the static instance pointer to nullptr
 inline loop_data_t* loop_data_t::instance = nullptr;
 
-class __event__handler {
+/* class __event__handler {
     private:
         std::unordered_map<int, function<void(xcb_generic_event_t *)>> Map;
         xcb_generic_event_t *ev;
         loop_data_t *ldata;
         xcb_connection_t *conn;
+        ThreadPool thread_pool;
 
         void makeMap_() {
             Map[XCB_EXPOSE] = [this](xcb_generic_event_t *ev) -> void {

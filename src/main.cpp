@@ -1025,17 +1025,9 @@ class __signal_manager__ {
 
     public:
     /* Variabels */
-        UMapWithID<client *, client *> client_signals;
-
         __window_signals__ _window_signals;
         __window_client_map__ _window_client_map;
         __c_func_arr__ client_arr;
-
-        // ldClientWindowArray _client_window_arr;
-
-        DynamicArray<client *> fixed_client_arr;
-
-        LinkedSuperArrayMap<client *, window> _linked_super_arr;
 
     /* Methods   */
         template<typename Callback>
@@ -6722,23 +6714,28 @@ class client {
         pid_t pid;
         bool moving = false;
         mutex mtx;
-
-        ThreadPool thread_pool;
+        ThreadPool thread_pool{8};
 
     /* Methods     */
         /* Main     */
             void make_decorations() {
                 make_frame();
-                set_icon_png();
-                make_titlebar();
-                make_close_button();
-                make_max_button();
-                make_min_button();
+
+                enqueueT(_1, thread_pool, [this]() { set_icon_png(); });
+                enqueueT(_2, thread_pool, [this]() { make_titlebar(); });
+                enqueueT(_3, thread_pool, [this]() { make_close_button(); });
+                enqueueT(_4, thread_pool, [this]() { make_max_button(); });
+                enqueueT(_5, thread_pool, [this]() { make_min_button(); });
                 
                 if (BORDER_SIZE > 0) {
                     make_borders();
 
                 }
+                _1.wait();
+                _2.wait();
+                _3.wait();
+                _4.wait();
+                _5.wait();
             
             }
             void raise() {
@@ -6825,19 +6822,6 @@ class client {
                 border[bottom_left].kill();
                 border[bottom_right].kill();
                 frame.kill();
-
-            }
-            template<typename Callback>
-            void setup_CLI_SIG(int __signal_type_id, Callback &&callback){
-                signal_manager->client_signals.connect(this, __signal_type_id, callback);
-            
-            }
-            template<typename Callback>
-            void setup_C_SIG(int __signal_type_id, Callback &&callback) {
-                C_SIG(this,
-                
-
-                ,BUTTON_MAXWIN_PRESS);
 
             }
             void align() {
