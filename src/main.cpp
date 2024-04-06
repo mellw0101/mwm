@@ -7905,14 +7905,7 @@ class Window_Manager {
                     loutI << "x succesfully connected" << loutEND;
                     
                 }
-                try {
-                    atoms = Malloc<atoms_t>().allocate();
-                    
-                } catch (std::bad_alloc &e) {
-                    loutE << e.what() << loutEND;
-                    atoms = nullptr;
-                    
-                }
+                atoms = new atoms_t;
                 if (atoms != nullptr) {
                     atoms->add((char *[]){
                         (char *)"WM_DELETE_WINDOW"
