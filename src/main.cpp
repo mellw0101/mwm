@@ -3126,9 +3126,14 @@ class __event_handler__ {
                         
                     } case MWM_Ev::DESTROY_NOTIF  :{
                         RE_CAST_EV(xcb_destroy_notify_event_t);
-                        HANDLE(DESTROY_NOTIF_EV, e->event);
-                        HANDLE(DESTROY_NOTIF_W, e->window);
-                        break;
+                        client *c;
+                        if ((c = signal_manager->_window_client_map.retrive(e->event)) != nullptr) {
+                            HANDLE(DESTROY_NOTIF_EV, e->event);
+
+                        } else if ((c = signal_manager->_window_client_map.retrive(e->window)) != nullptr) {
+                            HANDLE(DESTROY_NOTIF_W, e->window);
+
+                        } break;
 
                     } case MWM_Ev::MAP_REQ        :{
                         RE_CAST_EV(xcb_map_request_event_t);
