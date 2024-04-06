@@ -65,7 +65,7 @@ class loop_data_t {
         // Optionally, methods to manipulate state and event
 };
 
-// Initialize the static instance pointer to nullptr
+/* // Initialize the static instance pointer to nullptr
 inline loop_data_t* loop_data_t::instance = nullptr;
 
 class __event__handler {
@@ -107,5 +107,5 @@ class __event__handler {
         __event__handler(xcb_connection_t *conn) : ev(new xcb_generic_event_t) {}
 
 };
-
+ */
 #endif

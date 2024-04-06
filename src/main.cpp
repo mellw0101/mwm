@@ -3126,7 +3126,7 @@ class __event_handler__ {
                         
                     } case MWM_Ev::DESTROY_NOTIF  :{
                         RE_CAST_EV(xcb_destroy_notify_event_t);
-                        HANDLE(DESTROY_NOTIF_EV, e->window);
+                        HANDLE(DESTROY_NOTIF_EV, e->event);
                         HANDLE(DESTROY_NOTIF_W, e->window);
                         break;
 
@@ -3248,6 +3248,8 @@ class __event_handler__ {
 
                     } case MWM_Ev::PROPERTY_NOTIF :{
                         RE_CAST_EV(xcb_property_notify_event_t);
+                        client *c = signal_manager->_window_client_map.retrive(e->window);
+                        if (!c) break;
                         HANDLE(XCB_PROPERTY_NOTIFY, e->window);
                         break;
 
@@ -7218,7 +7220,7 @@ class client {
                     this->win.kill();
                 }
 
-            , this->win);
+            , this->frame);
 
             CONN(DESTROY_NOTIF_W,
                 if (this->win.is_mapped()) {
