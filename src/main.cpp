@@ -4254,7 +4254,7 @@ class window {
                 }
 
                 int i = 0; do {
-                    send_event(KILL_WINDOW, (uint32_t[3]){32, protocols_reply->atom, atoms->get("WM_DELETE_WINDOW")/* delete_reply->atom */});
+                    send_event(KILL_WINDOW, (uint32_t[3]){32, protocols_reply->atom, delete_reply->atom/* delete_reply->atom */});
 
                     if (is_mapped()) {
                         ++i;
