@@ -4,7 +4,11 @@
 #include <atomic>
 #include <cstdint>
 #include <cstdlib>
+#include <unordered_map>
+#include <utility>
 #include <vector>
+#include <xcb/xproto.h>
+#include "data.hpp"
 #include "tools.hpp"
 #include "Log.hpp"
 using namespace std;
@@ -202,13 +206,59 @@ class void_err_t {
     return error_detected; \
 }
 
-class atom {
+class intern_atom_cok_t {
     private:
-        
+        xcb_intern_atom_cookie_t _cookie;
 
     public:
+        intern_atom_cok_t(xcb_intern_atom_cookie_t __cookie) { this->_cookie = __cookie; }
+        intern_atom_cok_t(xcb_connection_t *conn, bool __only_if_exists, const char *__name) { this->_cookie = xcb_intern_atom(conn, __only_if_exists, slen(__name), __name); }
+        operator xcb_intern_atom_cookie_t() { return _cookie; }
+        operator const xcb_intern_atom_cookie_t&() const { return this->_cookie; }
 
 };
+
+class intern_atom_repl_t {
+    public:
+        uint8_t  response_type, pad0;
+        uint16_t sequence;
+        uint32_t length, atom;
+
+        intern_atom_repl_t(xcb_connection_t *conn, const intern_atom_cok_t &__cookie) {
+            xcb_intern_atom_reply_t *reply = xcb_intern_atom_reply(conn, __cookie, nullptr);
+            response_type = reply->response_type;
+            pad0          = reply->pad0;
+            sequence      = reply->sequence;
+            length        = reply->sequence;
+            atom          = reply->atom;
+            
+        }
+    
+}; 
+
+typedef struct {
+    uint8_t    response_type;
+    uint8_t    pad0;
+    uint16_t   sequence;
+    uint32_t   length;
+    xcb_atom_t atom;
+    
+} atom_t;
+
+class atoms_t {
+    private:
+        vector<atom_t *> _data;
+        void fetch_atom_data(xcb_connection_t *conn, const char *__name);
+
+    public:
+        atoms_t(xcb_connection_t *conn, char **__atoms);
+        ~atoms_t();
+
+};
+
+#define init_atom(...) do {\
+    \
+} while(0)
 
 class xcb {
     private:

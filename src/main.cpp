@@ -96,7 +96,8 @@ static xcb_connection_t * conn;
 static xcb_ewmh_connection_t * ewmh;
 static const xcb_setup_t * setup;
 static xcb_screen_iterator_t iter;
-static xcb_screen_t * screen;
+static xcb_screen_t *screen;
+static atoms_t *atoms;
 
 // #include "xcb.hpp"
 
@@ -3898,7 +3899,7 @@ namespace { /* 'window' class Namespace */
 }
 
 class window {
-    public:  
+    public:
     /* Constructor */
         window() {}
 
@@ -14649,8 +14650,6 @@ void setup_wm() {
     NEW_CLASS(system_settings, __system_settings__) { system_settings->init(); }
     NEW_CLASS(dock,            __dock__           ) { dock->init(); }
     NEW_CLASS(pid_manager,     __pid_manager__    ) {}
-
-    loutI << "sould be 12__:" << slen("WM_PROTOCOLS") << loutEND;
 
 }
 int main() {
