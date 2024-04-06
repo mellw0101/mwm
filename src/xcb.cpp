@@ -171,7 +171,7 @@ void atoms_t::fetch_atom_data(xcb_connection_t *conn, char *__name) {
     atom->length        = reply->length;
     atom->atom          = reply->atom;
 
-    _data.push_back(std::move(atom));
+    // _data.push_back(std::move(atom));
 
 }
 atoms_t::atoms_t(xcb_connection_t *conn, char **__atoms){
@@ -181,10 +181,10 @@ atoms_t::atoms_t(xcb_connection_t *conn, char **__atoms){
     }
 
 }
-atoms_t::~atoms_t() {
-    for (const auto &atom : _data) Malloc<atom_t>().deallocate(atom); /* delete atom; */
+// atoms_t::~atoms_t() {
+//     for (const auto &atom : _data) Malloc<atom_t>().deallocate(atom); /* delete atom; */
     
-}
+// }
 
 xcb_atom_t xcb::get_atom(char *name) {
     intern_atom_repl_t r(_conn, 0, name);

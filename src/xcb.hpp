@@ -303,10 +303,28 @@ typedef struct {
 
 class atoms_t {
     private:
-        vector<atom_t *> _data;
         void fetch_atom_data(xcb_connection_t *conn, char *__name);
+        xcb_connection_t *conn;
+
+        unordered_map<const char *, uint32_t> data;
+
 
     public:
+        uint32_t get(const char *__atom_name) {
+            auto it = data.find(__atom_name);
+            if (it == data.end()) return 0; 
+            
+            return it->second;
+
+        }
+        void add(char *__atoms[]) {
+            for (size_t i(0); __atoms[i]; ++i) {
+                data[__atoms[i]] = intern_atom_repl_t(conn, 0, __atoms[i]).atom;
+                
+            }
+            
+        }
+
         atoms_t(xcb_connection_t *conn, char **__atoms);
         ~atoms_t();
 
