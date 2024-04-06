@@ -6,7 +6,7 @@
 // #include <numeric>
 // #include <optional>
 // #include <limits>
-#include <new>
+// #include <new>
 #include <ratio>
 #include <regex>
 #include <sstream>
@@ -98,7 +98,6 @@ static xcb_ewmh_connection_t * ewmh;
 static const xcb_setup_t * setup;
 static xcb_screen_iterator_t iter;
 static xcb_screen_t *screen;
-static atoms_t *atoms;
 
 // #include "xcb.hpp"
 
@@ -1160,6 +1159,12 @@ class __window_attr__ {
         }
 
 };
+
+class __atoms__ {
+    public:
+        xcb_atom_t WM_DELETE_WINDOW, WM_PROTOCOLS;
+    
+}; static __atoms__ *atoms(nullptr);
 
 class __crypto__ {
     /* Defines */
@@ -7898,6 +7903,7 @@ class Window_Manager {
                     loutI << "x succesfully connected" << loutEND;
                     
                 }
+                atoms = Malloc<__atoms__>().allocate();
 
                 root = screen->root;
                 root.width(screen->width_in_pixels);
@@ -14655,7 +14661,7 @@ void setup_wm() {
     loutCUser(USER);
 
     NEW_CLASS(signal_manager, __signal_manager__) { signal_manager->init(); }
-    NEW_CLASS(file_system, __file_system__      ) { file_system->init_check(); }
+    NEW_CLASS(file_system,    __file_system__   ) { file_system->init_check(); }
 
     crypro = new __crypto__;
 
