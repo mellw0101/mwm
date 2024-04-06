@@ -219,6 +219,7 @@ auto enqueueTask(ThreadPoolType& pool, Func&& func, Args&&... args) -> std::futu
 
 class ThreadPool {
     public:
+        ThreadPool() {}
         ThreadPool(size_t threads) : stop(false) {
             for(size_t i = 0; i < threads; ++i) {
                 workers.emplace_back([this] {
@@ -241,13 +242,14 @@ class ThreadPool {
             }
                 
         }
-        template<class F, class... Args>
-        auto enqueue(F&& f, Args&&... args)
-        -> std::future<typename std::invoke_result<F, Args...>::type> {
-            using return_type = typename std::invoke_result<F, Args...>::type;
+
+        template<class Callback, class... Args>
+        auto enqueue(Callback&& f, Args&&... args)
+        -> std::future<typename std::invoke_result<Callback, Args...>::type> {
+            using return_type = typename std::invoke_result<Callback, Args...>::type;
 
             auto task = std::make_shared<std::packaged_task<return_type()>>(
-                std::bind(std::forward<F>(f), std::forward<Args>(args)...)
+                std::bind(std::forward<Callback>(f), std::forward<Args>(args)...)
 
             );
 
@@ -263,6 +265,7 @@ class ThreadPool {
             return res;
 
         }
+        
         ~ThreadPool() {
             {
                 std::unique_lock<std::mutex> lock(queueMutex);
