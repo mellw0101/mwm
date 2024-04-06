@@ -4234,8 +4234,10 @@ class window {
                 xcb_intern_atom_cookie_t protocols_cookie = xcb_intern_atom(conn, 1, 12, "WM_PROTOCOLS");
                 xcb_intern_atom_reply_t *protocols_reply = xcb_intern_atom_reply(conn, protocols_cookie, nullptr);
 
-                xcb_intern_atom_cookie_t delete_cookie = xcb_intern_atom(conn, 0, 16, "WM_DELETE_WINDOW");
-                xcb_intern_atom_reply_t *delete_reply = xcb_intern_atom_reply(conn, delete_cookie, nullptr);
+                // xcb_intern_atom_cookie_t delete_cookie = xcb_intern_atom(conn, 0, 16, "WM_DELETE_WINDOW");
+                // xcb_intern_atom_reply_t *delete_reply = xcb_intern_atom_reply(conn, delete_cookie, nullptr);
+                intern_atom_repl_t d_repl(conn, 0, (char *)"WM_DELETE_WINDOW");
+
 
                 if (protocols_reply == nullptr) {
                     loutE << "protocols reply is null" << loutEND;
@@ -4244,7 +4246,7 @@ class window {
                     return;
 
                 }
-                if (delete_reply == nullptr) {
+                if (d_repl.is_not_valid()) {
                     loutE << "delete reply is null" << loutEND;
                     free(protocols_reply);
                     // free(delete_reply);
@@ -4253,9 +4255,8 @@ class window {
                 }
 
                 int i = 0; do {
-                    send_event(KILL_WINDOW, (uint32_t[3]){32, protocols_reply->atom, delete_reply->atom});
-                    
-                    
+                    send_event(KILL_WINDOW, (uint32_t[3]){32, protocols_reply->atom, d_repl.atom});
+
                     if (is_mapped()) {
                         ++i;
                     } else {
@@ -4264,7 +4265,7 @@ class window {
 
                 } while (i < 3);
 
-                free(delete_reply);
+                // free(delete_reply);
                 free(protocols_reply);
 
                 if (xcb->window_exists(w)) {
