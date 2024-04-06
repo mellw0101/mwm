@@ -85,7 +85,7 @@
 #include "tools.hpp"
 
 #include "Log.hpp"
-#include "data.hpp"
+// #include "data.hpp"
 #include "xcb.hpp"
 #include "xcb.hpp"
 Logger logger;
@@ -93,7 +93,7 @@ Logger logger;
 #include "defenitions.hpp"
 #include "tools.hpp"
 #include "thread.hpp"
-#include "Event.hpp"
+// #include "Event.hpp"
 
 static xcb_connection_t * conn;
 static xcb_ewmh_connection_t * ewmh;
@@ -238,8 +238,6 @@ static string user;
 #define SCREEN_CENT_X()                  (screen->width_in_pixels / 2)
 #define SCREEN_CENTER_Y(__window_height) ((screen->height_in_pixels / 2) - (__window_height / 2))
 #define SCREEN_BOTTOM_Y(__window_height) (screen->height_in_pixels - __window_height)
-
-static __event__handler *ev = nullptr;
 
 template<typename Type>
 constexpr Type make_constexpr(Type value) { return value; }
@@ -2900,7 +2898,6 @@ class __event_handler__ {
     /* Variabels */
         __key_codes__ key_codes;
         mutex event_mutex;
-        Signal<const xcb_generic_event_t *> main_loop;
 
     /* Methods   */
         #define Emit signal_manager->_window_signals.emit
@@ -2933,7 +2930,11 @@ class __event_handler__ {
 
             setEventCallback(XCB_EXPOSE, [&](Ev ev) {
                 RE_CAST_EV(xcb_expose_event_t);
-                HANDLE(XCB_EXPOSE, e->window);
+                // HANDLE(XCB_EXPOSE, e->window);
+                auto t = enqueueTask(thread_pool, [](uint32_t __w) {
+                    Emit(__w, XCB_EXPOSE);
+
+                }, e->window);
                 
             });
             setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev) {
@@ -3456,6 +3457,7 @@ class __event_handler__ {
         unordered_map<uint8_t, vector<pair<CallbackId, EventCallback>>> eventCallbacks;
         bool shouldContinue = false;
         CallbackId nextCallbackId = 0;
+        ThreadPool thread_pool{20};
 
 }; static __event_handler__ *event_handler(nullptr);
 using EventCallback = function<void(Ev)>;
@@ -6686,11 +6688,12 @@ class client {
                     
                     if (x > c->x + c->width - N && x < c->x + c->width + N
                     &&  y + this->height > c->y && y < c->y + c->height) {
-                        if (y > c->y - NC && y < c->y + NC)                                                       {
+                        /* SNAP WINDOW TO 'RIGHT_TOP' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET */
+                        if (y > c->y - NC && y < c->y + NC) {
                             this->frame.x_y((c->x + c->width), c->y);
                             return;
 
-                        } /* SNAP WINDOW TO 'RIGHT_TOP' CORNER OF NON_CONROLLED WINDOW WHEN APPROPRIET */
+                        }
                         
                         if (y + this->height > c->y + c->height - NC && y + this->height < c->y + c->height + NC) {
                             this->frame.x_y((c->x + c->width), (c->y + c->height) - this->height);
@@ -7114,7 +7117,7 @@ class client {
             draw_title(TITLE_REQ_DRAW);
             icon.raise();
 
-            CONN(EXPOSE, if (__window == this->titlebar) {
+            CONN(XCB_EXPOSE, if (__window == this->titlebar) {
                 this->titlebar.clear();
                 this->titlebar.draw_acc_16(this->win.get_net_wm_name());
                 FLUSH_X();
@@ -14483,7 +14486,6 @@ class test {
         test() {}
 };
 void setup_wm() {
-    ev = new __event__handler(conn);
     user = get_user_name();
     loutCUser(USER);
 
