@@ -7098,13 +7098,19 @@ class client {
 
             , this->win);
 
-            CONN(L_MOUSE_BUTTON_EVENT,
+            /* CONN(L_MOUSE_BUTTON_EVENT,
                 this->focus();
                 this->win.focus_input();
 
-            , this->win);
+            , this->win); */
+            event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) {
+                RE_CAST_EV(xcb_button_press_event_t);
+                if (e->event != this->win) return;
 
-            CONN(XCB_BUTTON_RELEASE, m_pointer->ungrab();, this->win);
+                this->focus();
+                this->win.focus_input();
+
+            });
 
             frame.set_event_mask(XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY);
             frame.map();
@@ -7118,23 +7124,35 @@ class client {
 
             , this->win);
 
-            CONN(DESTROY_NOTIF_W,
-                if (!this->win.is_mapped()) {
-                    this->kill();
-                } else {
-                    this->win.kill();
+            // CONN(DESTROY_NOTIF_W,
+            //     if (!this->win.is_mapped()) {
+            //         this->kill();
+            //     } else {
+            //         this->win.kill();
+            //     }
+
+            // , this->win);
+
+            // CONN(DESTROY_NOTIF_EV,
+            //     if (!this->win.is_mapped()) {
+            //         this->kill();
+            //     } else {
+            //         this->win.kill();
+            //     }
+
+            // , this->win);
+            event_handler->setEventCallback(XCB_DESTROY_NOTIFY, [&](Ev ev) {
+                RE_CAST_EV(xcb_destroy_notify_event_t);
+                if (e->event == this->win && e->window == this->win) {
+                    if (!this->win.is_mapped()) {
+                        this->kill();
+                    } else {
+                        this->win.kill();
+                    }
+
                 }
 
-            , this->win);
-
-            CONN(DESTROY_NOTIF_EV,
-                if (!this->win.is_mapped()) {
-                    this->kill();
-                } else {
-                    this->win.kill();
-                }
-
-            , this->win);
+            });
 
             CWC(frame);
             CWC(win);
@@ -7170,11 +7188,6 @@ class client {
                 FLUSH_X();
                 
             }, this->win);
-
-            // CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->titlebar) {
-            //     C_EMIT(this, MOVE_CLIENT_MOUSE);
-                
-            // }, this->titlebar);
 
         }
         void make_close_button() {
@@ -7322,11 +7335,6 @@ class client {
             ); CWC(border[left]);
             border[left].grab_button({ { L_MOUSE_BUTTON, NULL } });
             FLUSH_X();
-            /* CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->border[left]) {
-                C_EMIT(this, RESIZE_CLIENT_BORDER_LEFT);
-
-            }, this->border[left]); */
-            CONN(BUTTON_RELEASE, m_pointer->ungrab();, this->border[left]);
 
             border[right].create_window(
                 frame,
@@ -7343,10 +7351,6 @@ class client {
             ); CWC(border[right]);
             border[right].grab_button({ { L_MOUSE_BUTTON, NULL } });
             FLUSH_X();
-            /* CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->border[right]) {
-                C_EMIT(this, RESIZE_CLIENT_BORDER_RIGHT);
-
-            }, this->border[right]); */
 
             border[top].create_window(
                 frame,
@@ -7363,10 +7367,6 @@ class client {
             ); CWC(border[top]);
             border[top].grab_button({ { L_MOUSE_BUTTON, NULL } });
             FLUSH_X();
-            /* CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->border[top]) {
-                C_EMIT(this, RESIZE_CLIENT_BORDER_TOP);
-
-            }, this->border[top]); */
 
             border[bottom].create_window(
                 frame,
@@ -7383,10 +7383,6 @@ class client {
             ); CWC(border[bottom]);
             border[bottom].grab_button({ { L_MOUSE_BUTTON, NULL } });
             FLUSH_X();
-            /* CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->border[bottom]) {
-                C_EMIT(this, RESIZE_CLIENT_BORDER_BOTTOM);
-
-            }, this->border[bottom]); */
 
             border[top_left].create_window(
                 frame,
@@ -7403,10 +7399,6 @@ class client {
             ); CWC(border[top_left]);
             border[top_left].grab_button({ { L_MOUSE_BUTTON, NULL } });
             FLUSH_X();
-            /* CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->border[top_left]) {
-                C_EMIT(this, RESIZE_CLIENT_BORDER_TOP_LEFT);
-
-            }, this->border[top_left]); */
 
             border[top_right].create_window(
                 frame,
@@ -7423,10 +7415,6 @@ class client {
             ); CWC(border[top_right]);
             border[top_right].grab_button({ { L_MOUSE_BUTTON, NULL } });
             FLUSH_X();
-            /* CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->border[top_right]) {
-                C_EMIT(this, RESIZE_CLIENT_BORDER_TOP_RIGHT);
-
-            }, this->border[top_right]); */
 
             border[bottom_left].create_window(
                 frame,
@@ -7443,10 +7431,6 @@ class client {
             ); CWC(border[bottom_left]);
             border[bottom_left].grab_button({ { L_MOUSE_BUTTON, NULL } });
             FLUSH_X();
-            /* CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->border[bottom_left]) {
-                C_EMIT(this, RESIZE_CLIENT_BORDER_BOTTOM_LEFT);    
-
-            }, this->border[bottom_left]);          */   
 
             border[bottom_right].create_window(
                 frame,
@@ -7463,10 +7447,6 @@ class client {
             ); CWC(border[bottom_right]);
             border[bottom_right].grab_button({ { L_MOUSE_BUTTON, NULL } });
             FLUSH_X();
-            /* CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->border[bottom_right]) {
-                C_EMIT(this, RESIZE_CLIENT_BORDER_BOTTOM_RIGHT);
-                
-            }, this->border[bottom_right]); */
 
         }
         void set_icon_png() {
@@ -13965,7 +13945,7 @@ class Events {
             // event_handler->setEventCallback(EV_CALL(XCB_KEY_PRESS)         { key_press_handler(ev); });
             // event_handler->setEventCallback(EV_CALL(XCB_MAP_NOTIFY)        { map_notify_handler(ev); });
             // event_handler->setEventCallback(EV_CALL(XCB_MAP_REQUEST)       { map_req_handler(ev); });
-            event_handler->setEventCallback(EV_CALL(XCB_BUTTON_PRESS)      { button_press_handler(ev); });
+            event_handler->setEventCallback(EV_CALL(XCB_BUTTON_PRESS) { button_press_handler(ev); });
             // event_handler->setEventCallback(EV_CALL(XCB_CONFIGURE_REQUEST) { configure_request_handler(ev); });
             // event_handler->setEventCallback(EV_CALL(XCB_FOCUS_IN)          { focus_in_handler(ev); });
             // event_handler->setEventCallback(EV_CALL(XCB_FOCUS_OUT)         { focus_out_handler(ev); });
