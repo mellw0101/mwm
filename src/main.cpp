@@ -3143,11 +3143,8 @@ class __event_handler__ {
                 auto it = eventCallbacks.find(res);
                 if (it != eventCallbacks.end()) {
                     for (const auto &pair : it->second) {
-                        tPool_2.enqueue([&](xcb_generic_event_t *ev) {
-                            pair.second(ev);
-
-                        }, ev);
-
+                        pair.second(ev);
+                        
                     }
                     
                 }
