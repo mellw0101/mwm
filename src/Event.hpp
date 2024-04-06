@@ -87,21 +87,21 @@ class __event__handler {
         }
 
     public:
-
         template<typename F>
         void addCb(int S, F &&f) {
             Map[S] = std::forward<F>(f);
             
         }
-
         void run() {
             while ((ev = xcb_wait_for_event(conn)) != nullptr) {
                 uint8_t responseType = ev->response_type & ~0x80;
                 if (Map.find(responseType) != Map.end()) {
                     Map[responseType](ev);
-                }
-                free(ev); // Remember to free the event
+
+                } free(ev); // Remember to free the event
+            
             }
+            
         }
 
         __event__handler(xcb_connection_t *conn) : ev(new xcb_generic_event_t) {}

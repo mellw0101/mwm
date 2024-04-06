@@ -46,19 +46,17 @@ bool xcb::window_exists(uint32_t __w) {
 uint32_t xcb::gen_Xid() {
     if (_flags & (1ULL << X_CONN_ERROR)) {
         return -1;
-    
+
     } uint32_t w = xcb_generate_id(_conn);
 
     if (w == -1) {
         set_flag(X_ID_GEN_ERROR);
         loutE << "Failed to generate Xid" << loutEND;
-    }
-    else {
+
+    } else {
         clear_flag(X_ID_GEN_ERROR);
-        // loutI << "Total windows in vec" << _xid_vec.size() << loutEND;  
-    }
-    // _xid_vec.push_back(w);
-    return w;
+
+    } return w;
 
 }
 void xcb::window_stack(uint32_t __window1, uint32_t __window2, uint32_t __mode) {

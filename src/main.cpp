@@ -3099,7 +3099,8 @@ class __event_handler__ {
                 if (!ev) continue;
                 // chrono::microseconds execTime;
                 // ScopeTimer st(__func__, execTime, ev->response_type & ~80);
-                main_loop(ev);
+                // main_loop(ev);
+                processEvent(ev);
                 free(ev);
             }
         }
@@ -3345,7 +3346,7 @@ class __event_handler__ {
         constexpr void processEvent(xcb_generic_event_t* ev) {
             uint8_t responseType = ev->response_type & ~0x80;
             switch (responseType) {
-                /* case XCB_KEY_PRESS:{
+                case XCB_KEY_PRESS:{
                     RE_CAST_EV(xcb_key_press_event_t);
                     switch (e->state) {
                         case (CTRL + ALT): {
@@ -3424,7 +3425,7 @@ class __event_handler__ {
 
                     } return;
 
-                }  *//* case XCB_BUTTON_PRESS:{
+                } case XCB_BUTTON_PRESS:{
                     RE_CAST_EV(xcb_button_press_event_t);
                     if (e->detail == L_MOUSE_BUTTON) {
                         if (e->state == ALT) {
@@ -3446,19 +3447,19 @@ class __event_handler__ {
 
                     } return;
 
-                } *//* case XCB_EXPOSE:{
+                } case XCB_EXPOSE:{
                     RE_CAST_EV(xcb_expose_event_t);
                     HANDLE_WINDOW(XCB_EXPOSE);
 
                     return;
 
-                } *//* case XCB_PROPERTY_NOTIFY:{
+                } case XCB_PROPERTY_NOTIFY:{
                     RE_CAST_EV(xcb_property_notify_event_t);
                     HANDLE_WINDOW(XCB_PROPERTY_NOTIFY);
 
                     return;
 
-                } *//*  case XCB_ENTER_NOTIFY:{
+                } case XCB_ENTER_NOTIFY:{
                     RE_CAST_EV(xcb_enter_notify_event_t);
                     HANDLE_EVENT(XCB_ENTER_NOTIFY);
 
@@ -3470,19 +3471,19 @@ class __event_handler__ {
 
                     return;
 
-                } */ /* case XCB_MAP_REQUEST: {
+                } case XCB_MAP_REQUEST: {
                     RE_CAST_EV(xcb_map_request_event_t);
                     HANDLE_WINDOW(MAP_REQ);
 
                     return;
 
-                }  *//* case XCB_MAP_NOTIFY:{
+                } case XCB_MAP_NOTIFY:{
                     RE_CAST_EV(xcb_map_notify_event_t);
                     HANDLE_EVENT(MAP_NOTIFY);
 
                     return;
 
-                }  *//* case XCB_FOCUS_IN:{
+                } case XCB_FOCUS_IN:{
                     RE_CAST_EV(xcb_focus_in_event_t);
                     HANDLE_EVENT(FOCUS_IN);
 
@@ -3494,48 +3495,19 @@ class __event_handler__ {
 
                     return;
 
-                } *//*  case XCB_DESTROY_NOTIFY:{
+                } case XCB_DESTROY_NOTIFY:{
                     RE_CAST_EV(xcb_destroy_notify_event_t);
                     HANDLE_EVENT(FOCUS_OUT);
 
                     return;
 
-                } *//* case XCB_MOTION_NOTIFY:{
+                } case XCB_MOTION_NOTIFY:{
                     RE_CAST_EV(xcb_motion_notify_event_t);
                     HANDLE_EVENT(MOTION_NOTIFY);
-
                     return;
 
-                } */
-
+                }
             }
-
-        }
-        template<uint8_t __sig>
-        constexpr void ev_to_sig(xcb_generic_event_t *ev) {
-            if constexpr (__sig == XCB_MAP_REQUEST) {
-                // thread(map_req, ev).detach();
-                
-            } else if constexpr (__sig == XCB_BUTTON_PRESS) {
-                // thread(button_press, ev).detach();
-
-            } else if constexpr (__sig == XCB_FOCUS_IN    ) {
-                // thread(focus_in, ev).detach();
-
-            } else if constexpr (__sig == XCB_FOCUS_OUT   ) {
-                // thread(focus_out, ev).detach();
-
-            } else if constexpr (__sig == XCB_EXPOSE      ) {
-                // thread(expose, ev).detach();
-                
-            } else if constexpr (__sig == XCB_LEAVE_NOTIFY) {
-                // thread(leave_notif, ev).detach();
-                
-            } else if constexpr (__sig == XCB_ENTER_NOTIFY) {
-                // thread(enter_notif, ev).detach();
-                
-            }
-
         }
         void end() {
             shouldContinue = false;
@@ -3547,6 +3519,7 @@ class __event_handler__ {
             CallbackId id = nextCallbackId++;
             eventCallbacks[eventType].emplace_back(id, std::forward<Callback>(callback));
             return id;
+
         }
         void removeEventCallback(uint8_t eventType, CallbackId id) {
             auto& callbacks = eventCallbacks[eventType];

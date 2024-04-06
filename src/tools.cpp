@@ -9,5 +9,5 @@ size_t slen(const char *__s) {
     size_t i(0);
     for(; __s[i]; ++i){}
     return i;
-    
+
 }
