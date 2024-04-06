@@ -52,14 +52,12 @@ uint32_t xcb::gen_Xid() {
     if (w == -1) {
         set_flag(X_ID_GEN_ERROR);
         loutE << "Failed to generate Xid" << loutEND;
-
     }
     else {
         clear_flag(X_ID_GEN_ERROR);
-        loutI << "Total windows in vec" << _xid_vec.size() << loutEND;
-        
+        // loutI << "Total windows in vec" << _xid_vec.size() << loutEND;  
     }
-    _xid_vec.push_back(w);
+    // _xid_vec.push_back(w);
     return w;
 
 }

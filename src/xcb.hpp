@@ -210,7 +210,7 @@ class xcb {
         xcb_void_cookie_t _cookie;
 
         uint64_t _flags = 0xffffffffffffffff;
-        vector<uint32_t> _xid_vec;
+        // vector<uint32_t> _xid_vec;
         // void_err_t void_err;
 
         void check_error();
