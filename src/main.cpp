@@ -2938,22 +2938,34 @@ class __event_handler__ {
             });
             setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev) {
                 RE_CAST_EV(xcb_enter_notify_event_t);
-                HANDLE(XCB_ENTER_NOTIFY, e->event);
+                thread_pool.enqueue([](uint32_t w) {
+                    Emit(w, XCB_ENTER_NOTIFY);
+
+                }, e->event);
 
             });
             setEventCallback(XCB_LEAVE_NOTIFY, [&](Ev ev) {
                 RE_CAST_EV(xcb_leave_notify_event_t);
-                HANDLE(XCB_LEAVE_NOTIFY, e->event);
+                thread_pool.enqueue([](uint32_t w) {
+                    Emit(w, XCB_LEAVE_NOTIFY);
+
+                }, e->event);
 
             });
             setEventCallback(XCB_FOCUS_IN, [&](Ev ev) {
                 RE_CAST_EV(xcb_focus_in_event_t);
-                HANDLE(XCB_FOCUS_IN, e->event);
+                thread_pool.enqueue([](uint32_t w) {
+                    Emit(w, XCB_FOCUS_IN);
+                    
+                }, e->event);
 
             });
             setEventCallback(XCB_FOCUS_OUT, [&](Ev ev) {
                 RE_CAST_EV(xcb_focus_out_event_t);
-                HANDLE(XCB_FOCUS_OUT, e->event);
+                thread_pool.enqueue([](uint32_t w) {
+                    Emit(w, XCB_FOCUS_OUT);
+                    
+                }, e->event);
 
             });
             setEventCallback(XCB_KEY_PRESS, [&](Ev ev) {
@@ -2961,13 +2973,19 @@ class __event_handler__ {
                 switch (e->state) {
                     case   CTRL  + ALT          :{
                         if (e->detail == key_codes.t) {
-                            thread(handle_event<ROOT_SIGNAL>, TERM_KEY_PRESS).detach();
+                            thread_pool.enqueue([](){
+                                Emit(screen->root, TERM_KEY_PRESS);
+                                
+                            });
 
                         } /* Terminal keybinding */ break;
 
                     } case SHIFT + CTRL + SUPER :{
                         if (e->detail == key_codes.r_arrow) {
-                            thread(handle_event<MOVE_TO_NEXT_DESKTOP_WAPP>, e->event).detach();
+                            thread_pool.enqueue([](uint32_t w) {
+                                Emit(w, MOVE_TO_NEXT_DESKTOP_WAPP);
+                                
+                            }, e->event);
 
                         } else if (e->detail == key_codes.l_arrow) {
                             thread(handle_event<MOVE_TO_PREV_DESKTOP_WAPP>, e->event).detach();
@@ -3062,19 +3080,31 @@ class __event_handler__ {
                 RE_CAST_EV(xcb_button_press_event_t);
                 if (e->detail == L_MOUSE_BUTTON)        {
                     if (e->state == ALT) {
-                        HANDLE(L_MOUSE_BUTTON_EVENT__ALT, e->event);
+                        thread_pool.enqueue([] (uint32_t w) {
+                            Emit(w, L_MOUSE_BUTTON_EVENT__ALT);
+                            
+                        }, e->event);
 
                     } else {
-                        HANDLE(L_MOUSE_BUTTON_EVENT, e->event);
+                        thread_pool.enqueue([] (uint32_t w) {
+                            Emit(w, L_MOUSE_BUTTON_EVENT);
+                            
+                        }, e->event);
 
                     }
 
                 } else if (e->detail == R_MOUSE_BUTTON) {
                     if (e->state == ALT) {
-                        HANDLE_EVENT(R_MOUSE_BUTTON_EVENT__ALT);
-                        
+                        thread_pool.enqueue([] (uint32_t w) {
+                            Emit(w, R_MOUSE_BUTTON_EVENT__ALT);
+                            
+                        }, e->event);
+
                     } else {
-                        HANDLE_EVENT(R_MOUSE_BUTTON_EVENT);
+                        thread_pool.enqueue([] (uint32_t w) {
+                            Emit(w, R_MOUSE_BUTTON_EVENT);
+                            
+                        }, e->event);
 
                     }
 
@@ -3083,7 +3113,10 @@ class __event_handler__ {
             });
             setEventCallback(XCB_MAP_NOTIFY, [&](Ev ev) {
                 RE_CAST_EV(xcb_map_notify_event_t);
-                HANDLE(XCB_MAP_NOTIFY, e->event);
+                thread_pool.enqueue([](uint32_t w) {
+                    Emit(w, XCB_MAP_NOTIFY);
+                    
+                }, e->event);
 
             });
             setEventCallback(XCB_PROPERTY_NOTIFY, [&](Ev ev) {
