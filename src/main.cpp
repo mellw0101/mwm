@@ -3099,48 +3099,48 @@ class __event_handler__ {
                 MWM_Ev res = map_ev_to_enum(ev->response_type & ~0x80);
                 switch (res) {
                     case   MWM_Ev::EXPOSE         :{
-                        const xcb_expose_event_t *e = (const xcb_expose_event_t *)ev;
+                        RE_CAST_EV(xcb_expose_event_t);
                         HANDLE(XCB_EXPOSE, e->window);
                         break;
 
                     } case MWM_Ev::ENTER_NOTIFY   :{
-                        const xcb_enter_notify_event_t *e = (const xcb_enter_notify_event_t *)ev;
+                        RE_CAST_EV(xcb_enter_notify_event_t);
                         HANDLE(XCB_ENTER_NOTIFY, e->event);
                         break;
                         
                     } case MWM_Ev::LEAVE_NOTIFY   :{
-                        const auto *e = (const xcb_leave_notify_event_t *)ev;
+                        RE_CAST_EV(xcb_leave_notify_event_t);
                         HANDLE(XCB_LEAVE_NOTIFY, e->event);
                         break;
                         
                     } case MWM_Ev::FOCUS_IN       :{
-                        const auto *e = (const xcb_focus_in_event_t *)ev;
+                        RE_CAST_EV(xcb_focus_in_event_t);
                         HANDLE(XCB_FOCUS_IN, e->event);
                         break;
                         
                     } case MWM_Ev::FOCUS_OUT      :{
-                        const auto *e = (const xcb_focus_out_event_t *)ev;
+                        RE_CAST_EV(xcb_focus_out_event_t);
                         HANDLE(XCB_FOCUS_OUT, e->event);
                         break;
                         
                     } case MWM_Ev::DESTROY_NOTIF  :{
-                        const auto *e = (const xcb_destroy_notify_event_t *)ev;
-                        HANDLE(DESTROY_NOTIF_EV, e->event);
+                        RE_CAST_EV(xcb_destroy_notify_event_t);
+                        HANDLE(DESTROY_NOTIF_EV, e->window);
                         HANDLE(DESTROY_NOTIF_W, e->window);
                         break;
 
                     } case MWM_Ev::MAP_REQ        :{
-                        auto e = (xcb_map_request_event_t *)ev;
+                        RE_CAST_EV(xcb_map_request_event_t);
                         HANDLE(XCB_MAP_REQUEST, e->window);
                         break;
 
                     } case MWM_Ev::MOTION_NOTIFY  :{
-                        auto const *e = (const xcb_motion_notify_event_t *)ev;
+                        RE_CAST_EV(xcb_motion_notify_event_t);
                         HANDLE_EVENT(XCB_MOTION_NOTIFY);
                         break;
                         
                     } case MWM_Ev::KEY_PRESS      :{
-                        const auto *e = (const xcb_key_press_event_t *)ev;
+                        RE_CAST_EV(xcb_key_press_event_t);
                         switch (e->state) {
                             case   CTRL  + ALT          :{
                                 if (e->detail == key_codes.t) {
@@ -3219,7 +3219,7 @@ class __event_handler__ {
                         } break;
 
                     } case MWM_Ev::BUTTON_PRESS   :{
-                        const auto *e = (const xcb_button_press_event_t *)ev;
+                        RE_CAST_EV(xcb_button_press_event_t);
                         if (e->detail == L_MOUSE_BUTTON)        {
                             if (e->state == ALT) {
                                 HANDLE(L_MOUSE_BUTTON_EVENT__ALT, e->event);
@@ -3241,12 +3241,12 @@ class __event_handler__ {
                         } break;
 
                     } case MWM_Ev::MAP_NOTIF      :{
-                        const auto *e = (const xcb_map_notify_event_t *)ev;
+                        RE_CAST_EV(xcb_map_notify_event_t);
                         HANDLE(XCB_MAP_NOTIFY, e->event);
                         break;
 
                     } case MWM_Ev::PROPERTY_NOTIF :{
-                        const auto *e = (const xcb_property_notify_event_t *)ev;
+                        RE_CAST_EV(xcb_property_notify_event_t);
                         HANDLE(XCB_PROPERTY_NOTIFY, e->window);
                         break;
 
