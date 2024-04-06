@@ -1,3 +1,6 @@
+#ifndef EVENT__HPP
+#define EVENT__HPP
+
 #include <cstdint>
 #include <functional>
 #include <unordered_map>
@@ -104,3 +107,5 @@ class __event__handler {
         __event__handler(xcb_connection_t *conn) : ev(new xcb_generic_event_t) {}
 
 };
+
+#endif

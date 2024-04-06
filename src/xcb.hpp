@@ -157,6 +157,20 @@ class void_err_t {
     error_detected; \
 } while(0)
 
+#define CheckUint64_t(__flags, __BITVALUE, __ACTION, ...)  do { \
+    bool error_detected = false; \
+    unsigned long __bits[] = { __VA_ARGS__ }; \
+    for (size_t i = 0; i < sizeof(__bits) / sizeof(__bits[0]); ++i) { \
+        if ((__flags & __bits[i]) == __BITVALUE) { \
+            error_detected = true; \
+            break; \
+        } \
+    } \
+    if (error_detected) { \
+        __ACTION; \
+    } \
+} while(0)
+
 #define lambda(__refrence, ...)  do { \
     [__refrence](...) {\
         \
