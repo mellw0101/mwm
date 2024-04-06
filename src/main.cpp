@@ -3074,7 +3074,10 @@ class __event_handler__ {
             });
             setEventCallback(XCB_MOTION_NOTIFY, [&](Ev ev) {
                 RE_CAST_EV(xcb_motion_notify_event_t);
-                HANDLE_EVENT(XCB_MOTION_NOTIFY);
+                thread_pool.enqueue([](uint32_t w) {
+                    Emit(w, XCB_MOTION_NOTIFY);
+                    
+                }, e->event);
 
             });
             setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) {
