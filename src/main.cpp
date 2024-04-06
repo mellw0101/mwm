@@ -6726,16 +6726,16 @@ class client {
                 enqueueT(_3, thread_pool, [this]() { make_close_button(); });
                 enqueueT(_4, thread_pool, [this]() { make_max_button(); });
                 enqueueT(_5, thread_pool, [this]() { make_min_button(); });
-                
-                if (BORDER_SIZE > 0) {
-                    make_borders();
-
-                }
                 _1.wait();
                 _2.wait();
                 _3.wait();
                 _4.wait();
                 _5.wait();
+                
+                if (BORDER_SIZE > 0) {
+                    make_borders();
+
+                }
             
             }
             void raise() {
