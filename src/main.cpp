@@ -2930,8 +2930,7 @@ class __event_handler__ {
 
             setEventCallback(XCB_EXPOSE, [&](Ev ev) {
                 RE_CAST_EV(xcb_expose_event_t);
-                // HANDLE(XCB_EXPOSE, e->window);
-                auto t = enqueueTask(thread_pool, [](uint32_t __w) {
+                thread_pool.enqueue([](uint32_t __w) {
                     Emit(__w, XCB_EXPOSE);
 
                 }, e->window);
@@ -3089,9 +3088,12 @@ class __event_handler__ {
             });
             setEventCallback(XCB_PROPERTY_NOTIFY, [&](Ev ev) {
                 RE_CAST_EV(xcb_property_notify_event_t);
-                client *c = signal_manager->_window_client_map.retrive(e->window);
-                if (!c) return;
-                HANDLE(XCB_PROPERTY_NOTIFY, e->window);
+                thread_pool.enqueue([](uint32_t __w) {
+                    client *c = signal_manager->_window_client_map.retrive(__w);
+                    if (!c) return;
+                    Emit(__w, XCB_PROPERTY_NOTIFY);
+                    
+                }, e->window);
 
             });
 
