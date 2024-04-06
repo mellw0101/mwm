@@ -7170,10 +7170,10 @@ class client {
                 
             }, this->win);
 
-            CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->titlebar) {
-                C_EMIT(this, MOVE_CLIENT_MOUSE);
+            // CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->titlebar) {
+            //     C_EMIT(this, MOVE_CLIENT_MOUSE);
                 
-            }, this->titlebar);
+            // }, this->titlebar);
 
         }
         void make_close_button() {
@@ -7321,10 +7321,10 @@ class client {
             ); CWC(border[left]);
             border[left].grab_button({ { L_MOUSE_BUTTON, NULL } });
             FLUSH_X();
-            CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->border[left]) {
+            /* CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->border[left]) {
                 C_EMIT(this, RESIZE_CLIENT_BORDER_LEFT);
 
-            }, this->border[left]);
+            }, this->border[left]); */
             CONN(BUTTON_RELEASE, m_pointer->ungrab();, this->border[left]);
 
             border[right].create_window(
@@ -7342,10 +7342,10 @@ class client {
             ); CWC(border[right]);
             border[right].grab_button({ { L_MOUSE_BUTTON, NULL } });
             FLUSH_X();
-            CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->border[right]) {
+            /* CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->border[right]) {
                 C_EMIT(this, RESIZE_CLIENT_BORDER_RIGHT);
 
-            }, this->border[right]);
+            }, this->border[right]); */
 
             border[top].create_window(
                 frame,
@@ -7362,10 +7362,10 @@ class client {
             ); CWC(border[top]);
             border[top].grab_button({ { L_MOUSE_BUTTON, NULL } });
             FLUSH_X();
-            CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->border[top]) {
+            /* CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->border[top]) {
                 C_EMIT(this, RESIZE_CLIENT_BORDER_TOP);
 
-            }, this->border[top]);
+            }, this->border[top]); */
 
             border[bottom].create_window(
                 frame,
@@ -7382,10 +7382,10 @@ class client {
             ); CWC(border[bottom]);
             border[bottom].grab_button({ { L_MOUSE_BUTTON, NULL } });
             FLUSH_X();
-            CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->border[bottom]) {
+            /* CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->border[bottom]) {
                 C_EMIT(this, RESIZE_CLIENT_BORDER_BOTTOM);
 
-            }, this->border[bottom]);
+            }, this->border[bottom]); */
 
             border[top_left].create_window(
                 frame,
@@ -7402,10 +7402,10 @@ class client {
             ); CWC(border[top_left]);
             border[top_left].grab_button({ { L_MOUSE_BUTTON, NULL } });
             FLUSH_X();
-            CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->border[top_left]) {
+            /* CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->border[top_left]) {
                 C_EMIT(this, RESIZE_CLIENT_BORDER_TOP_LEFT);
 
-            }, this->border[top_left]);
+            }, this->border[top_left]); */
 
             border[top_right].create_window(
                 frame,
@@ -7422,10 +7422,10 @@ class client {
             ); CWC(border[top_right]);
             border[top_right].grab_button({ { L_MOUSE_BUTTON, NULL } });
             FLUSH_X();
-            CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->border[top_right]) {
+            /* CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->border[top_right]) {
                 C_EMIT(this, RESIZE_CLIENT_BORDER_TOP_RIGHT);
 
-            }, this->border[top_right]);
+            }, this->border[top_right]); */
 
             border[bottom_left].create_window(
                 frame,
@@ -7442,10 +7442,10 @@ class client {
             ); CWC(border[bottom_left]);
             border[bottom_left].grab_button({ { L_MOUSE_BUTTON, NULL } });
             FLUSH_X();
-            CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->border[bottom_left]) {
+            /* CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->border[bottom_left]) {
                 C_EMIT(this, RESIZE_CLIENT_BORDER_BOTTOM_LEFT);    
 
-            }, this->border[bottom_left]);            
+            }, this->border[bottom_left]);          */   
 
             border[bottom_right].create_window(
                 frame,
@@ -7462,10 +7462,10 @@ class client {
             ); CWC(border[bottom_right]);
             border[bottom_right].grab_button({ { L_MOUSE_BUTTON, NULL } });
             FLUSH_X();
-            CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->border[bottom_right]) {
+            /* CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->border[bottom_right]) {
                 C_EMIT(this, RESIZE_CLIENT_BORDER_BOTTOM_RIGHT);
                 
-            }, this->border[bottom_right]);
+            }, this->border[bottom_right]); */
 
         }
         void set_icon_png() {
@@ -13964,7 +13964,7 @@ class Events {
             // event_handler->setEventCallback(EV_CALL(XCB_KEY_PRESS)         { key_press_handler(ev); });
             // event_handler->setEventCallback(EV_CALL(XCB_MAP_NOTIFY)        { map_notify_handler(ev); });
             // event_handler->setEventCallback(EV_CALL(XCB_MAP_REQUEST)       { map_req_handler(ev); });
-            // event_handler->setEventCallback(EV_CALL(XCB_BUTTON_PRESS)      { button_press_handler(ev); });
+            event_handler->setEventCallback(EV_CALL(XCB_BUTTON_PRESS)      { button_press_handler(ev); });
             // event_handler->setEventCallback(EV_CALL(XCB_CONFIGURE_REQUEST) { configure_request_handler(ev); });
             // event_handler->setEventCallback(EV_CALL(XCB_FOCUS_IN)          { focus_in_handler(ev); });
             // event_handler->setEventCallback(EV_CALL(XCB_FOCUS_OUT)         { focus_out_handler(ev); });
@@ -14038,7 +14038,7 @@ class Events {
                 wm->focused_client = __c;
 
             }, FOCUS_CLIENT);
-            C_SIGNAL(if (__c)  mv_client(__c, wm->pointer.x() - __c->x - BORDER_SIZE, wm->pointer.y() - __c->y - BORDER_SIZE);, MOVE_CLIENT_MOUSE);
+            C_SIGNAL(if (__c) mv_client(__c, wm->pointer.x() - __c->x - BORDER_SIZE, wm->pointer.y() - __c->y - BORDER_SIZE);, MOVE_CLIENT_MOUSE);
             C_SIGNAL(if (__c) max_win(__c, max_win::BUTTON_MAXWIN);, BUTTON_MAXWIN_PRESS);
             C_SIGNAL(if (__c) max_win(__c, max_win::EWMH_MAXWIN  );, EWMH_MAXWIN_SIGNAL );
             C_SIGNAL(if (__c) resize_client::border(__c, edge::LEFT        );, RESIZE_CLIENT_BORDER_LEFT        );
@@ -14209,99 +14209,99 @@ class Events {
             //     return;
             // }
 
-            // if (e->detail == L_MOUSE_BUTTON)
-            // {
-            //     // if (e->event == c->win) {
-            //     //     // switch (e->state)
-            //     //     // {
-            //     //     //     case ALT:
-            //     //     //     {
-            //     //     //         c->raise();
-            //     //     //         mv_client mv(c, e->event_x, e->event_y + 20);
-            //     //     //         c->focus();
-            //     //     //         wm->focused_client = c;
-            //     //     //         return;
-            //     //     //     }
-            //     //     // }
-
-            //     //     // c->raise();
-            //     //     // c->focus();
-            //     //     // wm->focused_client = c;
-            //     //     // return;
-            //     // }
-                
-            //     // if (e->event == c->titlebar)
-            //     // {
-            //     //     c->raise();
-            //     //     c->focus();
-            //     //     mv_client mv(c, e->event_x, e->event_y);
-            //     //     wm->focused_client = c;
-            //     //     return;
-            //     // }
-                
-            //     // if (e->event == c->border[left])
-            //     // {
-            //     //     resize_client::border border(c, edge::LEFT);
-            //     //     return;
-            //     // }
-                
-            //     // if (e->event == c->border[right])
-            //     // {
-            //     //     resize_client::border border(c, edge::RIGHT);
-            //     //     return;
-            //     // } 
-                
-            //     // if (e->event == c->border[top])
-            //     // {
-            //     //     resize_client::border border(c, edge::TOP);
-            //     //     return;
-            //     // }
-                
-            //     // if (e->event == c->border[bottom])
-            //     // {
-            //     //     resize_client::border border(c, edge::BOTTOM_edge);
-            //     //     return;
-            //     // }
-                
-            //     // if (e->event == c->border[top_left])
-            //     // {
-            //     //     resize_client::border border(c, edge::TOP_LEFT);
-            //     //     return;
-            //     // }
-
-            //     // if (e->event == c->border[top_right])
-            //     // {
-            //     //     resize_client::border border(c, edge::TOP_RIGHT);
-            //     //     return;
-            //     // }
-                
-            //     // if (e->event == c->border[bottom_left])
-            //     // {
-            //     //     resize_client::border border(c, edge::BOTTOM_LEFT);
-            //     //     return;
-            //     // }
-
-            //     // if (e->event == c->border[bottom_right])
-            //     // {
-            //     //     resize_client::border border(c, edge::BOTTOM_RIGHT);
-            //     //     return;
-            //     // }
-            // }
-
-            if (e->detail == R_MOUSE_BUTTON)
+            if (e->detail == L_MOUSE_BUTTON)
             {
-                switch (e->state)
+                // if (e->event == c->win) {
+                //     switch (e->state)
+                //     {
+                //         case ALT:
+                //         {
+                //             c->raise();
+                //             mv_client mv(c, e->event_x, e->event_y + 20);
+                //             c->focus();
+                //             wm->focused_client = c;
+                //             return;
+                //         }
+                //     }
+
+                //     c->raise();
+                //     c->focus();
+                //     wm->focused_client = c;
+                //     return;
+                // }
+                
+                if (e->event == c->titlebar)
                 {
-                    case ALT:
-                    {
-                        c->raise();
-                        c->focus();
-                        resize_client resize(c, 0);
-                        wm->focused_client = c;
-                        return;
-                    }
+                    c->raise();
+                    c->focus();
+                    mv_client mv(c, e->event_x, e->event_y);
+                    wm->focused_client = c;
+                    return;
+                }
+                
+                if (e->event == c->border[left])
+                {
+                    resize_client::border border(c, edge::LEFT);
+                    return;
+                }
+                
+                if (e->event == c->border[right])
+                {
+                    resize_client::border border(c, edge::RIGHT);
+                    return;
+                } 
+                
+                if (e->event == c->border[top])
+                {
+                    resize_client::border border(c, edge::TOP);
+                    return;
+                }
+                
+                if (e->event == c->border[bottom])
+                {
+                    resize_client::border border(c, edge::BOTTOM_edge);
+                    return;
+                }
+                
+                if (e->event == c->border[top_left])
+                {
+                    resize_client::border border(c, edge::TOP_LEFT);
+                    return;
+                }
+
+                if (e->event == c->border[top_right])
+                {
+                    resize_client::border border(c, edge::TOP_RIGHT);
+                    return;
+                }
+                
+                if (e->event == c->border[bottom_left])
+                {
+                    resize_client::border border(c, edge::BOTTOM_LEFT);
+                    return;
+                }
+
+                if (e->event == c->border[bottom_right])
+                {
+                    resize_client::border border(c, edge::BOTTOM_RIGHT);
+                    return;
                 }
             }
+
+            // if (e->detail == R_MOUSE_BUTTON)
+            // {
+            //     switch (e->state)
+            //     {
+            //         case ALT:
+            //         {
+            //             c->raise();
+            //             c->focus();
+            //             resize_client resize(c, 0);
+            //             wm->focused_client = c;
+            //             return;
+            //         }
+            //     }
+            // }
         }
         
         // void configure_request_handler(const xcb_generic_event_t *&ev)
