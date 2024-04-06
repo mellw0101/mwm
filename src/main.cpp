@@ -2931,10 +2931,16 @@ class __event_handler__ {
             shouldContinue = true;
             xcb_generic_event_t *ev;
 
+            setEventCallback(XCB_EXPOSE, [&](Ev ev) {
+                RE_CAST_EV(xcb_expose_event_t);
+                HANDLE(XCB_EXPOSE, e->window);
+                
+            });
+
             while (shouldContinue) {
                 ev = xcb_wait_for_event(conn);
                 if (!ev) continue;
-                uint8_t res = ev->response_type & ~0x80; 
+                uint8_t res = ev->response_type & ~0x80;
                 
                 auto it = eventCallbacks.find(res);
                 if (it != eventCallbacks.end()) {
