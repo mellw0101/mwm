@@ -2903,10 +2903,6 @@ class __event_handler__ {
         Signal<const xcb_generic_event_t *> main_loop;
 
     /* Methods   */
-        constexpr int add(int a, int b) {
-            return a + b;
-
-        }
         #define Emit signal_manager->_window_signals.emit
         #define handle_template(__type) template<> void handle_event<__type> (uint32_t __w)
         template<uint8_t __sig>
@@ -2938,34 +2934,35 @@ class __event_handler__ {
             while (shouldContinue) {
                 ev = xcb_wait_for_event(conn);
                 if (!ev) continue;
-                MWM_Ev res = map_ev_to_enum(ev->response_type & ~0x80);
+                // MWM_Ev res = map_ev_to_enum(ev->response_type & ~0x80);
+                uint8_t res = ev->response_type & ~0x80; 
                 switch (res) {
-                    case   MWM_Ev::EXPOSE         :{
+                    case   XCB_EXPOSE         :{
                         RE_CAST_EV(xcb_expose_event_t);
                         HANDLE(XCB_EXPOSE, e->window);
                         break;
 
-                    } case MWM_Ev::ENTER_NOTIFY   :{
+                    } case XCB_ENTER_NOTIFY   :{
                         RE_CAST_EV(xcb_enter_notify_event_t);
                         HANDLE(XCB_ENTER_NOTIFY, e->event);
                         break;
                         
-                    } case MWM_Ev::LEAVE_NOTIFY   :{
+                    } case XCB_LEAVE_NOTIFY   :{
                         RE_CAST_EV(xcb_leave_notify_event_t);
                         HANDLE(XCB_LEAVE_NOTIFY, e->event);
                         break;
                         
-                    } case MWM_Ev::FOCUS_IN       :{
+                    } case XCB_FOCUS_IN       :{
                         RE_CAST_EV(xcb_focus_in_event_t);
                         HANDLE(XCB_FOCUS_IN, e->event);
                         break;
                         
-                    } case MWM_Ev::FOCUS_OUT      :{
+                    } case XCB_FOCUS_OUT      :{
                         RE_CAST_EV(xcb_focus_out_event_t);
                         HANDLE(XCB_FOCUS_OUT, e->event);
                         break;
                         
-                    } case MWM_Ev::DESTROY_NOTIF  :{
+                    } case XCB_DESTROY_NOTIFY :{
                         RE_CAST_EV(xcb_destroy_notify_event_t);
                         client *c;
                         if ((c = signal_manager->_window_client_map.retrive(e->event)) != nullptr) {
@@ -2976,17 +2973,17 @@ class __event_handler__ {
 
                         } break;
 
-                    } case MWM_Ev::MAP_REQ        :{
+                    } case XCB_MAP_REQUEST    :{
                         RE_CAST_EV(xcb_map_request_event_t);
                         HANDLE(XCB_MAP_REQUEST, e->window);
                         break;
 
-                    } case MWM_Ev::MOTION_NOTIFY  :{
+                    } case XCB_MOTION_NOTIFY  :{
                         RE_CAST_EV(xcb_motion_notify_event_t);
                         HANDLE_EVENT(XCB_MOTION_NOTIFY);
                         break;
                         
-                    } case MWM_Ev::KEY_PRESS      :{
+                    } case XCB_KEY_PRESS      :{
                         RE_CAST_EV(xcb_key_press_event_t);
                         switch (e->state) {
                             case   CTRL  + ALT          :{
@@ -3065,7 +3062,7 @@ class __event_handler__ {
 
                         } break;
 
-                    } case MWM_Ev::BUTTON_PRESS   :{
+                    } case XCB_BUTTON_PRESS   :{
                         RE_CAST_EV(xcb_button_press_event_t);
                         if (e->detail == L_MOUSE_BUTTON)        {
                             if (e->state == ALT) {
@@ -3087,21 +3084,18 @@ class __event_handler__ {
 
                         } break;
 
-                    } case MWM_Ev::MAP_NOTIF      :{
+                    } case XCB_MAP_NOTIFY      :{
                         RE_CAST_EV(xcb_map_notify_event_t);
                         HANDLE(XCB_MAP_NOTIFY, e->event);
                         break;
 
-                    } case MWM_Ev::PROPERTY_NOTIF :{
+                    } case XCB_PROPERTY_NOTIFY :{
                         RE_CAST_EV(xcb_property_notify_event_t);
                         client *c = signal_manager->_window_client_map.retrive(e->window);
                         if (!c) break;
                         HANDLE(XCB_PROPERTY_NOTIFY, e->window);
                         break;
 
-                    } case MWM_Ev::NO_Ev          :{
-                        break;
-                        
                     }
                 
                 } free(ev);
@@ -3320,6 +3314,7 @@ class __event_handler__ {
             return id;
 
         }
+
         void removeEventCallback(uint8_t eventType, CallbackId id) {
             auto& callbacks = eventCallbacks[eventType];
             callbacks.erase(
