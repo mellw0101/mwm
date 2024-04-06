@@ -93,6 +93,7 @@ Logger logger;
 #include "defenitions.hpp"
 #include "tools.hpp"
 #include "thread.hpp"
+#include "Event.hpp"
 
 static xcb_connection_t * conn;
 static xcb_ewmh_connection_t * ewmh;
@@ -237,6 +238,8 @@ static string user;
 #define SCREEN_CENT_X()                  (screen->width_in_pixels / 2)
 #define SCREEN_CENTER_Y(__window_height) ((screen->height_in_pixels / 2) - (__window_height / 2))
 #define SCREEN_BOTTOM_Y(__window_height) (screen->height_in_pixels - __window_height)
+
+static __event__handler *ev = nullptr;
 
 template<typename Type>
 constexpr Type make_constexpr(Type value) { return value; }
@@ -2928,343 +2931,503 @@ class __event_handler__ {
 
         using EventCallback = function<void(Ev)>;
         void run() {
-            main_loop = [this](const xcb_generic_event_t *ev) -> void {
-                MWM_Ev res = map_ev_to_enum(ev->response_type & ~0x80);
-                switch (res) {
-                    case   MWM_Ev::EXPOSE         :{
-                        const xcb_expose_event_t *e = (const xcb_expose_event_t *)ev;
-                        HANDLE(XCB_EXPOSE, e->window);
-                        break;
+            ev->addCb(XCB_EXPOSE, [this](xcb_generic_event_t *ev) {
+                RE_CAST_EV(xcb_expose_event_t);
+                HANDLE(XCB_EXPOSE, e->window);
 
-                    } case MWM_Ev::ENTER_NOTIFY   :{
-                        const xcb_enter_notify_event_t *e = (const xcb_enter_notify_event_t *)ev;
-                        HANDLE(XCB_ENTER_NOTIFY, e->event);
-                        break;
-                        
-                    } case MWM_Ev::LEAVE_NOTIFY   :{
-                        const auto *e = (const xcb_leave_notify_event_t *)ev;
-                        HANDLE(XCB_LEAVE_NOTIFY, e->event);
-                        break;
-                        
-                    } case MWM_Ev::FOCUS_IN       :{
-                        const auto *e = (const xcb_focus_in_event_t *)ev;
-                        HANDLE(XCB_FOCUS_IN, e->event);
-                        break;
-                        
-                    } case MWM_Ev::FOCUS_OUT      :{
-                        const auto *e = (const xcb_focus_out_event_t *)ev;
-                        HANDLE(XCB_FOCUS_OUT, e->event);
-                        break;
-                        
-                    } case MWM_Ev::DESTROY_NOTIF  :{
-                        const auto *e = (const xcb_destroy_notify_event_t *)ev;
-                        HANDLE(DESTROY_NOTIF_EV, e->event);
-                        HANDLE(DESTROY_NOTIF_W, e->window);
-                        break;
+            });
+            ev->addCb(XCB_ENTER_NOTIFY, [this](xcb_generic_event_t *ev) {
+                RE_CAST_EV(xcb_enter_notify_event_t);
+                HANDLE(XCB_ENTER_NOTIFY, e->event);
 
-                    } case MWM_Ev::MAP_REQ        :{
-                        auto e = (xcb_map_request_event_t *)ev;
-                        HANDLE(XCB_MAP_REQUEST, e->window);
-                        break;
+            });
+            ev->addCb(XCB_LEAVE_NOTIFY, [this](xcb_generic_event_t *ev) {
+                RE_CAST_EV(xcb_leave_notify_event_t);
+                HANDLE(XCB_LEAVE_NOTIFY, e->event);
 
-                    } case MWM_Ev::MOTION_NOTIFY  :{
-                        auto const *e = (const xcb_motion_notify_event_t *)ev;
-                        HANDLE_EVENT(XCB_MOTION_NOTIFY);
-                        break;
-                        
-                    } case MWM_Ev::KEY_PRESS      :{
-                        const auto *e = (const xcb_key_press_event_t *)ev;
-                        switch (e->state) {
-                            case   CTRL  + ALT          :{
-                                if (e->detail == key_codes.t) {
-                                    thread(handle_event<ROOT_SIGNAL>, TERM_KEY_PRESS).detach();
+            });
+            ev->addCb(XCB_FOCUS_IN, [this](xcb_generic_event_t *ev) {
+                RE_CAST_EV(xcb_focus_in_event_t);
+                HANDLE(XCB_FOCUS_IN, e->event);
 
-                                } /* Terminal keybinding */ break;
+            });
+            ev->addCb(XCB_FOCUS_OUT, [this](xcb_generic_event_t *ev) {
+                RE_CAST_EV(xcb_focus_out_event_t);
+                HANDLE(XCB_FOCUS_OUT, e->event);
 
-                            } case SHIFT + CTRL + SUPER :{
-                                if (e->detail == key_codes.r_arrow) {
-                                    thread(handle_event<MOVE_TO_NEXT_DESKTOP_WAPP>, e->event).detach();
+            });
+            ev->addCb(XCB_DESTROY_NOTIFY, [this](xcb_generic_event_t *ev) {
+                RE_CAST_EV(xcb_destroy_notify_event_t);
+                client *c;
+                if ((c = signal_manager->_window_client_map.retrive(e->event)) != nullptr) {
+                    HANDLE(DESTROY_NOTIF_EV, e->event);
 
-                                } else if (e->detail == key_codes.l_arrow) {
-                                    thread(handle_event<MOVE_TO_PREV_DESKTOP_WAPP>, e->event).detach();
+                } else if ((c = signal_manager->_window_client_map.retrive(e->window)) != nullptr) {
+                    HANDLE(DESTROY_NOTIF_W, e->window);
 
-                                } break;
-
-                            } case SHIFT + ALT          :{
-                                if (e->detail == key_codes.q) {
-                                    thread(handle_event<ROOT_SIGNAL>, QUIT_KEY_PRESS).detach();
-
-                                } /* Quit keybinding */ break;
-
-                            } case ALT                  :{
-                                if (e->detail == key_codes.n_1) {
-                                    thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_1).detach();
-
-                                } else if (e->detail == key_codes.n_2) {
-                                    thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_2).detach();
-
-                                } else if (e->detail == key_codes.n_3) {
-                                    thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_3).detach();
-                                    
-                                } else if (e->detail == key_codes.n_4) {
-                                    thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_4).detach();
-
-                                } else if (e->detail == key_codes.n_5) {
-                                    thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_5).detach();
-                                    
-                                } else if (e->detail == key_codes.tab) {
-                                    thread(handle_event<ROOT_SIGNAL>, CYCLE_FOCUS_KEY_PRESS).detach();
-
-                                } break;
-
-                            } case CTRL  + SUPER        :{
-                                if (e->detail == key_codes.r_arrow) {
-                                    thread(handle_event<ROOT_SIGNAL>, MOVE_TO_NEXT_DESKTOP).detach();
-
-                                } else if (e->detail == key_codes.l_arrow) {
-                                    thread(handle_event<ROOT_SIGNAL>, MOVE_TO_PREV_DESKTOP).detach();
-
-                                } break;
-
-                            } case SUPER                :{
-                                if (e->detail == key_codes.r_arrow)        {
-                                    HANDLE_EVENT(TILE_RIGHT);
-
-                                } else if (e->detail == key_codes.l_arrow) {
-                                    HANDLE_EVENT(TILE_LEFT);
-
-                                } else if (e->detail == key_codes.u_arrow) {
-                                    HANDLE_EVENT(TILE_UP);
-
-                                } else if (e->detail == key_codes.d_arrow) {
-                                    HANDLE_EVENT(TILE_DOWN);
-
-                                } else if (e->detail == key_codes.k)       {
-                                    thread(handle_event<ROOT_SIGNAL>, DEBUG_KEY_PRESS).detach();
-                                
-                                } break;
-
-                            }
-
-                        } if (e->detail == key_codes.f11) {
-                            HANDLE(EWMH_MAXWIN_SIGNAL, e->event);
-
-                        } break;
-
-                    } case MWM_Ev::BUTTON_PRESS   :{
-                        const auto *e = (const xcb_button_press_event_t *)ev;
-                        if (e->detail == L_MOUSE_BUTTON)        {
-                            if (e->state == ALT) {
-                                HANDLE(L_MOUSE_BUTTON_EVENT__ALT, e->event);
-
-                            } else {
-                                HANDLE(L_MOUSE_BUTTON_EVENT, e->event);
-
-                            } break;
-
-                        } else if (e->detail == R_MOUSE_BUTTON) {
-                            if (e->state == ALT) {
-                                HANDLE_EVENT(R_MOUSE_BUTTON_EVENT__ALT);
-                                
-                            } else {
-                                HANDLE_EVENT(R_MOUSE_BUTTON_EVENT);
-
-                            } break;
-
-                        } break;
-
-                    } case MWM_Ev::MAP_NOTIF      :{
-                        const auto *e = (const xcb_map_notify_event_t *)ev;
-                        HANDLE(XCB_MAP_NOTIFY, e->event);
-                        break;
-
-                    } case MWM_Ev::PROPERTY_NOTIF :{
-                        const auto *e = (const xcb_property_notify_event_t *)ev;
-                        HANDLE(XCB_PROPERTY_NOTIFY, e->window);
-                        break;
-
-                    } case MWM_Ev::NO_Ev          :{
-                        break;
-                        
-                    }                
                 }
-            };
 
-            key_codes.init();
-            shouldContinue = true;
-            xcb_generic_event_t *ev;
-            while (shouldContinue) {
-                ev = xcb_wait_for_event(conn);
-                if (!ev) continue;
-                MWM_Ev res = map_ev_to_enum(ev->response_type & ~0x80);
-                switch (res) {
-                    case   MWM_Ev::EXPOSE         :{
-                        RE_CAST_EV(xcb_expose_event_t);
-                        HANDLE(XCB_EXPOSE, e->window);
-                        break;
+            });
+            ev->addCb(XCB_MAP_REQUEST, [this](xcb_generic_event_t *ev) {
+                RE_CAST_EV(xcb_map_request_event_t);
+                HANDLE(XCB_MAP_REQUEST, e->window);
+            
+            });
+            ev->addCb(XCB_KEY_PRESS, [this](xcb_generic_event_t *ev) {
+                RE_CAST_EV(xcb_key_press_event_t);
+                switch (e->state) {
+                    case   CTRL  + ALT          :{
+                        if (e->detail == key_codes.t) {
+                            thread(handle_event<ROOT_SIGNAL>, TERM_KEY_PRESS).detach();
 
-                    } case MWM_Ev::ENTER_NOTIFY   :{
-                        RE_CAST_EV(xcb_enter_notify_event_t);
-                        HANDLE(XCB_ENTER_NOTIFY, e->event);
-                        break;
-                        
-                    } case MWM_Ev::LEAVE_NOTIFY   :{
-                        RE_CAST_EV(xcb_leave_notify_event_t);
-                        HANDLE(XCB_LEAVE_NOTIFY, e->event);
-                        break;
-                        
-                    } case MWM_Ev::FOCUS_IN       :{
-                        RE_CAST_EV(xcb_focus_in_event_t);
-                        HANDLE(XCB_FOCUS_IN, e->event);
-                        break;
-                        
-                    } case MWM_Ev::FOCUS_OUT      :{
-                        RE_CAST_EV(xcb_focus_out_event_t);
-                        HANDLE(XCB_FOCUS_OUT, e->event);
-                        break;
-                        
-                    } case MWM_Ev::DESTROY_NOTIF  :{
-                        RE_CAST_EV(xcb_destroy_notify_event_t);
-                        client *c;
-                        if ((c = signal_manager->_window_client_map.retrive(e->event)) != nullptr) {
-                            HANDLE(DESTROY_NOTIF_EV, e->event);
+                        } /* Terminal keybinding */ break;
 
-                        } else if ((c = signal_manager->_window_client_map.retrive(e->window)) != nullptr) {
-                            HANDLE(DESTROY_NOTIF_W, e->window);
+                    } case SHIFT + CTRL + SUPER :{
+                        if (e->detail == key_codes.r_arrow) {
+                            thread(handle_event<MOVE_TO_NEXT_DESKTOP_WAPP>, e->event).detach();
+
+                        } else if (e->detail == key_codes.l_arrow) {
+                            thread(handle_event<MOVE_TO_PREV_DESKTOP_WAPP>, e->event).detach();
 
                         } break;
 
-                    } case MWM_Ev::MAP_REQ        :{
-                        RE_CAST_EV(xcb_map_request_event_t);
-                        HANDLE(XCB_MAP_REQUEST, e->window);
-                        break;
+                    } case SHIFT + ALT          :{
+                        if (e->detail == key_codes.q) {
+                            thread(handle_event<ROOT_SIGNAL>, QUIT_KEY_PRESS).detach();
 
-                    } case MWM_Ev::MOTION_NOTIFY  :{
-                        RE_CAST_EV(xcb_motion_notify_event_t);
-                        HANDLE_EVENT(XCB_MOTION_NOTIFY);
-                        break;
-                        
-                    } case MWM_Ev::KEY_PRESS      :{
-                        RE_CAST_EV(xcb_key_press_event_t);
-                        switch (e->state) {
-                            case   CTRL  + ALT          :{
-                                if (e->detail == key_codes.t) {
-                                    thread(handle_event<ROOT_SIGNAL>, TERM_KEY_PRESS).detach();
+                        } /* Quit keybinding */ break;
 
-                                } /* Terminal keybinding */ break;
+                    } case ALT                  :{
+                        if (e->detail == key_codes.n_1) {
+                            thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_1).detach();
 
-                            } case SHIFT + CTRL + SUPER :{
-                                if (e->detail == key_codes.r_arrow) {
-                                    thread(handle_event<MOVE_TO_NEXT_DESKTOP_WAPP>, e->event).detach();
+                        } else if (e->detail == key_codes.n_2) {
+                            thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_2).detach();
 
-                                } else if (e->detail == key_codes.l_arrow) {
-                                    thread(handle_event<MOVE_TO_PREV_DESKTOP_WAPP>, e->event).detach();
+                        } else if (e->detail == key_codes.n_3) {
+                            thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_3).detach();
+                            
+                        } else if (e->detail == key_codes.n_4) {
+                            thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_4).detach();
 
-                                } break;
-
-                            } case SHIFT + ALT          :{
-                                if (e->detail == key_codes.q) {
-                                    thread(handle_event<ROOT_SIGNAL>, QUIT_KEY_PRESS).detach();
-
-                                } /* Quit keybinding */ break;
-
-                            } case ALT                  :{
-                                if (e->detail == key_codes.n_1) {
-                                    thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_1).detach();
-
-                                } else if (e->detail == key_codes.n_2) {
-                                    thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_2).detach();
-
-                                } else if (e->detail == key_codes.n_3) {
-                                    thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_3).detach();
-                                    
-                                } else if (e->detail == key_codes.n_4) {
-                                    thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_4).detach();
-
-                                } else if (e->detail == key_codes.n_5) {
-                                    thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_5).detach();
-                                    
-                                } else if (e->detail == key_codes.tab) {
-                                    thread(handle_event<ROOT_SIGNAL>, CYCLE_FOCUS_KEY_PRESS).detach();
-
-                                } break;
-
-                            } case CTRL  + SUPER        :{
-                                if (e->detail == key_codes.r_arrow) {
-                                    thread(handle_event<ROOT_SIGNAL>, MOVE_TO_NEXT_DESKTOP).detach();
-
-                                } else if (e->detail == key_codes.l_arrow) {
-                                    thread(handle_event<ROOT_SIGNAL>, MOVE_TO_PREV_DESKTOP).detach();
-
-                                } break;
-
-                            } case SUPER                :{
-                                if (e->detail == key_codes.r_arrow)        {
-                                    HANDLE_EVENT(TILE_RIGHT);
-
-                                } else if (e->detail == key_codes.l_arrow) {
-                                    HANDLE_EVENT(TILE_LEFT);
-
-                                } else if (e->detail == key_codes.u_arrow) {
-                                    HANDLE_EVENT(TILE_UP);
-
-                                } else if (e->detail == key_codes.d_arrow) {
-                                    HANDLE_EVENT(TILE_DOWN);
-
-                                } else if (e->detail == key_codes.k)       {
-                                    thread(handle_event<ROOT_SIGNAL>, DEBUG_KEY_PRESS).detach();
-                                
-                                } break;
-
-                            }
-
-                        } if (e->detail == key_codes.f11) {
-                            HANDLE(EWMH_MAXWIN_SIGNAL, e->event);
+                        } else if (e->detail == key_codes.n_5) {
+                            thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_5).detach();
+                            
+                        } else if (e->detail == key_codes.tab) {
+                            thread(handle_event<ROOT_SIGNAL>, CYCLE_FOCUS_KEY_PRESS).detach();
 
                         } break;
 
-                    } case MWM_Ev::BUTTON_PRESS   :{
-                        RE_CAST_EV(xcb_button_press_event_t);
-                        if (e->detail == L_MOUSE_BUTTON)        {
-                            if (e->state == ALT) {
-                                HANDLE(L_MOUSE_BUTTON_EVENT__ALT, e->event);
+                    } case CTRL  + SUPER        :{
+                        if (e->detail == key_codes.r_arrow) {
+                            thread(handle_event<ROOT_SIGNAL>, MOVE_TO_NEXT_DESKTOP).detach();
 
-                            } else {
-                                HANDLE(L_MOUSE_BUTTON_EVENT, e->event);
-
-                            } break;
-
-                        } else if (e->detail == R_MOUSE_BUTTON) {
-                            if (e->state == ALT) {
-                                HANDLE_EVENT(R_MOUSE_BUTTON_EVENT__ALT);
-                                
-                            } else {
-                                HANDLE_EVENT(R_MOUSE_BUTTON_EVENT);
-
-                            } break;
+                        } else if (e->detail == key_codes.l_arrow) {
+                            thread(handle_event<ROOT_SIGNAL>, MOVE_TO_PREV_DESKTOP).detach();
 
                         } break;
 
-                    } case MWM_Ev::MAP_NOTIF      :{
-                        RE_CAST_EV(xcb_map_notify_event_t);
-                        HANDLE(XCB_MAP_NOTIFY, e->event);
-                        break;
+                    } case SUPER                :{
+                        if (e->detail == key_codes.r_arrow)        {
+                            HANDLE_EVENT(TILE_RIGHT);
 
-                    } case MWM_Ev::PROPERTY_NOTIF :{
-                        RE_CAST_EV(xcb_property_notify_event_t);
-                        client *c = signal_manager->_window_client_map.retrive(e->window);
-                        if (!c) break;
-                        HANDLE(XCB_PROPERTY_NOTIFY, e->window);
-                        break;
+                        } else if (e->detail == key_codes.l_arrow) {
+                            HANDLE_EVENT(TILE_LEFT);
 
-                    } case MWM_Ev::NO_Ev          :{
-                        break;
+                        } else if (e->detail == key_codes.u_arrow) {
+                            HANDLE_EVENT(TILE_UP);
+
+                        } else if (e->detail == key_codes.d_arrow) {
+                            HANDLE_EVENT(TILE_DOWN);
+
+                        } else if (e->detail == key_codes.k)       {
+                            thread(handle_event<ROOT_SIGNAL>, DEBUG_KEY_PRESS).detach();
                         
+                        } break;
+
                     }
-                
-                } free(ev);
 
-            }
+                } if (e->detail == key_codes.f11) {
+                    HANDLE(EWMH_MAXWIN_SIGNAL, e->event);
+
+                }
+            
+            });
+            ev->addCb(XCB_BUTTON_PRESS, [this](xcb_generic_event_t *ev) {
+                RE_CAST_EV(xcb_button_press_event_t);
+                if (e->detail == L_MOUSE_BUTTON)        {
+                    if (e->state == ALT) {
+                        HANDLE(L_MOUSE_BUTTON_EVENT__ALT, e->event);
+
+                    } else {
+                        HANDLE(L_MOUSE_BUTTON_EVENT, e->event);
+
+                    }
+
+                } else if (e->detail == R_MOUSE_BUTTON) {
+                    if (e->state == ALT) {
+                        HANDLE_EVENT(R_MOUSE_BUTTON_EVENT__ALT);
+                        
+                    } else {
+                        HANDLE_EVENT(R_MOUSE_BUTTON_EVENT);
+
+                    }
+
+                } 
+
+            });
+            ev->addCb(XCB_MAP_NOTIFY, [this](xcb_generic_event_t *ev) {
+                RE_CAST_EV(xcb_map_notify_event_t);
+                HANDLE(XCB_MAP_NOTIFY, e->event);
+
+            });
+            ev->addCb(XCB_PROPERTY_NOTIFY, [this](xcb_generic_event_t *ev) {
+                RE_CAST_EV(xcb_property_notify_event_t);
+                client *c = signal_manager->_window_client_map.retrive(e->window);
+                if (!c) return;
+                HANDLE(XCB_PROPERTY_NOTIFY, e->window);
+
+            });
+            
+            ev->run();
+
+            // main_loop = [this](const xcb_generic_event_t *ev) -> void {
+            //     MWM_Ev res = map_ev_to_enum(ev->response_type & ~0x80);
+            //     switch (res) {
+            //         case   MWM_Ev::EXPOSE         :{
+            //             const xcb_expose_event_t *e = (const xcb_expose_event_t *)ev;
+            //             HANDLE(XCB_EXPOSE, e->window);
+            //             break;
+
+            //         } case MWM_Ev::ENTER_NOTIFY   :{
+            //             const xcb_enter_notify_event_t *e = (const xcb_enter_notify_event_t *)ev;
+            //             HANDLE(XCB_ENTER_NOTIFY, e->event);
+            //             break;
+                        
+            //         } case MWM_Ev::LEAVE_NOTIFY   :{
+            //             const auto *e = (const xcb_leave_notify_event_t *)ev;
+            //             HANDLE(XCB_LEAVE_NOTIFY, e->event);
+            //             break;
+                        
+            //         } case MWM_Ev::FOCUS_IN       :{
+            //             const auto *e = (const xcb_focus_in_event_t *)ev;
+            //             HANDLE(XCB_FOCUS_IN, e->event);
+            //             break;
+                        
+            //         } case MWM_Ev::FOCUS_OUT      :{
+            //             const auto *e = (const xcb_focus_out_event_t *)ev;
+            //             HANDLE(XCB_FOCUS_OUT, e->event);
+            //             break;
+                        
+            //         } case MWM_Ev::DESTROY_NOTIF  :{
+            //             const auto *e = (const xcb_destroy_notify_event_t *)ev;
+            //             HANDLE(DESTROY_NOTIF_EV, e->event);
+            //             HANDLE(DESTROY_NOTIF_W, e->window);
+            //             break;
+
+            //         } case MWM_Ev::MAP_REQ        :{
+            //             auto e = (xcb_map_request_event_t *)ev;
+            //             HANDLE(XCB_MAP_REQUEST, e->window);
+            //             break;
+
+            //         } case MWM_Ev::MOTION_NOTIFY  :{
+            //             auto const *e = (const xcb_motion_notify_event_t *)ev;
+            //             HANDLE_EVENT(XCB_MOTION_NOTIFY);
+            //             break;
+                        
+            //         } case MWM_Ev::KEY_PRESS      :{
+            //             const auto *e = (const xcb_key_press_event_t *)ev;
+            //             switch (e->state) {
+            //                 case   CTRL  + ALT          :{
+            //                     if (e->detail == key_codes.t) {
+            //                         thread(handle_event<ROOT_SIGNAL>, TERM_KEY_PRESS).detach();
+
+            //                     } /* Terminal keybinding */ break;
+
+            //                 } case SHIFT + CTRL + SUPER :{
+            //                     if (e->detail == key_codes.r_arrow) {
+            //                         thread(handle_event<MOVE_TO_NEXT_DESKTOP_WAPP>, e->event).detach();
+
+            //                     } else if (e->detail == key_codes.l_arrow) {
+            //                         thread(handle_event<MOVE_TO_PREV_DESKTOP_WAPP>, e->event).detach();
+
+            //                     } break;
+
+            //                 } case SHIFT + ALT          :{
+            //                     if (e->detail == key_codes.q) {
+            //                         thread(handle_event<ROOT_SIGNAL>, QUIT_KEY_PRESS).detach();
+
+            //                     } /* Quit keybinding */ break;
+
+            //                 } case ALT                  :{
+            //                     if (e->detail == key_codes.n_1) {
+            //                         thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_1).detach();
+
+            //                     } else if (e->detail == key_codes.n_2) {
+            //                         thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_2).detach();
+
+            //                     } else if (e->detail == key_codes.n_3) {
+            //                         thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_3).detach();
+                                    
+            //                     } else if (e->detail == key_codes.n_4) {
+            //                         thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_4).detach();
+
+            //                     } else if (e->detail == key_codes.n_5) {
+            //                         thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_5).detach();
+                                    
+            //                     } else if (e->detail == key_codes.tab) {
+            //                         thread(handle_event<ROOT_SIGNAL>, CYCLE_FOCUS_KEY_PRESS).detach();
+
+            //                     } break;
+
+            //                 } case CTRL  + SUPER        :{
+            //                     if (e->detail == key_codes.r_arrow) {
+            //                         thread(handle_event<ROOT_SIGNAL>, MOVE_TO_NEXT_DESKTOP).detach();
+
+            //                     } else if (e->detail == key_codes.l_arrow) {
+            //                         thread(handle_event<ROOT_SIGNAL>, MOVE_TO_PREV_DESKTOP).detach();
+
+            //                     } break;
+
+            //                 } case SUPER                :{
+            //                     if (e->detail == key_codes.r_arrow)        {
+            //                         HANDLE_EVENT(TILE_RIGHT);
+
+            //                     } else if (e->detail == key_codes.l_arrow) {
+            //                         HANDLE_EVENT(TILE_LEFT);
+
+            //                     } else if (e->detail == key_codes.u_arrow) {
+            //                         HANDLE_EVENT(TILE_UP);
+
+            //                     } else if (e->detail == key_codes.d_arrow) {
+            //                         HANDLE_EVENT(TILE_DOWN);
+
+            //                     } else if (e->detail == key_codes.k)       {
+            //                         thread(handle_event<ROOT_SIGNAL>, DEBUG_KEY_PRESS).detach();
+                                
+            //                     } break;
+
+            //                 }
+
+            //             } if (e->detail == key_codes.f11) {
+            //                 HANDLE(EWMH_MAXWIN_SIGNAL, e->event);
+
+            //             } break;
+
+            //         } case MWM_Ev::BUTTON_PRESS   :{
+            //             const auto *e = (const xcb_button_press_event_t *)ev;
+            //             if (e->detail == L_MOUSE_BUTTON)        {
+            //                 if (e->state == ALT) {
+            //                     HANDLE(L_MOUSE_BUTTON_EVENT__ALT, e->event);
+
+            //                 } else {
+            //                     HANDLE(L_MOUSE_BUTTON_EVENT, e->event);
+
+            //                 } break;
+
+            //             } else if (e->detail == R_MOUSE_BUTTON) {
+            //                 if (e->state == ALT) {
+            //                     HANDLE_EVENT(R_MOUSE_BUTTON_EVENT__ALT);
+                                
+            //                 } else {
+            //                     HANDLE_EVENT(R_MOUSE_BUTTON_EVENT);
+
+            //                 } break;
+
+            //             } break;
+
+            //         } case MWM_Ev::MAP_NOTIF      :{
+            //             const auto *e = (const xcb_map_notify_event_t *)ev;
+            //             HANDLE(XCB_MAP_NOTIFY, e->event);
+            //             break;
+
+            //         } case MWM_Ev::PROPERTY_NOTIF :{
+            //             const auto *e = (const xcb_property_notify_event_t *)ev;
+            //             HANDLE(XCB_PROPERTY_NOTIFY, e->window);
+            //             break;
+
+            //         } case MWM_Ev::NO_Ev          :{
+            //             break;
+                        
+            //         }                
+            //     }
+            // };
+
+            // key_codes.init();
+            // shouldContinue = true;
+            // xcb_generic_event_t *ev;
+            // while (shouldContinue) {
+            //     ev = xcb_wait_for_event(conn);
+            //     if (!ev) continue;
+            //     MWM_Ev res = map_ev_to_enum(ev->response_type & ~0x80);
+            //     switch (res) {
+            //         case   MWM_Ev::EXPOSE         :{
+            //             RE_CAST_EV(xcb_expose_event_t);
+            //             HANDLE(XCB_EXPOSE, e->window);
+            //             break;
+
+            //         } case MWM_Ev::ENTER_NOTIFY   :{
+            //             RE_CAST_EV(xcb_enter_notify_event_t);
+            //             HANDLE(XCB_ENTER_NOTIFY, e->event);
+            //             break;
+                        
+            //         } case MWM_Ev::LEAVE_NOTIFY   :{
+            //             RE_CAST_EV(xcb_leave_notify_event_t);
+            //             HANDLE(XCB_LEAVE_NOTIFY, e->event);
+            //             break;
+                        
+            //         } case MWM_Ev::FOCUS_IN       :{
+            //             RE_CAST_EV(xcb_focus_in_event_t);
+            //             HANDLE(XCB_FOCUS_IN, e->event);
+            //             break;
+                        
+            //         } case MWM_Ev::FOCUS_OUT      :{
+            //             RE_CAST_EV(xcb_focus_out_event_t);
+            //             HANDLE(XCB_FOCUS_OUT, e->event);
+            //             break;
+                        
+            //         } case MWM_Ev::DESTROY_NOTIF  :{
+            //             RE_CAST_EV(xcb_destroy_notify_event_t);
+            //             client *c;
+            //             if ((c = signal_manager->_window_client_map.retrive(e->event)) != nullptr) {
+            //                 HANDLE(DESTROY_NOTIF_EV, e->event);
+
+            //             } else if ((c = signal_manager->_window_client_map.retrive(e->window)) != nullptr) {
+            //                 HANDLE(DESTROY_NOTIF_W, e->window);
+
+            //             } break;
+
+            //         } case MWM_Ev::MAP_REQ        :{
+            //             RE_CAST_EV(xcb_map_request_event_t);
+            //             HANDLE(XCB_MAP_REQUEST, e->window);
+            //             break;
+
+            //         } case MWM_Ev::MOTION_NOTIFY  :{
+            //             RE_CAST_EV(xcb_motion_notify_event_t);
+            //             HANDLE_EVENT(XCB_MOTION_NOTIFY);
+            //             break;
+                        
+            //         } case MWM_Ev::KEY_PRESS      :{
+            //             RE_CAST_EV(xcb_key_press_event_t);
+            //             switch (e->state) {
+            //                 case   CTRL  + ALT          :{
+            //                     if (e->detail == key_codes.t) {
+            //                         thread(handle_event<ROOT_SIGNAL>, TERM_KEY_PRESS).detach();
+
+            //                     } /* Terminal keybinding */ break;
+
+            //                 } case SHIFT + CTRL + SUPER :{
+            //                     if (e->detail == key_codes.r_arrow) {
+            //                         thread(handle_event<MOVE_TO_NEXT_DESKTOP_WAPP>, e->event).detach();
+
+            //                     } else if (e->detail == key_codes.l_arrow) {
+            //                         thread(handle_event<MOVE_TO_PREV_DESKTOP_WAPP>, e->event).detach();
+
+            //                     } break;
+
+            //                 } case SHIFT + ALT          :{
+            //                     if (e->detail == key_codes.q) {
+            //                         thread(handle_event<ROOT_SIGNAL>, QUIT_KEY_PRESS).detach();
+
+            //                     } /* Quit keybinding */ break;
+
+            //                 } case ALT                  :{
+            //                     if (e->detail == key_codes.n_1) {
+            //                         thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_1).detach();
+
+            //                     } else if (e->detail == key_codes.n_2) {
+            //                         thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_2).detach();
+
+            //                     } else if (e->detail == key_codes.n_3) {
+            //                         thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_3).detach();
+                                    
+            //                     } else if (e->detail == key_codes.n_4) {
+            //                         thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_4).detach();
+
+            //                     } else if (e->detail == key_codes.n_5) {
+            //                         thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_5).detach();
+                                    
+            //                     } else if (e->detail == key_codes.tab) {
+            //                         thread(handle_event<ROOT_SIGNAL>, CYCLE_FOCUS_KEY_PRESS).detach();
+
+            //                     } break;
+
+            //                 } case CTRL  + SUPER        :{
+            //                     if (e->detail == key_codes.r_arrow) {
+            //                         thread(handle_event<ROOT_SIGNAL>, MOVE_TO_NEXT_DESKTOP).detach();
+
+            //                     } else if (e->detail == key_codes.l_arrow) {
+            //                         thread(handle_event<ROOT_SIGNAL>, MOVE_TO_PREV_DESKTOP).detach();
+
+            //                     } break;
+
+            //                 } case SUPER                :{
+            //                     if (e->detail == key_codes.r_arrow)        {
+            //                         HANDLE_EVENT(TILE_RIGHT);
+
+            //                     } else if (e->detail == key_codes.l_arrow) {
+            //                         HANDLE_EVENT(TILE_LEFT);
+
+            //                     } else if (e->detail == key_codes.u_arrow) {
+            //                         HANDLE_EVENT(TILE_UP);
+
+            //                     } else if (e->detail == key_codes.d_arrow) {
+            //                         HANDLE_EVENT(TILE_DOWN);
+
+            //                     } else if (e->detail == key_codes.k)       {
+            //                         thread(handle_event<ROOT_SIGNAL>, DEBUG_KEY_PRESS).detach();
+                                
+            //                     } break;
+
+            //                 }
+
+            //             } if (e->detail == key_codes.f11) {
+            //                 HANDLE(EWMH_MAXWIN_SIGNAL, e->event);
+
+            //             } break;
+
+            //         } case MWM_Ev::BUTTON_PRESS   :{
+            //             RE_CAST_EV(xcb_button_press_event_t);
+            //             if (e->detail == L_MOUSE_BUTTON)        {
+            //                 if (e->state == ALT) {
+            //                     HANDLE(L_MOUSE_BUTTON_EVENT__ALT, e->event);
+
+            //                 } else {
+            //                     HANDLE(L_MOUSE_BUTTON_EVENT, e->event);
+
+            //                 } break;
+
+            //             } else if (e->detail == R_MOUSE_BUTTON) {
+            //                 if (e->state == ALT) {
+            //                     HANDLE_EVENT(R_MOUSE_BUTTON_EVENT__ALT);
+                                
+            //                 } else {
+            //                     HANDLE_EVENT(R_MOUSE_BUTTON_EVENT);
+
+            //                 } break;
+
+            //             } break;
+
+            //         } case MWM_Ev::MAP_NOTIF      :{
+            //             RE_CAST_EV(xcb_map_notify_event_t);
+            //             HANDLE(XCB_MAP_NOTIFY, e->event);
+            //             break;
+
+            //         } case MWM_Ev::PROPERTY_NOTIF :{
+            //             RE_CAST_EV(xcb_property_notify_event_t);
+            //             client *c = signal_manager->_window_client_map.retrive(e->window);
+            //             if (!c) break;
+            //             HANDLE(XCB_PROPERTY_NOTIFY, e->window);
+            //             break;
+
+            //         } case MWM_Ev::NO_Ev          :{
+            //             break;
+                        
+            //         }
+                
+            //     } free(ev);
+
+            // }
 
         }
         constexpr uint8_t char_to_keycode__(int8_t c) const {
@@ -6720,18 +6883,12 @@ class client {
         /* Main     */
             void make_decorations() {
                 make_frame();
+                set_icon_png();
+                make_titlebar();
+                make_close_button();
+                make_max_button();
+                make_min_button();
 
-                enqueueT(_1, thread_pool, [this]() { set_icon_png(); });
-                enqueueT(_2, thread_pool, [this]() { make_titlebar(); });
-                enqueueT(_3, thread_pool, [this]() { make_close_button(); });
-                enqueueT(_4, thread_pool, [this]() { make_max_button(); });
-                enqueueT(_5, thread_pool, [this]() { make_min_button(); });
-                _1.wait();
-                _2.wait();
-                _3.wait();
-                _4.wait();
-                _5.wait();
-                
                 if (BORDER_SIZE > 0) {
                     make_borders();
 
@@ -14643,6 +14800,7 @@ class test {
         test() {}
 };
 void setup_wm() {
+    ev = new __event__handler(conn);
     user = get_user_name();
     loutCUser(USER);
 

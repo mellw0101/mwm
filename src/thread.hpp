@@ -1,6 +1,9 @@
 /* #include <future>
 #include <mutex>
 #include <queue> */
+#ifndef THREAD__HPP
+#define THREAD__HPP
+
 #include <thread>
 #include <vector>
 using namespace std;
@@ -327,3 +330,5 @@ class root_thread {
         vector<thread> threads;
 
 };
+
+#endif

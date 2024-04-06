@@ -7,8 +7,8 @@
 #include <utility>
 #include <xcb/xcb.h>
 #include <xcb/xproto.h>
-#include "xcb.hpp"
-#include "thread.hpp"
+// #include "thread.hpp"
+// #include "xcb.hpp"
 
 #define lambdA(__Ref, __Param, ...) do { \
     [__Ref](__Param) __VA_ARGS__ \
@@ -69,13 +69,11 @@ class loop_data_t {
 // Initialize the static instance pointer to nullptr
 inline loop_data_t* loop_data_t::instance = nullptr;
 
-/* class __event__handler {
+class __event__handler {
     private:
-        std::unordered_map<int, function<void(xcb_generic_event_t *)>> Map;
+        std::unordered_map<int, std::function<void(xcb_generic_event_t *)>> Map;
         xcb_generic_event_t *ev;
-        loop_data_t *ldata;
         xcb_connection_t *conn;
-        ThreadPool thread_pool;
 
         void makeMap_() {
             Map[XCB_EXPOSE] = [this](xcb_generic_event_t *ev) -> void {
@@ -89,9 +87,9 @@ inline loop_data_t* loop_data_t::instance = nullptr;
         }
 
     public:
-        template<typename F>
-        void addCb(int S, F &&f) {
-            Map[S] = std::forward<F>(f);
+        template<typename Func>
+        void addCb(int __s, Func &&func) {
+            Map[__s] = std::forward<Func>(func);
             
         }
         void run() {
@@ -109,5 +107,5 @@ inline loop_data_t* loop_data_t::instance = nullptr;
         __event__handler(xcb_connection_t *conn) : ev(new xcb_generic_event_t) {}
 
 };
- */
+
 #endif
