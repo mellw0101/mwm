@@ -98,7 +98,7 @@ class __event__handler {
                 if (Map.find(responseType) != Map.end()) {
                     Map[responseType](ev);
 
-                } free(ev); // Remember to free the event
+                } /* free(ev); // Remember to free the event */
             
             }
             
