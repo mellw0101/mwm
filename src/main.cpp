@@ -2934,6 +2934,7 @@ class __event_handler__ {
             key_codes.init();
             shouldContinue = true;
             xcb_generic_event_t *ev;
+            
             while (shouldContinue) {
                 ev = xcb_wait_for_event(conn);
                 if (!ev) continue;
