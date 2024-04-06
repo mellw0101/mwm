@@ -7143,7 +7143,7 @@ class client {
             // , this->win);
             event_handler->setEventCallback(XCB_DESTROY_NOTIFY, [&](Ev ev) {
                 RE_CAST_EV(xcb_destroy_notify_event_t);
-                if (e->event == this->win && e->window == this->win) {
+                if (e->event == this->win || e->window == this->win) {
                     if (!this->win.is_mapped()) {
                         this->kill();
                     } else {
