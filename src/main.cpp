@@ -2898,7 +2898,6 @@ class __event_handler__ {
     /* Variabels */
         __key_codes__ key_codes;
         mutex event_mutex;
-        ThreadPool tPool_2{2};
 
     /* Methods   */
         #define Emit signal_manager->_window_signals.emit
@@ -3056,7 +3055,7 @@ class __event_handler__ {
                 }
 
             });
-            setEventCallback(XCB_DESTROY_NOTIFY, [&](Ev ev) {
+            /* setEventCallback(XCB_DESTROY_NOTIFY, [&](Ev ev) {
                 RE_CAST_EV(xcb_destroy_notify_event_t);
                 client *c;
                 if ((c = signal_manager->_window_client_map.retrive(e->event)) != nullptr) {
@@ -3067,20 +3066,20 @@ class __event_handler__ {
 
                 }
 
-            });
+            }); */
             setEventCallback(XCB_MAP_REQUEST, [&](Ev ev) {
                 RE_CAST_EV(xcb_map_request_event_t);
                 HANDLE(XCB_MAP_REQUEST, e->window);
 
             });
-            // setEventCallback(XCB_MOTION_NOTIFY, [&](Ev ev) {
-            //     RE_CAST_EV(xcb_motion_notify_event_t);
-            //     thread_pool.enqueue([](uint32_t w) {
-            //         Emit(w, XCB_MOTION_NOTIFY);
+            /* setEventCallback(XCB_MOTION_NOTIFY, [&](Ev ev) {
+                RE_CAST_EV(xcb_motion_notify_event_t);
+                thread_pool.enqueue([](uint32_t w) {
+                    Emit(w, XCB_MOTION_NOTIFY);
                     
-            //     }, e->event);
+                }, e->event);
 
-            // });
+            }); */
             setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) {
                 RE_CAST_EV(xcb_button_press_event_t);
                 if (e->detail == L_MOUSE_BUTTON)        {
@@ -7124,23 +7123,6 @@ class client {
 
             , this->win);
 
-            // CONN(DESTROY_NOTIF_W,
-            //     if (!this->win.is_mapped()) {
-            //         this->kill();
-            //     } else {
-            //         this->win.kill();
-            //     }
-
-            // , this->win);
-
-            // CONN(DESTROY_NOTIF_EV,
-            //     if (!this->win.is_mapped()) {
-            //         this->kill();
-            //     } else {
-            //         this->win.kill();
-            //     }
-
-            // , this->win);
             event_handler->setEventCallback(XCB_DESTROY_NOTIFY, [&](Ev ev) {
                 RE_CAST_EV(xcb_destroy_notify_event_t);
                 if (e->event == this->win || e->window == this->win) {
@@ -7206,10 +7188,17 @@ class client {
             ); CWC(close_button);
             close_button.make_then_set_png(USER_PATH_PREFIX("/close.png"), CLOSE_BUTTON_BITMAP);
             
-            CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->close_button) {
+            /* CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->close_button) {
                 WS_emit(this->win, KILL_SIGNAL);
             
-            }, this->close_button);
+            }, this->close_button); */
+            event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) {
+                RE_CAST_EV(xcb_button_press_event_t);
+                if (e->event != this->close_button) return;
+                if (e->detail != L_MOUSE_BUTTON) return;
+                WS_emit(this->win, KILL_SIGNAL);
+                
+            });
 
             CONN(ENTER_NOTIFY, if (__window == this->close_button) {
                 this->close_button.change_border_color(WHITE);
