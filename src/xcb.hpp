@@ -202,7 +202,13 @@ class void_err_t {
     return error_detected; \
 }
 
+class atom {
+    private:
+        
 
+    public:
+
+};
 
 class xcb {
     private:
