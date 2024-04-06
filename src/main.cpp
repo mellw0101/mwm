@@ -2868,6 +2868,8 @@ class __key_codes__ {
         xcb_key_symbols_t * keysyms;
 };
 
+
+
 using Ev = const xcb_generic_event_t *;
 class __event_handler__ {
     /* Defines   */
@@ -3097,190 +3099,10 @@ class __event_handler__ {
             while (shouldContinue) {
                 ev = xcb_wait_for_event(conn);
                 if (!ev) continue;
-                // chrono::microseconds execTime;
-                // ScopeTimer st(__func__, execTime, ev->response_type & ~80);
-                // main_loop(ev);
-                processEvent(ev);
+                main_loop(ev);
                 free(ev);
             }
         }
-        SimplifiedEvent convert_ev(xcb_generic_event_t* event) {
-            SimplifiedEvent se;
-            se.eventType = event->response_type & ~0x80; // Mask to get event type
-            // Extract window ID from event; the method depends on the specific event type
-            // For example, for a mouse event:
-            xcb_button_press_event_t* bp = (xcb_button_press_event_t*)event;
-            se.windowID = bp->event;
-            return se;
-
-        }
-        // const function<void(xcb_generic_event_t *)> arr[1] = {
-        //     {[this](xcb_generic_event_t *ev) -> void {
-        //         MWM_Ev res = map_ev_to_enum(ev->response_type & ~0x80);
-        //         switch (res) {
-        //             case   MWM_Ev::EXPOSE         :{
-        //                 auto e = (const xcb_expose_event_t *)ev;
-        //                 thread(handle_event<XCB_EXPOSE>, e->window).detach();
-        //                 break;
-
-        //             } case MWM_Ev::ENTER_NOTIFY   :{
-        //                 auto e = (const xcb_enter_notify_event_t *)ev;
-        //                 thread(handle_event<XCB_ENTER_NOTIFY>, e->event).detach();
-        //                 break;
-                        
-        //             } case MWM_Ev::LEAVE_NOTIFY   :{
-        //                 auto e = (const xcb_leave_notify_event_t *)ev;
-        //                 thread(handle_event<XCB_LEAVE_NOTIFY>, e->event).detach();
-        //                 break;
-                        
-        //             } case MWM_Ev::FOCUS_IN       :{
-        //                 auto e = (const xcb_focus_in_event_t *)ev;
-        //                 thread(handle_event<XCB_FOCUS_IN>, e->event).detach();
-        //                 break;
-                        
-        //             } case MWM_Ev::FOCUS_OUT      :{
-        //                 auto e = (xcb_focus_out_event_t *)ev;
-        //                 thread(handle_event<XCB_FOCUS_OUT>, e->event).detach();
-        //                 break;
-                        
-        //             } case MWM_Ev::DESTROY_NOTIF  :{
-        //                 auto e = (xcb_destroy_notify_event_t *)ev;
-        //                 thread(handle_event<DESTROY_NOTIF_EV>, e->event).detach();
-        //                 thread(handle_event<DESTROY_NOTIF_W>, e->window).detach();
-        //                 break;
-
-        //             } case MWM_Ev::MAP_REQ        :{
-        //                 auto e = (xcb_map_request_event_t *)ev;
-        //                 HANDLE(XCB_MAP_REQUEST, e->window);
-        //                 break;
-
-        //             } case MWM_Ev::MOTION_NOTIFY  :{
-        //                 auto const e = (xcb_motion_notify_event_t *)ev;
-        //                 HANDLE(XCB_MOTION_NOTIFY, e->event);
-        //                 break;
-                        
-        //             } case MWM_Ev::KEY_PRESS      :{
-        //                 auto const e = (const xcb_key_press_event_t *)ev;
-        //                 switch (e->state) {
-        //                     case   CTRL  + ALT          :{
-        //                         if (e->detail == key_codes.t) {
-        //                             thread(handle_event<ROOT_SIGNAL>, TERM_KEY_PRESS).detach();
-
-        //                         } /* Terminal keybinding */ break;
-
-        //                     } case SHIFT + CTRL + SUPER :{
-        //                         if (e->detail == key_codes.r_arrow) {
-        //                             thread(handle_event<MOVE_TO_NEXT_DESKTOP_WAPP>, e->event).detach();
-
-        //                         } else if (e->detail == key_codes.l_arrow) {
-        //                             thread(handle_event<MOVE_TO_PREV_DESKTOP_WAPP>, e->event).detach();
-
-        //                         } break;
-
-        //                     } case SHIFT + ALT          :{
-        //                         if (e->detail == key_codes.q) {
-        //                             thread(handle_event<ROOT_SIGNAL>, QUIT_KEY_PRESS).detach();
-
-        //                         } /* Quit keybinding */ break;
-
-        //                     } case ALT                  :{
-        //                         if (e->detail == key_codes.n_1) {
-        //                             thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_1).detach();
-
-        //                         } else if (e->detail == key_codes.n_2) {
-        //                             thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_2).detach();
-
-        //                         } else if (e->detail == key_codes.n_3) {
-        //                             thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_3).detach();
-                                    
-        //                         } else if (e->detail == key_codes.n_4) {
-        //                             thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_4).detach();
-
-        //                         } else if (e->detail == key_codes.n_5) {
-        //                             thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_5).detach();
-                                    
-        //                         } else if (e->detail == key_codes.tab) {
-        //                             thread(handle_event<ROOT_SIGNAL>, CYCLE_FOCUS_KEY_PRESS).detach();
-
-        //                         } break;
-
-        //                     } case CTRL  + SUPER        :{
-        //                         if (e->detail == key_codes.r_arrow) {
-        //                             thread(handle_event<ROOT_SIGNAL>, MOVE_TO_NEXT_DESKTOP).detach();
-
-        //                         } else if (e->detail == key_codes.l_arrow) {
-        //                             thread(handle_event<ROOT_SIGNAL>, MOVE_TO_PREV_DESKTOP).detach();
-
-        //                         } break;
-
-        //                     } case SUPER                :{
-        //                         if (e->detail == key_codes.r_arrow)        {
-        //                             HANDLE_EVENT(TILE_RIGHT);
-
-        //                         } else if (e->detail == key_codes.l_arrow) {
-        //                             HANDLE_EVENT(TILE_LEFT);
-
-        //                         } else if (e->detail == key_codes.u_arrow) {
-        //                             HANDLE_EVENT(TILE_UP);
-
-        //                         } else if (e->detail == key_codes.d_arrow) {
-        //                             HANDLE_EVENT(TILE_DOWN);
-
-        //                         } else if (e->detail == key_codes.k)       {
-        //                             thread(handle_event<ROOT_SIGNAL>, DEBUG_KEY_PRESS).detach();
-                                
-        //                         } break;
-
-        //                     }
-
-        //                 } if (e->detail == key_codes.f11) {
-        //                     HANDLE(EWMH_MAXWIN_SIGNAL, e->event);
-
-        //                 } break;
-
-        //             } case MWM_Ev::BUTTON_PRESS   :{
-        //                 auto e = (xcb_button_press_event_t *)ev;
-        //                 if (e->detail == L_MOUSE_BUTTON)        {
-        //                     if (e->state == ALT) {
-        //                         HANDLE(L_MOUSE_BUTTON_EVENT__ALT, e->event);
-
-        //                     } else {
-        //                         HANDLE(L_MOUSE_BUTTON_EVENT, e->event);
-
-        //                     } break;
-
-        //                 } else if (e->detail == R_MOUSE_BUTTON) {
-        //                     if (e->state == ALT) {
-        //                         HANDLE_EVENT(R_MOUSE_BUTTON_EVENT__ALT);
-                                
-        //                     } else {
-        //                         HANDLE_EVENT(R_MOUSE_BUTTON_EVENT);
-
-        //                     } break;
-
-        //                 } break;
-
-        //             } case MWM_Ev::MAP_NOTIF      :{
-        //                 auto e = (xcb_map_notify_event_t *)ev;
-        //                 HANDLE(XCB_MAP_NOTIFY, e->event);
-        //                 break;
-
-        //             } case MWM_Ev::PROPERTY_NOTIF :{
-        //                 auto e = (xcb_property_notify_event_t *)ev;
-        //                 HANDLE(XCB_PROPERTY_NOTIFY, e->window);
-        //                 break;
-
-        //             } case MWM_Ev::NO_Ev          :{
-        //                 break;
-                        
-        //             }
-                
-        //         }
-                
-        //     }}
-        // };
-        // DynamicArray<uint32_t *> _window_arr;
-
         constexpr uint8_t char_to_keycode__(int8_t c) const {
             switch (c) {
                 case 'a': return this->key_codes.a;
@@ -3315,34 +3137,6 @@ class __event_handler__ {
             } return (uint8_t)0;
 
         }
-        /* size_t find_window(uint32_t __window) {
-            for (size_t i = 0; i < _window_arr.getSize(); ++i) {
-                if (_window_arr[i] == nullptr) continue;
-
-                if (__window == _window_arr[i][0]
-                ||  __window == _window_arr[i][1]
-                ||  __window == _window_arr[i][2]
-                ||  __window == _window_arr[i][3]
-                ||  __window == _window_arr[i][4]
-                ||  __window == _window_arr[i][5]
-                ||  __window == _window_arr[i][6]
-                ||  __window == _window_arr[i][7]
-                ||  __window == _window_arr[i][8]
-                ||  __window == _window_arr[i][9]
-                ||  __window == _window_arr[i][10]
-                ||  __window == _window_arr[i][11]
-                ||  __window == _window_arr[i][12]
-                ||  __window == _window_arr[i][13]
-                ||  __window == _window_arr[i][14]
-                ||  __window == _window_arr[i][15]) {
-                    return i;
-
-                }
-
-            } return 0;
-
-        } */
-        // Function that creates a separate thread for each event type
         constexpr void processEvent(xcb_generic_event_t* ev) {
             uint8_t responseType = ev->response_type & ~0x80;
             switch (responseType) {
@@ -3513,8 +3307,7 @@ class __event_handler__ {
             shouldContinue = false;
 
         }
-        using CallbackId = int;
-        template<typename Callback>
+        using CallbackId = int; template<typename Callback>
         CallbackId setEventCallback(uint8_t eventType, Callback&& callback) {
             CallbackId id = nextCallbackId++;
             eventCallbacks[eventType].emplace_back(id, std::forward<Callback>(callback));
@@ -3524,17 +3317,17 @@ class __event_handler__ {
         void removeEventCallback(uint8_t eventType, CallbackId id) {
             auto& callbacks = eventCallbacks[eventType];
             callbacks.erase(
-                remove_if(
-                    callbacks.begin(),
-                    callbacks.end(),
-                    [id](const auto &pair)
-                    {
-                        return pair.first == id;
-                    }
-                ),
-                callbacks.end()
-            );
+            remove_if(
+                callbacks.begin(),
+                callbacks.end(),
+                [id](const auto &pair) {
+                    return pair.first == id;
+
+                }
+
+            ), callbacks.end());            
             loutI << "Deleting id" << id << " " << EVENT_TYPE(eventType) << " vecsize" << eventCallbacks[eventType].size() << loutEND;
+
         }
         template<typename Callback>
         void set_key_press_callback(const uint16_t &__mask, const xcb_keycode_t &__key, Callback &&callback) {
@@ -3552,18 +3345,19 @@ class __event_handler__ {
         }
         template<typename Callback>
         void set_button_press_callback(uint32_t __window, const uint16_t &__mask, const xcb_keycode_t &__key, Callback &&callback) {
-            setEventCallback(XCB_KEY_PRESS, [this, __window, callback, __key, __mask](Ev ev)
-            {
+            setEventCallback(XCB_KEY_PRESS, [this, __window, callback, __key, __mask](Ev ev) {
                 RE_CAST_EV(xcb_key_press_event_t);
                 if (e->event != __window) return;
-                if (e->detail == __key)
-                {
-                    if (e->state == __mask)
-                    {
+                if (e->detail == __key) {
+                    if (e->state == __mask) {
                         callback();
+
                     }
+
                 }
+
             });
+
         }
         void iter_and_log_map_size() {
             uint16_t total_events = 0;
@@ -6754,45 +6548,6 @@ class client {
                     make_borders();
 
                 }
-
-                // signal_manager->_client_window_arr.add_client(this,
-                // (uint32_t[15])
-                // {
-                //     this->win,
-                //     this->frame,
-                //     this->titlebar,
-                //     this->close_button,
-                //     this->max_button,
-                //     this->min_button,
-                //     this->icon,
-                //     border[left],
-                //     border[right],
-                //     border[top],
-                //     border[bottom],
-                //     border[top_left],
-                //     border[top_right],
-                //     border[bottom_left],
-                //     border[bottom_right]
-                // });
-
-                // event_handler->_window_arr.push_back((uint32_t[15])
-                // {
-                //     this->win,
-                //     this->frame,
-                //     this->titlebar,
-                //     this->close_button,
-                //     this->max_button,
-                //     this->min_button,
-                //     this->icon,
-                //     border[left],
-                //     border[right],
-                //     border[top],
-                //     border[bottom],
-                //     border[top_left],
-                //     border[top_right],
-                //     border[bottom_left],
-                //     border[bottom_right]
-                // });
             
             }
             void raise() {
