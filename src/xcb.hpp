@@ -326,6 +326,7 @@ class atoms_t {
         }
 
         atoms_t(xcb_connection_t *conn, char **__atoms);
+        atoms_t() {};
         ~atoms_t();
 
 };

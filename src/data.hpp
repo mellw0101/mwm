@@ -256,10 +256,11 @@ template<typename T>
 class Malloc {
     public:
         // Allocates memory for one object of type T using malloc
-        static T* allocate() {
+        template<typename ...Args>
+        static T* allocate(Args &&...args) {
             void* ptr = std::malloc(sizeof(T)); // Allocate raw memory
             if (!ptr) throw std::bad_alloc();   // Check for allocation failure
-            return new(ptr) T();                // Use placement new to construct the object
+            return new(ptr) T(args...);         // Use placement new to construct the object
 
         }
         // Deallocates memory for one object of type T
@@ -271,6 +272,8 @@ class Malloc {
         }
 
 };
+
+
 
 #include <vector>
 #include <memory>
