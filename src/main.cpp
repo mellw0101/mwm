@@ -4231,7 +4231,7 @@ class window {
 
                 // xcb_intern_atom_cookie_t delete_cookie = xcb_intern_atom(conn, 0, 16, "WM_DELETE_WINDOW");
                 // xcb_intern_atom_reply_t *delete_reply = xcb_intern_atom_reply(conn, delete_cookie, nullptr);
-                intern_atom_repl_t del_repl(conn, intern_atom_cok_t(conn, 0, "WM_DELETE_WINDOW"));
+                intern_atom_repl_t del_repl(conn, 0, (char *)"WM_DELETE_WINDOW");
 
                 if (protocols_reply == nullptr) {
                     loutE << "protocols reply is null" << loutEND;
@@ -7238,7 +7238,9 @@ class client {
             , this->win);
 
             CONN(DESTROY_NOTIF_W,
-                if (this->win.is_mapped()) {
+                if (!this->win.is_mapped()) {
+                    this->kill();
+                } else {
                     this->win.kill();
                 }
 

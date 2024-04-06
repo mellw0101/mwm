@@ -155,7 +155,7 @@ void xcb::mapW(uint32_t __w) {
     
 }
 
-void atoms_t::fetch_atom_data(xcb_connection_t *conn, const char *__name) {
+void atoms_t::fetch_atom_data(xcb_connection_t *conn, char *__name) {
     // atom_t *atom = new atom_t;
     atom_t *atom = MallocAllocator<atom_t>().allocate();
     intern_atom_cok_t cookie(conn, 0, __name);
@@ -184,4 +184,10 @@ atoms_t::atoms_t(xcb_connection_t *conn, char **__atoms){
 atoms_t::~atoms_t() {
     for (const auto &atom : _data) MallocAllocator<atom_t>().deallocate(atom); /* delete atom; */
     
+}
+
+xcb_atom_t xcb::get_atom(char *name) {
+    intern_atom_repl_t r(_conn, 0, name);
+    return (r.is_not_valid()) ? XCB_NONE : r.atom;
+
 }
