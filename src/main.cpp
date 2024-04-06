@@ -2986,6 +2986,7 @@ class __event_handler__ {
                                 Emit(w, MOVE_TO_NEXT_DESKTOP_WAPP);
                                 
                             }, e->event);
+                            thread(handle_event<MOVE_TO_NEXT_DESKTOP_WAPP>, e->event).detach();
 
                         } else if (e->detail == key_codes.l_arrow) {
                             thread(handle_event<MOVE_TO_PREV_DESKTOP_WAPP>, e->event).detach();
@@ -3114,7 +3115,7 @@ class __event_handler__ {
             setEventCallback(XCB_MAP_NOTIFY, [&](Ev ev) {
                 RE_CAST_EV(xcb_map_notify_event_t);
                 thread_pool.enqueue([](uint32_t w) {
-                    Emit(w, XCB_MAP_NOTIFY);
+                    Emit(screen->root, XCB_MAP_NOTIFY, w);
                     
                 }, e->event);
 
