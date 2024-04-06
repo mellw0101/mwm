@@ -2898,6 +2898,7 @@ class __event_handler__ {
     /* Variabels */
         __key_codes__ key_codes;
         mutex event_mutex;
+        ThreadPool tPool_2{2};
 
     /* Methods   */
         #define Emit signal_manager->_window_signals.emit
@@ -3142,7 +3143,10 @@ class __event_handler__ {
                 auto it = eventCallbacks.find(res);
                 if (it != eventCallbacks.end()) {
                     for (const auto &pair : it->second) {
-                        pair.second(ev);
+                        tPool_2.enqueue([&](xcb_generic_event_t *ev) {
+                            pair.second(ev);
+
+                        }, ev);
 
                     }
                     
