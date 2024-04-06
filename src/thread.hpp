@@ -200,6 +200,123 @@ class ThreadPool {
         bool stop;
 }; */
 
+
+#include <condition_variable>
+#include <functional>
+#include <future>
+#include <mutex>
+#include <queue>
+#include <thread>
+#include <vector>
+
+#define enqueueT(__Name, __Pool, ...) \
+    std::future<void> __Name = __Pool.enqueue(__VA_ARGS__)\
+
+template<typename ThreadPoolType, typename Func, typename... Args>
+auto enqueueTask(ThreadPoolType& pool, Func&& func, Args&&... args) -> std::future<decltype(func(args...))> {
+    return pool.enqueue(std::forward<Func>(func), std::forward<Args>(args)...);
+}
+
+class ThreadPool {
+    public:
+        ThreadPool(size_t threads) : stop(false) {
+            for(size_t i = 0; i < threads; ++i) {
+                workers.emplace_back([this] {
+                    while(true) {
+                        std::function<void()> task;
+                        {
+                            std::unique_lock<std::mutex> lock(this->queueMutex);
+                            this->condition.wait(lock, [this] { return this->stop || !this->tasks.empty(); });
+                            if(this->stop && this->tasks.empty())
+                                return;
+                            task = std::move(this->tasks.front());
+                            this->tasks.pop();
+
+                        } task();
+
+                    }
+
+                });
+
+            }
+                
+        }
+        template<class F, class... Args>
+        auto enqueue(F&& f, Args&&... args)
+        -> std::future<typename std::invoke_result<F, Args...>::type> {
+            using return_type = typename std::invoke_result<F, Args...>::type;
+
+            auto task = std::make_shared<std::packaged_task<return_type()>>(
+                std::bind(std::forward<F>(f), std::forward<Args>(args)...)
+
+            );
+
+            std::future<return_type> res = task->get_future();
+            {
+                std::unique_lock<std::mutex> lock(queueMutex);
+                if(stop)
+                    throw std::runtime_error("enqueue on stopped ThreadPool");
+                tasks.emplace([task](){ (*task)(); });
+            
+            } condition.notify_one();
+
+            return res;
+
+        }
+        ~ThreadPool() {
+            {
+                std::unique_lock<std::mutex> lock(queueMutex);
+                stop = true;
+            
+            } condition.notify_all();
+
+            for(std::thread &worker: workers) {
+                worker.join();
+
+            }
+
+        }
+
+    private:
+        vector<thread> workers;
+        queue<function<void()>> tasks;
+        mutex queueMutex;
+        condition_variable condition;
+        bool stop;
+
+};
+/** USAGE: ->
+    int main() {
+        // Create a ThreadPool with 4 worker threads
+        ThreadPool pool(4);
+
+        // Enqueue some tasks into the pool
+        std::future<void> result1 = pool.enqueue(workFunction, 1);
+        std::future<void> result2 = pool.enqueue(workFunction, 2);
+
+        // Optionally, wait for a specific task to complete
+        result1.wait();
+        result2.wait();
+
+        // The ThreadPool will automatically wait for all enqueued tasks to complete
+        // upon destruction, so an explicit wait is not strictly necessary unless
+        // you need to synchronize with tasks' completion.
+
+        return 0;
+    }
+
+    void foo() {
+        ThreadPool pool(4); // Assuming ThreadPool is defined and instantiated
+
+        auto futureResult = enqueueTask(pool, [](int x) -> int {
+            return x * 2;
+        }, 10);
+
+        int result = futureResult.get();
+        std::cout << "The result is: " << result << std::endl;
+    }
+*/
+
 class root_thread {
     private:
 

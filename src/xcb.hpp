@@ -200,7 +200,9 @@ class void_err_t {
     } \
     error_detected; \
     return error_detected; \
-} 
+}
+
+
 
 class xcb {
     private:

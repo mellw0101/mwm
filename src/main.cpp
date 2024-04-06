@@ -4268,6 +4268,7 @@ class window {
                     return;
 
                 }
+
                 if (delete_reply == nullptr) {
                     loutE << "delete reply is null" << loutEND;
                     free(protocols_reply);
@@ -4275,6 +4276,7 @@ class window {
                     return;
 
                 }
+
                 send_event(KILL_WINDOW, (uint32_t[]){32, protocols_reply->atom, delete_reply->atom});
                 
                 free(protocols_reply);
@@ -14647,6 +14649,8 @@ void setup_wm() {
     NEW_CLASS(system_settings, __system_settings__) { system_settings->init(); }
     NEW_CLASS(dock,            __dock__           ) { dock->init(); }
     NEW_CLASS(pid_manager,     __pid_manager__    ) {}
+
+    loutI << "sould be 12__:" << slen("WM_PROTOCOLS") << loutEND;
 
 }
 int main() {
