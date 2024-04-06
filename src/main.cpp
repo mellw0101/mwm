@@ -4240,8 +4240,8 @@ class window {
                 xcb_intern_atom_cookie_t protocols_cookie = xcb_intern_atom(conn, 1, 12, "WM_PROTOCOLS");
                 xcb_intern_atom_reply_t *protocols_reply = xcb_intern_atom_reply(conn, protocols_cookie, nullptr);
 
-                xcb_intern_atom_cookie_t delete_cookie = xcb_intern_atom(conn, 0, 16, "WM_DELETE_WINDOW");
-                xcb_intern_atom_reply_t *delete_reply = xcb_intern_atom_reply(conn, delete_cookie, nullptr);
+                // xcb_intern_atom_cookie_t delete_cookie = xcb_intern_atom(conn, 0, 16, "WM_DELETE_WINDOW");
+                // xcb_intern_atom_reply_t *delete_reply = xcb_intern_atom_reply(conn, delete_cookie, nullptr);
 
                 if (protocols_reply == nullptr) {
                     loutE << "protocols reply is null" << loutEND;
@@ -4250,16 +4250,16 @@ class window {
                     return;
 
                 }
-                if (delete_reply == nullptr) {
-                    loutE << "delete reply is null" << loutEND;
-                    free(protocols_reply);
-                    free(delete_reply);
-                    return;
+                // if (delete_reply == nullptr) {
+                //     loutE << "delete reply is null" << loutEND;
+                //     free(protocols_reply);
+                //     free(delete_reply);
+                //     return;
 
-                }
+                // }
 
                 int i = 0; do {
-                    send_event(KILL_WINDOW, (uint32_t[3]){32, protocols_reply->atom, delete_reply->atom/* delete_reply->atom */});
+                    send_event(KILL_WINDOW, (uint32_t[3]){32, protocols_reply->atom, atoms->WM_DELETE_WINDOW/* delete_reply->atom */});
 
                     if (is_mapped()) {
                         ++i;
@@ -4269,7 +4269,7 @@ class window {
 
                 } while (i < 3);
 
-                free(delete_reply);
+                // free(delete_reply);
                 free(protocols_reply);
 
                 if (xcb->window_exists(w)) {
@@ -7904,6 +7904,18 @@ class Window_Manager {
                     
                 }
                 atoms = Malloc<__atoms__>().allocate();
+
+                xcb_intern_atom_cookie_t cookie = xcb_intern_atom(conn, 0, slen("WM_DELETE_WINDOW"), "WM_DELETE_WINDOW");
+                xcb_intern_atom_reply_t  *reply = xcb_intern_atom_reply(conn, cookie, nullptr);
+                if (reply) {
+                    atoms->WM_DELETE_WINDOW = reply->atom; free(reply);
+                    free(reply);
+
+                } else {
+                    loutE << "reply == nullptr" <<loutEND;
+                    
+                }
+
 
                 root = screen->root;
                 root.width(screen->width_in_pixels);
