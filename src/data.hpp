@@ -128,7 +128,7 @@ constexpr MWM_Ev map_ev_to_enum(uint8_t eventCode) {
         case Ev10: return MWM_Ev::BUTTON_PRESS;
         case Ev11: return MWM_Ev::MAP_NOTIF;
         case Ev12: return MWM_Ev::PROPERTY_NOTIF;
-        
+
         default: {
             return MWM_Ev::NO_Ev;
 
@@ -260,14 +260,16 @@ public:
         void* ptr = std::malloc(sizeof(T)); // Allocate raw memory
         if (!ptr) throw std::bad_alloc();   // Check for allocation failure
         return new(ptr) T();                // Use placement new to construct the object
-    }
 
+    }
     // Deallocates memory for one object of type T
     static void deallocate(T* ptr) {
         if (!ptr) return;
         ptr->~T();    // Call the destructor explicitly
         std::free(ptr); // Free the memory
+
     }
+
 };
 
 #include <vector>

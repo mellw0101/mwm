@@ -2868,8 +2868,6 @@ class __key_codes__ {
         xcb_key_symbols_t * keysyms;
 };
 
-
-
 using Ev = const xcb_generic_event_t *;
 class __event_handler__ {
     /* Defines   */
@@ -3095,7 +3093,6 @@ class __event_handler__ {
             key_codes.init();
             shouldContinue = true;
             xcb_generic_event_t *ev;
-
             while (shouldContinue) {
                 ev = xcb_wait_for_event(conn);
                 if (!ev) continue;
@@ -3256,10 +3253,12 @@ class __event_handler__ {
                     } case MWM_Ev::NO_Ev          :{
                         break;
                         
-                    }                
-                }
-                free(ev);
+                    }
+                
+                } free(ev);
+
             }
+
         }
         constexpr uint8_t char_to_keycode__(int8_t c) const {
             switch (c) {
@@ -7812,6 +7811,7 @@ class context_menu {
             make_entries__();
 
             CONN(HIDE_CONTEXT_MENU, this->hide__();, this->context_window);
+
         }
         void add_entry(string name, function<void()> action) {
             Entry entry;
@@ -7820,7 +7820,8 @@ class context_menu {
             entries.push_back(entry);
 
         }
-        context_menu() { create_dialog_win__(); }
+    
+    context_menu() { create_dialog_win__(); }
 
 };
 class Window_Manager {
@@ -13755,92 +13756,67 @@ class tile {
          * @return false if the current tile position is not the specified tile position.
          *
          */
-        bool current_tile_pos(TILEPOS mode)
-        {
-            switch (mode)
-            {
-                case TILEPOS::LEFT:
-                {
+        bool current_tile_pos(TILEPOS mode) {
+            switch (mode) {
+                case   TILEPOS::LEFT       :{
                     if (c->x      == 0 
                     &&  c->y      == 0 
                     &&  c->width  == screen->width_in_pixels / 2 
-                    &&  c->height == screen->height_in_pixels)
-                    {
+                    &&  c->height == screen->height_in_pixels) {
                         return true;
-                    }
 
-                    break;
-                }
+                    } break;
 
-                case TILEPOS::RIGHT:
-                {
+                } case TILEPOS::RIGHT      :{
                     if (c->x      == screen->width_in_pixels / 2 
                     &&  c->y      == 0 
                     &&  c->width  == screen->width_in_pixels / 2
-                    &&  c->height == screen->height_in_pixels)
-                    {
+                    &&  c->height == screen->height_in_pixels) {
                         return true;
-                    }
 
-                    break;
-                }    
-                
-                case TILEPOS::LEFT_DOWN:
-                {
+                    } break;
+
+                } case TILEPOS::LEFT_DOWN  :{
                     if (c->x      == 0
                     &&  c->y      == screen->height_in_pixels / 2
                     &&  c->width  == screen->width_in_pixels  / 2
-                    &&  c->height == screen->height_in_pixels / 2)
-                    {
+                    &&  c->height == screen->height_in_pixels / 2) {
                         return true;
-                    }
 
-                    break;
-                }
-                
-                case TILEPOS::RIGHT_DOWN:
-                {
+                    } break;
+
+                } case TILEPOS::RIGHT_DOWN :{
                     if (c->x      == screen->width_in_pixels  / 2
                     &&  c->y      == screen->height_in_pixels / 2
                     &&  c->width  == screen->width_in_pixels  / 2
-                    &&  c->height == screen->height_in_pixels / 2)
-                    {    
+                    &&  c->height == screen->height_in_pixels / 2) {
                         return true;
-                    }
-                        
-                    break;
-                }
-                
-                case TILEPOS::LEFT_UP:
-                {
+
+                    } break;
+
+                } case TILEPOS::LEFT_UP    :{
                     if (c->x      == 0
                     &&  c->y      == 0
                     &&  c->width  == screen->width_in_pixels  / 2
-                    &&  c->height == screen->height_in_pixels / 2)
-                    {
+                    &&  c->height == screen->height_in_pixels / 2) {
                         return true;
-                    }
-                    
-                    break;
-                }
 
-                case TILEPOS::RIGHT_UP:
-                {
+                    } break;
+
+                } case TILEPOS::RIGHT_UP   :{
                     if (c->x      == screen->width_in_pixels  / 2
                     &&  c->y      == 0
                     &&  c->width  == screen->width_in_pixels  / 2
-                    &&  c->height == screen->height_in_pixels / 2)
-                    {
+                    &&  c->height == screen->height_in_pixels / 2) {
                         return true;
-                    }
 
-                    break;
+                    } break;
+
                 }
-            }
 
-            return false; 
+            } return false; 
+
         }
-
         /**
          *
          * @brief Sets the size and position of a window to a specific tile position.
@@ -13852,90 +13828,78 @@ class tile {
          * @param sizepos The tile position to set.
          *
          */
-        void set_tile_sizepos(TILEPOS sizepos)
-        {
-            switch (sizepos)
-            {
-                case TILEPOS::LEFT:
-                {
+        void set_tile_sizepos(TILEPOS sizepos) {
+            switch (sizepos) {
+                case   TILEPOS::LEFT       : {
                     animate(
                         0,
                         0,
                         screen->width_in_pixels / 2,
                         screen->height_in_pixels
-                    );
-                    return;
-                }
 
-                case TILEPOS::RIGHT:
-                {
+                    ); return;
+
+                } case TILEPOS::RIGHT      : {
                     animate(
                         screen->width_in_pixels / 2,
                         0,
                         screen->width_in_pixels / 2,
                         screen->height_in_pixels
-                    );
-                    return;
-                }
 
-                case TILEPOS::LEFT_DOWN:
-                {
+                    ); return;
+
+                } case TILEPOS::LEFT_DOWN  : {
                     animate(
                         0,
                         screen->height_in_pixels / 2,
                         screen->width_in_pixels / 2,
                         screen->height_in_pixels / 2
-                    );
-                    return;
-                }
 
-                case TILEPOS::RIGHT_DOWN:
-                {
+                    ); return;
+
+                } case TILEPOS::RIGHT_DOWN : {
                     animate(
                         screen->width_in_pixels / 2,
                         screen->height_in_pixels / 2,
                         screen->width_in_pixels / 2,
                         screen->height_in_pixels / 2
-                    );
-                    return;
-                }
 
-                case TILEPOS::LEFT_UP:
-                {
+                    ); return;
+
+                } case TILEPOS::LEFT_UP    : {
                     animate(
                         0,
                         0,
                         screen->width_in_pixels / 2,
                         screen->height_in_pixels / 2
-                    );
-                    return;
-                }
 
-                case TILEPOS::RIGHT_UP:
-                {
+                    ); return;
+
+                } case TILEPOS::RIGHT_UP   : {
                     animate(
                         screen->width_in_pixels / 2,
                         0,
                         screen->width_in_pixels / 2,
                         screen->height_in_pixels / 2
-                    );
-                    return;
+
+                    ); return;
+                    
                 }
+
             }
+
         }
-        
-        void restore_og_tile_pos()
-        {
+        void restore_og_tile_pos() {
             animate(
                 c->tile_ogsize.x,
                 c->tile_ogsize.y,
                 c->tile_ogsize.width,
                 c->tile_ogsize.height
-            );
-        }
 
-        void animate(const int &end_x, const int &end_y, const int &end_width, const int &end_height)
-        {
+            );
+
+        }
+        void animate(const int &end_x, const int &end_y, const int &end_width, const int &end_height) {
             Mwm_Animator anim(c);
             anim.animate_client(
                 c->x,
@@ -13947,144 +13911,138 @@ class tile {
                 end_width, 
                 end_height, 
                 TILE_ANIMATION_DURATION
-            );
-            c->update();
+
+            ); c->update();
+
         }
 
     public:
     /* Constructor */
-        tile(client *&c, TILE tile)
-        : c(c)
-        {
+        tile(client *&c, TILE tile) : c(c) {
             if (c->is_EWMH_fullscreen()) return;
-            
-            switch (tile)
-            {
-                case TILE::LEFT:
-                {
+            switch (tile) {
+                case   TILE::LEFT  : {
                     // IF 'CURRENTLT_TILED' TO 'LEFT'
-                    if (current_tile_pos(TILEPOS::LEFT))
-                    {
+                    if (current_tile_pos(TILEPOS::LEFT)) {
                         restore_og_tile_pos();
                         return;
+
                     }
-                    
+
                     // IF 'CURRENTLY_TILED' TO 'RIGHT', 'LEFT_DOWN' OR 'LEFT_UP'
                     if (current_tile_pos(TILEPOS::RIGHT)
                     ||  current_tile_pos(TILEPOS::LEFT_DOWN)
-                    ||  current_tile_pos(TILEPOS::LEFT_UP))
-                    {
+                    ||  current_tile_pos(TILEPOS::LEFT_UP)) {
                         set_tile_sizepos(TILEPOS::LEFT);
                         return;
+
                     }
-                    
+
                     // IF 'CURRENTLY_TILED' TO 'RIGHT_DOWN'
-                    if (current_tile_pos(TILEPOS::RIGHT_DOWN))
-                    {
+                    if (current_tile_pos(TILEPOS::RIGHT_DOWN)) {
                         set_tile_sizepos(TILEPOS::LEFT_DOWN);
                         return;
+
                     }
-                    
+
                     // IF 'CURRENTLY_TILED' TO 'RIGHT_UP'
-                    if (current_tile_pos(TILEPOS::RIGHT_UP))
-                    {
+                    if (current_tile_pos(TILEPOS::RIGHT_UP)) {
                         set_tile_sizepos(TILEPOS::LEFT_UP);
                         return;
+
                     }
 
                     c->save_tile_ogsize();
                     set_tile_sizepos(TILEPOS::LEFT);
                     break;
-                }
-                    
-                case TILE::RIGHT:
-                {
+
+                } case TILE::RIGHT : {
                     // IF 'CURRENTLY_TILED' TO 'RIGHT'
-                    if (current_tile_pos(TILEPOS::RIGHT))
-                    {
+                    if (current_tile_pos(TILEPOS::RIGHT)) {
                         restore_og_tile_pos();
                         return;
+
                     }
                     
                     // IF 'CURRENTLT_TILED' TO 'LEFT', 'RIGHT_DOWN' OR 'RIGHT_UP' 
                     if (current_tile_pos(TILEPOS::LEFT)
                     ||  current_tile_pos(TILEPOS::RIGHT_UP)
-                    ||  current_tile_pos(TILEPOS::RIGHT_DOWN))
-                    {
+                    ||  current_tile_pos(TILEPOS::RIGHT_DOWN)) {
                         set_tile_sizepos(TILEPOS::RIGHT);
                         return;
+
                     }
                     
                     // IF 'CURRENTLT_TILED' 'LEFT_DOWN'
-                    if (current_tile_pos(TILEPOS::LEFT_DOWN))
-                    {
+                    if (current_tile_pos(TILEPOS::LEFT_DOWN)) {
                         set_tile_sizepos(TILEPOS::RIGHT_DOWN);
                         return;
+
                     }
                     
                     // IF 'CURRENTLY_TILED' 'LEFT_UP'
-                    if (current_tile_pos(TILEPOS::LEFT_UP))
-                    {
+                    if (current_tile_pos(TILEPOS::LEFT_UP)) {
                         set_tile_sizepos(TILEPOS::RIGHT_UP);
                         return;
+
                     }
 
                     c->save_tile_ogsize();
                     set_tile_sizepos(TILEPOS::RIGHT);
                     break;
-                }
-                
-                case TILE::DOWN:
-                {
+
+                } case TILE::DOWN  : {
                     // IF 'CURRENTLY_TILED' 'LEFT' OR 'LEFT_UP'
                     if (current_tile_pos(TILEPOS::LEFT)
-                    ||  current_tile_pos(TILEPOS::LEFT_UP))
-                    {
+                    ||  current_tile_pos(TILEPOS::LEFT_UP)) {
                         set_tile_sizepos(TILEPOS::LEFT_DOWN);
                         return;
+
                     }
 
                     // IF 'CURRENTLY_TILED' 'RIGHT' OR 'RIGHT_UP'
                     if (current_tile_pos(TILEPOS::RIGHT) 
-                    ||  current_tile_pos(TILEPOS::RIGHT_UP))
-                    {
+                    ||  current_tile_pos(TILEPOS::RIGHT_UP)) {
                         set_tile_sizepos(TILEPOS::RIGHT_DOWN);
                         return;
+
                     }
                     
                     // IF 'CURRENTLY_TILED' 'LEFT_DOWN' OR 'RIGHT_DOWN'
                     if (current_tile_pos(TILEPOS::LEFT_DOWN)
-                    ||  current_tile_pos(TILEPOS::RIGHT_DOWN))
-                    {
+                    ||  current_tile_pos(TILEPOS::RIGHT_DOWN)) {
                         restore_og_tile_pos();
                         return;
+
                     }
 
                     break;
-                }
 
-                case TILE::UP:
-                {
+                } case TILE::UP    : {
                     // IF 'CURRENTLY_TILED' 'LEFT'
                     if (current_tile_pos(TILEPOS::LEFT)
-                    ||  current_tile_pos(TILEPOS::LEFT_DOWN))
-                    {
+                    ||  current_tile_pos(TILEPOS::LEFT_DOWN)) {
                         set_tile_sizepos(TILEPOS::LEFT_UP);
                         return;
+
                     }
 
                     // IF 'CURRENTLY_TILED' 'RIGHT' OR RIGHT_DOWN
                     if (current_tile_pos(TILEPOS::RIGHT)
-                    ||  current_tile_pos(TILEPOS::RIGHT_DOWN))
-                    {
+                    ||  current_tile_pos(TILEPOS::RIGHT_DOWN)) {
                         set_tile_sizepos(TILEPOS::RIGHT_UP);
                         return;
+
                     }
 
                     break;
+
                 }
+
             }
+
         }
+
 };
 
 class Events {
@@ -14113,10 +14071,10 @@ class Events {
             // event_handler->setEventCallback(EV_CALL(XCB_MOTION_NOTIFY)     { motion_notify_handler(ev); });
 
             init_signals();
+
         }
 
-        void init_signals()
-        {
+        void init_signals() {
             CONN_root(MOVE_TO_DESKTOP_1, W_callback -> void { change_desktop::teleport_to(1); });
             CONN_root(MOVE_TO_DESKTOP_2, W_callback -> void { change_desktop::teleport_to(2); });
             CONN_root(MOVE_TO_DESKTOP_3, W_callback -> void { change_desktop::teleport_to(3); });
