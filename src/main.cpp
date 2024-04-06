@@ -7296,7 +7296,7 @@ class client {
             close_button.make_then_set_png(USER_PATH_PREFIX("/close.png"), CLOSE_BUTTON_BITMAP);
             
             CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->close_button) {
-                WS_emit(this->win, KILL_SIGNAL);
+                WS_emit(this->frame, KILL_SIGNAL);
             
             }, this->close_button);
 
