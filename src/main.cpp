@@ -7214,10 +7214,10 @@ class client {
             frame.map();
 
             CONN(KILL_SIGNAL,
-                if (!this->win.is_mapped()) {
-                    this->kill();
-                } else {
+                if (this->win.is_mapped()) {
                     this->win.kill();
+                } else if (this->frame.is_mapped()) {
+                    this->kill();
                 }
 
             , this->frame);
