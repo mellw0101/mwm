@@ -7906,7 +7906,9 @@ class Window_Manager {
                     
                 }
                 try {
-                    atoms = Malloc<atoms_t>().allocate();
+                    Malloc<atoms_t> atoms_malloc;
+
+                    atoms = atoms_malloc.allocate();
                     
                 } catch (std::bad_alloc &e) {
                     loutE << e.what() << loutEND;
