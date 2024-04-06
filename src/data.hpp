@@ -253,7 +253,7 @@ auto reg_callB(Func&& func, BoundArgs&&... boundArgs) {
 #include <new>     // For placement new
 
 template<typename T>
-class MallocAllocator {
+class Malloc {
     public:
         // Allocates memory for one object of type T using malloc
         static T* allocate() {
