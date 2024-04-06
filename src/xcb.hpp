@@ -264,8 +264,8 @@ class intern_atom_repl_t {
         operator xcb_atom_t() { return atom; }
         operator xcb_atom_t&() { return atom; }
 
-        bool is_reply_valid() {
-            return !(
+        bool is_not_valid() {
+            return (
                 response_type == 1 << 7
             &&  pad0          == 1 << 7
             &&  sequence      == 1 << 7
