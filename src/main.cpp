@@ -7302,58 +7302,49 @@ class client {
 
             ); win.reparent(frame, BORDER_SIZE, (TITLE_BAR_HEIGHT + BORDER_SIZE));
     
-            CONN(FOCUS_IN, if (__window == this->win) {
+            CONN(XCB_FOCUS_IN,
                 this->win.ungrab_button({{L_MOUSE_BUTTON, NULL}});
                 this->win.set_active_EWMH_window();
 
-            }, this->win);
+            , this->win);
 
-            CONN(FOCUS_OUT, if (__window == this->win) {
+            CONN(XCB_FOCUS_OUT,
                 this->win.grab_button({{L_MOUSE_BUTTON, NULL}});
 
-            }, this->win);
+            , this->win);
 
-            CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->win) {
+            CONN(L_MOUSE_BUTTON_EVENT,
                 this->focus();
                 this->win.focus_input();
 
-            }, this->win);
+            , this->win);
 
-            // CONN(BUTTON_RELEASE, , this->win);
+            CONN(XCB_BUTTON_RELEASE, m_pointer->ungrab();, this->win);
 
             frame.set_event_mask(XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY);
             frame.map();
 
-            CONN(KILL_SIGNAL, if (__window == this->win) { while (this->win.is_mapped())   this->win.kill();
+            CONN(KILL_SIGNAL,
+                while (this->win.is_mapped())   this->win.kill();
                 while (this->frame.is_mapped()) this->kill();
 
-            }, this->win);
+            , this->win);
 
-            /* CONN(DESTROY_NOTIF_EV, if (__window == this->win) {
-                // WS_emit(this->win, KILL_SIGNAL);
+            CONN(DESTROY_NOTIF_W,
                 if (this->win.is_mapped()) {
                     this->win.kill();
-                } else {
-                    this->kill();
                 }
 
-            }, this->win); */
+            , this->win);
 
-            CONN(DESTROY_NOTIF_W, {
-                if (this->win.is_mapped()) {
-                    this->win.kill();
-                }/*  else {
-                    this->kill();
-                } */
-
-            }, this->win);
-
-            CONN(DESTROY_NOTIF_EV, {
+            CONN(DESTROY_NOTIF_EV,
                 if (!this->win.is_mapped()) {
                     this->kill();
+                } else {
+                    this->win.kill();
                 }
 
-            }, this->win);
+            , this->win);
 
             CWC(frame);
             CWC(win);

@@ -626,6 +626,8 @@ class lout {
 		#define loutEND \
 			'\n'
 
+		#define Var_(_Var) #_Var << ' ' << _Var
+
 	public:
 	/* Methods 	 */
 		/**
