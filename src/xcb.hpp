@@ -206,6 +206,8 @@ class void_err_t {
     return error_detected; \
 }
 
+#define Vlist(__type, ...) (__type[]){__VA_ARGS__}
+
 class intern_atom_cok_t {
     private:
         xcb_intern_atom_cookie_t _cookie;
@@ -218,22 +220,59 @@ class intern_atom_cok_t {
 
 };
 
+inline void setErrState() {}
+
+#define ERR_STATE(__int) __int = 1 << 7
+
+template<typename T, typename... Args>
+inline void setErrState(T& first, Args&... args) {
+    ERR_STATE(first);    
+    setErrState(args...); // Recurse for the rest of the arguments
+
+}
+
+#define set_ERR_STATE(...) do { \
+    setErrState(__VA_ARGS__); \
+} while(0)
+
+
 class intern_atom_repl_t {
     public:
-        uint8_t  response_type, pad0;
-        uint16_t sequence;
-        uint32_t length, atom;
+        uint8_t    response_type;
+        uint8_t    pad0;
+        uint16_t   sequence;
+        uint32_t   length;
+        xcb_atom_t atom;
 
         intern_atom_repl_t(xcb_connection_t *conn, const intern_atom_cok_t &__cookie) {
             xcb_intern_atom_reply_t *reply = xcb_intern_atom_reply(conn, __cookie, nullptr);
+            if (!reply) {
+                set_ERR_STATE(response_type, pad0, sequence, length, atom);
+                return;
+
+            }
             response_type = reply->response_type;
             pad0          = reply->pad0;
             sequence      = reply->sequence;
             length        = reply->sequence;
             atom          = reply->atom;
+
+            free(reply);
             
         }
-    
+
+        operator xcb_atom_t() { return atom; }
+        operator xcb_atom_t&() { return atom; }
+
+        bool is_reply_valid() {
+            return !(
+                response_type == 1 << 7
+            &&  pad0          == 1 << 7
+            &&  sequence      == 1 << 7
+            &&  length        == 1 << 7
+            &&  atom          == 1 << 7);
+        }
+
 }; 
 
 typedef struct {
