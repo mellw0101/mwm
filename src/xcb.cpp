@@ -47,12 +47,11 @@ bool xcb::window_exists(uint32_t __w) {
     auto *reply = xcb_query_tree_reply(_conn, xcb_query_tree(_conn, __w), &err);
     if (reply) free(reply); // Correctly free the reply if it's non-null
 
-    if (err) {
-        loutE << err->error_code << loutEND;
-        free(err); // Free the error if it's non-null
-        return false; // Return false if there was an error, assuming it indicates non-existence
-    }
-    return true; // If there was no error, assume the window exists
+    if (!err) return true; // If there was no error, assume the window exists
+    loutE << err->error_code << loutEND;
+    free(err); // Free the error if it's non-null
+    return false; // Return false if there was an error, assuming it indicates non-existence
+
 }
 uint32_t xcb::gen_Xid() {
     if (_flags & (1ULL << X_CONN_ERROR)) {
