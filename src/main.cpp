@@ -9093,11 +9093,10 @@ class __status_bar__ {
 
             event_handler->setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev) {
                 RE_CAST_EV(xcb_enter_notify_event_t);
-                if (e->event == this->_w[_AUDIO]) {
-                    this->_w[_AUDIO].change_border_color(WHITE);
-                }
+                if (e->event != this->_w[_AUDIO]) return;
+
+                this->_w[_AUDIO].change_border_color(WHITE);
             });
-            this->_w[_AUDIO];
 
             event_handler->setEventCallback(XCB_LEAVE_NOTIFY, [&](Ev ev) {
                 RE_CAST_EV(xcb_leave_notify_event_t);
