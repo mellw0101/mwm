@@ -12396,6 +12396,7 @@ class DropDownTerm {
     {
         if ( w.y(  ) == ( - ( screen->height_in_pixels / 2 )))
         {
+            w.raise();
             w.y( 0 );
             FlushX_Win( w );
         }
