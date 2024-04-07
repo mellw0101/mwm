@@ -12392,11 +12392,11 @@ class __dock__ {
 }; static __dock__ *dock( nullptr );
 
 class DropDownTerm {
-    void toggleTerm(  )
+    /* void toggleTerm(  )
     {
-        if ( w.y(  ) == ( - ( screen->height_in_pixels / 2 )))
+        if ( w.y( ) == ( - ( screen->height_in_pixels / 2 )))
         {
-            w.raise();
+            w.raise( );
             w.y( 0 );
             FlushX_Win( w );
         }
@@ -12405,7 +12405,7 @@ class DropDownTerm {
             w.y( - ( screen->height_in_pixels / 2 ));
             FlushX_Win( w );
         }
-    }
+    } */
 
     public:
         window w;
@@ -12429,7 +12429,17 @@ class DropDownTerm {
                 RE_CAST_EV( xcb_key_press_event_t );
                 if ( e->detail == wm->key_codes.f12 )
                 {
-                    toggleTerm(  );
+                    if ( w.y( ) == ( - ( screen->height_in_pixels / 2 )))
+                    {
+                        w.raise( );
+                        w.y( 0 );
+                        FlushX_Win( w );
+                    }
+                    else
+                    {
+                        w.y( - ( screen->height_in_pixels / 2 ));
+                        FlushX_Win( w );
+                    }
                 }
             });
         }
