@@ -7085,6 +7085,8 @@ class client {
                 DARK_GREY
 
             ); win.reparent(frame, BORDER_SIZE, (TITLE_BAR_HEIGHT + BORDER_SIZE));
+            FLUSH_X();
+            update();
     
             CONN(XCB_FOCUS_IN,
                 this->win.ungrab_button({{L_MOUSE_BUTTON, NULL}});
@@ -8291,7 +8293,8 @@ class Window_Manager {
                     RE_CAST_EV(xcb_map_request_event_t);
                     client *c = signal_manager->_window_client_map.retrive(e->window);
                     if (c == nullptr) {
-                        this->manage_new_client(e->window); 
+                        this->manage_new_client(e->window);
+
                     }
                 });
                 /* CONN_Win(root, L_MOUSE_BUTTON_EVENT,

@@ -322,6 +322,96 @@ class ThreadPool {
     }
 */
 
+class ThreadWrapper {
+public:
+    ThreadWrapper() : running(false) {}
+
+    ~ThreadWrapper() {
+        stop();
+    }
+
+    // Delete copy constructor and assignment operator
+    ThreadWrapper(const ThreadWrapper&) = delete;
+    ThreadWrapper& operator=(const ThreadWrapper&) = delete;
+
+    // Start the thread with a new task
+    template<typename Callable, typename... Args>
+    void start(Callable&& task, Args&&... args) {
+        // Ensure any running thread is stopped before starting a new one
+        stop();
+
+        // Set the running flag and start the new thread
+        running = true;
+        thread = std::thread([this, task = std::function<void()>(std::bind(std::forward<Callable>(task), std::forward<Args>(args)...))] {
+            task();
+            running = false;
+        });
+    }
+
+    // Stop the thread
+    void stop() {
+        if (running) {
+            running = false; // Set running flag to false, allowing the thread to exit if it checks this flag
+            if (thread.joinable()) {
+                thread.join(); // Wait for the thread to finish execution
+            }
+        }
+    }
+
+    // Check if the thread is running
+    bool isRunning() const {
+        return running;
+    }
+
+private:
+    std::thread thread;
+    std::atomic<bool> running;
+};
+
+#include "Log.hpp"
+
+class AsyncWrapper {
+    public:
+        AsyncWrapper() = default;
+
+        // Delete copy semantics
+        AsyncWrapper(const AsyncWrapper&) = delete;
+        AsyncWrapper& operator=(const AsyncWrapper&) = delete;
+
+        // Allow move semantics
+        AsyncWrapper(AsyncWrapper&&) = default;
+        AsyncWrapper& operator=(AsyncWrapper&&) = default;
+
+        // Start an asynchronous task
+        template<typename Callable, typename... Args>
+        void start(Callable&& task, Args&&... args) {
+            // Ensure any previous task is not pending
+            if (future.valid()) {
+                try {
+                    future.get(); // Attempt to retrieve the result, if any, or wait for completion
+                } catch (const std::exception& e) {
+                    // Handle or log exceptions from the previous task
+                    loutE << "Exception from previous task: " << e.what() << loutEND;
+                }
+            }
+
+            // Launch a new asynchronous task
+            future = std::async(std::launch::async, std::forward<Callable>(task), std::forward<Args>(args)...);
+        }
+
+        // Attempt to retrieve the result of the asynchronous task, waiting if necessary
+        template<typename ResultType>
+        ResultType get() {
+            if (!future.valid()) {
+                throw std::runtime_error("No valid future available. Did you start a task?");
+            }
+            return future.get(); // This will wait for the task to complete if it hasn't already
+        }
+
+    private:
+        std::future<void> future;
+};
+
 class root_thread {
     private:
 
