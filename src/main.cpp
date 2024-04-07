@@ -8327,7 +8327,7 @@ class Window_Manager {
                 ); */
                 event_handler->setEventCallback(XCB_MAP_NOTIFY, [&](Ev ev) {
                     RE_CAST_EV(xcb_map_notify_event_t);
-                    client *c = signal_manager->_window_client_map.retrive(e->window);
+                    client *c = signal_manager->_window_client_map.retrive(e->event);
                     if (!c) return;
                     c->update();
 
