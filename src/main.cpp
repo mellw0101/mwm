@@ -9109,14 +9109,14 @@ class __status_bar__ {
             id = event_handler->setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev) {
                 RE_CAST_EV(xcb_enter_notify_event_t);
                 if (e->event != this->_w[_AUDIO]) return;
-                this->_w[_AUDIO].change_border_color(WHITE);
+                this->_w[_AUDIO].change_backround_color(WHITE);
             });
             this->_w[_AUDIO].add_event_id(XCB_ENTER_NOTIFY, id);
 
             id = event_handler->setEventCallback(XCB_LEAVE_NOTIFY, [&](Ev ev) {
                 RE_CAST_EV(xcb_leave_notify_event_t);
                 if (e->event != this->_w[_AUDIO]) return;
-                this->_w[_AUDIO].change_border_color(BLACK);
+                this->_w[_AUDIO].change_backround_color(BLACK);
             });
             this->_w[_AUDIO].add_event_id(XCB_LEAVE_NOTIFY, id);
 
