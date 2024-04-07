@@ -3117,14 +3117,14 @@ class __event_handler__ {
                 }, e->event);
 
             }); */
-            setEventCallback(XCB_PROPERTY_NOTIFY, [&](Ev ev) {
+            /* setEventCallback(XCB_PROPERTY_NOTIFY, [&](Ev ev) {
                 RE_CAST_EV(xcb_property_notify_event_t);
                 thread_pool.enqueue([](uint32_t __w) {
                     client *c = signal_manager->_window_client_map.retrive(__w);
                     if (!c) return;
                     Emit(__w, XCB_PROPERTY_NOTIFY);
                 }, e->window);
-            });
+            }); */
 
             while (shouldContinue) {
                 ev = xcb_wait_for_event(conn);
@@ -3365,7 +3365,7 @@ class __event_handler__ {
 
                 }
 
-            ), callbacks.end());            
+            ), callbacks.end());
             loutI << "Deleting id" << id << " " << EVENT_TYPE(eventType) << " vecsize" << eventCallbacks[eventType].size() << loutEND;
 
         }
@@ -4092,22 +4092,23 @@ class window {
                     free(protocols_reply);
                     // free(delete_reply);
                     return;
-
                 }
+
                 if (delete_reply == nullptr) {
                     loutE << "delete reply is null" << loutEND;
                     free(protocols_reply);
                     free(delete_reply);
                     return;
-
                 }
 
-                int i = 0; do {
+                int i = 0;
+                do {
                     send_event(KILL_WINDOW, (uint32_t[3]){32, protocols_reply->atom, delete_reply->atom});
 
                     if (is_mapped()) {
                         ++i;
-                    } else {
+                    }
+                    else {
                         break;
                     }
 
@@ -4119,10 +4120,14 @@ class window {
                 if (xcb->window_exists(w)) {
                     loutEWin << "Failed to kill window by asking nicely" << loutEND;
                     return;
-
                 }
+
                 signal_manager->_window_signals.remove(w);
                 signal_manager->_window_client_map.remove(w);
+
+                for (size_t i(0); i< _event_id_vector.size(); ++i) {
+                    event_handler->removeEventCallback(_event_id_vector[i].first, _event_id_vector[i].second);
+                }
 
             }
             void kill_test() {
@@ -4267,6 +4272,9 @@ class window {
                 _width  = __width;
                 _height = __height;
 
+            }
+            void add_event_id(uint8_t __type, int __event_id) {
+                this->_event_id_vector.push_back({__type, __event_id});
             }
 
         /* Signal System */
@@ -5836,6 +5844,7 @@ class window {
         pid_t    _pid = 0;
 
         FixedArray<uint32_t, 4> _border{};
+        vector<pair<uint8_t, int>> _event_id_vector;
 
     /* Methods     */
         /* Main       */
@@ -8912,6 +8921,8 @@ class __status_bar__ {
 
         }
         void create_windows__() {
+            int id = 0;
+
             _w[_BAR].create_window(
                 screen->root,
                 BAR_WINDOW_X,
@@ -8940,12 +8951,13 @@ class __status_bar__ {
                 this->_w[_TIME_DATE].draw_acc(this->get_time_and_date__());
 
             ); */
-            event_handler->setEventCallback(XCB_EXPOSE, [&](Ev ev) {
+            id = event_handler->setEventCallback(XCB_EXPOSE, [&](Ev ev) {
                 RE_CAST_EV(xcb_expose_event_t);
                 if (e->window == this->_w[_TIME_DATE]) {
                     this->_w[_TIME_DATE].draw_acc(this->get_time_and_date__());
                 }
             });
+            this->_w[_TIME_DATE].add_event_id(XCB_EXPOSE, id);
 
             _w[_WIFI].create_window(
                 _w[_BAR],
@@ -8976,7 +8988,7 @@ class __status_bar__ {
 
             }); */
 
-            event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) {
+            id = event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) {
                 RE_CAST_EV(xcb_button_press_event_t);
                 if (e->detail != L_MOUSE_BUTTON) return;
                 if (e->event != this->_w[_WIFI]) return;
@@ -8993,6 +9005,7 @@ class __status_bar__ {
                     this->_w[_WIFI_CLOSE].send_event(XCB_EVENT_MASK_EXPOSURE);
                 }
             });
+            this->_w[_WIFI].add_event_id(XCB_BUTTON_PRESS, id);
 
             Bitmap bitmap(20, 20);
             
@@ -9033,12 +9046,13 @@ class __status_bar__ {
             );
             FLUSH_X();
 
-            event_handler->setEventCallback(XCB_EXPOSE, [&](Ev ev) {
+            id = event_handler->setEventCallback(XCB_EXPOSE, [&](Ev ev) {
                 RE_CAST_EV(xcb_expose_event_t);
                 if (e->window == this->_w[_AUDIO]) {
                     this->_w[_AUDIO].draw_acc("Audio");
                 }
             });
+            this->_w[_AUDIO].add_event_id(XCB_EXPOSE, id);
             
             /* WS_conn(this->_w[_AUDIO], EXPOSE, W_callback {
                 if (__window != this->_w[_AUDIO]) return;
@@ -9064,7 +9078,7 @@ class __status_bar__ {
 
             }); */
 
-            event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) {
+            id = event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) {
                 RE_CAST_EV(xcb_button_press_event_t);
                 if (e->detail != L_MOUSE_BUTTON) return;
                 if (e->event != this->_w[_AUDIO]) return;
@@ -9079,6 +9093,7 @@ class __status_bar__ {
                     this->show__(this->_w[_AUDIO_DROPDOWN]);
                 }
             });
+            this->_w[_AUDIO].add_event_id(XCB_BUTTON_PRESS, id);
             
             /* WS_conn(this->_w[_AUDIO], ENTER_NOTIFY, W_callback {
                 if (__window != this->_w[_AUDIO]) return;
@@ -9091,19 +9106,19 @@ class __status_bar__ {
 
             }); */
 
-            event_handler->setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev) {
+            id = event_handler->setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev) {
                 RE_CAST_EV(xcb_enter_notify_event_t);
                 if (e->event != this->_w[_AUDIO]) return;
-
                 this->_w[_AUDIO].change_border_color(WHITE);
             });
+            this->_w[_AUDIO].add_event_id(XCB_ENTER_NOTIFY, id);
 
-            event_handler->setEventCallback(XCB_LEAVE_NOTIFY, [&](Ev ev) {
+            id = event_handler->setEventCallback(XCB_LEAVE_NOTIFY, [&](Ev ev) {
                 RE_CAST_EV(xcb_leave_notify_event_t);
-                if (e->event == this->_w[_AUDIO]) {
-                    this->_w[_AUDIO].change_border_color(BLACK);
-                }
+                if (e->event != this->_w[_AUDIO]) return;
+                this->_w[_AUDIO].change_border_color(BLACK);
             });
+            this->_w[_AUDIO].add_event_id(XCB_LEAVE_NOTIFY, id);
 
         }
         void show__(const uint32_t &__window) {
@@ -9152,14 +9167,17 @@ class __status_bar__ {
                     (int[3]){ALL, WIFI_DROPDOWN_BORDER, BLACK}
                 );
 
-                event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) {
+                int id = 0;
+
+                id = event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) {
                     RE_CAST_EV(xcb_button_press_event_t);
                     if (e->event == this->_w[_WIFI_CLOSE]) {
                         this->hide__(_WIFI_DROPWOWN);
                     }
                 });
+                this->_w[_WIFI_CLOSE].add_event_id(XCB_BUTTON_PRESS, id);
 
-                event_handler->setEventCallback(XCB_EXPOSE, [&] (Ev ev) {
+                id = event_handler->setEventCallback(XCB_EXPOSE, [&] (Ev ev) {
                     RE_CAST_EV(xcb_expose_event_t);
                     if (e->window == this->_w[_WIFI_CLOSE]) {
                         this->_w[_WIFI_CLOSE].draw_acc("Close");
@@ -9174,22 +9192,26 @@ class __status_bar__ {
                     }
 
                 });
+                this->_w[_WIFI_CLOSE].add_event_id(XCB_EXPOSE, id);
+                this->_w[_WIFI_INFO].add_event_id(XCB_EXPOSE, id);
                 this->_w[_WIFI_INFO].send_event(XCB_EVENT_MASK_EXPOSURE);
                 this->_w[_WIFI_CLOSE].send_event(XCB_EVENT_MASK_EXPOSURE);
 
-                event_handler->setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev) {
+                id = event_handler->setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev) {
                     RE_CAST_EV(xcb_enter_notify_event_t);
                     if (e->event == this->_w[_WIFI_CLOSE]) {
                         this->_w[_WIFI_CLOSE].change_backround_color(WHITE);
                     }
                 });
+                this->_w[_WIFI_CLOSE].add_event_id(XCB_ENTER_NOTIFY, id);
 
-                event_handler->setEventCallback(XCB_LEAVE_NOTIFY, [&](Ev ev) {
+                id = event_handler->setEventCallback(XCB_LEAVE_NOTIFY, [&](Ev ev) {
                     RE_CAST_EV(xcb_leave_notify_event_t);
                     if (e->event == this->_w[_WIFI_CLOSE]) {
                         this->_w[_WIFI_CLOSE].change_backround_color(BLACK);
                     }
                 });
+                this->_w[_WIFI_CLOSE].add_event_id(XCB_LEAVE_NOTIFY, id);
 
                 /* WS_conn(this->_w[_WIFI_CLOSE], EXPOSE, W_callback
                 {
