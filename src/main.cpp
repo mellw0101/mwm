@@ -4338,13 +4338,11 @@ class window {
                         if (reply.atoms[i] == __atom) {
                             xcb_ewmh_get_atoms_reply_wipe(&reply);
                             return true;
-
                         } /* 'true' if the specified atom is found */
-                    
-                    } xcb_ewmh_get_atoms_reply_wipe(&reply); // Clean up
-                
-                } return false; /* The atom was not found or the property could not be retrieved */
-            
+                    }
+                    xcb_ewmh_get_atoms_reply_wipe(&reply); // Clean up
+                }
+                return false; /* The atom was not found or the property could not be retrieved */
             }
             bool check_frameless_window_hint() {
                 bool is_frameless = false;
@@ -4358,15 +4356,14 @@ class window {
                         motif_wm_hints* hints = (motif_wm_hints*)xcb_get_property_value(reply);
                         if (hints->decorations == 0) {
                             is_frameless = true;
-
                         }
-
-                    } else {
+                    }
+                    else {
                         loutEWin << "No _MOTIF_WM_HINTS property found." << loutEND;
-
-                    } free(reply);
-                
-                } return is_frameless;
+                    }
+                    free(reply);
+                }
+                return is_frameless;
             
             } /* Function to fetch and check the _MOTIF_WM_HINTS property */
             bool is_EWMH_fullscreen() {
@@ -5290,8 +5287,9 @@ class window {
                 if (!image) {
                     loutE << "Failed to load image: " << imagePath << endl;
                     return;
+                }
 
-                } imlib_context_set_image(image);
+                imlib_context_set_image(image);
                 
                 int originalWidth  = imlib_image_get_width();
                 int originalHeight = imlib_image_get_height();
@@ -5508,7 +5506,6 @@ class window {
                 );
                 FLUSH_XWin();
                 CHECK_VOID_COOKIE();
-
             }
             void draw_text(const char *str , const int &text_color, const int &backround_color, const char *font_name, const int16_t &x, const int16_t &y) {
                 get_font(font_name);
@@ -5524,7 +5521,6 @@ class window {
                 );
                 FLUSH_XWin();
                 CHECK_VOID_COOKIE();
-
             }
             void draw_text_auto_color(const char *__str, int16_t __x, int16_t __y, int __text_color = WHITE, int __backround_color = 0, const char *__font_name = DEFAULT_FONT) {
                 get_font(__font_name);
@@ -5541,7 +5537,6 @@ class window {
                 );
                 FLUSH_XWin();
                 CHECK_VOID_COOKIE();
-
             }
             /**
              *
@@ -5803,12 +5798,10 @@ class window {
                         _window,
                         pair.second
 
-                    ); CHECK_VOID_COOKIE();
-                    
+                    );
+                    CHECK_VOID_COOKIE();
                     FLUSH_XWin();
-
                 }
-
             }
         
     private:
@@ -7613,9 +7606,7 @@ class context_menu {
 
             for (int i = 0; i < entries.size(); ++i) {
                 entries[i].window.kill();
-
             }
-
         }
         void make_entries__() {
             for (int i(0), y(0); i < entries.size(); ++i, y += _height) {
@@ -7701,11 +7692,9 @@ class Window_Manager {
                 xcb = connect_to_server(conn, screen);
                 if ((xcb->check_conn() & (1ULL << X_CONN_ERROR)) != 0) {
                     loutE << "x not connected" << loutEND;
-                    
                 }
                 else {
                     loutI << "x succesfully connected" << loutEND;
-                    
                 }
 
                 root = screen->root;

@@ -323,64 +323,64 @@ class ThreadPool {
 */
 
 class ThreadWrapper {
-public:
-    ThreadWrapper() : running(false) {}
+    public:
+        ThreadWrapper() : running(false) {}
 
-    ~ThreadWrapper() {
-        stop();
-    }
+        ~ThreadWrapper() {
+            stop();
+        }
 
-    // Delete copy constructor and assignment operator
-    ThreadWrapper(const ThreadWrapper&) = delete;
-    ThreadWrapper& operator=(const ThreadWrapper&) = delete;
+        // Delete copy constructor and assignment operator
+        ThreadWrapper(const ThreadWrapper&) = delete;
+        ThreadWrapper& operator=(const ThreadWrapper&) = delete;
 
-    // Start the thread with a new task
-    template<typename Callable, typename... Args>
-    void start(Callable&& task, Args&&... args) {
-        // Ensure any running thread is stopped before starting a new one
-        stop();
+        // Start the thread with a new task
+        template<typename Callable, typename... Args>
+        void start(Callable&& task, Args&&... args) {
+            // Ensure any running thread is stopped before starting a new one
+            stop();
 
-        // Set the running flag and start the new thread
-        running = true;
-        thread = std::thread([this, task = std::function<void()>(std::bind(std::forward<Callable>(task), std::forward<Args>(args)...))] {
-            task();
-            running = false;
-        });
-    }
+            // Set the running flag and start the new thread
+            running = true;
+            thread = std::thread([this, task = std::function<void()>(std::bind(std::forward<Callable>(task), std::forward<Args>(args)...))] {
+                task();
+                running = false;
+            });
+        }
 
-    // Stop the thread
-    void stop() {
-        if (running) {
-            running = false; // Set running flag to false, allowing the thread to exit if it checks this flag
-            if (thread.joinable()) {
-                thread.join(); // Wait for the thread to finish execution
+        // Stop the thread
+        void stop() {
+            if (running) {
+                running = false; // Set running flag to false, allowing the thread to exit if it checks this flag
+                if (thread.joinable()) {
+                    thread.join(); // Wait for the thread to finish execution
+                }
             }
         }
-    }
 
-    // Check if the thread is running
-    bool isRunning() const {
-        return running;
-    }
+        // Check if the thread is running
+        bool isRunning() const {
+            return running;
+        }
 
-private:
-    std::thread thread;
-    std::atomic<bool> running;
+    private:
+        std::thread thread;
+        std::atomic<bool> running;
 };
 
 #include "Log.hpp"
 
-class AsyncWrapper {
+class AsyncWrapper_first {
     public:
-        AsyncWrapper() = default;
+        AsyncWrapper_first() = default;
 
         // Delete copy semantics
-        AsyncWrapper(const AsyncWrapper&) = delete;
-        AsyncWrapper& operator=(const AsyncWrapper&) = delete;
+        AsyncWrapper_first(const AsyncWrapper_first&) = delete;
+        AsyncWrapper_first& operator=(const AsyncWrapper_first&) = delete;
 
         // Allow move semantics
-        AsyncWrapper(AsyncWrapper&&) = default;
-        AsyncWrapper& operator=(AsyncWrapper&&) = default;
+        AsyncWrapper_first(AsyncWrapper_first&&) = default;
+        AsyncWrapper_first& operator=(AsyncWrapper_first&&) = default;
 
         // Start an asynchronous task
         template<typename Callable, typename... Args>
@@ -411,6 +411,78 @@ class AsyncWrapper {
     private:
         std::future<void> future;
 
+};
+
+enum class TaskState {
+    Idle,
+    Waiting,
+    Running,
+    Completed,
+    Exception
+};
+
+class AsyncWrapper {
+    public:
+        AsyncWrapper() : state(TaskState::Idle) {}
+
+        // Prevent copy operations
+        AsyncWrapper(const AsyncWrapper&) = delete;
+        AsyncWrapper& operator=(const AsyncWrapper&) = delete;
+
+        // Enable move operations
+        AsyncWrapper(AsyncWrapper&&) = delete;
+        AsyncWrapper& operator=(AsyncWrapper &&) = delete;
+
+        template<typename Callable, typename... Args>
+        void start(Callable&& task, Args&&... args) {
+            {
+                std::lock_guard<std::mutex> lock(mutex);
+                if (state != TaskState::Idle) {
+                    throw std::runtime_error("Task is already set or running.");
+                }
+                // Set the task but don't start it yet
+                this->task = std::bind(std::forward<Callable>(task), std::forward<Args>(args)...);
+                state = TaskState::Waiting;
+            }
+        }
+
+        // Call this method to start the task
+        void trigger() {
+            {
+                std::lock_guard<std::mutex> lock(mutex);
+                if (state != TaskState::Waiting) {
+                    throw std::runtime_error("No task is waiting to be triggered.");
+                }
+                state = TaskState::Running;
+            }
+            condition.notify_one(); // Signal the condition variable to start the task
+
+            future = std::async(std::launch::async, [this]() {
+                std::unique_lock<std::mutex> lock(mutex);
+                condition.wait(lock, [this]{ return state == TaskState::Running; }); // Wait to be triggered
+                try {
+                    task(); // Execute the task
+                    state = TaskState::Completed;
+                } catch (...) {
+                    state = TaskState::Exception;
+                }
+            });
+        }
+
+        TaskState getState() const {
+            return state;
+        }
+
+        bool isFinished() const {
+            return state == TaskState::Completed || state == TaskState::Exception;
+        }
+
+    private:
+        std::future<void> future;
+        std::function<void()> task;
+        std::mutex mutex;
+        std::condition_variable condition;
+        std::atomic<TaskState> state;
 };
 
 class root_thread {
