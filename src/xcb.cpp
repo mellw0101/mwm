@@ -33,16 +33,25 @@ xcb_atom_t xcb::intern_atom(const char *__name) {
     return atom;
 
 }
-bool xcb::window_exists(uint32_t __w) {
+/* bool xcb::window_exists(uint32_t __w) {
     xcb_generic_error_t *err;
     free(xcb_query_tree_reply(_conn, xcb_query_tree(_conn, __w), &err));
     if (err != NULL) {
         free(err);
         return false;
-
     }
     return true;
+} */
+bool xcb::window_exists(uint32_t __w) {
+    xcb_generic_error_t *err = nullptr;
+    auto *reply = xcb_query_tree_reply(_conn, xcb_query_tree(_conn, __w), &err);
+    if (reply) free(reply); // Correctly free the reply if it's non-null
 
+    if (err) {
+        free(err); // Free the error if it's non-null
+        return false; // Return false if there was an error, assuming it indicates non-existence
+    }
+    return true; // If there was no error, assume the window exists
 }
 uint32_t xcb::gen_Xid() {
     if (_flags & (1ULL << X_CONN_ERROR)) {
