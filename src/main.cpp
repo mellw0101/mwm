@@ -2971,7 +2971,7 @@ class __event_handler__ {
                         } // Terminal keybinding
                         break;
 
-                    } */ case SHIFT + CTRL + SUPER :{
+                    } *//*  case SHIFT + CTRL + SUPER :{
                         if (e->detail == key_codes.r_arrow) {
                             thread_pool.enqueue([](uint32_t w) {
                                 Emit(w, MOVE_TO_NEXT_DESKTOP_WAPP);
@@ -2984,7 +2984,7 @@ class __event_handler__ {
 
                         } break;
 
-                    } /* case SHIFT + ALT          :{
+                    } */ /* case SHIFT + ALT          :{
                         if (e->detail == key_codes.q) {
                             thread(handle_event<ROOT_SIGNAL>, QUIT_KEY_PRESS).detach();
 
@@ -3007,12 +3007,13 @@ class __event_handler__ {
                         } else if (e->detail == key_codes.n_5) {
                             thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_5).detach();
                             
-                        } else if (e->detail == key_codes.tab) {
+                        } /* else if (e->detail == key_codes.tab) {
                             thread(handle_event<ROOT_SIGNAL>, CYCLE_FOCUS_KEY_PRESS).detach();
 
-                        } break;
+                        } */
+                        break;
 
-                    } case CTRL  + SUPER        :{
+                    } /* case CTRL  + SUPER        :{
                         if (e->detail == key_codes.r_arrow) {
                             thread(handle_event<ROOT_SIGNAL>, MOVE_TO_NEXT_DESKTOP).detach();
 
@@ -3022,7 +3023,7 @@ class __event_handler__ {
                         }
                         break;
 
-                    } case SUPER                :{
+                    }  *//* case SUPER                :{
                         if (e->detail == key_codes.r_arrow)        {
                             HANDLE_EVENT(TILE_RIGHT);
 
@@ -3035,13 +3036,14 @@ class __event_handler__ {
                         } else if (e->detail == key_codes.d_arrow) {
                             HANDLE_EVENT(TILE_DOWN);
 
-                        } else if (e->detail == key_codes.k)       {
+                        } else  */
+                        /* if (e->detail == key_codes.k)       {
                             thread(handle_event<ROOT_SIGNAL>, DEBUG_KEY_PRESS).detach();
                         
                         }
                         break;
 
-                    }
+                    } */
 
                 }
                 if (e->detail == key_codes.f11) {
@@ -8278,15 +8280,13 @@ class Window_Manager {
 
                     if (e->detail == key_codes.t && ((e->state & ALT) != 0) && ((e->state & CTRL) != 0)) {
                         this->launcher.launch_child_process("konsole");
-                    
-                    } else if (e->detail == key_codes.q && ((e->state & ALT) != 0) && ((e->state & SHIFT) != 0)) {
-                        this->quit(0);
-                    
-                    } else if (e->detail == key_codes.tab && ((e->state & ALT) != 0)) {
-                        this->cycle_focus();
-
                     }
-
+                    else if (e->detail == key_codes.q && ((e->state & ALT) != 0) && ((e->state & SHIFT) != 0)) {
+                        this->quit(0);
+                    }
+                    else if (e->detail == key_codes.tab && ((e->state & ALT) != 0)) {
+                        this->cycle_focus();
+                    }
                 });
                 
                 if (BORDER_SIZE == 0) {
@@ -8943,15 +8943,14 @@ class __status_bar__ {
 
                 if (this->_w[_WIFI_DROPWOWN].is_mapped()) {
                     this->hide__(this->_w[_WIFI_DROPWOWN]);
-
-                } else {
+                }
+                else {
                     if (this->_w[_AUDIO_DROPDOWN].is_mapped()) {
                         this->hide__(this->_w[_AUDIO_DROPDOWN]);
-
-                    } show__(this->_w[_WIFI_DROPWOWN]);
+                    }
+                    show__(this->_w[_WIFI_DROPWOWN]);
                     this->_w[_WIFI_INFO].send_event(XCB_EVENT_MASK_EXPOSURE);
                     this->_w[_WIFI_CLOSE].send_event(XCB_EVENT_MASK_EXPOSURE);
-
                 }
 
             });
@@ -13908,7 +13907,7 @@ class Events {
     /* Methods     */
         void setup()
         {
-            // event_handler->setEventCallback(EV_CALL(XCB_KEY_PRESS)         { key_press_handler(ev); });
+            event_handler->setEventCallback(EV_CALL(XCB_KEY_PRESS)    { key_press_handler(ev); });
             // event_handler->setEventCallback(EV_CALL(XCB_MAP_NOTIFY)        { map_notify_handler(ev); });
             // event_handler->setEventCallback(EV_CALL(XCB_MAP_REQUEST)       { map_req_handler(ev); });
             event_handler->setEventCallback(EV_CALL(XCB_BUTTON_PRESS) { button_press_handler(ev); });
@@ -14012,120 +14011,116 @@ class Events {
 
     private:
     /* Methods     */
-        // void key_press_handler(const xcb_generic_event_t *&ev)
-        // {
-        //     RE_CAST_EV(xcb_key_press_event_t);
-        //     // if (e->detail == wm->key_codes.r_arrow)
-        //     // {
-        //     //     switch (e->state)
-        //     //     {
-        //     //         case (SHIFT + CTRL + SUPER):
-        //     //         {
-        //     //             change_desktop cd(conn);
-        //     //             cd.change_with_app(change_desktop::NEXT);
-        //     //             return;
-        //     //         }
+        void key_press_handler(const xcb_generic_event_t *&ev)
+        {
+            RE_CAST_EV(xcb_key_press_event_t);
+            if (e->detail == wm->key_codes.r_arrow)
+            {
+                switch (e->state) {
+                    case (SHIFT + CTRL + SUPER): {
+                        change_desktop cd(conn);
+                        cd.change_with_app(change_desktop::NEXT);
+                        return;
+                    }
                     
-        //     //         // case (CTRL + SUPER):
-        //     //         // {
-        //     //         //     change_desktop change_desktop(conn);
-        //     //         //     change_desktop.change_to(change_desktop::NEXT);
-        //     //         //     return;
-        //     //         // }
+                    case (CTRL + SUPER): {
+                        change_desktop change_desktop(conn);
+                        change_desktop.change_to(change_desktop::NEXT);
+                        return;
+                    }
 
-        //     //         // case SUPER:
-        //     //         // {
-        //     //         //     client *c = signal_manager->_window_client_map.retrive(e->event);
-        //     //         //     tile(c, TILE::RIGHT);
-        //     //         //     return;
-        //     //         // }
-        //     //     }
-        //     // }
+                    case SUPER: {
+                        client *c = signal_manager->_window_client_map.retrive(e->event);
+                        tile(c, TILE::RIGHT);
+                        return;
+                    }
+                }
+            }
             
-        //     // if (e->detail == wm->key_codes.l_arrow)
-        //     // {
-        //     //     switch (e->state)
-        //     //     {
-        //     //         // case (SHIFT + CTRL + SUPER):
-        //     //         // {
+            if (e->detail == wm->key_codes.l_arrow)
+            {
+                switch (e->state)
+                {
+                    case (SHIFT + CTRL + SUPER):
+                    {
                         
-        //     //         //     return;
-        //     //         // }
+                        return;
+                    }
 
-        //     //         // case (CTRL + SUPER):
-        //     //         // {
-        //     //         //     change_desktop change_desktop(conn);
-        //     //         //     change_desktop.change_to(change_desktop::PREV);
-        //     //         //     return;
-        //     //         // }
+                    case (CTRL + SUPER):
+                    {
+                        change_desktop change_desktop(conn);
+                        change_desktop.change_to(change_desktop::PREV);
+                        return;
+                    }
                     
-        //     //         // case SUPER:
-        //     //         // {
-        //     //         //     client *c = signal_manager->_window_client_map.retrive(e->event);
-        //     //         //     tile(c, TILE::LEFT);
-        //     //         //     return;
-        //     //         // }
-        //     //     }
-        //     // }
+                    case SUPER:
+                    {
+                        client *c = signal_manager->_window_client_map.retrive(e->event);
+                        tile(c, TILE::LEFT);
+                        return;
+                    }
+                }
+            }
             
-        //     // if (e->detail == wm->key_codes.d_arrow)
-        //     // {
-        //     //     switch (e->state)
-        //     //     {
-        //     //         case SUPER:
-        //     //         {
-        //     //             client *c = signal_manager->_window_client_map.retrive(e->event);
-        //     //             tile(c, TILE::DOWN);
-        //     //             return;
-        //     //         }
-        //     //     }
-        //     // }
+            if (e->detail == wm->key_codes.d_arrow)
+            {
+                switch (e->state)
+                {
+                    case SUPER:
+                    {
+                        client *c = signal_manager->_window_client_map.retrive(e->event);
+                        tile(c, TILE::DOWN);
+                        return;
+                    }
+                }
+            }
 
-        //     // if (e->detail == wm->key_codes.u_arrow)
-        //     // {
-        //     //     switch (e->state)
-        //     //     {
-        //     //         case SUPER:
-        //     //         {
-        //     //             client *c = signal_manager->_window_client_map.retrive(e->event);
-        //     //             tile(c, TILE::UP);
-        //     //             return;
-        //     //         }
-        //     //     }
-        //     // }
+            if (e->detail == wm->key_codes.u_arrow)
+            {
+                switch (e->state)
+                {
+                    case SUPER:
+                    {
+                        client *c = signal_manager->_window_client_map.retrive(e->event);
+                        tile(c, TILE::UP);
+                        return;
+                    }
+                }
+            }
 
-        //     // if (e->detail == wm->key_codes.tab)
-        //     // {
-        //     //     switch (e->state)
-        //     //     {
-        //     //         case ALT:
-        //     //         {
-        //     //             wm->cycle_focus();
-        //     //             return;
-        //     //         }
-        //     //     }
-        //     // }
+            /* if (e->detail == wm->key_codes.tab)
+            {
+                switch (e->state)
+                {
+                    case ALT:
+                    {
+                        wm->cycle_focus();
+                        return;
+                    }
+                }
+            }
 
-        //     // if (e->detail == wm->key_codes.k)
-        //     // {
-        //     //     switch (e->state)
-        //     //     {
-        //     //         case SUPER:
-        //     //         {
-        //     //             pid_manager->list_pids();
-        //     //             event_handler->iter_and_log_map_size();
-        //     //             // wm->root.set_backround_png(USER_PATH_PREFIX("/mwm_png/galaxy16-17-3840x1200.png"));
-        //     //             // GET_CLIENT_FROM_WINDOW(e->event);
-        //     //             // c->kill();
-        //     //             // c->win.x(BORDER_SIZE);
-        //     //             // c->win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
-        //     //             // xcb_flush(conn);
+            if (e->detail == wm->key_codes.k)
+            {
+                switch (e->state)
+                {
+                    case SUPER:
+                    {
+                        pid_manager->list_pids();
+                        event_handler->iter_and_log_map_size();
+                        // wm->root.set_backround_png(USER_PATH_PREFIX("/mwm_png/galaxy16-17-3840x1200.png"));
+                        // GET_CLIENT_FROM_WINDOW(e->event);
+                        // c->kill();
+                        // c->win.x(BORDER_SIZE);
+                        // c->win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
+                        // xcb_flush(conn);
 
-        //     //             return;
-        //     //         }
-        //     //     }
-        //     // }
-        // }
+                        return;
+                    }
+                }
+            } */
+        }
 
         // void map_notify_handler(const xcb_generic_event_t *&ev)
         // {
