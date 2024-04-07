@@ -8979,19 +8979,18 @@ class __status_bar__ {
             event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) {
                 RE_CAST_EV(xcb_button_press_event_t);
                 if (e->detail != L_MOUSE_BUTTON) return;
-                if (e->event == this->_w[_WIFI]) {
+                if (e->event != this->_w[_WIFI]) return;
+                
+                if (this->_w[_WIFI_DROPWOWN].is_mapped()) {
+                    this->hide__(this->_w[_WIFI_DROPWOWN]);
+                }
+                else {
                     if (this->_w[_AUDIO_DROPDOWN].is_mapped()) {
                         this->hide__(this->_w[_AUDIO_DROPDOWN]);
                     }
-                    else {
-                        if (this->_w[_WIFI_DROPWOWN].is_mapped()) {
-                            this->hide__(this->_w[_WIFI_DROPWOWN]);
-                            return;
-                        }
-                        this->show__(this->_w[_WIFI_DROPWOWN]);
-                        this->_w[_WIFI_INFO].send_event(XCB_EVENT_MASK_EXPOSURE);
-                        this->_w[_WIFI_CLOSE].send_event(XCB_EVENT_MASK_EXPOSURE);
-                    }
+                    this->show__(this->_w[_WIFI_DROPWOWN]);
+                    this->_w[_WIFI_INFO].send_event(XCB_EVENT_MASK_EXPOSURE);
+                    this->_w[_WIFI_CLOSE].send_event(XCB_EVENT_MASK_EXPOSURE);
                 }
             });
 
@@ -9098,6 +9097,7 @@ class __status_bar__ {
                     this->_w[_AUDIO].change_border_color(WHITE);
                 }
             });
+            this->_w[_AUDIO];
 
             event_handler->setEventCallback(XCB_LEAVE_NOTIFY, [&](Ev ev) {
                 RE_CAST_EV(xcb_leave_notify_event_t);
