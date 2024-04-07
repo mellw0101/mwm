@@ -2961,16 +2961,17 @@ class __event_handler__ {
             setEventCallback(XCB_KEY_PRESS, [&](Ev ev) {
                 RE_CAST_EV(xcb_key_press_event_t);
                 switch (e->state) {
-                    case   CTRL  + ALT          :{
+                    /* case   CTRL  + ALT          :{
                         if (e->detail == key_codes.t) {
                             thread_pool.enqueue([](){
                                 Emit(screen->root, TERM_KEY_PRESS);
                                 
                             });
 
-                        } /* Terminal keybinding */ break;
+                        } // Terminal keybinding
+                        break;
 
-                    } case SHIFT + CTRL + SUPER :{
+                    } */case SHIFT + CTRL + SUPER :{
                         if (e->detail == key_codes.r_arrow) {
                             thread_pool.enqueue([](uint32_t w) {
                                 Emit(w, MOVE_TO_NEXT_DESKTOP_WAPP);
@@ -7119,19 +7120,22 @@ class client {
             draw_title(TITLE_REQ_DRAW);
             icon.raise();
 
-            CONN(XCB_EXPOSE, if (__window == this->titlebar) {
-                this->titlebar.clear();
-                this->titlebar.draw_acc_16(this->win.get_net_wm_name());
-                FLUSH_X();
-            
-            }, this->titlebar);
-
-            CONN(PROPERTY_NOTIFY, if (__window == this->win) {
-                this->titlebar.clear();
-                this->titlebar.draw_acc_16(this->win.get_net_wm_name_by_req());
-                FLUSH_X();
-                
-            }, this->win);
+            event_handler->setEventCallback(XCB_EXPOSE, [&] (Ev ev) {
+                RE_CAST_EV(xcb_expose_event_t);
+                if (e->window == this->titlebar) {
+                    this->titlebar.clear();
+                    this->titlebar.draw_acc_16(this->win.get_net_wm_name());
+                    FLUSH_X();
+                }
+            });
+            event_handler->setEventCallback(XCB_PROPERTY_NOTIFY, [&](Ev ev) {
+                RE_CAST_EV(xcb_property_notify_event_t);
+                if (e->window == this->titlebar) {
+                    this->titlebar.clear();
+                    this->titlebar.draw_acc_16(this->win.get_net_wm_name_by_req());
+                    FLUSH_X();
+                }
+            });
 
         }
         void make_close_button() {
@@ -7151,10 +7155,6 @@ class client {
             FLUSH_X();
             close_button.make_then_set_png(USER_PATH_PREFIX("/close.png"), CLOSE_BUTTON_BITMAP);
             
-            /* CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->close_button) {
-                WS_emit(this->win, KILL_SIGNAL);
-            
-            }, this->close_button); */
             event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) {
                 RE_CAST_EV(xcb_button_press_event_t);
                 if (e->event != this->close_button) return;
@@ -7162,29 +7162,18 @@ class client {
                 WS_emit(this->win, KILL_SIGNAL);
                 
             });
-
-            /* CONN(ENTER_NOTIFY, if (__window == this->close_button) {
-                this->close_button.change_border_color(WHITE);
-
-            }, this->close_button); */
             event_handler->setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev) {
                 RE_CAST_EV(xcb_enter_notify_event_t);
-                if (e->event != this->close_button) return;
-                this->close_button.change_border_color(WHITE);
-                
+                if (e->event != this->close_button) {
+                    this->close_button.change_border_color(WHITE);
+                }
             });
-
             event_handler->setEventCallback(XCB_LEAVE_NOTIFY, [&](Ev ev) {
                 RE_CAST_EV(xcb_leave_notify_event_t);
                 if (e->event != this->close_button) return;
                 this->close_button.change_border_color(BLACK);
  
             });
-
-            /* CONN(LEAVE_NOTIFY, if (__window == this->close_button) {
-                this->close_button.change_border_color(BLACK);
-
-            }, this->close_button); */
 
         }
         void make_max_button() {
