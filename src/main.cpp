@@ -7713,9 +7713,7 @@ class Window_Manager {
                 if (fork() == 0) {
                     setsid();
                     execvp(program, (char *[]) { program, nullptr });
-
                 }
-
             }
             void quit(const int &__status) {
                 pid_manager->kill_all_pids();
@@ -7744,10 +7742,9 @@ class Window_Manager {
                     XCB_NONE,
                     screen->root,
                     XCB_CURRENT_TIME
-
-                ); CHECK_VOID_COOKIE();
+                );
+                CHECK_VOID_COOKIE();
                 FLUSH_X();
-
             }
 
         /* Window       */
@@ -8222,10 +8219,9 @@ class Window_Manager {
                 event_handler->setEventCallback(XCB_MAP_REQUEST, [&](Ev ev) {
                     RE_CAST_EV(xcb_map_request_event_t);
                     client *c = signal_manager->_window_client_map.retrive(e->window);
-                    if (c == nullptr) {
+                    if (!c) {
                         this->manage_new_client(e->window);
                     }
-
                 });
 
                 event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) {
@@ -8236,26 +8232,34 @@ class Window_Manager {
                         if (this->context_menu->context_window.is_mapped()) {
                             Emit(this->context_menu->context_window, HIDE_CONTEXT_MENU);
                         }
-
-                    } else if (e->detail == R_MOUSE_BUTTON) {
-                        this->context_menu->show();
-                        
+                    }
+                    else if (e->detail == R_MOUSE_BUTTON) {
+                        this->context_menu->show();    
                     }
                     
                 });
 
                 event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev) {
                     RE_CAST_EV(xcb_key_press_event_t);
-                    if (e->event != screen->root) return;
-
-                    if (e->detail == key_codes.t && ((e->state & ALT) != 0) && ((e->state & CTRL) != 0)) {
+                    if (e->detail == key_codes.tab && ((e->state & ALT) != 0)) {
+                        this->cycle_focus();
+                    }
+                    else if (e->detail == key_codes.t && ((e->state & ALT) != 0) && ((e->state & CTRL) != 0)) {
                         this->launcher.launch_child_process("konsole");
                     }
                     else if (e->detail == key_codes.q && ((e->state & ALT) != 0) && ((e->state & SHIFT) != 0)) {
                         this->quit(0);
                     }
-                    else if (e->detail == key_codes.tab && ((e->state & ALT) != 0)) {
-                        this->cycle_focus();
+                });
+
+                event_handler->setEventCallback(XCB_FOCUS_IN, [&](Ev ev) {
+                    RE_CAST_EV(xcb_focus_in_event_t);
+                    client *c = signal_manager->_window_client_map.retrive(e->event);
+                    if (c) {
+                        focused_client = c;
+                        if (!c->win.is_active_EWMH_window()) {
+                            loutE << "c->win is not 'EWMH active window'" << loutEND;
+                        }
                     }
                 });
                 
@@ -8263,7 +8267,6 @@ class Window_Manager {
                     signal_manager->emit("SET_EV_CALLBACK__RESIZE_NO_BORDER");
                     
                 }
-
             }
 
         /* Check  */

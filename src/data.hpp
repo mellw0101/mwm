@@ -270,7 +270,7 @@ class Malloc {
 #include <type_traits> // For type traits
 
 template<typename Type>
-class Malloc {
+class Malloc 
     private:
         static constexpr size_t
             size_needed = sizeof(Type),
