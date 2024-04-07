@@ -4113,7 +4113,8 @@ class window {
 
                     if (is_mapped()) {
                         ++i;
-                    } else {
+                    }
+                    else {
                         break;
                     }
 
@@ -4187,9 +4188,9 @@ class window {
                     _window,
                     XCB_CURRENT_TIME
 
-                ); CHECK_VOID_COOKIE();
+                );
+                CHECK_VOID_COOKIE();
                 FLUSH_XWin();
-
             }
             void send_event(uint32_t __event_mask, void *__value_list = nullptr) {
                 if (__event_mask & XCB_EVENT_MASK_EXPOSURE) {
@@ -4201,7 +4202,6 @@ class window {
                         .width  = static_cast<uint16_t>(_width),  /* < Width of the area to be redrawn                                 */
                         .height = static_cast<uint16_t>(_height), /* < Height of the area to be redrawn                                */
                         .count  = 0                               /* < Number of expose events to follow if this is part of a sequence */
-
                     };
 
                     VOID_COOKIE = xcb_send_event(
@@ -4210,10 +4210,9 @@ class window {
                         _window,
                         XCB_EVENT_MASK_EXPOSURE,
                         (char *)&expose_event
-
-                    ); CHECK_VOID_COOKIE();
+                    );
+                    CHECK_VOID_COOKIE();
                     FLUSH_XWin();
-
                 }
                 if (__event_mask & XCB_EVENT_MASK_STRUCTURE_NOTIFY) {
                     uint32_t *value_list =  reinterpret_cast<uint32_t *>(__value_list);
@@ -4238,10 +4237,9 @@ class window {
                         _window,
                         XCB_EVENT_MASK_STRUCTURE_NOTIFY,
                         (char *)&event
-
-                    ); CHECK_VOID_COOKIE();
+                    );
+                    CHECK_VOID_COOKIE();
                     FLUSH_XWin();
-
                 }
                 if (__event_mask & KILL_WINDOW) {
                     uint32_t *value_list = reinterpret_cast<uint32_t *>(__value_list);
@@ -4262,18 +4260,16 @@ class window {
                         XCB_EVENT_MASK_NO_EVENT,
                         (char *)&ev
 
-                    ); CHECK_VOID_COOKIE();
+                    );
+                    CHECK_VOID_COOKIE();
                     FLUSH_XWin();
-
                 }
-
             }
             void update(uint32_t __x, uint32_t __y, uint32_t __width, uint32_t __height) {
                 _x      = __x;
                 _y      = __y;
                 _width  = __width;
                 _height = __height;
-
             }
 
         /* Signal System */
@@ -7456,8 +7452,7 @@ class Key_Codes {
         Key_Codes() 
         : keysyms(nullptr) {}
 
-        ~Key_Codes()
-        {
+        ~Key_Codes() {
             free(keysyms);
         }
 
@@ -7510,15 +7505,14 @@ class Key_Codes {
                 { MINUS,        &minus     },
                 { UNDERSCORE,   &underscore}
 
-            }; for (auto &pair : key_map) {
-                xcb_keycode_t * keycode = xcb_key_symbols_get_keycode(keysyms, pair.first);
+            };
+            for (auto &pair : key_map) {
+                xcb_keycode_t *keycode = xcb_key_symbols_get_keycode(keysyms, pair.first);
                 if (keycode) { 
                     *(pair.second) = *keycode;
                     free(keycode);
-
                 }
-            }
-            }
+            }}
         }
 
     // variabels.
@@ -7534,7 +7528,7 @@ class Key_Codes {
 
     private:
     // variabels.
-        xcb_key_symbols_t * keysyms;
+        xcb_key_symbols_t *keysyms;
 };
 class Entry {
     public:
@@ -14449,7 +14443,9 @@ void setup_wm() {
     events.setup();
 
     NEW_CLASS(file_app,        __file_app__       ) { file_app->init(); }
-    NEW_CLASS(status_bar,      __status_bar__     ) { status_bar->init(); }
+    /* NEW_CLASS(status_bar,      __status_bar__     ) { status_bar->init(); } */
+    status_bar = Malloc<__status_bar__>().aligned_allocate();
+
     NEW_CLASS(wifi,            __wifi__           ) { wifi->init(); }
     NEW_CLASS(network,         __network__        ) {}
     NEW_CLASS(screen_settings, __screen_settings__) { screen_settings->init(); }

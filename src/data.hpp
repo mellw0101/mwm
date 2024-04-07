@@ -1,6 +1,7 @@
 #ifndef __DATA__HPP__
 #define __DATA__HPP__
 #include <X11/X.h>
+#include <cstddef>
 #include <cstdint>
 #include <array>
 #include <utility>
@@ -268,32 +269,70 @@ class Malloc {
 #include <new> // For std::bad_alloc and placement new
 #include <type_traits> // For type traits
 
-template<typename T>
+template<typename Type>
 class Malloc {
-public:
-    // Allocates memory for one object of type T using malloc, considering alignment
-    static T* allocate() {
-        if constexpr (std::alignment_of_v<T> > alignof(std::max_align_t)) {
-            // Allocate memory with proper alignment for overaligned types
-            void* ptr = std::aligned_alloc(std::alignment_of_v<T>, sizeof(T));
-            if (!ptr) throw std::bad_alloc();
-            return new(ptr) T(); // Use placement new to construct the object
-        }
-        else {
-            void* ptr = std::malloc(sizeof(T)); // Allocate raw memory
-            if (!ptr) throw std::bad_alloc();
-            return new(ptr) T();
-        }
-    }
+    private:
+        static constexpr size_t
+            size_needed = sizeof(Type),
+            alignment = std::alignment_of_v<Type>,
+            size_aligned = (size_needed + alignment - 1) / alignment * alignment;
 
-    // Deallocates memory for one object of type T
-    static void deallocate(T* ptr) {
-        if (!ptr) return;
-        if constexpr (!std::is_trivially_destructible_v<T>) {
-            ptr->~T(); // Call the destructor explicitly for non-trivially destructible types
+    public:
+        // Allocates memory for one object of type T using malloc, considering alignment
+        static Type* allocate() {
+            void *ptr = nullptr;
+            if constexpr (std::alignment_of_v<Type> > alignof(std::max_align_t)) {
+                void* ptr = std::aligned_alloc(std::alignment_of_v<Type>, sizeof(Type));
+            }
+            else {
+                void* ptr = std::malloc(sizeof(Type));    
+            }
+
+            if (!ptr) throw std::bad_alloc();
+            try {
+                return new(ptr) Type(); // Use placement new to construct the object
+            } catch (...) {
+                std::free(ptr);
+                throw;
+            }
         }
-        std::free(ptr);
-    }
+
+        // Allocates memory for one object of type Type using malloc, considering alignment
+        static Type* aligned_allocate() {
+            void *ptr = nullptr;
+            if constexpr (std::alignment_of_v<Type> > alignof(std::max_align_t)) {
+                ptr = std::aligned_alloc(alignment, size_aligned); // Use size_aligned to ensure it's a multiple of alignment
+            }
+            else {
+                ptr = std::malloc(size_needed);
+            }
+
+            if (!ptr) throw std::bad_alloc();
+            return new(ptr) Type();
+        }
+
+        // Allocates and constructs an object with arguments
+        template<typename... Args>
+        static Type* construct(Args&&... args) {
+            void* ptr = std::aligned_alloc(alignment, size_aligned);
+            if (!ptr) throw std::bad_alloc();
+
+            try {
+                return new(ptr) Type(std::forward<Args>(args)...);
+            } catch (...) {
+                std::free(ptr);
+                throw;
+            }
+        }
+
+        // Deallocates memory for one object of type Type
+        static void deallocate(Type* ptr) {
+            if (!ptr) return;
+            if constexpr (!std::is_trivially_destructible_v<Type>) {
+                ptr->~Type(); // Call the destructor explicitly for non-trivially destructible types
+            }
+            std::free(ptr);
+        }
 };
 
 #include <vector>
@@ -372,7 +411,7 @@ class Signal {
 };
 
 template<typename ReturnType, typename... Args>
-class Sig {
+class Sig {    
     private:
         function<ReturnType(Args...)> cb;
 
