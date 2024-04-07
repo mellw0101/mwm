@@ -9100,6 +9100,7 @@ class __status_bar__ {
                     MAP,
                     (int[3]){ALL, WIFI_DROPDOWN_BORDER, BLACK}
                 );
+                FLUSH_X();
 
                 int id = 0;                
                 id = event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) {
