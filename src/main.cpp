@@ -2971,7 +2971,7 @@ class __event_handler__ {
                         } // Terminal keybinding
                         break;
 
-                    } */case SHIFT + CTRL + SUPER :{
+                    } */ case SHIFT + CTRL + SUPER :{
                         if (e->detail == key_codes.r_arrow) {
                             thread_pool.enqueue([](uint32_t w) {
                                 Emit(w, MOVE_TO_NEXT_DESKTOP_WAPP);
@@ -2984,13 +2984,14 @@ class __event_handler__ {
 
                         } break;
 
-                    } case SHIFT + ALT          :{
+                    } /* case SHIFT + ALT          :{
                         if (e->detail == key_codes.q) {
                             thread(handle_event<ROOT_SIGNAL>, QUIT_KEY_PRESS).detach();
 
-                        } /* Quit keybinding */ break;
+                        } // Quit keybinding
+                        break;
 
-                    } case ALT                  :{
+                    } */ case ALT                  :{
                         if (e->detail == key_codes.n_1) {
                             thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_1).detach();
 
@@ -3018,7 +3019,8 @@ class __event_handler__ {
                         } else if (e->detail == key_codes.l_arrow) {
                             thread(handle_event<ROOT_SIGNAL>, MOVE_TO_PREV_DESKTOP).detach();
 
-                        } break;
+                        }
+                        break;
 
                     } case SUPER                :{
                         if (e->detail == key_codes.r_arrow)        {
@@ -3036,7 +3038,8 @@ class __event_handler__ {
                         } else if (e->detail == key_codes.k)       {
                             thread(handle_event<ROOT_SIGNAL>, DEBUG_KEY_PRESS).detach();
                         
-                        } break;
+                        }
+                        break;
 
                     }
 
@@ -7067,10 +7070,10 @@ class client {
             , this->win); */
             event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) {
                 RE_CAST_EV(xcb_button_press_event_t);
-                if (e->event != this->win) return;
-
-                this->focus();
-                this->win.focus_input();
+                if (e->event == this->win) {
+                    this->focus();
+                    this->win.focus_input();
+                }
 
             });
 
@@ -7164,15 +7167,15 @@ class client {
             });
             event_handler->setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev) {
                 RE_CAST_EV(xcb_enter_notify_event_t);
-                if (e->event != this->close_button) {
+                if (e->event == this->close_button) {
                     this->close_button.change_border_color(WHITE);
                 }
             });
             event_handler->setEventCallback(XCB_LEAVE_NOTIFY, [&](Ev ev) {
                 RE_CAST_EV(xcb_leave_notify_event_t);
-                if (e->event != this->close_button) return;
-                this->close_button.change_border_color(BLACK);
- 
+                if (e->event == this->close_button) {
+                    this->close_button.change_border_color(BLACK);
+                }
             });
 
         }
@@ -7868,8 +7871,7 @@ class Window_Manager {
                     }
 
                 }
-                void unfocus()
-                {
+                void unfocus() {
                     window(tmp);
                     tmp.create_default(
                         screen->root,
@@ -7877,12 +7879,14 @@ class Window_Manager {
                         -20,
                         20,
                         20
+
                     );
                     tmp.map();
                     tmp.focus_input();
                     tmp.unmap();
                     tmp.kill();
                     focused_client = nullptr;
+
                 }
 
             /* Fetch */
@@ -7890,11 +7894,9 @@ class Window_Manager {
                     for (const auto &c:client_list) {
                         if (*window == c->win) {
                             return c;
-
                         }
-
-                    } return nullptr;
-                
+                    }
+                    return nullptr;
                 }
                 client *client_from_any_window(const xcb_window_t *window) {
                     for (const auto &c:client_list) {
@@ -8262,9 +8264,10 @@ class Window_Manager {
                     client *c = signal_manager->_window_client_map.retrive(e->window);
                     if (c == nullptr) {
                         this->manage_new_client(e->window);
-
                     }
+
                 });
+
                 event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) {
                     RE_CAST_EV(xcb_button_press_event_t);
                     if (e->event != screen->root) return;
@@ -8272,28 +8275,26 @@ class Window_Manager {
                         this->unfocus();
                         if (this->context_menu->context_window.is_mapped()) {
                             Emit(this->context_menu->context_window, HIDE_CONTEXT_MENU);
-                            
                         }
-                        
+
                     } else if (e->detail == R_MOUSE_BUTTON) {
                         this->context_menu->show();
                         
                     }
                     
                 });
+
                 event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev) {
                     RE_CAST_EV(xcb_key_press_event_t);
                     if (e->event != screen->root) return;
 
                     if (e->detail == key_codes.t && ((e->state & ALT) != 0) && ((e->state & CTRL) != 0)) {
                         this->launcher.launch_child_process("konsole");
-
-                    }
-                    if (e->detail == key_codes.q && ((e->state & ALT) != 0) && ((e->state & SHIFT) != 0)) {
+                    
+                    } else if (e->detail == key_codes.q && ((e->state & ALT) != 0) && ((e->state & SHIFT) != 0)) {
                         this->quit(0);
-
-                    }
-                    if (e->detail == key_codes.tab && ((e->state & ALT) != 0)) {
+                    
+                    } else if (e->detail == key_codes.tab && ((e->state & ALT) != 0)) {
                         this->cycle_focus();
 
                     }
@@ -8933,11 +8934,19 @@ class __status_bar__ {
                 MAP
 
             );
-            CONN_Win(_w[_TIME_DATE], EXPOSE,
+            FLUSH_X();
+            /* CONN_Win(_w[_TIME_DATE], EXPOSE,
                 if (__window != this->_w[_TIME_DATE]) return;
                 this->_w[_TIME_DATE].draw_acc(this->get_time_and_date__());
 
-            );
+            ); */
+            event_handler->setEventCallback(XCB_EXPOSE, [&](Ev ev) {
+                RE_CAST_EV(xcb_expose_event_t);
+                if (e->window == this->_w[_TIME_DATE]) {
+                    this->_w[_TIME_DATE].draw_acc(this->get_time_and_date__());
+                }
+            });
+
             _w[_WIFI].create_window(
                 _w[_BAR],
                 WIFI_WINDOW_X,
@@ -8949,7 +8958,7 @@ class __status_bar__ {
                 MAP
 
             );
-            WS_conn(_w[_WIFI], L_MOUSE_BUTTON_EVENT, W_callback {
+            /* WS_conn(_w[_WIFI], L_MOUSE_BUTTON_EVENT, W_callback {
                 if (__window != this->_w[_WIFI]) return;
 
                 if (this->_w[_WIFI_DROPWOWN].is_mapped()) {
@@ -8965,6 +8974,24 @@ class __status_bar__ {
 
                 }
 
+            }); */
+
+            event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) {
+                RE_CAST_EV(xcb_button_press_event_t);
+                if (e->detail != L_MOUSE_BUTTON) return;
+                if (e->event == this->_w[_WIFI]) {
+                    if (this->_w[_WIFI_DROPWOWN].is_mapped()) {
+                        this->hide__(this->_w[_WIFI_DROPWOWN]);
+                    }
+                    else {
+                        if (this->_w[_AUDIO_DROPDOWN].is_mapped()) {
+                            this->hide__(this->_w[_AUDIO_DROPDOWN]);
+                        }
+                        this->show__(this->_w[_AUDIO_DROPDOWN]);
+                        this->_w[_WIFI_INFO].send_event(XCB_EVENT_MASK_EXPOSURE);
+                        this->_w[_WIFI_CLOSE].send_event(XCB_EVENT_MASK_EXPOSURE);
+                    }
+                }
             });
 
             Bitmap bitmap(20, 20);
@@ -9004,13 +9031,24 @@ class __status_bar__ {
                 CURSOR::hand2
 
             );
-            WS_conn(this->_w[_AUDIO], EXPOSE, W_callback {
+            FLUSH_X();
+
+            event_handler->setEventCallback(XCB_EXPOSE, [&](Ev ev) {
+                RE_CAST_EV(xcb_expose_event_t);
+                if (e->window == this->_w[_AUDIO]) {
+                    this->_w[_AUDIO].draw_acc("Audio");
+                }
+            });
+            
+            /* WS_conn(this->_w[_AUDIO], EXPOSE, W_callback {
                 if (__window != this->_w[_AUDIO]) return;
                 this->_w[_AUDIO].draw("Audio");
 
-            });
+            }); */
+            
             this->_w[_AUDIO].send_event(XCB_EVENT_MASK_EXPOSURE);
-            WS_conn(this->_w[_AUDIO], L_MOUSE_BUTTON_EVENT, W_callback {
+            
+            /* WS_conn(this->_w[_AUDIO], L_MOUSE_BUTTON_EVENT, W_callback {
                 if (__window != this->_w[_AUDIO]) return;
 
                 if (this->_w[_AUDIO_DROPDOWN].is_mapped()) {
@@ -9024,8 +9062,24 @@ class __status_bar__ {
 
                 }
 
+            }); */
+
+            event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) {
+                RE_CAST_EV(xcb_button_press_event_t);
+                if (e->event != this->_w[_AUDIO]) return;
+
+                if (this->_w[_AUDIO_DROPDOWN].is_mapped()) {
+                    this->hide__(this->_w[_AUDIO_DROPDOWN]);
+                }
+                else {
+                    if (this->_w[_WIFI_DROPWOWN].is_mapped()) {
+                        this->hide__(this->_w[_WIFI_DROPWOWN]);
+                    }
+                    this->show__(this->_w[_AUDIO_DROPDOWN]);
+                }
             });
-            WS_conn(this->_w[_AUDIO], ENTER_NOTIFY, W_callback {
+            
+            /* WS_conn(this->_w[_AUDIO], ENTER_NOTIFY, W_callback {
                 if (__window != this->_w[_AUDIO]) return;
                 this->_w[_AUDIO].change_backround_color(WHITE);
 
@@ -9034,6 +9088,20 @@ class __status_bar__ {
                 if (__window != this->_w[_AUDIO]) return;
                 this->_w[_AUDIO].change_backround_color(DARK_GREY);
 
+            }); */
+
+            event_handler->setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev) {
+                RE_CAST_EV(xcb_enter_notify_event_t);
+                if (e->event == this->_w[_AUDIO]) {
+                    this->_w[_AUDIO].change_border_color(WHITE);
+                }
+            });
+
+            event_handler->setEventCallback(XCB_LEAVE_NOTIFY, [&](Ev ev) {
+                RE_CAST_EV(xcb_leave_notify_event_t);
+                if (e->event == this->_w[_AUDIO]) {
+                    this->_w[_AUDIO].change_border_color(BLACK);
+                }
             });
 
         }
@@ -9065,31 +9133,11 @@ class __status_bar__ {
                     CURSOR::hand2
                 );
 
-                WS_conn(this->_w[_WIFI_CLOSE], L_MOUSE_BUTTON_EVENT, W_callback
+                /* WS_conn(this->_w[_WIFI_CLOSE], L_MOUSE_BUTTON_EVENT, W_callback
                 {
                     if (__window != this->_w[_WIFI_CLOSE]) return;
                     this->hide__(this->_w[_WIFI_DROPWOWN]);
-                });
-
-                WS_conn(this->_w[_WIFI_CLOSE], EXPOSE, W_callback
-                {
-                    if (__window != this->_w[_WIFI_CLOSE]) return;
-                    this->_w[_WIFI_CLOSE].draw_acc("Close");
-                });
-
-                this->_w[_WIFI_CLOSE].send_event(XCB_EVENT_MASK_EXPOSURE);
-
-                WS_conn(this->_w[_WIFI_CLOSE], ENTER_NOTIFY, W_callback
-                {
-                    if (__window != this->_w[_WIFI_CLOSE]) return;
-                    this->_w[_WIFI_CLOSE].change_backround_color(WHITE);
-                });
-
-                WS_conn(this->_w[_WIFI_CLOSE], LEAVE_NOTIFY, W_callback
-                {
-                    if (__window != this->_w[_WIFI_CLOSE]) return;
-                    this->_w[_WIFI_CLOSE].change_backround_color(DARK_GREY);
-                });
+                }); */
 
                 _w[_WIFI_INFO].create_window(
                     _w[_WIFI_DROPWOWN],
@@ -9103,16 +9151,73 @@ class __status_bar__ {
                     (int[3]){ALL, WIFI_DROPDOWN_BORDER, BLACK}
                 );
 
-                WS_conn(this->_w[_WIFI_INFO], EXPOSE, W_callback
+                event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) {
+                    RE_CAST_EV(xcb_button_press_event_t);
+                    if (e->event == this->_w[_WIFI_CLOSE]) {
+                        this->hide__(_WIFI_DROPWOWN);
+                    }
+                });
+
+                event_handler->setEventCallback(XCB_EXPOSE, [&] (Ev ev) {
+                    RE_CAST_EV(xcb_expose_event_t);
+                    if (e->window == this->_w[_WIFI_CLOSE]) {
+                        this->_w[_WIFI_CLOSE].draw_acc("Close");
+                    }
+                    else if (e->window == this->_w[_WIFI_INFO]) {
+                        string local_ip("Local ip: " + network->get_local_ip_info(__network__::LOCAL_IP));
+                        this->_w[_WIFI_INFO].draw_text_auto_color(local_ip.c_str(), 4, 16, BLACK);
+                    }
+                    else if (e->window == this->_w[_WIFI_INFO]) {
+                        string local_interface("interface: " + network->get_local_ip_info(__network__::INTERFACE_FOR_LOCAL_IP));
+                        this->_w[_WIFI_INFO].draw_text_auto_color(local_interface.c_str(), 4, 30, BLACK);
+                    }
+
+                });
+                this->_w[_WIFI_INFO].send_event(XCB_EVENT_MASK_EXPOSURE);
+                this->_w[_WIFI_CLOSE].send_event(XCB_EVENT_MASK_EXPOSURE);
+
+                event_handler->setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev) {
+                    RE_CAST_EV(xcb_enter_notify_event_t);
+                    if (e->event == this->_w[_WIFI_CLOSE]) {
+                        this->_w[_WIFI_CLOSE].change_backround_color(WHITE);
+                    }
+                });
+
+                event_handler->setEventCallback(XCB_LEAVE_NOTIFY, [&](Ev ev) {
+                    RE_CAST_EV(xcb_leave_notify_event_t);
+                    if (e->event == this->_w[_WIFI_CLOSE]) {
+                        this->_w[_WIFI_CLOSE].change_backround_color(BLACK);
+                    }
+                });
+
+                /* WS_conn(this->_w[_WIFI_CLOSE], EXPOSE, W_callback
+                {
+                    if (__window != this->_w[_WIFI_CLOSE]) return;
+                    this->_w[_WIFI_CLOSE].draw_acc("Close");
+                }); */
+
+
+                /* WS_conn(this->_w[_WIFI_CLOSE], ENTER_NOTIFY, W_callback
+                {
+                    if (__window != this->_w[_WIFI_CLOSE]) return;
+                    this->_w[_WIFI_CLOSE].change_backround_color(WHITE);
+                });
+
+                WS_conn(this->_w[_WIFI_CLOSE], LEAVE_NOTIFY, W_callback
+                {
+                    if (__window != this->_w[_WIFI_CLOSE]) return;
+                    this->_w[_WIFI_CLOSE].change_backround_color(DARK_GREY);
+                }); */
+
+                /* WS_conn(this->_w[_WIFI_INFO], EXPOSE, W_callback
                 {
                     string local_ip("Local ip: " + network->get_local_ip_info(__network__::LOCAL_IP));
                     this->_w[_WIFI_INFO].draw_text_auto_color(local_ip.c_str(), 4, 16, BLACK);
 
                     string local_interface("interface: " + network->get_local_ip_info(__network__::INTERFACE_FOR_LOCAL_IP));
                     this->_w[_WIFI_INFO].draw_text_auto_color(local_interface.c_str(), 4, 30, BLACK);
-                });
+                }); */
 
-                this->_w[_WIFI_INFO].send_event(XCB_EVENT_MASK_EXPOSURE);
             }
             
             if (__window == _w[_AUDIO_DROPDOWN])
@@ -9178,8 +9283,8 @@ class __status_bar__ {
         void init() {
             create_windows__();
             setup_thread__(_w[_TIME_DATE]);
-
         }
+
         __status_bar__() {}
 
 }; static __status_bar__ *status_bar(nullptr);
