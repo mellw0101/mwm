@@ -8934,6 +8934,7 @@ class __status_bar__ {
                 MAP
 
             );
+
             _w[_TIME_DATE].create_window(
                 _w[_BAR],
                 TIME_DATE_WINDOW_X,
@@ -8965,24 +8966,6 @@ class __status_bar__ {
                 MAP
 
             );
-            id = event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) {
-                RE_CAST_EV(xcb_button_press_event_t);
-                if (e->detail != L_MOUSE_BUTTON) return;
-                if (e->event != this->_w[_WIFI]) return;
-                
-                if (this->_w[_WIFI_DROPWOWN].is_mapped()) {
-                    this->hide__(this->_w[_WIFI_DROPWOWN]);
-                }
-                else {
-                    if (this->_w[_AUDIO_DROPDOWN].is_mapped()) {
-                        this->hide__(this->_w[_AUDIO_DROPDOWN]);
-                    }
-                    this->show__(this->_w[_WIFI_DROPWOWN]);
-                    this->_w[_WIFI_INFO].send_event(XCB_EVENT_MASK_EXPOSURE);
-                    this->_w[_WIFI_CLOSE].send_event(XCB_EVENT_MASK_EXPOSURE);
-                }
-            });
-            this->_w[_WIFI].add_event_id(XCB_BUTTON_PRESS, id);
 
             Bitmap bitmap(20, 20);
             
@@ -9008,6 +8991,7 @@ class __status_bar__ {
             bitmap.exportToPng(s.c_str());
             _w[_WIFI].set_backround_png(USER_PATH_PREFIX("/wifi.png"));
             _w[_WIFI].set_pointer(CURSOR::hand2);
+            
             _w[_AUDIO].create_window(
                 _w[_BAR],
                 (WIFI_WINDOW_X - 50),
@@ -9023,6 +9007,37 @@ class __status_bar__ {
             );
             FLUSH_X();
 
+            _w[_AUDIO_DROPDOWN].create_window(
+                screen->root,
+                ((WIFI_WINDOW_X - (50 / 2) - (200 / 2))),
+                20,
+                200,
+                100,
+                DARK_GREY,
+                NONE,
+                NONE,
+                (int[3]){ALL, 2, BLACK}
+            );
+            
+            id = event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) {
+                RE_CAST_EV(xcb_button_press_event_t);
+                if (e->detail != L_MOUSE_BUTTON) return;
+                if (e->event != this->_w[_WIFI]) return;
+                
+                if (this->_w[_WIFI_DROPWOWN].is_mapped()) {
+                    this->hide__(this->_w[_WIFI_DROPWOWN]);
+                }
+                else {
+                    if (this->_w[_AUDIO_DROPDOWN].is_mapped()) {
+                        this->hide__(this->_w[_AUDIO_DROPDOWN]);
+                    }
+                    this->show__(this->_w[_WIFI_DROPWOWN]);
+                    this->_w[_WIFI_INFO].send_event(XCB_EVENT_MASK_EXPOSURE);
+                    this->_w[_WIFI_CLOSE].send_event(XCB_EVENT_MASK_EXPOSURE);
+                }
+            });
+            this->_w[_WIFI].add_event_id(XCB_BUTTON_PRESS, id);
+
             id = event_handler->setEventCallback(XCB_EXPOSE, [&](Ev ev) {
                 RE_CAST_EV(xcb_expose_event_t);
                 if (e->window == this->_w[_AUDIO]) {
@@ -9032,6 +9047,20 @@ class __status_bar__ {
             this->_w[_AUDIO].add_event_id(XCB_EXPOSE, id);
             this->_w[_AUDIO].send_event(XCB_EVENT_MASK_EXPOSURE);
 
+            id = event_handler->setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev) {
+                RE_CAST_EV(xcb_enter_notify_event_t);
+                if (e->event != this->_w[_AUDIO]) return;
+                this->_w[_AUDIO].change_backround_color(WHITE);
+            });
+            this->_w[_AUDIO].add_event_id(XCB_ENTER_NOTIFY, id);
+
+            id = event_handler->setEventCallback(XCB_LEAVE_NOTIFY, [&](Ev ev) {
+                RE_CAST_EV(xcb_leave_notify_event_t);
+                if (e->event != this->_w[_AUDIO]) return;
+                this->_w[_AUDIO].change_backround_color(BLACK);
+            });
+
+            this->_w[_AUDIO].add_event_id(XCB_LEAVE_NOTIFY, id);
             id = event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) {
                 RE_CAST_EV(xcb_button_press_event_t);
                 if (e->detail != L_MOUSE_BUTTON) return;
@@ -9048,33 +9077,6 @@ class __status_bar__ {
                 }
             });
             this->_w[_AUDIO].add_event_id(XCB_BUTTON_PRESS, id);
-            
-            id = event_handler->setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev) {
-                RE_CAST_EV(xcb_enter_notify_event_t);
-                if (e->event != this->_w[_AUDIO]) return;
-                this->_w[_AUDIO].change_backround_color(WHITE);
-            });
-            this->_w[_AUDIO].add_event_id(XCB_ENTER_NOTIFY, id);
-            
-            id = event_handler->setEventCallback(XCB_LEAVE_NOTIFY, [&](Ev ev) {
-                RE_CAST_EV(xcb_leave_notify_event_t);
-                if (e->event != this->_w[_AUDIO]) return;
-                this->_w[_AUDIO].change_backround_color(BLACK);
-            });
-            this->_w[_AUDIO].add_event_id(XCB_LEAVE_NOTIFY, id);
-
-            _w[_AUDIO_DROPDOWN].create_window(
-                screen->root,
-                ((WIFI_WINDOW_X - (50 / 2) - (200 / 2))),
-                20,
-                200,
-                100,
-                DARK_GREY,
-                NONE,
-                NONE,
-                (int[3]){ALL, 2, BLACK}
-            );
-
         }
         void show__(const uint32_t &__window) {
             if (__window == _w[_WIFI_DROPWOWN]) {
