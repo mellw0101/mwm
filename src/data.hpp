@@ -304,21 +304,20 @@ class AnyCallable {
     public:
         virtual ~AnyCallable() = default;
         virtual void call() = 0; // Define a common interface
-
 };
+
 template<typename Func>
 class TypedCallable : public AnyCallable {
     public:
         TypedCallable(Func f) : func(std::move(f)) {}
         void call() override {
             func(); // Invoke the stored callable
-
         }
 
     private:
         Func func;
-    
 };
+
 class CallableVector {
     public:
         template<typename Fu>

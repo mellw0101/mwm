@@ -4109,6 +4109,7 @@ class window {
                 int i = 0;
                 do {
                     send_event(KILL_WINDOW, (uint32_t[3]){32, protocols_reply->atom, delete_reply->atom});
+                    FLUSH_XWin();
 
                     if (is_mapped()) {
                         ++i;
