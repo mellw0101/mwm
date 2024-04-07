@@ -3049,18 +3049,20 @@ class __event_handler__ {
                 }
 
             });
-            /* setEventCallback(XCB_DESTROY_NOTIFY, [&](Ev ev) {
+            setEventCallback(XCB_DESTROY_NOTIFY, [&](Ev ev) {
                 RE_CAST_EV(xcb_destroy_notify_event_t);
-                client *c;
+                Emit(e->event, XCB_DESTROY_NOTIFY);
+                Emit(e->window, XCB_DESTROY_NOTIFY);
+                /* client *c;
                 if ((c = signal_manager->_window_client_map.retrive(e->event)) != nullptr) {
                     HANDLE(DESTROY_NOTIF_EV, e->event);
 
                 } else if ((c = signal_manager->_window_client_map.retrive(e->window)) != nullptr) {
                     HANDLE(DESTROY_NOTIF_W, e->window);
 
-                }
+                } */
 
-            }); */
+            });
             /* setEventCallback(XCB_MAP_REQUEST, [&](Ev ev) {
                 RE_CAST_EV(xcb_map_request_event_t);
                 HANDLE(XCB_MAP_REQUEST, e->window); 
@@ -3138,7 +3140,6 @@ class __event_handler__ {
                         pair.second(ev);
                     }
                 }
-
                 free(ev);
             }
         }
@@ -4090,19 +4091,19 @@ class window {
                 if (protocols_reply == nullptr) {
                     loutE << "protocols reply is null" << loutEND;
                     free(protocols_reply);
-                    // free(delete_reply);
+                    free(delete_reply);
                     return;
-
                 }
+
                 if (delete_reply == nullptr) {
                     loutE << "delete reply is null" << loutEND;
                     free(protocols_reply);
                     free(delete_reply);
                     return;
-
                 }
 
-                int i = 0; do {
+                int i = 0;
+                do {
                     send_event(KILL_WINDOW, (uint32_t[3]){32, protocols_reply->atom, delete_reply->atom});
 
                     if (is_mapped()) {
@@ -4119,10 +4120,11 @@ class window {
                 if (xcb->window_exists(w)) {
                     loutEWin << "Failed to kill window by asking nicely" << loutEND;
                     return;
-
                 }
-                signal_manager->_window_signals.remove(w);
-                signal_manager->_window_client_map.remove(w);
+                else {
+                    signal_manager->_window_signals.remove(w);
+                    signal_manager->_window_client_map.remove(w);
+                }
 
             }
             void kill_test() {
@@ -7075,24 +7077,22 @@ class client {
             CONN(KILL_SIGNAL,
                 if (this->win.is_mapped()) {
                     this->win.kill();
-                } else if (this->frame.is_mapped()) {
+                }
+                else if (this->frame.is_mapped()) {
                     this->kill();
                 }
 
             , this->win);
 
-            event_handler->setEventCallback(XCB_DESTROY_NOTIFY, [&](Ev ev) {
-                RE_CAST_EV(xcb_destroy_notify_event_t);
-                if (e->event == this->win || e->window == this->win) {
-                    if (!this->win.is_mapped()) {
-                        this->kill();
-                    } else {
-                        this->win.kill();
-                    }
-
+            CONN(XCB_DESTROY_NOTIFY,
+                if (!this->win.is_mapped()) {
+                    this->kill();
                 }
-
-            });
+                else {
+                    this->win.kill();
+                }
+            
+            , this->win);
 
             CWC(frame);
             CWC(win);
@@ -7115,23 +7115,19 @@ class client {
             draw_title(TITLE_REQ_DRAW);
             icon.raise();
 
-            event_handler->setEventCallback(XCB_EXPOSE, [&] (Ev ev) {
-                RE_CAST_EV(xcb_expose_event_t);
-                if (e->window == this->titlebar) {
-                    this->titlebar.clear();
-                    this->titlebar.draw_acc_16(this->win.get_net_wm_name());
-                    FLUSH_X();
-                }
-            });
-            event_handler->setEventCallback(XCB_PROPERTY_NOTIFY, [&](Ev ev) {
-                RE_CAST_EV(xcb_property_notify_event_t);
-                if (e->window == this->titlebar) {
-                    this->titlebar.clear();
-                    this->titlebar.draw_acc_16(this->win.get_net_wm_name_by_req());
-                    FLUSH_X();
-                }
-            });
+            CONN(XCB_EXPOSE,
+                this->titlebar.clear();
+                this->titlebar.draw_acc_16(this->win.get_net_wm_name());
+                FLUSH_X();
+            
+            , this->titlebar);
 
+            CONN(XCB_PROPERTY_NOTIFY,
+                this->titlebar.clear();
+                this->titlebar.draw_acc_16(this->win.get_net_wm_name_by_req());
+                FLUSH_X();
+
+            , this->titlebar);
         }
         void make_close_button() {
             this->close_button.create_window(
