@@ -8328,13 +8328,13 @@ class Window_Manager {
                     c->update();
 
                 ); */
-                event_handler->setEventCallback(XCB_MAP_NOTIFY, [&](Ev ev) {
+                /* event_handler->setEventCallback(XCB_MAP_NOTIFY, [&](Ev ev) {
                     RE_CAST_EV(xcb_map_notify_event_t);
                     client *c = signal_manager->_window_client_map.retrive(e->event);
                     if (!c) return;
                     c->update();
 
-                });
+                }); */
                 /* CONN_Win(root, TERM_KEY_PRESS, this->launcher.launch_child_process("konsole"););
                 CONN_Win(root, QUIT_KEY_PRESS, this->quit(0););
                 CONN_root(CYCLE_FOCUS_KEY_PRESS, W_callback -> void { this->cycle_focus(); }); */
