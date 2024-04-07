@@ -7232,20 +7232,29 @@ class client {
 
             max_button.set_backround_png(USER_PATH_PREFIX("/max.png"));
 
-            CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->max_button) {
+            /* CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->max_button) {
                 C_EMIT(this, BUTTON_MAXWIN_PRESS);
 
-            }, this->max_button);
+            }, this->max_button); */
+            event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) {
+                RE_CAST_EV(xcb_button_press_event_t);
+                if (e->event == this->max_button) C_EMIT(this, BUTTON_MAXWIN_PRESS);
 
-            CONN(ENTER_NOTIFY, if (__window == this->max_button) {
+            });
+
+            event_handler->setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev) {
+                RE_CAST_EV(xcb_enter_notify_event_t);
+                if (e->event != this->max_button) return;
                 this->max_button.change_border_color(WHITE);
                 
-            }, this->max_button);
+            });
 
-            CONN(LEAVE_NOTIFY, if (__window == this->max_button) {
+            event_handler->setEventCallback(XCB_LEAVE_NOTIFY, [&](Ev ev) {
+                RE_CAST_EV(xcb_leave_notify_event_t);
+                if (e->event != this->max_button) return;
                 this->max_button.change_border_color(BLACK);
-
-            }, this->max_button);
+ 
+            });
 
         }
         void make_min_button() {
@@ -7273,15 +7282,19 @@ class client {
 
             min_button.set_backround_png(USER_PATH_PREFIX("/min.png"));
 
-            CONN(ENTER_NOTIFY, if (__window == this->min_button) {   
-                this->min_button.change_border_color(WHITE);
+            event_handler->setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev) {
+                RE_CAST_EV(xcb_enter_notify_event_t);
+                if (e->event == this->min_button) {
+                    this->min_button.change_border_color(WHITE);
+                }
+            });
 
-            }, this->min_button);
-
-            CONN(LEAVE_NOTIFY, if (__window == this->min_button) {
-                this->min_button.change_border_color(BLACK);
-
-            }, this->min_button);
+            event_handler->setEventCallback(XCB_LEAVE_NOTIFY, [&](Ev ev) {
+                RE_CAST_EV(xcb_leave_notify_event_t);
+                if (e->event == this->min_button) {
+                    this->min_button.change_border_color(BLACK);
+                }
+            });
 
         }
         void make_borders() {
