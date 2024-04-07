@@ -7,6 +7,7 @@
 // #include <optional>
 // #include <limits>
 // #include <new>
+#include <queue>
 #include <ratio>
 #include <regex>
 #include <sstream>
@@ -110,6 +111,10 @@ ThreadPool tPool{6};
 #define DEFAULT_FONT_HEIGHT 14
 
 using namespace std;
+
+vector<pair<uint32_t, function<void()>>> expose_tasks;
+vector<client *> cli_tasks;
+UInt32UnorderedMap<client *> cw_map;
 
 #define NET_DEBUG false
 
@@ -365,6 +370,7 @@ namespace { // Tools
         }
         #define FLUSH_X()    flush_x(__func__)
         #define FLUSH_XWin() flush_x(__func__, _window)
+        #define FlushX_Win( __window ) do { flush_x( __func__, __window ); } while(0)
 
         void check_xcb_void_cookie(xcb_void_cookie_t cookie, const char *__calling_function)
         {
@@ -2872,6 +2878,8 @@ class __key_codes__ {
         xcb_key_symbols_t * keysyms;
 };
 
+queue<xcb_expose_event_t *> expose_events;
+
 using Ev = const xcb_generic_event_t *;
 class __event_handler__ {
     /* Defines   */
@@ -2933,37 +2941,37 @@ class __event_handler__ {
 
             setEventCallback(XCB_EXPOSE, [&](Ev ev) {
                 RE_CAST_EV(xcb_expose_event_t);
+                Emit(e->window, XCB_EXPOSE);/* 
                 thread_pool.enqueue([](uint32_t __w) {
-                    Emit(__w, XCB_EXPOSE);
-                }, e->window);
+                }, e->window); */
             });
             setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev) {
                 RE_CAST_EV(xcb_enter_notify_event_t);
+                Emit(e->event, XCB_ENTER_NOTIFY);/* 
                 thread_pool.enqueue([](uint32_t w) {
-                    Emit(w, XCB_ENTER_NOTIFY);
-                }, e->event);
+                }, e->event); */
             });
             setEventCallback(XCB_LEAVE_NOTIFY, [&](Ev ev) {
                 RE_CAST_EV(xcb_leave_notify_event_t);
-                thread_pool.enqueue([](uint32_t w) {
-                    Emit(w, XCB_LEAVE_NOTIFY);
-                }, e->event);
+                Emit(e->event, XCB_LEAVE_NOTIFY);
+                /* thread_pool.enqueue([](uint32_t w) {
+                }, e->event); */
             });
             setEventCallback(XCB_FOCUS_IN, [&](Ev ev) {
                 RE_CAST_EV(xcb_focus_in_event_t);
+                Emit(e->event, XCB_FOCUS_IN);/* 
                 thread_pool.enqueue([](uint32_t w) {
-                    Emit(w, XCB_FOCUS_IN);
-                }, e->event);
+                }, e->event); */
             });
             setEventCallback(XCB_FOCUS_OUT, [&](Ev ev) {
                 RE_CAST_EV(xcb_focus_out_event_t);
+                Emit(e->event, XCB_FOCUS_OUT);/* 
                 thread_pool.enqueue([](uint32_t w) {
-                    Emit(w, XCB_FOCUS_OUT);
-                }, e->event);
+                }, e->event); */
             });
             setEventCallback(XCB_KEY_PRESS, [&](Ev ev) {
                 RE_CAST_EV(xcb_key_press_event_t);
-                switch (e->state) {
+                /* switch (e->state) { */
                     /* case   CTRL  + ALT          :{
                         if (e->detail == key_codes.t) {
                             thread_pool.enqueue([](){
@@ -2994,7 +3002,7 @@ class __event_handler__ {
                         } // Quit keybinding
                         break;
 
-                    } */ case ALT                  :{
+                    } */ /* case ALT                  :{
                         if (e->detail == key_codes.n_1) {
                             thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_1).detach();
 
@@ -3010,13 +3018,13 @@ class __event_handler__ {
                         } else if (e->detail == key_codes.n_5) {
                             thread(handle_event<ROOT_SIGNAL>, MOVE_TO_DESKTOP_5).detach();
                             
-                        } /* else if (e->detail == key_codes.tab) {
+                        } */ /* else if (e->detail == key_codes.tab) {
                             thread(handle_event<ROOT_SIGNAL>, CYCLE_FOCUS_KEY_PRESS).detach();
 
                         } */
-                        break;
+                        /* break;
 
-                    } /* case CTRL  + SUPER        :{
+                    } */ /* case CTRL  + SUPER        :{
                         if (e->detail == key_codes.r_arrow) {
                             thread(handle_event<ROOT_SIGNAL>, MOVE_TO_NEXT_DESKTOP).detach();
 
@@ -3048,8 +3056,9 @@ class __event_handler__ {
 
                     } */
 
-                }
-                if (e->detail == key_codes.f11) {
+                /* } */
+                if (e->detail == key_codes.f11)
+                {
                     HANDLE(EWMH_MAXWIN_SIGNAL, e->event);
                 }
 
@@ -3081,40 +3090,40 @@ class __event_handler__ {
                 }, e->event);
 
             }); */
-            setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) {
+            setEventCallback( XCB_BUTTON_PRESS, [&]( Ev ev )
+            {
                 RE_CAST_EV(xcb_button_press_event_t);
-                if (e->detail == L_MOUSE_BUTTON)        {
-                    if (e->state == ALT) {
-                        thread_pool.enqueue([] (uint32_t w) {
-                            Emit(w, L_MOUSE_BUTTON_EVENT__ALT);
-                            
-                        }, e->event);
-
-                    } else {
-                        thread_pool.enqueue([] (uint32_t w) {
-                            Emit(w, L_MOUSE_BUTTON_EVENT);
-                            
-                        }, e->event);
+                if ( e->detail == L_MOUSE_BUTTON )
+                {
+                    if (( e->state & ALT ) != 0 )
+                    {
+                        Emit(e->event, L_MOUSE_BUTTON_EVENT__ALT);
+                        /* thread_pool.enqueue([] (uint32_t w) {
+                        }, e->event); */
+                    }
+                    else
+                    {
+                        Emit(e->event, L_MOUSE_BUTTON_EVENT);
+                        /* thread_pool.enqueue([] (uint32_t w) { 
+                        }, e->event); */
 
                     }
-
-                } else if (e->detail == R_MOUSE_BUTTON) {
-                    if (e->state == ALT) {
-                        thread_pool.enqueue([] (uint32_t w) {
-                            Emit(w, R_MOUSE_BUTTON_EVENT__ALT);
-                            
-                        }, e->event);
-
-                    } else {
-                        thread_pool.enqueue([] (uint32_t w) {
-                            Emit(w, R_MOUSE_BUTTON_EVENT);
-                            
-                        }, e->event);
-
-                    }
-
                 }
-
+                else if ( e->detail == R_MOUSE_BUTTON )
+                {
+                    if (( e->state & ALT ) != 0 )
+                    {
+                        /* thread_pool.enqueue([] (uint32_t w) {
+                        }, e->event); */
+                        Emit( e->event, R_MOUSE_BUTTON_EVENT__ALT );
+                    }
+                    else
+                    {
+                        Emit( e->event, R_MOUSE_BUTTON_EVENT );
+                        /* thread_pool.enqueue([] (uint32_t w) {
+                        }, e->event); */
+                    }
+                }
             });
             /* setEventCallback(XCB_MAP_NOTIFY, [&](Ev ev) {
                 RE_CAST_EV(xcb_map_notify_event_t);
@@ -3124,13 +3133,11 @@ class __event_handler__ {
                 }, e->event);
 
             }); */
-            setEventCallback(XCB_PROPERTY_NOTIFY, [&](Ev ev) {
+            setEventCallback( XCB_PROPERTY_NOTIFY, [&]( Ev ev ) {
                 RE_CAST_EV(xcb_property_notify_event_t);
+                Emit( e->window, XCB_PROPERTY_NOTIFY );/* 
                 thread_pool.enqueue([](uint32_t __w) {
-                    client *c = signal_manager->_window_client_map.retrive(__w);
-                    if (!c) return;
-                    Emit(__w, XCB_PROPERTY_NOTIFY);
-                }, e->window);
+                }, e->window); */
             });
 
             while (shouldContinue) {
@@ -6483,6 +6490,8 @@ class window {
             }/* Converts a UTF-8 string to an array of xcb_char2b_t for xcb_image_text_16 */
 
 };
+#define CLI_TITLE_BAR_EXPOSE_BIT 1
+#define CLI_TITLE_REQ_BIT 2
 class client {
     public:
     /* Sub Classes */
@@ -6563,6 +6572,8 @@ class client {
         bool moving = false;
         mutex mtx;
         ThreadPool thread_pool{8};
+        
+        uint64_t bit_state = 0xffffffffffffffff;
 
     /* Methods     */
         /* Main     */
@@ -6661,6 +6672,42 @@ class client {
                 border[bottom_right].kill();
                 frame.kill();
 
+                remove_from_map();
+
+            }
+            void add_to_map() {
+                cw_map.insert(win,          this);
+                cw_map.insert(frame,        this);
+                cw_map.insert(titlebar,     this);
+                cw_map.insert(close_button, this);
+                cw_map.insert(max_button,   this);
+                cw_map.insert(min_button,   this);
+                cw_map.insert(icon,         this);
+                cw_map.insert(border[0],    this);
+                cw_map.insert(border[1],    this);
+                cw_map.insert(border[2],    this);
+                cw_map.insert(border[3],    this);
+                cw_map.insert(border[4],    this);
+                cw_map.insert(border[5],    this);
+                cw_map.insert(border[6],    this);
+                cw_map.insert(border[7],    this);
+            }
+            void remove_from_map() {
+                cw_map.remove(win);
+                cw_map.remove(frame);
+                cw_map.remove(titlebar);
+                cw_map.remove(close_button);
+                cw_map.remove(max_button);
+                cw_map.remove(min_button);
+                cw_map.remove(icon);
+                cw_map.remove(border[0]);
+                cw_map.remove(border[1]);
+                cw_map.remove(border[2]);
+                cw_map.remove(border[3]);
+                cw_map.remove(border[4]);
+                cw_map.remove(border[5]);
+                cw_map.remove(border[6]);
+                cw_map.remove(border[7]);
             }
             void align() {
                 win.x(BORDER_SIZE);
@@ -7023,10 +7070,24 @@ class client {
             void unset_EWMH_fullscreen_state() {
                 win.unset_EWMH_fullscreen_state();
             }
+
+        /* Bit State */
+            bool check_bit( uint8_t __pos ) {
+                return ((this->bit_state & ( 1ULL << __pos )) != 0);
+            }
+            void set_bit( uint8_t __pos ) {
+                bit_state |= (1ULL << __pos);
+            }
+            void clear_bit( uint8_t __pos ) {
+                bit_state &= ~(1ULL << __pos);
+            }
+            void flip_bit( uint8_t __pos ) {
+                bit_state ^= ( 1ULL << __pos );
+            }
     
     private:
     /* Methods     */
-        void make_frame() {
+        void make_frame ( ) {
             frame.create_window(
                 screen->root,
                 (x - BORDER_SIZE),
@@ -7084,12 +7145,12 @@ class client {
             CWC(win);
         
         }
-        void make_titlebar() {
+        void make_titlebar ( ) {
             titlebar.create_window(
                 frame,
                 BORDER_SIZE,
                 BORDER_SIZE,
-                (width - (BORDER_SIZE * 2)),
+                ( width - ( BORDER_SIZE * 2 )),
                 TITLE_BAR_HEIGHT,
                 BLACK,
                 XCB_EVENT_MASK_EXPOSURE,
@@ -7098,22 +7159,51 @@ class client {
             ); CWC(titlebar);
 
             titlebar.grab_button({ { L_MOUSE_BUTTON, NULL } });
-            draw_title(TITLE_REQ_DRAW);
-            icon.raise();
+            draw_title( TITLE_REQ_DRAW );
+            icon.raise( );
 
-            CONN(XCB_EXPOSE,
+            /* expose_tasks.push_back({this->titlebar, [&]() {
                 this->titlebar.clear();
                 this->titlebar.draw_acc_16(this->win.get_net_wm_name());
                 FLUSH_X();
-            
-            , this->titlebar);
+            }}); */
+            /* CONN(XCB_EXPOSE, this->set_bit(CLI_TITLE_BAR_EXPOSE_BIT);, this->titlebar); */
 
-            CONN(XCB_PROPERTY_NOTIFY,
+            // // cli_tasks.push_back(this);
+            // CONN(XCB_PROPERTY_NOTIFY, this->bit_state &= ( 1ULL << CLI_TITLE_REQ_BIT ); , this->titlebar);
+            /* CONN( XCB_PROPERTY_NOTIFY,
                 this->titlebar.clear();
                 this->titlebar.draw_acc_16(this->win.get_net_wm_name_by_req());
                 FLUSH_X();
+            , this->win); */
+            event_handler->setEventCallback( XCB_PROPERTY_NOTIFY, [&](Ev ev)
+            {
+                RE_CAST_EV( xcb_property_notify_event_t );
+                if ( e->window == this->win )
+                {
+                    this->titlebar.clear( );
+                    this->titlebar.draw_acc_16( this->win.get_net_wm_name_by_req( ) );
+                    FlushX_Win( this->titlebar );
+                }
+            });
 
-            , this->titlebar);
+            event_handler->setEventCallback( XCB_EXPOSE, [&](Ev ev)
+            {
+                RE_CAST_EV(xcb_expose_event_t);
+                if ( e->window == this->titlebar )
+                {
+                    this->titlebar.clear( );
+                    this->titlebar.draw_acc_16( this->win.get_net_wm_name( ) );
+                    FlushX_Win( this->titlebar );
+                }
+            });
+
+            /* CONN( XCB_EXPOSE,
+                this->titlebar.clear( );
+                this->titlebar.draw_acc_16( this->win.get_net_wm_name( ) );
+                FLUSH_X( );
+
+            , this->titlebar ); */
         }
         void make_close_button() {
             this->close_button.create_window(
@@ -7435,6 +7525,8 @@ class client {
             {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
             {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
         };
+
+        
 };
 class desktop {
     public:
@@ -7493,6 +7585,7 @@ class Key_Codes {
                 { DELETE,       &_delete   },
 
                 { F11,          &f11       },
+                { 0xffc9,       &f12       },
                 { N_1,          &n_1       },
                 { N_2,          &n_2       },
                 { N_3,          &n_3       },
@@ -7524,7 +7617,9 @@ class Key_Codes {
             
             space_bar{}, enter{},
 
-            f11{}, n_1{}, n_2{}, n_3{}, n_4{}, n_5{}, r_arrow{},
+            f11{}, f12{},
+            
+            n_1{}, n_2{}, n_3{}, n_4{}, n_5{}, r_arrow{},
             l_arrow{}, u_arrow{}, d_arrow{}, tab{}, _delete{},
             super_l{}, minus{}, underscore{};
 
@@ -7673,16 +7768,19 @@ class Window_Manager {
 
     /* Methods     */
         /* Main         */
-            void init() {
+            void init()
+            {
                 _conn(nullptr, nullptr);
                 _setup();
                 _iter();
                 _screen();
                 xcb = connect_to_server(conn, screen);
-                if ((xcb->check_conn() & (1ULL << X_CONN_ERROR)) != 0) {
+                if ((xcb->check_conn() & (1ULL << X_CONN_ERROR)) != 0)
+                {
                     loutE << "x not connected" << loutEND;
                 }
-                else {
+                else
+                {
                     loutI << "x succesfully connected" << loutEND;
                 }
 
@@ -7707,6 +7805,7 @@ class Window_Manager {
                 context_menu->add_entry("konsole",              [this]() -> void { launcher.program((char *) "konsole"); });
                 context_menu->add_entry("google-chrome-stable", [this]() -> void { launcher.launch_child_process("google-chrome-stable"); });
                 context_menu->add_entry("code",                 [this]() -> void { launcher.launch_child_process("code"); });
+                context_menu->add_entry("dolphin",              [&]() { launcher.launch_child_process("dolphin"); });
 
                 setup_events(); 
 
@@ -8022,8 +8121,8 @@ class Window_Manager {
                 if (c == nullptr) {
                     loutE << "could not make client" << loutEND;
                     return;
-
                 }
+
                 c->win.get_override_redirect();
                 c->win.x_y_width_height(c->x, c->y, c->width, c->height);
                 FLUSH_X();
@@ -8045,8 +8144,9 @@ class Window_Manager {
                     focused_client = c;
                     check_client(c);
                     c->frame.grab_default_keys();
-
-                } c->win.grab_default_keys();
+                    c->add_to_map();
+                }
+                c->win.grab_default_keys();
 
             }
             client *make_internal_client(window &window) {
@@ -8206,6 +8306,7 @@ class Window_Manager {
                     { T,       CTRL   | ALT   },
                     { L_ARROW, CTRL   | SUPER },
                     { R_ARROW, CTRL   | SUPER },
+                    { key_codes.f12, NULL },
                     { SUPER_L, SHIFT          }
                 
                 }); root.clear();
@@ -8217,7 +8318,8 @@ class Window_Manager {
                 root.set_pointer(CURSOR::arrow);
 
             }
-            void setup_events() {
+            void setup_events()
+            {
                 event_handler->setEventCallback(XCB_MAP_REQUEST, [&](Ev ev) {
                     RE_CAST_EV(xcb_map_request_event_t);
                     client *c = signal_manager->_window_client_map.retrive(e->window);
@@ -8243,13 +8345,16 @@ class Window_Manager {
 
                 event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev) {
                     RE_CAST_EV(xcb_key_press_event_t);
-                    if (e->detail == key_codes.tab && ((e->state & ALT) != 0)) {
+                    if (e->detail == key_codes.tab && ((e->state & ALT) != 0))
+                    {
                         this->cycle_focus();
                     }
-                    else if (e->detail == key_codes.t && ((e->state & ALT) != 0) && ((e->state & CTRL) != 0)) {
+                    else if (e->detail == key_codes.t && ((e->state & ALT) != 0) && ((e->state & CTRL) != 0))
+                    {
                         this->launcher.launch_child_process("konsole");
                     }
-                    else if (e->detail == key_codes.q && ((e->state & ALT) != 0) && ((e->state & SHIFT) != 0)) {
+                    else if (e->detail == key_codes.q && ((e->state & ALT) != 0) && ((e->state & SHIFT) != 0))
+                    {
                         this->quit(0);
                     }
                 });
@@ -8862,18 +8967,6 @@ namespace {
 class __status_bar__ {
     private:
     // Methods.
-        string get_time_and_date__() {
-            long now(time({}));
-            char buf[80];
-            strftime(
-                buf,
-                size(buf),
-                "%Y-%m-%d %H:%M:%S",
-                localtime(&now)
-
-            ); return string(buf);
-
-        }
         void create_windows__() {
             _w[_BAR].create_window(
                 screen->root,
@@ -8902,6 +8995,9 @@ class __status_bar__ {
                 this->_w[_TIME_DATE].draw_acc(this->get_time_and_date__());
 
             );
+            /* expose_tasks.push_back({this->_w[_TIME_DATE], [&]() {
+                this->_w[_TIME_DATE].draw_acc(this->get_time_and_date__());
+            }}); */
             _w[_WIFI].create_window(
                 _w[_BAR],
                 WIFI_WINDOW_X,
@@ -8967,12 +9063,13 @@ class __status_bar__ {
                 CURSOR::hand2
 
             );
-            WS_conn(this->_w[_AUDIO], EXPOSE, W_callback {
-                if (__window != this->_w[_AUDIO]) return;
-                this->_w[_AUDIO].draw("Audio");
+            WS_conn( this->_w[_AUDIO], EXPOSE, W_callback {
+                if ( __window != this->_w[_AUDIO] ) return;
+                this->_w[_AUDIO].draw( "Audio" ); 
 
-            });
-            this->_w[_AUDIO].send_event(XCB_EVENT_MASK_EXPOSURE);
+            });/* 
+            expose_tasks.push_back({this->_w[_AUDIO], [&]() { this->_w[_AUDIO].draw("Audio"); }}); */
+            /* this->_w[_AUDIO].send_event(XCB_EVENT_MASK_EXPOSURE); */
             WS_conn(this->_w[_AUDIO], L_MOUSE_BUTTON_EVENT, W_callback {
                 if (__window != this->_w[_AUDIO]) return;
 
@@ -9126,6 +9223,20 @@ class __status_bar__ {
         }
 
     public:
+        string get_time_and_date__() {
+            long now(time({}));
+            char buf[80];
+            strftime(
+                buf,
+                size(buf),
+                "%Y-%m-%d %H:%M:%S",
+                localtime(&now)
+
+            );
+            return string(buf);
+
+        }
+
         FixedArray<window, 8> _w{};
         typedef enum {
             _BAR,
@@ -12278,7 +12389,51 @@ class __dock__ {
     /* Constructor */
         __dock__() {}
 
-}; static __dock__ *dock(nullptr);
+}; static __dock__ *dock( nullptr );
+
+class DropDownTerm {
+    void toggleTerm(  )
+    {
+        if ( w.x(  ) == ( - ( screen->height_in_pixels / 2 )))
+        {
+            w.y( 0 );
+            FlushX_Win( w );
+        }
+        else
+        {
+            w.y( - ( screen->height_in_pixels / 2 ));
+            FlushX_Win( w );
+        }
+    }
+
+    public:
+        window w;
+
+        void init(  )
+        {
+            w.create_window(
+                screen->root,
+                0,
+                - ( screen->height_in_pixels / 2 ),
+                screen->width_in_pixels,
+                ( screen->height_in_pixels / 2 ),
+                BLACK,
+                NONE,
+                MAP
+            );
+            FlushX_Win( w );
+
+            event_handler->setEventCallback( XCB_KEY_PRESS, [ & ]( Ev ev )
+            {
+                RE_CAST_EV( xcb_key_press_event_t );
+                if ( e->detail == wm->key_codes.f12 )
+                {
+                    toggleTerm();
+                }
+            });
+        }
+};
+static DropDownTerm *ddTerm( nullptr );
 
 class mv_client {
     /* Defines     */
@@ -14428,7 +14583,8 @@ class test {
     // Constructor.
         test() {}
 };
-void setup_wm() {
+void setup_wm()
+{
     user = get_user_name();
     loutCUser(USER);
 
@@ -14451,12 +14607,31 @@ void setup_wm() {
     NEW_CLASS(status_bar,      __status_bar__     ) { status_bar->init(); }
 
     NEW_CLASS(wifi,            __wifi__           ) { wifi->init(); }
-    NEW_CLASS(network,         __network__        ) {}
+    NEW_CLASS(network,         __network__        ) { }
     NEW_CLASS(screen_settings, __screen_settings__) { screen_settings->init(); }
     NEW_CLASS(system_settings, __system_settings__) { system_settings->init(); }
     NEW_CLASS(dock,            __dock__           ) { dock->init(); }
-    NEW_CLASS(pid_manager,     __pid_manager__    ) {}
+    NEW_CLASS(pid_manager,     __pid_manager__    ) { }
+    NEW_CLASS(ddTerm,          DropDownTerm       ) { ddTerm->init(); }
 
+}
+void process_expose_events_only() {
+    xcb_generic_event_t *ev;
+
+    while ((ev = xcb_poll_for_queued_event(conn)) != NULL) {
+        // Check if the event is an Expose event
+        uint8_t res = ev->response_type & ~0x80;
+        if (res == XCB_EXPOSE) {
+            xcb_expose_event_t *e = (xcb_expose_event_t *)ev;
+            Emit(e->window, XCB_EXPOSE);
+            
+            // Here you can add more logic to handle the Expose event,
+            // such as redrawing the contents of the window.
+        }
+        free(ev);
+        
+        // Free the event structure allocated by xcb_poll_for_queued_event
+    }
 }
 int main() {
     loutI << "\n\n          -- mwm starting --\n" << '\n';
@@ -14475,13 +14650,27 @@ int main() {
 
     test tester;
     tester.init();
+    /* TimedDataSender sync( 8, [&]() -> void {
+        FLUSH_X();
+    });
 
-    // event_handler->init_map();
-    auto time_thread = enqueueTask(tPool, [&]() {
-        while (true) {
-            loutI << "time now" << '\n';
+    TimedDataSender tds(300, [&]() -> void {
+        for (const auto &pair : expose_tasks) {
+            pair.second();
         }
     });
+    TimedDataSender cli(400, [&]() -> void {
+        chrono::microseconds time;
+        {
+            ScopeTimer timer( "cli_tasks", time );
+            for ( client *c : cli_tasks ) {
+                if ( c ) {
+                    c->draw_title( TITLE_REQ_DRAW );
+                }
+            }
+        }
+    }); */
+
     event_handler->run();
     xcb_disconnect(conn);
     return 0;

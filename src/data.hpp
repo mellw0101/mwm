@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <array>
+#include <filesystem>
 #include <utility>
 #include <xcb/xcb.h>
 #include "functional"
@@ -460,6 +461,10 @@ class ScopeTimer {
             : scopeName(name), executionTime(executionTimeRef), ev_type(ev_type) {
             startTime = chrono::high_resolution_clock::now();
         }
+        ScopeTimer(const string& name, chrono::microseconds &executionTimeRef)
+            : scopeName(name), executionTime(executionTimeRef) {
+            startTime = chrono::high_resolution_clock::now();
+        }
 
         ~ScopeTimer() {
             auto endTime = chrono::high_resolution_clock::now();
@@ -467,6 +472,26 @@ class ScopeTimer {
             loutI << scopeName << " executed in " << executionTime.count() << " microseconds" << loutEND;
         }
 
+};
+
+template<typename DurationType = std::chrono::microseconds>
+class ScopeTimer_t {
+    private:
+        std::string scopeName;
+        std::chrono::high_resolution_clock::time_point startTime;
+        DurationType& executionTime;
+
+    public:
+        ScopeTimer_t(const std::string& name, DurationType& executionTimeRef)
+            : scopeName(name), executionTime(executionTimeRef) {
+            startTime = std::chrono::high_resolution_clock::now();
+        }
+
+        ~ScopeTimer_t() {
+            auto endTime = std::chrono::high_resolution_clock::now();
+            executionTime = std::chrono::duration_cast<DurationType>(endTime - startTime);
+            std::cout << scopeName << " executed in " << executionTime.count() << " " << typeid(DurationType).name() << std::endl;
+        }
 };
 /* 
 class AtomicSignal {
@@ -498,8 +523,120 @@ class AtomicSignal {
 };
  */
 
+#include <thread>
+#include <atomic>
+#include <functional>
+#include <queue>
+#include <mutex>
+#include <condition_variable>
+
+class SignalHandler {
+    public:
+        SignalHandler(std::function<void(int)> task)
+        : task_(std::move(task)), active_(true) {
+            worker_ = std::thread([this]() { this->loop(); });
+        }
+
+        ~SignalHandler() {
+            active_.store(false);
+            cv_.notify_one();
+            if (worker_.joinable()) {
+                worker_.join();
+            }
+        }
+
+        // Delete copy and move constructors and assignment operators
+        SignalHandler(const SignalHandler&) = delete;
+        SignalHandler& operator=(const SignalHandler&) = delete;
+        SignalHandler(SignalHandler&&) = delete;
+        SignalHandler& operator=(SignalHandler&&) = delete;
+
+        // Function to receive a signal and enqueue it for processing
+        void receiveSignal(int signal) {
+            {
+                std::lock_guard<std::mutex> lock(queue_mutex_);
+                signals_.push(signal);
+            }
+            cv_.notify_one(); // Notify the loop that a new signal is available
+        }
+
+    private:
+        void loop() {
+            while (active_.load()) {
+                int signal = 0;
+                {
+                    std::unique_lock<std::mutex> lock(queue_mutex_);
+                    cv_.wait(lock, [this] { return !active_.load() || !signals_.empty(); });
+
+                    if (!active_ && signals_.empty())
+                        return;
+
+                    signal = signals_.front();
+                    signals_.pop();
+                }
+
+                // Handle the signal in a new thread
+                std::thread([this, signal]() { task_(signal); }).detach();
+            }
+        }
+
+        std::thread worker_;
+        std::atomic<bool> active_;
+        std::function<void(int)> task_; // The task to be performed for each signal
+        std::queue<int> signals_; // Queue to hold incoming signals
+        std::mutex queue_mutex_; // Mutex to protect access to the queue
+        std::condition_variable cv_; // Condition variable for signal arrival
+};
+
 class Atomic_u64 {
-    
+    uint64_t data = 0xffffffffffffffff;
+    mutex mutex;
+public:
+};
+
+class fileAsCout {    
+    public:
+        fileAsCout(const std::filesystem::path &__path) {
+            std::ofstream logFile(__path);
+            if (!logFile) {
+                std::cerr << "Error opening log file." << std::endl;
+            }
+            /* Redirect std::cout */
+            auto prevBuf = std::cout.rdbuf(logFile.rdbuf());
+        };
+};
+
+class PeriodicExecutor {
+public:
+    PeriodicExecutor(unsigned int intervalMilliseconds, std::function<void()> task)
+    : interval_(intervalMilliseconds), task_(std::move(task)), active_(false) {}
+
+    void start() {
+        active_ = true;
+        worker_ = std::thread([this]() {
+            while (active_) {
+                task_();
+                std::this_thread::sleep_for(std::chrono::milliseconds(interval_));
+            }
+        });
+    }
+
+    void stop() {
+        active_ = false;
+        if (worker_.joinable()) {
+            worker_.join();
+        }
+    }
+
+    ~PeriodicExecutor() {
+        stop();
+    }
+
+private:
+    std::thread worker_;
+    std::atomic<bool> active_;
+    unsigned int interval_;
+    std::function<void()> task_;
 };
 
 #endif/*__DATA_HPP__*/

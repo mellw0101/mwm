@@ -5,6 +5,7 @@
 #define THREAD__HPP
 
 #include <thread>
+#include <type_traits>
 #include <vector>
 using namespace std;
 #include <atomic>
@@ -91,28 +92,15 @@ class Thread {
 
 };
 
-class TimedDataSender {
-    public:
-        // Constructor: Takes the interval in milliseconds and the task to perform
-        TimedDataSender(unsigned interval, std::function<void()> task)
-        : interval_(interval), task_(std::move(task)), active_(true) {
-            worker_ = std::thread([this]() { this->loop(); });
-        }
-
-        ~TimedDataSender() {
-            // Signal the loop to stop and join the thread upon destruction
-            active_.store(false);
-            if (worker_.joinable()) {
-                worker_.join();
-            }
-        }
-
-        TimedDataSender(const TimedDataSender&) = delete;
-        TimedDataSender& operator=(const TimedDataSender&) = delete;
-        TimedDataSender(TimedDataSender&&) = delete;
-        TimedDataSender& operator=(TimedDataSender&&) = delete;
-
+template<typename... ParamTypes>
+class iter_thread_t {
     private:
+        std::thread worker_;
+        std::atomic<bool> active_;
+        unsigned interval_; // The interval between task executions, in milliseconds
+        std::function<void()> task_; // The task to be performed, adjusted as needed
+        std::tuple<ParamTypes...> params_; // Parameters to be used with the task
+
         void loop() {
             using namespace std::chrono;
             auto next_run_time = steady_clock::now() + milliseconds(interval_);
@@ -120,23 +108,32 @@ class TimedDataSender {
             while (active_.load()) {
                 auto now = steady_clock::now();
                 if (now >= next_run_time) {
-                    // It's time to perform the task
-                    task_();
-
-                    // Schedule the next run
-                    next_run_time = now + milliseconds(interval_);
-                }
-                else {
-                    // Sleep for a short while to prevent busy waiting
-                    std::this_thread::sleep_for(milliseconds(1));
+                    std::apply(task_, params_); // Use std::apply to pass tuple elements as arguments
+                    next_run_time = now + milliseconds(interval_); // Schedule the next run
+                } else {
+                    std::this_thread::sleep_for(milliseconds(1)); // Sleep for a short while to prevent busy waiting
                 }
             }
         }
 
-        std::thread worker_;
-        std::atomic<bool> active_;
-        unsigned interval_; // The interval between task executions, in milliseconds
-        std::function<void()> task_; // The task to be performed
+    public:
+        // Constructor: Takes the interval in milliseconds, the task to perform, and parameters for the task
+        iter_thread_t(unsigned interval, std::function<void(ParamTypes...)> task, ParamTypes... params)
+        : interval_(interval), task_(std::move(task)), active_(true), params_(std::make_tuple(std::forward<ParamTypes>(params)...)) {
+            worker_ = std::thread([this]() { this->loop(); });
+        }
+
+        ~iter_thread_t() {
+            active_.store(false);
+            if (worker_.joinable()) {
+                worker_.join();
+            }
+        }
+
+        iter_thread_t(const iter_thread_t&) = delete;
+        iter_thread_t& operator=(const iter_thread_t&) = delete;
+        iter_thread_t(iter_thread_t&&) = delete;
+        iter_thread_t& operator=(iter_thread_t&&) = delete;
 };
 
 /* #include <vector>
@@ -204,6 +201,56 @@ class ThreadPool {
         bool stop;
 }; */
 
+#include <cstdint> // For uint32_t
+#include <unordered_map>
+// #include <optional>
+
+template<typename ValueType>
+class UInt32UnorderedMap {
+    std::unordered_map<uint32_t, ValueType> map_;
+    
+public:
+    // Add or update a value associated with a uint32_t key
+    void insert(uint32_t key, const ValueType& value) {
+        map_[key] = value;
+    }
+
+    // Retrieve a value by its uint32_t key. Returns std::nullopt if the key does not exist
+    /* std::optional<ValueType> get(uint32_t key) const {
+        auto it = map_.find(key);
+        if (it != map_.end()) {
+            return it->second;
+        }
+        return std::nullopt; // Key not found
+    } */
+
+    ValueType get(uint32_t __w) {
+        auto it = map_.find(__w);
+        if (it == map_.end()) {
+            return it->second;
+        }
+
+        if constexpr (is_pointer<ValueType>()) {
+            return nullptr;
+        }
+        else {
+            return ValueType{};
+        }
+    }
+
+    // Check if a key exists in the map
+    bool contains(uint32_t key) const {
+        return map_.find(key) != map_.end();
+    }
+
+    // Remove a key-value pair by its key
+    void remove(uint32_t key) {
+        map_.erase(key);
+    }
+
+    // Optional: Define more functions as needed for your application
+
+};
 
 #include <condition_variable>
 #include <functional>
@@ -366,6 +413,49 @@ class ThreadWrapper {
         std::atomic<bool> running;
 };
 
+class TimedDataSender {
+        void loop() {
+            using namespace std::chrono;
+            auto next_run_time = steady_clock::now() + milliseconds(interval_);
+
+            while (active_.load()) {
+                auto now = steady_clock::now();
+                if (now >= next_run_time) {
+                    task_();/* It's time to perform the task */
+                    next_run_time = now + milliseconds(interval_);/* Schedule the next run */
+                }
+                else {
+                    this_thread::sleep_for(milliseconds(1));/* Sleep for a short while to prevent busy waiting */
+                }
+            }
+        }
+
+        thread worker_;
+        atomic<bool> active_;
+        unsigned int interval_; // The interval between task executions, in milliseconds
+        function<void()> task_; // The task to be performed
+
+    public:
+        // Constructor: Takes the interval in milliseconds and the task to perform
+        TimedDataSender(unsigned interval, std::function<void()> task)
+        : interval_(interval), task_(std::move(task)), active_(true) {
+            worker_ = std::thread([this]() { this->loop(); });
+        }
+
+        ~TimedDataSender() {
+            // Signal the loop to stop and join the thread upon destruction
+            active_.store(false);
+            if (worker_.joinable()) {
+                worker_.join();
+            }
+        }
+
+        TimedDataSender(const TimedDataSender&) = delete;
+        TimedDataSender& operator=(const TimedDataSender&) = delete;
+        TimedDataSender(TimedDataSender&&) = delete;
+        TimedDataSender& operator=(TimedDataSender&&) = delete;
+};
+
 #include "Log.hpp"
 
 class AsyncWrapper_first {
@@ -411,7 +501,7 @@ class AsyncWrapper_first {
 
 };
 
-enum class TaskState {
+enum class tState {
     Idle,
     Waiting,
     Running,
@@ -421,7 +511,7 @@ enum class TaskState {
 
 class AsyncWrapper {
     public:
-        AsyncWrapper() : state(TaskState::Idle) {}
+        AsyncWrapper() : state(tState::Idle) {}
 
         // Prevent copy operations
         AsyncWrapper(const AsyncWrapper&) = delete;
@@ -435,12 +525,12 @@ class AsyncWrapper {
         void start(Callable&& task, Args&&... args) {
             {
                 std::lock_guard<std::mutex> lock(mutex);
-                if (state != TaskState::Idle) {
+                if (state != tState::Idle) {
                     throw std::runtime_error("Task is already set or running.");
                 }
                 // Set the task but don't start it yet
                 this->task = std::bind(std::forward<Callable>(task), std::forward<Args>(args)...);
-                state = TaskState::Waiting;
+                state = tState::Waiting;
             }
         }
 
@@ -448,31 +538,31 @@ class AsyncWrapper {
         void trigger() {
             {
                 std::lock_guard<std::mutex> lock(mutex);
-                if (state != TaskState::Waiting) {
+                if (state != tState::Waiting) {
                     throw std::runtime_error("No task is waiting to be triggered.");
                 }
-                state = TaskState::Running;
+                state = tState::Running;
             }
             condition.notify_one(); // Signal the condition variable to start the task
 
             future = std::async(std::launch::async, [this]() {
                 std::unique_lock<std::mutex> lock(mutex);
-                condition.wait(lock, [this]{ return state == TaskState::Running; }); // Wait to be triggered
+                condition.wait(lock, [this]{ return state == tState::Running; }); // Wait to be triggered
                 try {
                     task(); // Execute the task
-                    state = TaskState::Completed;
+                    state = tState::Completed;
                 } catch (...) {
-                    state = TaskState::Exception;
+                    state = tState::Exception;
                 }
             });
         }
 
-        TaskState getState() const {
+        tState getState() const {
             return state;
         }
 
         bool isFinished() const {
-            return state == TaskState::Completed || state == TaskState::Exception;
+            return state == tState::Completed || state == tState::Exception;
         }
 
     private:
@@ -480,7 +570,12 @@ class AsyncWrapper {
         std::function<void()> task;
         std::mutex mutex;
         std::condition_variable condition;
-        std::atomic<TaskState> state;
+        std::atomic<tState> state;
+};
+
+class AsyncT {
+
+    
 };
 
 class root_thread {

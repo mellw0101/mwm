@@ -66,6 +66,9 @@ class loop_data_t {
         // Optionally, methods to manipulate state and event
 };
 
+template<typename Type>
+Type get_type( const xcb_generic_event_t *ev ) {};
+
 // Initialize the static instance pointer to nullptr
 inline loop_data_t* loop_data_t::instance = nullptr;
 
