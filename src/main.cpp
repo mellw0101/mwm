@@ -8988,7 +8988,7 @@ class __status_bar__ {
 
             }); */
 
-            id = event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) {
+            /* id = event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) {
                 RE_CAST_EV(xcb_button_press_event_t);
                 if (e->detail != L_MOUSE_BUTTON) return;
                 if (e->event != this->_w[_WIFI]) return;
@@ -9005,7 +9005,7 @@ class __status_bar__ {
                     this->_w[_WIFI_CLOSE].send_event(XCB_EVENT_MASK_EXPOSURE);
                 }
             });
-            this->_w[_WIFI].add_event_id(XCB_BUTTON_PRESS, id);
+            this->_w[_WIFI].add_event_id(XCB_BUTTON_PRESS, id); */
 
             Bitmap bitmap(20, 20);
             
@@ -9037,7 +9037,7 @@ class __status_bar__ {
                 0,
                 50,
                 20,
-                DARK_GREY,
+                BLACK,
                 BUTTON_EVENT_MASK,
                 MAP,
                 (int[]){ALL, 2, BLACK},
@@ -9171,11 +9171,32 @@ class __status_bar__ {
 
                 id = event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) {
                     RE_CAST_EV(xcb_button_press_event_t);
+                    if (e->detail != L_MOUSE_BUTTON) return;
+                    if (e->event != this->_w[_WIFI]) return;
+                    
+                    if (this->_w[_WIFI_DROPWOWN].is_mapped()) {
+                        this->hide__(this->_w[_WIFI_DROPWOWN]);
+                    }
+                    else {
+                        if (this->_w[_AUDIO_DROPDOWN].is_mapped()) {
+                            this->hide__(this->_w[_AUDIO_DROPDOWN]);
+                        }
+                        this->show__(this->_w[_WIFI_DROPWOWN]);
+                        this->_w[_WIFI_INFO].send_event(XCB_EVENT_MASK_EXPOSURE);
+                        this->_w[_WIFI_CLOSE].send_event(XCB_EVENT_MASK_EXPOSURE);
+                    }
+                });
+                this->_w[_WIFI].add_event_id(XCB_BUTTON_PRESS, id);
+                
+                id = event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) {
+                    RE_CAST_EV(xcb_button_press_event_t);
                     if (e->event == this->_w[_WIFI_CLOSE]) {
                         this->hide__(_WIFI_DROPWOWN);
                     }
                 });
                 this->_w[_WIFI_CLOSE].add_event_id(XCB_BUTTON_PRESS, id);
+
+
 
                 id = event_handler->setEventCallback(XCB_EXPOSE, [&] (Ev ev) {
                     RE_CAST_EV(xcb_expose_event_t);
