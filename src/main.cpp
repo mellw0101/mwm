@@ -9063,6 +9063,18 @@ class __status_bar__ {
             });
             this->_w[_AUDIO].add_event_id(XCB_LEAVE_NOTIFY, id);
 
+            _w[_AUDIO_DROPDOWN].create_window(
+                screen->root,
+                ((WIFI_WINDOW_X - (50 / 2) - (200 / 2))),
+                20,
+                200,
+                100,
+                DARK_GREY,
+                NONE,
+                NONE,
+                (int[3]){ALL, 2, BLACK}
+            );
+
         }
         void show__(const uint32_t &__window) {
             if (__window == _w[_WIFI_DROPWOWN]) {
@@ -9148,17 +9160,7 @@ class __status_bar__ {
             
             if (__window == _w[_AUDIO_DROPDOWN])
             {
-                _w[_AUDIO_DROPDOWN].create_window(
-                    screen->root,
-                    ((WIFI_WINDOW_X - (50 / 2) - (200 / 2))),
-                    20,
-                    200,
-                    100,
-                    DARK_GREY,
-                    NONE,
-                    MAP,
-                    (int[3]){ALL, 2, BLACK}
-                );
+                _w[_AUDIO_DROPDOWN].map();
             }
         }
         void hide__(const uint32_t &__window) {
