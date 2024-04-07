@@ -82,6 +82,7 @@
 #include <spawn.h>
 #include <sys/stat.h>
 // #include <any>
+#include "data.hpp"
 #include "tools.hpp"
 
 #include "Log.hpp"
@@ -986,6 +987,7 @@ namespace XCB {
     }
 
 }
+
 class __signal_manager__ {
     /* Defines   */
         #define WS_conn signal_manager->_window_signals.conect
@@ -4479,8 +4481,8 @@ class window {
                     0,
                     _window
                 );
-                FLUSH_X();
                 CHECK_VOID_COOKIE();
+                FLUSH_X();
             }
             void set_EWMH_fullscreen_state() {
                 VOID_COOKIE = xcb_change_property(
@@ -4492,8 +4494,8 @@ class window {
                     32,
                     1,
                     &ewmh->_NET_WM_STATE_FULLSCREEN
-
-                ); CHECK_VOID_COOKIE();
+                );
+                CHECK_VOID_COOKIE();
                 FLUSH_XWin();
         
             }
@@ -6576,13 +6578,10 @@ class client {
 
                 if (BORDER_SIZE > 0) {
                     make_borders();
-
                 }
-            
             }
             void raise() {
                 frame.raise();
-
             }
             void focus() {
                 win.focus_input();
@@ -6600,7 +6599,6 @@ class client {
             }
             void map() {
                 frame.map();
-        
             }
             void unmap() {
                 frame.unmap();
@@ -6935,19 +6933,15 @@ class client {
         /* Size_pos */
             void save_ogsize() {
                 ogsize.save(x, y, width, height);
-
             }
             void save_tile_ogsize() {
                 tile_ogsize.save(x, y, width, height);
-
             }
             void save_max_ewmh_ogsize() {
                 max_ewmh_ogsize.save(x, y, width, height);
-        
             }
             void save_max_button_ogsize() {
                 max_button_ogsize.save(x, y, width, height);
-
             }
         
         /* Check    */
@@ -6996,8 +6990,8 @@ class client {
                 if (reply == nullptr) {
                     loutE << "Unable to get window geometry" << '\n';
                     return;
+                }
 
-                }            
                 x      = reply->x;
                 y      = reply->y;
                 width  = reply->width;
@@ -7014,8 +7008,7 @@ class client {
             void get_window_parameters_and_log() {
                 xcb_get_geometry_cookie_t cookie = xcb_get_geometry(conn, win);
                 xcb_get_geometry_reply_t *reply = xcb_get_geometry_reply(conn, cookie, nullptr);
-                if (reply == nullptr)
-                {
+                if (reply == nullptr) {
                     loutE << "Unable to get window geometry" << '\n';
                     return;
                 }
@@ -7031,7 +7024,6 @@ class client {
         /* Unset    */
             void unset_EWMH_fullscreen_state() {
                 win.unset_EWMH_fullscreen_state();
-
             }
     
     private:
@@ -7596,8 +7588,8 @@ class context_menu {
                 DARK_GREY,
                 XCB_EVENT_MASK_FOCUS_CHANGE | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY | XCB_EVENT_MASK_POINTER_MOTION,
                 RAISE
-
-            ); CONN(L_MOUSE_BUTTON_EVENT, WS_emit(this->context_window, HIDE_CONTEXT_MENU);, this->context_window);
+            );
+            CONN(L_MOUSE_BUTTON_EVENT, WS_emit(this->context_window, HIDE_CONTEXT_MENU);, this->context_window);
 
         }
         void hide__() {
@@ -14443,7 +14435,9 @@ void setup_wm() {
     NEW_CLASS(signal_manager, __signal_manager__) { signal_manager->init(); }
     NEW_CLASS(file_system,    __file_system__   ) { file_system->init_check(); }
 
-    crypro = new __crypto__;
+    /* crypro = new __crypto__; */
+
+    crypro = Malloc<__crypto__>().allocate();
 
     INIT_NEW_WM(wm, Window_Manager) { wm->init(); }
     change_desktop::teleport_to(1);

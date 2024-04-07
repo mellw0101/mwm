@@ -165,29 +165,28 @@ class AnyFunction {
     public:
         virtual ~AnyFunction() = default;
         virtual void call() = 0; // A common interface for invocation
-
 };
+
 template<typename Func>
 class TypedFunction : public AnyFunction {
     public:
         TypedFunction(Func f) : func(std::move(f)) {}
         void call() override {
             func(); // Assumes a no-argument call for simplicity
-
         }
 
     private:
         Func func;
-
 };
+
 class FunctionMap {
     public:
         template<typename Fu>
         void add(uint8_t outerKey, uint32_t innerKey, Fu f) {
             auto& innerMap = functions[outerKey];
             innerMap[innerKey] = std::make_unique<TypedFunction<Fu>>(std::move(f));
-
         }
+
         void invoke(uint8_t outerKey, uint32_t innerKey) {
             auto outerIt = functions.find(outerKey);
             if (outerIt != functions.end()) {
@@ -195,11 +194,8 @@ class FunctionMap {
                 auto innerIt = innerMap.find(innerKey);
                 if (innerIt != innerMap.end()) {
                     innerIt->second->call(); // Invoke the function
-
                 }
-
             }
-
         }
 
     private:
@@ -212,9 +208,7 @@ using Callback = std::function<void(T)>;
 
 template<typename... Args>
 auto makeCallback(Args&&... args) -> std::function<void(Args...)> {
-    return [...args = std::forward<Args>(args)]() {
-
-    };
+    return [...args = std::forward<Args>(args)]() {};
 
 } /* Usage -> ' auto myCallback = makeCallback(1, 2.0, "test"); ' */
 #define DEFINE_CALLBACK(name, ...) \
@@ -249,31 +243,58 @@ auto reg_callB(Func&& func, BoundArgs&&... boundArgs) {
     };
 }
 
-#include <cstdlib> // For malloc and free
+/* #include <cstdlib> // For malloc and free
 #include <new>     // For placement new
 
 template<typename T>
 class Malloc {
     public:
         // Allocates memory for one object of type T using malloc
-        template<typename ...Args>
-        static T* allocate(Args &&...args) {
+        static T* allocate() {
             void* ptr = std::malloc(sizeof(T)); // Allocate raw memory
             if (!ptr) throw std::bad_alloc();   // Check for allocation failure
-            return new(ptr) T(args...);         // Use placement new to construct the object
-
+            return new(ptr) T();                // Use placement new to construct the object
         }
+
         // Deallocates memory for one object of type T
         static void deallocate(T* ptr) {
             if (!ptr) return;
             ptr->~T();    // Call the destructor explicitly
             std::free(ptr); // Free the memory
-
         }
+}; */
 
+#include <cstdlib>
+#include <new> // For std::bad_alloc and placement new
+#include <type_traits> // For type traits
+
+template<typename T>
+class Malloc {
+public:
+    // Allocates memory for one object of type T using malloc, considering alignment
+    static T* allocate() {
+        if constexpr (std::alignment_of_v<T> > alignof(std::max_align_t)) {
+            // Allocate memory with proper alignment for overaligned types
+            void* ptr = std::aligned_alloc(std::alignment_of_v<T>, sizeof(T));
+            if (!ptr) throw std::bad_alloc();
+            return new(ptr) T(); // Use placement new to construct the object
+        }
+        else {
+            void* ptr = std::malloc(sizeof(T)); // Allocate raw memory
+            if (!ptr) throw std::bad_alloc();
+            return new(ptr) T();
+        }
+    }
+
+    // Deallocates memory for one object of type T
+    static void deallocate(T* ptr) {
+        if (!ptr) return;
+        if constexpr (!std::is_trivially_destructible_v<T>) {
+            ptr->~T(); // Call the destructor explicitly for non-trivially destructible types
+        }
+        std::free(ptr);
+    }
 };
-
-
 
 #include <vector>
 #include <memory>
