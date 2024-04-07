@@ -101,6 +101,7 @@ static xcb_ewmh_connection_t * ewmh;
 static const xcb_setup_t * setup;
 static xcb_screen_iterator_t iter;
 static xcb_screen_t *screen;
+ThreadPool tPool{6};
 
 // #include "xcb.hpp"
 
@@ -7040,7 +7041,7 @@ class client {
     
             CONN(XCB_FOCUS_IN,
                 this->win.ungrab_button({{L_MOUSE_BUTTON, NULL}});
-                this->win.set_active_EWMH_window();
+                
 
             , this->win);
 
@@ -7050,12 +7051,13 @@ class client {
             , this->win);
 
             CONN(L_MOUSE_BUTTON_EVENT,
+                this->win.set_active_EWMH_window();
                 this->focus();
                 this->win.focus_input();
 
             , this->win);
 
-            frame.set_event_mask(XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY);
+            frame.set_event_mask(FRAME_EVENT_MASK);
             frame.map();
 
             CONN(KILL_SIGNAL,
@@ -14475,6 +14477,11 @@ int main() {
     tester.init();
 
     // event_handler->init_map();
+    auto time_thread = enqueueTask(tPool, [&]() {
+        while (true) {
+            loutI << "time now" << '\n';
+        }
+    });
     event_handler->run();
     xcb_disconnect(conn);
     return 0;

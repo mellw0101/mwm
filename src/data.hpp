@@ -497,5 +497,11 @@ class AtomicSignal {
         }
 };
  */
+
+class Atomic_u64 {
+    
+};
+
 #endif/*__DATA_HPP__*/
+
 
