@@ -14011,11 +14011,9 @@ class Events {
 
     private:
     /* Methods     */
-        void key_press_handler(const xcb_generic_event_t *&ev)
-        {
+        void key_press_handler(const xcb_generic_event_t *&ev) {
             RE_CAST_EV(xcb_key_press_event_t);
-            if (e->detail == wm->key_codes.r_arrow)
-            {
+            if (e->detail == wm->key_codes.r_arrow) {
                 switch (e->state) {
                     case (SHIFT + CTRL + SUPER): {
                         change_desktop cd(conn);
@@ -14037,25 +14035,21 @@ class Events {
                 }
             }
             
-            if (e->detail == wm->key_codes.l_arrow)
-            {
-                switch (e->state)
-                {
-                    case (SHIFT + CTRL + SUPER):
-                    {
-                        
+            if (e->detail == wm->key_codes.l_arrow) {
+                switch (e->state) {
+                    case (SHIFT + CTRL + SUPER): {
+                        change_desktop cd(conn);
+                        cd.change_with_app(change_desktop::PREV);
                         return;
                     }
 
-                    case (CTRL + SUPER):
-                    {
+                    case (CTRL + SUPER): {
                         change_desktop change_desktop(conn);
                         change_desktop.change_to(change_desktop::PREV);
                         return;
                     }
                     
-                    case SUPER:
-                    {
+                    case SUPER: {
                         client *c = signal_manager->_window_client_map.retrive(e->event);
                         tile(c, TILE::LEFT);
                         return;
@@ -14063,12 +14057,9 @@ class Events {
                 }
             }
             
-            if (e->detail == wm->key_codes.d_arrow)
-            {
-                switch (e->state)
-                {
-                    case SUPER:
-                    {
+            if (e->detail == wm->key_codes.d_arrow) {
+                switch (e->state) {
+                    case SUPER: {
                         client *c = signal_manager->_window_client_map.retrive(e->event);
                         tile(c, TILE::DOWN);
                         return;
@@ -14076,12 +14067,9 @@ class Events {
                 }
             }
 
-            if (e->detail == wm->key_codes.u_arrow)
-            {
-                switch (e->state)
-                {
-                    case SUPER:
-                    {
+            if (e->detail == wm->key_codes.u_arrow) {
+                switch (e->state) {
+                    case SUPER: {
                         client *c = signal_manager->_window_client_map.retrive(e->event);
                         tile(c, TILE::UP);
                         return;
