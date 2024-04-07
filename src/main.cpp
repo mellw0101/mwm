@@ -8279,42 +8279,85 @@ class Window_Manager {
 
             }
             void setup_events() {
-                signal_manager->_window_signals.conect(root, MAP_REQ, [this](uint32_t __window) -> void {
+                /* signal_manager->_window_signals.conect(root, MAP_REQ, [this](uint32_t __window) -> void {
                     client *c = signal_manager->_window_client_map.retrive(__window);
                     if (c == nullptr) {
                         this->manage_new_client(__window);
                         
                     }
                     
+                }); */
+                event_handler->setEventCallback(XCB_MAP_REQUEST, [&](Ev ev) {
+                    RE_CAST_EV(xcb_map_request_event_t);
+                    client *c = signal_manager->_window_client_map.retrive(e->window);
+                    if (c == nullptr) {
+                        this->manage_new_client(e->window); 
+                    }
                 });
-                CONN_Win(root, L_MOUSE_BUTTON_EVENT,
+                /* CONN_Win(root, L_MOUSE_BUTTON_EVENT,
                     this->unfocus();
-                    if (this->context_menu->context_window.is_mapped()) Emit(this->context_menu->context_window, HIDE_CONTEXT_MENU); 
+                    if (this->context_menu->context_window.is_mapped()) Emit(this->context_menu->context_window, HIDE_CONTEXT_MENU);
 
                 );
                 CONN_Win(root, R_MOUSE_BUTTON_EVENT,
                     this->context_menu->show();
                 
-                );
-                CONN_Win(root, MAP_NOTIFY,
+                ); */
+                event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) {
+                    RE_CAST_EV(xcb_button_press_event_t);
+                    if (e->event != screen->root) return;
+                    if (e->detail == L_MOUSE_BUTTON) {
+                        this->unfocus();
+                        if (this->context_menu->context_window.is_mapped()) {
+                            Emit(this->context_menu->context_window, HIDE_CONTEXT_MENU);
+                            
+                        }
+                        
+                    } else if (e->detail == R_MOUSE_BUTTON) {
+                        this->context_menu->show();
+                        
+                    }
+                    
+                });
+                /* CONN_Win(root, MAP_NOTIFY,
                     client *c = signal_manager->_window_client_map.retrive(__window);
                     if (!c) return;
                     c->update();
 
-                );
-                CONN_Win(root, TERM_KEY_PRESS, this->launcher.launch_child_process("konsole"););
+                ); */
+                event_handler->setEventCallback(XCB_MAP_NOTIFY, [&](Ev ev) {
+                    RE_CAST_EV(xcb_map_notify_event_t);
+                    client *c = signal_manager->_window_client_map.retrive(e->window);
+                    if (!c) return;
+                    c->update();
+
+                });
+                /* CONN_Win(root, TERM_KEY_PRESS, this->launcher.launch_child_process("konsole"););
                 CONN_Win(root, QUIT_KEY_PRESS, this->quit(0););
-                CONN_root(CYCLE_FOCUS_KEY_PRESS, W_callback -> void { this->cycle_focus(); });
+                CONN_root(CYCLE_FOCUS_KEY_PRESS, W_callback -> void { this->cycle_focus(); }); */
+                event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev) {
+                    RE_CAST_EV(xcb_key_press_event_t);
+                    if (e->event != screen->root) return;
+
+                    if (e->detail == key_codes.t && ((e->state & ALT) != 0) && ((e->state & CTRL) != 0)) {
+                        this->launcher.launch_child_process("konsole");
+
+                    }
+                    if (e->detail == key_codes.q && ((e->state & ALT) != 0) && ((e->state & SHIFT) != 0)) {
+                        this->quit(0);
+
+                    }
+                    if (e->detail == key_codes.tab && ((e->state & ALT) != 0)) {
+                        this->cycle_focus();
+
+                    }
+
+                });
                 
                 if (BORDER_SIZE == 0) {
                     signal_manager->emit("SET_EV_CALLBACK__RESIZE_NO_BORDER");
                     
-                } /* signal_manager->_window_signals.conect(screen->root, EWMH_MAXWIN_SIGNAL, [this](uint32_t __w) -> void {
-                    client *c = signal_manager->_window_client_map.retrive(__w);
-                    if (c != nullptr) {
-
-                    }
-                }); */
+                }
 
             }
 
