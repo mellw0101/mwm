@@ -353,21 +353,20 @@ class Signal {
         void connect(Fu&& f){
             cb = std::forward<Fu>(f);
         }
-        
-        template<typename... CbArgs>/**
+
+        /**
          *
          * Emit the signal, invoking the callback with perfect forwarding
          *
          */
+        template<typename... CbArgs>
         void emit(CbArgs&&... args) {
             cb(std::forward<CbArgs>(args)...);
-
         }
 
         template<typename ...A>
         void operator()(A &&...a) {
             cb(std::forward<A>(a)...);
-            
         }
         
 };

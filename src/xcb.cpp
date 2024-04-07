@@ -43,11 +43,12 @@ xcb_atom_t xcb::intern_atom(const char *__name) {
     return true;
 } */
 bool xcb::window_exists(uint32_t __w) {
-    xcb_generic_error_t *err = nullptr;
+    xcb_generic_error_t *err = NULL;
     auto *reply = xcb_query_tree_reply(_conn, xcb_query_tree(_conn, __w), &err);
     if (reply) free(reply); // Correctly free the reply if it's non-null
 
     if (err) {
+        loutE << err->error_code << loutEND;
         free(err); // Free the error if it's non-null
         return false; // Return false if there was an error, assuming it indicates non-existence
     }
