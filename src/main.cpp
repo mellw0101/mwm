@@ -9125,7 +9125,6 @@ class __status_bar__ {
 
                 });
                 this->_w[_WIFI_CLOSE].add_event_id(XCB_EXPOSE, id);
-                this->_w[_WIFI_INFO].add_event_id(XCB_EXPOSE, id);
                 this->_w[_WIFI_INFO].send_event(XCB_EVENT_MASK_EXPOSURE);
                 this->_w[_WIFI_CLOSE].send_event(XCB_EVENT_MASK_EXPOSURE);
 
