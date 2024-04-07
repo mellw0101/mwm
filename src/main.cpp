@@ -3067,11 +3067,11 @@ class __event_handler__ {
                 }
 
             }); */
-            setEventCallback(XCB_MAP_REQUEST, [&](Ev ev) {
-                RE_CAST_EV(xcb_map_request_event_t);
-                HANDLE(XCB_MAP_REQUEST, e->window);
+            // setEventCallback(XCB_MAP_REQUEST, [&](Ev ev) {
+            //     RE_CAST_EV(xcb_map_request_event_t);
+            //     HANDLE(XCB_MAP_REQUEST, e->window);
 
-            });
+            // });
             /* setEventCallback(XCB_MOTION_NOTIFY, [&](Ev ev) {
                 RE_CAST_EV(xcb_motion_notify_event_t);
                 thread_pool.enqueue([](uint32_t w) {
@@ -3115,14 +3115,14 @@ class __event_handler__ {
                 }
 
             });
-            setEventCallback(XCB_MAP_NOTIFY, [&](Ev ev) {
-                RE_CAST_EV(xcb_map_notify_event_t);
-                thread_pool.enqueue([](uint32_t w) {
-                    Emit(screen->root, XCB_MAP_NOTIFY, w);
+            // setEventCallback(XCB_MAP_NOTIFY, [&](Ev ev) {
+            //     RE_CAST_EV(xcb_map_notify_event_t);
+            //     thread_pool.enqueue([](uint32_t w) {
+            //         Emit(screen->root, XCB_MAP_NOTIFY, w);
                     
-                }, e->event);
+            //     }, e->event);
 
-            });
+            // });
             setEventCallback(XCB_PROPERTY_NOTIFY, [&](Ev ev) {
                 RE_CAST_EV(xcb_property_notify_event_t);
                 thread_pool.enqueue([](uint32_t __w) {
