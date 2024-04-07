@@ -4123,7 +4123,7 @@ class window {
                 free(protocols_reply);
 
                 if (xcb->window_exists(w)) {
-                    loutEWin << "Failed to kill window by asking nicely" << loutEND;
+                    loutEWin << "Failed to kill window by asking nicely iters" << i << loutEND;
                     return;
                 }
                 else {

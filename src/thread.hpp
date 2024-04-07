@@ -125,7 +125,8 @@ class TimedDataSender {
 
                     // Schedule the next run
                     next_run_time = now + milliseconds(interval_);
-                } else {
+                }
+                else {
                     // Sleep for a short while to prevent busy waiting
                     std::this_thread::sleep_for(milliseconds(1));
                 }
@@ -213,8 +214,7 @@ class ThreadPool {
 #include <vector>
 
 #define enqueueT(__Name, __Pool, ...) \
-    std::future<void> __Name = __Pool.enqueue(__VA_ARGS__)\
-
+    std::future<void> __Name = __Pool.enqueue(__VA_ARGS__)
 template<typename ThreadPoolType, typename Func, typename... Args>
 auto enqueueTask(ThreadPoolType& pool, Func&& func, Args&&... args) -> std::future<decltype(func(args...))> {
     return pool.enqueue(std::forward<Func>(func), std::forward<Args>(args)...);

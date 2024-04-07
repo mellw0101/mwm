@@ -323,14 +323,12 @@ class CallableVector {
         template<typename Fu>
         void add(Fu f) {
             callables.push_back(std::make_unique<TypedCallable<Fu>>(std::move(f)));
-
         }
+
         void invokeAll() {
             for (auto& callable : callables) {
                 callable->call(); // Call through the common interface
-
             }
-
         }
 
     private:
@@ -345,15 +343,16 @@ class Signal {
         function<void(Args...)> cb;
 
     public:
+        Signal() {}
+    
         template<typename Cb>
         Signal(Cb &&__cb) : cb(std::forward<Cb>(__cb)) {}
-        Signal() {}
 
+        /* Register a callback */
         template<typename Fu>
-        void connect(Fu&& f) {
+        void connect(Fu&& f){
             cb = std::forward<Fu>(f);
-
-        }/* Register a callback */
+        }
         
         template<typename... CbArgs>/**
          *
@@ -422,13 +421,12 @@ class ScopeTimer {
         ScopeTimer(const string& name, chrono::microseconds &executionTimeRef, uint8_t ev_type)
             : scopeName(name), executionTime(executionTimeRef), ev_type(ev_type) {
             startTime = chrono::high_resolution_clock::now();
-
         }
+
         ~ScopeTimer() {
             auto endTime = chrono::high_resolution_clock::now();
             executionTime = chrono::duration_cast<chrono::microseconds>(endTime - startTime);
             loutI << scopeName << " executed in " << executionTime.count() << " microseconds" << loutEND;
-
         }
 
 };
