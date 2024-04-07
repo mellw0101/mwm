@@ -7621,9 +7621,7 @@ class context_menu {
             for (int i(0), y(0); i < entries.size(); ++i, y += _height) {
                 entries[i].make_window(context_window, 0, y, _width, _height);
                 signal_manager->_window_signals.emit(entries[i].window, EXPOSE);
-            
             }
-        
         }
     
     public:
@@ -7637,18 +7635,15 @@ class context_menu {
                 if (entries[i].name.length() > max_len) {
                     max_len = entries[i].name.length();
                     _width = ((max_len + 2) * DEFAULT_FONT_WIDTH);
-                
                 }
-            
-            } uint16_t new_height = (entries.size() * _height);
+            }
+            uint16_t new_height = (entries.size() * _height);
 
             if (_y + new_height > screen->height_in_pixels) {
                 _y = (screen->height_in_pixels - new_height);
-
             }
             if (_x + _width > screen->width_in_pixels) {
                 _x = (screen->width_in_pixels - _width);
-
             }
 
             context_window.x_y_width_height((_x - BORDER_SIZE), (_y - BORDER_SIZE), _width, new_height);
@@ -7664,7 +7659,6 @@ class context_menu {
             entry.name = name;
             entry.action = action;
             entries.push_back(entry);
-
         }
     
     context_menu() { create_dialog_win__(); }
