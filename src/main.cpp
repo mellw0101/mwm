@@ -2932,42 +2932,32 @@ class __event_handler__ {
                 RE_CAST_EV(xcb_expose_event_t);
                 thread_pool.enqueue([](uint32_t __w) {
                     Emit(__w, XCB_EXPOSE);
-
                 }, e->window);
-                
             });
-            setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev) {
+            /* setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev) {
                 RE_CAST_EV(xcb_enter_notify_event_t);
                 thread_pool.enqueue([](uint32_t w) {
                     Emit(w, XCB_ENTER_NOTIFY);
-
                 }, e->event);
-
             });
             setEventCallback(XCB_LEAVE_NOTIFY, [&](Ev ev) {
                 RE_CAST_EV(xcb_leave_notify_event_t);
                 thread_pool.enqueue([](uint32_t w) {
                     Emit(w, XCB_LEAVE_NOTIFY);
-
                 }, e->event);
-
-            });
-            setEventCallback(XCB_FOCUS_IN, [&](Ev ev) {
+            }); */
+            /* setEventCallback(XCB_FOCUS_IN, [&](Ev ev) {
                 RE_CAST_EV(xcb_focus_in_event_t);
                 thread_pool.enqueue([](uint32_t w) {
                     Emit(w, XCB_FOCUS_IN);
-                    
                 }, e->event);
-
-            });
-            setEventCallback(XCB_FOCUS_OUT, [&](Ev ev) {
+            }); */
+            /* setEventCallback(XCB_FOCUS_OUT, [&](Ev ev) {
                 RE_CAST_EV(xcb_focus_out_event_t);
                 thread_pool.enqueue([](uint32_t w) {
                     Emit(w, XCB_FOCUS_OUT);
-                    
                 }, e->event);
-
-            });
+            }); */
             setEventCallback(XCB_KEY_PRESS, [&](Ev ev) {
                 RE_CAST_EV(xcb_key_press_event_t);
                 switch (e->state) {
@@ -3049,9 +3039,9 @@ class __event_handler__ {
 
                     }
 
-                } if (e->detail == key_codes.f11) {
+                }
+                if (e->detail == key_codes.f11) {
                     HANDLE(EWMH_MAXWIN_SIGNAL, e->event);
-
                 }
 
             });
@@ -3067,11 +3057,11 @@ class __event_handler__ {
                 }
 
             }); */
-            // setEventCallback(XCB_MAP_REQUEST, [&](Ev ev) {
-            //     RE_CAST_EV(xcb_map_request_event_t);
-            //     HANDLE(XCB_MAP_REQUEST, e->window);
+            /* setEventCallback(XCB_MAP_REQUEST, [&](Ev ev) {
+                RE_CAST_EV(xcb_map_request_event_t);
+                HANDLE(XCB_MAP_REQUEST, e->window); 
 
-            // });
+            }); */
             /* setEventCallback(XCB_MOTION_NOTIFY, [&](Ev ev) {
                 RE_CAST_EV(xcb_motion_notify_event_t);
                 thread_pool.enqueue([](uint32_t w) {
@@ -3115,42 +3105,38 @@ class __event_handler__ {
                 }
 
             });
-            // setEventCallback(XCB_MAP_NOTIFY, [&](Ev ev) {
-            //     RE_CAST_EV(xcb_map_notify_event_t);
-            //     thread_pool.enqueue([](uint32_t w) {
-            //         Emit(screen->root, XCB_MAP_NOTIFY, w);
+            /* setEventCallback(XCB_MAP_NOTIFY, [&](Ev ev) {
+                RE_CAST_EV(xcb_map_notify_event_t);
+                thread_pool.enqueue([](uint32_t w) {
+                    Emit(screen->root, XCB_MAP_NOTIFY, w);
                     
-            //     }, e->event);
+                }, e->event);
 
-            // });
+            }); */
             setEventCallback(XCB_PROPERTY_NOTIFY, [&](Ev ev) {
                 RE_CAST_EV(xcb_property_notify_event_t);
                 thread_pool.enqueue([](uint32_t __w) {
                     client *c = signal_manager->_window_client_map.retrive(__w);
                     if (!c) return;
                     Emit(__w, XCB_PROPERTY_NOTIFY);
-                    
                 }, e->window);
-
             });
 
             while (shouldContinue) {
                 ev = xcb_wait_for_event(conn);
                 if (!ev) continue;
-                uint8_t res = ev->response_type & ~0x80;
-                
+
+                uint8_t res = ev->response_type & ~0x80;   
                 auto it = eventCallbacks.find(res);
+                
                 if (it != eventCallbacks.end()) {
                     for (const auto &pair : it->second) {
                         pair.second(ev);
-                        
                     }
-                    
                 }
+
                 free(ev);
-
             }
-
         }
         constexpr uint8_t char_to_keycode__(int8_t c) const {
             switch (c) {
@@ -3420,76 +3406,50 @@ class __event_handler__ {
             loutI << "Total events in map" << total_events << loutEND;
             // loutI << "Total _window_arr size" << _window_arr.getSize() << loutEND;
         }
-        void log_map_and_check_rehash() {
-            // Check pre-insertion stats
-            auto preInsertionCapacity = eventCallbacks.bucket_count();
-            auto preInsertionSize = eventCallbacks.size();
+        // void init_map() {
+        //     eventCallbacks.reserve(34);
 
-            // Check post-insertion stats
-            auto postInsertionCapacity = eventCallbacks.bucket_count();
-            
-            if (postInsertionCapacity != preInsertionCapacity) {
-                std::cout << "Rehash occurred. Previous capacity: " << preInsertionCapacity << ", New capacity: " << postInsertionCapacity << std::endl;
+        //     vector<uint8_t> event_type_keys = {
+        //         XCB_KEY_PRESS,
+        //         XCB_KEY_RELEASE,
+        //         XCB_BUTTON_PRESS,
+        //         XCB_BUTTON_RELEASE,
+        //         XCB_MOTION_NOTIFY,
+        //         XCB_ENTER_NOTIFY,
+        //         XCB_LEAVE_NOTIFY,
+        //         XCB_FOCUS_IN,
+        //         XCB_FOCUS_OUT,
+        //         XCB_KEYMAP_NOTIFY,
+        //         XCB_EXPOSE,
+        //         XCB_GRAPHICS_EXPOSURE,
+        //         XCB_NO_EXPOSURE,
+        //         XCB_VISIBILITY_NOTIFY,
+        //         XCB_CREATE_NOTIFY,
+        //         XCB_DESTROY_NOTIFY,
+        //         XCB_UNMAP_NOTIFY,
+        //         XCB_MAP_NOTIFY,
+        //         XCB_MAP_REQUEST,
+        //         XCB_REPARENT_NOTIFY,
+        //         XCB_CONFIGURE_NOTIFY,
+        //         XCB_CONFIGURE_REQUEST,
+        //         XCB_GRAVITY_NOTIFY,
+        //         XCB_RESIZE_REQUEST,
+        //         XCB_CIRCULATE_NOTIFY,
+        //         XCB_CIRCULATE_REQUEST,
+        //         XCB_PROPERTY_NOTIFY,
+        //         XCB_SELECTION_CLEAR,
+        //         XCB_SELECTION_REQUEST,
+        //         XCB_SELECTION_NOTIFY,
+        //         XCB_COLORMAP_NOTIFY,
+        //         XCB_CLIENT_MESSAGE,
+        //         XCB_MAPPING_NOTIFY
+        //     };
 
-            }/* If the capacity has changed, a rehash occurred */
+        //     for (int i = 0; i < event_type_keys.size(); ++i) {
+        //         eventCallbacks[event_type_keys[i]].reserve(100);
 
-            if (eventCallbacks.size() != preInsertionSize) {
-                std::cout << "Size before insertion: " << preInsertionSize << ", Size after insertion: " << eventCallbacks.size() << std::endl;
-
-            }/* Optionally, log the size change for information */
-
-        }
-        void check_and_adjust_vec_capacity(uint8_t eventType) {
-            if (eventCallbacks[eventType].capacity() < 30) {
-                eventCallbacks[eventType].reserve(100);
-
-            }
-
-        }
-        void init_map() {
-            eventCallbacks.reserve(34);
-
-            vector<uint8_t> event_type_keys = {
-                XCB_KEY_PRESS,
-                XCB_KEY_RELEASE,
-                XCB_BUTTON_PRESS,
-                XCB_BUTTON_RELEASE,
-                XCB_MOTION_NOTIFY,
-                XCB_ENTER_NOTIFY,
-                XCB_LEAVE_NOTIFY,
-                XCB_FOCUS_IN,
-                XCB_FOCUS_OUT,
-                XCB_KEYMAP_NOTIFY,
-                XCB_EXPOSE,
-                XCB_GRAPHICS_EXPOSURE,
-                XCB_NO_EXPOSURE,
-                XCB_VISIBILITY_NOTIFY,
-                XCB_CREATE_NOTIFY,
-                XCB_DESTROY_NOTIFY,
-                XCB_UNMAP_NOTIFY,
-                XCB_MAP_NOTIFY,
-                XCB_MAP_REQUEST,
-                XCB_REPARENT_NOTIFY,
-                XCB_CONFIGURE_NOTIFY,
-                XCB_CONFIGURE_REQUEST,
-                XCB_GRAVITY_NOTIFY,
-                XCB_RESIZE_REQUEST,
-                XCB_CIRCULATE_NOTIFY,
-                XCB_CIRCULATE_REQUEST,
-                XCB_PROPERTY_NOTIFY,
-                XCB_SELECTION_CLEAR,
-                XCB_SELECTION_REQUEST,
-                XCB_SELECTION_NOTIFY,
-                XCB_COLORMAP_NOTIFY,
-                XCB_CLIENT_MESSAGE,
-                XCB_MAPPING_NOTIFY
-            };
-
-            for (int i = 0; i < event_type_keys.size(); ++i) {
-                eventCallbacks[event_type_keys[i]].reserve(100);
-
-            }
-        }
+        //     }
+        // }
 
     private:
     /* Variables */
@@ -7188,6 +7148,7 @@ class client {
                 CURSOR::hand2
 
             ); CWC(close_button);
+            FLUSH_X();
             close_button.make_then_set_png(USER_PATH_PREFIX("/close.png"), CLOSE_BUTTON_BITMAP);
             
             /* CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->close_button) {
@@ -7202,15 +7163,28 @@ class client {
                 
             });
 
-            CONN(ENTER_NOTIFY, if (__window == this->close_button) {
+            /* CONN(ENTER_NOTIFY, if (__window == this->close_button) {
                 this->close_button.change_border_color(WHITE);
 
-            }, this->close_button);
+            }, this->close_button); */
+            event_handler->setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev) {
+                RE_CAST_EV(xcb_enter_notify_event_t);
+                if (e->event != this->close_button) return;
+                this->close_button.change_border_color(WHITE);
+                
+            });
 
-            CONN(LEAVE_NOTIFY, if (__window == this->close_button) {
+            event_handler->setEventCallback(XCB_LEAVE_NOTIFY, [&](Ev ev) {
+                RE_CAST_EV(xcb_leave_notify_event_t);
+                if (e->event != this->close_button) return;
+                this->close_button.change_border_color(WHITE);
+ 
+            });
+
+            /* CONN(LEAVE_NOTIFY, if (__window == this->close_button) {
                 this->close_button.change_border_color(BLACK);
 
-            }, this->close_button);
+            }, this->close_button); */
 
         }
         void make_max_button() {
@@ -8281,14 +8255,6 @@ class Window_Manager {
 
             }
             void setup_events() {
-                /* signal_manager->_window_signals.conect(root, MAP_REQ, [this](uint32_t __window) -> void {
-                    client *c = signal_manager->_window_client_map.retrive(__window);
-                    if (c == nullptr) {
-                        this->manage_new_client(__window);
-                        
-                    }
-                    
-                }); */
                 event_handler->setEventCallback(XCB_MAP_REQUEST, [&](Ev ev) {
                     RE_CAST_EV(xcb_map_request_event_t);
                     client *c = signal_manager->_window_client_map.retrive(e->window);
@@ -8297,15 +8263,6 @@ class Window_Manager {
 
                     }
                 });
-                /* CONN_Win(root, L_MOUSE_BUTTON_EVENT,
-                    this->unfocus();
-                    if (this->context_menu->context_window.is_mapped()) Emit(this->context_menu->context_window, HIDE_CONTEXT_MENU);
-
-                );
-                CONN_Win(root, R_MOUSE_BUTTON_EVENT,
-                    this->context_menu->show();
-                
-                ); */
                 event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) {
                     RE_CAST_EV(xcb_button_press_event_t);
                     if (e->event != screen->root) return;
@@ -8322,22 +8279,6 @@ class Window_Manager {
                     }
                     
                 });
-                /* CONN_Win(root, MAP_NOTIFY,
-                    client *c = signal_manager->_window_client_map.retrive(__window);
-                    if (!c) return;
-                    c->update();
-
-                ); */
-                /* event_handler->setEventCallback(XCB_MAP_NOTIFY, [&](Ev ev) {
-                    RE_CAST_EV(xcb_map_notify_event_t);
-                    client *c = signal_manager->_window_client_map.retrive(e->event);
-                    if (!c) return;
-                    c->update();
-
-                }); */
-                /* CONN_Win(root, TERM_KEY_PRESS, this->launcher.launch_child_process("konsole"););
-                CONN_Win(root, QUIT_KEY_PRESS, this->quit(0););
-                CONN_root(CYCLE_FOCUS_KEY_PRESS, W_callback -> void { this->cycle_focus(); }); */
                 event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev) {
                     RE_CAST_EV(xcb_key_press_event_t);
                     if (e->event != screen->root) return;
@@ -13535,17 +13476,17 @@ class max_win {
         client(*c);
 
     /* Methods     */
-        void max_win_animate(const int &endX, const int &endY, const int &endWidth, const int &endHeight)
-        {
+        void max_win_animate(const int &endX, const int &endY, const int &endWidth, const int &endHeight) {
             animate_client(
-                c, 
-                endX, 
-                endY, 
-                endWidth, 
-                endHeight, 
+                c,
+                endX,
+                endY,
+                endWidth,
+                endHeight,
                 MAXWIN_ANIMATION_DURATION
             );
             xcb_flush(conn);
+
         }
         
         void button_unmax_win()
@@ -13965,7 +13906,6 @@ class tile {
         }
 
 };
-
 class Events {
     public:
     /* Variabels */
@@ -14406,7 +14346,6 @@ class Events {
         //     RE_CAST_EV(xcb_motion_notify_event_t);
         // }
 };
-
 class test {
     private:
     // Methods.
@@ -14585,7 +14524,7 @@ int main() {
     test tester;
     tester.init();
 
-    event_handler->init_map();
+    // event_handler->init_map();
     event_handler->run();
     xcb_disconnect(conn);
     return 0;

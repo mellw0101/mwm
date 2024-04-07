@@ -410,6 +410,7 @@ class AsyncWrapper {
 
     private:
         std::future<void> future;
+
 };
 
 class root_thread {
