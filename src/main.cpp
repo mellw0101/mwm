@@ -8988,7 +8988,7 @@ class __status_bar__ {
 
             }); */
 
-            /* id = event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) {
+            id = event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) {
                 RE_CAST_EV(xcb_button_press_event_t);
                 if (e->detail != L_MOUSE_BUTTON) return;
                 if (e->event != this->_w[_WIFI]) return;
@@ -9005,7 +9005,7 @@ class __status_bar__ {
                     this->_w[_WIFI_CLOSE].send_event(XCB_EVENT_MASK_EXPOSURE);
                 }
             });
-            this->_w[_WIFI].add_event_id(XCB_BUTTON_PRESS, id); */
+            this->_w[_WIFI].add_event_id(XCB_BUTTON_PRESS, id);
 
             Bitmap bitmap(20, 20);
             
@@ -9135,7 +9135,6 @@ class __status_bar__ {
                     MAP,
                     (int[3]){ALL, WIFI_DROPDOWN_BORDER, BLACK}
                 );
-                
                 _w[_WIFI_CLOSE].create_window(
                     _w[_WIFI_DROPWOWN],
                     WIFI_CLOSE_WINDOW_X,
@@ -9148,13 +9147,6 @@ class __status_bar__ {
                     (int[3]){ALL, WIFI_DROPDOWN_BORDER, BLACK},
                     CURSOR::hand2
                 );
-
-                /* WS_conn(this->_w[_WIFI_CLOSE], L_MOUSE_BUTTON_EVENT, W_callback
-                {
-                    if (__window != this->_w[_WIFI_CLOSE]) return;
-                    this->hide__(this->_w[_WIFI_DROPWOWN]);
-                }); */
-
                 _w[_WIFI_INFO].create_window(
                     _w[_WIFI_DROPWOWN],
                     WIFI_INFO_WINDOW_X,
@@ -9167,27 +9159,7 @@ class __status_bar__ {
                     (int[3]){ALL, WIFI_DROPDOWN_BORDER, BLACK}
                 );
 
-                int id = 0;
-
-                id = event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) {
-                    RE_CAST_EV(xcb_button_press_event_t);
-                    if (e->detail != L_MOUSE_BUTTON) return;
-                    if (e->event != this->_w[_WIFI]) return;
-                    
-                    if (this->_w[_WIFI_DROPWOWN].is_mapped()) {
-                        this->hide__(this->_w[_WIFI_DROPWOWN]);
-                    }
-                    else {
-                        if (this->_w[_AUDIO_DROPDOWN].is_mapped()) {
-                            this->hide__(this->_w[_AUDIO_DROPDOWN]);
-                        }
-                        this->show__(this->_w[_WIFI_DROPWOWN]);
-                        this->_w[_WIFI_INFO].send_event(XCB_EVENT_MASK_EXPOSURE);
-                        this->_w[_WIFI_CLOSE].send_event(XCB_EVENT_MASK_EXPOSURE);
-                    }
-                });
-                this->_w[_WIFI].add_event_id(XCB_BUTTON_PRESS, id);
-                
+                int id = 0;                
                 id = event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) {
                     RE_CAST_EV(xcb_button_press_event_t);
                     if (e->event == this->_w[_WIFI_CLOSE]) {
@@ -9195,9 +9167,6 @@ class __status_bar__ {
                     }
                 });
                 this->_w[_WIFI_CLOSE].add_event_id(XCB_BUTTON_PRESS, id);
-
-
-
                 id = event_handler->setEventCallback(XCB_EXPOSE, [&] (Ev ev) {
                     RE_CAST_EV(xcb_expose_event_t);
                     if (e->window == this->_w[_WIFI_CLOSE]) {
@@ -9225,7 +9194,7 @@ class __status_bar__ {
                     }
                 });
                 this->_w[_WIFI_CLOSE].add_event_id(XCB_ENTER_NOTIFY, id);
-
+                
                 id = event_handler->setEventCallback(XCB_LEAVE_NOTIFY, [&](Ev ev) {
                     RE_CAST_EV(xcb_leave_notify_event_t);
                     if (e->event == this->_w[_WIFI_CLOSE]) {
