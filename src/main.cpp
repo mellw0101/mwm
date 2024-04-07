@@ -7177,6 +7177,8 @@ class client {
             event_handler->setEventCallback(XCB_LEAVE_NOTIFY, [&](Ev ev) {
                 RE_CAST_EV(xcb_leave_notify_event_t);
                 if (e->event != this->close_button) return;
+                this->close_button.change_border_color(BLACK);RE_CAST_EV(xcb_enter_notify_event_t);
+                if (e->event != this->close_button) return;
                 this->close_button.change_border_color(WHITE);
  
             });
