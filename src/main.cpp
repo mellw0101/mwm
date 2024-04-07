@@ -12394,7 +12394,7 @@ class __dock__ {
 class DropDownTerm {
     void toggleTerm(  )
     {
-        if ( w.x(  ) == ( - ( screen->height_in_pixels / 2 )))
+        if ( w.y(  ) == ( - ( screen->height_in_pixels / 2 )))
         {
             w.y( 0 );
             FlushX_Win( w );
