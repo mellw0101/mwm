@@ -244,7 +244,7 @@ auto reg_callB(Func&& func, BoundArgs&&... boundArgs) {
     };
 }
 
-/* #include <cstdlib> // For malloc and free
+#include <cstdlib> // For malloc and free
 #include <new>     // For placement new
 
 template<typename T>
@@ -263,9 +263,9 @@ class Malloc {
             ptr->~T();    // Call the destructor explicitly
             std::free(ptr); // Free the memory
         }
-}; */
+};
 
-#include <cstdlib>
+/* #include <cstdlib>
 #include <new> // For std::bad_alloc and placement new
 #include <type_traits> // For type traits
 
@@ -333,7 +333,7 @@ class Malloc {
             }
             std::free(ptr);
         }
-};
+}; */
 
 #include <vector>
 #include <memory>

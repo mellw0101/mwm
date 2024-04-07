@@ -14443,8 +14443,7 @@ void setup_wm() {
     events.setup();
 
     NEW_CLASS(file_app,        __file_app__       ) { file_app->init(); }
-    /* NEW_CLASS(status_bar,      __status_bar__     ) { status_bar->init(); } */
-    status_bar = Malloc<__status_bar__>().aligned_allocate();
+    NEW_CLASS(status_bar,      __status_bar__     ) { status_bar->init(); }
 
     NEW_CLASS(wifi,            __wifi__           ) { wifi->init(); }
     NEW_CLASS(network,         __network__        ) {}
