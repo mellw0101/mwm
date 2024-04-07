@@ -63,6 +63,7 @@
 #define DELETE  0xff08
 
 #define F11     0xffc8
+#define F12     0xffc9
 #define N_1     0x31
 #define N_2     0x32
 #define N_3     0x33

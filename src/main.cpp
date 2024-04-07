@@ -7585,7 +7585,7 @@ class Key_Codes {
                 { DELETE,       &_delete   },
 
                 { F11,          &f11       },
-                { 0xffc9,       &f12       },
+                { F12,          &f12       },
                 { N_1,          &n_1       },
                 { N_2,          &n_2       },
                 { N_3,          &n_3       },
@@ -8306,7 +8306,7 @@ class Window_Manager {
                     { T,       CTRL   | ALT   },
                     { L_ARROW, CTRL   | SUPER },
                     { R_ARROW, CTRL   | SUPER },
-                    { key_codes.f12, NULL },
+                    { F12,     NULL           },
                     { SUPER_L, SHIFT          }
                 
                 }); root.clear();
@@ -12428,7 +12428,7 @@ class DropDownTerm {
                 RE_CAST_EV( xcb_key_press_event_t );
                 if ( e->detail == wm->key_codes.f12 )
                 {
-                    toggleTerm();
+                    toggleTerm(  );
                 }
             });
         }
