@@ -3766,6 +3766,11 @@ namespace { /* 'window' class Namespace */
             // other_data_t otherData;
         };
     };
+
+    enum WINDOW_BIT_STATES
+    {
+        Xid_gen_success = 0
+    };
 }
 
 class window {
@@ -4142,10 +4147,10 @@ class window {
 
                 signal_manager->_window_signals.remove( w );
                 signal_manager->_window_client_map.remove( w );
-                for ( int i = 0; i < _ev_id_vec.size(); ++i )
+                /* for ( int i = 0; i < _ev_id_vec.size(); ++i )
                 {
                     event_handler->removeEventCallback( _ev_id_vec[i].first, _ev_id_vec[i].second );
-                }
+                } */
 
             }
             void kill_test() {
@@ -5877,9 +5882,12 @@ class window {
         /* Main       */
             void make_window()
             {
-                if (( _window = xcb_generate_id( conn )) == -1 )
+                if (( _window = xcb_generate_id( conn )) == 0xFFFFFFFF )
                 {
                     loutEWin << "Could not generate id for window" << loutEND;
+                    /** NOTE: Clering the @p Xid_gen_success bit of @class member variable @p '_bit_state' */
+                    _bit_state &= ~( 1 << Xid_gen_success );
+                    return;
                 }
 
                 VOID_COOKIE = xcb_create_window(
@@ -5899,14 +5907,27 @@ class window {
                 );
                 CHECK_VOID_COOKIE();
                 FLUSH_XWin();
+                /** NOTE: Setting @p Xid_gen_success bit of @class member variable @p '_bit_state' */
+                _bit_state |= ( 1 << Xid_gen_success );
+                if ( _bit_state & ( 1 << Xid_gen_success ))
+                {
+                    loutI << "Xid_gen_success bit is set" << '\n';
+                }
 
-                /* do {
-                    int id = event_handler->setEventCallback(XCB_VISIBILITY_NOTIFY, [ this ](Ev ev)-> void
+                do {
+                    int id = event_handler->setEventCallback( XCB_DESTROY_NOTIFY, [ this ](Ev ev)-> void
                     {
-                        RE_CAST_EV( xcb_visibility_notify_event_t );
+                        RE_CAST_EV( xcb_destroy_notify_event_t );
+                        if ( e->window == this->_window )
+                        {
+                            for ( int i = 0; i < this->_ev_id_vec.size(); ++i )
+                            {
+                                event_handler->removeEventCallback( this->_ev_id_vec[i].first, this->_ev_id_vec[i].second );
+                            }
+                        }
                     });
-
-                } while ( 0 ); */
+                    this->_ev_id_vec.push_back( { XCB_DESTROY_NOTIFY, id } );
+                } while ( 0 );
 
             }
             void clear_window() {

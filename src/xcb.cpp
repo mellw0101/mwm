@@ -78,21 +78,21 @@ void xcb::window_stack(uint32_t __window1, uint32_t __window2, uint32_t __mode) 
     xcb_configure_window(_conn, __window1, mask, values);
     
 }
-bool xcb::is_flag_set(unsigned int __f) {
-    return (_flags & (1ULL << __f)) != 0;
-
+bool xcb::is_flag_set(unsigned int __f)
+{
+    return ( _flags & ( 1ULL << __f )) != 0;
 }
-void xcb::set_flag(unsigned int __f) {
+void xcb::set_flag(unsigned int __f)
+{
     _flags |= 1ULL << __f;
-
 }
-void xcb::clear_flag(unsigned int __f) {
+void xcb::clear_flag(unsigned int __f)
+{
     _flags &= ~(1ULL << __f);
-
 }
-void xcb::toggle_flag(unsigned int __f) {
+void xcb::toggle_flag(unsigned int __f)
+{
     _flags ^= 1ULL << __f;
-
 }
 xcb::xcb(xcb_connection_t *__conn, xcb_screen_t *__s) : _conn(__conn), _s(__s) {
     if (xcb_connection_has_error(_conn)) {
