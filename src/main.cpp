@@ -7299,7 +7299,15 @@ class client {
             close_button.add_action_on_L_button_event(
             [ this ]()-> void
             {
-                Emit( this->win, KILL_SIGNAL );
+                if ( this->win.is_mapped() )
+                {
+                    this->win.kill();
+                }
+                else
+                {
+                    this->kill();
+                }
+                /* Emit( this->win, KILL_SIGNAL ); */
             });
 
             do {
