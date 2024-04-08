@@ -7191,20 +7191,24 @@ class client {
             frame.map();
 
             CONN(KILL_SIGNAL,
-                if (this->win.is_mapped()) {
+                if ( this->win.is_mapped() )
+                {
                     this->win.kill();
                 }
-                else if (this->frame.is_mapped()) {
+                else if ( this->frame.is_mapped() )
+                {
                     this->kill();
                 }
 
             , this->win);
 
             CONN(XCB_DESTROY_NOTIFY,
-                if (!this->win.is_mapped()) {
+                if (!this->win.is_mapped())
+                {
                     this->kill();
                 }
-                else {
+                else
+                {
                     this->win.kill();
                 }
             
@@ -7302,18 +7306,26 @@ class client {
             CWC( close_button );
             FlushX_Win( this->close_button );
             close_button.make_then_set_png( USER_PATH_PREFIX( "/close.png" ), CLOSE_BUTTON_BITMAP );
-            /* do {
+            do {
                 int id = event_handler->setEventCallback( XCB_BUTTON_PRESS, [ & ]( Ev ev )-> void
                 {
                     RE_CAST_EV( xcb_button_press_event_t );
                     if ( e->event != this->close_button ) return;
                     if ( e->detail != L_MOUSE_BUTTON ) return;
-                    WS_emit( this->win, KILL_SIGNAL );
+                    if ( this->win.is_mapped() )
+                    {
+                        this->win.kill();
+                    }
+                    else 
+                    {
+                        this->kill();
+                    }
+                    /* WS_emit( this->win, KILL_SIGNAL ); */
                 });
                 ev_id_vec.push_back( { XCB_BUTTON_PRESS, id } );
 
-            } while ( 0 ); */
-            close_button.add_action_on_L_button_event(
+            } while ( 0 );
+            /* close_button.add_action_on_L_button_event(
             [ this ]()-> void
             {
                 if ( this->win.is_mapped() )
@@ -7324,8 +7336,7 @@ class client {
                 {
                     this->kill();
                 }
-                /* Emit( this->win, KILL_SIGNAL ); */
-            });
+            }); */
 
             do {
                 int id = event_handler->setEventCallback( XCB_ENTER_NOTIFY, [ & ]( Ev ev )-> void
