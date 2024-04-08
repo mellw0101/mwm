@@ -5914,7 +5914,7 @@ class window {
                     int id = event_handler->setEventCallback( XCB_DESTROY_NOTIFY, [ this ](Ev ev)-> void
                     {
                         RE_CAST_EV( xcb_destroy_notify_event_t );
-                        if ( e->window == this->_window )
+                        if ( e->event == this->_window )
                         {
                             loutI << "cur vec size" << this->_ev_id_vec.size() << '\n';
                             for ( int i = 0; i < this->_ev_id_vec.size(); ++i )
