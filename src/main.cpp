@@ -12424,8 +12424,10 @@ class DropDownTerm {
                     20,
                     WHITE,
                     NONE,
-                    MAP
+                    MAP,
+                    ( int[] ){ DOWN | LEFT | RIGHT, 1, BLACK }
                 );
+                w_vec.push_back( window );
             }
 
             event_handler->setEventCallback( XCB_KEY_PRESS, [ & ]( Ev ev ) -> void
