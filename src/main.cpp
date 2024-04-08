@@ -4123,6 +4123,7 @@ class window {
 
                     if ( ! is_mapped() )
                     {
+                        loutI << "is_mapped = true" << '\n';
                         break;
                     }
 
