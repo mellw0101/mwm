@@ -5909,10 +5909,6 @@ class window {
                 FLUSH_XWin();
                 /** NOTE: Setting @p Xid_gen_success bit of @class member variable @p '_bit_state' */
                 _bit_state |= ( 1 << Xid_gen_success );
-                if ( _bit_state & ( 1 << Xid_gen_success ))
-                {
-                    loutI << "Xid_gen_success bit is set" << '\n';
-                }
 
                 do {
                     int id = event_handler->setEventCallback( XCB_DESTROY_NOTIFY, [ this ](Ev ev)-> void
@@ -5920,13 +5916,14 @@ class window {
                         RE_CAST_EV( xcb_destroy_notify_event_t );
                         if ( e->window == this->_window )
                         {
+                            loutI << "cur vec size" << this->_ev_id_vec.size() << '\n';
                             for ( int i = 0; i < this->_ev_id_vec.size(); ++i )
                             {
                                 event_handler->removeEventCallback( this->_ev_id_vec[i].first, this->_ev_id_vec[i].second );
                             }
                         }
                     });
-                    this->_ev_id_vec.push_back( { XCB_DESTROY_NOTIFY, id } );
+                    _ev_id_vec.push_back( { XCB_DESTROY_NOTIFY, id } );
                 } while ( 0 );
 
             }
