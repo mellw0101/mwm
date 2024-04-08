@@ -112,8 +112,8 @@ ThreadPool tPool{6};
 
 using namespace std;
 
-vector<pair<uint32_t, function<void()>>> expose_tasks;
-vector<client *> cli_tasks;
+/* vector<pair<uint32_t, function<void()>>> expose_tasks;
+vector<client *> cli_tasks; */
 UInt32UnorderedMap<client *> cw_map;
 
 #define NET_DEBUG false
@@ -3774,11 +3774,12 @@ class window {
         window() {}
 
     /* Operators   */
-        operator uint32_t() {
+        operator uint32_t()
+        {
             return _window;
 
         }    
-        window& operator=(uint32_t new_window) // Overload the assignment operator for uint32_t
+        window& operator=( uint32_t new_window ) // Overload the assignment operator for uint32_t
         { 
             _window = new_window;
             return *this;
@@ -4091,14 +4092,15 @@ class window {
                 FLUSH_XWin();
 
             }            
-            void kill() {
+            void kill()
+            {
                 uint32_t w = this->_window;
                 
-                xcb_intern_atom_cookie_t protocols_cookie = xcb_intern_atom(conn, 1, 12, "WM_PROTOCOLS");
-                xcb_intern_atom_reply_t *protocols_reply = xcb_intern_atom_reply(conn, protocols_cookie, nullptr);
+                xcb_intern_atom_cookie_t protocols_cookie = xcb_intern_atom( conn, 1, 12, "WM_PROTOCOLS" );
+                xcb_intern_atom_reply_t *protocols_reply = xcb_intern_atom_reply( conn, protocols_cookie, nullptr );
 
-                xcb_intern_atom_cookie_t delete_cookie = xcb_intern_atom(conn, 0, 16, "WM_DELETE_WINDOW");
-                xcb_intern_atom_reply_t *delete_reply = xcb_intern_atom_reply(conn, delete_cookie, nullptr);
+                xcb_intern_atom_cookie_t delete_cookie = xcb_intern_atom( conn, 0, 16, "WM_DELETE_WINDOW" );
+                xcb_intern_atom_reply_t *delete_reply = xcb_intern_atom_reply( conn, delete_cookie, nullptr );
 
                 if ( ! protocols_reply )
                 {
@@ -4140,6 +4142,10 @@ class window {
 
                 signal_manager->_window_signals.remove( w );
                 signal_manager->_window_client_map.remove( w );
+                for ( int i = 0; i < _ev_id_vec.size(); ++i )
+                {
+                    event_handler->removeEventCallback( _ev_id_vec[i].first, _ev_id_vec[i].second );
+                }
 
             }
             void kill_test() {
@@ -4434,18 +4440,20 @@ class window {
                 } return false;
 
             }
-            bool is_mapped() {
-                xcb_get_window_attributes_cookie_t cookie = xcb_get_window_attributes(conn, _window);
-                xcb_get_window_attributes_reply_t *reply = xcb_get_window_attributes_reply(conn, cookie, nullptr);
-                if (reply == nullptr) {
+            bool is_mapped()
+            {
+                xcb_get_window_attributes_cookie_t cookie = xcb_get_window_attributes( conn, _window );
+                xcb_get_window_attributes_reply_t *reply = xcb_get_window_attributes_reply( conn, cookie, nullptr );
+                if ( ! reply )
+                {
                     loutEWin << "Unable to get window attributes" << '\n';
                     return false;
-
                 }
-                bool isMapped = (reply->map_state == XCB_MAP_STATE_VIEWABLE);
-                free(reply);
-                return isMapped;    
 
+                bool isMapped = ( reply->map_state == XCB_MAP_STATE_VIEWABLE );
+                free(reply);
+
+                return isMapped;
             }
             bool should_be_decorated() {
                 // Atom for the _MOTIF_WM_HINTS property, used to control window decorations
@@ -5812,6 +5820,24 @@ class window {
                 }
             }
         
+        /* Events */
+            template <typename Callback>
+            void add_action_on_L_button_event(Callback &&__callback)
+            {
+                do {
+                    int id = event_handler->setEventCallback( XCB_BUTTON_PRESS, [ this, __callback ]( Ev ev )-> void
+                    {
+                        RE_CAST_EV( xcb_button_press_event_t );
+                        if (( e->event == this->_window ) && ( e->detail == L_MOUSE_BUTTON ))
+                        {
+                            __callback();
+                        }
+                    });
+                    _ev_id_vec.push_back( { XCB_BUTTON_PRESS, id });
+
+                } while ( 0 );
+            }
+            
     private:
     /* Variables   */
         /* Main */
@@ -5837,18 +5863,25 @@ class window {
 
         uint32_t _min_width  = 200;
         uint32_t _min_height = 100;
-        uint8_t  _override_redirect = 0;
         pid_t    _pid = 0;
 
         FixedArray<uint32_t, 4> _border{};
 
+        uint8_t  _override_redirect = 0;
+        uint8_t _bit_state = 0;
+
+        vector<pair<uint8_t, int>> _ev_id_vec;
+        /* vector<pair<uint8_t, function<void(const xcb_generic_event_t *)>>> _func_vec; */
+
     /* Methods     */
         /* Main       */
-            void make_window() {
-                if ((_window = xcb_generate_id(conn)) == -1) {
+            void make_window()
+            {
+                if (( _window = xcb_generate_id( conn )) == -1 )
+                {
                     loutEWin << "Could not generate id for window" << loutEND;
-
                 }
+
                 VOID_COOKIE = xcb_create_window(
                     conn,
                     _depth,
@@ -5863,9 +5896,17 @@ class window {
                     _visual,
                     _value_mask,
                     _value_list
-
-                ); CHECK_VOID_COOKIE();
+                );
+                CHECK_VOID_COOKIE();
                 FLUSH_XWin();
+
+                /* do {
+                    int id = event_handler->setEventCallback(XCB_VISIBILITY_NOTIFY, [ this ](Ev ev)-> void
+                    {
+                        RE_CAST_EV( xcb_visibility_notify_event_t );
+                    });
+
+                } while ( 0 ); */
 
             }
             void clear_window() {
@@ -5882,7 +5923,8 @@ class window {
                 FLUSH_XWin();
 
             }
-            void clear_window(uint32_t __window) {
+            void clear_window(uint32_t __window)
+            {
                 VOID_COOKIE = xcb_clear_area(
                     conn, 
                     0,
@@ -5905,7 +5947,8 @@ class window {
              * @param value The value to set for the specified attributes.
              * 
              */
-            void config_window(const uint16_t & mask, const uint16_t & value) {
+            void config_window( const uint16_t & mask, const uint16_t & value )
+            {
                 xcb_configure_window(
                     conn,
                     _window,
@@ -7242,7 +7285,7 @@ class client {
             CWC( close_button );
             FlushX_Win( this->close_button );
             close_button.make_then_set_png( USER_PATH_PREFIX( "/close.png" ), CLOSE_BUTTON_BITMAP );
-            do {
+            /* do {
                 int id = event_handler->setEventCallback( XCB_BUTTON_PRESS, [ & ]( Ev ev )-> void
                 {
                     RE_CAST_EV( xcb_button_press_event_t );
@@ -7252,7 +7295,13 @@ class client {
                 });
                 ev_id_vec.push_back( { XCB_BUTTON_PRESS, id } );
 
-            } while ( 0 );
+            } while ( 0 ); */
+            close_button.add_action_on_L_button_event(
+            [ this ]()-> void
+            {
+                Emit( this->win, KILL_SIGNAL );
+            });
+
             do {
                 int id = event_handler->setEventCallback( XCB_ENTER_NOTIFY, [ & ]( Ev ev )-> void
                 {
