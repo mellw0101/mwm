@@ -6574,6 +6574,7 @@ class client {
         ThreadPool thread_pool{8};
         
         uint64_t bit_state = 0xffffffffffffffff;
+        vector<pair<uint8_t, int>> ev_id_vec;
 
     /* Methods     */
         /* Main     */
@@ -6613,21 +6614,22 @@ class client {
                 frame.unmap();
         
             }
-            void kill() {
+            void kill()
+            {
                 frame.unmap();
                 win.unmap();
                 close_button.unmap();
                 max_button.unmap();
                 min_button.unmap();
                 titlebar.unmap();
-                border[left].unmap();
-                border[right].unmap();
-                border[top].unmap();
-                border[bottom].unmap();
-                border[top_left].unmap();
-                border[top_right].unmap();
-                border[bottom_left].unmap();
-                border[bottom_right].unmap();
+                border[ left ].unmap();
+                border[ right ].unmap();
+                border[ top ].unmap();
+                border[ bottom ].unmap();
+                border[ top_left ].unmap();
+                border[ top_right ].unmap();
+                border[ bottom_left ].unmap();
+                border[ bottom_right ].unmap();
 
                 // vector<window> window_vec = {
                 //     win,
@@ -6673,7 +6675,10 @@ class client {
                 frame.kill();
 
                 remove_from_map();
-
+                for ( int i = 0; i < ev_id_vec.size(); ++i )
+                {
+                    event_handler->removeEventCallback( ev_id_vec[i].first, ev_id_vec[i].second );
+                }
             }
             void add_to_map() {
                 cw_map.insert(win,          this);
@@ -6717,15 +6722,17 @@ class client {
             }
             #define TITLE_REQ_DRAW  (uint32_t)1 << 0
             #define TITLE_INTR_DRAW (uint32_t)1 << 1
-            void draw_title(uint32_t __mode) {
+            void draw_title( uint32_t __mode )
+            {
                 titlebar.clear();
-                if (__mode & TITLE_REQ_DRAW ) { titlebar.draw_acc_16(win.get_net_wm_name_by_req()); }
-                if (__mode & TITLE_INTR_DRAW) { titlebar.draw_acc_16(win.get_net_wm_name()); }
+                if ( __mode & TITLE_REQ_DRAW )  { titlebar.draw_acc_16( win.get_net_wm_name_by_req() ); }
+                if ( __mode & TITLE_INTR_DRAW ) { titlebar.draw_acc_16( win.get_net_wm_name() ); }
 
             }
             #define CLI_RIGHT  screen->width_in_pixels  - this->width
             #define CLI_BOTTOM screen->height_in_pixels - this->height
-            void snap(int x, int y, const vector<client *> &__vec ) {
+            void snap(int x, int y, const vector<client *> &__vec )
+            {
                 for (client *const &c : __vec) {
                     if (c == this) continue;
                     
@@ -6838,7 +6845,7 @@ class client {
 
                 }
 
-            } /** @brief client to client snaping */
+            }/** @brief client to client snaping */
         
         /* Config   */
             void x_y(const uint32_t &x, const uint32_t &y) {
@@ -7087,7 +7094,8 @@ class client {
     
     private:
     /* Methods     */
-        void make_frame ( ) {
+        void make_frame()
+        {
             frame.create_window(
                 screen->root,
                 (x - BORDER_SIZE),
@@ -7145,7 +7153,8 @@ class client {
             CWC(win);
         
         }
-        void make_titlebar ( ) {
+        void make_titlebar()
+        {
             titlebar.create_window(
                 frame,
                 BORDER_SIZE,
@@ -7156,11 +7165,12 @@ class client {
                 XCB_EVENT_MASK_EXPOSURE,
                 MAP
             
-            ); CWC(titlebar);
+            );
+            CWC( titlebar );
 
             titlebar.grab_button({ { L_MOUSE_BUTTON, NULL } });
             draw_title( TITLE_REQ_DRAW );
-            icon.raise( );
+            icon.raise();
 
             /* expose_tasks.push_back({this->titlebar, [&]() {
                 this->titlebar.clear();
@@ -7176,27 +7186,35 @@ class client {
                 this->titlebar.draw_acc_16(this->win.get_net_wm_name_by_req());
                 FLUSH_X();
             , this->win); */
-            event_handler->setEventCallback( XCB_PROPERTY_NOTIFY, [&](Ev ev)
-            {
-                RE_CAST_EV( xcb_property_notify_event_t );
-                if ( e->window == this->win )
+            do {
+                int id = event_handler->setEventCallback( XCB_PROPERTY_NOTIFY, [ & ]( Ev ev )
                 {
-                    this->titlebar.clear( );
-                    this->titlebar.draw_acc_16( this->win.get_net_wm_name_by_req( ) );
-                    FlushX_Win( this->titlebar );
-                }
-            });
+                    RE_CAST_EV( xcb_property_notify_event_t );
+                    if ( e->window == this->win )
+                    {
+                        this->titlebar.clear( );
+                        this->titlebar.draw_acc_16( this->win.get_net_wm_name_by_req( ) );
+                        FlushX_Win( this->titlebar );
+                    }
+                });
+                ev_id_vec.push_back({XCB_PROPERTY_NOTIFY, id});
+            
+            } while ( 0 );
 
-            event_handler->setEventCallback( XCB_EXPOSE, [&](Ev ev)
-            {
-                RE_CAST_EV(xcb_expose_event_t);
-                if ( e->window == this->titlebar )
+            do {
+                int id = event_handler->setEventCallback( XCB_EXPOSE, [&](Ev ev)
                 {
-                    this->titlebar.clear( );
-                    this->titlebar.draw_acc_16( this->win.get_net_wm_name( ) );
-                    FlushX_Win( this->titlebar );
-                }
-            });
+                    RE_CAST_EV( xcb_expose_event_t );
+                    if ( e->window == this->titlebar )
+                    {
+                        this->titlebar.clear();
+                        this->titlebar.draw_acc_16( this->win.get_net_wm_name() );
+                        FlushX_Win( this->titlebar );
+                    }
+                });
+                ev_id_vec.push_back( { XCB_EXPOSE, id } );
+
+            } while ( 0 );
 
             /* CONN( XCB_EXPOSE,
                 this->titlebar.clear( );
