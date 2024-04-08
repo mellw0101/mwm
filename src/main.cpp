@@ -7551,63 +7551,69 @@ class Key_Codes {
         }
 
     // methods.
-        void init() { keysyms = xcb_key_symbols_alloc(conn);
-            if (keysyms) { map<uint32_t, xcb_keycode_t *> key_map = {
-                { A,            &a         },
-                { B,            &b         },
-                { C,            &c         },
-                { D,            &d         },
-                { E,            &e         },
-                { F,            &f         },
-                { G,            &g         },
-                { H,            &h         },
-                { I,            &i         },
-                { J,            &j         },
-                { K,            &k         },
-                { L,            &l         },
-                { M,            &m         },
-                { _N,           &n         },
-                { O,            &o         },
-                { P,            &p         },
-                { Q,            &q         },
-                { R,            &r         },
-                { S,            &s         },
-                { T,            &t         },
-                { U,            &u         },
-                { V,            &v         },
-                { W,            &w         },
-                { _X,           &x         },
-                { _Y,           &y         },
-                { Z,            &z         },
+        void init()
+        {
+            keysyms = xcb_key_symbols_alloc( conn );
+            if ( keysyms )
+            {
+                map<uint32_t, xcb_keycode_t *> key_map = {
+                    { A,            &a         },
+                    { B,            &b         },
+                    { C,            &c         },
+                    { D,            &d         },
+                    { E,            &e         },
+                    { F,            &f         },
+                    { G,            &g         },
+                    { H,            &h         },
+                    { I,            &i         },
+                    { J,            &j         },
+                    { K,            &k         },
+                    { L,            &l         },
+                    { M,            &m         },
+                    { _N,           &n         },
+                    { O,            &o         },
+                    { P,            &p         },
+                    { Q,            &q         },
+                    { R,            &r         },
+                    { S,            &s         },
+                    { T,            &t         },
+                    { U,            &u         },
+                    { V,            &v         },
+                    { W,            &w         },
+                    { _X,           &x         },
+                    { _Y,           &y         },
+                    { Z,            &z         },
 
-                { SPACE_BAR,    &space_bar },
-                { ENTER,        &enter     },
-                { DELETE,       &_delete   },
+                    { SPACE_BAR,    &space_bar },
+                    { ENTER,        &enter     },
+                    { DELETE,       &_delete   },
 
-                { F11,          &f11       },
-                { F12,          &f12       },
-                { N_1,          &n_1       },
-                { N_2,          &n_2       },
-                { N_3,          &n_3       },
-                { N_4,          &n_4       },
-                { N_5,          &n_5       },
-                { R_ARROW,      &r_arrow   },
-                { L_ARROW,      &l_arrow   },
-                { U_ARROW,      &u_arrow   },
-                { D_ARROW,      &d_arrow   },
-                { TAB,          &tab       },
-                { SUPER_L,      &super_l   },
-                { MINUS,        &minus     },
-                { UNDERSCORE,   &underscore}
-
-            };
-            for (auto &pair : key_map) {
-                xcb_keycode_t *keycode = xcb_key_symbols_get_keycode(keysyms, pair.first);
-                if (keycode) { 
-                    *(pair.second) = *keycode;
-                    free(keycode);
+                    { F11,          &f11       },
+                    { F12,          &f12       },
+                    { N_1,          &n_1       },
+                    { N_2,          &n_2       },
+                    { N_3,          &n_3       },
+                    { N_4,          &n_4       },
+                    { N_5,          &n_5       },
+                    { R_ARROW,      &r_arrow   },
+                    { L_ARROW,      &l_arrow   },
+                    { U_ARROW,      &u_arrow   },
+                    { D_ARROW,      &d_arrow   },
+                    { TAB,          &tab       },
+                    { SUPER_L,      &super_l   },
+                    { MINUS,        &minus     },
+                    { UNDERSCORE,   &underscore}
+                };
+                for ( auto &pair : key_map )
+                {
+                    xcb_keycode_t *keycode = xcb_key_symbols_get_keycode( keysyms, pair.first );
+                    if ( keycode )
+                    { 
+                        *( pair.second ) = *keycode;
+                        free( keycode );
+                    }
                 }
-            }}
+            }
         }
 
     // variabels.
@@ -7774,8 +7780,8 @@ class Window_Manager {
                 _setup();
                 _iter();
                 _screen();
-                xcb = connect_to_server(conn, screen);
-                if ((xcb->check_conn() & (1ULL << X_CONN_ERROR)) != 0)
+                xcb = connect_to_server( conn, screen );
+                if (( xcb->check_conn() & ( 1ULL << X_CONN_ERROR )) != 0 )
                 {
                     loutE << "x not connected" << loutEND;
                 }
@@ -7785,8 +7791,8 @@ class Window_Manager {
                 }
 
                 root = screen->root;
-                root.width(screen->width_in_pixels);
-                root.height(screen->height_in_pixels);
+                root.width( screen->width_in_pixels );
+                root.height( screen->height_in_pixels );
 
                 setSubstructureRedirectMask();
                 configure_root();
@@ -7795,36 +7801,30 @@ class Window_Manager {
                 key_codes.init();
                 event_handler = new __event_handler__();
                 
-                create_new_desktop(1);
-                create_new_desktop(2);
-                create_new_desktop(3);
-                create_new_desktop(4);
-                create_new_desktop(5);
+                create_new_desktop( 1 );
+                create_new_desktop( 2 );
+                create_new_desktop( 3 );
+                create_new_desktop( 4 );
+                create_new_desktop( 5 );
 
                 context_menu = new class context_menu();
-                context_menu->add_entry("konsole",              [this]() -> void { launcher.program((char *) "konsole"); });
-                context_menu->add_entry("google-chrome-stable", [this]() -> void { launcher.launch_child_process("google-chrome-stable"); });
-                context_menu->add_entry("code",                 [this]() -> void { launcher.launch_child_process("code"); });
-                context_menu->add_entry("dolphin",              [&]() { launcher.launch_child_process("dolphin"); });
+                context_menu->add_entry( "konsole",              [ this ]() -> void { launcher.program( (char *) "konsole" ); });
+                context_menu->add_entry( "google-chrome-stable", [ this ]() -> void { launcher.launch_child_process( "google-chrome-stable" ); });
+                context_menu->add_entry( "code",                 [ this ]() -> void { launcher.launch_child_process( "code" ); });
+                context_menu->add_entry( "dolphin",              [ this ]() -> void { launcher.launch_child_process( "dolphin" ); });
 
                 setup_events(); 
 
             }
-            void launch_program(char *program) {
-                if (fork() == 0) {
-                    setsid();
-                    execvp(program, (char *[]) { program, nullptr });
-                }
-            }
-            void quit(const int &__status) {
+            void quit( int __status )
+            {
                 pid_manager->kill_all_pids();
-                xcb_flush(conn);
-                delete_client_vec(client_list);
-                delete_desktop_vec(desktop_list);
-                xcb_ewmh_connection_wipe(ewmh);
-                xcb_disconnect(conn);
-                exit(__status);
-
+                xcb_flush( conn );
+                delete_client_vec( client_list );
+                delete_desktop_vec( desktop_list );
+                xcb_ewmh_connection_wipe( ewmh );
+                xcb_disconnect( conn );
+                exit( __status );
             }
             void get_atom(char *name, xcb_atom_t *atom) {
                 xcb_intern_atom_reply_t *reply = xcb_intern_atom_reply(conn, xcb_intern_atom(conn, 0, slen(name), name), NULL);
@@ -8247,61 +8247,61 @@ class Window_Manager {
     private:
     /* Functions   */
         /* Init   */
-            void _conn(const char *displayname, int *screenp) {
-                conn = xcb_connect(displayname, screenp);
+            void _conn(const char *displayname, int *screenp)
+            {
+                conn = xcb_connect( displayname, screenp );
                 check_conn();
-
             }
-            void _ewmh() {
-                if (!(ewmh = static_cast<xcb_ewmh_connection_t *>(calloc(1, sizeof(xcb_ewmh_connection_t))))) {
+            void _ewmh()
+            {
+                if ( !( ewmh = static_cast<xcb_ewmh_connection_t *>( calloc( 1, sizeof( xcb_ewmh_connection_t )))))
+                {
                     loutE << "ewmh faild to initialize" << loutEND;
-                    quit(1);
-
+                    quit( 1 );
                 }                    
-                xcb_intern_atom_cookie_t * cookie = xcb_ewmh_init_atoms(conn, ewmh);
-                if (!(xcb_ewmh_init_atoms_replies(ewmh, cookie, 0))) {
+                
+                xcb_intern_atom_cookie_t * cookie = xcb_ewmh_init_atoms( conn, ewmh );
+                if ( !( xcb_ewmh_init_atoms_replies( ewmh, cookie, 0 )))
+                {
                     loutE << "xcb_ewmh_init_atoms_replies:faild" << loutEND;
-                    quit(1);
-
+                    quit( 1 );
                 }
-
             }
-            void _setup() {
+            void _setup()
+            {
                 setup = xcb_get_setup(conn);
-
             }
-            void _iter() {
+            void _iter()
+            {
                 iter = xcb_setup_roots_iterator(setup);
-            
             }
-            void _screen() {
+            void _screen()
+            {
                 screen = iter.data;
-            
             }
-            bool setSubstructureRedirectMask() {
+            bool setSubstructureRedirectMask()
+            {
                 xcb_void_cookie_t cookie = xcb_change_window_attributes_checked(
                     conn,
                     root,
                     XCB_CW_EVENT_MASK,
-                    (const uint32_t[1]) {
+                    (const uint32_t[1])
+                    {
                         XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY
-                    
                     }
-
-                ); xcb_generic_error_t * error = xcb_request_check(conn, cookie);
-
-                if (error) {
-                    loutE << "Error: Another window manager is already running or failed to set SubstructureRedirect mask" << loutEND; 
-                    free(error);
-                    return false;
-
-                } return true;
-            
+                );
+                xcb_generic_error_t *error = xcb_request_check( conn, cookie );
+                if ( !error ) return true;
+                
+                loutE << "Error: Another window manager is already running or failed to set SubstructureRedirect mask" << loutEND;
+                free( error );
+                return false;
             }
-            void configure_root() {
-                root.set_backround_color(DARK_GREY);
-                root.set_event_mask(ROOT_EVENT_MASK);
-                root.grab_keys({
+            void configure_root()
+            {
+                root.set_backround_color( DARK_GREY );
+                root.set_event_mask( ROOT_EVENT_MASK );
+                root.grab_keys( {
                     { Q,       SHIFT  | ALT   },
                     { T,       CTRL   | ALT   },
                     { L_ARROW, CTRL   | SUPER },
@@ -8312,54 +8312,58 @@ class Window_Manager {
                 }); root.clear();
 
                 #ifndef ARMV8_BUILD
-                    root.set_backround_png(USER_PATH_PREFIX("/mwm_png/galaxy21.png"));
+                    root.set_backround_png( USER_PATH_PREFIX( "/mwm_png/galaxy21.png" ));
                     // root.set_backround_png(USER_PATH_PREFIX("/mwm_png/galaxy16-17-3840x1200.png"));
                 #endif
-                root.set_pointer(CURSOR::arrow);
+                root.set_pointer( CURSOR::arrow );
 
             }
             void setup_events()
             {
-                event_handler->setEventCallback(XCB_MAP_REQUEST, [&](Ev ev) {
-                    RE_CAST_EV(xcb_map_request_event_t);
-                    client *c = signal_manager->_window_client_map.retrive(e->window);
-                    if (!c) {
-                        this->manage_new_client(e->window);
-                    }
+                event_handler->setEventCallback( XCB_MAP_REQUEST, [ & ]( Ev ev ) -> void
+                {
+                    RE_CAST_EV( xcb_map_request_event_t );
+                    client *c = signal_manager->_window_client_map.retrive( e->window );
+                    if ( c ) return;
+                    this->manage_new_client( e->window );
                 });
-
-                event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) {
-                    RE_CAST_EV(xcb_button_press_event_t);
-                    if (e->event != screen->root) return;
-                    if (e->detail == L_MOUSE_BUTTON) {
+                event_handler->setEventCallback( XCB_BUTTON_PRESS, [ & ]( Ev ev ) -> void
+                {
+                    RE_CAST_EV( xcb_button_press_event_t );
+                    if ( e->event != screen->root ) return;
+                    
+                    if ( e->detail == L_MOUSE_BUTTON )
+                    {
                         this->unfocus();
-                        if (this->context_menu->context_window.is_mapped()) {
-                            Emit(this->context_menu->context_window, HIDE_CONTEXT_MENU);
+                        if ( this->context_menu->context_window.is_mapped() )
+                        {
+                            Emit( this->context_menu->context_window, HIDE_CONTEXT_MENU );
                         }
                     }
-                    else if (e->detail == R_MOUSE_BUTTON) {
+                    else if ( e->detail == R_MOUSE_BUTTON )
+                    {
                         this->context_menu->show();    
                     }
                     
                 });
-
-                event_handler->setEventCallback(XCB_KEY_PRESS, [&](Ev ev) {
-                    RE_CAST_EV(xcb_key_press_event_t);
-                    if (e->detail == key_codes.tab && ((e->state & ALT) != 0))
+                event_handler->setEventCallback( XCB_KEY_PRESS, [ & ]( Ev ev ) -> void
+                {
+                    RE_CAST_EV( xcb_key_press_event_t );
+                    if ( e->detail == key_codes.tab && (( e->state & ALT ) != 0 ))
                     {
                         this->cycle_focus();
                     }
-                    else if (e->detail == key_codes.t && ((e->state & ALT) != 0) && ((e->state & CTRL) != 0))
+                    else if ( e->detail == key_codes.t && (( e->state & ALT ) != 0 ) && (( e->state & CTRL ) != 0 ))
                     {
-                        this->launcher.launch_child_process("konsole");
+                        this->launcher.launch_child_process( "konsole" );
                     }
-                    else if (e->detail == key_codes.q && ((e->state & ALT) != 0) && ((e->state & SHIFT) != 0))
+                    else if ( e->detail == key_codes.q && (( e->state & ALT ) != 0 ) && (( e->state & SHIFT ) != 0 ))
                     {
-                        this->quit(0);
+                        this->quit( 0 );
                     }
                 });
-
-                event_handler->setEventCallback(XCB_FOCUS_IN, [&](Ev ev) {
+                event_handler->setEventCallback( XCB_FOCUS_IN, [ & ]( Ev ev ) -> void
+                {
                     RE_CAST_EV(xcb_focus_in_event_t);
                     client *c = signal_manager->_window_client_map.retrive(e->event);
                     if (c) {
@@ -12392,25 +12396,11 @@ class __dock__ {
 }; static __dock__ *dock( nullptr );
 
 class DropDownTerm {
-    /* void toggleTerm(  )
-    {
-        if ( w.y( ) == ( - ( screen->height_in_pixels / 2 )))
-        {
-            w.raise( );
-            w.y( 0 );
-            FlushX_Win( w );
-        }
-        else
-        {
-            w.y( - ( screen->height_in_pixels / 2 ));
-            FlushX_Win( w );
-        }
-    } */
-
     public:
         window w;
+        vector<window> w_vec;
 
-        void init(  )
+        void init()
         {
             w.create_window(
                 screen->root,
@@ -12423,15 +12413,29 @@ class DropDownTerm {
                 MAP
             );
             FlushX_Win( w );
+            for ( int i = 0; i < (( screen->height_in_pixels / 2 ) / 20 ); ++i )
+            {
+                window window;
+                window.create_window(
+                    w,
+                    0,
+                    ((( screen->height_in_pixels / 2 ) - 20 ) - ( i * 20 )),
+                    screen->width_in_pixels,
+                    20,
+                    WHITE,
+                    NONE,
+                    MAP
+                );
+            }
 
-            event_handler->setEventCallback( XCB_KEY_PRESS, [ & ]( Ev ev )
+            event_handler->setEventCallback( XCB_KEY_PRESS, [ & ]( Ev ev ) -> void
             {
                 RE_CAST_EV( xcb_key_press_event_t );
                 if ( e->detail == wm->key_codes.f12 )
                 {
-                    if ( w.y( ) == ( - ( screen->height_in_pixels / 2 )))
+                    if ( w.y() == ( - ( screen->height_in_pixels / 2 )))
                     {
-                        w.raise( );
+                        w.raise();
                         w.y( 0 );
                         FlushX_Win( w );
                     }
@@ -14502,13 +14506,13 @@ class test {
             change_desktop cd(conn);
             const int og_duration = cd.duration;
 
-            while (i < (end + 1))
+            while ( i < ( end + 1 ))
             {
                 cd.change_to(change_desktop::NEXT);
                 cd.change_to(change_desktop::PREV);
                 cd.duration = (cd.duration - 1);
                 ++i;
-                if (!running) break;
+                if ( !running ) break;
             }
         }
 
@@ -14626,61 +14630,22 @@ void setup_wm()
     NEW_CLASS(ddTerm,          DropDownTerm       ) { ddTerm->init(); }
 
 }
-void process_expose_events_only() {
-    xcb_generic_event_t *ev;
-
-    while ((ev = xcb_poll_for_queued_event(conn)) != NULL) {
-        // Check if the event is an Expose event
-        uint8_t res = ev->response_type & ~0x80;
-        if (res == XCB_EXPOSE) {
-            xcb_expose_event_t *e = (xcb_expose_event_t *)ev;
-            Emit(e->window, XCB_EXPOSE);
-            
-            // Here you can add more logic to handle the Expose event,
-            // such as redrawing the contents of the window.
-        }
-        free(ev);
-        
-        // Free the event structure allocated by xcb_poll_for_queued_event
-    }
-}
-int main() {
+int main()
+{
     loutI << "\n\n          -- mwm starting --\n" << '\n';
 
-    INIT_NET_LOG(ESP_SERVER);
-    NET_LOG("Starting mwm.");
-
-    function<void()> audio_thread = [&]()-> void {
+    function<void()> audio_thread = [ & ]()-> void
+    {
         audio.init();
         audio.run();
 
-    }; thread(audio_thread).detach();
+    }; thread( audio_thread ).detach();
 
     setup_wm();
     audio.list_sinks();
 
     test tester;
     tester.init();
-    /* TimedDataSender sync( 8, [&]() -> void {
-        FLUSH_X();
-    });
-
-    TimedDataSender tds(300, [&]() -> void {
-        for (const auto &pair : expose_tasks) {
-            pair.second();
-        }
-    });
-    TimedDataSender cli(400, [&]() -> void {
-        chrono::microseconds time;
-        {
-            ScopeTimer timer( "cli_tasks", time );
-            for ( client *c : cli_tasks ) {
-                if ( c ) {
-                    c->draw_title( TITLE_REQ_DRAW );
-                }
-            }
-        }
-    }); */
 
     event_handler->run();
     xcb_disconnect(conn);
