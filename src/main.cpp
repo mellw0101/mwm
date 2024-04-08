@@ -7316,7 +7316,7 @@ class client {
                     {
                         this->win.kill();
                     }
-                    else 
+                    else if ( this->frame.is_mapped() )
                     {
                         this->kill();
                     }
