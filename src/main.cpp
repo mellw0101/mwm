@@ -5917,7 +5917,7 @@ class window {
                         if ( e->event == this->_window )
                         {
                             loutI << "cur vec size" << this->_ev_id_vec.size() << '\n';
-                            for ( int i = 0; i < this->_ev_id_vec.size(); ++i )
+                            for ( int i = 1; i < this->_ev_id_vec.size(); ++i )
                             {
                                 event_handler->removeEventCallback( this->_ev_id_vec[i].first, this->_ev_id_vec[i].second );
                             }
