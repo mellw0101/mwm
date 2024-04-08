@@ -4100,14 +4100,16 @@ class window {
                 xcb_intern_atom_cookie_t delete_cookie = xcb_intern_atom(conn, 0, 16, "WM_DELETE_WINDOW");
                 xcb_intern_atom_reply_t *delete_reply = xcb_intern_atom_reply(conn, delete_cookie, nullptr);
 
-                if (protocols_reply == nullptr) {
+                if ( ! protocols_reply )
+                {
                     loutE << "protocols reply is null" << loutEND;
                     free(protocols_reply);
                     free(delete_reply);
                     return;
                 }
 
-                if (delete_reply == nullptr) {
+                if ( ! delete_reply )
+                {
                     loutE << "delete reply is null" << loutEND;
                     free(protocols_reply);
                     free(delete_reply);
@@ -4116,29 +4118,27 @@ class window {
 
                 int i = 0;
                 do {
-                    send_event(KILL_WINDOW, (uint32_t[3]){32, protocols_reply->atom, delete_reply->atom});
+                    send_event( KILL_WINDOW, (uint32_t[3]){ 32, protocols_reply->atom, delete_reply->atom });
                     FLUSH_XWin();
 
-                    if (is_mapped()) {
-                        ++i;
-                    }
-                    else {
+                    if ( ! is_mapped() )
+                    {
                         break;
                     }
 
-                } while (i < 3);
+                } while ( ++i < 3 );
 
-                free(delete_reply);
-                free(protocols_reply);
+                free( delete_reply );
+                free( protocols_reply );
 
-                if (xcb->window_exists(w)) {
+                if ( is_mapped() )
+                {
                     loutEWin << "Failed to kill window by asking nicely iters" << i << loutEND;
                     return;
                 }
-                else {
-                    signal_manager->_window_signals.remove(w);
-                    signal_manager->_window_client_map.remove(w);
-                }
+
+                signal_manager->_window_signals.remove( w );
+                signal_manager->_window_client_map.remove( w );
 
             }
             void kill_test() {
@@ -7187,7 +7187,7 @@ class client {
                 FLUSH_X();
             , this->win); */
             do {
-                int id = event_handler->setEventCallback( XCB_PROPERTY_NOTIFY, [ & ]( Ev ev )
+                int id = event_handler->setEventCallback( XCB_PROPERTY_NOTIFY, [ & ]( Ev ev )-> void
                 {
                     RE_CAST_EV( xcb_property_notify_event_t );
                     if ( e->window == this->win )
@@ -7223,7 +7223,8 @@ class client {
 
             , this->titlebar ); */
         }
-        void make_close_button() {
+        void make_close_button()
+        {
             this->close_button.create_window(
                 frame,
                 (width - BUTTON_SIZE - BORDER_SIZE),
@@ -7236,30 +7237,45 @@ class client {
                 (int[]){ALL, 1, BLACK},
                 CURSOR::hand2
 
-            ); CWC(close_button);
-            FLUSH_X();
-            close_button.make_then_set_png(USER_PATH_PREFIX("/close.png"), CLOSE_BUTTON_BITMAP);
-            
-            event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) {
-                RE_CAST_EV(xcb_button_press_event_t);
-                if (e->event != this->close_button) return;
-                if (e->detail != L_MOUSE_BUTTON) return;
-                WS_emit(this->win, KILL_SIGNAL);
-                
-            });
-            event_handler->setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev) {
-                RE_CAST_EV(xcb_enter_notify_event_t);
-                if (e->event == this->close_button) {
-                    this->close_button.change_border_color(WHITE);
-                }
-            });
-            event_handler->setEventCallback(XCB_LEAVE_NOTIFY, [&](Ev ev) {
-                RE_CAST_EV(xcb_leave_notify_event_t);
-                if (e->event == this->close_button) {
-                    this->close_button.change_border_color(BLACK);
-                }
-            });
+            );
+            CWC( close_button );
+            FlushX_Win( this->close_button );
+            close_button.make_then_set_png( USER_PATH_PREFIX( "/close.png" ), CLOSE_BUTTON_BITMAP );
+            do {
+                int id = event_handler->setEventCallback( XCB_BUTTON_PRESS, [ & ]( Ev ev )-> void
+                {
+                    RE_CAST_EV( xcb_button_press_event_t );
+                    if ( e->event != this->close_button ) return;
+                    if ( e->detail != L_MOUSE_BUTTON ) return;
+                    WS_emit( this->win, KILL_SIGNAL );
+                });
+                ev_id_vec.push_back( { XCB_BUTTON_PRESS, id } );
 
+            } while ( 0 );
+            do {
+                int id = event_handler->setEventCallback( XCB_ENTER_NOTIFY, [ & ]( Ev ev )-> void
+                {
+                    RE_CAST_EV( xcb_enter_notify_event_t );
+                    if ( e->event == this->close_button )
+                    {
+                        this->close_button.change_border_color(WHITE);
+                    }
+                });
+                ev_id_vec.push_back( { XCB_ENTER_NOTIFY, id } );
+                
+            } while ( 0 );
+            do {
+                int id = event_handler->setEventCallback( XCB_LEAVE_NOTIFY, [ & ]( Ev ev )-> void
+                {
+                    RE_CAST_EV( xcb_leave_notify_event_t );
+                    if ( e->event == this->close_button )
+                    {
+                        this->close_button.change_border_color( BLACK );
+                    }
+                });
+                ev_id_vec.push_back( { XCB_LEAVE_NOTIFY, id } );
+
+            } while ( 0 );
         }
         void make_max_button() {
             max_button.create_window(
