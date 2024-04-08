@@ -2945,30 +2945,30 @@ class __event_handler__ {
                 thread_pool.enqueue([](uint32_t __w) {
                 }, e->window); */
             });
-            setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev) {
+            /* setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev) {
                 RE_CAST_EV(xcb_enter_notify_event_t);
-                Emit(e->event, XCB_ENTER_NOTIFY);/* 
-                thread_pool.enqueue([](uint32_t w) {
-                }, e->event); */
+                Emit(e->event, XCB_ENTER_NOTIFY);
+                // thread_pool.enqueue([](uint32_t w) {
+                // }, e->event);
             });
             setEventCallback(XCB_LEAVE_NOTIFY, [&](Ev ev) {
                 RE_CAST_EV(xcb_leave_notify_event_t);
                 Emit(e->event, XCB_LEAVE_NOTIFY);
-                /* thread_pool.enqueue([](uint32_t w) {
-                }, e->event); */
-            });
-            setEventCallback(XCB_FOCUS_IN, [&](Ev ev) {
+                // thread_pool.enqueue([](uint32_t w) {
+                // }, e->event);
+            }); */
+            /* setEventCallback(XCB_FOCUS_IN, [&](Ev ev) {
                 RE_CAST_EV(xcb_focus_in_event_t);
-                Emit(e->event, XCB_FOCUS_IN);/* 
-                thread_pool.enqueue([](uint32_t w) {
-                }, e->event); */
-            });
-            setEventCallback(XCB_FOCUS_OUT, [&](Ev ev) {
+                Emit(e->event, XCB_FOCUS_IN);
+                // thread_pool.enqueue([](uint32_t w) {
+                // }, e->event);
+            }); */
+            /* setEventCallback(XCB_FOCUS_OUT, [&](Ev ev) {
                 RE_CAST_EV(xcb_focus_out_event_t);
-                Emit(e->event, XCB_FOCUS_OUT);/* 
-                thread_pool.enqueue([](uint32_t w) {
-                }, e->event); */
-            });
+                Emit(e->event, XCB_FOCUS_OUT);
+                // thread_pool.enqueue([](uint32_t w) {
+                // }, e->event);
+            }); */
             setEventCallback(XCB_KEY_PRESS, [&](Ev ev) {
                 RE_CAST_EV(xcb_key_press_event_t);
                 /* switch (e->state) { */
@@ -3063,20 +3063,20 @@ class __event_handler__ {
                 }
 
             });
-            setEventCallback(XCB_DESTROY_NOTIFY, [&](Ev ev) {
+            /* setEventCallback(XCB_DESTROY_NOTIFY, [&](Ev ev) {
                 RE_CAST_EV(xcb_destroy_notify_event_t);
                 Emit(e->event, XCB_DESTROY_NOTIFY);
                 Emit(e->window, XCB_DESTROY_NOTIFY);
-                /* client *c;
+                client *c;
                 if ((c = signal_manager->_window_client_map.retrive(e->event)) != nullptr) {
                     HANDLE(DESTROY_NOTIF_EV, e->event);
 
                 } else if ((c = signal_manager->_window_client_map.retrive(e->window)) != nullptr) {
                     HANDLE(DESTROY_NOTIF_W, e->window);
 
-                } */
+                }
 
-            });
+            }); */
             /* setEventCallback(XCB_MAP_REQUEST, [&](Ev ev) {
                 RE_CAST_EV(xcb_map_request_event_t);
                 HANDLE(XCB_MAP_REQUEST, e->window); 
@@ -3133,12 +3133,12 @@ class __event_handler__ {
                 }, e->event);
 
             }); */
-            setEventCallback( XCB_PROPERTY_NOTIFY, [&]( Ev ev ) {
+            /* setEventCallback( XCB_PROPERTY_NOTIFY, [&]( Ev ev ) {
                 RE_CAST_EV(xcb_property_notify_event_t);
-                Emit( e->window, XCB_PROPERTY_NOTIFY );/* 
+                Emit( e->window, XCB_PROPERTY_NOTIFY );
                 thread_pool.enqueue([](uint32_t __w) {
-                }, e->window); */
-            });
+                }, e->window);
+            }); */
 
             while (shouldContinue) {
                 ev = xcb_wait_for_event(conn);
@@ -4123,35 +4123,14 @@ class window {
                     return;
                 }
 
-                int i = 0;
-                do {
-                    send_event( KILL_WINDOW, (uint32_t[3]){ 32, protocols_reply->atom, delete_reply->atom });
-                    FLUSH_XWin();
-
-                    if ( ! is_mapped() )
-                    {
-                        loutIWin << "is_mapped = false" << '\n';
-                        break;
-                    }
-
-                } while ( ++i < 3 );
+                send_event( KILL_WINDOW, (uint32_t[3]){ 32, protocols_reply->atom, delete_reply->atom });
+                FLUSH_XWin();
 
                 free( delete_reply );
                 free( protocols_reply );
 
-                if ( is_mapped() )
-                {
-                    loutEWin << "Failed to kill window by asking nicely iters" << i << loutEND;
-                    return;
-                }
-
                 signal_manager->_window_signals.remove( w );
                 signal_manager->_window_client_map.remove( w );
-                /* for ( int i = 0; i < _ev_id_vec.size(); ++i )
-                {
-                    event_handler->removeEventCallback( _ev_id_vec[i].first, _ev_id_vec[i].second );
-                } */
-
             }
             void kill_test() {
                 uint32_t w = this->_window;
@@ -4261,7 +4240,9 @@ class window {
                     CHECK_VOID_COOKIE();
                     FLUSH_XWin();
                 }
-                if (__event_mask & KILL_WINDOW) {
+                
+                if (__event_mask & KILL_WINDOW)
+                {
                     uint32_t *value_list = reinterpret_cast<uint32_t *>(__value_list);
 
                     xcb_client_message_event_t ev;
@@ -4279,7 +4260,6 @@ class window {
                         _window,
                         XCB_EVENT_MASK_NO_EVENT,
                         (char *)&ev
-
                     );
                     CHECK_VOID_COOKIE();
                     FLUSH_XWin();
@@ -5792,33 +5772,32 @@ class window {
         
         /* Buttons       */
             void grab_button(initializer_list<pair<uint8_t, uint16_t>> __bindings) {
-                for (const auto &pair : __bindings) {
+                for (const auto &pair : __bindings)
+                {
                     VOID_COOKIE = xcb_grab_button(
                         conn, 
-                        1, 
+                        0,
                         _window, 
-                        XCB_EVENT_MASK_BUTTON_PRESS, 
+                        XCB_EVENT_MASK_BUTTON_PRESS,
                         XCB_GRAB_MODE_ASYNC, 
                         XCB_GRAB_MODE_ASYNC, 
                         XCB_NONE,
                         XCB_NONE,
                         pair.first,
                         pair.second
-
-                    ); CHECK_VOID_COOKIE();
+                    );
+                    CHECK_VOID_COOKIE();
                     FLUSH_XWin();
-
                 }
-
             }
             void ungrab_button(initializer_list<pair<uint8_t, uint16_t>> __bindings) {
-                for (const auto &pair : __bindings) {
+                for (const auto &pair : __bindings)
+                {
                     VOID_COOKIE = xcb_ungrab_button(
                         conn,
                         pair.first,
                         _window,
                         pair.second
-
                     );
                     CHECK_VOID_COOKIE();
                     FLUSH_XWin();
@@ -5826,7 +5805,7 @@ class window {
             }
         
         /* Events */
-            template <typename Callback>
+            /* template <typename Callback>
             void add_action_on_L_button_event(Callback &&__callback)
             {
                 do {
@@ -5841,7 +5820,7 @@ class window {
                     _ev_id_vec.push_back( { XCB_BUTTON_PRESS, id });
 
                 } while ( 0 );
-            }
+            } */
             
     private:
     /* Variables   */
@@ -5875,7 +5854,7 @@ class window {
         uint8_t  _override_redirect = 0;
         uint8_t _bit_state = 0;
 
-        vector<pair<uint8_t, int>> _ev_id_vec;
+        /* vector<pair<uint8_t, int>> _ev_id_vec; */
         /* vector<pair<uint8_t, function<void(const xcb_generic_event_t *)>>> _func_vec; */
 
     /* Methods     */
@@ -6720,6 +6699,7 @@ class client {
                 //     t.join();   
                 // }
 
+                frame.kill();
                 win.kill();
                 close_button.kill();
                 max_button.kill();
@@ -6733,12 +6713,12 @@ class client {
                 border[top_right].kill();
                 border[bottom_left].kill();
                 border[bottom_right].kill();
-                frame.kill();
 
-                remove_from_map();
-                for ( int i = 0; i < ev_id_vec.size(); ++i )
+                /* remove_from_map(); */
+                loutI << "ev_id_vec size" << this->ev_id_vec.size() << '\n';
+                for ( int i = 0; i < this->ev_id_vec.size(); ++i )
                 {
-                    event_handler->removeEventCallback( ev_id_vec[i].first, ev_id_vec[i].second );
+                    event_handler->removeEventCallback( this->ev_id_vec[i].first, this->ev_id_vec[i].second );
                 }
             }
             void add_to_map() {
@@ -7164,14 +7144,14 @@ class client {
                 (width + (BORDER_SIZE * 2)),
                 (height + TITLE_BAR_HEIGHT + (BORDER_SIZE * 2)),
                 DARK_GREY
-
-            ); win.reparent(frame, BORDER_SIZE, (TITLE_BAR_HEIGHT + BORDER_SIZE));
-            FLUSH_X();
+            );
+            FlushX_Win( this->frame );
+            win.reparent( frame, BORDER_SIZE, ( TITLE_BAR_HEIGHT + BORDER_SIZE ));
+            FlushX_Win( this->win );
             update();
     
             CONN(XCB_FOCUS_IN,
                 this->win.ungrab_button({{L_MOUSE_BUTTON, NULL}});
-                
 
             , this->win);
 
@@ -7186,37 +7166,43 @@ class client {
                 this->win.focus_input();
 
             , this->win);
-
-            frame.set_event_mask(FRAME_EVENT_MASK);
+            /* do {
+                int id = event_handler->setEventCallback(
+                XCB_BUTTON_PRESS,
+                [ this ]( Ev ev )
+                {
+                    RE_CAST_EV( xcb_button_press_event_t );
+                    if ( e->event == this->win )
+                    {
+                        this->win.set_active_EWMH_window();
+                        this->focus();
+                        this->win.focus_input();
+                    }
+                });
+                ev_id_vec.push_back( { XCB_BUTTON_PRESS, id } );
+                
+            } while ( 0 ); */
+            frame.set_event_mask( FRAME_EVENT_MASK );
             frame.map();
 
-            CONN(KILL_SIGNAL,
-                if ( this->win.is_mapped() )
+            do {
+                int id = event_handler->setEventCallback(
+                XCB_DESTROY_NOTIFY,
+                [ & ]( Ev ev )-> void
                 {
-                    this->win.kill();
-                }
-                else if ( this->frame.is_mapped() )
-                {
-                    this->kill();
-                }
-
-            , this->win);
-
-            CONN(XCB_DESTROY_NOTIFY,
-                if (!this->win.is_mapped())
-                {
-                    this->kill();
-                }
-                else
-                {
-                    this->win.kill();
-                }
+                    RE_CAST_EV( xcb_destroy_notify_event_t );
+                    if ( e->window == this->win && e->event != this->win )
+                    {
+                        loutI << Var_( e->window ) << ' ' << Var_( e->event ) << ' ' << Var_( screen->root ) << '\n';
+                        this->kill();
+                    }
+                });
+                ev_id_vec.push_back( { XCB_DESTROY_NOTIFY, id } );
             
-            , this->win);
+            } while ( 0 );
 
-            CWC(frame);
-            CWC(win);
-        
+            CWC( frame );
+            CWC( win );
         }
         void make_titlebar()
         {
@@ -7252,25 +7238,29 @@ class client {
                 FLUSH_X();
             , this->win); */
             do {
-                int id = event_handler->setEventCallback( XCB_PROPERTY_NOTIFY, [ & ]( Ev ev )-> void
+                int id = event_handler->setEventCallback(
+                XCB_PROPERTY_NOTIFY,
+                [ this ]( Ev ev )-> void
                 {
                     RE_CAST_EV( xcb_property_notify_event_t );
-                    if ( e->window == this->win )
+                    if ( e->window == this->win && e->atom == ewmh->_NET_WM_NAME )
                     {
-                        this->titlebar.clear( );
-                        this->titlebar.draw_acc_16( this->win.get_net_wm_name_by_req( ) );
+                        this->titlebar.clear();
+                        this->titlebar.draw_acc_16( this->win.get_net_wm_name_by_req() );
                         FlushX_Win( this->titlebar );
                     }
                 });
-                ev_id_vec.push_back({XCB_PROPERTY_NOTIFY, id});
+                ev_id_vec.push_back( { XCB_PROPERTY_NOTIFY, id } );
             
             } while ( 0 );
 
             do {
-                int id = event_handler->setEventCallback( XCB_EXPOSE, [&](Ev ev)
+                int id = event_handler->setEventCallback(
+                XCB_EXPOSE,
+                [ this ]( Ev ev )-> void
                 {
                     RE_CAST_EV( xcb_expose_event_t );
-                    if ( e->window == this->titlebar )
+                    if ( e->window == this->titlebar && this->titlebar.is_mapped() )
                     {
                         this->titlebar.clear();
                         this->titlebar.draw_acc_16( this->win.get_net_wm_name() );
@@ -7301,13 +7291,16 @@ class client {
                 MAP,
                 (int[]){ALL, 1, BLACK},
                 CURSOR::hand2
-
             );
             CWC( close_button );
             FlushX_Win( this->close_button );
             close_button.make_then_set_png( USER_PATH_PREFIX( "/close.png" ), CLOSE_BUTTON_BITMAP );
+            close_button.grab_button( { { L_MOUSE_BUTTON, NULL } } );
+            
             do {
-                int id = event_handler->setEventCallback( XCB_BUTTON_PRESS, [ & ]( Ev ev )-> void
+                int id = event_handler->setEventCallback(
+                XCB_BUTTON_PRESS,
+                [ this ]( Ev ev )-> void
                 {
                     RE_CAST_EV( xcb_button_press_event_t );
                     if ( e->event != this->close_button ) return;
@@ -7316,42 +7309,31 @@ class client {
                     {
                         this->win.kill();
                     }
-                    else if ( this->frame.is_mapped() )
-                    {
-                        this->kill();
-                    }
-                    /* WS_emit( this->win, KILL_SIGNAL ); */
                 });
+                loutI << "'close_button' XCB_BUTTON_PRESS id" << id << '\n';
                 ev_id_vec.push_back( { XCB_BUTTON_PRESS, id } );
 
             } while ( 0 );
-            /* close_button.add_action_on_L_button_event(
-            [ this ]()-> void
-            {
-                if ( this->win.is_mapped() )
-                {
-                    this->win.kill();
-                }
-                else
-                {
-                    this->kill();
-                }
-            }); */
 
             do {
-                int id = event_handler->setEventCallback( XCB_ENTER_NOTIFY, [ & ]( Ev ev )-> void
+                int id = event_handler->setEventCallback(
+                XCB_ENTER_NOTIFY,
+                [ this ]( Ev ev )-> void
                 {
                     RE_CAST_EV( xcb_enter_notify_event_t );
                     if ( e->event == this->close_button )
                     {
-                        this->close_button.change_border_color(WHITE);
+                        this->close_button.change_border_color( WHITE );
                     }
                 });
                 ev_id_vec.push_back( { XCB_ENTER_NOTIFY, id } );
                 
             } while ( 0 );
+
             do {
-                int id = event_handler->setEventCallback( XCB_LEAVE_NOTIFY, [ & ]( Ev ev )-> void
+                int id = event_handler->setEventCallback(
+                XCB_LEAVE_NOTIFY,
+                [ this ]( Ev ev )-> void
                 {
                     RE_CAST_EV( xcb_leave_notify_event_t );
                     if ( e->event == this->close_button )
@@ -7363,7 +7345,8 @@ class client {
 
             } while ( 0 );
         }
-        void make_max_button() {
+        void make_max_button()
+        {
             max_button.create_window(
                 frame,
                 (width - (BUTTON_SIZE * 2) - BORDER_SIZE),
@@ -7376,8 +7359,9 @@ class client {
                 (int[3]) {ALL, 1, BLACK},
                 CURSOR::hand2
 
-            ); CWC(max_button);
-            max_button.grab_button({ { L_MOUSE_BUTTON, NULL } });
+            );
+            CWC( max_button );
+            max_button.grab_button( { { L_MOUSE_BUTTON, NULL } } );
 
             Bitmap bitmap(20, 20);
             bitmap.modify(4, 4, 16, true);
@@ -7405,35 +7389,62 @@ class client {
             string s = USER_PATH_PREFIX("/max.png");
             bitmap.exportToPng(s.c_str());
 
-
             max_button.set_backround_png(USER_PATH_PREFIX("/max.png"));
 
             /* CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->max_button) {
                 C_EMIT(this, BUTTON_MAXWIN_PRESS);
 
             }, this->max_button); */
-            event_handler->setEventCallback(XCB_BUTTON_PRESS, [&](Ev ev) {
-                RE_CAST_EV(xcb_button_press_event_t);
-                if (e->event == this->max_button) C_EMIT(this, BUTTON_MAXWIN_PRESS);
 
-            });
+            do {
+                int id = event_handler->setEventCallback(
+                XCB_BUTTON_PRESS,
+                [ this ]( Ev ev ) -> void
+                {
+                    RE_CAST_EV( xcb_button_press_event_t );
+                    if ( e->event != this->max_button ) return;
+                    if ( e->detail == L_MOUSE_BUTTON )
+                    {
+                        C_EMIT( this, BUTTON_MAXWIN_PRESS );
+                    }
+                });
+                ev_id_vec.push_back( { XCB_BUTTON_PRESS, id } );
 
-            event_handler->setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev) {
-                RE_CAST_EV(xcb_enter_notify_event_t);
-                if (e->event != this->max_button) return;
-                this->max_button.change_border_color(WHITE);
-                
-            });
+            } while ( 0 );
 
-            event_handler->setEventCallback(XCB_LEAVE_NOTIFY, [&](Ev ev) {
-                RE_CAST_EV(xcb_leave_notify_event_t);
-                if (e->event != this->max_button) return;
-                this->max_button.change_border_color(BLACK);
- 
-            });
+            do {
+                int id = event_handler->setEventCallback(
+                XCB_ENTER_NOTIFY,
+                [ this ]( Ev ev )-> void
+                {
+                    RE_CAST_EV( xcb_enter_notify_event_t );
+                    if ( e->event == this->max_button ) 
+                    {
+                        this->max_button.change_border_color( WHITE );
+                    }
+                });
+                ev_id_vec.push_back( { XCB_ENTER_NOTIFY, id } );
+
+            } while ( 0 );
+
+            do {
+                int id = event_handler->setEventCallback(
+                XCB_LEAVE_NOTIFY,
+                [ this ]( Ev ev )-> void
+                 {
+                    RE_CAST_EV( xcb_leave_notify_event_t );
+                    if ( e->event == this->max_button )
+                    {
+                        this->max_button.change_border_color( BLACK );
+                    }
+                });
+                ev_id_vec.push_back( { XCB_LEAVE_NOTIFY, id } );
+
+            } while ( 0 );
 
         }
-        void make_min_button() {
+        void make_min_button()
+        {
             min_button.create_window(
                 frame,
                 (width - (BUTTON_SIZE * 3) - BORDER_SIZE),
@@ -7446,9 +7457,10 @@ class client {
                 (int[3]) {ALL, 1, BLACK},
                 CURSOR::hand2
 
-            ); CWC(min_button);
-            FLUSH_X();
-            min_button.grab_button({ { L_MOUSE_BUTTON, NULL } });
+            );
+            FlushX_Win( this->min_button );
+            CWC( min_button );
+            min_button.grab_button( { { L_MOUSE_BUTTON, NULL } } );
 
             Bitmap bitmap(20, 20);
             bitmap.modify(9, 4, 16, true);
@@ -7458,22 +7470,39 @@ class client {
 
             min_button.set_backround_png(USER_PATH_PREFIX("/min.png"));
 
-            event_handler->setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev) {
-                RE_CAST_EV(xcb_enter_notify_event_t);
-                if (e->event == this->min_button) {
-                    this->min_button.change_border_color(WHITE);
-                }
-            });
+            do {
+                int id = event_handler->setEventCallback(
+                XCB_ENTER_NOTIFY,
+                [ this ]( Ev ev )-> void
+                {
+                    RE_CAST_EV( xcb_enter_notify_event_t );
+                    if ( e->event == this->min_button )
+                    {
+                        this->min_button.change_border_color( WHITE );
+                    }
+                });
+                ev_id_vec.push_back( { XCB_ENTER_NOTIFY, id } );
 
-            event_handler->setEventCallback(XCB_LEAVE_NOTIFY, [&](Ev ev) {
-                RE_CAST_EV(xcb_leave_notify_event_t);
-                if (e->event == this->min_button) {
-                    this->min_button.change_border_color(BLACK);
-                }
-            });
+            } while ( 0 );
+
+            do {
+                int id = event_handler->setEventCallback(
+                XCB_LEAVE_NOTIFY,
+                [ this ]( Ev ev )-> void
+                {
+                    RE_CAST_EV( xcb_leave_notify_event_t );
+                    if ( e->event == this->min_button )
+                    {
+                        this->min_button.change_border_color( BLACK );
+                    }
+                });
+                this->ev_id_vec.push_back( { XCB_LEAVE_NOTIFY, id } );
+
+            } while ( 0 );
 
         }
-        void make_borders() {
+        void make_borders()
+        {
             border[left].create_window(
                 frame,
                 0,
@@ -7486,9 +7515,10 @@ class client {
                 nullptr,
                 CURSOR::left_side
 
-            ); CWC(border[left]);
-            border[left].grab_button({ { L_MOUSE_BUTTON, NULL } });
-            FLUSH_X();
+            );
+            CWC( border[ left ] );
+            border[ left ].grab_button( { { L_MOUSE_BUTTON, XCB_BUTTON_MASK_ANY } } );
+            FlushX_Win( this->border[ left ] );
 
             border[right].create_window(
                 frame,
@@ -7503,7 +7533,7 @@ class client {
                 CURSOR::right_side
 
             ); CWC(border[right]);
-            border[right].grab_button({ { L_MOUSE_BUTTON, NULL } });
+            border[right].grab_button({ { L_MOUSE_BUTTON, XCB_BUTTON_MASK_ANY } });
             FLUSH_X();
 
             border[top].create_window(
@@ -7519,7 +7549,7 @@ class client {
                 CURSOR::top_side
 
             ); CWC(border[top]);
-            border[top].grab_button({ { L_MOUSE_BUTTON, NULL } });
+            border[top].grab_button({ { L_MOUSE_BUTTON, XCB_BUTTON_MASK_ANY } });
             FLUSH_X();
 
             border[bottom].create_window(
@@ -7535,7 +7565,7 @@ class client {
                 CURSOR::bottom_side
 
             ); CWC(border[bottom]);
-            border[bottom].grab_button({ { L_MOUSE_BUTTON, NULL } });
+            border[bottom].grab_button({ { L_MOUSE_BUTTON, XCB_BUTTON_MASK_ANY } });
             FLUSH_X();
 
             border[top_left].create_window(
@@ -7551,7 +7581,7 @@ class client {
                 CURSOR::top_left_corner
 
             ); CWC(border[top_left]);
-            border[top_left].grab_button({ { L_MOUSE_BUTTON, NULL } });
+            border[top_left].grab_button({ { L_MOUSE_BUTTON, XCB_BUTTON_MASK_ANY } });
             FLUSH_X();
 
             border[top_right].create_window(
@@ -7567,7 +7597,7 @@ class client {
                 CURSOR::top_right_corner
 
             ); CWC(border[top_right]);
-            border[top_right].grab_button({ { L_MOUSE_BUTTON, NULL } });
+            border[top_right].grab_button({ { L_MOUSE_BUTTON, XCB_BUTTON_MASK_ANY } });
             FLUSH_X();
 
             border[bottom_left].create_window(
@@ -7583,7 +7613,7 @@ class client {
                 CURSOR::bottom_left_corner
 
             ); CWC(border[bottom_left]);
-            border[bottom_left].grab_button({ { L_MOUSE_BUTTON, NULL } });
+            border[bottom_left].grab_button({ { L_MOUSE_BUTTON, XCB_BUTTON_MASK_ANY } });
             FLUSH_X();
 
             border[bottom_right].create_window(
@@ -7599,11 +7629,12 @@ class client {
                 CURSOR::bottom_right_corner
 
             ); CWC(border[bottom_right]);
-            border[bottom_right].grab_button({ { L_MOUSE_BUTTON, NULL } });
+            border[bottom_right].grab_button({ { L_MOUSE_BUTTON, XCB_BUTTON_MASK_ANY } });
             FLUSH_X();
 
         }
-        void set_icon_png() {
+        void set_icon_png()
+        {
             icon.create_window(
                 frame,
                 BORDER_SIZE,
@@ -7615,11 +7646,10 @@ class client {
                 MAP
             
             );
-            CWC(icon);
+            CWC( icon );
 
             win.make_png_from_icon();
-            icon.set_backround_png(PNG_HASH(win.get_icccm_class()));
-
+            icon.set_backround_png( PNG_HASH( win.get_icccm_class()) );
         }
     
     /* Variables   */
@@ -7765,7 +7795,8 @@ class Entry {
         function<void()> action;
 
     /* Methods */
-        void make_window(uint32_t __parent, int16_t __x, int16_t __y, uint16_t __width, uint16_t __height) {
+        void make_window(uint32_t __parent, int16_t __x, int16_t __y, uint16_t __width, uint16_t __height)
+        {
             window.create_window(
                 __parent,
                 __x,
@@ -7775,14 +7806,13 @@ class Entry {
                 BLACK,
                 BUTTON_EVENT_MASK,
                 MAP
-
             );
             CONN(EXPOSE, if (__window == this->window) this->window.draw_acc(name);, this->window);
-            CONN(L_MOUSE_BUTTON_EVENT, if (__window == this->window && this->action != nullptr) this->action(); WS_emit(window.parent(), HIDE_CONTEXT_MENU);, this->window);
+            CONN(L_MOUSE_BUTTON_EVENT, if ( __window == this->window && this->action != nullptr ) this->action(); WS_emit(window.parent(), HIDE_CONTEXT_MENU);, this->window);
+            CONN(R_MOUSE_BUTTON_EVENT, if ( __window == this->window ) Emit( window.parent(), HIDE_CONTEXT_MENU );, this->window);
             CONN(ENTER_NOTIFY, if (__window == this->window) this->window.change_backround_color(WHITE);, this->window);
             CONN(LEAVE_NOTIFY, if (__window == this->window) this->window.change_backround_color(BLACK);, this->window);
-            window.grab_button({ { L_MOUSE_BUTTON, NULL } });
-
+            window.grab_button({ { L_MOUSE_BUTTON, XCB_BUTTON_MASK_ANY } });
         }
 
 };
@@ -7810,52 +7840,60 @@ class context_menu {
             CONN(L_MOUSE_BUTTON_EVENT, WS_emit(this->context_window, HIDE_CONTEXT_MENU);, this->context_window);
 
         }
-        void hide__() {
+        void hide__()
+        {
             context_window.unmap();
             context_window.kill();
 
-            for (int i = 0; i < entries.size(); ++i) {
+            for (int i = 0; i < entries.size(); ++i)
+            {
                 entries[i].window.kill();
             }
         }
-        void make_entries__() {
-            for (int i(0), y(0); i < entries.size(); ++i, y += _height) {
-                entries[i].make_window(context_window, 0, y, _width, _height);
-                signal_manager->_window_signals.emit(entries[i].window, EXPOSE);
+        void make_entries__()
+        {
+            for ( int i(0), y(0); i < entries.size(); ++i, y += _height )
+            {
+                entries[i].make_window( context_window, 0, y, _width, _height );
+                signal_manager->_window_signals.emit( entries[i].window, EXPOSE );
             }
         }
     
     public:
         window context_window;
     
-        void show() {
+        void show()
+        {
             _x = m_pointer->x();
             _y = m_pointer->y();
             
-            for (int i(0), max_len(0); i < entries.size(); ++i) {
-                if (entries[i].name.length() > max_len) {
+            for ( int i(0), max_len(0); i < entries.size(); ++i )
+            {
+                if ( entries[i].name.length() > max_len )
+                {
                     max_len = entries[i].name.length();
-                    _width = ((max_len + 2) * DEFAULT_FONT_WIDTH);
+                    _width = (( max_len + 2 ) * DEFAULT_FONT_WIDTH );
                 }
             }
-            uint16_t new_height = (entries.size() * _height);
+            uint16_t new_height = ( entries.size() * _height );
 
-            if (_y + new_height > screen->height_in_pixels) {
-                _y = (screen->height_in_pixels - new_height);
+            if ( _y + new_height > screen->height_in_pixels )
+            {
+                _y = ( screen->height_in_pixels - new_height );
             }
-            if (_x + _width > screen->width_in_pixels) {
-                _x = (screen->width_in_pixels - _width);
+            if ( _x + _width > screen->width_in_pixels )
+            {
+                _x = ( screen->width_in_pixels - _width );
             }
 
             context_window.x_y_width_height((_x - BORDER_SIZE), (_y - BORDER_SIZE), _width, new_height);
             context_window.map();
             context_window.raise();
+            CONN( HIDE_CONTEXT_MENU, this->hide__();, this->context_window );
             make_entries__();
-
-            CONN(HIDE_CONTEXT_MENU, this->hide__();, this->context_window);
-
         }
-        void add_entry(string name, function<void()> action) {
+        void add_entry(string name, function<void()> action)
+        {
             Entry entry;
             entry.name = name;
             entry.action = action;
@@ -8264,7 +8302,7 @@ class Window_Manager {
                     focused_client = c;
                     check_client(c);
                     c->frame.grab_default_keys();
-                    c->add_to_map();
+                    /* c->add_to_map(); */
                 }
                 c->win.grab_default_keys();
 
@@ -12338,12 +12376,9 @@ class __dock_search__ {
                 BLACK,
                 XCB_EVENT_MASK_STRUCTURE_NOTIFY | XCB_EVENT_MASK_FOCUS_CHANGE,
                 DEFAULT_KEYS | KEYS_FOR_TYPING,
-                (int[]){ALL, 2, BLUE}
+                ( int[]){ALL, 2, BLUE }
             );
-
-            main_window.grab_button({
-                { L_MOUSE_BUTTON, NULL }
-            });
+            main_window.grab_button( { { L_MOUSE_BUTTON, NULL }});
         }
 
         void add_enter_action(function<void()> enter_action)
@@ -12516,6 +12551,22 @@ class __dock__ {
 }; static __dock__ *dock( nullptr );
 
 class DropDownTerm {
+    private:
+        void toggle__()
+        {
+            if ( w.y() == ( - ( screen->height_in_pixels / 2 )))
+            {
+                w.raise();
+                w.y( 0 );
+                FlushX_Win( w );
+            }
+            else
+            {
+                w.y( - ( screen->height_in_pixels / 2 ));
+                FlushX_Win( w );
+            }
+        }
+        
     public:
         window w;
         vector<window> w_vec;
@@ -12542,32 +12593,25 @@ class DropDownTerm {
                     ((( screen->height_in_pixels / 2 ) - 20 ) - ( i * 20 )),
                     screen->width_in_pixels,
                     20,
-                    WHITE,
+                    BLACK,
                     NONE,
-                    MAP,
-                    ( int[] ){ DOWN | LEFT | RIGHT, 1, BLACK }
+                    MAP
                 );
                 w_vec.push_back( window );
             }
 
-            event_handler->setEventCallback( XCB_KEY_PRESS, [ & ]( Ev ev ) -> void
+            event_handler->setEventCallback(
+            XCB_KEY_PRESS,
+            [ this ]( Ev ev ) -> void
             {
                 RE_CAST_EV( xcb_key_press_event_t );
                 if ( e->detail == wm->key_codes.f12 )
                 {
-                    if ( w.y() == ( - ( screen->height_in_pixels / 2 )))
-                    {
-                        w.raise();
-                        w.y( 0 );
-                        FlushX_Win( w );
-                    }
-                    else
-                    {
-                        w.y( - ( screen->height_in_pixels / 2 ));
-                        FlushX_Win( w );
-                    }
+                    toggle__();
                 }
             });
+
+            wm->context_menu->add_entry( "DropDownTerm", [ this ]()-> void { this->toggle__(); } );
         }
 };
 static DropDownTerm *ddTerm( nullptr );
@@ -14192,23 +14236,24 @@ class Events {
 
         }
 
-        void init_signals() {
+        void init_signals()
+        {
             CONN_root(MOVE_TO_DESKTOP_1, W_callback -> void { change_desktop::teleport_to(1); });
             CONN_root(MOVE_TO_DESKTOP_2, W_callback -> void { change_desktop::teleport_to(2); });
             CONN_root(MOVE_TO_DESKTOP_3, W_callback -> void { change_desktop::teleport_to(3); });
             CONN_root(MOVE_TO_DESKTOP_4, W_callback -> void { change_desktop::teleport_to(4); });
             CONN_root(MOVE_TO_DESKTOP_5, W_callback -> void { change_desktop::teleport_to(5); });
 
-            CONN_root(MOVE_TO_NEXT_DESKTOP, W_callback -> void { change_desktop(conn).change_to(change_desktop::NEXT); });
-            CONN_root(MOVE_TO_PREV_DESKTOP, W_callback -> void { change_desktop(conn).change_to(change_desktop::PREV); });
+            /* CONN_root(MOVE_TO_NEXT_DESKTOP, W_callback -> void { change_desktop(conn).change_to(change_desktop::NEXT); });
+            CONN_root(MOVE_TO_PREV_DESKTOP, W_callback -> void { change_desktop(conn).change_to(change_desktop::PREV); }); */
             
-            CONN_root(FOCUS_CLIENT_FROM_POINTER, W_callback -> void {
+            /* CONN_root(FOCUS_CLIENT_FROM_POINTER, W_callback -> void {
                 client *c = wm->get_client_from_pointer();
                 if (c == nullptr) return;
                 loutI << "got client from pointer" << loutEND;
                 c->focus();
 
-            });
+            }); */
 
             C_SIGNAL(if (__c) tile(__c, TILE::LEFT );, TILE_LEFT);
             C_SIGNAL(if (__c) tile(__c, TILE::RIGHT);, TILE_RIGHT);
@@ -14234,13 +14279,15 @@ class Events {
             });
 
             C_SIGNAL(if (__c) {
-                if (!__c->win.is_mapped()) {
+                if (!__c->win.is_mapped())
+                {
                     __c->kill();
 
-                } else {
+                }
+                else
+                {
                     __c->win.kill();
                     __c->kill();
-
                 }
 
             }, KILL_SIGNAL);
