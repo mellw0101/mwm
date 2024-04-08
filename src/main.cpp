@@ -5910,7 +5910,7 @@ class window {
                 /** NOTE: Setting @p Xid_gen_success bit of @class member variable @p '_bit_state' */
                 _bit_state |= ( 1 << Xid_gen_success );
 
-                do {
+                /* do {
                     int id = event_handler->setEventCallback( XCB_DESTROY_NOTIFY, [ this ](Ev ev)-> void
                     {
                         RE_CAST_EV( xcb_destroy_notify_event_t );
@@ -5924,8 +5924,7 @@ class window {
                         }
                     });
                     _ev_id_vec.push_back( { XCB_DESTROY_NOTIFY, id } );
-                } while ( 0 );
-
+                } while ( 0 ); */
             }
             void clear_window() {
                 VOID_COOKIE = xcb_clear_area(
