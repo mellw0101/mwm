@@ -3467,7 +3467,10 @@ __event_handler__
             });
 
         }
-        void iter_and_log_map_size() {
+
+        void
+        iter_and_log_map_size()
+        {
             uint16_t total_events = 0;
             for (const auto &pair : eventCallbacks)
             {
@@ -4111,11 +4114,10 @@ class window {
                     conn,
                     _window,
                     XCB_CONFIG_WINDOW_STACK_MODE, 
-                    (const uint32_t[1]) {
+                    (const uint32_t[1])
+                    {
                         XCB_STACK_MODE_ABOVE
-
                     }
-                
                 );
                 CHECK_VOID_COOKIE();
                 FLUSH_XWin();
@@ -4140,8 +4142,8 @@ class window {
                     __new_parent,
                     __x,
                     __y
-                
-                ); CHECK_VOID_COOKIE();
+                );
+                CHECK_VOID_COOKIE();
                 FLUSH_XWin();
 
             }

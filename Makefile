@@ -17,43 +17,55 @@ ARMV8_LDFLAGS =  ${LIBS}       	\
                  -std=c++20		\
 				 -DARMV8_BUILD
 
-FASTFLAGS = -O3	 			\
-			-march=native
+FASTFLAGS = \
+	-O3 					\
+	-march=native			\
+	-funroll-loops			\
+	-Rpass=loop-vectorize 	\
+	-flto 					\
+	-m64
 
-CFLAGS =	-std=c++20 						\
-			-pedantic 						\
-			-Wall 							\
-			-Wno-deprecated-declarations	\
-			${FASTFLAGS}
+CFLAGS = \
+	-std=c++20 						\
+	-pedantic 						\
+	-Wall 							\
+	-Wno-deprecated-declarations	\
+	${FASTFLAGS}
 
 CXXFLAGS = ${CFLAGS}
 
-LIBS    = -lxcb         \
-		-lxcb-keysyms	\
-		-lxcb-cursor 	\
-		-lxcb-icccm 	\
-		-lxcb-ewmh 		\
-		-lxcb-xinput	\
-		-lpng 			\
-		-lxcb-image 	\
-		-lxcb-render 	\
-		-lxcb-composite \
-		-lxcb-xinerama 	\
-		-lxcb-xkb 		\
-		-lxcb-xfixes 	\
-		-lxcb-shape 	\
-		-lxcb-randr     \
-		-lImlib2		\
-		-lXau			\
-		-lpthread		\
-		-liw			\
-		-lpulse
+LIBS = \
+	-lxcb         	\
+	-lxcb-keysyms	\
+	-lxcb-cursor 	\
+	-lxcb-icccm 	\
+	-lxcb-ewmh 		\
+	-lxcb-xinput	\
+	-lpng 			\
+	-lxcb-image 	\
+	-lxcb-render 	\
+	-lxcb-composite \
+	-lxcb-xinerama 	\
+	-lxcb-xkb 		\
+	-lxcb-xfixes 	\
+	-lxcb-shape 	\
+	-lxcb-randr     \
+	-lImlib2		\
+	-lXau			\
+	-lpthread		\
+	-liw			\
+	-lpulse
 
-LDFLAGS = ${LIBS}       \
-			-flto 			\
-			-O3 			\
-			-march=native 	\
-			-std=c++20		
+LDFLAGS = \
+	${LIBS} 				\
+	-flto 					\
+	-O3 					\
+	-march=native 			\
+	-std=c++20				\
+	-funroll-loops			\
+	-Rpass=loop-vectorize 	\
+	-flto 					\
+	-m64
 
 # -std=c++20
 
@@ -69,7 +81,6 @@ all: test
 
 %.o: %.cpp
 	${CXX} -c ${CXXFLAGS} $< -o $@ -MMD -MP
-
 
 test: $(OBJ)
 	${CXX} -o $@ $^ ${LDFLAGS}
