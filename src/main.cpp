@@ -8561,6 +8561,7 @@ class Window_Manager {
             void
             quit( int __status )
             {
+                gProf->report("/home/mellw/profiling_report.txt");
                 pid_manager->kill_all_pids();
                 xcb_flush( conn );
                 delete_client_vec( client_list );
