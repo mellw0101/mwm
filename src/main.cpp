@@ -3366,7 +3366,8 @@ class __event_handler__ {
 
         }
 
-        void removeEventCallback(uint8_t eventType, CallbackId id) {
+        void removeEventCallback(uint8_t eventType, CallbackId id)
+        {
             auto& callbacks = eventCallbacks[eventType];
             callbacks.erase(
             remove_if(
@@ -3377,9 +3378,8 @@ class __event_handler__ {
 
                 }
 
-            ), callbacks.end());            
-            loutI << "Deleting id" << id << " " << EVENT_TYPE(eventType) << " vecsize" << eventCallbacks[eventType].size() << loutEND;
-
+            ), callbacks.end());
+            /* loutI << "Deleting id" << id << " " << EVENT_TYPE(eventType) << " vecsize" << eventCallbacks[eventType].size() << loutEND; */
         }
         template<typename Callback>
         void set_key_press_callback(const uint16_t &__mask, const xcb_keycode_t &__key, Callback &&callback) {
@@ -4188,8 +4188,10 @@ class window {
                 CHECK_VOID_COOKIE();
                 FLUSH_XWin();
             }
-            void send_event(uint32_t __event_mask, void *__value_list = nullptr) {
-                if (__event_mask & XCB_EVENT_MASK_EXPOSURE) {
+            void send_event(uint32_t __event_mask, void *__value_list = nullptr)
+            {
+                if (__event_mask & XCB_EVENT_MASK_EXPOSURE)
+                {
                     xcb_expose_event_t expose_event = {
                         .response_type = XCB_EXPOSE,
                         .window = _window,
@@ -4210,7 +4212,8 @@ class window {
                     CHECK_VOID_COOKIE();
                     FLUSH_XWin();
                 }
-                if (__event_mask & XCB_EVENT_MASK_STRUCTURE_NOTIFY) {
+                if (__event_mask & XCB_EVENT_MASK_STRUCTURE_NOTIFY)
+                {
                     uint32_t *value_list =  reinterpret_cast<uint32_t *>(__value_list);
 
                     xcb_configure_notify_event_t event;
@@ -4719,24 +4722,28 @@ class window {
                     }
 
                 }
-                void set_client_size_as_hints(int16_t *__x, int16_t *__y, uint16_t *__width, uint16_t *__height) {
+                void set_client_size_as_hints(int16_t *__x, int16_t *__y, uint16_t *__width, uint16_t *__height)
+                {
                     xcb_size_hints_t hints;
-                    memset(&hints, 0, sizeof(xcb_size_hints_t)); // Initialize hints structure
+                    memset( &hints, 0, sizeof( xcb_size_hints_t )); // Initialize hints structure
 
                     xcb_get_property_cookie_t cookie = xcb_icccm_get_wm_normal_hints(conn, _window);
                     xcb_generic_error_t* error = NULL; // To capture any error
-                    bool result = xcb_icccm_get_wm_normal_hints_reply(conn, cookie, &hints, &error);
+                    bool result = xcb_icccm_get_wm_normal_hints_reply( conn, cookie, &hints, &error );
 
-                    if (!result || error) {
-                        if (error) {
+                    if ( !result || error )
+                    {
+                        if (error)
+                        {
                             loutEWin << "Error retrieving window hints" << loutEND;
                             free(error);
+                        }
+                        return;
+                    }
+                    /* Now, check and use the hints as needed */
 
-                        } return;
-
-                    } /* Now, check and use the hints as needed */
-
-                    if (hints.flags & XCB_ICCCM_SIZE_HINT_P_MIN_SIZE) {
+                    if ( hints.flags & XCB_ICCCM_SIZE_HINT_P_MIN_SIZE )
+                    {
                         _min_width  = hints.min_width;
                         _min_height = hints.min_height;
                         *__x        = hints.x;
@@ -4744,18 +4751,19 @@ class window {
                         *__width    = hints.width;
                         *__height   = hints.height;
 
-                        if (hints.width < hints.min_width) {
+                        if ( hints.width < hints.min_width )
+                        {
                             loutE << "something went wrong hints.width" << hints.width << " is less then hints.min_width" << hints.min_width << '\n';
-
                         }
-                        if (hints.height < hints.min_height) {
+                        if ( hints.height < hints.min_height )
+                        {
                             loutE << "something went wrong hints.height" << hints.height << " is less then hints.min_height" << hints.min_height << '\n';
-
                         }
 
-                    } else {
+                    }
+                    else
+                    {
                         loutEWin << "Could not get size hints" << '\n';
-
                     }
 
                 }
@@ -6613,7 +6621,7 @@ class client {
         vector<pair<uint8_t, int>> ev_id_vec;
 
     /* Methods     */
-        /* Main     */
+        /* Main      */
             void make_decorations() {
                 make_frame();
                 set_icon_png();
@@ -6629,11 +6637,11 @@ class client {
             void raise() {
                 frame.raise();
             }
-            void focus() {
+            void focus()
+            {
                 win.focus_input();
                 win.set_active_EWMH_window();
                 frame.raise();
-
             }
             void update()
             {
@@ -6695,7 +6703,6 @@ class client {
                 //     t.join();   
                 // }
 
-                frame.kill();
                 win.kill();
                 close_button.kill();
                 max_button.kill();
@@ -6709,6 +6716,7 @@ class client {
                 border[top_right].kill();
                 border[bottom_left].kill();
                 border[bottom_right].kill();
+                frame.kill();
 
                 for ( int i = 0; i < ev_id_vec.size(); ++i )
                 {
@@ -6882,7 +6890,7 @@ class client {
 
             }/** @brief client to client snaping */
         
-        /* Config   */
+        /* Config    */
             void x_y(const uint32_t &x, const uint32_t &y) {
                 frame.x_y(x, y);
                 // frame.configure(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, (uint32_t[2]){x, y});
@@ -6911,7 +6919,8 @@ class client {
                 xcb_flush(conn);
         
             }
-            void _height(const uint32_t &height) {
+            void _height(const uint32_t &height)
+            {
                 win.height((height - TITLE_BAR_HEIGHT - (BORDER_SIZE * 2)));
                 frame.height(height);
                 border[left].height((height - (BORDER_SIZE * 2)));
@@ -6919,9 +6928,9 @@ class client {
                 border[bottom].y((height - BORDER_SIZE));
                 border[bottom_left].y((height - BORDER_SIZE));
                 border[bottom_right].y((height - BORDER_SIZE));
-        
             }
-            void x_width(const uint32_t &x, const uint32_t &width) {
+            void x_width(const uint32_t &x, const uint32_t &width)
+            {
                 win.width((width - (BORDER_SIZE * 2)));
                 frame.x_width(x, width);
                 titlebar.width((width - (BORDER_SIZE * 2)));
@@ -6934,7 +6943,6 @@ class client {
                 border[top_right].x((width - BORDER_SIZE));
                 border[bottom_right].x((width - BORDER_SIZE));
                 xcb_flush(conn);
-        
             }
             void y_height(const uint32_t & y, const uint32_t & height) {
                 win.height((height - TITLE_BAR_HEIGHT) - (BORDER_SIZE * 2));
@@ -7017,41 +7025,46 @@ class client {
 
             }
         
-        /* Size_pos */
-            void save_ogsize() {
+        /* Size_pos  */
+            void save_ogsize()
+            {
                 ogsize.save(x, y, width, height);
             }
-            void save_tile_ogsize() {
+            void save_tile_ogsize()
+            {
                 tile_ogsize.save(x, y, width, height);
             }
-            void save_max_ewmh_ogsize() {
+            void save_max_ewmh_ogsize()
+            {
                 max_ewmh_ogsize.save(x, y, width, height);
             }
-            void save_max_button_ogsize() {
+            void save_max_button_ogsize()
+            {
                 max_button_ogsize.save(x, y, width, height);
             }
         
-        /* Check    */
-            bool is_active_EWMH_window() {
+        /* Check     */
+            bool is_active_EWMH_window()
+            {
                 return win.is_active_EWMH_window();
-        
             }
-            bool is_EWMH_fullscreen() {
+            bool is_EWMH_fullscreen()
+            {
                 return win.is_EWMH_fullscreen();
-        
             }
-            bool is_button_max_win() {
+            bool is_button_max_win()
+            {
                 if (x      == -BORDER_SIZE
                 &&  y      == -BORDER_SIZE
                 &&  width  == (screen->width_in_pixels  + (BORDER_SIZE * 2))
-                &&  height == (screen->height_in_pixels + (BORDER_SIZE * 2))) {
+                &&  height == (screen->height_in_pixels + (BORDER_SIZE * 2)))
+                {
                     return true;
-
-                } return false;
-
+                }
+                return false;
             }
         
-        /* Set      */
+        /* Set       */
             void set_active_EWMH_window() {
                 win.set_active_EWMH_window();
     
@@ -7060,29 +7073,69 @@ class client {
                 win.set_EWMH_fullscreen_state();
 
             }
-            void set_client_params() {
-                win.set_client_size_as_hints(&x, &y, &width, &height);
-                if (win.get_min_width()  > width
-                &&  win.get_min_height() > height) {
+            void set_client_params()
+            {
+                win.set_client_size_as_hints( &x, &y, &width, &height );
+                if ( win.get_min_width()  > width
+                &&   win.get_min_height() > height
+                ||   height == 0 && width == 0 )
+                {
+                    loutI << "running get_window_parameters" << '\n';
                     get_window_parameters();
-
                 }
 
             }
 
-        /* Get      */
-            void get_window_parameters() {
-                xcb_get_geometry_cookie_t cookie = xcb_get_geometry(conn, win);
-                xcb_get_geometry_reply_t *reply = xcb_get_geometry_reply(conn, cookie, nullptr);
-                if (reply == nullptr) {
+        /* Get       */
+            void get_window_parameters()
+            {
+                xcb_get_geometry_cookie_t cookie = xcb_get_geometry( conn, win );
+                xcb_get_geometry_reply_t *reply = xcb_get_geometry_reply( conn, cookie, nullptr );
+                if ( reply == nullptr )
+                {
                     loutE << "Unable to get window geometry" << '\n';
                     return;
                 }
 
-                x      = reply->x;
-                y      = reply->y;
-                width  = reply->width;
-                height = reply->height;
+                if ( reply->x >= screen->width_in_pixels )
+                {
+                    loutE << "geo reply->x" << reply->x << '\n';
+                    x = ( screen->width_in_pixels / 4 );
+                }
+                else 
+                {
+                    x = reply->x;
+                }
+                
+                if ( reply->y >= screen->height_in_pixels )
+                {
+                    loutE << "geo reply->y" << reply->y << '\n';
+                    y = ( screen->height_in_pixels / 4 );
+                }
+                else 
+                {
+                    y = reply->y;
+                }
+                
+                if ( reply->width >= screen->width_in_pixels )
+                {
+                    loutE << Var_( reply->width ) << '\n';
+                    width = ( screen->width_in_pixels / 2 );
+                }
+                else 
+                {
+                    width = reply->width;
+                }
+
+                if ( reply->height >= screen->height_in_pixels )
+                {
+                    loutE << Var_( reply->height );
+                    height = ( screen->height_in_pixels / 2 );
+                }
+                else
+                {
+                    height = reply->height;
+                }
 
                 // loutI << "reply->x"      << reply->x      << '\n';
                 // loutI << "reply->y"      << reply->y      << '\n';
@@ -7108,7 +7161,7 @@ class client {
                 free(reply);
             }
 
-        /* Unset    */
+        /* Unset     */
             void unset_EWMH_fullscreen_state() {
                 win.unset_EWMH_fullscreen_state();
             }
@@ -7154,12 +7207,7 @@ class client {
 
             , this->win);
 
-            CONN(L_MOUSE_BUTTON_EVENT,
-                this->win.set_active_EWMH_window();
-                this->focus();
-                this->win.focus_input();
-
-            , this->win);
+            CONN( L_MOUSE_BUTTON_EVENT, this->focus(); , this->win );
             /* do {
                 int id = event_handler->setEventCallback(
                 XCB_BUTTON_PRESS,
@@ -7185,8 +7233,9 @@ class client {
                 [ this ]( Ev ev )-> void
                 {
                     RE_CAST_EV( xcb_destroy_notify_event_t );
-                    if ( e->window == this->win && e->event == this->win )
+                    if ( e->event == this->win )
                     {
+                        signal_manager->_window_client_map.remove_by_value( this );
                         this->kill();
                     }
                 });
@@ -7207,7 +7256,6 @@ class client {
                 BLACK,
                 XCB_EVENT_MASK_EXPOSURE,
                 MAP
-            
             );
             CWC( titlebar );
 
@@ -7215,20 +7263,6 @@ class client {
             draw_title( TITLE_REQ_DRAW );
             icon.raise();
 
-            /* expose_tasks.push_back({this->titlebar, [&]() {
-                this->titlebar.clear();
-                this->titlebar.draw_acc_16(this->win.get_net_wm_name());
-                FLUSH_X();
-            }}); */
-            /* CONN(XCB_EXPOSE, this->set_bit(CLI_TITLE_BAR_EXPOSE_BIT);, this->titlebar); */
-
-            // // cli_tasks.push_back(this);
-            // CONN(XCB_PROPERTY_NOTIFY, this->bit_state &= ( 1ULL << CLI_TITLE_REQ_BIT ); , this->titlebar);
-            /* CONN( XCB_PROPERTY_NOTIFY,
-                this->titlebar.clear();
-                this->titlebar.draw_acc_16(this->win.get_net_wm_name_by_req());
-                FLUSH_X();
-            , this->win); */
             do {
                 int id = event_handler->setEventCallback(
                 XCB_PROPERTY_NOTIFY,
@@ -7262,17 +7296,10 @@ class client {
                 ev_id_vec.push_back( { XCB_EXPOSE, id } );
 
             } while ( 0 );
-
-            /* CONN( XCB_EXPOSE,
-                this->titlebar.clear( );
-                this->titlebar.draw_acc_16( this->win.get_net_wm_name( ) );
-                FLUSH_X( );
-
-            , this->titlebar ); */
         }
         void make_close_button()
         {
-            this->close_button.create_window(
+            close_button.create_window(
                 frame,
                 (width - BUTTON_SIZE - BORDER_SIZE),
                 BORDER_SIZE,
@@ -7285,7 +7312,7 @@ class client {
                 CURSOR::hand2
             );
             CWC( close_button );
-            FlushX_Win( this->close_button );
+            FlushX_Win( close_button );
             close_button.make_then_set_png( USER_PATH_PREFIX( "/close.png" ), CLOSE_BUTTON_BITMAP );
             close_button.grab_button( { { L_MOUSE_BUTTON, NULL } } );
             
@@ -7297,10 +7324,8 @@ class client {
                     RE_CAST_EV( xcb_button_press_event_t );
                     if ( e->event != this->close_button ) return;
                     if ( e->detail != L_MOUSE_BUTTON ) return;
-                    if ( this->win.is_mapped() )
-                    {
-                        this->win.kill();
-                    }
+                    if ( !win.is_mapped() ) frame.kill();
+                    this->win.kill();
                 });
                 ev_id_vec.push_back( { XCB_BUTTON_PRESS, id } );
 
@@ -7956,10 +7981,11 @@ class Window_Manager {
                 create_new_desktop( 5 );
 
                 context_menu = new class context_menu();
-                context_menu->add_entry( "konsole",              [ this ]() -> void { launcher.program( (char *) "konsole" ); });
-                context_menu->add_entry( "google-chrome-stable", [ this ]() -> void { launcher.launch_child_process( "google-chrome-stable" ); });
-                context_menu->add_entry( "code",                 [ this ]() -> void { launcher.launch_child_process( "code" ); });
-                context_menu->add_entry( "dolphin",              [ this ]() -> void { launcher.launch_child_process( "dolphin" ); });
+                context_menu->add_entry( "konsole",              [ this ]() { launcher.program( (char *) "konsole" ); });
+                context_menu->add_entry( "google-chrome-stable", [ this ]() { launcher.launch_child_process( "google-chrome-stable" ); });
+                context_menu->add_entry( "code",                 [ this ]() { launcher.launch_child_process( "code" ); });
+                context_menu->add_entry( "dolphin",              [ this ]() { launcher.launch_child_process( "dolphin" ); });
+                context_menu->add_entry( "alacritty",            [ this ]() { launcher.launch_child_process( "alacritty" ); });
 
                 setup_events(); 
 
@@ -8471,7 +8497,6 @@ class Window_Manager {
                 root.set_pointer( CURSOR::arrow );
 
             }
-            
 
         /* Check  */
             void check_error(const int &code) {
@@ -8574,28 +8599,33 @@ class Window_Manager {
                 } vec.clear(); vector<Type *>().swap(vec);
 
             }
-            void remove_client_from_vector(client * c, vector<client *> &vec) {
-                if (c == nullptr) {
+            void remove_client_from_vector(client * c, vector<client *> &vec)
+            {
+                if (c == nullptr)
+                {
                     loutE << "client is nullptr." << loutEND;
                     return;
+                }
+                vec.erase(
+                    std::remove(
+                        vec.begin(),
+                        vec.end(),
+                        c
+                    ),
+                    vec.end()
+                );
 
-                } vec.erase(std::remove(
-                    vec.begin(),
-                    vec.end(),
-                    c
-                
-                ), vec.end());
                 delete c;
-
             }
 
         /* Client */
-            client *make_client(const uint32_t &window) {
+            client *make_client(const uint32_t &window)
+            {
                 client *c = new client;
-                if (c == nullptr) {
+                if (c == nullptr)
+                {
                     loutE << "Could not allocate memory for client" << '\n';
                     return nullptr;
-
                 }
 
                 c->win = window;
@@ -8607,27 +8637,30 @@ class Window_Manager {
                 c->depth   = 24;
                 c->desktop = cur_d->desktop;
 
-                if (c->x <= 0 && c->y <= 0 && c->width != screen->width_in_pixels && c->height != screen->height_in_pixels) {
+                if (c->x <= 0 && c->y <= 0 && c->width != screen->width_in_pixels && c->height != screen->height_in_pixels)
+                {
                     c->x = ((screen->width_in_pixels - c->width) / 2);
                     c->y = (((screen->height_in_pixels - c->height) / 2) + (BORDER_SIZE * 2));
-
                 }
+
                 if (c->height > screen->height_in_pixels) c->height = screen->height_in_pixels;
                 if (c->width  > screen->width_in_pixels ) c->width  = screen->width_in_pixels;
 
-                if (c->win.is_EWMH_fullscreen()) {
+                if (c->win.is_EWMH_fullscreen())
+                {
                     c->x      = 0;
                     c->y      = 0;
                     c->width  = screen->width_in_pixels;
                     c->height = screen->height_in_pixels;
                     c->win.set_EWMH_fullscreen_state();
-
                 }
-                if (c->win.check_atom(ewmh->_NET_WM_STATE_MODAL)) {
+
+                if ( c->win.check_atom( ewmh->_NET_WM_STATE_MODAL ))
+                {
                     c->atoms.is_modal = true;
                     c->modal_data.transient_for = c->win.get_transient_for_window();
-
                 }
+
                 client_list.push_back(c);
                 cur_d->current_clients.push_back(c);
                 return c;
@@ -8693,29 +8726,32 @@ class Window_Manager {
             }
 
         /* Window */
-            void get_window_parameters(const uint32_t &__window, int16_t *__x, int16_t *__y, uint16_t *__width,  uint16_t *__height) {
+            void get_window_parameters(const uint32_t &__window, int16_t *__x, int16_t *__y, uint16_t *__width,  uint16_t *__height)
+            {
                 xcb_get_geometry_cookie_t cookie = xcb_get_geometry(conn, __window);
                 xcb_get_geometry_reply_t *reply = xcb_get_geometry_reply(conn, cookie, nullptr);
-                if (reply == nullptr) {
+                if ( reply == nullptr )
+                {
                     loutE << "Unable to get window geometry." << loutEND;
                     return;
-                
                 }
+                
                 *__x      = reply->x;
                 *__y      = reply->y;
                 *__width  = reply->width;
                 *__height = reply->height;
-                free(reply);
 
+                free(reply);
             }
 
         /* Status */
-            void check_volt() {
+            void check_volt()
+            {
                 loutE << "running" << loutEND;
                 this_thread::sleep_for(chrono::minutes(1));
                 check_volt();
-
             }
+
 
         /* Events */
             void setup_events()
@@ -8754,9 +8790,18 @@ class Window_Manager {
                     }
                     else if ( e->detail == R_MOUSE_BUTTON )
                     {
-                        this->context_menu->show();    
+                        this->context_menu->show();
                     }
                 });
+                /* event_handler->setEventCallback(
+                XCB_DESTROY_NOTIFY,
+                [ this ]( Ev ev )
+                {
+                    RE_CAST_EV( xcb_destroy_notify_event_t );
+                    client *c = C_RETRIVE( e->window );
+                    if ( !c ) return;
+                    remove_client( c );
+                }); */
                 event_handler->setEventCallback(
                 XCB_KEY_PRESS,
                 [ this ]( Ev ev ) -> void
@@ -8794,7 +8839,6 @@ class Window_Manager {
                 if (BORDER_SIZE == 0)
                 {
                     signal_manager->emit("SET_EV_CALLBACK__RESIZE_NO_BORDER");
-                    
                 }
             }
 
@@ -13874,6 +13918,8 @@ class max_win {
         max_win(client *c, max_win_type type)
         : c(c)
         {
+            if ( !c ) return;
+
             switch (type)
             {
                 case EWMH_MAXWIN:
