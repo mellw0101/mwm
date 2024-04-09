@@ -3202,6 +3202,7 @@ __event_handler__
                 
                 if (it != eventCallbacks.end())
                 {
+                    AutoTimer timer_2("inner loop");
                     for (const auto &pair : it->second)
                     {
                         pair.second(ev);

@@ -68,7 +68,7 @@ GlobalProfiler::report(const std::string& filename)
             " Stddev = " << pair.second.stddev() << " ms," <<
             " Min = "    << pair.second.min()    << " ms," <<
             " Max = "    << pair.second.max()    << " ms," <<
-            " Count = "  << pair.second.count()  << " ms," <<
+            " Count = "  << pair.second.count()  <<
         "\n";
     }
 }
