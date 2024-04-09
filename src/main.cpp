@@ -3234,11 +3234,10 @@ __event_handler__
                 }, e->event);
 
             }); */
-            /* setEventCallback( XCB_PROPERTY_NOTIFY, [&]( Ev ev ) {
+            /* setEventCallback(XCB_PROPERTY_NOTIFY, [&]( Ev ev )
+            {
                 RE_CAST_EV(xcb_property_notify_event_t);
-                Emit( e->window, XCB_PROPERTY_NOTIFY );
-                // thread_pool.enqueue([](uint32_t __w) {
-                // }, e->window);
+                Emit(e->window, XCB_PROPERTY_NOTIFY);
             }); */
 
             while (shouldContinue)
@@ -4324,6 +4323,8 @@ window {
             void
             clear()
             {
+                AutoTimer timer(__func__);
+
                 VoidC cookie = xcb_clear_area(
                     conn, 
                     0,
@@ -4340,6 +4341,8 @@ window {
             void
             focus_input()
             {
+                AutoTimer timer(__func__);
+
                 VoidC cookie = xcb_set_input_focus(
                     conn,
                     XCB_INPUT_FOCUS_POINTER_ROOT,
@@ -4520,6 +4523,8 @@ window {
             bool
             check_frameless_window_hint()
             {
+                AutoTimer timer(__func__);
+
                 bool is_frameless = false;
                 xcb_atom_t property;
                 get_atom((char *)"_MOTIF_WM_HINTS", &property);
@@ -4548,6 +4553,8 @@ window {
             bool
             is_EWMH_fullscreen()
             {
+                AutoTimer timer(__func__);
+
                 xcb_get_property_cookie_t cookie = xcb_ewmh_get_wm_state(ewmh, _window);
                 xcb_ewmh_get_atoms_reply_t wm_state;
                 if (xcb_ewmh_get_wm_state_reply(ewmh, cookie, &wm_state, NULL) == 1)
@@ -4568,6 +4575,8 @@ window {
             bool
             is_active_EWMH_window()
             {
+                AutoTimer timer(__func__);
+
                 uint32_t active_window = 0;
                 uint8_t err = xcb_ewmh_get_active_window_reply(
                     ewmh,
@@ -4623,8 +4632,11 @@ window {
                 }
                 return false;
             }
+            
             bool is_mapped()
             {
+                AutoTimer timer(__func__);
+
                 xcb_get_window_attributes_cookie_t cookie = xcb_get_window_attributes( conn, _window );
                 xcb_get_window_attributes_reply_t *reply = xcb_get_window_attributes_reply( conn, cookie, nullptr );
                 if ( ! reply )
@@ -4636,6 +4648,7 @@ window {
                 free(reply);
                 return isMapped;
             }
+
             bool should_be_decorated()
             {
                 // Atom for the _MOTIF_WM_HINTS property, used to control window decorations
@@ -4673,6 +4686,8 @@ window {
         /* Set           */
             void set_active_EWMH_window()
             {
+                AutoTimer timer(__func__);
+
                 VOID_COOKIE = xcb_ewmh_set_active_window(
                     ewmh,
                     0,
@@ -4681,6 +4696,7 @@ window {
                 CHECK_VOID_COOKIE();
                 FLUSH_X();
             }
+
             void set_EWMH_fullscreen_state()
             {
                 VOID_COOKIE = xcb_change_property(
@@ -4994,6 +5010,8 @@ window {
             uint32_t
             get_transient_for_window()
             {
+                AutoTimer timer(__func__);
+
                 uint32_t t_for = 0; // Default to 0 (no parent)
                 xcb_get_property_cookie_t cookie = xcb_get_property(conn, 0, _window, XCB_ATOM_WM_TRANSIENT_FOR, XCB_ATOM_WINDOW, 0, sizeof(uint32_t));
                 xcb_get_property_reply_t *reply = xcb_get_property_reply(conn, cookie, NULL);
@@ -6573,6 +6591,7 @@ window {
             void
             get_font(const char *font_name)
             {
+                AutoTimer timer(__func__);
                 font = xcb->gen_Xid()/* xcb_generate_id(conn) */;
                 VoidC cookie = xcb_open_font(
                     conn,
@@ -6588,6 +6607,7 @@ window {
             void
             change_back_pixel(uint32_t pixel)
             {
+                AutoTimer timer(__func__);
                 VOID_COOKIE = xcb_change_window_attributes(
                     conn,
                     _window,
@@ -6620,6 +6640,8 @@ window {
             uint32_t
             get_color(int __color)
             {
+                AutoTimer timer(__func__);
+
                 uint32_t pi          = 0;
                 xcb_colormap_t cmap  = screen->default_colormap;
                 rgb_color_code ccode = rgb_code(__color);
@@ -6684,6 +6706,8 @@ window {
             rgb_color_code
             rgb_code(int __color)
             {
+                AutoTimer timer(__func__);
+
                 rgb_color_code color;
                 uint8_t r, g, b;
                 
@@ -6840,6 +6864,8 @@ window {
             void
             create_border_window(BORDER __border, int __color, uint32_t __x, uint32_t __y, uint32_t __width, uint32_t __height)
             {
+                AutoTimer timer(__func__);
+
                 uint32_t window;
                 if ((window = xcb->gen_Xid()) == -1)
                 {
@@ -7680,6 +7706,7 @@ class client {
         void
         make_frame()
         {
+            AutoTimer timer(__func__);
             frame.create_window(
                 screen->root,
                 (x - BORDER_SIZE),
@@ -7762,6 +7789,7 @@ class client {
         void
         make_titlebar()
         {
+            AutoTimer timer(__func__);
             titlebar.create_window(
                 frame,
                 BORDER_SIZE,
@@ -7779,6 +7807,35 @@ class client {
             draw_title( TITLE_REQ_DRAW );
             icon.raise();
 
+            CONN(XCB_EXPOSE, {
+                titlebar.clear();
+                titlebar.draw_acc_16(win.get_net_wm_name());
+                FlushX_Win(titlebar);
+            }, titlebar);
+
+            /* CONN(XCB_PROPERTY_NOTIFY, {
+                titlebar.clear();
+                titlebar.draw_acc_16(win.get_net_wm_name_by_req());
+                FlushX_Win(titlebar);
+            }, titlebar); */
+
+            /* do {
+                int id = event_handler->setEventCallback(
+                XCB_EXPOSE,
+                [ this ]( Ev ev )-> void
+                {
+                    RE_CAST_EV( xcb_expose_event_t );
+                    if ( e->window == this->titlebar )
+                    {
+                        this->titlebar.clear();
+                        this->titlebar.draw_acc_16( this->win.get_net_wm_name() );
+                        FlushX_Win( this->titlebar );
+                    }
+                });
+                ev_id_vec.push_back( { XCB_EXPOSE, id } );
+
+            } while ( 0 ); */
+            
             do {
                 int id = event_handler->setEventCallback(
                 XCB_PROPERTY_NOTIFY,
@@ -7794,23 +7851,6 @@ class client {
                 });
                 ev_id_vec.push_back( { XCB_PROPERTY_NOTIFY, id } );
             
-            } while ( 0 );
-
-            do {
-                int id = event_handler->setEventCallback(
-                XCB_EXPOSE,
-                [ this ]( Ev ev )-> void
-                {
-                    RE_CAST_EV( xcb_expose_event_t );
-                    if ( e->window == this->titlebar )
-                    {
-                        this->titlebar.clear();
-                        this->titlebar.draw_acc_16( this->win.get_net_wm_name() );
-                        FlushX_Win( this->titlebar );
-                    }
-                });
-                ev_id_vec.push_back( { XCB_EXPOSE, id } );
-
             } while ( 0 );
         }
         
@@ -7883,6 +7923,7 @@ class client {
         void
         make_max_button()
         {
+            AutoTimer timer(__func__);
             max_button.create_window(
                 frame,
                 (width - (BUTTON_SIZE * 2) - BORDER_SIZE),
@@ -7983,6 +8024,7 @@ class client {
         void
         make_min_button()
         {
+            AutoTimer timer(__func__);
             min_button.create_window(
                 frame,
                 (width - (BUTTON_SIZE * 3) - BORDER_SIZE),
@@ -8043,6 +8085,7 @@ class client {
         void
         make_borders()
         {
+            AutoTimer timer(__func__);
             border[left].create_window(
                 frame,
                 0,
@@ -8176,6 +8219,7 @@ class client {
         void
         set_icon_png()
         {
+            AutoTimer timer(__func__);
             icon.create_window(
                 frame,
                 BORDER_SIZE,
@@ -8474,6 +8518,8 @@ class Window_Manager {
             void
             init()
             {
+                AutoTimer timer("Class Window_Manager: " + string(__func__));
+
                 _conn(nullptr, nullptr);
                 _setup();
                 _iter();
@@ -8598,41 +8644,46 @@ class Window_Manager {
 
         /* Client       */
             /* Focus */
-                void cycle_focus() {
-                    if (focused_client == nullptr) {
+                void
+                cycle_focus()
+                {
+                    if (focused_client == nullptr)
+                    {
                         if (cur_d->current_clients.size() == 0) return;
-                        for (long i(0); i < cur_d->current_clients.size(); ++i) {
+                        for (long i(0); i < cur_d->current_clients.size(); ++i)
+                        {
                             if (cur_d->current_clients[i] == nullptr) continue;
                             
                             cur_d->current_clients[i]->focus();
                             focused_client = cur_d->current_clients[i];
                             
                             return;
-
                         }
-
                     }
-                    for (int i(0); i < cur_d->current_clients.size(); ++i) {
+
+                    for (int i(0); i < cur_d->current_clients.size(); ++i)
+                    {
                         if (cur_d->current_clients[i] == nullptr) continue;
-                        if (cur_d->current_clients[i] == focused_client) {
-                            if (i == (cur_d->current_clients.size() - 1)) {
+                        if (cur_d->current_clients[i] == focused_client)
+                        {
+                            if (i == (cur_d->current_clients.size() - 1))
+                            {
                                 cur_d->current_clients[0]->focus();
                                 focused_client = cur_d->current_clients[0];
-                            
                                 return;
-
                             }
+
                             cur_d->current_clients[i + 1]->focus();
                             focused_client = cur_d->current_clients[i + 1];
-
                             return;
-
-                        } if (i == (cur_d->current_clients.size() - 1)) i = 0;
-
+                        }
+                        if (i == (cur_d->current_clients.size() - 1)) i = 0;
                     }
-
                 }
-                void unfocus() {
+
+                void
+                unfocus()
+                {
                     window(tmp);
                     tmp.create_default(
                         screen->root,
@@ -8647,7 +8698,6 @@ class Window_Manager {
                     tmp.unmap();
                     tmp.kill();
                     focused_client = nullptr;
-
                 }
 
             /* Fetch */
@@ -8822,6 +8872,7 @@ class Window_Manager {
             void
             manage_new_client( uint32_t __window )
             {
+                AutoTimer timer(__func__);
                 client *c = make_client( __window );
                 if ( !c )
                 {
@@ -8860,6 +8911,7 @@ class Window_Manager {
                 }
                 c->win.grab_default_keys();
             }
+
             client *make_internal_client(window &window)
             {
                 client *c = new client;
@@ -8878,14 +8930,18 @@ class Window_Manager {
                 return c;
 
             }
+            
             void send_sigterm_to_client(client *c)
             {
                 c->kill();
                 remove_client(c);
             }
 
-            void remove_client(client *c)
+            void
+            remove_client(client *c)
             {
+                AutoTimer timer(__func__);
+
                 client_list.erase(remove(
                     client_list.begin(),
                     client_list.end(),
@@ -8905,8 +8961,10 @@ class Window_Manager {
             }
 
         /* Desktop      */
-            void create_new_desktop(const uint16_t &n)
+            void
+            create_new_desktop(const uint16_t &n)
             {
+                AutoTimer timer(__func__);
                 desktop *d = new desktop;
                 
                 d->desktop = n;

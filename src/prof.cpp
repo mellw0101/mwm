@@ -68,9 +68,10 @@ void
 GlobalProfiler::report(const std::string& filename)
 {
     std::ofstream file(filename, std::ios::app);
+    file << "\nProfiling report:\n";
     for (const auto& pair : stats)
     {
-        file << 
+        file <<
             pair.first <<
             ": Mean = "  << pair.second.mean()   << " ms," <<
             " Stddev = " << pair.second.stddev() << " ms," <<
