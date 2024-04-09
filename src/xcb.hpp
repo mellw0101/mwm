@@ -261,27 +261,29 @@ class intern_atom_repl_t {
             
         }
 
-        intern_atom_repl_t(xcb_connection_t *conn, bool only_if_exists, char *__name) {
+        intern_atom_repl_t(xcb_connection_t *conn, bool only_if_exists, char *__name)
+        {
             xcb_intern_atom_reply_t *reply = xcb_intern_atom_reply(conn, intern_atom_cok_t(conn, only_if_exists, __name), nullptr);
-            if (!reply) {
+            if (!reply)
+            {
                 set_ERR_STATE(response_type, pad0, sequence, length, atom);
                 return;
-
             }
+
             response_type = reply->response_type;
             pad0          = reply->pad0;
             sequence      = reply->sequence;
             length        = reply->sequence;
             atom          = reply->atom;
 
-            free(reply);
-            
+            free(reply);            
         }        
 
         operator xcb_atom_t() { return atom; }
         operator xcb_atom_t&() { return atom; }
 
-        bool is_not_valid() {
+        bool is_not_valid()
+        {
             return (
                 response_type == 1 << 7
             &&  pad0          == 1 << 7

@@ -102,7 +102,7 @@ static xcb_ewmh_connection_t * ewmh;
 static const xcb_setup_t * setup;
 static xcb_screen_iterator_t iter;
 static xcb_screen_t *screen;
-ThreadPool tPool{6};
+/* ThreadPool tPool{6}; */
 
 // #include "xcb.hpp"
 
@@ -932,21 +932,38 @@ namespace {
         public:
             umap<uint32_t, client *> _data;
 
-            void connect(uint32_t __window, client *__c) {
+            void connect(uint32_t __window, client *__c)
+            {
                 _data[__window] = __c;
-
             }
-            client *retrive(uint32_t __window) {
+            client *retrive(uint32_t __window)
+            {
                 auto it = _data.find(__window);
-                if (it != _data.end()) {
+                if (it != _data.end())
+                {
                     return it->second;
-
-                } return nullptr;
+                }
+                return nullptr;
 
             }/** @brief @returns @p 'client' from uint32_t */
-            void remove(uint32_t __window) {
+            void remove(uint32_t __window)
+            {
                 _data.erase(__window);
+            }
 
+            void remove_by_value(client* __c)
+            {
+                for ( auto it = _data.begin(); it != _data.end(); )
+                {
+                    if ( it->second == __c )
+                    {
+                        it = _data.erase( it ); // Erase and move to next valid iterator
+                    }
+                    else
+                    {
+                        ++it; // Move to next item if current doesn't match
+                    }
+                }
             }
     };
 
@@ -2945,7 +2962,7 @@ class __event_handler__ {
                 thread_pool.enqueue([](uint32_t __w) {
                 }, e->window); */
             });
-            /* setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev) {
+            setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev) {
                 RE_CAST_EV(xcb_enter_notify_event_t);
                 Emit(e->event, XCB_ENTER_NOTIFY);
                 // thread_pool.enqueue([](uint32_t w) {
@@ -2956,19 +2973,15 @@ class __event_handler__ {
                 Emit(e->event, XCB_LEAVE_NOTIFY);
                 // thread_pool.enqueue([](uint32_t w) {
                 // }, e->event);
-            }); */
-            /* setEventCallback(XCB_FOCUS_IN, [&](Ev ev) {
+            });
+            setEventCallback(XCB_FOCUS_IN, [&](Ev ev) {
                 RE_CAST_EV(xcb_focus_in_event_t);
                 Emit(e->event, XCB_FOCUS_IN);
-                // thread_pool.enqueue([](uint32_t w) {
-                // }, e->event);
-            }); */
-            /* setEventCallback(XCB_FOCUS_OUT, [&](Ev ev) {
+            });
+            setEventCallback(XCB_FOCUS_OUT, [&](Ev ev) {
                 RE_CAST_EV(xcb_focus_out_event_t);
                 Emit(e->event, XCB_FOCUS_OUT);
-                // thread_pool.enqueue([](uint32_t w) {
-                // }, e->event);
-            }); */
+            });
             setEventCallback(XCB_KEY_PRESS, [&](Ev ev) {
                 RE_CAST_EV(xcb_key_press_event_t);
                 /* switch (e->state) { */
@@ -3063,20 +3076,6 @@ class __event_handler__ {
                 }
 
             });
-            /* setEventCallback(XCB_DESTROY_NOTIFY, [&](Ev ev) {
-                RE_CAST_EV(xcb_destroy_notify_event_t);
-                Emit(e->event, XCB_DESTROY_NOTIFY);
-                Emit(e->window, XCB_DESTROY_NOTIFY);
-                client *c;
-                if ((c = signal_manager->_window_client_map.retrive(e->event)) != nullptr) {
-                    HANDLE(DESTROY_NOTIF_EV, e->event);
-
-                } else if ((c = signal_manager->_window_client_map.retrive(e->window)) != nullptr) {
-                    HANDLE(DESTROY_NOTIF_W, e->window);
-
-                }
-
-            }); */
             /* setEventCallback(XCB_MAP_REQUEST, [&](Ev ev) {
                 RE_CAST_EV(xcb_map_request_event_t);
                 HANDLE(XCB_MAP_REQUEST, e->window); 
@@ -3136,8 +3135,8 @@ class __event_handler__ {
             /* setEventCallback( XCB_PROPERTY_NOTIFY, [&]( Ev ev ) {
                 RE_CAST_EV(xcb_property_notify_event_t);
                 Emit( e->window, XCB_PROPERTY_NOTIFY );
-                thread_pool.enqueue([](uint32_t __w) {
-                }, e->window);
+                // thread_pool.enqueue([](uint32_t __w) {
+                // }, e->window);
             }); */
 
             while (shouldContinue) {
@@ -3423,57 +3422,57 @@ class __event_handler__ {
             loutI << "Total events in map" << total_events << loutEND;
             // loutI << "Total _window_arr size" << _window_arr.getSize() << loutEND;
         }
-        // void init_map() {
-        //     eventCallbacks.reserve(34);
+        /* void init_map() {
+            eventCallbacks.reserve(34);
 
-        //     vector<uint8_t> event_type_keys = {
-        //         XCB_KEY_PRESS,
-        //         XCB_KEY_RELEASE,
-        //         XCB_BUTTON_PRESS,
-        //         XCB_BUTTON_RELEASE,
-        //         XCB_MOTION_NOTIFY,
-        //         XCB_ENTER_NOTIFY,
-        //         XCB_LEAVE_NOTIFY,
-        //         XCB_FOCUS_IN,
-        //         XCB_FOCUS_OUT,
-        //         XCB_KEYMAP_NOTIFY,
-        //         XCB_EXPOSE,
-        //         XCB_GRAPHICS_EXPOSURE,
-        //         XCB_NO_EXPOSURE,
-        //         XCB_VISIBILITY_NOTIFY,
-        //         XCB_CREATE_NOTIFY,
-        //         XCB_DESTROY_NOTIFY,
-        //         XCB_UNMAP_NOTIFY,
-        //         XCB_MAP_NOTIFY,
-        //         XCB_MAP_REQUEST,
-        //         XCB_REPARENT_NOTIFY,
-        //         XCB_CONFIGURE_NOTIFY,
-        //         XCB_CONFIGURE_REQUEST,
-        //         XCB_GRAVITY_NOTIFY,
-        //         XCB_RESIZE_REQUEST,
-        //         XCB_CIRCULATE_NOTIFY,
-        //         XCB_CIRCULATE_REQUEST,
-        //         XCB_PROPERTY_NOTIFY,
-        //         XCB_SELECTION_CLEAR,
-        //         XCB_SELECTION_REQUEST,
-        //         XCB_SELECTION_NOTIFY,
-        //         XCB_COLORMAP_NOTIFY,
-        //         XCB_CLIENT_MESSAGE,
-        //         XCB_MAPPING_NOTIFY
-        //     };
+            vector<uint8_t> event_type_keys = {
+                XCB_KEY_PRESS,
+                XCB_KEY_RELEASE,
+                XCB_BUTTON_PRESS,
+                XCB_BUTTON_RELEASE,
+                XCB_MOTION_NOTIFY,
+                XCB_ENTER_NOTIFY,
+                XCB_LEAVE_NOTIFY,
+                XCB_FOCUS_IN,
+                XCB_FOCUS_OUT,
+                XCB_KEYMAP_NOTIFY,
+                XCB_EXPOSE,
+                XCB_GRAPHICS_EXPOSURE,
+                XCB_NO_EXPOSURE,
+                XCB_VISIBILITY_NOTIFY,
+                XCB_CREATE_NOTIFY,
+                XCB_DESTROY_NOTIFY,
+                XCB_UNMAP_NOTIFY,
+                XCB_MAP_NOTIFY,
+                XCB_MAP_REQUEST,
+                XCB_REPARENT_NOTIFY,
+                XCB_CONFIGURE_NOTIFY,
+                XCB_CONFIGURE_REQUEST,
+                XCB_GRAVITY_NOTIFY,
+                XCB_RESIZE_REQUEST,
+                XCB_CIRCULATE_NOTIFY,
+                XCB_CIRCULATE_REQUEST,
+                XCB_PROPERTY_NOTIFY,
+                XCB_SELECTION_CLEAR,
+                XCB_SELECTION_REQUEST,
+                XCB_SELECTION_NOTIFY,
+                XCB_COLORMAP_NOTIFY,
+                XCB_CLIENT_MESSAGE,
+                XCB_MAPPING_NOTIFY
+            };
 
-        //     for (int i = 0; i < event_type_keys.size(); ++i) {
-        //         eventCallbacks[event_type_keys[i]].reserve(100);
+            for (int i = 0; i < event_type_keys.size(); ++i) {
+                eventCallbacks[event_type_keys[i]].reserve(100);
 
-        //     }
-        // }
+            }
+        } */
 
     private:
     /* Variables */
         unordered_map<uint8_t, vector<pair<CallbackId, EventCallback>>> eventCallbacks;
         bool shouldContinue = false;
         CallbackId nextCallbackId = 0;
-        ThreadPool thread_pool{20};
+        /* ThreadPool thread_pool{20}; */
 
 }; static __event_handler__ *event_handler(nullptr);
 using EventCallback = function<void(Ev)>;
@@ -4099,8 +4098,6 @@ class window {
             }            
             void kill()
             {
-                uint32_t w = this->_window;
-                
                 xcb_intern_atom_cookie_t protocols_cookie = xcb_intern_atom( conn, 1, 12, "WM_PROTOCOLS" );
                 xcb_intern_atom_reply_t *protocols_reply = xcb_intern_atom_reply( conn, protocols_cookie, nullptr );
 
@@ -4129,8 +4126,8 @@ class window {
                 free( delete_reply );
                 free( protocols_reply );
 
-                signal_manager->_window_signals.remove( w );
-                signal_manager->_window_client_map.remove( w );
+                signal_manager->_window_signals.remove( _window );
+                signal_manager->_window_client_map.remove( _window );
             }
             void kill_test() {
                 uint32_t w = this->_window;
@@ -4179,7 +4176,7 @@ class window {
                 ); CHECK_VOID_COOKIE();
                 FLUSH_XWin();
 
-            }            
+            }
             void focus_input() {
                 VOID_COOKIE = xcb_set_input_focus(
                     conn,
@@ -4265,7 +4262,8 @@ class window {
                     FLUSH_XWin();
                 }
             }
-            void update(uint32_t __x, uint32_t __y, uint32_t __width, uint32_t __height) {
+            void update(uint32_t __x, uint32_t __y, uint32_t __width, uint32_t __height)
+            {
                 _x      = __x;
                 _y      = __y;
                 _width  = __width;
@@ -5776,7 +5774,7 @@ class window {
                 {
                     VOID_COOKIE = xcb_grab_button(
                         conn, 
-                        0,
+                        1,
                         _window, 
                         XCB_EVENT_MASK_BUTTON_PRESS,
                         XCB_GRAB_MODE_ASYNC, 
@@ -5949,24 +5947,22 @@ class window {
                     conn,
                     _window,
                     mask,
-                    (const uint32_t[1]) {
+                    (const uint32_t[1])
+                    {
                         static_cast<const uint32_t &>(value)
-
                     }
-
                 );
-
             }
-            void config_window(uint16_t __mask, const void *__value) {
+            void config_window(uint16_t __mask, const void *__value)
+            {
                 VOID_COOKIE = xcb_configure_window(
                     conn,
                     _window,
                     __mask,
                     __value
-                
-                ); CHECK_VOID_COOKIE();
+                );
+                CHECK_VOID_COOKIE();
                 FLUSH_XWin();
-
             }
             void config_window(uint32_t mask, const vector<uint32_t> & values) {
                 if (values.empty()) {
@@ -6611,7 +6607,7 @@ class client {
         pid_t pid;
         bool moving = false;
         mutex mtx;
-        ThreadPool thread_pool{8};
+        /* ThreadPool thread_pool{8}; */
         
         uint64_t bit_state = 0xffffffffffffffff;
         vector<pair<uint8_t, int>> ev_id_vec;
@@ -6639,23 +6635,24 @@ class client {
                 frame.raise();
 
             }
-            void update() {
+            void update()
+            {
                 x = frame.x();
                 y = frame.y();
                 width = frame.width();
                 height = frame.height();
-                win.send_event(XCB_EVENT_MASK_STRUCTURE_NOTIFY, (uint32_t[]){(static_cast<uint32_t>(x) + BORDER_SIZE), (static_cast<uint32_t>(y) + (TITLE_BAR_HEIGHT + BORDER_SIZE)), win.width(), win.height()});
-        
+                win.send_event(XCB_EVENT_MASK_STRUCTURE_NOTIFY, (uint32_t[]){(static_cast<uint32_t>(x) + BORDER_SIZE), (static_cast<uint32_t>(y) + ( TITLE_BAR_HEIGHT + BORDER_SIZE )), win.width(), win.height()});
             }
             void map() {
                 frame.map();
             }
-            void unmap() {
+            void unmap()
+            {
                 frame.unmap();
-        
             }
             void kill()
             {
+
                 frame.unmap();
                 win.unmap();
                 close_button.unmap();
@@ -6715,10 +6712,10 @@ class client {
                 border[bottom_right].kill();
 
                 /* remove_from_map(); */
-                loutI << "ev_id_vec size" << this->ev_id_vec.size() << '\n';
-                for ( int i = 0; i < this->ev_id_vec.size(); ++i )
+                // loutI << "ev_id_vec size" << this->ev_id_vec.size() << '\n';
+                for ( int i = 0; i < ev_id_vec.size(); ++i )
                 {
-                    event_handler->removeEventCallback( this->ev_id_vec[i].first, this->ev_id_vec[i].second );
+                    event_handler->removeEventCallback( ev_id_vec[i].first, ev_id_vec[i].second );
                 }
             }
             void add_to_map() {
@@ -7186,18 +7183,16 @@ class client {
             frame.map();
 
             do {
-                int id = event_handler->setEventCallback(
+                event_handler->setEventCallback(
                 XCB_DESTROY_NOTIFY,
-                [ & ]( Ev ev )-> void
+                [ this ]( Ev ev )-> void
                 {
                     RE_CAST_EV( xcb_destroy_notify_event_t );
-                    if ( e->window == this->win && e->event != this->win )
+                    if ( e->window == this->win && e->event == this->win )
                     {
-                        loutI << Var_( e->window ) << ' ' << Var_( e->event ) << ' ' << Var_( screen->root ) << '\n';
                         this->kill();
                     }
                 });
-                ev_id_vec.push_back( { XCB_DESTROY_NOTIFY, id } );
             
             } while ( 0 );
 
@@ -7260,7 +7255,7 @@ class client {
                 [ this ]( Ev ev )-> void
                 {
                     RE_CAST_EV( xcb_expose_event_t );
-                    if ( e->window == this->titlebar && this->titlebar.is_mapped() )
+                    if ( e->window == this->titlebar )
                     {
                         this->titlebar.clear();
                         this->titlebar.draw_acc_16( this->win.get_net_wm_name() );
@@ -7310,7 +7305,6 @@ class client {
                         this->win.kill();
                     }
                 });
-                loutI << "'close_button' XCB_BUTTON_PRESS id" << id << '\n';
                 ev_id_vec.push_back( { XCB_BUTTON_PRESS, id } );
 
             } while ( 0 );
@@ -7676,7 +7670,6 @@ class client {
             {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
         };
 
-        
 };
 class desktop {
     public:
@@ -8274,9 +8267,11 @@ class Window_Manager {
 
                 }
 
-            void manage_new_client(const uint32_t &__window) {
-                client *c = make_client(__window);
-                if (c == nullptr) {
+            void manage_new_client( uint32_t __window )
+            {
+                client *c = make_client( __window );
+                if ( !c )
+                {
                     loutE << "could not make client" << loutEND;
                     return;
                 }
@@ -8293,10 +8288,11 @@ class Window_Manager {
                     { L_MOUSE_BUTTON, 0   }
                 });
 
-                if (!c->win.check_frameless_window_hint()) {
+                if (!c->win.check_frameless_window_hint())
+                {
                     c->make_decorations();
-                    c->frame.set_event_mask(FRAME_EVENT_MASK);
-                    c->win.set_event_mask(CLIENT_EVENT_MASK);
+                    c->frame.set_event_mask( FRAME_EVENT_MASK );
+                    c->win.set_event_mask( CLIENT_EVENT_MASK );
                     c->update();
                     c->focus();
                     focused_client = c;
@@ -8305,9 +8301,9 @@ class Window_Manager {
                     /* c->add_to_map(); */
                 }
                 c->win.grab_default_keys();
-
             }
-            client *make_internal_client(window &window) {
+            client *make_internal_client(window &window)
+            {
                 client *c = new client;
 
                 c->win    = window;
@@ -8324,12 +8320,14 @@ class Window_Manager {
                 return c;
 
             }
-            void send_sigterm_to_client(client *c) {
+            void send_sigterm_to_client(client *c)
+            {
                 c->kill();
                 remove_client(c);
-
             }
-            void remove_client(client *c) {
+
+            void remove_client(client *c)
+            {
                 client_list.erase(remove(
                     client_list.begin(),
                     client_list.end(),
@@ -8344,8 +8342,8 @@ class Window_Manager {
 
                 ), cur_d->current_clients.end());
 
+                signal_manager->_window_client_map.remove_by_value( c );
                 delete c;
-
             }
 
         /* Desktop      */
@@ -8476,67 +8474,7 @@ class Window_Manager {
                 root.set_pointer( CURSOR::arrow );
 
             }
-            void setup_events()
-            {
-                event_handler->setEventCallback( XCB_MAP_REQUEST, [ & ]( Ev ev ) -> void
-                {
-                    RE_CAST_EV( xcb_map_request_event_t );
-                    client *c = signal_manager->_window_client_map.retrive( e->window );
-                    if ( c ) return;
-                    this->manage_new_client( e->window );
-                });
-                event_handler->setEventCallback( XCB_BUTTON_PRESS, [ & ]( Ev ev ) -> void
-                {
-                    RE_CAST_EV( xcb_button_press_event_t );
-                    if ( e->event != screen->root ) return;
-                    
-                    if ( e->detail == L_MOUSE_BUTTON )
-                    {
-                        this->unfocus();
-                        if ( this->context_menu->context_window.is_mapped() )
-                        {
-                            Emit( this->context_menu->context_window, HIDE_CONTEXT_MENU );
-                        }
-                    }
-                    else if ( e->detail == R_MOUSE_BUTTON )
-                    {
-                        this->context_menu->show();    
-                    }
-                    
-                });
-                event_handler->setEventCallback( XCB_KEY_PRESS, [ & ]( Ev ev ) -> void
-                {
-                    RE_CAST_EV( xcb_key_press_event_t );
-                    if ( e->detail == key_codes.tab && (( e->state & ALT ) != 0 ))
-                    {
-                        this->cycle_focus();
-                    }
-                    else if ( e->detail == key_codes.t && (( e->state & ALT ) != 0 ) && (( e->state & CTRL ) != 0 ))
-                    {
-                        this->launcher.launch_child_process( "konsole" );
-                    }
-                    else if ( e->detail == key_codes.q && (( e->state & ALT ) != 0 ) && (( e->state & SHIFT ) != 0 ))
-                    {
-                        this->quit( 0 );
-                    }
-                });
-                event_handler->setEventCallback( XCB_FOCUS_IN, [ & ]( Ev ev ) -> void
-                {
-                    RE_CAST_EV(xcb_focus_in_event_t);
-                    client *c = signal_manager->_window_client_map.retrive(e->event);
-                    if (c) {
-                        focused_client = c;
-                        if (!c->win.is_active_EWMH_window()) {
-                            loutE << "c->win is not 'EWMH active window'" << loutEND;
-                        }
-                    }
-                });
-                
-                if (BORDER_SIZE == 0) {
-                    signal_manager->emit("SET_EV_CALLBACK__RESIZE_NO_BORDER");
-                    
-                }
-            }
+            
 
         /* Check  */
             void check_error(const int &code) {
@@ -8782,6 +8720,86 @@ class Window_Manager {
 
             }
 
+        /* Events */
+            void setup_events()
+            {
+                event_handler->setEventCallback(
+                XCB_MAP_REQUEST,
+                [ this ]( Ev ev ) -> void
+                {
+                    RE_CAST_EV( xcb_map_request_event_t );
+                    client *c = signal_manager->_window_client_map.retrive( e->window );
+                    if ( c ) return;
+                    this->manage_new_client( e->window );
+                });
+                event_handler->setEventCallback(
+                XCB_MAP_NOTIFY,
+                [ this ]( Ev ev )
+                {
+                    RE_CAST_EV( xcb_map_notify_event_t );
+                    client *c = C_RETRIVE( e->event );
+                    if ( c ) c->update();
+                });
+                event_handler->setEventCallback(
+                XCB_BUTTON_PRESS,
+                [ this ]( Ev ev ) -> void
+                {
+                    RE_CAST_EV( xcb_button_press_event_t );
+                    if ( e->event != screen->root ) return;
+                    
+                    if ( e->detail == L_MOUSE_BUTTON )
+                    {
+                        this->unfocus();
+                        if ( this->context_menu->context_window.is_mapped() )
+                        {
+                            Emit( this->context_menu->context_window, HIDE_CONTEXT_MENU );
+                        }
+                    }
+                    else if ( e->detail == R_MOUSE_BUTTON )
+                    {
+                        this->context_menu->show();    
+                    } 
+                });
+                event_handler->setEventCallback(
+                XCB_KEY_PRESS,
+                [ this ]( Ev ev ) -> void
+                {
+                    RE_CAST_EV( xcb_key_press_event_t );
+                    if ( e->detail == key_codes.tab && (( e->state & ALT ) != 0 ))
+                    {
+                        this->cycle_focus();
+                    }
+                    else if ( e->detail == key_codes.t && (( e->state & ALT ) != 0 ) && (( e->state & CTRL ) != 0 ))
+                    {
+                        this->launcher.launch_child_process( "alacritty" );
+                    }
+                    else if ( e->detail == key_codes.q && (( e->state & ALT ) != 0 ) && (( e->state & SHIFT ) != 0 ))
+                    {
+                        this->quit( 0 );
+                    }
+                });
+                event_handler->setEventCallback(
+                XCB_FOCUS_IN,
+                [ this ]( Ev ev ) -> void
+                {
+                    RE_CAST_EV(xcb_focus_in_event_t);
+                    client *c = signal_manager->_window_client_map.retrive( e->event );
+                    if ( c )
+                    {
+                        focused_client = c;
+                        if (!c->win.is_active_EWMH_window())
+                        {
+                            loutE << "c->win is not 'EWMH active window'" << loutEND;
+                        }
+                    }
+                });
+                
+                if (BORDER_SIZE == 0)
+                {
+                    signal_manager->emit("SET_EV_CALLBACK__RESIZE_NO_BORDER");
+                    
+                }
+            }
 }; static Window_Manager *wm(nullptr);
 
 class __network__ {
@@ -12597,6 +12615,7 @@ class DropDownTerm {
                     NONE,
                     MAP
                 );
+                FlushX_Win( window );
                 w_vec.push_back( window );
             }
 
@@ -14255,7 +14274,7 @@ class Events {
 
             }); */
 
-            C_SIGNAL(if (__c) tile(__c, TILE::LEFT );, TILE_LEFT);
+            /* C_SIGNAL(if (__c) tile(__c, TILE::LEFT );, TILE_LEFT);
             C_SIGNAL(if (__c) tile(__c, TILE::RIGHT);, TILE_RIGHT);
             C_SIGNAL(if (__c) tile(__c, TILE::UP   );, TILE_UP);
             C_SIGNAL(if (__c) tile(__c, TILE::DOWN );, TILE_DOWN);
@@ -14270,15 +14289,15 @@ class Events {
                 change_desktop cd(conn);
                 cd.change_with_app(change_desktop::PREV);
             
-            });
+            }); */
 
-            CONN_root(DEBUG_KEY_PRESS, W_callback -> void {
+            /* CONN_root(DEBUG_KEY_PRESS, W_callback -> void {
                 pid_manager->list_pids();
                 event_handler->iter_and_log_map_size();
                 
-            });
+            }); */
 
-            C_SIGNAL(if (__c) {
+            /* C_SIGNAL(if (__c) {
                 if (!__c->win.is_mapped())
                 {
                     __c->kill();
@@ -14290,25 +14309,25 @@ class Events {
                     __c->kill();
                 }
 
-            }, KILL_SIGNAL);
+            }, KILL_SIGNAL); */
 
-            C_SIGNAL(if (__c) {
+            /* C_SIGNAL(if (__c) {
                 __c->raise();
                 __c->focus();
                 wm->focused_client = __c;
 
-            }, FOCUS_CLIENT);
-            C_SIGNAL(if (__c) mv_client(__c, wm->pointer.x() - __c->x - BORDER_SIZE, wm->pointer.y() - __c->y - BORDER_SIZE);, MOVE_CLIENT_MOUSE);
+            }, FOCUS_CLIENT); */
+            /* C_SIGNAL(if (__c) mv_client(__c, wm->pointer.x() - __c->x - BORDER_SIZE, wm->pointer.y() - __c->y - BORDER_SIZE);, MOVE_CLIENT_MOUSE); */
             C_SIGNAL(if (__c) max_win(__c, max_win::BUTTON_MAXWIN);, BUTTON_MAXWIN_PRESS);
             C_SIGNAL(if (__c) max_win(__c, max_win::EWMH_MAXWIN  );, EWMH_MAXWIN_SIGNAL );
-            C_SIGNAL(if (__c) resize_client::border(__c, edge::LEFT        );, RESIZE_CLIENT_BORDER_LEFT        );
+            /* C_SIGNAL(if (__c) resize_client::border(__c, edge::LEFT        );, RESIZE_CLIENT_BORDER_LEFT        );
             C_SIGNAL(if (__c) resize_client::border(__c, edge::RIGHT       );, RESIZE_CLIENT_BORDER_RIGHT       );
             C_SIGNAL(if (__c) resize_client::border(__c, edge::TOP         );, RESIZE_CLIENT_BORDER_TOP         );
             C_SIGNAL(if (__c) resize_client::border(__c, edge::BOTTOM_edge );, RESIZE_CLIENT_BORDER_BOTTOM      );
             C_SIGNAL(if (__c) resize_client::border(__c, edge::TOP_LEFT    );, RESIZE_CLIENT_BORDER_TOP_LEFT    );
             C_SIGNAL(if (__c) resize_client::border(__c, edge::TOP_RIGHT   );, RESIZE_CLIENT_BORDER_TOP_RIGHT   );
             C_SIGNAL(if (__c) resize_client::border(__c, edge::BOTTOM_LEFT );, RESIZE_CLIENT_BORDER_BOTTOM_LEFT );
-            C_SIGNAL(if (__c) resize_client::border(__c, edge::BOTTOM_RIGHT);, RESIZE_CLIENT_BORDER_BOTTOM_RIGHT);
+            C_SIGNAL(if (__c) resize_client::border(__c, edge::BOTTOM_RIGHT);, RESIZE_CLIENT_BORDER_BOTTOM_RIGHT); */
 
             CONN_root(CONF_REQ_WIDTH,  W_callback -> void { wm->data.width  = __window; });
             CONN_root(CONF_REQ_HEIGHT, W_callback -> void { wm->data.height = __window; });
@@ -14325,67 +14344,88 @@ class Events {
 
     private:
     /* Methods     */
-        void key_press_handler(const xcb_generic_event_t *&ev) {
+        void key_press_handler(const xcb_generic_event_t *&ev)
+        {
             RE_CAST_EV(xcb_key_press_event_t);
-            if (e->detail == wm->key_codes.r_arrow) {
-                switch (e->state) {
-                    case (SHIFT + CTRL + SUPER): {
+            if (e->detail == wm->key_codes.r_arrow)
+            {
+                switch (e->state)
+                {
+                    case (SHIFT + CTRL + SUPER):
+                    {
                         change_desktop cd(conn);
                         cd.change_with_app(change_desktop::NEXT);
                         return;
                     }
                     
-                    case (CTRL + SUPER): {
+                    case (CTRL + SUPER):
+                    {
                         change_desktop change_desktop(conn);
                         change_desktop.change_to(change_desktop::NEXT);
                         return;
                     }
 
-                    case SUPER: {
-                        client *c = signal_manager->_window_client_map.retrive(e->event);
-                        tile(c, TILE::RIGHT);
+                    case SUPER:
+                    {
+                        client *c = signal_manager->_window_client_map.retrive( e->event );
+                        if ( !c ) return;
+                        tile( c, TILE::RIGHT );
                         return;
                     }
                 }
             }
             
-            if (e->detail == wm->key_codes.l_arrow) {
-                switch (e->state) {
-                    case (SHIFT + CTRL + SUPER): {
+            if (e->detail == wm->key_codes.l_arrow)
+            {
+                switch (e->state)
+                {
+                    case (SHIFT + CTRL + SUPER):
+                    {
                         change_desktop cd(conn);
                         cd.change_with_app(change_desktop::PREV);
                         return;
                     }
 
-                    case (CTRL + SUPER): {
+                    case (CTRL + SUPER):
+                    {
                         change_desktop change_desktop(conn);
                         change_desktop.change_to(change_desktop::PREV);
                         return;
                     }
                     
-                    case SUPER: {
+                    case SUPER:
+                    {
                         client *c = signal_manager->_window_client_map.retrive(e->event);
+                        if ( !c ) return;
                         tile(c, TILE::LEFT);
                         return;
                     }
                 }
             }
             
-            if (e->detail == wm->key_codes.d_arrow) {
-                switch (e->state) {
-                    case SUPER: {
+            if (e->detail == wm->key_codes.d_arrow)
+            {
+                switch (e->state)
+                {
+                    case SUPER:
+                    {
                         client *c = signal_manager->_window_client_map.retrive(e->event);
+                        if ( !c ) return;
                         tile(c, TILE::DOWN);
                         return;
                     }
                 }
             }
 
-            if (e->detail == wm->key_codes.u_arrow) {
-                switch (e->state) {
-                    case SUPER: {
+            if ( e->detail == wm->key_codes.u_arrow )
+            {
+                switch ( e->state )
+                {
+                    case SUPER:
+                    {
                         client *c = signal_manager->_window_client_map.retrive(e->event);
-                        tile(c, TILE::UP);
+                        if ( !c ) return;
+                        tile( c, TILE::UP );
                         return;
                     }
                 }
@@ -14444,7 +14484,7 @@ class Events {
         {
             RE_CAST_EV(xcb_button_press_event_t);
             client *c = signal_manager->_window_client_map.retrive(e->event);
-            if (c == nullptr) return;
+            if ( !c ) return;
             // {
             //     c = wm->get_client_from_pointer();
             //     if (c == nullptr) return;

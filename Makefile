@@ -17,7 +17,7 @@ ARMV8_LDFLAGS =  ${LIBS}       	\
                  -std=c++20		\
 				 -DARMV8_BUILD
 
-FASTFLAGS = -O2	 			\
+FASTFLAGS = -O3	 			\
 			-march=native
 
 CFLAGS =	-std=c++20 						\
@@ -51,7 +51,7 @@ LIBS    = -lxcb         \
 
 LDFLAGS = ${LIBS}       \
 			-flto 			\
-			-O2 			\
+			-O3 			\
 			-march=native 	\
 			-std=c++20		
 
