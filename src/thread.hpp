@@ -27,23 +27,27 @@ class Thread {
     public:
         template<typename Callable, typename... Args>
         Thread(Callable&& func, Args&&... args)
-        : active(true), paused(false), worker([this, func = std::forward<Callable>(func), ...args = std::forward<Args>(args)]() {
+        : active(true), paused(false),
+        worker([this, func = std::forward<Callable>(func), ...args = 
+        std::forward<Args>(args)]()
+        {
             try {
-                while (active) {
-                    if (!paused) {
-                        func(std::forward<Args>(args)...);
-                        
+                while (active)
+                {
+                    if (!paused)
+                    {
+                        func(std::forward<Args>(args)...);    
                     }
                     std::this_thread::yield(); // Yield to avoid busy waiting
-                    
                 }
-
-            } catch (...) {
+            }
+            catch (...)
+            {
                 lastException = std::current_exception(); // Capture any exception
                 // Optionally, notify about the exception here
-
             }
-        }) {}
+        })
+        {}
 
         ~Thread() {
             stop(); // Ensure the thread is signaled to stop

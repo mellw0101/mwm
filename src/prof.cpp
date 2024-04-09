@@ -59,7 +59,7 @@ GlobalProfiler::record(const std::string& name, double duration)
 void
 GlobalProfiler::report(const std::string& filename)
 {
-    std::ofstream file(filename);
+    std::ofstream file(filename, std::ios::app);
     for (const auto& pair : stats)
     {
         file << 
