@@ -516,7 +516,7 @@ public:
 
     xcb(/* xcb_connection_t *__conn, */ xcb_screen_t *__s);
 };
-static xcb *xcb(nullptr);
+static class xcb *xcb(nullptr);
 
 inline class xcb *connect_to_server(xcb_connection_t *__conn, xcb_screen_t *__s)
 {
