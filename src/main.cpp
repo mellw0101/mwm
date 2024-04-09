@@ -352,12 +352,15 @@ namespace { // Tools
 
     namespace {
         /**
-        *
-        * @brief Flushes any X server requests in que and checks for errors 
-        *
-        */
-        void flush_x(const char *__calling_function, uint32_t __window = 0)
+         *
+         * @brief Flushes any X server requests in que and checks for errors 
+         *
+         */
+        void
+        flush_x(const char *__calling_function, uint32_t __window = 0)
         {
+            AutoTimer t(__func__);
+
             int err = xcb_flush(conn);
             if (err <= 0)
             {
@@ -373,8 +376,11 @@ namespace { // Tools
         #define FLUSH_XWin() flush_x(__func__, _window)
         #define FlushX_Win( __window ) do { flush_x( __func__, __window ); } while(0)
 
-        void check_xcb_void_cookie(xcb_void_cookie_t cookie, const char *__calling_function)
+        void
+        check_xcb_void_cookie(xcb_void_cookie_t cookie, const char *__calling_function)
         {
+            AutoTimer t(__func__);
+
             xcb_generic_error_t *error = xcb_request_check(conn, cookie);
             if (error)
             {
@@ -382,6 +388,7 @@ namespace { // Tools
                 free(error); // Remember to free the error
             }
         }
+
         #define VOID_COOKIE xcb_void_cookie_t void_cookie
         #define VOID_cookie void_cookie
         #define CHECK_VOID_COOKIE() check_xcb_void_cookie(void_cookie, __func__)
@@ -447,6 +454,7 @@ namespace { // Tools
     template<typename Type>
     bool remove_element_from_vec(vector<Type>& vec, size_t index)
     {
+        AutoTimer t(__func__);
         if (index < vec.size())
         {
             vec.erase(vec.begin() + index);
@@ -524,24 +532,28 @@ namespace {
 
             }
 
-            void emit(uint32_t __w, uint8_t __sig) {
+            void emit(uint32_t __w, uint8_t __sig)
+            {
+                AutoTimer t("__window_signals__:" + string(__func__) + ":1");
+            
                 auto it = _data[__w].find(__sig);
-                if (it != _data[__w].end()) {
+                if (it != _data[__w].end())
+                {
                     it->second(__w);
                     FLUSH_X();
-
                 }
-
             }
 
-            void emit(uint32_t __w, uint8_t __sig, uint32_t __w2) {
+            void emit(uint32_t __w, uint8_t __sig, uint32_t __w2)
+            {
+                AutoTimer t("__window_signals__:" + string(__func__) + ":2");
+
                 auto it = _data[__w].find(__sig);
-                if (it != _data[__w].end()) {
+                if (it != _data[__w].end())
+                {
                     it->second(__w2);
                     FLUSH_X();
-
                 }
-
             }
 
             void remove(uint32_t __w) {
@@ -2771,7 +2783,10 @@ class Launcher {
             } return 0;
 
         }
-        int launch_child_process(const char *command) {
+        int launch_child_process(const char *command)
+        {
+            AutoTimer t(__func__);
+
             pid_t pid;
             posix_spawnattr_t attr;
 
@@ -4502,6 +4517,8 @@ window {
             bool
             check_atom(xcb_atom_t __atom)
             {
+                AutoTimer timer(__func__);
+
                 xcb_get_property_cookie_t cookie = xcb_ewmh_get_wm_state(ewmh, _window);
                 xcb_ewmh_get_atoms_reply_t reply;
                 if ( xcb_ewmh_get_wm_state_reply( ewmh, cookie, &reply, NULL ))
@@ -4633,7 +4650,8 @@ window {
                 return false;
             }
             
-            bool is_mapped()
+            bool
+            is_mapped()
             {
                 AutoTimer timer(__func__);
 
@@ -4699,6 +4717,8 @@ window {
 
             void set_EWMH_fullscreen_state()
             {
+                AutoTimer t(__func__);
+
                 VOID_COOKIE = xcb_change_property(
                     conn,
                     XCB_PROP_MODE_REPLACE,
@@ -4717,6 +4737,8 @@ window {
             void
             unset_EWMH_fullscreen_state()
             {
+                AutoTimer t(__func__);
+
                 VoidC cookie = xcb_change_property(
                     conn,
                     XCB_PROP_MODE_REPLACE,
@@ -4860,6 +4882,8 @@ window {
 
                 void make_png_from_icon()
                 {
+                    AutoTimer t(__func__);
+
                     if (fs::exists(PNG_HASH(get_icccm_class())))
                     {
                         return;
@@ -4881,8 +4905,11 @@ window {
                 }
 
             /* icccm */
-                void get_override_redirect()
+                void
+                get_override_redirect()
                 {
+                    AutoTimer t(__func__);
+
                     xcb_get_window_attributes_reply_t *wa = xcb_get_window_attributes_reply(conn, xcb_get_window_attributes(conn, _window), NULL);
                     if ( !wa )
                     {
@@ -4898,6 +4925,7 @@ window {
                         loutIWin << "override_redirect = true" << '\n';
                     }
                 }
+
                 void get_min_window_size_hints()
                 {
                     xcb_size_hints_t hints;
@@ -5237,14 +5265,27 @@ window {
                 }
                 return propertyValue;
             }
+
             xcb_rectangle_t get_xcb_rectangle_t_by_req()
             {
+                AutoTimer t(__func__);
+
                 xcb_get_geometry_reply_t *g = xcb_get_geometry_reply(conn, xcb_get_geometry(conn, _window), nullptr);
                 if (g == nullptr) return (xcb_rectangle_t){0, 0, 0, 0};
                 xcb_rectangle_t rect = (xcb_rectangle_t) {g->x, g->y, g->width, g->height};
                 free(g);
                 return rect;
             }
+
+            xcb_rectangle_t
+            get_xcb_rectangle_t_by_req_2()
+            {
+                AutoTimer t(__func__);
+                xcb_rectangle_t rect{0, 0, 0, 0};
+                geo(&rect.x, &rect.y, &rect.width, &rect.height);
+                return rect;
+            }
+
             xcb_rectangle_t get_xcb_rectangle_t() const
             {
                 return (xcb_rectangle_t) {_x, _y, _width, _height};
@@ -5393,12 +5434,17 @@ window {
                 FLUSH_XWin();
 
             }
-            void set_event_mask(uint32_t __mask)
+
+            void
+            set_event_mask(uint32_t __mask)
             {
                 apply_event_mask(&__mask);
             }
-            void apply_event_mask(const uint32_t *__mask)
+            
+            void
+            apply_event_mask(const uint32_t *__mask)
             {
+                AutoTimer t(__func__);
                 VoidC cookie = xcb_change_window_attributes(
                     conn,
                     _window,
@@ -5408,7 +5454,9 @@ window {
                 CheckVoidC(cookie, "ERROR: ( xcb_change_window_attributes ) Failed");
                 FlushX_Win(_window);
             }
-            void set_pointer(CURSOR cursor_type)
+            
+            void
+            set_pointer(CURSOR cursor_type)
             {
                 xcb_cursor_context_t *ctx;
                 if (xcb_cursor_context_new(conn, screen, &ctx) < 0)
@@ -8561,7 +8609,6 @@ class Window_Manager {
             void
             quit( int __status )
             {
-                gProf->report("/home/mellw/profiling_report.txt");
                 pid_manager->kill_all_pids();
                 xcb_flush( conn );
                 delete_client_vec( client_list );

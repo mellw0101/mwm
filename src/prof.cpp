@@ -80,6 +80,19 @@ GlobalProfiler::report(const std::string& filename)
             " Count = "  << pair.second.count()  <<
         "\n";
     }
+    file.close();
+    
+    for (const auto &i : stats)
+    {
+        std::ofstream File("/home/mellw/gprof/" + i.first, std::ios::app);
+        File <<
+            i.second.mean()   << ':' <<
+            i.second.stddev() << ':' <<
+            i.second.min()    << ':' <<
+            i.second.max()    << ':' <<
+            i.second.count()  << ':' <<
+        "\n";
+    }
 }
 
 GlobalProfiler *
@@ -93,6 +106,14 @@ init_gProf()
 {
     gProf = GlobalProfiler::createNewGprof();
 }
+
+/** 
+**********************************************************************
+**********************************************************************
+*****************<<      @class @c AutoTimer      >>******************
+**********************************************************************
+**********************************************************************
+**/
 
 AutoTimer::AutoTimer(const std::string& name)
 : name(name), start(std::chrono::high_resolution_clock::now()) {}
