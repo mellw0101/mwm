@@ -170,6 +170,9 @@ vector<client *> cli_tasks; */
     XCB_GC_BACKGROUND         |\
     XCB_GC_GRAPHICS_EXPOSURES
 
+#define GC_FONT_MASK \
+    XCB_GC_FOREGROUND | XCB_GC_BACKGROUND | XCB_GC_FONT
+
 /**
  *
  * @brief General purpose definition to reinterpret cast.
@@ -388,10 +391,6 @@ namespace { // Tools
                 free(error); // Remember to free the error
             }
         }
-
-        #define VOID_COOKIE xcb_void_cookie_t void_cookie
-        #define VOID_cookie void_cookie
-        #define CHECK_VOID_COOKIE() check_xcb_void_cookie(void_cookie, __func__)
 
         class __window_geo__ {
             public:
@@ -1063,18 +1062,9 @@ namespace XCB
     }
 
     #define ConfW(__w, __mask, ...) \
-    do { \
         unsigned int __value[] = {__VA_ARGS__}; \
-        /* VoidC cookie =  */xcb_configure_window( \
-            conn, \
-            __w, \
-            __mask, \
-            __value \
-        );\
-        /* CheckVoidC(cookie, "ERROR: ( xcb_configure_window ) Failed"); */ \
-        xcb_flush(conn); \
-        \
-    } while (0)
+        xcb_configure_window(conn, __w, __mask, __value); \
+        xcb_flush(conn);
 
     xcb_get_geometry_cookie_t
     get_unchecked_geoC(uint32_t __w)
@@ -1320,7 +1310,9 @@ class __crypto__ {
 
 }; static __crypto__ *crypro(nullptr);
 
-namespace fs = filesystem;
+// namespace fs = filesystem;
+namespace fs = std::filesystem;
+
 class __file_system__ {
     /* Defines */
         #define FS_ACC(__folder, __sub_path) file_system->accessor(__folder, __sub_path)
@@ -1343,8 +1335,10 @@ class __file_system__ {
         } accessor_t;
     
     /* Methods */
-        void create(const string &__path, create_type_t __type = FOLDER) {
-            if (__type == FOLDER) {
+        void create(const string &__path, create_type_t __type = FOLDER)
+        {
+            if (__type == FOLDER)
+            {
                 bool create_bool = false;
 
                 if (!fs::exists(__path)) {
@@ -1858,9 +1852,9 @@ class pointer {
             return y;
         }
 
-        void teleport(const int16_t &x, const int16_t &y)
+        void teleport(int16_t __x, int16_t __y)
         {
-            VOID_COOKIE = xcb_warp_pointer(
+            xcb_warp_pointer(
                 conn,
                 XCB_NONE,
                 screen->root,
@@ -1868,11 +1862,10 @@ class pointer {
                 0,
                 0,
                 0,
-                x,
-                y
+                __x,
+                __y
             );
-            FLUSH_X();
-            CHECK_VOID_COOKIE();
+            xcb_flush(conn);
         }
 
         void grab()
@@ -1908,9 +1901,8 @@ class pointer {
 
         void ungrab()
         {
-            VOID_COOKIE = xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
-            FLUSH_X();
-            CHECK_VOID_COOKIE();
+            xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
+            xcb_flush(conn);
         }
 
         void center_pointer()
@@ -1960,7 +1952,7 @@ class __pointer__ {
 
         void teleport(const int16_t &x, const int16_t &y)
         {
-            VOID_COOKIE = xcb_warp_pointer(
+            xcb_warp_pointer(
                 conn,
                 XCB_NONE,
                 screen->root,
@@ -1971,8 +1963,7 @@ class __pointer__ {
                 x,
                 y
             );
-            FLUSH_X();
-            CHECK_VOID_COOKIE();
+            xcb_flush(conn);
         }
 
         void grab()
@@ -2008,9 +1999,8 @@ class __pointer__ {
 
         void ungrab()
         {
-            VOID_COOKIE = xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
-            FLUSH_X();
-            CHECK_VOID_COOKIE();
+            xcb_ungrab_pointer(conn, XCB_CURRENT_TIME);
+            xcb_flush(conn);
         }
 
         void center_pointer()
@@ -4192,7 +4182,7 @@ window {
             void
             make_xcb_borders(int __color)
             {
-                VoidC cookie = xcb_change_window_attributes(
+                xcb_change_window_attributes(
                     conn,
                     _window,
                     XCB_CW_BORDER_PIXEL,
@@ -4201,8 +4191,7 @@ window {
                         get_color(__color)
                     }
                 );
-                CheckVoidC(cookie, "Failed to change border color");
-                FLUSH_XWin();
+                xcb_flush(conn);
             }
         
         /* Main          */
@@ -4229,9 +4218,8 @@ window {
             {
                 AutoTimer t(__func__);
 
-                VOID_COOKIE = xcb_map_window(conn, _window);
-                CHECK_VOID_COOKIE();
-                FLUSH_XWin();
+                xcb_map_window(conn, _window);
+                xcb_flush(conn);
             }
             
             void
@@ -4249,29 +4237,27 @@ window {
             {
                 AutoTimer t(__func__);
 
-                VOID_COOKIE = xcb_reparent_window(
+                xcb_reparent_window(
                     conn,
                     _window,
                     __new_parent,
                     __x,
                     __y
                 );
-                CHECK_VOID_COOKIE();
-                FLUSH_XWin();
+                xcb_flush(conn);
             }
             
             void
             make_child(uint32_t __window_to_make_child, uint32_t __child_x, uint32_t __child_y)
             {
-                VOID_COOKIE = xcb_reparent_window(
+                xcb_reparent_window(
                     conn,
                     __window_to_make_child,
                     _window,
                     __child_x,
                     __child_y
                 );
-                CHECK_VOID_COOKIE();
-                FLUSH_XWin();
+                xcb_flush(conn);
             }            
             
             void
@@ -4300,10 +4286,10 @@ window {
                 }
 
                 send_event( KILL_WINDOW, (uint32_t[3]){ 32, protocols_reply->atom, delete_reply->atom });
-                FLUSH_XWin();
+                xcb_flush(conn);
 
-                free( delete_reply );
-                free( protocols_reply );
+                free(delete_reply);
+                free(protocols_reply);
 
                 signal_manager->_window_signals.remove( _window );
                 signal_manager->_window_client_map.remove( _window );
@@ -4346,6 +4332,7 @@ window {
                 }
 
                 send_event(KILL_WINDOW, (uint32_t[]){32, p_reply.Atom(), d_reply.Atom()});
+                xcb_flush(conn);
                 signal_manager->_window_signals.remove(w);
                 signal_manager->_window_client_map.remove(w);
             }    
@@ -4355,7 +4342,7 @@ window {
             {
                 AutoTimer timer(__func__);
 
-                VoidC cookie = xcb_clear_area(
+                xcb_clear_area(
                     conn, 
                     0,
                     _window,
@@ -4364,8 +4351,7 @@ window {
                     _width,
                     _height
                 );
-                CheckVoidC(cookie, "Failed to clear window");
-                FLUSH_XWin();
+                xcb_flush(conn);
             }
             
             void
@@ -4373,14 +4359,13 @@ window {
             {
                 AutoTimer timer(__func__);
 
-                VoidC cookie = xcb_set_input_focus(
+                xcb_set_input_focus(
                     conn,
                     XCB_INPUT_FOCUS_POINTER_ROOT,
                     _window,
                     XCB_CURRENT_TIME
                 );
-                CheckVoidC(cookie, "Failed to set input focus");
-                FlushX_Win(_window);
+                xcb_flush(conn);
             }
             
             void
@@ -4388,6 +4373,8 @@ window {
             {
                 if (__event_mask & XCB_EVENT_MASK_EXPOSURE)
                 {
+                    AutoTimer t("window:send_event:XCB_EVENT_MASK_EXPOSURE");
+
                     xcb_expose_event_t expose_event = {
                         .response_type = XCB_EXPOSE,
                         .window = _window,
@@ -4398,19 +4385,20 @@ window {
                         .count  = 0        /* <- Number of expose events to follow if this is part of a sequence */
                     };
 
-                    VoidC cookie = xcb_send_event(
+                    xcb_send_event(
                         conn,
                         false,
                         _window,
                         XCB_EVENT_MASK_EXPOSURE,
                         (char *)&expose_event
                     );
-                    CheckVoidC(cookie, "ERROR: ( xcb_send_event ) Failed");
-                    FlushX_Win(_window);
+                    xcb_flush(conn);
                 }
 
                 if (__event_mask & XCB_EVENT_MASK_STRUCTURE_NOTIFY)
                 {
+                    AutoTimer t("window:send_event:XCB_EVENT_MASK_STRUCTURE_NOTIFY");
+
                     uint32_t *value_list =  reinterpret_cast<uint32_t *>(__value_list);
 
                     xcb_configure_notify_event_t event;
@@ -4427,19 +4415,20 @@ window {
                     event.pad0              = 0;
                     event.sequence          = 0;
 
-                    VOID_COOKIE = xcb_send_event(
+                    xcb_send_event(
                         conn,
                         false,
                         _window,
                         XCB_EVENT_MASK_STRUCTURE_NOTIFY,
                         (char *)&event
                     );
-                    CHECK_VOID_COOKIE();
-                    FLUSH_XWin();
+                    xcb_flush(conn);
                 }
                 
                 if (__event_mask & KILL_WINDOW)
                 {
+                    AutoTimer t("window:send_event:KILL_WINDOW");
+
                     uint32_t *value_list = reinterpret_cast<uint32_t *>(__value_list);
 
                     xcb_client_message_event_t ev;
@@ -4451,21 +4440,22 @@ window {
                     ev.data.data32[0] = value_list[2];
                     ev.data.data32[1] = XCB_CURRENT_TIME;
 
-                    VOID_COOKIE = xcb_send_event(
+                    xcb_send_event(
                         conn,
                         false,
                         _window,
                         XCB_EVENT_MASK_NO_EVENT,
                         (char *)&ev
                     );
-                    CHECK_VOID_COOKIE();
-                    FLUSH_XWin();
+                    xcb_flush(conn);
                 }
             }
             
             void
             update(uint32_t __x, uint32_t __y, uint32_t __width, uint32_t __height)
             {
+                AutoTimer t("client:" + string(__func__));
+
                 _x      = __x;
                 _y      = __y;
                 _width  = __width;
@@ -4610,7 +4600,7 @@ window {
                 AutoTimer timer(__func__);
 
                 uint32_t active_window = 0;
-                uint8_t err = xcb_ewmh_get_active_window_reply(
+                uint8_t err = xcb_ewmh_get_active_window_reply(/** TODO: check for unchecked foo */
                     ewmh,
                     xcb_ewmh_get_active_window(ewmh, 0),
                     &active_window,
@@ -4717,24 +4707,25 @@ window {
             }
         
         /* Set           */
-            void set_active_EWMH_window()
+            void
+            set_active_EWMH_window()
             {
                 AutoTimer timer(__func__);
 
-                VOID_COOKIE = xcb_ewmh_set_active_window(
+                xcb_ewmh_set_active_window(
                     ewmh,
                     0,
                     _window
                 );
-                CHECK_VOID_COOKIE();
-                FLUSH_X();
+                xcb_flush(conn);
             }
 
-            void set_EWMH_fullscreen_state()
+            void
+            set_EWMH_fullscreen_state()
             {
                 AutoTimer t(__func__);
 
-                VOID_COOKIE = xcb_change_property(
+                xcb_change_property(
                     conn,
                     XCB_PROP_MODE_REPLACE,
                     _window,
@@ -4744,8 +4735,7 @@ window {
                     1,
                     &ewmh->_NET_WM_STATE_FULLSCREEN
                 );
-                CHECK_VOID_COOKIE();
-                FLUSH_XWin();
+                xcb_flush(conn);
             }
 
         /* Unset         */
@@ -4955,7 +4945,9 @@ window {
                         loutI << "min_height" << hints.min_height << loutEND;
                     }
                 }
-                void get_window_size_hints() {
+
+                void
+                get_window_size_hints() {
                     xcb_size_hints_t hints;
                     memset(&hints, 0, sizeof(xcb_size_hints_t)); // Initialize hints structure
 
@@ -4989,7 +4981,9 @@ window {
                     }
 
                 }
-                void set_client_size_as_hints(int16_t *__x, int16_t *__y, uint16_t *__width, uint16_t *__height)
+
+                void
+                set_client_size_as_hints(int16_t *__x, int16_t *__y, uint16_t *__width, uint16_t *__height)
                 {
                     xcb_size_hints_t hints;
                     memset( &hints, 0, sizeof( xcb_size_hints_t )); // Initialize hints structure
@@ -5034,19 +5028,24 @@ window {
                     }
 
                 }
-                string get_window_icon_name() {
+                
+                string
+                get_window_icon_name()
+                {
                     xcb_get_property_cookie_t cookie = xcb_icccm_get_wm_icon_name(conn, _window);
                     xcb_icccm_get_text_property_reply_t reply; string icon_name;
 
-                    if (xcb_icccm_get_wm_icon_name_reply(conn, cookie, &reply, NULL)) {
+                    if (xcb_icccm_get_wm_icon_name_reply(conn, cookie, &reply, NULL))
+                    {
                         icon_name = string(reply.name, reply.name_len);
                         xcb_icccm_get_text_property_reply_wipe(&reply);
                         loutIWin << "icon_name: " << icon_name << loutEND;
-
-                    } else {
+                    }
+                    else
+                    {
                         loutEWin << "Failed to retrieve the window icon name" << loutEND;
-
-                    } return icon_name;
+                    }
+                    return icon_name;
 
                 } /** @brief @return the icon name of a window */
 
@@ -5432,24 +5431,6 @@ window {
             }
         
         /* Configuration */
-            void apply_event_mask(const vector<uint32_t> &values)
-            {
-                if (values.empty())
-                {
-                    loutE << "values vector is empty" << '\n';
-                    return;
-                }
-                VOID_COOKIE = xcb_change_window_attributes(
-                    conn,
-                    _window,
-                    XCB_CW_EVENT_MASK,
-                    values.data()
-
-                ); CHECK_VOID_COOKIE();
-                FLUSH_XWin();
-
-            }
-
             void
             set_event_mask(uint32_t __mask)
             {
@@ -5460,14 +5441,14 @@ window {
             apply_event_mask(const uint32_t *__mask)
             {
                 AutoTimer t(__func__);
-                VoidC cookie = xcb_change_window_attributes(
+
+                xcb_change_window_attributes(
                     conn,
                     _window,
                     XCB_CW_EVENT_MASK,
                     __mask
                 );
-                CheckVoidC(cookie, "ERROR: ( xcb_change_window_attributes ) Failed");
-                FlushX_Win(_window);
+                xcb_flush(conn);
             }
             
             void
@@ -5489,7 +5470,7 @@ window {
                     return;
                 }
 
-                VoidC cookie = xcb_change_window_attributes(
+                xcb_change_window_attributes(
                     conn,
                     _window,
                     XCB_CW_CURSOR,
@@ -5498,11 +5479,10 @@ window {
                         cursor
                     }
                 );
-                CheckVoidC(cookie, "Failed to set cursor");
-                FlushX_Win(_window);
-
                 xcb_cursor_context_free(ctx);
                 xcb_free_cursor(conn, cursor);
+                
+                xcb_flush(conn);
             }
 
             /* Size_pos  */
@@ -5559,8 +5539,11 @@ window {
                 x(uint32_t x)
                 {
                     // config_window(XCB_CONFIG_WINDOW_X, x);
-                    ConfW(_window, XCB_CONFIG_WINDOW_X, x);
                     /* update(x, _y, _width, _height); */
+                    /* ConfW(_window, XCB_CONFIG_WINDOW_X, x);
+                    _x = x; */
+                    xcb_configure_window(conn, _window, XCB_CONFIG_WINDOW_X, (uint32_t[]){x});
+                    xcb_flush(conn);
                     _x = x;
                 }
                 
@@ -5568,7 +5551,9 @@ window {
                 y(uint32_t y)
                 {
                     // config_window(XCB_CONFIG_WINDOW_Y, (const uint32_t[1]){y});
-                    ConfW(_window, XCB_CONFIG_WINDOW_Y, y);
+                    // ConfW(_window, XCB_CONFIG_WINDOW_Y, y);
+                    xcb_configure_window(conn, _window, XCB_CONFIG_WINDOW_Y, (uint32_t[]){y});
+                    xcb_flush(conn);
                     // update(_x, y, _width, _height);
                     _y = y;
                 }
@@ -5576,16 +5561,21 @@ window {
                 void
                 width(uint32_t width)
                 {
-                    config_window(XCB_CONFIG_WINDOW_WIDTH, (uint32_t[1]){width});
-                    update(_x, _y, width, _height);
-
+                    /* config_window(XCB_CONFIG_WINDOW_WIDTH, (uint32_t[1]){width});
+                    update(_x, _y, width, _height); */
+                    xcb_configure_window(conn, _window, XCB_CONFIG_WINDOW_WIDTH, (uint32_t[]){width});
+                    xcb_flush(conn);
+                    _width = width;
                 }
                 
                 void
                 height(uint32_t height)
                 {
-                    config_window(XCB_CONFIG_WINDOW_HEIGHT, (uint32_t[1]){height});
-                    update(_x, _y, _width, height);
+                    /* config_window(XCB_CONFIG_WINDOW_HEIGHT, (uint32_t[1]){height});
+                    update(_x, _y, _width, height); */
+                    xcb_configure_window(conn, _window, XCB_CONFIG_WINDOW_HEIGHT, (uint32_t[]){height});
+                    xcb_flush(conn);
+                    _height = height;
                 }
                 
                 void
@@ -5593,7 +5583,9 @@ window {
                 {
                     /* config_window(XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, (uint32_t[2]){x, y});
                     update(x, y, _width, _height); */
-                    ConfW(_window, XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, x, y);
+                    /* ConfW(_window, XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, x, y); */
+                    xcb_configure_window(conn, _window, XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, (uint32_t[]){x, y});
+                    xcb_flush(conn);
                     _x = x;
                     _y = y;
                 }
@@ -5717,7 +5709,7 @@ window {
             {
                 set_backround_color(__color);
                 clear();
-                FlushX_Win(_window);
+                xcb_flush(conn);
                 send_event(XCB_EVENT_MASK_EXPOSURE);
             }
             
@@ -5806,7 +5798,7 @@ window {
                 }
 
                 /* Put the scaled image onto the pixmap at the calculated position */
-                VOID_COOKIE = xcb_image_put(
+                xcb_image_put(
                     conn, 
                     pixmap, 
                     _gc,
@@ -5815,22 +5807,22 @@ window {
                     y, 
                     0
                 );
-                CHECK_VOID_COOKIE();
-                
+                xcb_flush(conn);
+
                 /* Set the pixmap as the background of the window */
-                VOID_cookie = xcb_change_window_attributes( 
+                xcb_change_window_attributes( 
                     conn,
                     _window,
                     XCB_CW_BACK_PIXMAP,
                     &pixmap
 
-                ); CHECK_VOID_COOKIE();
+                );
+                xcb_flush(conn);
 
 
                 // Cleanup
-                VOID_cookie = xcb_free_gc(conn, _gc);/* Free the GC */
-                CHECK_VOID_COOKIE();
-                FLUSH_XWin();
+                xcb_free_gc(conn, _gc);/* Free the GC */
+                xcb_flush(conn);
                 xcb_image_destroy(xcb_image);
                 imlib_free_image(); // Free scaled image
                 clear_window();
@@ -5963,13 +5955,15 @@ window {
             #define AUTO -16
             void draw(const string &__str, int __text_color = WHITE, int __backround_color = AUTO, int16_t __x = AUTO, int16_t __y = AUTO, const char *__font_name = DEFAULT_FONT)
             {
+                AutoTimer t(__func__);
+
                 get_font(__font_name);
                 if (__backround_color == AUTO) __backround_color = _color;
                 if (__backround_color == WHITE) __text_color = BLACK;
                 create_font_gc(__text_color, __backround_color, font);
                 if (__x == AUTO) __x = CENTER_TEXT(_width, __str.length());
                 if (__y == AUTO) __y = CENTER_TEXT_Y(_height);
-                VOID_COOKIE = xcb_image_text_8(
+                xcb_image_text_8(
                     conn,
                     __str.length(),
                     _window,
@@ -5978,16 +5972,17 @@ window {
                     __y,
                     __str.c_str()
                 );
-                FLUSH_XWin();
-                CHECK_VOID_COOKIE();
+                xcb_flush(conn);
             }
             
             void
             draw_text(const char *str , int text_color, int backround_color, const char *font_name, int16_t x, int16_t y)
             {
+                AutoTimer t(__func__);
+
                 get_font(font_name);
                 create_font_gc(text_color, backround_color, font);
-                VoidC cookie = xcb_image_text_8(
+                xcb_image_text_8(
                     conn,
                     slen(str),
                     _window, 
@@ -5996,17 +5991,18 @@ window {
                     y,
                     str
                 );
-                CheckVoidC(cookie, "ERROR: ( xcb_image_text_8 ) Failed");
-                FLUSH_XWin();
+                xcb_flush(conn);
             }
             
             void
             draw_text_auto_color(const char *__str, int16_t __x, int16_t __y, int __text_color = WHITE, int __backround_color = 0, const char *__font_name = DEFAULT_FONT)
             {
+                AutoTimer t(__func__);
+
                 get_font(__font_name);
                 if (__backround_color == 0) __backround_color = _color;
                 create_font_gc(__text_color, __backround_color, font);
-                VOID_COOKIE = xcb_image_text_8(
+                xcb_image_text_8(
                     conn,
                     slen(__str),
                     _window,
@@ -6015,8 +6011,7 @@ window {
                     __y,
                     __str
                 );
-                CHECK_VOID_COOKIE();
-                FLUSH_XWin();
+                xcb_flush(conn);
             }
             
             /**
@@ -6036,11 +6031,14 @@ window {
             void
             draw_acc(const string &__str, int __text_color = WHITE, int __backround_color = 0, const char *__font_name = DEFAULT_FONT)
             {
+                AutoTimer t(__func__);
+
                 get_font(__font_name);
                 if (__backround_color == 0) __backround_color = _color;
                 if (__backround_color == WHITE) __text_color = BLACK;
                 create_font_gc(__text_color, __backround_color, font);
-                VoidC cookie = xcb_image_text_8(
+                
+                xcb_image_text_8(
                     conn,
                     __str.length(),
                     _window,
@@ -6049,20 +6047,21 @@ window {
                     CENTER_TEXT_Y(_height),
                     __str.c_str()
                 );
-                CheckVoidC(cookie, "ERROR: ( xcb_image_text_8 ) Failed");
-                FLUSH_XWin();
+                xcb_flush(conn);
             }
 
             void
             draw_text_16(const char *str, int text_color, int background_color, const char *font_name, int16_t x, int16_t y)
             {
-                get_font(font_name); // Your existing function to set the font
-                create_font_gc(text_color, background_color, font); // Your existing function to create a GC with the font
+                AutoTimer t(__func__);
+
+                get_font(font_name);
+                create_font_gc(text_color, background_color, font);
 
                 int len;
                 xcb_char2b_t *char2b_str = to_char2b(str, &len);
 
-                VoidC cookie = xcb_image_text_16(
+                xcb_image_text_16(
                     conn,
                     len,
                     _window,
@@ -6071,14 +6070,15 @@ window {
                     y,
                     char2b_str
                 );
-                CheckVoidC(cookie, "ERROR: ( xcb_image_text_16 ) Failed");
-                FlushX_Win(_window);
+                xcb_flush(conn);
                 free(char2b_str);
             }
 
             void
             draw_text_16_auto_color(const char *__str, int16_t __x, int16_t __y, int __text_color = WHITE, int __background_color = 0, const char *__font_name = DEFAULT_FONT)
             {
+                AutoTimer t(__func__);
+
                 get_font(__font_name);
                 int bg_color;
                 if (__background_color == 0) bg_color = _color;
@@ -6087,7 +6087,7 @@ window {
                 int len;
                 xcb_char2b_t *char2b_str = to_char2b(__str, &len);
 
-                VoidC cookie = xcb_image_text_16(
+                xcb_image_text_16(
                     conn,
                     len,
                     _window,
@@ -6096,14 +6096,15 @@ window {
                     __y,
                     char2b_str
                 );
-                CheckVoidC(cookie, "ERROR: ( xcb_image_text_16 ) Failed");
-                FlushX_Win(_window);
+                xcb_flush(conn);
                 free(char2b_str);
             }
             
             void
             draw_acc_16(const string &__str, int __text_color = WHITE, int __background_color = 0, const char *__font_name = DEFAULT_FONT)
             {
+                AutoTimer t(__func__);
+
                 get_font(__font_name);
                 if (__background_color == 0) __background_color = _color;
                 if (__background_color == WHITE) __text_color = BLACK;
@@ -6112,7 +6113,7 @@ window {
                 int len;
                 xcb_char2b_t *char2b_str = to_char2b(__str.c_str(), &len);
                 
-                VoidC cookie = xcb_image_text_16(
+                xcb_image_text_16(
                     conn,
                     len,
                     _window,
@@ -6121,8 +6122,7 @@ window {
                     CENTER_TEXT_Y(_height),
                     char2b_str
                 );
-                CheckVoidC(cookie, "ERROR: ( xcb_image_text_16 ) Failed");
-                FlushX_Win(_window);
+                xcb_flush(conn);
                 free(char2b_str);
             }
 
@@ -6171,8 +6171,9 @@ window {
                     xcb_keycode_t * keycodes = xcb_key_symbols_get_keycode(keysyms, binding.first);
                     if (keycodes)
                     {
-                        for (auto * kc = keycodes; * kc; kc++) {
-                            VOID_COOKIE = xcb_grab_key(
+                        for (auto * kc = keycodes; * kc; kc++)
+                        {
+                            xcb_grab_key(
                                 conn,
                                 1,
                                 _window,
@@ -6181,13 +6182,13 @@ window {
                                 XCB_GRAB_MODE_ASYNC, 
                                 XCB_GRAB_MODE_ASYNC  
                             );
-                            CHECK_VOID_COOKIE();
+                            xcb_flush(conn);
                         }
                         free(keycodes);
                     }
                 }
                 xcb_key_symbols_free(keysyms);
-                FLUSH_XWin();
+                xcb_flush(conn);
             }
             
             void
@@ -6261,11 +6262,14 @@ window {
             }
         
         /* Buttons       */
-            void grab_button(initializer_list<pair<uint8_t, uint16_t>> __bindings)
+            void
+            grab_button(initializer_list<pair<uint8_t, uint16_t>> __bindings)
             {
+                AutoTimer t(__func__);
+
                 for (const auto &pair : __bindings)
                 {
-                    VOID_COOKIE = xcb_grab_button(
+                    xcb_grab_button(
                         conn, 
                         1,
                         _window, 
@@ -6277,43 +6281,27 @@ window {
                         pair.first,
                         pair.second
                     );
-                    CHECK_VOID_COOKIE();
-                    FLUSH_XWin();
+                    xcb_flush(conn);
                 }
             }
-            void ungrab_button(initializer_list<pair<uint8_t, uint16_t>> __bindings)
+
+            void
+            ungrab_button(initializer_list<pair<uint8_t, uint16_t>> __bindings)
             {
+                AutoTimer t(__func__);
+
                 for (const auto &pair : __bindings)
                 {
-                    VOID_COOKIE = xcb_ungrab_button(
+                    xcb_ungrab_button(
                         conn,
                         pair.first,
                         _window,
                         pair.second
                     );
-                    CHECK_VOID_COOKIE();
-                    FLUSH_XWin();
+                    xcb_flush(conn);
                 }
             }
-        
-        /* Events        */
-            /* template <typename Callback>
-            void add_action_on_L_button_event(Callback &&__callback)
-            {
-                do {
-                    int id = event_handler->setEventCallback( XCB_BUTTON_PRESS, [ this, __callback ]( Ev ev )-> void
-                    {
-                        RE_CAST_EV( xcb_button_press_event_t );
-                        if (( e->event == this->_window ) && ( e->detail == L_MOUSE_BUTTON ))
-                        {
-                            __callback();
-                        }
-                    });
-                    _ev_id_vec.push_back( { XCB_BUTTON_PRESS, id });
 
-                } while ( 0 );
-            } */
-            
     private:
     /* Variables   */
         /* Main */
@@ -6362,7 +6350,7 @@ window {
                     return;
                 }
 
-                VoidC cookie = xcb_create_window(
+                xcb_create_window(
                     conn,
                     _depth,
                     _window,
@@ -6377,48 +6365,31 @@ window {
                     _value_mask,
                     _value_list
                 );
-                CheckVoidC(cookie, "ERROR: ( xcb_create_window ) Failed");
-                FLUSH_XWin();
-                /** NOTE: Setting @p Xid_gen_success bit of @class member variable @p '_bit_state' */
-                _bit_state |= ( 1 << Xid_gen_success );
+                xcb_flush(conn);
 
-                /* do {
-                    int id = event_handler->setEventCallback( XCB_DESTROY_NOTIFY, [ this ](Ev ev)-> void
-                    {
-                        RE_CAST_EV( xcb_destroy_notify_event_t );
-                        if ( e->event == this->_window )
-                        {
-                            loutI << "cur vec size" << this->_ev_id_vec.size() << '\n';
-                            for ( int i = 1; i < this->_ev_id_vec.size(); ++i )
-                            {
-                                event_handler->removeEventCallback( this->_ev_id_vec[i].first, this->_ev_id_vec[i].second );
-                            }
-                        }
-                    });
-                    _ev_id_vec.push_back( { XCB_DESTROY_NOTIFY, id } );
-                } while ( 0 ); */
+                /** NOTE: Setting @p Xid_gen_success bit of @class member variable @p '_bit_state' */
+                _bit_state |= (1 << Xid_gen_success);
             }
             
             void
             clear_window()
             {
-                VOID_COOKIE = xcb_clear_area(
+                xcb_clear_area(
                     conn, 
                     0,
                     _window,
                     0, 
                     0,
-                    this->_width,
-                    this->_height
+                    _width,
+                    _height
                 );
-                CHECK_VOID_COOKIE();
-                FLUSH_XWin();
+                xcb_flush(conn);
             }
 
             void
             clear_window(uint32_t __window)
             {
-                VOID_COOKIE = xcb_clear_area(
+                xcb_clear_area(
                     conn, 
                     0,
                     __window,
@@ -6427,8 +6398,7 @@ window {
                     20,
                     20
                 );
-                CHECK_VOID_COOKIE();
-                FLUSH_XWin();
+                xcb_flush(conn);
             }
 
             /**
@@ -6453,20 +6423,19 @@ window {
                         static_cast<const uint32_t &>(__value)
                     }
                 );
-                FLUSH_XWin();
+                xcb_flush(conn);
             }
             
             void
             config_window(uint16_t __mask, const void *__value)
             {
-                VOID_COOKIE = xcb_configure_window(
+                xcb_configure_window(
                     conn,
                     _window,
                     __mask,
                     __value
                 );
-                CHECK_VOID_COOKIE();
-                FLUSH_XWin();
+                xcb_flush(conn);
             }
             
             void
@@ -6478,25 +6447,25 @@ window {
                     return;
                 }
 
-                VOID_COOKIE = xcb_configure_window(
+                xcb_configure_window(
                     conn,
                     _window,
                     mask,
                     values.data()
 
                 );
-                CHECK_VOID_COOKIE();
-                FLUSH_XWin();
+                xcb_flush(conn);
             }
 
         /* Create     */
             /* Gc     */
-                void create_graphics_exposure_gc()
+                void
+                create_graphics_exposure_gc()
                 {
+                    AutoTimer t(__func__);
+                    
                     _gc = xcb_generate_id(conn);
-                    // uint32_t mask = XCB_GC_FOREGROUND | XCB_GC_BACKGROUND | XCB_GC_GRAPHICS_EXPOSURES;
-
-                    VOID_COOKIE = xcb_create_gc(
+                    xcb_create_gc(
                         conn,
                         _gc,
                         _window,
@@ -6508,17 +6477,20 @@ window {
                             0
                         }
                     );
-                    CHECK_VOID_COOKIE();
-                    FLUSH_XWin();
+                    xcb_flush(conn);
                 }
-                void create_font_gc(int text_color, int backround_color, xcb_font_t font)
+
+                void
+                create_font_gc(int text_color, int backround_color, xcb_font_t font)
                 {
+                    AutoTimer t(__func__);
+
                     font_gc = xcb_generate_id(conn);
-                    VOID_COOKIE = xcb_create_gc(
+                    xcb_create_gc(
                         conn, 
                         font_gc, 
                         _window, 
-                        XCB_GC_FOREGROUND | XCB_GC_BACKGROUND | XCB_GC_FONT, 
+                        GC_FONT_MASK,
                         (const uint32_t[3])
                         {
                             get_color(text_color),
@@ -6526,128 +6498,147 @@ window {
                             font
                         }
                     );
-                    CHECK_VOID_COOKIE();
-                    FLUSH_XWin();
+                    xcb_flush(conn);
                 }
             
             /* Pixmap */
-                void create_pixmap()
+                void
+                create_pixmap()
                 {
+                    AutoTimer t(__func__);
+
                     pixmap = xcb_generate_id(conn);
-                    VOID_COOKIE = xcb_create_pixmap(
-                        conn, 
-                        screen->root_depth, 
-                        pixmap, 
-                        _window, 
-                        _width, 
+                    xcb_create_pixmap(
+                        conn,
+                        screen->root_depth,
+                        pixmap,
+                        _window,
+                        _width,
                         _height
 
                     );
-                    CHECK_VOID_COOKIE();
-                    FLUSH_XWin();
+                    xcb_flush(conn);
                 }
             
             /* Png    */
-                void create_png_from_vector_bitmap(const char *file_name, const vector<vector<bool>> &bitmap) {
+                void
+                create_png_from_vector_bitmap(const char *file_name, const vector<vector<bool>> &bitmap)
+                {
+                    AutoTimer t(__func__);
+
                     int width = bitmap[0].size();
                     int height = bitmap.size();
 
                     FILE *fp = fopen(file_name, "wb"); 
-                    if (!fp) {
+                    if (!fp)
+                    {
                         log_error("Failed to open file: " + std::string(file_name));
                         return;
-
                     }
+
                     png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-                    if (!png_ptr) {
+                    if (!png_ptr)
+                    {
                         fclose(fp);
                         log_error("Failed to create PNG write struct");
                         return;
-
                     }
+
                     png_infop info_ptr = png_create_info_struct(png_ptr);
-                    if (!info_ptr) {
+                    if (!info_ptr)
+                    {
                         fclose(fp);
                         png_destroy_write_struct(&png_ptr, NULL);
                         log_error("Failed to create PNG info struct");
                         return;
-
                     }
-                    if (setjmp(png_jmpbuf(png_ptr))) {
+
+                    if (setjmp(png_jmpbuf(png_ptr)))
+                    {
                         fclose(fp);
                         png_destroy_write_struct(&png_ptr, &info_ptr);
                         log_error("Error during PNG creation");
                         return;
-
                     }
+
                     png_init_io(png_ptr, fp);
                     png_set_IHDR(png_ptr, info_ptr, width, height, 8, PNG_COLOR_TYPE_GRAY, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
                     png_write_info(png_ptr, info_ptr);
 
                     // Write bitmap to PNG
                     png_bytep row = new png_byte[width];
-                    for (int y = 0; y < height; y++) {
-                        for (int x = 0; x < width; x++) {
+                    for (int y = 0; y < height; y++)
+                    {
+                        for (int x = 0; x < width; x++)
+                        {
                             row[x] = bitmap[y][x] ? 0xFF : 0x00;
-
-                        } png_write_row(png_ptr, row);
-
-                    } delete[] row;
+                        }
+                        png_write_row(png_ptr, row);
+                    }
+                    delete[] row;
                     
                     png_write_end(png_ptr, NULL);
                     fclose(fp);
                     png_destroy_write_struct(&png_ptr, &info_ptr);
-
                 }
-                void create_png_from_vector_bitmap(const char *file_name, bool bitmap[20][20]) {
+
+                void
+                create_png_from_vector_bitmap(const char *file_name, bool bitmap[20][20])
+                {
                     int width  = 20, height = 20;
 
                     FILE *fp = fopen(file_name, "wb");
-                    if (!fp) {
+                    if (!fp)
+                    {
                         loutE << "Failed to open file:" << file_name << loutEND;
                         return;
-
                     }
+
                     png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-                    if (!png_ptr) {
+                    if (!png_ptr)
+                    {
                         fclose(fp);
                         log_error("Failed to create PNG write struct");
                         return;
-
                     }
+
                     png_infop info_ptr = png_create_info_struct(png_ptr);
-                    if (!info_ptr) {
+                    if (!info_ptr)
+                    {
                         fclose(fp);
                         png_destroy_write_struct(&png_ptr, NULL);
                         log_error("Failed to create PNG info struct");
                         return;
-
                     }
-                    if (setjmp(png_jmpbuf(png_ptr))) {
+
+                    if (setjmp(png_jmpbuf(png_ptr)))
+                    {
                         fclose(fp);
                         png_destroy_write_struct(&png_ptr, &info_ptr);
                         log_error("Error during PNG creation");
                         return;
-
                     }
+
                     png_init_io(png_ptr, fp);
                     png_set_IHDR(png_ptr, info_ptr, width, height, 8, PNG_COLOR_TYPE_GRAY, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
                     png_write_info(png_ptr, info_ptr);
 
                     // Write bitmap to PNG
                     png_bytep row = new png_byte[width];
-                    for (int y = 0; y < height; y++) {
-                        for (int x = 0; x < width; x++) {
+                    for (int y = 0; y < height; y++)
+                    {
+                        for (int x = 0; x < width; x++)
+                        {
                             row[x] = bitmap[y][x] ? 0xFF : 0x00;
+                        }
+                        png_write_row(png_ptr, row);
 
-                        } png_write_row(png_ptr, row);
-
-                    } delete[] row;
+                    }
+                    delete[] row;
 
                     png_write_end(png_ptr, NULL);
                     fclose(fp);
                     png_destroy_write_struct(&png_ptr, &info_ptr);
-
                 }
 
         /* Get        */
@@ -6655,7 +6646,8 @@ window {
             get_font(const char *font_name)
             {
                 AutoTimer timer(__func__);
-                font = xcb->gen_Xid()/* xcb_generate_id(conn) */;
+
+                font = xcb_generate_id(conn);
                 xcb_open_font(
                     conn,
                     font,
@@ -6670,7 +6662,8 @@ window {
             change_back_pixel(uint32_t pixel)
             {
                 AutoTimer timer(__func__);
-                VOID_COOKIE = xcb_change_window_attributes(
+
+                xcb_change_window_attributes(
                     conn,
                     _window,
                     XCB_CW_BACK_PIXEL,
@@ -6679,14 +6672,13 @@ window {
                         pixel
                     }
                 );
-                CHECK_VOID_COOKIE();
-                FLUSH_XWin();
+                xcb_flush(conn);
             }
             
             void
             change_back_pixel(uint32_t pixel, uint32_t __window)
             {
-                VOID_COOKIE = xcb_change_window_attributes(
+                xcb_change_window_attributes(
                     conn,
                     __window,
                     XCB_CW_BACK_PIXEL,
@@ -6695,8 +6687,7 @@ window {
                         pixel
                     }
                 );
-                CHECK_VOID_COOKIE();
-                FLUSH_XWin();
+                xcb_flush(conn);
             }
             
             uint32_t
@@ -6929,7 +6920,7 @@ window {
                 AutoTimer timer(__func__);
 
                 uint32_t window;
-                if ((window = xcb->gen_Xid()) == -1)
+                if ((window = xcb->gen_Xid()) == U32_MAX)
                 {
                     loutEWin << "Failed to create border window: " << WINDOW_ID_BY_INPUT(window) << '\n';
                     return;
@@ -6937,15 +6928,13 @@ window {
                 xcb->create_w(_window, window, __x, __y, __width, __height);
 
                 change_back_pixel(get_color(__color), window);
-                VOID_COOKIE = xcb_map_window(conn, window); CHECK_VOID_COOKIE(); FLUSH_XWin();
-                CHECK_BITFLAG_ERR(xcb->check_conn(), X_W_CREATION_ERR);
+                xcb_map_window(conn, window);
+                xcb_flush(conn);
 
                 if (__border == UP   ) _border[0] = window;
                 if (__border == DOWN ) _border[1] = window;
                 if (__border == LEFT ) _border[2] = window;
                 if (__border == RIGHT) _border[3] = window;
-
-                _bit_state |= (1 << has_borders);
             }
             
             #define CREATE_UP_BORDER(__size, __color)    create_border_window(UP,    __color, 0, 0, _width, __size)
@@ -6968,6 +6957,8 @@ window {
             void
             make_border_window(int __border, uint32_t __size, int __color)
             {
+                AutoTimer t(__func__);
+
                 if (__border & UP   ) CREATE_UP_BORDER(__size, __color);
                 if (__border & DOWN ) CREATE_DOWN_BORDER(__size, __color);
                 if (__border & LEFT ) CREATE_LEFT_BORDER(__size, __color);
@@ -7014,7 +7005,6 @@ window {
                     
                     count++;
                 }
-                
                 return count;
             }
 
@@ -7196,6 +7186,8 @@ class client {
         /* Main      */
             void make_decorations()
             {
+                AutoTimer t(__func__);
+
                 make_frame();
                 set_icon_png();
                 make_titlebar();
@@ -7216,14 +7208,18 @@ class client {
                 win.focus_input();
                 win.set_active_EWMH_window();
                 frame.raise();
+                xcb_flush(conn);
             }
             void update()
             {
+                AutoTimer t("client:" + string(__func__));
+
                 x = frame.x();
                 y = frame.y();
                 width = frame.width();
                 height = frame.height();
                 win.send_event(XCB_EVENT_MASK_STRUCTURE_NOTIFY, (uint32_t[]){(static_cast<uint32_t>(x) + BORDER_SIZE), (static_cast<uint32_t>(y) + ( TITLE_BAR_HEIGHT + BORDER_SIZE )), win.width(), win.height()});
+                xcb_flush(conn);
             }
             void map()
             {
@@ -7657,6 +7653,8 @@ class client {
             void
             set_client_params()
             {
+                AutoTimer t(__func__);
+
                 win.set_client_size_as_hints( &x, &y, &width, &height );
                 if ( win.get_min_width()  > width
                 &&   win.get_min_height() > height
@@ -7670,6 +7668,8 @@ class client {
         /* Get       */
             void get_window_parameters()
             {
+                AutoTimer t("client:" + string(__func__));
+
                 xcb_get_geometry_cookie_t cookie = xcb_get_geometry( conn, win );
                 xcb_get_geometry_reply_t *reply = xcb_get_geometry_reply( conn, cookie, nullptr );
                 if ( reply == nullptr )
@@ -7769,6 +7769,7 @@ class client {
         make_frame()
         {
             AutoTimer timer(__func__);
+
             frame.create_window(
                 screen->root,
                 (x - BORDER_SIZE),
@@ -7777,38 +7778,22 @@ class client {
                 (height + TITLE_BAR_HEIGHT + (BORDER_SIZE * 2)),
                 DARK_GREY
             );
-            FlushX_Win( this->frame );
-            win.reparent( frame, BORDER_SIZE, ( TITLE_BAR_HEIGHT + BORDER_SIZE ));
-            FlushX_Win( this->win );
+            xcb_flush(conn);
+            win.reparent(frame, BORDER_SIZE, (TITLE_BAR_HEIGHT + BORDER_SIZE));
             update();
+            xcb_flush(conn);
     
-            CONN(XCB_FOCUS_IN,
-                this->win.ungrab_button({{L_MOUSE_BUTTON, NULL}});
+            CONN(XCB_FOCUS_IN, {
+                win.ungrab_button({{L_MOUSE_BUTTON, NULL}});
+                xcb_flush(conn);
+            }, win);
 
-            , this->win);
+            CONN(XCB_FOCUS_OUT, {
+                win.grab_button({{L_MOUSE_BUTTON, NULL}});
+                xcb_flush(conn);
+            }, win);
 
-            CONN(XCB_FOCUS_OUT,
-                this->win.grab_button({{L_MOUSE_BUTTON, NULL}});
-
-            , this->win);
-
-            CONN( L_MOUSE_BUTTON_EVENT, this->focus(); , this->win );
-            /* do {
-                int id = event_handler->setEventCallback(
-                XCB_BUTTON_PRESS,
-                [ this ]( Ev ev )
-                {
-                    RE_CAST_EV( xcb_button_press_event_t );
-                    if ( e->event == this->win )
-                    {
-                        this->win.set_active_EWMH_window();
-                        this->focus();
-                        this->win.focus_input();
-                    }
-                });
-                ev_id_vec.push_back( { XCB_BUTTON_PRESS, id } );
-                
-            } while ( 0 ); */
+            CONN(L_MOUSE_BUTTON_EVENT, { focus(); xcb_flush(conn); }, win);
             frame.set_event_mask( FRAME_EVENT_MASK );
             frame.map();
 
@@ -7822,6 +7807,7 @@ class client {
                     {
                         signal_manager->_window_client_map.remove_by_value( this );
                         this->kill();
+                        xcb_flush(conn);
                     }
                 });
             
@@ -7838,7 +7824,7 @@ class client {
                     {
                         signal_manager->_window_client_map.remove_by_value(this);
                         this->kill();
-                        FlushX_Win(frame);
+                        xcb_flush(conn);
                     }
                 });
             
@@ -7856,62 +7842,40 @@ class client {
                 frame,
                 BORDER_SIZE,
                 BORDER_SIZE,
-                ( width - ( BORDER_SIZE * 2 )),
+                (width - (BORDER_SIZE * 2)),
                 TITLE_BAR_HEIGHT,
                 BLACK,
                 XCB_EVENT_MASK_EXPOSURE,
                 MAP
             );
-            FlushX_Win(titlebar);
+            xcb_flush(conn);
             CWC(titlebar);
 
-            titlebar.grab_button({ { L_MOUSE_BUTTON, NULL } });
-            draw_title( TITLE_REQ_DRAW );
+            titlebar.grab_button({{L_MOUSE_BUTTON, NULL}});
+            draw_title(TITLE_REQ_DRAW);
             icon.raise();
 
             CONN(XCB_EXPOSE, {
                 titlebar.clear();
                 titlebar.draw_acc_16(win.get_net_wm_name());
-                FlushX_Win(titlebar);
+                xcb_flush(conn);
+
             }, titlebar);
 
-            /* CONN(XCB_PROPERTY_NOTIFY, {
-                titlebar.clear();
-                titlebar.draw_acc_16(win.get_net_wm_name_by_req());
-                FlushX_Win(titlebar);
-            }, titlebar); */
-
-            /* do {
-                int id = event_handler->setEventCallback(
-                XCB_EXPOSE,
-                [ this ]( Ev ev )-> void
-                {
-                    RE_CAST_EV( xcb_expose_event_t );
-                    if ( e->window == this->titlebar )
-                    {
-                        this->titlebar.clear();
-                        this->titlebar.draw_acc_16( this->win.get_net_wm_name() );
-                        FlushX_Win( this->titlebar );
-                    }
-                });
-                ev_id_vec.push_back( { XCB_EXPOSE, id } );
-
-            } while ( 0 ); */
-            
             do {
                 int id = event_handler->setEventCallback(
                 XCB_PROPERTY_NOTIFY,
-                [ this ]( Ev ev )-> void
+                [this](Ev ev)-> void
                 {
                     RE_CAST_EV( xcb_property_notify_event_t );
-                    if ( e->window == this->win && e->atom == ewmh->_NET_WM_NAME )
+                    if (e->window == win && e->atom == ewmh->_NET_WM_NAME)
                     {
-                        this->titlebar.clear();
-                        this->titlebar.draw_acc_16( this->win.get_net_wm_name_by_req() );
-                        FlushX_Win( this->titlebar );
+                        titlebar.clear();
+                        titlebar.draw_acc_16(win.get_net_wm_name_by_req());
+                        xcb_flush(conn);
                     }
                 });
-                ev_id_vec.push_back( { XCB_PROPERTY_NOTIFY, id } );
+                ev_id_vec.push_back({XCB_PROPERTY_NOTIFY, id});
             
             } while ( 0 );
         }
@@ -7919,6 +7883,8 @@ class client {
         void
         make_close_button()
         {
+            AutoTimer t(__func__);
+
             close_button.create_window(
                 frame,
                 (width - BUTTON_SIZE - BORDER_SIZE),
@@ -7931,21 +7897,22 @@ class client {
                 (int[]){ALL, 1, BLACK},
                 CURSOR::hand2
             );
-            CWC( close_button );
-            FlushX_Win( close_button );
-            close_button.make_then_set_png( USER_PATH_PREFIX( "/close.png" ), CLOSE_BUTTON_BITMAP );
-            close_button.grab_button( { { L_MOUSE_BUTTON, NULL } } );
+            xcb_flush(conn);
+            CWC(close_button);
+            close_button.make_then_set_png(USER_PATH_PREFIX("/close.png"), CLOSE_BUTTON_BITMAP);
+            close_button.grab_button({{L_MOUSE_BUTTON, NULL}});
             
             do {
                 int id = event_handler->setEventCallback(
                 XCB_BUTTON_PRESS,
-                [ this ]( Ev ev )-> void
+                [this](Ev ev)-> void
                 {
-                    RE_CAST_EV( xcb_button_press_event_t );
-                    if ( e->event != this->close_button ) return;
-                    if ( e->detail != L_MOUSE_BUTTON ) return;
-                    if ( !win.is_mapped() ) frame.kill();
-                    this->win.kill_test();
+                    RE_CAST_EV(xcb_button_press_event_t);
+                    if (e->event != close_button) return;
+                    if (e->detail != L_MOUSE_BUTTON) return;
+                    if (!win.is_mapped()) frame.kill();
+                    win.kill_test();
+                    xcb_flush(conn);
                 });
                 ev_id_vec.push_back( { XCB_BUTTON_PRESS, id } );
 
@@ -7954,30 +7921,32 @@ class client {
             do {
                 int id = event_handler->setEventCallback(
                 XCB_ENTER_NOTIFY,
-                [ this ]( Ev ev )-> void
+                [this](Ev ev)-> void
                 {
                     RE_CAST_EV( xcb_enter_notify_event_t );
-                    if ( e->event == this->close_button )
+                    if (e->event == close_button)
                     {
-                        this->close_button.change_border_color( WHITE );
+                        close_button.change_border_color(WHITE);
+                        xcb_flush(conn);
                     }
                 });
-                ev_id_vec.push_back( { XCB_ENTER_NOTIFY, id } );
+                ev_id_vec.push_back({XCB_ENTER_NOTIFY, id});
                 
             } while ( 0 );
 
             do {
                 int id = event_handler->setEventCallback(
                 XCB_LEAVE_NOTIFY,
-                [ this ]( Ev ev )-> void
+                [this](Ev ev)-> void
                 {
-                    RE_CAST_EV( xcb_leave_notify_event_t );
-                    if ( e->event == this->close_button )
+                    RE_CAST_EV(xcb_leave_notify_event_t);
+                    if (e->event == close_button)
                     {
-                        this->close_button.change_border_color( BLACK );
+                        close_button.change_border_color(BLACK);
+                        xcb_flush(conn);
                     }
                 });
-                ev_id_vec.push_back( { XCB_LEAVE_NOTIFY, id } );
+                ev_id_vec.push_back({XCB_LEAVE_NOTIFY, id});
 
             } while ( 0 );
         }
@@ -7998,9 +7967,9 @@ class client {
                 (int[3]) {ALL, 1, BLACK},
                 CURSOR::hand2
             );
-            FlushX_Win(max_button);
+            xcb_flush(conn);
             CWC(max_button);
-            max_button.grab_button( { { L_MOUSE_BUTTON, NULL } } );
+            max_button.grab_button({{L_MOUSE_BUTTON, NULL}});
 
             Bitmap bitmap(20, 20);
             bitmap.modify(4, 4, 16, true);
@@ -8038,13 +8007,14 @@ class client {
             do {
                 int id = event_handler->setEventCallback(
                 XCB_BUTTON_PRESS,
-                [ this ]( Ev ev ) -> void
+                [this](Ev ev) -> void
                 {
-                    RE_CAST_EV( xcb_button_press_event_t );
-                    if ( e->event != this->max_button ) return;
-                    if ( e->detail == L_MOUSE_BUTTON )
+                    RE_CAST_EV(xcb_button_press_event_t);
+                    if (e->event != max_button) return;
+                    if (e->detail == L_MOUSE_BUTTON)
                     {
                         C_EMIT( this, BUTTON_MAXWIN_PRESS );
+                        xcb_flush(conn);
                     }
                 });
                 ev_id_vec.push_back( { XCB_BUTTON_PRESS, id } );
@@ -8054,12 +8024,13 @@ class client {
             do {
                 int id = event_handler->setEventCallback(
                 XCB_ENTER_NOTIFY,
-                [ this ]( Ev ev )-> void
+                [this](Ev ev)-> void
                 {
-                    RE_CAST_EV( xcb_enter_notify_event_t );
-                    if ( e->event == this->max_button ) 
+                    RE_CAST_EV(xcb_enter_notify_event_t);
+                    if (e->event == max_button)
                     {
-                        this->max_button.change_border_color( WHITE );
+                        max_button.change_border_color(WHITE);
+                        xcb_flush(conn);
                     }
                 });
                 ev_id_vec.push_back( { XCB_ENTER_NOTIFY, id } );
@@ -8069,24 +8040,25 @@ class client {
             do {
                 int id = event_handler->setEventCallback(
                 XCB_LEAVE_NOTIFY,
-                [ this ]( Ev ev )-> void
+                [this](Ev ev)-> void
                  {
-                    RE_CAST_EV( xcb_leave_notify_event_t );
-                    if ( e->event == this->max_button )
+                    RE_CAST_EV(xcb_leave_notify_event_t);
+                    if (e->event == max_button)
                     {
-                        this->max_button.change_border_color( BLACK );
+                        max_button.change_border_color(BLACK);
+                        xcb_flush(conn);
                     }
                 });
-                ev_id_vec.push_back( { XCB_LEAVE_NOTIFY, id } );
+                ev_id_vec.push_back({XCB_LEAVE_NOTIFY, id});
 
             } while ( 0 );
-
         }
         
         void
         make_min_button()
         {
             AutoTimer timer(__func__);
+
             min_button.create_window(
                 frame,
                 (width - (BUTTON_SIZE * 3) - BORDER_SIZE),
@@ -8100,9 +8072,10 @@ class client {
                 CURSOR::hand2
 
             );
-            FlushX_Win( this->min_button );
+            xcb_flush(conn);
+
             CWC( min_button );
-            min_button.grab_button( { { L_MOUSE_BUTTON, NULL } } );
+            min_button.grab_button({{L_MOUSE_BUTTON, NULL}});
 
             Bitmap bitmap(20, 20);
             bitmap.modify(9, 4, 16, true);
@@ -8115,39 +8088,41 @@ class client {
             do {
                 int id = event_handler->setEventCallback(
                 XCB_ENTER_NOTIFY,
-                [ this ]( Ev ev )-> void
+                [this](Ev ev)-> void
                 {
-                    RE_CAST_EV( xcb_enter_notify_event_t );
-                    if ( e->event == this->min_button )
+                    RE_CAST_EV(xcb_enter_notify_event_t);
+                    if (e->event == min_button)
                     {
-                        this->min_button.change_border_color( WHITE );
+                        min_button.change_border_color( WHITE );
+                        xcb_flush(conn);
                     }
                 });
                 ev_id_vec.push_back( { XCB_ENTER_NOTIFY, id } );
 
-            } while ( 0 );
+            } while (0);
 
             do {
                 int id = event_handler->setEventCallback(
                 XCB_LEAVE_NOTIFY,
-                [ this ]( Ev ev )-> void
+                [this](Ev ev)-> void
                 {
-                    RE_CAST_EV( xcb_leave_notify_event_t );
-                    if ( e->event == this->min_button )
+                    RE_CAST_EV(xcb_leave_notify_event_t);
+                    if (e->event == min_button)
                     {
-                        this->min_button.change_border_color( BLACK );
+                        min_button.change_border_color(BLACK);
+                        xcb_flush(conn);
                     }
                 });
-                this->ev_id_vec.push_back( { XCB_LEAVE_NOTIFY, id } );
+                ev_id_vec.push_back({XCB_LEAVE_NOTIFY, id});
 
-            } while ( 0 );
-
+            } while (0);
         }
         
         void
         make_borders()
         {
             AutoTimer timer(__func__);
+            
             border[left].create_window(
                 frame,
                 0,
@@ -8161,9 +8136,10 @@ class client {
                 CURSOR::left_side
 
             );
+            xcb_flush(conn);
+
             CWC(border[left]);
-            border[left].grab_button( { { L_MOUSE_BUTTON, XCB_BUTTON_MASK_ANY } } );
-            FlushX_Win( this->border[ left ] );
+            border[left].grab_button({{L_MOUSE_BUTTON, XCB_BUTTON_MASK_ANY}});
 
             border[right].create_window(
                 frame,
@@ -8176,10 +8152,11 @@ class client {
                 MAP,
                 nullptr,
                 CURSOR::right_side
+            );
+            xcb_flush(conn);
 
-            ); CWC(border[right]);
-            border[right].grab_button({ { L_MOUSE_BUTTON, XCB_BUTTON_MASK_ANY } });
-            FLUSH_X();
+            CWC(border[right]);
+            border[right].grab_button({{L_MOUSE_BUTTON, XCB_BUTTON_MASK_ANY}});
 
             border[top].create_window(
                 frame,
@@ -8193,10 +8170,12 @@ class client {
                 nullptr,
                 CURSOR::top_side
 
-            ); CWC(border[top]);
-            border[top].grab_button({ { L_MOUSE_BUTTON, XCB_BUTTON_MASK_ANY } });
-            FLUSH_X();
+            );
+            xcb_flush(conn);
 
+            CWC(border[top]);
+            border[top].grab_button({{L_MOUSE_BUTTON, XCB_BUTTON_MASK_ANY}});
+            
             border[bottom].create_window(
                 frame,
                 BORDER_SIZE,
@@ -8208,10 +8187,11 @@ class client {
                 MAP,
                 nullptr,
                 CURSOR::bottom_side
-
-            ); CWC(border[bottom]);
-            border[bottom].grab_button({ { L_MOUSE_BUTTON, XCB_BUTTON_MASK_ANY } });
-            FLUSH_X();
+            );
+            xcb_flush(conn);
+            
+            CWC(border[bottom]);
+            border[bottom].grab_button({{L_MOUSE_BUTTON, XCB_BUTTON_MASK_ANY}});
 
             border[top_left].create_window(
                 frame,
@@ -8225,9 +8205,11 @@ class client {
                 nullptr,
                 CURSOR::top_left_corner
 
-            ); CWC(border[top_left]);
-            border[top_left].grab_button({ { L_MOUSE_BUTTON, XCB_BUTTON_MASK_ANY } });
-            FLUSH_X();
+            );
+            xcb_flush(conn);
+
+            CWC(border[top_left]);
+            border[top_left].grab_button({{L_MOUSE_BUTTON, XCB_BUTTON_MASK_ANY}});
 
             border[top_right].create_window(
                 frame,
@@ -8241,9 +8223,11 @@ class client {
                 nullptr,
                 CURSOR::top_right_corner
 
-            ); CWC(border[top_right]);
-            border[top_right].grab_button({ { L_MOUSE_BUTTON, XCB_BUTTON_MASK_ANY } });
-            FLUSH_X();
+            );
+            xcb_flush(conn);
+            
+            CWC(border[top_right]);
+            border[top_right].grab_button({{L_MOUSE_BUTTON, XCB_BUTTON_MASK_ANY}});
 
             border[bottom_left].create_window(
                 frame,
@@ -8256,10 +8240,11 @@ class client {
                 MAP,
                 nullptr,
                 CURSOR::bottom_left_corner
+            );
+            xcb_flush(conn);
 
-            ); CWC(border[bottom_left]);
-            border[bottom_left].grab_button({ { L_MOUSE_BUTTON, XCB_BUTTON_MASK_ANY } });
-            FLUSH_X();
+            CWC(border[bottom_left]);
+            border[bottom_left].grab_button({{L_MOUSE_BUTTON, XCB_BUTTON_MASK_ANY}});
 
             border[bottom_right].create_window(
                 frame,
@@ -8272,10 +8257,13 @@ class client {
                 MAP,
                 nullptr,
                 CURSOR::bottom_right_corner
-
-            ); CWC(border[bottom_right]);
-            border[bottom_right].grab_button({ { L_MOUSE_BUTTON, XCB_BUTTON_MASK_ANY } });
-            FLUSH_X();
+            );
+            xcb_flush(conn);
+            
+            CWC(border[bottom_right]);
+            border[bottom_right].grab_button({{L_MOUSE_BUTTON, XCB_BUTTON_MASK_ANY}});
+            
+            xcb_flush(conn);
         }
         
         void
@@ -8292,6 +8280,7 @@ class client {
                 NONE,
                 MAP
             );
+            xcb_flush(conn);
             CWC(icon);
 
             win.make_png_from_icon();
@@ -8649,14 +8638,15 @@ class Window_Manager {
             void
             focus_none()
             {
-                VOID_COOKIE = xcb_set_input_focus(
+                AutoTimer t(__func__);
+
+                xcb_set_input_focus(
                     conn,
                     XCB_NONE,
                     screen->root,
                     XCB_CURRENT_TIME
                 );
-                CHECK_VOID_COOKIE();
-                FLUSH_X();
+                xcb_flush(conn);
             }
 
         /* Window       */
@@ -8698,10 +8688,12 @@ class Window_Manager {
                 );
 
             }/* stack '__window1' below '__window2' */
-            void unmap_window(uint32_t __window) {
-                VOID_COOKIE = xcb_unmap_window(conn, __window); CHECK_VOID_COOKIE();
-                FLUSH_X();
-
+            
+            void
+            unmap_window(uint32_t __window)
+            {
+                xcb_unmap_window(conn, __window);
+                xcb_flush(conn);
             }
 
         /* Client       */
@@ -8962,12 +8954,12 @@ class Window_Manager {
                 if (!c->win.check_frameless_window_hint())
                 {
                     c->make_decorations();
-                    c->frame.set_event_mask( FRAME_EVENT_MASK );
-                    c->win.set_event_mask( CLIENT_EVENT_MASK );
+                    c->frame.set_event_mask(FRAME_EVENT_MASK);
+                    c->win.set_event_mask(CLIENT_EVENT_MASK);
                     c->update();
                     c->focus();
                     focused_client = c;
-                    check_client(c);
+                    /* check_client(c); */
                     c->frame.grab_default_keys();
                     /* c->add_to_map(); */
                 }
@@ -9321,12 +9313,13 @@ class Window_Manager {
                 return c;
 
             }
-            void check_client(client *c) {
-                c->win.x(BORDER_SIZE);
+            void check_client(client *c)
+            {
+                /* c->win.x(BORDER_SIZE);
                 FLUSH_X();
 
                 c->win.y(TITLE_BAR_HEIGHT + BORDER_SIZE);
-                FLUSH_X();
+                FLUSH_X(); */
 
                 // if client if full_screen but 'y' is offset for some reason, make 'y' (0)
                 if (c->x == 0

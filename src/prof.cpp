@@ -1,9 +1,11 @@
 #include <chrono>
 #include <fstream>
+#include <ios>
 #include <iostream>
 #include <map>
 // #include <memory>
 #include <numeric>
+#include <sstream>
 #include <string>
 #include <vector>
 #include <cmath>
@@ -50,10 +52,10 @@ ProfilerStats::count() const
     return values.size();
 }
 
-/* 
+/**
 **********************************************************************
 **********************************************************************
-********************<<      GlobalProfiler      >>********************
+****************<<    @class @c GlobalProfiler      >>****************
 **********************************************************************
 **********************************************************************
 */
@@ -64,23 +66,60 @@ GlobalProfiler::record(const std::string& name, double duration)
     stats[name].record(duration);
 }
 
+std::string
+makeNamePadding(const std::string &__s)
+{
+    std::stringstream ss;
+    for (int i = 0; (i + __s.length()) < 30; ++i)
+    {
+        ss << ' ';
+    }
+    return ss.str();
+}
+
+/* std::string
+makeDoublePadding(const double &__d)
+{
+    std::stringstream ss;
+    for (int i = 0; (i + std::to_string(__d).length()) < 12; ++i)
+    {
+        ss << ' ';
+    }
+    return ss.str();
+} */
+
+/* std::string
+makeDoublePadding(const double &__d)
+{
+    std::ostringstream oss;
+    oss << std::setprecision(2) << __d; // Set desired precision for the double's string representation
+    std::string doubleAsString = oss.str(); // Convert the double to a string with fixed precision
+
+    std::stringstream ss;
+    for (size_t i = doubleAsString.length(); i < 12; ++i) // Calculate the padding based on the length of the double's string representation
+    {
+        ss << ' ';
+    }
+    return ss.str();
+} */
+
 void
-GlobalProfiler::report(const std::string& filename)
+GlobalProfiler::report(const std::string &filename)
 {
     std::ofstream file(filename, std::ios::app);
     file << "\nProfiling report:\n";
     for (const auto& pair : stats)
     {
         file <<
-            pair.first <<
-            ": Mean = "  << pair.second.mean()   << " ms," <<
-            " Stddev = " << pair.second.stddev() << " ms," <<
-            " Min = "    << pair.second.min()    << " ms," <<
-            " Max = "    << pair.second.max()    << " ms," <<
-            " Count = "  << pair.second.count()  <<
+            pair.first << makeNamePadding(pair.first) <<
+            ": Mean = " << pair.second.mean()   << " ms," << /* makeDoublePadding(pair.second.mean())   << */
+            "Stddev = " << pair.second.stddev() << " ms," << /* makeDoublePadding(pair.second.stddev()) << */
+            "   Min = " << pair.second.min()    << " ms," << /* makeDoublePadding(pair.second.min())    << */
+            "   Max = " << pair.second.max()    << " ms," << /* makeDoublePadding(pair.second.max())    << */
+            " Count = " << pair.second.count()  <<           /* makeDoublePadding(pair.second.count())  << */
         "\n";
     }
-    file.close();
+    (void)file.close();
     
     for (const auto &i : stats)
     {

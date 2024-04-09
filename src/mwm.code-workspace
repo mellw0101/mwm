@@ -9,6 +9,8 @@
 			"*.cpp": "cpp",
 			"cstdint": "cpp",
 			"ios": "cpp"
-		}
+		},
+		// "editor.defaultFoldingRangeProvider": "NathanJ.cpp-tools-plugin",
+		// "editor.defaultFormatter": "NathanJ.cpp-tools-plugin"
 	}
 }
