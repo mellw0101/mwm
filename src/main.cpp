@@ -3,10 +3,6 @@
 #include <exception>
 #include <features.h>
 #include <iterator>
-// #include <numeric>
-// #include <optional>
-// #include <limits>
-// #include <new>
 #include <queue>
 #include <ratio>
 #include <regex>
@@ -82,19 +78,27 @@
 #include <type_traits>
 #include <spawn.h>
 #include <sys/stat.h>
-// #include <any>
 #include "data.hpp"
 #include "tools.hpp"
 
 #include "Log.hpp"
-// #include "data.hpp"
 #include "xcb.hpp"
 Logger logger;
 #include "structs.hpp"
 #include "defenitions.hpp"
 #include "tools.hpp"
+#include "prof.hpp"
+
+/*
+#include <numeric>
+#include <optional>
+#include <limits>
+#include <new>
+#include <any>
+#include "data.hpp"
 #include "thread.hpp"
-// #include "Event.hpp"
+#include "Event.hpp"
+*/
 
 static xcb_connection_t * conn;
 static xcb_ewmh_connection_t * ewmh;
@@ -110,7 +114,7 @@ using namespace std;
 
 /* vector<pair<uint32_t, function<void()>>> expose_tasks;
 vector<client *> cli_tasks; */
-UInt32UnorderedMap<client *> cw_map;
+/* UInt32UnorderedMap<client *> cw_map; */
 
 #define NET_DEBUG false
 
@@ -978,26 +982,35 @@ namespace XCB
     {
         return xcb_get_window_attributes(conn, __w);    
     }    
-    inline xcb_get_window_attributes_reply_t *attributes_reply(xcb_get_window_attributes_cookie_t __cok) {
-        return xcb_get_window_attributes_reply(conn, __cok, nullptr);  
-        
-    }    
-    inline xcb_intern_atom_cookie_t atom_cok(const char *__s) {
-        if (strcmp(__s, "_NET_WM_STATE")) {
-            return xcb_intern_atom(conn, 1, 12, __s);
-
-        } return {};
-            
-    }
-    inline xcb_intern_atom_reply_t* atom_r(xcb_intern_atom_cookie_t __atom_cok) {
-        return xcb_intern_atom_reply(conn, __atom_cok, NULL);
     
+    inline xcb_get_window_attributes_reply_t *
+    attributes_reply(xcb_get_window_attributes_cookie_t __cok)
+    {
+        return xcb_get_window_attributes_reply(conn, __cok, nullptr);          
+    }    
+    
+    inline xcb_intern_atom_cookie_t
+    atom_cok(const char *__s)
+    {
+        if (strcmp(__s, "_NET_WM_STATE"))
+        {
+            return xcb_intern_atom(conn, 1, 12, __s);
+        }
+        return {};
     }
-    bool is_mapped(uint32_t __window)
+    
+    inline xcb_intern_atom_reply_t *
+    atom_r(xcb_intern_atom_cookie_t __atom_cok)
+    {
+        return xcb_intern_atom_reply(conn, __atom_cok, NULL);
+    }
+
+    bool
+    is_mapped(uint32_t __window)
     {
         xcb_get_window_attributes_cookie_t cookie = xcb_get_window_attributes(conn, __window);
         xcb_get_window_attributes_reply_t *reply = xcb_get_window_attributes_reply(conn, cookie, nullptr);
-        if (reply == nullptr)
+        if ( !reply )
         {
             loutE << "Unable to get window attributes" << loutEND;
             return false;
@@ -1006,7 +1019,6 @@ namespace XCB
         free(reply);
         return (state == XCB_MAP_STATE_VIEWABLE);
     }
-
 }
 
 class __signal_manager__ {
@@ -2894,8 +2906,50 @@ class __key_codes__ {
 
 queue<xcb_expose_event_t *> expose_events;
 
+void
+handle_configure_request(xcb_configure_request_event_t* event)
+{
+    uint32_t values[7];
+    int i = 0;
+
+    if (event->value_mask & XCB_CONFIG_WINDOW_X)
+    {
+        values[i++] = event->x;
+    }
+    if (event->value_mask & XCB_CONFIG_WINDOW_Y)
+    {
+        values[i++] = event->y;
+    }
+    if (event->value_mask & XCB_CONFIG_WINDOW_WIDTH)
+    {
+        values[i++] = event->width;
+    }
+    if (event->value_mask & XCB_CONFIG_WINDOW_HEIGHT)
+    {
+        values[i++] = event->height;
+    }
+    if (event->value_mask & XCB_CONFIG_WINDOW_BORDER_WIDTH)
+    {
+        values[i++] = event->border_width;
+    }
+    if (event->value_mask & XCB_CONFIG_WINDOW_SIBLING)
+    {
+        values[i++] = event->sibling;
+    }
+    if (event->value_mask & XCB_CONFIG_WINDOW_STACK_MODE)
+    {
+        values[i++] = event->stack_mode;
+    }
+
+    xcb_configure_window(conn, event->window, event->value_mask, values);
+    xcb_flush(conn);
+}
+
 using Ev = const xcb_generic_event_t *;
-class __event_handler__ {
+
+class
+__event_handler__
+{
     /* Defines   */
         #define EV_ID \
             int event_id
@@ -2948,22 +3002,22 @@ class __event_handler__ {
         #define HANDLE(__type, __w)   thread(handle_event<__type>, __w         ).detach()
 
         using EventCallback = function<void(Ev)>;
-        void run() {
+        void
+        run()
+        {
             key_codes.init();
             shouldContinue = true;
             xcb_generic_event_t *ev;
 
-            setEventCallback(XCB_EXPOSE, [&](Ev ev) {
+            setEventCallback(XCB_EXPOSE, [&](Ev ev)
+            {
                 RE_CAST_EV(xcb_expose_event_t);
-                Emit(e->window, XCB_EXPOSE);/* 
-                thread_pool.enqueue([](uint32_t __w) {
-                }, e->window); */
+                Emit(e->window, XCB_EXPOSE);
             });
-            setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev) {
+            setEventCallback(XCB_ENTER_NOTIFY, [&](Ev ev)
+            {
                 RE_CAST_EV(xcb_enter_notify_event_t);
                 Emit(e->event, XCB_ENTER_NOTIFY);
-                // thread_pool.enqueue([](uint32_t w) {
-                // }, e->event);
             });
             setEventCallback(XCB_LEAVE_NOTIFY, [&](Ev ev) {
                 RE_CAST_EV(xcb_leave_notify_event_t);
@@ -3136,15 +3190,20 @@ class __event_handler__ {
                 // }, e->window);
             }); */
 
-            while (shouldContinue) {
+            while (shouldContinue)
+            {
+                AutoTimer timer("main loop");
+
                 ev = xcb_wait_for_event(conn);
                 if (!ev) continue;
 
-                uint8_t res = ev->response_type & ~0x80;   
+                uint8_t res = ev->response_type & ~0x80;
                 auto it = eventCallbacks.find(res);
                 
-                if (it != eventCallbacks.end()) {
-                    for (const auto &pair : it->second) {
+                if (it != eventCallbacks.end())
+                {
+                    for (const auto &pair : it->second)
+                    {
                         pair.second(ev);
                     }
                 }
@@ -3471,7 +3530,9 @@ class __event_handler__ {
         CallbackId nextCallbackId = 0;
         /* ThreadPool thread_pool{20}; */
 
-}; static __event_handler__ *event_handler(nullptr);
+};
+
+static __event_handler__ *event_handler(nullptr);
 using EventCallback = function<void(Ev)>;
 
 class Bitmap {
@@ -4271,7 +4332,7 @@ class window {
 
                     VOID_COOKIE = xcb_send_event(
                         conn,
-                        0,
+                        false,
                         _window,
                         XCB_EVENT_MASK_NO_EVENT,
                         (char *)&ev
@@ -4547,45 +4608,52 @@ class window {
         
         /* Get           */
             /* ewmh  */
-                vector<uint32_t> get_window_icon(uint32_t *__width = nullptr, uint32_t *__height = nullptr) {
+                vector<uint32_t> get_window_icon(uint32_t *__width = nullptr, uint32_t *__height = nullptr)
+                {
                     xcb_intern_atom_cookie_t* ewmh_cookie = xcb_ewmh_init_atoms(conn, ewmh);
-                    if (!xcb_ewmh_init_atoms_replies(ewmh, ewmh_cookie, nullptr)) {
+                    if (!xcb_ewmh_init_atoms_replies(ewmh, ewmh_cookie, nullptr))
+                    {
                         loutEWin << "Failed to initialize EWMH atoms" << '\n';
                         free(ewmh_cookie);
                         return {};
-
                     }
 
                     // Request the _NET_WM_ICON property
                     xcb_get_property_cookie_t cookie = xcb_get_property(conn, 0, _window, ewmh->_NET_WM_ICON, XCB_GET_PROPERTY_TYPE_ANY, 0, UINT32_MAX);
                     xcb_get_property_reply_t* reply = xcb_get_property_reply(conn, cookie, nullptr);
                     
-                    if (reply == nullptr) {
+                    if (reply == nullptr)
+                    {
                         loutE << "reply = nullptr" << '\n';
                         free(reply);
                         return {};
-
                     }
 
                     vector<uint32_t> icon_data;
-                    if (reply && reply->value_len > 0) {
+                    if (reply && reply->value_len > 0)
+                    {
                         // The value is an array of 32-bit items, so cast the reply's value to a uint32_t pointer
                         uint32_t* data = (uint32_t*)xcb_get_property_value(reply);
                         uint32_t len = xcb_get_property_value_length(reply) / sizeof(uint32_t);
 
                         // Parse icon data (width, height, and ARGB data)
-                        for (uint32_t i = 0; i < len;) {
-                            uint32_t width = data[i++]; if (__width == nullptr) {
+                        for (uint32_t i = 0; i < len;)
+                        {
+                            uint32_t width = data[i++];
+                            if (__width == nullptr)
+                            {
                                 loutEWin << "icon data is invalid" << loutEND;
                                 return {};
-                            
-                            } *__width = width;
+                            }
+                            *__width = width;
 
-                            uint32_t height = data[i++]; if (__height == nullptr) {
+                            uint32_t height = data[i++];
+                            if (__height == nullptr)
+                            {
                                 loutEWin << "icon data is invalid" << loutEND;
-                                return {};
-                                
-                            } *__height = height;
+                                return {};    
+                            }
+                            *__height = height;
 
                             uint32_t size = width * height;
 
@@ -4598,11 +4666,8 @@ class window {
                             // Assuming we want the first icon for simplicity
                             icon_data.assign(data + i, data + i + size);
                             break; // This example only processes the first icon
-
                         }
-
                     }
-
                     free(reply);
                     return icon_data;
                 }
@@ -4691,30 +4756,36 @@ class window {
                 }
 
             /* icccm */
-                void get_override_redirect() {
+                void get_override_redirect()
+                {
                     xcb_get_window_attributes_reply_t *wa = xcb_get_window_attributes_reply(conn, xcb_get_window_attributes(conn, _window), NULL);
-                    if (wa == nullptr) {
+                    if ( !wa )
+                    {
                         loutEWin << "wa == nullptr" << loutEND;
                         free(wa);
                         return;
-
-                    } _override_redirect = wa->override_redirect; free(wa);
-                    if (_override_redirect == true) loutIWin << "override_redirect = true" << loutEND;
-
+                    }
+                    _override_redirect = wa->override_redirect;
+                    free(wa);
+                    
+                    if (_override_redirect == true)
+                    {
+                        loutIWin << "override_redirect = true" << '\n';
+                    }
                 }
-                void get_min_window_size_hints() {
+                void get_min_window_size_hints()
+                {
                     xcb_size_hints_t hints;
                     xcb_icccm_get_wm_normal_hints_reply(conn, xcb_icccm_get_wm_normal_hints(conn, _window), &hints, NULL);
 
-                    if (hints.flags & XCB_ICCCM_SIZE_HINT_P_MIN_SIZE) {
+                    if (hints.flags & XCB_ICCCM_SIZE_HINT_P_MIN_SIZE)
+                    {
                         _min_width  = hints.min_width;
                         _min_height = hints.min_height;
                         
                         loutI << "min_width"  << hints.min_width  << loutEND;
                         loutI << "min_height" << hints.min_height << loutEND;
-
                     }
-
                 }
                 void get_window_size_hints() {
                     xcb_size_hints_t hints;
@@ -5002,7 +5073,6 @@ class window {
                         _window,
                         atom(
                             atom_name
-
                         ),
                         XCB_GET_PROPERTY_TYPE_ANY,
                         0,
@@ -5015,7 +5085,7 @@ class window {
                 {
                     if (reply != nullptr)
                     {
-                        loutE << "reply length for property(" << string(atom_name) << ") = 0" << loutEND;
+                        loutE << "reply length for property(" << atom_name << ") = 0" << '\n';
                         free(reply);
                         return (char *) "";
                     }
@@ -5031,7 +5101,7 @@ class window {
                 if (reply)
                 {
                     free(reply);
-                    loutI << "property(" << string(atom_name) << ") = " << string(propertyValue) << loutEND;
+                    loutI << "property(" << atom_name << ") = " << propertyValue << '\n';
                 }
                 return propertyValue;
             }
@@ -5065,13 +5135,12 @@ class window {
                 uint32_t p = 0;
                 xcb_query_tree_cookie_t cok = xcb_query_tree(conn, _window);
                 xcb_query_tree_reply_t *r = xcb_query_tree_reply(conn, cok, nullptr);
-
                 if (r == nullptr)
                 {
                     loutE << "Unable to query the window tree" << loutEND;
                 }
-                p = r->parent;
 
+                p = r->parent;
                 if (_parent != p)
                 {
                     loutE << "internal parent: " <<  _parent << " does not match 'retrived_parent': " << p << loutEND;
@@ -5092,7 +5161,7 @@ class window {
 
                 if (reply == nullptr)
                 {
-                    log_error("Unable to query the window tree.");
+                    loutEWin << "Unable to query the window tree." << '\n';
                     return nullptr;
                 }
 
@@ -5101,15 +5170,14 @@ class window {
 
                 if (children == nullptr)
                 {
-                    log_error("Unable to allocate memory for children.");
+                    loutEWin << "Unable to allocate memory for children." << '\n';
                     free(reply);
                     return nullptr;
                 }
-                memcpy(children, xcb_query_tree_children(reply), * child_count * sizeof(uint32_t));
                 
+                memcpy(children, xcb_query_tree_children(reply), * child_count * sizeof(uint32_t));
                 free(reply);
                 return children;
-
             }
             uint32_t get_min_width() const
             {
@@ -5176,11 +5244,12 @@ class window {
             }
         
         /* Configuration */
-            void apply_event_mask(const vector<uint32_t> &values) {
-                if (values.empty()) { 
-                    log_error("values vector is empty");
+            void apply_event_mask(const vector<uint32_t> &values)
+            {
+                if (values.empty())
+                {
+                    loutE << "values vector is empty" << '\n';
                     return;
-
                 }
                 VOID_COOKIE = xcb_change_window_attributes(
                     conn,
@@ -5192,51 +5261,53 @@ class window {
                 FLUSH_XWin();
 
             }
-            void set_event_mask(uint32_t __mask) {
+            void set_event_mask(uint32_t __mask)
+            {
                 apply_event_mask(&__mask);
-
             }
-            void apply_event_mask(const uint32_t *__mask) {
+            void apply_event_mask(const uint32_t *__mask)
+            {
                 VOID_COOKIE = xcb_change_window_attributes(
                     conn,
                     _window,
                     XCB_CW_EVENT_MASK,
                     __mask
-
-                ); CHECK_VOID_COOKIE();
+                );
+                CHECK_VOID_COOKIE();
                 FLUSH_X();
-
             }
-            void set_pointer(CURSOR cursor_type) {
+            void set_pointer(CURSOR cursor_type)
+            {
                 xcb_cursor_context_t *ctx;
-                if (xcb_cursor_context_new(conn, screen, &ctx) < 0) {
+                if (xcb_cursor_context_new(conn, screen, &ctx) < 0)
+                {
                     loutEWin << "Unable to create cursor context" << '\n';
                     return;
-
                 }
                 xcb_cursor_t cursor = xcb_cursor_load_cursor(ctx, pointer_from_enum(cursor_type));
-                if (!cursor) {
+                
+                if (!cursor)
+                {
                     loutEWin << "Unable to load cursor" << '\n';
                     xcb_cursor_context_free(ctx);
                     xcb_free_cursor(conn, cursor);
                     return;
-
                 }
+
                 VOID_COOKIE = xcb_change_window_attributes(
                     conn,
                     _window,
                     XCB_CW_CURSOR,
-                    (uint32_t[1]) {
+                    (const uint32_t[1])
+                    {
                         cursor
-
                     }
-
-                ); CHECK_VOID_COOKIE();
+                );
+                CHECK_VOID_COOKIE();
                 FLUSH_X();
 
                 xcb_cursor_context_free(ctx);
                 xcb_free_cursor(conn, cursor);
-
             }
 
             /* Size_pos  */
@@ -5366,17 +5437,19 @@ class window {
             {
                 change_back_pixel(get_color(red_value, green_value, blue_value));
             }
-            void set_backround_color_16_bit(const uint16_t & red_value, const uint16_t & green_value, const uint16_t & blue_value) {
+            void set_backround_color_16_bit(const uint16_t & red_value, const uint16_t & green_value, const uint16_t & blue_value)
+            {
                 change_back_pixel(get_color(red_value, green_value, blue_value));
 
             }
-            void set_backround_png(const char * imagePath) {
+            void set_backround_png(const char * imagePath)
+            {
                 Imlib_Image image = imlib_load_image(imagePath);
-                if (!image) {
+                if (!image)
+                {
                     loutE << "Failed to load image: " << imagePath << endl;
                     return;
                 }
-
                 imlib_context_set_image(image);
                 
                 int originalWidth  = imlib_image_get_width();
@@ -5424,16 +5497,22 @@ class window {
                     1, 
                     &rect
 
-                );/* Init x and y */
+                );
+                
+                /* Init x and y */
                 int x(0), y(0);
                 if (newWidth != _width) {
                     x = (_width - newWidth) / 2;
 
-                }/* Calculate position to center the image */
+                }
+                
+                /* Calculate position to center the image */
                 if (newHeight != _height) {
                     y = (_height - newHeight) / 2;
 
-                }/* Put the scaled image onto the pixmap at the calculated position */
+                }
+
+                /* Put the scaled image onto the pixmap at the calculated position */
                 VOID_COOKIE = xcb_image_put(
                     conn, 
                     pixmap, 
@@ -5442,8 +5521,9 @@ class window {
                     x,
                     y, 
                     0
-
-                ); CHECK_VOID_COOKIE();
+                );
+                CHECK_VOID_COOKIE();
+                
                 /* Set the pixmap as the background of the window */
                 VOID_cookie = xcb_change_window_attributes( 
                     conn,
@@ -5453,15 +5533,17 @@ class window {
 
                 ); CHECK_VOID_COOKIE();
 
-                // Cleanup
 
-                VOID_cookie = xcb_free_gc(conn, _gc);/* Free the GC */CHECK_VOID_COOKIE();
+                // Cleanup
+                VOID_cookie = xcb_free_gc(conn, _gc);/* Free the GC */
+                CHECK_VOID_COOKIE();
+                FLUSH_XWin();
                 xcb_image_destroy(xcb_image);
                 imlib_free_image(); // Free scaled image
                 clear_window();
-
             }
-            void set_backround_png(const string &__imagePath) {
+            void set_backround_png(const string &__imagePath)
+            {
                 set_backround_png(__imagePath.c_str());
                 // Imlib_Image image = imlib_load_image(__imagePath.c_str());
                 // if (!image)
@@ -5554,29 +5636,30 @@ class window {
 
                 // clear_window();
             }
-            void make_then_set_png(const char * file_name, const std::vector<std::vector<bool>> &bitmap) {
+            void make_then_set_png(const char * file_name, const std::vector<std::vector<bool>> &bitmap)
+            {
                 create_png_from_vector_bitmap(file_name, bitmap);
                 set_backround_png(file_name);
-
             }
-            void make_then_set_png(const string &__file_name, const std::vector<std::vector<bool>> &bitmap) {
+            void make_then_set_png(const string &__file_name, const std::vector<std::vector<bool>> &bitmap)
+            {
                 create_png_from_vector_bitmap(__file_name.c_str(), bitmap);
                 set_backround_png(__file_name);
-
             }
-            void make_then_set_png(const string &__file_name, bool bitmap[20][20]) {
+            void make_then_set_png(const string &__file_name, bool bitmap[20][20])
+            {
                 create_png_from_vector_bitmap(__file_name.c_str(), bitmap);
                 set_backround_png(__file_name);
-
             }
-            int get_current_backround_color() const {
+            int get_current_backround_color() const
+            {
                 return _color;
-
             }
 
         /* Draw          */
             #define AUTO -16
-            void draw(const string &__str, int __text_color = WHITE, int __backround_color = AUTO, int16_t __x = AUTO, int16_t __y = AUTO, const char *__font_name = DEFAULT_FONT) {
+            void draw(const string &__str, int __text_color = WHITE, int __backround_color = AUTO, int16_t __x = AUTO, int16_t __y = AUTO, const char *__font_name = DEFAULT_FONT)
+            {
                 get_font(__font_name);
                 if (__backround_color == AUTO) __backround_color = _color;
                 if (__backround_color == WHITE) __text_color = BLACK;
@@ -5585,7 +5668,7 @@ class window {
                 if (__y == AUTO) __y = CENTER_TEXT_Y(_height);
                 VOID_COOKIE = xcb_image_text_8(
                     conn,
-                    strlen(__str.c_str()),
+                    __str.length(),
                     _window,
                     font_gc,
                     __x,
@@ -5595,22 +5678,24 @@ class window {
                 FLUSH_XWin();
                 CHECK_VOID_COOKIE();
             }
-            void draw_text(const char *str , const int &text_color, const int &backround_color, const char *font_name, const int16_t &x, const int16_t &y) {
+            void draw_text(const char *str , int text_color, int backround_color, const char *font_name, int16_t x, int16_t y)
+            {
                 get_font(font_name);
                 create_font_gc(text_color, backround_color, font);
                 VOID_COOKIE = xcb_image_text_8(
-                    conn, 
-                    strlen(str), 
+                    conn,
+                    slen(str),
                     _window, 
                     font_gc,
-                    x, 
-                    y, 
+                    x,
+                    y,
                     str
                 );
                 FLUSH_XWin();
                 CHECK_VOID_COOKIE();
             }
-            void draw_text_auto_color(const char *__str, int16_t __x, int16_t __y, int __text_color = WHITE, int __backround_color = 0, const char *__font_name = DEFAULT_FONT) {
+            void draw_text_auto_color(const char *__str, int16_t __x, int16_t __y, int __text_color = WHITE, int __backround_color = 0, const char *__font_name = DEFAULT_FONT)
+            {
                 get_font(__font_name);
                 if (__backround_color == 0) __backround_color = _color;
                 create_font_gc(__text_color, __backround_color, font);
@@ -5640,14 +5725,15 @@ class window {
              *       ALSO IF YOU ONLY WANT AUTO COLOR NOT CENTERING USE 'draw_text_auto_color' FUNCTION
              *
              */
-            void draw_acc(const string &__str, int __text_color = WHITE, int __backround_color = 0, const char *__font_name = DEFAULT_FONT) {
+            void draw_acc(const string &__str, int __text_color = WHITE, int __backround_color = 0, const char *__font_name = DEFAULT_FONT)
+            {
                 get_font(__font_name);
                 if (__backround_color == 0) __backround_color = _color;
                 if (__backround_color == WHITE) __text_color = BLACK;
                 create_font_gc(__text_color, __backround_color, font);
                 VOID_COOKIE = xcb_image_text_8(
                     conn,
-                    strlen(__str.c_str()),
+                    slen(__str.c_str()),
                     _window,
                     font_gc,
                     CENTER_TEXT(_width, __str.length()),
@@ -5656,9 +5742,9 @@ class window {
                 );
                 FLUSH_XWin();
                 CHECK_VOID_COOKIE();
-
             }
-            void draw_text_16(const char *str, const int &text_color, const int &background_color, const char *font_name, const int16_t &x, const int16_t &y) {
+            void draw_text_16(const char *str, int text_color, int background_color, const char *font_name, int16_t x, int16_t y)
+            {
                 get_font(font_name); // Your existing function to set the font
                 create_font_gc(text_color, background_color, font); // Your existing function to create a GC with the font
 
@@ -5674,12 +5760,11 @@ class window {
                     y,
                     char2b_str
                 );
-
                 xcb_flush(conn);
                 free(char2b_str);
-
             }
-            void draw_text_16_auto_color(const char *__str, const int16_t &__x, const int16_t &__y, const int &__text_color = WHITE, const int &__background_color = 0, const char *__font_name = DEFAULT_FONT) {
+            void draw_text_16_auto_color(const char *__str, const int16_t &__x, const int16_t &__y, const int &__text_color = WHITE, const int &__background_color = 0, const char *__font_name = DEFAULT_FONT)
+            {
                 get_font(__font_name); // Your existing function to set the font
                 int bg_color;
                 if (__background_color == 0) bg_color = _color;
@@ -5696,14 +5781,12 @@ class window {
                     __x,
                     __y,
                     char2b_str
-
                 );
-
                 xcb_flush(conn);
                 free(char2b_str);
-
             }
-            void draw_acc_16(const string &__str, int __text_color = WHITE, int __background_color = 0, const char *__font_name = DEFAULT_FONT) {
+            void draw_acc_16(const string &__str, int __text_color = WHITE, int __background_color = 0, const char *__font_name = DEFAULT_FONT)
+            {
                 get_font(__font_name);
                 if (__background_color == 0) __background_color = _color;
                 if (__background_color == WHITE) __text_color = BLACK;
@@ -5711,27 +5794,24 @@ class window {
 
                 int len;
                 xcb_char2b_t *char2b_str = convert_to_char2b(__str.c_str(), &len);
-
-                int16_t x = CENTER_TEXT(_width, __str.length());
-                int16_t y = CENTER_TEXT_Y(_height);
                 
                 VOID_COOKIE = xcb_image_text_16(
                     conn,
                     len,
                     _window,
                     font_gc,
-                    x,
-                    y,
+                    CENTER_TEXT(_width, __str.length()),
+                    CENTER_TEXT_Y(_height),
                     char2b_str
-
-                ); CHECK_VOID_COOKIE();
+                );
+                CHECK_VOID_COOKIE();
                 FLUSH_XWin();
                 free(char2b_str);
-
             }
 
         /* Keys          */
-            void grab_default_keys() {
+            void grab_default_keys()
+            {
                 grab_keys({
                     {   T,          ALT | CTRL              }, // for launching terminal
                     {   Q,          ALT | SHIFT             }, // quiting key_binding for mwm_wm
@@ -5755,21 +5835,22 @@ class window {
                     {   R,          SUPER                   }, // key_binding for 'runner_window'
                     {   F,          SUPER                   }, // key_binding for 'file_app'
                     {   D,          SUPER                   }  // key_binding for 'debub menu' */
-
                 });
-
             }
-            void grab_keys(initializer_list<pair<const uint32_t, const uint16_t>> bindings) {
+            void grab_keys(initializer_list<pair<const uint32_t, const uint16_t>> bindings)
+            {
                 xcb_key_symbols_t * keysyms = xcb_key_symbols_alloc(conn);
-                if (!keysyms) {
+                if (!keysyms)
+                {
                     loutE << "keysyms could not get initialized" << loutEND;
                     return;
-
                 }
 
-                for (const auto & binding : bindings) {
+                for (const auto & binding : bindings)
+                {
                     xcb_keycode_t * keycodes = xcb_key_symbols_get_keycode(keysyms, binding.first);
-                    if (keycodes) {
+                    if (keycodes)
+                    {
                         for (auto * kc = keycodes; * kc; kc++) {
                             VOID_COOKIE = xcb_grab_key(
                                 conn,
@@ -5779,18 +5860,19 @@ class window {
                                 *kc,        
                                 XCB_GRAB_MODE_ASYNC, 
                                 XCB_GRAB_MODE_ASYNC  
-
-                            ); CHECK_VOID_COOKIE();
-
-                        } free(keycodes);
-
+                            );
+                            CHECK_VOID_COOKIE();
+                        }
+                        free(keycodes);
                     }
-
-                } xcb_key_symbols_free(keysyms); FLUSH_XWin();
- 
+                }
+                xcb_key_symbols_free(keysyms);
+                FLUSH_XWin();
             }
-            void grab_keys_for_typing() {
-                grab_keys({
+            void grab_keys_for_typing()
+            {
+                grab_keys(
+                {
                     { A,   NULL  },
                     { B,   NULL  },
                     { C,   NULL  },
@@ -5854,11 +5936,11 @@ class window {
                     { DELETE,       NULL        },
                     { DELETE,       SHIFT       },
                 });
-
             }
         
         /* Buttons       */
-            void grab_button(initializer_list<pair<uint8_t, uint16_t>> __bindings) {
+            void grab_button(initializer_list<pair<uint8_t, uint16_t>> __bindings)
+            {
                 for (const auto &pair : __bindings)
                 {
                     VOID_COOKIE = xcb_grab_button(
@@ -5877,7 +5959,8 @@ class window {
                     FLUSH_XWin();
                 }
             }
-            void ungrab_button(initializer_list<pair<uint8_t, uint16_t>> __bindings) {
+            void ungrab_button(initializer_list<pair<uint8_t, uint16_t>> __bindings)
+            {
                 for (const auto &pair : __bindings)
                 {
                     VOID_COOKIE = xcb_ungrab_button(
@@ -6074,7 +6157,8 @@ class window {
 
         /* Create     */
             /* Gc     */
-                void create_graphics_exposure_gc() {
+                void create_graphics_exposure_gc()
+                {
                     _gc = xcb_generate_id(conn);
                     // uint32_t mask = XCB_GC_FOREGROUND | XCB_GC_BACKGROUND | XCB_GC_GRAPHICS_EXPOSURES;
 
@@ -6083,38 +6167,38 @@ class window {
                         _gc,
                         _window,
                         GC_MASK,
-                        (uint32_t[3]) {
+                        (const uint32_t[3])
+                        {
                             screen->black_pixel,
                             screen->white_pixel,
                             0
-
                         }
-
-                    ); CHECK_VOID_COOKIE();
+                    );
+                    CHECK_VOID_COOKIE();
                     FLUSH_XWin();
-
                 }
-                void create_font_gc(int text_color, int backround_color, xcb_font_t font) {
+                void create_font_gc(int text_color, int backround_color, xcb_font_t font)
+                {
                     font_gc = xcb_generate_id(conn);
                     VOID_COOKIE = xcb_create_gc(
                         conn, 
                         font_gc, 
                         _window, 
                         XCB_GC_FOREGROUND | XCB_GC_BACKGROUND | XCB_GC_FONT, 
-                        (const uint32_t[3]) {
+                        (const uint32_t[3])
+                        {
                             get_color(text_color),
                             get_color(backround_color),
                             font
-
                         }
-
-                    ); CHECK_VOID_COOKIE();
+                    );
+                    CHECK_VOID_COOKIE();
                     FLUSH_XWin();
-
                 }
             
             /* Pixmap */
-                void create_pixmap() {
+                void create_pixmap()
+                {
                     pixmap = xcb_generate_id(conn);
                     VOID_COOKIE = xcb_create_pixmap(
                         conn, 
@@ -6124,9 +6208,9 @@ class window {
                         _width, 
                         _height
 
-                    ); CHECK_VOID_COOKIE();
+                    );
+                    CHECK_VOID_COOKIE();
                     FLUSH_XWin();
-
                 }
             
             /* Png    */
@@ -6270,253 +6354,268 @@ class window {
                 return atomName;
                 
             }
-            void get_font(const char *font_name) {
+            void get_font(const char *font_name)
+            {
                 font = xcb_generate_id(conn);
                 VOID_COOKIE = xcb_open_font(
                     conn, 
                     font, 
                     slen(font_name),
                     font_name
-
-                ); CHECK_VOID_COOKIE();
+                );
+                CHECK_VOID_COOKIE();
                 FLUSH_XWin();
-
             }
         
         /* Background */
-            void change_back_pixel(uint32_t pixel) {
+            void change_back_pixel(uint32_t pixel)
+            {
                 VOID_COOKIE = xcb_change_window_attributes(
                     conn,
                     _window,
                     XCB_CW_BACK_PIXEL,
-                    (const uint32_t[1]) {
+                    (const uint32_t[1])
+                    {
                         pixel
-
                     }
-
-                ); CHECK_VOID_COOKIE();
+                );
+                CHECK_VOID_COOKIE();
                 FLUSH_XWin();
-
             }
-            void change_back_pixel(uint32_t pixel, uint32_t __window) {
+            void change_back_pixel(uint32_t pixel, uint32_t __window)
+            {
                 VOID_COOKIE = xcb_change_window_attributes(
                     conn,
                     __window,
                     XCB_CW_BACK_PIXEL,
-                    (const uint32_t[1]) {
+                    (const uint32_t[1])
+                    {
                         pixel
-
                     }
-
-                ); CHECK_VOID_COOKIE();
+                );
+                CHECK_VOID_COOKIE();
                 FLUSH_XWin();
-
             }
-            uint32_t get_color(int __color) {
+            uint32_t get_color(int __color)
+            {
+                uint32_t pi          = 0;
+                xcb_colormap_t cmap  = screen->default_colormap;
+                rgb_color_code ccode = rgb_code(__color);
+                xcb_alloc_color_reply_t *r = xcb_alloc_color_reply(
+                    conn,
+                    xcb_alloc_color(
+                        conn,
+                        cmap,
+                        _scale::from_8_to_16_bit(ccode.r), 
+                        _scale::from_8_to_16_bit(ccode.g),
+                        _scale::from_8_to_16_bit(ccode.b)
+                    ),
+                    NULL
+                );
+                pi = r->pixel;
+                free(r);    
+                return pi;
+            }
+            uint32_t get_color(const uint16_t &red_value, const uint16_t &green_value, const uint16_t &blue_value)
+            {
                 uint32_t                pi = 0;
                 xcb_colormap_t        cmap = screen->default_colormap;
-                rgb_color_code       ccode = rgb_code(__color);
-                xcb_alloc_color_reply_t *r = xcb_alloc_color_reply(conn, xcb_alloc_color(
+                xcb_alloc_color_reply_t *r = xcb_alloc_color_reply(
                     conn,
-                    cmap,
-                    _scale::from_8_to_16_bit(ccode.r), 
-                    _scale::from_8_to_16_bit(ccode.g),
-                    _scale::from_8_to_16_bit(ccode.b)
-
-                ), NULL); pi = r->pixel; free(r);
-                
+                    xcb_alloc_color(
+                        conn,
+                        cmap,
+                        red_value, 
+                        green_value,
+                        blue_value
+                    ),
+                    NULL
+                );
+                pi = r->pixel;
+                free(r);
                 return pi;
-                
             }
-            uint32_t get_color(const uint16_t &red_value, const uint16_t &green_value, const uint16_t &blue_value) {
+            uint32_t get_color(const uint8_t & red_value, const uint8_t & green_value, const uint8_t & blue_value)
+            {
                 uint32_t                pi = 0;
                 xcb_colormap_t        cmap = screen->default_colormap;
-                xcb_alloc_color_reply_t *r = xcb_alloc_color_reply(conn, xcb_alloc_color(
+                xcb_alloc_color_reply_t *r = xcb_alloc_color_reply(
                     conn,
-                    cmap,
-                    red_value, 
-                    green_value,
-                    blue_value
-
-                ), NULL); pi = r->pixel; free(r);
-                
+                    xcb_alloc_color(
+                        conn,
+                        cmap,
+                        _scale::from_8_to_16_bit(red_value), 
+                        _scale::from_8_to_16_bit(green_value),
+                        _scale::from_8_to_16_bit(blue_value)
+                    ),
+                    NULL
+                );
+                pi = r->pixel;
+                free(r);
                 return pi;
-
             }
-            uint32_t get_color(const uint8_t & red_value, const uint8_t & green_value, const uint8_t & blue_value) {
-                uint32_t                pi = 0;
-                xcb_colormap_t        cmap = screen->default_colormap;
-                xcb_alloc_color_reply_t *r = xcb_alloc_color_reply(conn, xcb_alloc_color(
-                    conn,
-                    cmap,
-                    _scale::from_8_to_16_bit(red_value), 
-                    _scale::from_8_to_16_bit(green_value),
-                    _scale::from_8_to_16_bit(blue_value)
-
-                ), NULL); pi = r->pixel; free(r);
-                
-                return pi;
-
-            }
-            rgb_color_code rgb_code(int __color) {
+            rgb_color_code rgb_code(int __color)
+            {
                 rgb_color_code color;
                 uint8_t r, g, b;
                 
-                switch (__color) {
-                    case WHITE: {
+                switch (__color)
+                {
+                    case WHITE:
+                    {
                         r = 255; g = 255; b = 255;
                         break;
-
                     }
-                    case BLACK: {
+                    case BLACK:
+                    {
                         r = 0; g = 0; b = 0;
                         break;
-
                     }
-                    case RED: {
+                    case RED:
+                    {
                         r = 255; g = 0; b = 0;
                         break;
-
                     }
-                    case GREEN: {
+                    case GREEN:
+                    {
                         r = 0; g = 255; b = 0;
                         break;
-
                     }
-                    case BLUE: {
+                    case BLUE:
+                    {
                         r = 0; g = 0; b = 255;
                         break;
-
                     }
-                    case BLUE_2: {
+                    case BLUE_2:
+                    {
                         r = 0; g = 0; b = 230;
                         break;
-
                     }
-                    case BLUE_3: {
+                    case BLUE_3:
+                    {
                         r = 0; g = 0; b = 204;
                         break;
-
                     }
-                    case BLUE_4: {
+                    case BLUE_4:
+                    {
                         r = 0; g = 0; b = 178;
                         break;
-
                     }
-                    case BLUE_5: {
+                    case BLUE_5:
+                    {
                         r = 0; g = 0; b = 153;
                         break;
-
                     }
-                    case BLUE_6: {
+                    case BLUE_6:
+                    {
                         r = 0; g = 0; b = 128;
                         break;
-
                     }
-                    case BLUE_7: {
+                    case BLUE_7:
+                    {
                         r = 0; g = 0; b = 102;
                         break;
-
                     }
-                    case BLUE_8: {
+                    case BLUE_8:
+                    {
                         r = 0; g = 0; b = 76;
                         break;
-
                     }
-                    case BLUE_9: {
+                    case BLUE_9:
+                    {
                         r = 0; g = 0; b = 51;
                         break;
-
                     }
-                    case BLUE_10: {
+                    case BLUE_10:
+                    {
                         r = 0; g = 0; b = 26;
                         break;
-
                     }
-                    case YELLOW: {
+                    case YELLOW:
+                    {
                         r = 255; g = 255; b = 0;
                         break;
-
                     }
-                    case CYAN: {
+                    case CYAN:
+                    {
                         r = 0; g = 255; b = 255;
-                        break;
-                        
+                        break;    
                     }
-                    case MAGENTA: {
+                    case MAGENTA:
+                    {
                         r = 255; g = 0; b = 255;
-                        break;
-                        
+                        break;    
                     }
-                    case GREY: {
+                    case GREY:
+                    {
                         r = 128; g = 128; b = 128;
                         break;
-
                     }
-                    case LIGHT_GREY: {
+                    case LIGHT_GREY:
+                    {
                         r = 192; g = 192; b = 192;
                         break;
-
                     }
-                    case DARK_GREY: {
+                    case DARK_GREY:
+                    {
                         r = 64; g = 64; b = 64;
                         break;
-
                     }
                     case DARK_GREY_2: {
                         r = 70; g = 70; b = 70;
                         break;
-
                     }
-                    case DARK_GREY_3: {
+                    case DARK_GREY_3:
+                    {
                         r = 76; g = 76; b = 76;
                         break;
-
                     }
-                    case DARK_GREY_4: {
+                    case DARK_GREY_4:
+                    {
                         r = 82; g = 82; b = 82;
                         break;
-
                     }
-                    case ORANGE: {
+                    case ORANGE:
+                    {
                         r = 255; g = 165; b = 0;
                         break;
-
                     }
-                    case PURPLE: {
+                    case PURPLE:
+                    {
                         r = 128; g = 0; b = 128;
                         break;
-
                     }
-                    case BROWN: {
+                    case BROWN:
+                    {
                         r = 165; g = 42; b = 42;
                         break;
-
                     }
-                    case PINK: {
+                    case PINK:
+                    {
                         r = 255; g = 192; b = 203;
                         break;
-
                     }
-                    default: {
+                    default:
+                    {
                         r = 0; g = 0; b = 0; 
                         break;
-
                     }
 
-                } color.r = r; color.g = g; color.b = b;
-
+                }
+                color.r = r;
+                color.g = g;
+                color.b = b;
                 return color;
-
             }
         
         /* Borders    */
-            void create_border_window(BORDER __border, int __color, uint32_t __x, uint32_t __y, uint32_t __width, uint32_t __height) {
+            void create_border_window(BORDER __border, int __color, uint32_t __x, uint32_t __y, uint32_t __width, uint32_t __height)
+            {
                 uint32_t window;
-                if ((window = xcb->gen_Xid()) == -1) {
+                if ((window = xcb->gen_Xid()) == -1)
+                {
                     loutEWin << "Failed to create border window: " << WINDOW_ID_BY_INPUT(window) << loutEND;
-                    return; 
-
+                    return;
                 }
                 xcb->create_w(_window, window, __x, __y, __width, __height);
 
@@ -6545,13 +6644,12 @@ class window {
                     __bits[3]); \
                 \
             } while(0)
-            void make_border_window(int __border, const uint32_t &__size, const int &__color) {
+            void make_border_window(int __border, uint32_t __size, int __color)
+            {
                 if (__border & UP   ) CREATE_UP_BORDER(__size, __color);
-                Create_Border(UP, __color, 0, 0, _width, __size);
                 if (__border & DOWN ) CREATE_DOWN_BORDER(__size, __color);
                 if (__border & LEFT ) CREATE_LEFT_BORDER(__size, __color);
                 if (__border & RIGHT) CREATE_RIGHT_BORDER(__size, __color);
-
             }
 
         /* Font       */
@@ -6561,61 +6659,57 @@ class window {
              *        Also advances the input string by the number of bytes used for
              *        the decoded character. 
              */
-            uint32_t decode_utf8_char(const char **input) {
+            uint32_t decode_utf8_char(const char **input)
+            {
                 const unsigned char *str = (const unsigned char *)*input;
                 uint32_t codepoint = 0;
-                if (str[0] <= 0x7F) {
-                    
+                
+                if (str[0] <= 0x7F)/* 1-byte character */
+                {    
                     codepoint = str[0];
                     *input += 1;
-
-                }/* 1-byte character */
-                else if ((str[0] & 0xE0) == 0xC0) {
+                }
+                else if ((str[0] & 0xE0) == 0xC0)/* 2-byte character */
+                {
                     codepoint = ((str[0] & 0x1F) << 6) | (str[1] & 0x3F);
                     *input += 2;
-
-                }/* 2-byte character */
-                else if ((str[0] & 0xF0) == 0xE0) {
+                }
+                else if ((str[0] & 0xF0) == 0xE0)/* 3-byte character */
+                {
                     codepoint = ((str[0] & 0x0F) << 12) | ((str[1] & 0x3F) << 6) | (str[2] & 0x3F);
                     *input += 3;
-
-                }/* 3-byte character */
-                else if ((str[0] & 0xF8) == 0xF0) {
-                    
+                }
+                else if ((str[0] & 0xF8) == 0xF0)/* 4-byte character (will not be fully represented in UCS-2) */
+                {    
                     codepoint = 0xFFFD; // Replacement character, as UCS-2 cannot represent this
                     *input += 4;
-
-                }/* 4-byte character (will not be fully represented in UCS-2) */
-                else {
+                }
+                else/* Invalid UTF-8, return replacement character */
+                {
                     codepoint = 0xFFFD;
                     *input += 1; // Advance past the invalid byte
-
-                }/* Invalid UTF-8, return replacement character */
-
+                }
                 return codepoint;
-
             }
-            xcb_char2b_t *convert_to_char2b(const char *input, int *len) {
+            /* Converts a UTF-8 string to an array of xcb_char2b_t for xcb_image_text_16 */
+            xcb_char2b_t *convert_to_char2b(const char *input, int *len)
+            {
                 size_t utf8_len = slen(input);
                 size_t max_chars = utf8_len; // Maximum possible number of characters (all 1-byte)
 
                 xcb_char2b_t *char2b = (xcb_char2b_t *)malloc(max_chars * sizeof(xcb_char2b_t));
                 int count = 0;
-                while (*input != '\0' && count < max_chars) {
+                while (*input != '\0' && count < max_chars)
+                {
                     uint32_t codepoint = decode_utf8_char(&input);
-
                     // Convert Unicode codepoint to xcb_char2b_t
                     char2b[count].byte1 = (codepoint >> 8) & 0xFF;
                     char2b[count].byte2 = codepoint & 0xFF;
                     count++;
-
                 }
-
                 *len = count; // Actual number of characters converted
                 return char2b;
-
-            }/* Converts a UTF-8 string to an array of xcb_char2b_t for xcb_image_text_16 */
-
+            }
 };
 #define CLI_TITLE_BAR_EXPOSE_BIT 1
 #define CLI_TITLE_REQ_BIT 2
@@ -6705,7 +6799,8 @@ class client {
 
     /* Methods     */
         /* Main      */
-            void make_decorations() {
+            void make_decorations()
+            {
                 make_frame();
                 set_icon_png();
                 make_titlebar();
@@ -6717,7 +6812,8 @@ class client {
                     make_borders();
                 }
             }
-            void raise() {
+            void raise()
+            {
                 frame.raise();
             }
             void focus()
@@ -6807,7 +6903,7 @@ class client {
                     event_handler->removeEventCallback( ev_id_vec[i].first, ev_id_vec[i].second );
                 }
             }
-            void add_to_map()
+            /* void add_to_map()
             {
                 cw_map.insert(win,          this);
                 cw_map.insert(frame,        this);
@@ -6824,8 +6920,8 @@ class client {
                 cw_map.insert(border[5],    this);
                 cw_map.insert(border[6],    this);
                 cw_map.insert(border[7],    this);
-            }
-            void remove_from_map()
+            } */
+            /* void remove_from_map()
             {
                 cw_map.remove(win);
                 cw_map.remove(frame);
@@ -6842,7 +6938,7 @@ class client {
                 cw_map.remove(border[5]);
                 cw_map.remove(border[6]);
                 cw_map.remove(border[7]);
-            }
+            } */
             void align()
             {
                 win.x(BORDER_SIZE);
@@ -12591,7 +12687,8 @@ class __dock__ {
             MIN
         } dock_anim_t;
 
-        void anim_dock_menu(dock_anim_t __state)
+        void
+        anim_dock_menu(dock_anim_t __state)
         {
             const int duration = 200;
 
@@ -12623,7 +12720,8 @@ class __dock__ {
             }
         }
 
-        void create_window__()
+        void
+        create_window__()
         {
             dock_menu.create_window(
                 screen->root,
@@ -12638,7 +12736,8 @@ class __dock__ {
             dock_search.init();
         }
 
-        void show__(uint32_t __window)
+        void
+        show__(uint32_t __window)
         {
             if (__window == dock_menu)
             {
@@ -12659,7 +12758,8 @@ class __dock__ {
             }
         }
 
-        void hide__(uint32_t __window)
+        void
+        hide__(uint32_t __window)
         {
             if (__window == dock_menu)
             {
@@ -14952,10 +15052,14 @@ class test {
     // Constructor.
         test() {}
 };
-void setup_wm()
+
+void
+setup_wm()
 {
     user = get_user_name();
     loutCUser(USER);
+    init_gProf();
+    setupReportGeneration();
 
     NEW_CLASS(signal_manager, __signal_manager__) { signal_manager->init(); }
     NEW_CLASS(file_system,    __file_system__   ) { file_system->init_check(); }
@@ -14974,17 +15078,17 @@ void setup_wm()
 
     NEW_CLASS(file_app,        __file_app__       ) { file_app->init(); }
     NEW_CLASS(status_bar,      __status_bar__     ) { status_bar->init(); }
-
     NEW_CLASS(wifi,            __wifi__           ) { wifi->init(); }
-    NEW_CLASS(network,         __network__        ) { }
+    NEW_CLASS(network,         __network__        ) {}
     NEW_CLASS(screen_settings, __screen_settings__) { screen_settings->init(); }
     NEW_CLASS(system_settings, __system_settings__) { system_settings->init(); }
     NEW_CLASS(dock,            __dock__           ) { dock->init(); }
-    NEW_CLASS(pid_manager,     __pid_manager__    ) { }
+    NEW_CLASS(pid_manager,     __pid_manager__    ) {}
     NEW_CLASS(ddTerm,          DropDownTerm       ) { ddTerm->init(); }
-
 }
-int main()
+
+int
+main()
 {
     loutI << "\n\n          -- mwm starting --\n" << '\n';
 

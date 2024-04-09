@@ -60,7 +60,7 @@ LDFLAGS = ${LIBS}       \
 cc  = clang
 CXX = clang++
 
-SRC = src/main.cpp src/tools.cpp src/xcb.cpp
+SRC = src/main.cpp src/tools.cpp src/xcb.cpp src/prof.cpp
 
 OBJ  = $(SRC:../src/%.cpp=%.o)
 DEPS = $(OBJ:.o=.d)
