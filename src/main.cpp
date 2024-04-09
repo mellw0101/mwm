@@ -6652,7 +6652,6 @@ class client {
             }
             void kill()
             {
-
                 frame.unmap();
                 win.unmap();
                 close_button.unmap();
@@ -6711,8 +6710,6 @@ class client {
                 border[bottom_left].kill();
                 border[bottom_right].kill();
 
-                /* remove_from_map(); */
-                // loutI << "ev_id_vec size" << this->ev_id_vec.size() << '\n';
                 for ( int i = 0; i < ev_id_vec.size(); ++i )
                 {
                     event_handler->removeEventCallback( ev_id_vec[i].first, ev_id_vec[i].second );
@@ -8758,7 +8755,7 @@ class Window_Manager {
                     else if ( e->detail == R_MOUSE_BUTTON )
                     {
                         this->context_menu->show();    
-                    } 
+                    }
                 });
                 event_handler->setEventCallback(
                 XCB_KEY_PRESS,
@@ -8771,7 +8768,7 @@ class Window_Manager {
                     }
                     else if ( e->detail == key_codes.t && (( e->state & ALT ) != 0 ) && (( e->state & CTRL ) != 0 ))
                     {
-                        this->launcher.launch_child_process( "alacritty" );
+                        this->launcher.launch_child_process( "konsole" );
                     }
                     else if ( e->detail == key_codes.q && (( e->state & ALT ) != 0 ) && (( e->state & SHIFT ) != 0 ))
                     {
@@ -8800,6 +8797,7 @@ class Window_Manager {
                     
                 }
             }
+
 }; static Window_Manager *wm(nullptr);
 
 class __network__ {
