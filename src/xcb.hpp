@@ -11,22 +11,27 @@
 #include "data.hpp"
 #include "tools.hpp"
 #include "Log.hpp"
+#include "globals.h"
+
 using namespace std;
+
+
 #define X_CONN_ERROR 1
 #define X_REQ_ERROR 2
 #define X_ID_GEN_ERROR 3
 #define X_CREATE_ERR 4
 #define X_W_CREATION_ERR 5
 
+
 #include <xcb/xcb.h>
 
 class AtomMonitor {
     private:
-        xcb_connection_t* _conn;
+        /* xcb_connection_t* _conn; */
         xcb_atom_t* _atomPtr; // Pointer to atom value
 
     public:
-        AtomMonitor(xcb_connection_t* conn) : _conn(conn), _atomPtr(new xcb_atom_t) {
+        AtomMonitor(xcb_connection_t* conn) : /* _conn(conn), */ _atomPtr(new xcb_atom_t) {
             // Initialize the atom value to XCB_ATOM_NONE
             *_atomPtr = XCB_ATOM_NONE;
         }
@@ -38,8 +43,8 @@ class AtomMonitor {
 
         // Fetch and store an atom by name
         void fetchAndStoreAtom(const char* name) {
-            xcb_intern_atom_cookie_t cookie = xcb_intern_atom(_conn, 0, slen(name), name);
-            xcb_intern_atom_reply_t* reply = xcb_intern_atom_reply(_conn, cookie, nullptr);
+            xcb_intern_atom_cookie_t cookie = xcb_intern_atom(conn, 0, slen(name), name);
+            xcb_intern_atom_reply_t* reply = xcb_intern_atom_reply(conn, cookie, nullptr);
 
             if (reply) {
                 *_atomPtr = reply->atom;
@@ -103,12 +108,12 @@ inline void init_256_bit_data(_256__bit__data__t *obj) {
 class void_err_t {
     private:
         xcb_generic_error_t *err;
-        xcb_connection_t *conn;
+        /* xcb_connection_t *conn; */
 
     public:
         // Constructor takes the connection and the cookie
         void_err_t(xcb_connection_t* __conn, xcb_void_cookie_t cookie)
-        : conn(__conn), err(nullptr) {
+        : /* conn(__conn), */ err(nullptr) {
             checkErr(cookie);
 
         }
@@ -136,7 +141,7 @@ class void_err_t {
 };
 
 #define V_COKE( ...) do { \
-    _err = xcb_request_check(_conn, _cookie); \
+    _err = xcb_request_check(conn, _cookie); \
     if (_err) { \
         loutE << ERRNO_MSG(__VA_ARGS__) << loutEND; \
         free(_err); \
@@ -208,13 +213,22 @@ class void_err_t {
 
 #define Vlist(__type, ...) (__type[]){__VA_ARGS__}
 
-class intern_atom_cok_t {
-    private:
-        xcb_intern_atom_cookie_t _cookie;
+class iAtomC
+{
+    xcb_intern_atom_cookie_t _cookie;
 
-    public:
-        intern_atom_cok_t(xcb_intern_atom_cookie_t __cookie) { this->_cookie = __cookie; }
-        intern_atom_cok_t(xcb_connection_t *conn, bool __only_if_exists, char *__name) { this->_cookie = xcb_intern_atom(conn, __only_if_exists, slen(__name), __name); }
+public:
+        /* intern_atom_cok_t(xcb_intern_atom_cookie_t __cookie) { this->_cookie = __cookie; } */
+        iAtomC(bool __only_if_exists, const char *__name)
+        : _cookie(
+            xcb_intern_atom(
+                conn,
+                __only_if_exists,
+                slen(__name),
+                __name
+            )
+        ) {}
+
         operator xcb_intern_atom_cookie_t() { return _cookie; }
         operator const xcb_intern_atom_cookie_t&() const { return this->_cookie; }
 
@@ -225,10 +239,10 @@ inline void setErrState() {}
 #define ERR_STATE(__int) __int = 1 << 7
 
 template<typename T, typename... Args>
-inline void setErrState(T& first, Args&... args) {
+inline void setErrState(T& first, Args&... args)
+{
     ERR_STATE(first);    
     setErrState(args...); // Recurse for the rest of the arguments
-
 }
 
 #define set_ERR_STATE(...) do { \
@@ -236,62 +250,192 @@ inline void setErrState(T& first, Args&... args) {
 } while(0)
 
 
-class intern_atom_repl_t {
-    public:
-        uint8_t    response_type;
-        uint8_t    pad0;
-        uint16_t   sequence;
-        uint32_t   length;
-        xcb_atom_t atom;
+class iAtomR
+{
+    uint8_t    response_type;
+    uint8_t    pad0;
+    uint16_t   sequence;
+    uint32_t   length;
+    xcb_atom_t atom;
 
-        intern_atom_repl_t(xcb_connection_t *conn, const intern_atom_cok_t &__cookie) {
-            xcb_intern_atom_reply_t *reply = xcb_intern_atom_reply(conn, __cookie, nullptr);
-            if (!reply) {
-                set_ERR_STATE(response_type, pad0, sequence, length, atom);
-                return;
+public:
+    iAtomR(const iAtomC &__cookie)
+    {
+        xcb_intern_atom_reply_t *reply = xcb_intern_atom_reply(conn, __cookie, nullptr);
+        if (!reply)
+        {
+            set_ERR_STATE(response_type, pad0, sequence, length, atom);
+            return;
+        }
+        
+        response_type = reply->response_type;
+        pad0          = reply->pad0;
+        sequence      = reply->sequence;
+        length        = reply->sequence;
+        atom          = reply->atom;
+        
+        free(reply);
+    }
 
-            }
+    iAtomR(bool __only_if_exists, const char *__name)
+    {
+        xcb_intern_atom_reply_t *reply = xcb_intern_atom_reply(conn, iAtomC(__only_if_exists, __name), nullptr);
+        if ( !reply )
+        {
+            set_ERR_STATE(response_type, pad0, sequence, length, atom);
+            return;
+        }
+
+        response_type = reply->response_type;
+        pad0          = reply->pad0;
+        sequence      = reply->sequence;
+        length        = reply->sequence;
+        atom          = reply->atom;
+
+        free(reply);            
+    }        
+
+    operator xcb_atom_t() { return atom; }
+    operator xcb_atom_t&() { return atom; }
+
+    bool is_not_valid()
+    {
+        return (
+            response_type == 1 << 7
+        &&  pad0          == 1 << 7
+        &&  sequence      == 1 << 7
+        &&  length        == 1 << 7
+        &&  atom          == 1 << 7);
+    }
+
+    uint32_t Atom() const
+    {
+        return atom;
+    }
+};
+
+class wAttrC
+{
+    xcb_get_window_attributes_cookie_t _cookie;
+
+public:
+    wAttrC(uint32_t __w)
+    : _cookie(xcb_get_window_attributes(conn, __w)) {}
+
+    operator xcb_get_window_attributes_cookie_t () { return _cookie; }
+    operator const xcb_get_window_attributes_cookie_t &() const { return this->_cookie; }
+};
+
+class wAttrR
+{
+public:
+    uint8_t        response_type;
+    uint8_t        backing_store;
+    uint16_t       sequence;
+    uint32_t       length;
+    xcb_visualid_t visual;
+    uint16_t       _class;
+    uint8_t        bit_gravity;
+    uint8_t        win_gravity;
+    uint32_t       backing_planes;
+    uint32_t       backing_pixel;
+    uint8_t        save_under;
+    uint8_t        map_is_installed;
+    uint8_t        map_state;
+    uint8_t        override_redirect;
+    xcb_colormap_t colormap;
+    uint32_t       all_event_masks;
+    uint32_t       your_event_mask;
+    uint16_t       do_not_propagate_mask;
+    uint8_t        pad0[2];
+
+    wAttrR(xcb_get_window_attributes_cookie_t __cookie)
+    {
+        xcb_get_window_attributes_reply_t *reply = xcb_get_window_attributes_reply(conn, __cookie, nullptr);
+        if ( reply )
+        {
             response_type = reply->response_type;
-            pad0          = reply->pad0;
-            sequence      = reply->sequence;
-            length        = reply->sequence;
-            atom          = reply->atom;
-
+            backing_store = reply->backing_store;
+            sequence = reply->sequence;
+            length = reply->length;
+            visual = reply->visual;
+            _class = reply->_class;
+            bit_gravity = reply->bit_gravity;
+            win_gravity = reply->win_gravity;
+            backing_planes = reply->backing_planes;
+            backing_pixel = reply->backing_pixel;
+            save_under = reply->save_under;
+            map_is_installed = reply->map_is_installed;
+            map_state = reply->map_state;
+            override_redirect = reply->override_redirect;
+            colormap = reply->colormap;
+            all_event_masks = reply->all_event_masks;
+            your_event_mask = reply->your_event_mask;
+            do_not_propagate_mask = reply->do_not_propagate_mask;
+            pad0[0] = reply->pad0[0];
+            pad0[1] = reply->pad0[1];
             free(reply);
-            
         }
-
-        intern_atom_repl_t(xcb_connection_t *conn, bool only_if_exists, char *__name)
+        else
         {
-            xcb_intern_atom_reply_t *reply = xcb_intern_atom_reply(conn, intern_atom_cok_t(conn, only_if_exists, __name), nullptr);
-            if (!reply)
-            {
-                set_ERR_STATE(response_type, pad0, sequence, length, atom);
-                return;
-            }
+            set_ERR_STATE(response_type, backing_store, sequence, length, visual, _class, bit_gravity, win_gravity, backing_planes, backing_pixel, save_under, map_is_installed, map_state, override_redirect, colormap, all_event_masks, your_event_mask, do_not_propagate_mask, pad0[0], pad0[1]);
+        }
+    }
 
+    bool is_not_valid()
+    {
+        return (
+            (   response_type == 1 << 7
+            &&  backing_store == 1 << 7
+            &&  sequence == 1 << 7
+            &&  length == 1 << 7
+            &&  visual == 1 << 7
+            &&  _class == 1 << 7
+            &&  bit_gravity == 1 << 7
+            &&  win_gravity == 1 << 7
+            &&  backing_planes == 1 << 7
+            &&  backing_pixel == 1 << 7
+            &&  save_under == 1 << 7
+            &&  map_is_installed == 1 << 7
+            &&  map_state == 1 << 7
+            &&  override_redirect == 1 << 7
+            &&  colormap == 1 << 7
+            &&  all_event_masks == 1 << 7
+            &&  your_event_mask == 1 << 7
+            &&  do_not_propagate_mask == 1 << 7
+            &&  pad0[0] == 1 << 7
+            &&  pad0[1] == 1 << 7 )
+        );
+    }
+
+    wAttrR(uint32_t __w)
+    {
+        xcb_get_window_attributes_reply_t *reply = xcb_get_window_attributes_reply(conn, wAttrC(__w), nullptr);
+        if ( reply )
+        {
             response_type = reply->response_type;
-            pad0          = reply->pad0;
-            sequence      = reply->sequence;
-            length        = reply->sequence;
-            atom          = reply->atom;
-
-            free(reply);            
-        }        
-
-        operator xcb_atom_t() { return atom; }
-        operator xcb_atom_t&() { return atom; }
-
-        bool is_not_valid()
-        {
-            return (
-                response_type == 1 << 7
-            &&  pad0          == 1 << 7
-            &&  sequence      == 1 << 7
-            &&  length        == 1 << 7
-            &&  atom          == 1 << 7);
+            backing_store = reply->backing_store;
+            sequence = reply->sequence;
+            length = reply->length;
+            visual = reply->visual;
+            _class = reply->_class;
+            bit_gravity = reply->bit_gravity;
+            win_gravity = reply->win_gravity;
+            backing_planes = reply->backing_planes;
+            backing_pixel = reply->backing_pixel;
+            save_under = reply->save_under;
+            map_is_installed = reply->map_is_installed;
+            map_state = reply->map_state;
+            override_redirect = reply->override_redirect;
+            colormap = reply->colormap;
+            all_event_masks = reply->all_event_masks;
+            your_event_mask = reply->your_event_mask;
+            do_not_propagate_mask = reply->do_not_propagate_mask;
+            pad0[0] = reply->pad0[0];
+            pad0[1] = reply->pad0[1];
+            free(reply);
         }
-
+    }
 };
 
 typedef struct {
@@ -319,12 +463,13 @@ class atoms_t {
             return it->second;
 
         }
-        void add(char *__atoms[]) {
-            for (size_t i(0); __atoms[i]; ++i) {
-                data[__atoms[i]] = intern_atom_repl_t(conn, 0, __atoms[i]).atom;
-                
-            }
-            
+        
+        void add(char *__atoms[])
+        {
+            for (size_t i(0); __atoms[i]; ++i)
+            {
+                data[__atoms[i]] = iAtomR(0, __atoms[i]).Atom();
+            }    
         }
 
         // atoms_t(xcb_connection_t *conn, char **__atoms);
@@ -338,47 +483,44 @@ class atoms_t {
 } while(0)
 
 class xcb {
-    private:
-        xcb_connection_t *_conn;
-        xcb_screen_t * _s;
-        xcb_generic_error_t* _err;
-        xcb_void_cookie_t _cookie;
+    /* xcb_connection_t *_conn; */
+    xcb_screen_t * _s;
+    xcb_generic_error_t* _err;
+    xcb_void_cookie_t _cookie;
 
-        uint64_t _flags = 0xffffffffffffffff;
-        // vector<uint32_t> _xid_vec;
-        // void_err_t void_err;
+    uint64_t _flags = 0xffffffffffffffff;
+    // vector<uint32_t> _xid_vec;
+    // void_err_t void_err;
 
-        void check_error();
+    void check_error();
 
-    public:
-        bool is_flag_set(unsigned int __f);
-        void set_flag(unsigned int __f);
-        void clear_flag(unsigned int __f);
-        void toggle_flag(unsigned int __f);
+public:
+    bool is_flag_set(unsigned int __f);
+    void set_flag(unsigned int __f);
+    void clear_flag(unsigned int __f);
+    void toggle_flag(unsigned int __f);
 
-        xcb_intern_atom_cookie_t intern_atom_cookie(const char *__name);
-        xcb_atom_t get_atom(char *name);
-        xcb_intern_atom_reply_t *intern_atom_reply(xcb_intern_atom_cookie_t __cookie);
-        xcb_atom_t intern_atom(const char *__name);
-        bool window_exists(uint32_t __w);
-        uint32_t gen_Xid();
-        void window_stack(uint32_t __window1, uint32_t __window2, uint32_t __mode);
-        inline bool check_req_err() { return ((_flags & (1ULL << X_REQ_ERROR)) != 0); }
-        void mapW(uint32_t __w);
+    xcb_intern_atom_cookie_t intern_atom_cookie(const char *__name);
+    xcb_atom_t get_atom(uint8_t __only_if_exists, const char *name);
+    xcb_intern_atom_reply_t *intern_atom_reply(xcb_intern_atom_cookie_t __cookie);
+    xcb_atom_t intern_atom(const char *__name);
+    bool window_exists(uint32_t __w);
+    uint32_t gen_Xid();
+    void window_stack(uint32_t __window1, uint32_t __window2, uint32_t __mode);
+    inline bool check_req_err() { return ((_flags & (1ULL << X_REQ_ERROR)) != 0); }
+    void mapW(uint32_t __w);
 
-        uint64_t &check_conn();
-        void create_w(uint32_t __pw, uint32_t __w, int16_t __x, int16_t __y,
-                      uint16_t __width, uint16_t __height);
+    uint64_t &check_conn();
+    void create_w(uint32_t __pw, uint32_t __w, int16_t __x, int16_t __y,
+                    uint16_t __width, uint16_t __height);
 
-        
-
-        xcb(xcb_connection_t *__conn, xcb_screen_t *__s);
-
+    xcb(/* xcb_connection_t *__conn, */ xcb_screen_t *__s);
 };
 static xcb *xcb(nullptr);
 
-inline class xcb *connect_to_server(xcb_connection_t *__conn, xcb_screen_t *__s) {
-    return new class xcb(__conn, __s);
-    
+inline class xcb *connect_to_server(xcb_connection_t *__conn, xcb_screen_t *__s)
+{
+    return new class xcb(/* __conn, */ __s);
 }
+
 #endif/* XCB__HPP */

@@ -3,8 +3,75 @@
 #define DEFENITIONS_HPP
 
 /* main.cpp */
-#define conn_err()  error::conn_error(conn ,__func__)                     
+#include "tools.hpp"
+#include <cstdarg>
+#define conn_err()  error::conn_error(conn ,__func__)
 #define check_cookie(cookie)  error::cookie_error(cookie, __func__)
+
+/* // Example function that processes a fixed number of arguments
+std::string processStrings(int count, ...)
+{
+    va_list args;
+    va_start(args, count);
+
+    std::string result;
+    for (int i = 0; i < count; ++i)
+    {
+        char* str = va_arg(args, char*);
+        result += str;
+    }
+    va_end(args);
+
+    return result;
+} */
+
+// Function that takes a count and a variable number of char* arguments
+inline const char *
+processStrings(int count, ...)
+{
+    va_list args;
+    va_start(args, count);
+    char buf[200];
+
+    int length = 0;
+    for (int i = 0; i < count; ++i)
+    {
+        int start = length;
+        length += slen(va_arg(args, char *));
+        for (int j = start; j < length; ++j)
+        {
+            buf[j] = va_arg(args, char *)[j - start];
+        }
+        
+        if (i == count - 1)
+        {
+            buf[length] = '\0';
+        }
+    }
+    va_end(args);
+
+    const char *s = buf;
+    return s;
+}
+
+// Macro that forwards its arguments to the processStrings function
+#define sctr(...) processStrings(sizeof((const char*[]){__VA_ARGS__})/sizeof(char*), __VA_ARGS__)
+
+#define CheckVoidC(__cookie, __s) \
+do { \
+    xcb_generic_error_t *err = xcb_request_check(conn, __cookie); \
+    if ( err ) \
+    { \
+        loutE << ERRNO_MSG(__s) << loutEND; \
+        free(err); \
+    } \
+ \
+} while (0)
+
+/* #define sctr(...) \
+do { \
+     \
+} while (0) */
 
 /* LOG DEFENITIONS */
 #define LOG_ev_response_type(ev)    	    Log::xcb_event_response_type(__func__, ev);
