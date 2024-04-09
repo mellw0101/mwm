@@ -4079,7 +4079,9 @@ window {
                 make_borders(__border_info[0], __border_info[1], __border_info[2]);
 
             }
-            void create_window( uint32_t __parent,
+            
+            void
+            create_window( uint32_t __parent,
                                 int16_t  __x,
                                 int16_t  __y,
                                 uint16_t __width,
@@ -4090,6 +4092,8 @@ window {
                                 void    *__border_data = nullptr,
                                 CURSOR   __cursor = CURSOR::arrow)
             {
+                AutoTimer t(__func__);
+
                 _depth        = 0L;
                 _parent       = __parent;
                 _x            = __x;
@@ -4132,6 +4136,7 @@ window {
                 }
             
             }
+            
             void create_client_window(const uint32_t &parent, const int16_t &x, const int16_t &y, const uint16_t &width, const uint16_t &height) {
                 _window = xcb_generate_id(conn);
                 uint32_t value_mask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
@@ -4204,6 +4209,8 @@ window {
             void
             raise()
             {
+                AutoTimer t(__func__);
+
                 VoidC cookie = xcb_configure_window(
                     conn,
                     _window,
@@ -4220,6 +4227,8 @@ window {
             void
             map()
             {
+                AutoTimer t(__func__);
+
                 VOID_COOKIE = xcb_map_window(conn, _window);
                 CHECK_VOID_COOKIE();
                 FLUSH_XWin();
@@ -4228,6 +4237,8 @@ window {
             void
             unmap()
             {
+                AutoTimer t(__func__);
+
                 VoidC cookie = xcb_unmap_window(conn, _window);
                 CheckVoidC(cookie, "Failed to unmap window");
                 FlushX_Win(_window);
@@ -4236,6 +4247,8 @@ window {
             void
             reparent(uint32_t __new_parent, int16_t __x, int16_t __y)
             {
+                AutoTimer t(__func__);
+
                 VOID_COOKIE = xcb_reparent_window(
                     conn,
                     _window,
@@ -4315,6 +4328,8 @@ window {
             void
             kill_test()
             {
+                AutoTimer t(__func__);
+
                 uint32_t w = this->_window;
                 iAtomR p_reply(1, "WM_PROTOCOLS");
                 iAtomR d_reply(0, "WM_DELETE_WINDOW");
@@ -6641,14 +6656,13 @@ window {
             {
                 AutoTimer timer(__func__);
                 font = xcb->gen_Xid()/* xcb_generate_id(conn) */;
-                VoidC cookie = xcb_open_font(
+                xcb_open_font(
                     conn,
                     font,
                     slen(font_name),
                     font_name
                 );
-                CheckVoidC(cookie, "ERROR: ( xcb_open_font ) Failed");
-                FLUSH_XWin();
+                xcb_flush(conn);
             }
         
         /* Background */
