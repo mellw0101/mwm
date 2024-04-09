@@ -3211,8 +3211,12 @@ __event_handler__
                 free(ev);
             }
         }
-        constexpr uint8_t char_to_keycode__(int8_t c) const {
-            switch (c) {
+        
+        constexpr uint8_t
+        char_to_keycode__(int8_t c) const
+        {
+            switch (c)
+            {
                 case 'a': return this->key_codes.a;
                 case 'b': return this->key_codes.b;
                 case 'c': return this->key_codes.c;
@@ -3242,12 +3246,16 @@ __event_handler__
                 case '-': return this->key_codes.minus;
                 case ' ': return this->key_codes.space_bar;
 
-            } return (uint8_t)0;
-
+            }
+            return (uint8_t)0;
         }
-        constexpr void processEvent(xcb_generic_event_t* ev) {
+
+        constexpr void
+        processEvent(xcb_generic_event_t* ev)
+        {
             uint8_t responseType = ev->response_type & ~0x80;
-            switch (responseType) {
+            switch (responseType)
+            {
                 case XCB_KEY_PRESS:{
                     RE_CAST_EV(xcb_key_press_event_t);
                     switch (e->state) {
@@ -3411,19 +3419,25 @@ __event_handler__
                 }
             }
         }
-        void end() {
+        
+        void
+        end()
+        {
             shouldContinue = false;
 
         }
+        
         using CallbackId = int; template<typename Callback>
-        CallbackId setEventCallback(uint8_t eventType, Callback&& callback) {
+        CallbackId
+        setEventCallback(uint8_t eventType, Callback&& callback) {
             CallbackId id = nextCallbackId++;
             eventCallbacks[eventType].emplace_back(id, std::forward<Callback>(callback));
             return id;
 
         }
 
-        void removeEventCallback(uint8_t eventType, CallbackId id)
+        void
+        removeEventCallback(uint8_t eventType, CallbackId id)
         {
             auto& callbacks = eventCallbacks[eventType];
             callbacks.erase(
@@ -3438,8 +3452,10 @@ __event_handler__
             ), callbacks.end());
             /* loutI << "Deleting id" << id << " " << EVENT_TYPE(eventType) << " vecsize" << eventCallbacks[eventType].size() << loutEND; */
         }
+        
         template<typename Callback>
-        void set_key_press_callback(const uint16_t &__mask, const xcb_keycode_t &__key, Callback &&callback) {
+        void
+        set_key_press_callback(const uint16_t &__mask, const xcb_keycode_t &__key, Callback &&callback) {
             setEventCallback(XCB_KEY_PRESS, [this, callback, __key, __mask](Ev ev)
             {
                 RE_CAST_EV(xcb_key_press_event_t);
@@ -3452,8 +3468,10 @@ __event_handler__
                 }
             });
         }
+        
         template<typename Callback>
-        void set_button_press_callback(uint32_t __window, const uint16_t &__mask, const xcb_keycode_t &__key, Callback &&callback) {
+        void
+        set_button_press_callback(uint32_t __window, const uint16_t &__mask, const xcb_keycode_t &__key, Callback &&callback) {
             setEventCallback(XCB_KEY_PRESS, [this, __window, callback, __key, __mask](Ev ev) {
                 RE_CAST_EV(xcb_key_press_event_t);
                 if (e->event != __window) return;
@@ -3540,85 +3558,82 @@ static __event_handler__ *event_handler(nullptr);
 using EventCallback = function<void(Ev)>;
 
 class Bitmap {
-    private:
-    // variables
-        int width, height;
-        vector<vector<bool>>(bitmap);
+    int width, height;
+    vector<vector<bool>>(bitmap);
         
-    public:
-    // methods
-        void modify(int row, int startCol, int endCol, bool value)
+public:
+    void
+    modify(int row, int startCol, int endCol, bool value)
+    {
+        if (row < 0 || row >= height || startCol < 0 || endCol > width)
         {
-            if (row < 0 || row >= height || startCol < 0 || endCol > width)
-            {
-                loutE << "Invalid row or column indices" << loutEND;
-            }
-        
-            for (int i = startCol; i < endCol; ++i)
-            {
-                bitmap[row][i] = value;
-            }
+            loutE << "Invalid row or column indices" << loutEND;
+        }
+    
+        for (int i = startCol; i < endCol; ++i)
+        {
+            bitmap[row][i] = value;
+        }
+    }
+
+    void
+    exportToPng(const char * file_name) const
+    {
+        FILE *fp = fopen(file_name, "wb");
+        if (!fp)
+        {
+            loutE << "Failed to create PNG file" << loutEND;
+            return;
         }
 
-        void exportToPng(const char * file_name) const
+        png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
+        if (!png_ptr)
         {
-            FILE *fp = fopen(file_name, "wb");
-            if (!fp)
-            {
-                loutE << "Failed to create PNG file" << loutEND;
-                return;
-            }
+            fclose(fp);
+            loutE << "Failed to create PNG write struct" << loutEND;
+            return;
+        }
 
-            png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
-            if (!png_ptr)
-            {
-                fclose(fp);
-                loutE << "Failed to create PNG write struct" << loutEND;
-                return;
-            }
+        png_infop info_ptr = png_create_info_struct(png_ptr);
+        if (!info_ptr)
+        {
+            fclose(fp);
+            png_destroy_write_struct(&png_ptr, nullptr);
+            loutE << "Failed to create PNG info struct" << loutEND;
+            return;
+        }
 
-            png_infop info_ptr = png_create_info_struct(png_ptr);
-            if (!info_ptr)
-            {
-                fclose(fp);
-                png_destroy_write_struct(&png_ptr, nullptr);
-                loutE << "Failed to create PNG info struct" << loutEND;
-                return;
-            }
-
-            if (setjmp(png_jmpbuf(png_ptr)))
-            {
-                fclose(fp);
-                png_destroy_write_struct(&png_ptr, &info_ptr);
-                loutE << "Error during PNG creation" << loutEND;
-                return;
-            }
-
-            png_init_io(png_ptr, fp);
-            png_set_IHDR(png_ptr, info_ptr, width, height, 8, PNG_COLOR_TYPE_GRAY, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
-            png_write_info(png_ptr, info_ptr);
-
-            png_bytep row = new png_byte[width];
-            for (int y = 0; y < height; y++)
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    row[x] = bitmap[y][x] ? 0xFF : 0x00;
-                }
-
-                png_write_row(png_ptr, row);
-            }
-
-            delete[] row;
-            png_write_end(png_ptr, nullptr);
+        if (setjmp(png_jmpbuf(png_ptr)))
+        {
             fclose(fp);
             png_destroy_write_struct(&png_ptr, &info_ptr);
+            loutE << "Error during PNG creation" << loutEND;
+            return;
         }
 
-    // constructor
-        Bitmap(int width, int height) 
-        : width(width), height(height), bitmap(height, std::vector<bool>(width, false)) {}
-    
+        png_init_io(png_ptr, fp);
+        png_set_IHDR(png_ptr, info_ptr, width, height, 8, PNG_COLOR_TYPE_GRAY, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
+        png_write_info(png_ptr, info_ptr);
+
+        png_bytep row = new png_byte[width];
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                row[x] = bitmap[y][x] ? 0xFF : 0x00;
+            }
+
+            png_write_row(png_ptr, row);
+        }
+
+        delete[] row;
+        png_write_end(png_ptr, nullptr);
+        fclose(fp);
+        png_destroy_write_struct(&png_ptr, &info_ptr);
+    }
+
+    Bitmap(int width, int height) 
+    :   width(width), height(height), bitmap(height, std::vector<bool>(width, false)) {}
 };
 
 class __color_bitmap__ {
@@ -3834,7 +3849,9 @@ namespace { /* 'window' class Namespace */
     };
 }
 
-class window {
+class
+window
+{
     public:
     /* Constructor */
         window() {}
@@ -4070,46 +4087,53 @@ class window {
             }
 
         /* Borders       */
-            void make_borders(int __border_mask, uint32_t __size, int __color) {
+            void
+            make_borders(int __border_mask, uint32_t __size, int __color)
+            {
                 if (__border_mask & UP   ) make_border_window(UP,    __size, __color);
                 if (__border_mask & DOWN ) make_border_window(DOWN,  __size, __color);
                 if (__border_mask & LEFT ) make_border_window(LEFT,  __size, __color);
                 if (__border_mask & RIGHT) make_border_window(RIGHT, __size, __color);
-            
             }
+
             #define CHANGE_BORDER_COLOR(__window) \
-                if (__window != 0)                                   \
-                {                                                    \
-                    change_back_pixel(get_color(__color), __window); \
-                    FLUSH_X();                                       \
-                    clear_window(__window);                          \
-                    FLUSH_X();                                       \
+                if (__window != 0)                                      \
+                {                                                       \
+                    change_back_pixel(get_color(__color), __window);    \
+                    FlushX_Win( __window );                             \
+                    clear_window(__window);                             \
+                    FLUSH_X();                                          \
                 }
             ;
-            void change_border_color(int __color, int __border_mask = ALL) {
+            
+            void
+            change_border_color(int __color, int __border_mask = ALL)
+            {
                 if (__border_mask & UP   ) CHANGE_BORDER_COLOR(_border[0]);
                 if (__border_mask & DOWN ) CHANGE_BORDER_COLOR(_border[1]);
                 if (__border_mask & LEFT ) CHANGE_BORDER_COLOR(_border[2]);
                 if (__border_mask & RIGHT) CHANGE_BORDER_COLOR(_border[3]);
-            
             }
-            void make_xcb_borders(const int &__color) {
+            
+            void
+            make_xcb_borders(const int &__color)
+            {
                 VOID_COOKIE = xcb_change_window_attributes(
                     conn,
                     _window,
                     XCB_CW_BORDER_PIXEL,
-                    (uint32_t[1]) {
+                    (uint32_t[1])
+                    {
                         get_color(__color)
-
                     }
-
-                ); CHECK_VOID_COOKIE();
+                );
+                CHECK_VOID_COOKIE();
                 FLUSH_XWin();
-
             }
         
         /* Main          */
-            void raise()
+            void
+            raise()
             {
                 VOID_COOKIE = xcb_configure_window(
                     conn,
@@ -4123,19 +4147,25 @@ class window {
                 CHECK_VOID_COOKIE();
                 FLUSH_XWin();
             }            
-            void map()
+            
+            void
+            map()
             {
                 VOID_COOKIE = xcb_map_window(conn, _window);
                 CHECK_VOID_COOKIE();
                 FLUSH_XWin();
             }
-            void unmap()
+            
+            void
+            unmap()
             {
                 VOID_COOKIE = xcb_unmap_window(conn, _window);
                 CHECK_VOID_COOKIE();
                 FLUSH_XWin();
             }            
-            void reparent(uint32_t __new_parent, int16_t __x, int16_t __y)
+            
+            void
+            reparent(uint32_t __new_parent, int16_t __x, int16_t __y)
             {
                 VOID_COOKIE = xcb_reparent_window(
                     conn,
@@ -4148,7 +4178,9 @@ class window {
                 FLUSH_XWin();
 
             }
-            void make_child(uint32_t __window_to_make_child, uint32_t __child_x, uint32_t __child_y)
+            
+            void
+            make_child(uint32_t __window_to_make_child, uint32_t __child_x, uint32_t __child_y)
             {
                 VOID_COOKIE = xcb_reparent_window(
                     conn,
@@ -4160,7 +4192,9 @@ class window {
                 CHECK_VOID_COOKIE();
                 FLUSH_XWin();
             }            
-            void kill()
+            
+            void
+            kill()
             {
                 xcb_intern_atom_cookie_t protocols_cookie = xcb_intern_atom( conn, 1, 12, "WM_PROTOCOLS" );
                 xcb_intern_atom_reply_t *protocols_reply = xcb_intern_atom_reply( conn, protocols_cookie, nullptr );
@@ -4193,7 +4227,9 @@ class window {
                 signal_manager->_window_signals.remove( _window );
                 signal_manager->_window_client_map.remove( _window );
             }
-            void ewmh_kill()
+
+            void
+            ewmh_kill()
             {
                 xcb_client_message_event_t ev = {0};
                 ev.response_type  = XCB_CLIENT_MESSAGE;
@@ -4207,7 +4243,10 @@ class window {
                 xcb_send_event(conn, 0, _window, XCB_EVENT_MASK_NO_EVENT, (char *)&ev);
                 xcb_flush(conn);
             }
-            void kill_test() {
+            
+            void
+            kill_test()
+            {
                 uint32_t w = this->_window;
 
                 xcb_intern_atom_cookie_t protocols_cookie = xcb_intern_atom(conn, 1, slen("WM_PROTOCOLS"), "WM_PROTOCOLS");
@@ -4241,7 +4280,9 @@ class window {
                 signal_manager->_window_client_map.remove(w);
 
             }    
-            void clear()
+            
+            void
+            clear()
             {
                 VOID_COOKIE = xcb_clear_area(
                     conn, 
@@ -4255,7 +4296,9 @@ class window {
                 CHECK_VOID_COOKIE();
                 FLUSH_XWin();
             }
-            void focus_input()
+            
+            void
+            focus_input()
             {
                 VOID_COOKIE = xcb_set_input_focus(
                     conn,
@@ -4266,7 +4309,9 @@ class window {
                 CHECK_VOID_COOKIE();
                 FLUSH_XWin();
             }
-            void send_event(uint32_t __event_mask, void *__value_list = nullptr)
+            
+            void
+            send_event(uint32_t __event_mask, void *__value_list = nullptr)
             {
                 if (__event_mask & XCB_EVENT_MASK_EXPOSURE)
                 {
@@ -4344,7 +4389,9 @@ class window {
                     FLUSH_XWin();
                 }
             }
-            void update(uint32_t __x, uint32_t __y, uint32_t __width, uint32_t __height)
+            
+            void
+            update(uint32_t __x, uint32_t __y, uint32_t __width, uint32_t __height)
             {
                 _x      = __x;
                 _y      = __y;
@@ -4484,7 +4531,9 @@ class window {
                 if (err != 1) loutE << "xcb_ewmh_get_active_window_reply failed" << loutEND;
                 return _window == active_window;
             }
-            uint32_t check_event_mask_sum()
+
+            uint32_t
+            check_event_mask_sum()
             {
                 xcb_get_window_attributes_cookie_t cookie = xcb_get_window_attributes(conn, _window);
                 xcb_get_window_attributes_reply_t *reply = xcb_get_window_attributes_reply(conn, cookie, nullptr);
@@ -4493,6 +4542,7 @@ class window {
                 free(reply);
                 return mask;
             }
+            
             vector<xcb_event_mask_t> check_event_mask_codes()
             {
                 uint32_t maskSum = check_event_mask_sum();
@@ -6714,6 +6764,7 @@ class window {
                 return char2b;
             }
 };
+
 #define CLI_TITLE_BAR_EXPOSE_BIT 1
 #define CLI_TITLE_REQ_BIT 2
 class client {
@@ -7250,13 +7301,13 @@ class client {
             }
         
         /* Set       */
-            void set_active_EWMH_window() {
+            void set_active_EWMH_window()
+            {
                 win.set_active_EWMH_window();
-    
             }
-            void set_EWMH_fullscreen_state() {
+            void set_EWMH_fullscreen_state()
+            {
                 win.set_EWMH_fullscreen_state();
-
             }
             void set_client_params()
             {
@@ -7268,7 +7319,6 @@ class client {
                     loutI << "running get_window_parameters" << '\n';
                     get_window_parameters();
                 }
-
             }
 
         /* Get       */
@@ -7347,7 +7397,8 @@ class client {
             }
 
         /* Unset     */
-            void unset_EWMH_fullscreen_state() {
+            void unset_EWMH_fullscreen_state()
+            {
                 win.unset_EWMH_fullscreen_state();
             }
 
@@ -15061,6 +15112,7 @@ setup_wm()
 {
     user = get_user_name();
     loutCUser(USER);
+
     init_gProf();
     setupReportGeneration();
 

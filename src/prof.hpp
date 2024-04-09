@@ -35,8 +35,8 @@ private:
     GlobalProfiler() {}
 };
 static GlobalProfiler *gProf(nullptr);
-void
-init_gProf();
+
+void init_gProf();
 
 class AutoTimer {
 public:
